@@ -1,0 +1,25 @@
+{
+  "name": "Eagles — Criador de Treinos",
+  "short_name": "Eagles Treinos",
+  "description": "Criador e publicador de treinos Eagles CrossFit",
+  "start_url": "./schedule_builder_pt.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0a0a",
+  "theme_color": "#e87820",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
