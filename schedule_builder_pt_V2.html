@@ -1390,9 +1390,11 @@ function SchedulePublisher({sessions}){
   const [settingsOpen,setSettingsOpen]=useState(false);
   const [eaglesBg,setEaglesBg]=useState(APP_CONFIG.mobileEaglesBg||'#000000');
   const [megaManBg,setMegaManBg]=useState(APP_CONFIG.mobileMegaManBg||'#0a1a5c');
+  const [noteColor,setNoteColor]=useState(APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa');
   const [previewScale,setPreviewScale]=useState(1);
   useEffect(()=>{APP_CONFIG.mobileEaglesBg=eaglesBg;},[eaglesBg]);
   useEffect(()=>{APP_CONFIG.mobileMegaManBg=megaManBg;},[megaManBg]);
+  useEffect(()=>{APP_CONFIG.mobileExerciseNoteColor=noteColor;},[noteColor]);
   const now=new Date();
   const [month,setMonth]=useState(now.getMonth());
   const [year,setYear]=useState(now.getFullYear());
@@ -1835,9 +1837,26 @@ function SchedulePublisher({sessions}){
             )
           )
         ),
-        React.createElement('div',{style:{fontSize:'11px',color:'#444',marginTop:'8px',lineHeight:'1.6'}},
+        // note colour
+        React.createElement('div',{className:'settings-section'},
+          React.createElement('div',{style:{fontSize:'11px',color:'#555',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'10px'}},'Cor das observações — ambos os móbiles'),
+          React.createElement('div',{className:'settings-row'},
+            React.createElement('span',{className:'settings-lbl'},'Cor do texto'),
+            React.createElement('div',{className:'color-row'},
+              React.createElement('div',{className:'color-preview',style:{background:noteColor},onClick:()=>document.getElementById('picker-note').click()}),
+              React.createElement('input',{type:'color',id:'picker-note',value:noteColor,onChange:e=>setNoteColor(e.target.value),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
+              React.createElement('input',{type:'text',className:'color-input',value:noteColor,
+                onChange:e=>{if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))setNoteColor(e.target.value);},
+                onBlur:e=>{if(!/^#[0-9a-fA-F]{6}$/.test(e.target.value))setNoteColor(APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa');}
+              })
+            )
+          )
+        ),
+        React.createElement('div',{style:{fontSize:'11px',color:'#444',lineHeight:'1.6'}},
           'Estas cores também podem ser configuradas no arquivo config.json no GitHub.'
         )
+      )
+    ),
       )
     ),
     // ── hidden export targets — always rendered, off-screen, dedicated refs ──
