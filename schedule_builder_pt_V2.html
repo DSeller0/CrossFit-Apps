@@ -454,7 +454,7 @@ function IntensityInput({value,onChange}){
 }
 
 const emptyEx=()=>({id:uid(),name:'',rounds:'',sets:'',reps:'',intensity:null,note:''});
-const emptyBlock=()=>({id:uid(),label:APP_CONFIG.blockNames[0]||'-',type:'Força',zone:'Zona 01',duration:'',rounds:'',notes:'',exercises:[emptyEx()]});
+const emptyBlock=()=>({id:uid(),label:APP_CONFIG.blockNames[0]||'-',type:APP_CONFIG.blockNames.find(n=>n!=='-')||'Força',zone:'Zona 01',duration:'',rounds:'',notes:'',exercises:[emptyEx()]});
 const emptyS=()=>({id:uid(),date:todayISO(),mainTraining:'',blocks:[emptyBlock()]});
 
 // ── BlockEditor ───────────────────────────────────────────
@@ -488,12 +488,12 @@ function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete}){
         value:block.label||'-',
         onChange:e=>onUpdate({...block,label:e.target.value})
       }, (blockNames||APP_CONFIG.blockNames).map(l=>React.createElement('option',{key:l,style:{background:'#1c1c1c',color:'#e0e0e0'}},l))),
-      // Type selector
+      // Type selector — same pool as label, minus the '-' placeholder
       React.createElement('select',{
         className:'blk-sel',
         value:block.type,
         onChange:e=>onUpdate({...block,type:e.target.value})
-      }, TYPES.map(t=>React.createElement('option',{key:t,style:{background:'#1c1c1c',color:'#e0e0e0'}},t))),
+      }, (blockNames||APP_CONFIG.blockNames).filter(n=>n!=='-').map(t=>React.createElement('option',{key:t,style:{background:'#1c1c1c',color:'#e0e0e0'}},t))),
       // Zone selector
       React.createElement('select',{
         className:'blk-zone-sel',
