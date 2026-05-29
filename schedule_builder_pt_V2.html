@@ -239,19 +239,24 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .blk-wrap.drag-over{border-color:#e87820;box-shadow:0 0 0 2px rgba(232,120,32,.3)}
 .ex-card.drag-over{border-color:#e87820}
 .sc-card.drag-over-session{border-color:#e87820;box-shadow:0 0 0 2px rgba(232,120,32,.2)}
-.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;pointer-events:none}
+.settings-modal{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #2e2e2e;border-radius:12px;width:820px;max-width:96vw;max-height:88vh;overflow-y:auto;z-index:501;pointer-events:all;box-shadow:0 8px 40px rgba(0,0,0,.8)}
+.settings-drag-hdr{padding:12px 16px;background:#141414;border-bottom:1px solid #252525;border-radius:12px 12px 0 0;display:flex;align-items:center;gap:8px;cursor:grab;user-select:none}
+.settings-drag-hdr:active{cursor:grabbing}
+.settings-body{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.settings-col-title{font-size:11px;font-weight:700;color:#e87820;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #252525}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.settings-row:last-child{margin-bottom:0}
+.settings-lbl{font-size:11px;color:#888;flex:1}
+.color-row{display:flex;align-items:center;gap:6px}
+.color-swatch{width:24px;height:24px;border-radius:4px;border:1px solid #333;flex-shrink:0;cursor:pointer;transition:transform .1s}
+.color-swatch:hover{transform:scale(1.1)}
+.color-input{font-family:inherit;font-size:12px;border:1px solid #2e2e2e;border-radius:4px;padding:4px 7px;background:#111;color:#e0e0e0;outline:none;width:86px}
+.color-input:focus{border-color:#444}
+input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:none}
 .settings-modal{background:#1c1c1c;border:1px solid #2e2e2e;border-radius:12px;padding:22px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
 .settings-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.settings-section{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #222}
-.settings-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-.settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
-.settings-row:last-child{margin-bottom:0}
-.settings-lbl{font-size:12px;color:#aaa;font-weight:500}
-.color-row{display:flex;align-items:center;gap:8px}
-.color-preview{width:28px;height:28px;border-radius:4px;border:1px solid #333;flex-shrink:0;cursor:pointer}
-.color-input{font-family:inherit;font-size:13px;border:1px solid #2e2e2e;border-radius:5px;padding:5px 8px;background:#111;color:#e0e0e0;outline:none;width:96px}
-.color-input:focus{border-color:#444}
-input[type=color]{width:36px;height:28px;border:1px solid #333;border-radius:4px;padding:1px;background:#111;cursor:pointer;-webkit-appearance:none}
+
 .mic-btn{font-family:inherit;font-size:13px;padding:0;width:32px;height:32px;border-radius:50%;border:1px solid #2e2e2e;background:transparent;color:#666;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .mic-btn:hover{border-color:#e87820;color:#e87820}
 .mic-btn.listening{background:#e87820;border-color:#e87820;color:#000;animation:mic-pulse 1.2s ease-in-out infinite}
@@ -1391,6 +1396,27 @@ function SchedulePublisher({sessions}){
   const [eaglesBg,setEaglesBg]=useState(APP_CONFIG.mobileEaglesBg||'#000000');
   const [megaManBg,setMegaManBg]=useState(APP_CONFIG.mobileMegaManBg||'#0a1a5c');
   const [noteColor,setNoteColor]=useState(APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa');
+  // Eagles colours
+  const [eaGymName,setEaGymName]=useState('#ffffff');
+  const [eaDate,setEaDate]=useState('#e87820');
+  const [eaSubtitle,setEaSubtitle]=useState('#666666');
+  const [eaBlockType,setEaBlockType]=useState('#00b8d4');
+  const [eaBlockMeta,setEaBlockMeta]=useState('#00b8d4');
+  const [eaExName,setEaExName]=useState('#ffffff');
+  const [eaIntensity,setEaIntensity]=useState('#ffd700');
+  const [eaBlockHdr,setEaBlockHdr]=useState('rgba(0,184,212,0.12)');
+  const [eaDivider,setEaDivider]=useState('rgba(0,184,212,0.1)');
+  // Mega Man colours
+  const [mmGymName,setMmGymName]=useState('#ffffff');
+  const [mmDate,setMmDate]=useState('#00b8d4');
+  const [mmSubtitle,setMmSubtitle]=useState('#3a6a80');
+  const [mmBlockType,setMmBlockType]=useState('#00b8d4');
+  const [mmBlockMetaBg,setMmBlockMetaBg]=useState('#00b8d4');
+  const [mmBlockMetaText,setMmBlockMetaText]=useState('#000000');
+  const [mmExName,setMmExName]=useState('#ffffff');
+  const [mmIntensity,setMmIntensity]=useState('#ffd700');
+  const [mmBlockHdr,setMmBlockHdr]=useState('rgba(0,184,212,0.12)');
+  const [mmDivider,setMmDivider]=useState('rgba(0,184,212,0.1)');
   const [previewScale,setPreviewScale]=useState(1);
   useEffect(()=>{APP_CONFIG.mobileEaglesBg=eaglesBg;},[eaglesBg]);
   useEffect(()=>{APP_CONFIG.mobileMegaManBg=megaManBg;},[megaManBg]);
@@ -1548,16 +1574,16 @@ function SchedulePublisher({sessions}){
         React.createElement('span',{className:'lbl'},`Escala do logo — ${logoScale.toFixed(2)}×`),
         React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
           React.createElement('button',{type:'button',className:'b bsm',style:{padding:'4px 8px',minHeight:'28px'},
-            onClick:()=>setLogoScale(s=>Math.max(0.25,Math.round((s-0.05)*100)/100))
+            onClick:()=>setLogoScale(s=>Math.max(0.25,Math.round((s-0.01)*1000)/1000))
           },'−'),
           React.createElement('input',{
-            type:'range',min:'0.25',max:'4',step:'0.05',
+            type:'range',min:'0.25',max:'4',step:'0.01',
             value:logoScale,
             onChange:e=>setLogoScale(parseFloat(e.target.value)),
             style:{flex:1,accentColor:'#e87820'}
           }),
           React.createElement('button',{type:'button',className:'b bsm',style:{padding:'4px 8px',minHeight:'28px'},
-            onClick:()=>setLogoScale(s=>Math.min(4,Math.round((s+0.05)*100)/100))
+            onClick:()=>setLogoScale(s=>Math.min(4,Math.round((s+0.01)*1000)/1000))
           },'+')
         )
       ),
@@ -1577,16 +1603,16 @@ function SchedulePublisher({sessions}){
         React.createElement('span',{className:'lbl'},`Escala da fonte — ${fontScale.toFixed(2)}×`),
         React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
           React.createElement('button',{type:'button',className:'b bsm',style:{padding:'4px 8px',minHeight:'28px'},
-            onClick:()=>setFontScale(f=>Math.max(0.5,Math.round((f-0.05)*100)/100))
+            onClick:()=>setFontScale(f=>Math.max(0.5,Math.round((f-0.01)*1000)/1000))
           },'−'),
           React.createElement('input',{
-            type:'range',min:'0.5',max:'3',step:'0.05',
+            type:'range',min:'0.5',max:'3',step:'0.01',
             value:fontScale,
             onChange:e=>setFontScale(parseFloat(e.target.value)),
             style:{flex:1,accentColor:'#e87820'}
           }),
           React.createElement('button',{type:'button',className:'b bsm',style:{padding:'4px 8px',minHeight:'28px'},
-            onClick:()=>setFontScale(f=>Math.min(3,Math.round((f+0.05)*100)/100))
+            onClick:()=>setFontScale(f=>Math.min(3,Math.round((f+0.01)*1000)/1000))
           },'+')
         )
       ),
@@ -1696,16 +1722,16 @@ function SchedulePublisher({sessions}){
             ),
             React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px'}},
               React.createElement('button',{type:'button',className:'b bsm',style:{padding:'3px 7px',minHeight:'26px'},
-                onClick:()=>setZoneScales(s=>{const n=[...s];n[zi]=Math.max(0.3,Math.round((n[zi]-0.05)*100)/100);return n;})
+                onClick:()=>setZoneScales(s=>{const n=[...s];n[zi]=Math.max(0.3,Math.round((n[zi]-0.01)*1000)/1000);return n;})
               },'−'),
               React.createElement('input',{
-                type:'range',min:'0.3',max:'3',step:'0.05',
+                type:'range',min:'0.3',max:'3',step:'0.01',
                 value:zoneScales[zi],
                 onChange:e=>setZoneScales(s=>{const n=[...s];n[zi]=parseFloat(e.target.value);return n;}),
                 style:{flex:1,accentColor:'#e87820'}
               }),
               React.createElement('button',{type:'button',className:'b bsm',style:{padding:'3px 7px',minHeight:'26px'},
-                onClick:()=>setZoneScales(s=>{const n=[...s];n[zi]=Math.min(3,Math.round((n[zi]+0.05)*100)/100);return n;})
+                onClick:()=>setZoneScales(s=>{const n=[...s];n[zi]=Math.min(3,Math.round((n[zi]+0.01)*1000)/1000);return n;})
               },'+')
             )
           )
@@ -1725,16 +1751,16 @@ function SchedulePublisher({sessions}){
             ),
             React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px'}},
               React.createElement('button',{type:'button',className:'b bsm',style:{padding:'3px 7px',minHeight:'26px'},
-                onClick:()=>setBlockTitleScales(s=>{const n=[...s];n[zi]=Math.max(0.3,Math.round((n[zi]-0.05)*100)/100);return n;})
+                onClick:()=>setBlockTitleScales(s=>{const n=[...s];n[zi]=Math.max(0.3,Math.round((n[zi]-0.01)*1000)/1000);return n;})
               },'−'),
               React.createElement('input',{
-                type:'range',min:'0.3',max:'3',step:'0.05',
+                type:'range',min:'0.3',max:'3',step:'0.01',
                 value:blockTitleScales[zi],
                 onChange:e=>setBlockTitleScales(s=>{const n=[...s];n[zi]=parseFloat(e.target.value);return n;}),
                 style:{flex:1,accentColor:'#f5c842'}
               }),
               React.createElement('button',{type:'button',className:'b bsm',style:{padding:'3px 7px',minHeight:'26px'},
-                onClick:()=>setBlockTitleScales(s=>{const n=[...s];n[zi]=Math.min(3,Math.round((n[zi]+0.05)*100)/100);return n;})
+                onClick:()=>setBlockTitleScales(s=>{const n=[...s];n[zi]=Math.min(3,Math.round((n[zi]+0.01)*1000)/1000);return n;})
               },'+')
             )
           )
@@ -1776,9 +1802,9 @@ function SchedulePublisher({sessions}){
             :previewTarget==='semanal'
             ?React.createElement(WeeklyCalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates})
             :previewTarget==='mobileA'
-            ?React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg})
+            ?React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg,colors:{gymName:eaGymName,date:eaDate,subtitle:eaSubtitle,blockType:eaBlockType,blockMeta:eaBlockMeta,exName:eaExName,intensity:eaIntensity,blockHdr:eaBlockHdr,divider:eaDivider,note:noteColor}})
             :previewTarget==='mobileB'
-            ?React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg})
+            ?React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg,colors:{gymName:mmGymName,date:mmDate,subtitle:mmSubtitle,blockType:mmBlockType,blockMetaBg:mmBlockMetaBg,blockMetaText:mmBlockMetaText,exName:mmExName,intensity:mmIntensity,blockHdr:mmBlockHdr,divider:mmDivider,note:noteColor}})
             :React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale})
         ),
         React.createElement('div',{style:{height:`${(previewTarget==='mobileA'||previewTarget==='mobileB')?'auto':1080}px`,...((previewTarget==='mobileA'||previewTarget==='mobileB')?{}:{marginTop:`-${1080*previewScale}px`}),pointerEvents:'none'}})
@@ -1797,63 +1823,104 @@ function SchedulePublisher({sessions}){
     }, React.createElement('i',{className:'ti ti-arrow-left','aria-hidden':'true'}),' Voltar ao mensal'),
 
 
-    // ── settings modal ──
-    settingsOpen&&React.createElement('div',{className:'settings-overlay',onClick:e=>{if(e.target===e.currentTarget)setSettingsOpen(false);}},
-      React.createElement('div',{className:'settings-modal'},
-        React.createElement('div',{className:'settings-title'},
-          React.createElement('i',{className:'ti ti-settings','aria-hidden':'true'}),
-          'Configurações',
-          React.createElement('button',{type:'button',className:'b bd bsm',style:{marginLeft:'auto',padding:'3px 8px',minHeight:'26px'},onClick:()=>setSettingsOpen(false)},
-            React.createElement('i',{className:'ti ti-x','aria-hidden':'true'})
-          )
+    // ── settings modal — draggable, two columns ──
+    settingsOpen&&React.createElement(React.Fragment,null,
+      React.createElement('div',{className:'settings-overlay',onClick:()=>setSettingsOpen(false)}),
+      React.createElement('div',{
+        className:'settings-modal',
+        ref:el=>{
+          if(!el) return;
+          let dragging=false,ox=0,oy=0,ex=0,ey=0;
+          const hdr=el.querySelector('.settings-drag-hdr');
+          if(!hdr||hdr._drag) return;
+          hdr._drag=true;
+          const down=e=>{dragging=true;const r=el.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;el.style.transform='none';document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);};
+          const move=e=>{if(!dragging)return;el.style.left=(e.clientX-ox)+'px';el.style.top=(e.clientY-oy)+'px';};
+          const up=()=>{dragging=false;document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);};
+          hdr.addEventListener('mousedown',down);
+        }
+      },
+        // drag header
+        React.createElement('div',{className:'settings-drag-hdr'},
+          React.createElement('i',{className:'ti ti-grip-horizontal',style:{color:'#555',fontSize:'16px'}}),
+          React.createElement('span',{style:{fontSize:'14px',fontWeight:700,color:'#fff'}},'Configurações — Mobile'),
+          React.createElement('button',{
+            type:'button',className:'b bd bsm',
+            style:{marginLeft:'auto',padding:'3px 8px',minHeight:'24px'},
+            onClick:()=>setSettingsOpen(false)
+          }, React.createElement('i',{className:'ti ti-x'}))
         ),
-        // mobile eagles bg
-        React.createElement('div',{className:'settings-section'},
-          React.createElement('div',{style:{fontSize:'11px',color:'#555',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'10px'}},'Cor de fundo — Mobile Eagles'),
-          React.createElement('div',{className:'settings-row'},
-            React.createElement('span',{className:'settings-lbl'},'Cor de fundo'),
-            React.createElement('div',{className:'color-row'},
-              React.createElement('div',{className:'color-preview',style:{background:eaglesBg},onClick:()=>document.getElementById('picker-eagles').click()}),
-              React.createElement('input',{type:'color',id:'picker-eagles',value:eaglesBg,onChange:e=>setEaglesBg(e.target.value),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
-              React.createElement('input',{type:'text',className:'color-input',value:eaglesBg,
-                onChange:e=>{if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))setEaglesBg(e.target.value);},
-                onBlur:e=>{if(!/^#[0-9a-fA-F]{6}$/.test(e.target.value))setEaglesBg(APP_CONFIG.mobileEaglesBg||'#000000');}
-              })
+        // two-column body
+        React.createElement('div',{className:'settings-body'},
+          // ── Eagles column ──
+          React.createElement('div',null,
+            React.createElement('div',{className:'settings-col-title'},'Mobile Eagles'),
+            ...[
+              ['Fundo',eaglesBg,setEaglesBg,'ea-bg'],
+              ['Nome da academia',eaGymName,setEaGymName,'ea-gn'],
+              ['Data / dia',eaDate,setEaDate,'ea-dt'],
+              ['Sub-título',eaSubtitle,setEaSubtitle,'ea-st'],
+              ['Tipo do bloco',eaBlockType,setEaBlockType,'ea-bt'],
+              ['Meta do bloco',eaBlockMeta,setEaBlockMeta,'ea-bm'],
+              ['Fundo do header',eaBlockHdr,setEaBlockHdr,'ea-bh'],
+              ['Nome do exercício',eaExName,setEaExName,'ea-en'],
+              ['Intensidade',eaIntensity,setEaIntensity,'ea-in'],
+              ['Divisor',eaDivider,setEaDivider,'ea-dv'],
+              ['Observação (ambos)',noteColor,setNoteColor,'ea-nc'],
+            ].map(([lbl,val,setter,id])=>
+              React.createElement('div',{key:id,className:'settings-row'},
+                React.createElement('span',{className:'settings-lbl'},lbl),
+                React.createElement('div',{className:'color-row'},
+                  React.createElement('div',{
+                    className:'color-swatch',
+                    style:{background:val},
+                    onClick:()=>document.getElementById('picker-'+id)?.click()
+                  }),
+                  React.createElement('input',{type:'color',id:'picker-'+id,value:val.startsWith('#')&&val.length===7?val:'#888888',onChange:e=>setter(e.target.value)}),
+                  React.createElement('input',{
+                    type:'text',className:'color-input',value:val,
+                    onChange:e=>{if(/^(#[0-9a-fA-F]{0,8}|rgba?.*)$/.test(e.target.value))setter(e.target.value);}
+                  })
+                )
+              )
+            )
+          ),
+          // ── Mega Man column ──
+          React.createElement('div',null,
+            React.createElement('div',{className:'settings-col-title'},'Mobile Mega Man'),
+            ...[
+              ['Fundo',megaManBg,setMegaManBg,'mm-bg'],
+              ['Nome da academia',mmGymName,setMmGymName,'mm-gn'],
+              ['Data / dia',mmDate,setMmDate,'mm-dt'],
+              ['Sub-título',mmSubtitle,setMmSubtitle,'mm-st'],
+              ['Tipo do bloco',mmBlockType,setMmBlockType,'mm-bt'],
+              ['Meta bg',mmBlockMetaBg,setMmBlockMetaBg,'mm-bmbg'],
+              ['Meta texto',mmBlockMetaText,setMmBlockMetaText,'mm-bmt'],
+              ['Fundo do header',mmBlockHdr,setMmBlockHdr,'mm-bh'],
+              ['Nome do exercício',mmExName,setMmExName,'mm-en'],
+              ['Intensidade',mmIntensity,setMmIntensity,'mm-in'],
+              ['Divisor',mmDivider,setMmDivider,'mm-dv'],
+            ].map(([lbl,val,setter,id])=>
+              React.createElement('div',{key:id,className:'settings-row'},
+                React.createElement('span',{className:'settings-lbl'},lbl),
+                React.createElement('div',{className:'color-row'},
+                  React.createElement('div',{
+                    className:'color-swatch',
+                    style:{background:val},
+                    onClick:()=>document.getElementById('picker-'+id)?.click()
+                  }),
+                  React.createElement('input',{type:'color',id:'picker-'+id,value:val.startsWith('#')&&val.length===7?val:'#888888',onChange:e=>setter(e.target.value)}),
+                  React.createElement('input',{
+                    type:'text',className:'color-input',value:val,
+                    onChange:e=>{if(/^(#[0-9a-fA-F]{0,8}|rgba?.*)$/.test(e.target.value))setter(e.target.value);}
+                  })
+                )
+              )
             )
           )
         ),
-        // mobile megaman bg
-        React.createElement('div',{className:'settings-section'},
-          React.createElement('div',{style:{fontSize:'11px',color:'#555',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'10px'}},'Cor de fundo — Mobile Mega Man'),
-          React.createElement('div',{className:'settings-row'},
-            React.createElement('span',{className:'settings-lbl'},'Cor de fundo'),
-            React.createElement('div',{className:'color-row'},
-              React.createElement('div',{className:'color-preview',style:{background:megaManBg},onClick:()=>document.getElementById('picker-mega').click()}),
-              React.createElement('input',{type:'color',id:'picker-mega',value:megaManBg,onChange:e=>setMegaManBg(e.target.value),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
-              React.createElement('input',{type:'text',className:'color-input',value:megaManBg,
-                onChange:e=>{if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))setMegaManBg(e.target.value);},
-                onBlur:e=>{if(!/^#[0-9a-fA-F]{6}$/.test(e.target.value))setMegaManBg(APP_CONFIG.mobileMegaManBg||'#0a1a5c');}
-              })
-            )
-          )
-        ),
-        // note colour
-        React.createElement('div',{className:'settings-section'},
-          React.createElement('div',{style:{fontSize:'11px',color:'#555',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'10px'}},'Cor das observações — ambos os móbiles'),
-          React.createElement('div',{className:'settings-row'},
-            React.createElement('span',{className:'settings-lbl'},'Cor do texto'),
-            React.createElement('div',{className:'color-row'},
-              React.createElement('div',{className:'color-preview',style:{background:noteColor},onClick:()=>document.getElementById('picker-note').click()}),
-              React.createElement('input',{type:'color',id:'picker-note',value:noteColor,onChange:e=>setNoteColor(e.target.value),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
-              React.createElement('input',{type:'text',className:'color-input',value:noteColor,
-                onChange:e=>{if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))setNoteColor(e.target.value);},
-                onBlur:e=>{if(!/^#[0-9a-fA-F]{6}$/.test(e.target.value))setNoteColor(APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa');}
-              })
-            )
-          )
-        ),
-        React.createElement('div',{style:{fontSize:'11px',color:'#444',lineHeight:'1.6'}},
-          'Estas cores também podem ser configuradas no arquivo config.json no GitHub.'
+        React.createElement('div',{style:{padding:'10px 16px',fontSize:'11px',color:'#444',borderTop:'1px solid #252525'}},
+          'Arraste pelo topo para mover. Cores também configuráveis em config.json no GitHub.'
         )
       )
     ),
@@ -1872,10 +1939,10 @@ function SchedulePublisher({sessions}){
         React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale})
       ),
       React.createElement('div',{ref:exportMobileARef,style:{width:'1080px'}},
-        React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg})
+        React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg,colors:{gymName:eaGymName,date:eaDate,subtitle:eaSubtitle,blockType:eaBlockType,blockMeta:eaBlockMeta,exName:eaExName,intensity:eaIntensity,blockHdr:eaBlockHdr,divider:eaDivider,note:noteColor}})
       ),
       React.createElement('div',{ref:exportMobileBRef,style:{width:'1080px'}},
-        React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg})
+        React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg,colors:{gymName:mmGymName,date:mmDate,subtitle:mmSubtitle,blockType:mmBlockType,blockMetaBg:mmBlockMetaBg,blockMetaText:mmBlockMetaText,exName:mmExName,intensity:mmIntensity,blockHdr:mmBlockHdr,divider:mmDivider,note:noteColor}})
       )
     ),
 
@@ -1913,7 +1980,8 @@ function buildMobileSession(sessions, selectedDate, currentWeekDates){
 // fs helper — returns calc string
 const mfs=(px,fs)=>`${Math.round(px*fs)}px`;
 
-function MobileBlockA({bl,fs,bg}){
+function MobileBlockA({bl,fs,bg,colors}){
+  const col=colors||{};
   const f=fs||1;
   const pad=Math.round(20*f);
   const hasLabel=bl.label&&bl.label!=='-';
@@ -1921,11 +1989,10 @@ function MobileBlockA({bl,fs,bg}){
   const meta=[bl.rounds&&`${bl.rounds} RDS`, bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
   const loads=[...new Set((bl.exercises||[]).filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio').map(e=>fmtIntensity(e.intensity)))];
   const blockBg=bg||APP_CONFIG.mobileEaglesBg||'#000';
-  const hdrBg=`color-mix(in srgb, ${blockBg} 60%, #00b8d4 40%)` || blockBg;
-  return React.createElement('div',{style:{borderBottom:`1px solid rgba(0,184,212,0.2)`}},
-    React.createElement('div',{style:{background:`rgba(0,184,212,0.12)`,padding:`${Math.round(10*f)}px ${pad}px ${Math.round(6*f)}px`,borderTop:`2px solid #00b8d4`}},
-      React.createElement('div',{style:{fontSize:mfs(18,f),fontWeight:900,color:'#00b8d4',textTransform:'uppercase',letterSpacing:'.07em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},title),
-      meta&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'#00b8d4',fontWeight:700,textTransform:'uppercase',marginTop:mfs(2,f),fontFamily:"'Arial Black',Arial,sans-serif"}},meta)
+  return React.createElement('div',{style:{borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
+    React.createElement('div',{style:{background:col.blockHdr||'rgba(0,184,212,0.12)',padding:`${Math.round(10*f)}px ${pad}px ${Math.round(6*f)}px`,borderTop:`2px solid #00b8d4`}},
+      React.createElement('div',{style:{fontSize:mfs(18,f),fontWeight:900,color:col.blockType||'#00b8d4',textTransform:'uppercase',letterSpacing:'.07em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},title),
+      meta&&React.createElement('div',{style:{fontSize:mfs(12,f),color:col.blockMeta||'#00b8d4',fontWeight:700,textTransform:'uppercase',marginTop:mfs(2,f),fontFamily:"'Arial Black',Arial,sans-serif"}},meta)
     ),
     React.createElement('div',{style:{background:blockBg,padding:`${Math.round(4*f)}px ${pad}px ${Math.round(14*f)}px`}},
       (bl.exercises||[]).filter(e=>e.name).map((ex,ei)=>{
@@ -1934,8 +2001,8 @@ function MobileBlockA({bl,fs,bg}){
         const volPrefix=ex.sets&&ex.reps?`${ex.sets}×${ex.reps}`:ex.reps||'';
         const prefix=cardioPrefix||volPrefix;
         const line=[prefix,ex.name.toUpperCase()].filter(Boolean).join(' ');
-        return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:'1px solid rgba(0,184,212,0.1)'}},
-          React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},line),
+        return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
+          React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},line),
           ex.note&&React.createElement('div',{style:{fontSize:mfs(12,f),color:APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa',fontStyle:'italic',marginTop:mfs(2,f)}},ex.note)
         );
       }),
@@ -1945,7 +2012,8 @@ function MobileBlockA({bl,fs,bg}){
   );
 }
 
-function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride}){
+function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride,colors}){
+  const col=colors||{};
   const found=buildMobileSession(sessions,selectedDate,currentWeekDates);
   const f=fontScale||1;
   const pad=Math.round(28*f);
@@ -1959,28 +2027,29 @@ function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,
     React.createElement('div',{style:{background:bgA,padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:'2px solid rgba(255,255,255,0.08)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(16,f)}},
         logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
-        React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.08em'}},gymName||'Eagles')
+        React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:col.gymName||'#fff',textTransform:'uppercase',letterSpacing:'.08em'}},gymName||'Eagles')
       ),
       React.createElement('div',{style:{textAlign:'right'}},
-        React.createElement('div',{style:{fontSize:mfs(18,f),color:'#e87820',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
-        s.mainTraining&&React.createElement('div',{style:{fontSize:mfs(13,f),color:'#666',textTransform:'uppercase',letterSpacing:'.06em',marginTop:mfs(2,f)}},s.mainTraining)
+        React.createElement('div',{style:{fontSize:mfs(18,f),color:col.date||'#e87820',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
+        s.mainTraining&&React.createElement('div',{style:{fontSize:mfs(13,f),color:col.subtitle||'#666',textTransform:'uppercase',letterSpacing:'.06em',marginTop:mfs(2,f)}},s.mainTraining)
       )
     ),
-    (s.blocks||[]).map(bl=>React.createElement(MobileBlockA,{key:bl.id,bl,fs:f,bg:bgA}))
+    (s.blocks||[]).map(bl=>React.createElement(MobileBlockA,{key:bl.id,bl,fs:f,bg:bgA,colors:col}))
   );
 }
 
-function MobileBlockB({bl,fs}){
+function MobileBlockB({bl,fs,colors}){
+  const col=colors||{};
   const f=fs||1;
   const pad=Math.round(20*f);
   const hasLabel=bl.label&&bl.label!=='-';
   const title=hasLabel?bl.label:bl.type;
   const meta=[bl.rounds&&`${bl.rounds} RDS`, bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
   const loads=[...new Set((bl.exercises||[]).filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio').map(e=>fmtIntensity(e.intensity)))];
-  return React.createElement('div',{style:{borderBottom:'1px solid rgba(0,184,212,0.2)'}},
-    React.createElement('div',{style:{background:'rgba(0,184,212,0.12)',padding:`${Math.round(10*f)}px ${pad}px`,borderTop:`${Math.max(2,Math.round(3*f))}px solid #00b8d4`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
-      React.createElement('div',{style:{fontSize:mfs(16,f),fontWeight:900,color:'#00b8d4',textTransform:'uppercase',letterSpacing:'.1em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},title),
-      meta&&React.createElement('span',{style:{fontSize:mfs(12,f),fontWeight:900,color:'#000',background:'#00b8d4',padding:`${Math.round(3*f)}px ${Math.round(10*f)}px`,borderRadius:'2px',fontFamily:"'Courier New',monospace",whiteSpace:'nowrap'}},meta)
+  return React.createElement('div',{style:{borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
+    React.createElement('div',{style:{background:col.blockHdr||'rgba(0,184,212,0.12)',padding:`${Math.round(10*f)}px ${pad}px`,borderTop:`${Math.max(2,Math.round(3*f))}px solid ${col.blockType||'#00b8d4'}`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
+      React.createElement('div',{style:{fontSize:mfs(16,f),fontWeight:900,color:col.blockType||'#00b8d4',textTransform:'uppercase',letterSpacing:'.1em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},title),
+      meta&&React.createElement('span',{style:{fontSize:mfs(12,f),fontWeight:900,color:col.blockMetaText||'#000',background:col.blockMetaBg||'#00b8d4',padding:`${Math.round(3*f)}px ${Math.round(10*f)}px`,borderRadius:'2px',fontFamily:"'Courier New',monospace",whiteSpace:'nowrap'}},meta)
     ),
     React.createElement('div',{style:{background:APP_CONFIG.mobileMegaManBg||'#000',padding:`${Math.round(8*f)}px ${pad}px ${Math.round(14*f)}px`}},
       (bl.exercises||[]).filter(e=>e.name).map((ex,ei)=>{
@@ -1989,18 +2058,19 @@ function MobileBlockB({bl,fs}){
         const volPrefix=ex.sets&&ex.reps?`${ex.sets}×${ex.reps}`:ex.reps||'';
         const prefix=cardioPrefix||volPrefix;
         const line=[prefix,ex.name.toUpperCase()].filter(Boolean).join(' ');
-        return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:'1px solid rgba(0,184,212,0.1)'}},
-          React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},line),
+        return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
+          React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},line),
           ex.note&&React.createElement('div',{style:{fontSize:mfs(11,f),color:APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa',fontStyle:'italic',marginTop:mfs(2,f)}},ex.note)
         );
       }),
-      loads.length>0&&React.createElement('div',{style:{fontSize:mfs(13,f),fontWeight:700,color:'#ffd700',marginTop:mfs(7,f),fontFamily:"'Courier New',monospace",display:'inline-block',background:'#060f10',border:'1px solid #1a3a40',padding:`${Math.round(3*f)}px ${Math.round(9*f)}px`}},loads.join(' · ')),
+      loads.length>0&&React.createElement('div',{style:{fontSize:mfs(13,f),fontWeight:700,color:col.intensity||'#ffd700',marginTop:mfs(7,f),fontFamily:"'Courier New',monospace",display:'inline-block',background:'#060f10',border:'1px solid #1a3a40',padding:`${Math.round(3*f)}px ${Math.round(9*f)}px`}},loads.join(' · ')),
       bl.notes&&React.createElement('div',{style:{fontSize:mfs(12,f),color:APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa',marginTop:mfs(5,f),paddingTop:mfs(5,f),borderTop:'1px solid rgba(0,184,212,0.15)',fontFamily:"'Courier New',monospace"}},bl.notes)
     )
   );
 }
 
-function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride}){
+function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride,colors}){
+  const col=colors||{};
   const found=buildMobileSession(sessions,selectedDate,currentWeekDates);
   const f=fontScale||1;
   const pad=Math.round(28*f);
@@ -2014,14 +2084,14 @@ function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName
     React.createElement('div',{style:{background:bg,padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:`${Math.max(2,Math.round(3*f))}px solid rgba(0,184,212,0.8)`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(16,f)}},
         logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
-        React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},gymName||'Eagles')
+        React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:col.gymName||'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},gymName||'Eagles')
       ),
       React.createElement('div',{style:{textAlign:'right'}},
-        React.createElement('div',{style:{fontSize:mfs(18,f),color:'#00b8d4',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
-        s.mainTraining&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'#3a6a80',textTransform:'uppercase',letterSpacing:'.06em',marginTop:mfs(2,f)}},s.mainTraining)
+        React.createElement('div',{style:{fontSize:mfs(18,f),color:col.date||'#00b8d4',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
+        s.mainTraining&&React.createElement('div',{style:{fontSize:mfs(12,f),color:col.subtitle||'#3a6a80',textTransform:'uppercase',letterSpacing:'.06em',marginTop:mfs(2,f)}},s.mainTraining)
       )
     ),
-    (s.blocks||[]).map(bl=>React.createElement(MobileBlockB,{key:bl.id,bl,fs:f}))
+    (s.blocks||[]).map(bl=>React.createElement(MobileBlockB,{key:bl.id,bl,fs:f,colors:col}))
   );
 }
 
