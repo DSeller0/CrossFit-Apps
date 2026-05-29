@@ -239,6 +239,19 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .blk-wrap.drag-over{border-color:#e87820;box-shadow:0 0 0 2px rgba(232,120,32,.3)}
 .ex-card.drag-over{border-color:#e87820}
 .sc-card.drag-over-session{border-color:#e87820;box-shadow:0 0 0 2px rgba(232,120,32,.2)}
+.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+.settings-modal{background:#1c1c1c;border:1px solid #2e2e2e;border-radius:12px;padding:22px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
+.settings-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.settings-section{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #222}
+.settings-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.settings-row:last-child{margin-bottom:0}
+.settings-lbl{font-size:12px;color:#aaa;font-weight:500}
+.color-row{display:flex;align-items:center;gap:8px}
+.color-preview{width:28px;height:28px;border-radius:4px;border:1px solid #333;flex-shrink:0;cursor:pointer}
+.color-input{font-family:inherit;font-size:13px;border:1px solid #2e2e2e;border-radius:5px;padding:5px 8px;background:#111;color:#e0e0e0;outline:none;width:96px}
+.color-input:focus{border-color:#444}
+input[type=color]{width:36px;height:28px;border:1px solid #333;border-radius:4px;padding:1px;background:#111;cursor:pointer;-webkit-appearance:none}
 .mic-btn{font-family:inherit;font-size:13px;padding:0;width:32px;height:32px;border-radius:50%;border:1px solid #2e2e2e;background:transparent;color:#666;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .mic-btn:hover{border-color:#e87820;color:#e87820}
 .mic-btn.listening{background:#e87820;border-color:#e87820;color:#000;animation:mic-pulse 1.2s ease-in-out infinite}
@@ -267,7 +280,8 @@ const APP_CONFIG={
   zoneScales:[1,1,1],
   blockTitleScales:[1,1,1],
   logoScale:1,
-  mobileMegaManBg:'#000000',
+  mobileEaglesBg:'#000000',
+  mobileMegaManBg:'#0a1a5c',
   blockNames:['-','WOD','Skill','Core','Acessórios','LPO','Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso']
 };
 
@@ -1372,7 +1386,12 @@ function SchedulePublisher({sessions}){
   const [zoneScales,setZoneScales]=useState([1,1,1]);
   const [blockTitleScales,setBlockTitleScales]=useState([1,1,1]);
   const [previewOpen,setPreviewOpen]=useState(false);
+  const [settingsOpen,setSettingsOpen]=useState(false);
+  const [eaglesBg,setEaglesBg]=useState(APP_CONFIG.mobileEaglesBg||'#000000');
+  const [megaManBg,setMegaManBg]=useState(APP_CONFIG.mobileMegaManBg||'#0a1a5c');
   const [previewScale,setPreviewScale]=useState(1);
+  useEffect(()=>{APP_CONFIG.mobileEaglesBg=eaglesBg;},[eaglesBg]);
+  useEffect(()=>{APP_CONFIG.mobileMegaManBg=megaManBg;},[megaManBg]);
   const now=new Date();
   const [month,setMonth]=useState(now.getMonth());
   const [year,setYear]=useState(now.getFullYear());
@@ -1581,14 +1600,18 @@ function SchedulePublisher({sessions}){
       // preview + export
       React.createElement('div',{style:{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}},
         React.createElement('button',{
-          type:'button',
-          className:'b',
+          type:'button',className:'b',
           style:{borderColor:'#e87820',color:previewOpen?'#000':'#e87820',background:previewOpen?'#e87820':'transparent'},
           onClick:()=>setPreviewOpen(p=>!p)
         },
           React.createElement('i',{className:'ti ti-eye','aria-hidden':'true'}),
           previewOpen?' Fechar':' Pré-visualizar'
         ),
+        React.createElement('button',{
+          type:'button',className:'b bsm',
+          title:'Configurações',
+          onClick:()=>setSettingsOpen(true)
+        }, React.createElement('i',{className:'ti ti-settings','aria-hidden':'true'})),
         React.createElement('button',{
           type:'button',className:'b bsec',style:{fontSize:'12px'},
           onClick:()=>{setExportTarget('daily');doExport('daily');},disabled:exporting
@@ -1750,9 +1773,9 @@ function SchedulePublisher({sessions}){
             :previewTarget==='semanal'
             ?React.createElement(WeeklyCalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates})
             :previewTarget==='mobileA'
-            ?React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale})
+            ?React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg})
             :previewTarget==='mobileB'
-            ?React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale})
+            ?React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg})
             :React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale})
         ),
         React.createElement('div',{style:{height:`${(previewTarget==='mobileA'||previewTarget==='mobileB')?'auto':1080}px`,...((previewTarget==='mobileA'||previewTarget==='mobileB')?{}:{marginTop:`-${1080*previewScale}px`}),pointerEvents:'none'}})
@@ -1770,6 +1793,52 @@ function SchedulePublisher({sessions}){
       onClick:()=>setView('weekly')
     }, React.createElement('i',{className:'ti ti-arrow-left','aria-hidden':'true'}),' Voltar ao mensal'),
 
+
+    // ── settings modal ──
+    settingsOpen&&React.createElement('div',{className:'settings-overlay',onClick:e=>{if(e.target===e.currentTarget)setSettingsOpen(false);}},
+      React.createElement('div',{className:'settings-modal'},
+        React.createElement('div',{className:'settings-title'},
+          React.createElement('i',{className:'ti ti-settings','aria-hidden':'true'}),
+          'Configurações',
+          React.createElement('button',{type:'button',className:'b bd bsm',style:{marginLeft:'auto',padding:'3px 8px',minHeight:'26px'},onClick:()=>setSettingsOpen(false)},
+            React.createElement('i',{className:'ti ti-x','aria-hidden':'true'})
+          )
+        ),
+        // mobile eagles bg
+        React.createElement('div',{className:'settings-section'},
+          React.createElement('div',{style:{fontSize:'11px',color:'#555',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'10px'}},'Cor de fundo — Mobile Eagles'),
+          React.createElement('div',{className:'settings-row'},
+            React.createElement('span',{className:'settings-lbl'},'Cor de fundo'),
+            React.createElement('div',{className:'color-row'},
+              React.createElement('div',{className:'color-preview',style:{background:eaglesBg},onClick:()=>document.getElementById('picker-eagles').click()}),
+              React.createElement('input',{type:'color',id:'picker-eagles',value:eaglesBg,onChange:e=>setEaglesBg(e.target.value),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
+              React.createElement('input',{type:'text',className:'color-input',value:eaglesBg,
+                onChange:e=>{if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))setEaglesBg(e.target.value);},
+                onBlur:e=>{if(!/^#[0-9a-fA-F]{6}$/.test(e.target.value))setEaglesBg(APP_CONFIG.mobileEaglesBg||'#000000');}
+              })
+            )
+          )
+        ),
+        // mobile megaman bg
+        React.createElement('div',{className:'settings-section'},
+          React.createElement('div',{style:{fontSize:'11px',color:'#555',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'10px'}},'Cor de fundo — Mobile Mega Man'),
+          React.createElement('div',{className:'settings-row'},
+            React.createElement('span',{className:'settings-lbl'},'Cor de fundo'),
+            React.createElement('div',{className:'color-row'},
+              React.createElement('div',{className:'color-preview',style:{background:megaManBg},onClick:()=>document.getElementById('picker-mega').click()}),
+              React.createElement('input',{type:'color',id:'picker-mega',value:megaManBg,onChange:e=>setMegaManBg(e.target.value),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
+              React.createElement('input',{type:'text',className:'color-input',value:megaManBg,
+                onChange:e=>{if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))setMegaManBg(e.target.value);},
+                onBlur:e=>{if(!/^#[0-9a-fA-F]{6}$/.test(e.target.value))setMegaManBg(APP_CONFIG.mobileMegaManBg||'#0a1a5c');}
+              })
+            )
+          )
+        ),
+        React.createElement('div',{style:{fontSize:'11px',color:'#444',marginTop:'8px',lineHeight:'1.6'}},
+          'Estas cores também podem ser configuradas no arquivo config.json no GitHub.'
+        )
+      )
+    ),
     // ── hidden export targets — always rendered, off-screen, dedicated refs ──
     React.createElement('div',{style:{position:'fixed',left:'-9999px',top:'-9999px',pointerEvents:'none',zIndex:-1,overflow:'hidden'}},
       React.createElement('div',{ref:exportDailyRef},
@@ -1785,10 +1854,10 @@ function SchedulePublisher({sessions}){
         React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale})
       ),
       React.createElement('div',{ref:exportMobileARef,style:{width:'1080px'}},
-        React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale})
+        React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg})
       ),
       React.createElement('div',{ref:exportMobileBRef,style:{width:'1080px'}},
-        React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale})
+        React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg})
       )
     ),
 
@@ -1826,37 +1895,39 @@ function buildMobileSession(sessions, selectedDate, currentWeekDates){
 // fs helper — returns calc string
 const mfs=(px,fs)=>`${Math.round(px*fs)}px`;
 
-function MobileBlockA({bl,fs}){
+function MobileBlockA({bl,fs,bg}){
   const f=fs||1;
   const pad=Math.round(20*f);
   const hasLabel=bl.label&&bl.label!=='-';
   const title=hasLabel?bl.label:bl.type;
   const meta=[bl.rounds&&`${bl.rounds} RDS`, bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
   const loads=[...new Set((bl.exercises||[]).filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio').map(e=>fmtIntensity(e.intensity)))];
-  return React.createElement('div',{style:{borderBottom:'1px solid #1a1a1a'}},
-    React.createElement('div',{style:{padding:`${Math.round(10*f)}px ${pad}px ${Math.round(6*f)}px`}},
-      React.createElement('div',{style:{fontSize:mfs(18,f),fontWeight:900,color:'#e87820',textTransform:'uppercase',letterSpacing:'.07em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},title),
-      meta&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'#e87820',fontWeight:700,textTransform:'uppercase',marginTop:mfs(2,f),fontFamily:"'Arial Black',Arial,sans-serif"}},meta)
+  const blockBg=bg||APP_CONFIG.mobileEaglesBg||'#000';
+  const hdrBg=`color-mix(in srgb, ${blockBg} 60%, #00b8d4 40%)` || blockBg;
+  return React.createElement('div',{style:{borderBottom:`1px solid rgba(0,184,212,0.2)`}},
+    React.createElement('div',{style:{background:`rgba(0,184,212,0.12)`,padding:`${Math.round(10*f)}px ${pad}px ${Math.round(6*f)}px`,borderTop:`2px solid #00b8d4`}},
+      React.createElement('div',{style:{fontSize:mfs(18,f),fontWeight:900,color:'#00b8d4',textTransform:'uppercase',letterSpacing:'.07em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},title),
+      meta&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'#00b8d4',fontWeight:700,textTransform:'uppercase',marginTop:mfs(2,f),fontFamily:"'Arial Black',Arial,sans-serif"}},meta)
     ),
-    React.createElement('div',{style:{padding:`0 ${pad}px ${Math.round(14*f)}px`}},
+    React.createElement('div',{style:{background:blockBg,padding:`${Math.round(4*f)}px ${pad}px ${Math.round(14*f)}px`}},
       (bl.exercises||[]).filter(e=>e.name).map((ex,ei)=>{
         const isCardio=ex.intensity?.mode==='cardio';
         const cardioPrefix=isCardio&&ex.intensity?.cardioVal?`${ex.intensity.cardioVal}${ex.intensity.cardioUnit||'m'}`:'';
         const volPrefix=ex.sets&&ex.reps?`${ex.sets}×${ex.reps}`:ex.reps||'';
         const prefix=cardioPrefix||volPrefix;
         const line=[prefix,ex.name.toUpperCase()].filter(Boolean).join(' ');
-        return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:'1px solid #111'}},
+        return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:'1px solid rgba(0,184,212,0.1)'}},
           React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},line),
-          ex.note&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'#888',fontStyle:'italic',marginTop:mfs(2,f)}},ex.note)
+          ex.note&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'rgba(0,184,212,0.6)',fontStyle:'italic',marginTop:mfs(2,f)}},ex.note)
         );
       }),
-      loads.length>0&&React.createElement('div',{style:{fontSize:mfs(13,f),fontWeight:700,color:'#f5c842',marginTop:mfs(7,f),fontFamily:"'Arial Black',Arial,sans-serif"}},loads.join(' · ')),
-      bl.notes&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'#888',fontStyle:'italic',marginTop:mfs(5,f),paddingTop:mfs(5,f),borderTop:'1px solid #1a1a1a'}},bl.notes)
+      loads.length>0&&React.createElement('div',{style:{fontSize:mfs(13,f),fontWeight:700,color:'#ffd700',marginTop:mfs(7,f),fontFamily:"'Arial Black',Arial,sans-serif",display:'inline-block',background:'rgba(0,0,0,0.3)',border:'1px solid rgba(0,184,212,0.3)',padding:`${Math.round(3*f)}px ${Math.round(9*f)}px`}},loads.join(' · ')),
+      bl.notes&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'rgba(0,184,212,0.6)',fontStyle:'italic',marginTop:mfs(5,f),paddingTop:mfs(5,f),borderTop:'1px solid rgba(0,184,212,0.15)'}}  ,bl.notes)
     )
   );
 }
 
-function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale}){
+function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride}){
   const found=buildMobileSession(sessions,selectedDate,currentWeekDates);
   const f=fontScale||1;
   const pad=Math.round(28*f);
@@ -1865,8 +1936,9 @@ function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,
   const weekday=date.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase();
   const dateNum=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
   const ls=logoScale||1;
-  return React.createElement('div',{style:{background:'#000',width:'1080px',fontFamily:"'Arial Black',Arial,sans-serif"}},
-    React.createElement('div',{style:{background:'#0a0a0a',padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:'2px solid #1a1a1a',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+  const bgA=bgOverride||APP_CONFIG.mobileEaglesBg||'#000000';
+  return React.createElement('div',{style:{background:bgA,width:'1080px',fontFamily:"'Arial Black',Arial,sans-serif"}},
+    React.createElement('div',{style:{background:bgA,padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:'2px solid rgba(255,255,255,0.08)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(16,f)}},
         logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
         React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.08em'}},gymName||'Eagles')
@@ -1876,7 +1948,7 @@ function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,
         s.mainTraining&&React.createElement('div',{style:{fontSize:mfs(13,f),color:'#666',textTransform:'uppercase',letterSpacing:'.06em',marginTop:mfs(2,f)}},s.mainTraining)
       )
     ),
-    (s.blocks||[]).map(bl=>React.createElement(MobileBlockA,{key:bl.id,bl,fs:f}))
+    (s.blocks||[]).map(bl=>React.createElement(MobileBlockA,{key:bl.id,bl,fs:f,bg:bgA}))
   );
 }
 
@@ -1887,8 +1959,8 @@ function MobileBlockB({bl,fs}){
   const title=hasLabel?bl.label:bl.type;
   const meta=[bl.rounds&&`${bl.rounds} RDS`, bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
   const loads=[...new Set((bl.exercises||[]).filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio').map(e=>fmtIntensity(e.intensity)))];
-  return React.createElement('div',{style:{borderBottom:'2px solid #0d2a30'}},
-    React.createElement('div',{style:{background:'#050e14',padding:`${Math.round(10*f)}px ${pad}px`,borderTop:`${Math.max(2,Math.round(3*f))}px solid #00b8d4`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
+  return React.createElement('div',{style:{borderBottom:'1px solid rgba(0,184,212,0.2)'}},
+    React.createElement('div',{style:{background:'rgba(0,184,212,0.12)',padding:`${Math.round(10*f)}px ${pad}px`,borderTop:`${Math.max(2,Math.round(3*f))}px solid #00b8d4`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
       React.createElement('div',{style:{fontSize:mfs(16,f),fontWeight:900,color:'#00b8d4',textTransform:'uppercase',letterSpacing:'.1em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},title),
       meta&&React.createElement('span',{style:{fontSize:mfs(12,f),fontWeight:900,color:'#000',background:'#00b8d4',padding:`${Math.round(3*f)}px ${Math.round(10*f)}px`,borderRadius:'2px',fontFamily:"'Courier New',monospace",whiteSpace:'nowrap'}},meta)
     ),
@@ -1899,7 +1971,7 @@ function MobileBlockB({bl,fs}){
         const volPrefix=ex.sets&&ex.reps?`${ex.sets}×${ex.reps}`:ex.reps||'';
         const prefix=cardioPrefix||volPrefix;
         const line=[prefix,ex.name.toUpperCase()].filter(Boolean).join(' ');
-        return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:'1px solid #0d1e1e'}},
+        return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:'1px solid rgba(0,184,212,0.1)'}},
           React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},line),
           ex.note&&React.createElement('div',{style:{fontSize:mfs(11,f),color:'#3a6a80',fontStyle:'italic',marginTop:mfs(2,f)}},ex.note)
         );
@@ -1910,7 +1982,7 @@ function MobileBlockB({bl,fs}){
   );
 }
 
-function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale}){
+function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride}){
   const found=buildMobileSession(sessions,selectedDate,currentWeekDates);
   const f=fontScale||1;
   const pad=Math.round(28*f);
@@ -1919,9 +1991,9 @@ function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName
   const weekday=date.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase();
   const dateNum=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
   const ls=logoScale||1;
-  const bg=APP_CONFIG.mobileMegaManBg||'#000000';
+  const bg=bgOverride||APP_CONFIG.mobileMegaManBg||'#0a1a5c';
   return React.createElement('div',{style:{background:bg,width:'1080px',fontFamily:"'Courier New',monospace"}},
-    React.createElement('div',{style:{background:bg,padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:`${Math.max(2,Math.round(3*f))}px solid #00b8d4`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
+    React.createElement('div',{style:{background:bg,padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:`${Math.max(2,Math.round(3*f))}px solid rgba(0,184,212,0.8)`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(16,f)}},
         logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
         React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},gymName||'Eagles')
@@ -2167,6 +2239,7 @@ function App(){
       .catch(()=>null)
       .then(cfg=>{
         if(!cfg) return;
+        if(cfg.mobileEaglesBg) APP_CONFIG.mobileEaglesBg=cfg.mobileEaglesBg;
         if(cfg.mobileMegaManBg) APP_CONFIG.mobileMegaManBg=cfg.mobileMegaManBg;
         if(cfg.blockNames&&Array.isArray(cfg.blockNames)){
           APP_CONFIG.blockNames=cfg.blockNames;
