@@ -6,7 +6,7 @@
   "blockTitleScales": [1, 1, 1],
   "mobileMegaManBg": "#0A1650",
   "mobileEaglesBg": "#000000",
-  "mobileExerciseNoteColor": "#4a9aaa",
+  "mobileExerciseNoteColor": "#000000",
   "blockNames": [
     "-",
     "WOD",
