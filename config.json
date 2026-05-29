@@ -4,7 +4,7 @@
   "logoScale": 1.0,
   "zoneScales": [1, 1, 1],
   "blockTitleScales": [1, 1, 1],
-  "mobileMegaManBg": "#000000",
+  "mobileMegaManBg": "#00b8d4",
   "blockNames": [
     "-",
     "WOD",
