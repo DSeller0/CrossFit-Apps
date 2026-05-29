@@ -997,7 +997,12 @@ function DailyExportView({sessions,label,weekDates,gymName,fontScale,zoneScales,
             ec0
               ? React.createElement('div',null,
                   React.createElement('div',{className:'dv-zone-type'},
-                    (zoneBlocks[0].label&&zoneBlocks[0].label!=='-')?zoneBlocks[0].label:zoneBlocks[0].type
+                    (zoneBlocks[0].label&&zoneBlocks[0].label!=='-')
+                      ? React.createElement('div',null,
+                          React.createElement('div',null, zoneBlocks[0].label),
+                          React.createElement('div',{style:{fontSize:'calc(16px * var(--fs,1) * var(--bts,1))',opacity:.75,marginTop:'2px'}}, zoneBlocks[0].type)
+                        )
+                      : zoneBlocks[0].type
                   ),
                   (primaryBlock&&primaryBlock.duration)&&
                     React.createElement('div',{className:'dv-zone-subtitle'},
