@@ -1,0 +1,2320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>Eagles — Treinos</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#e87820"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+
+<!-- iOS Safari PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Eagles Treinos"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+
+<!-- Description for sharing -->
+<meta name="description" content="Criador e publicador de treinos Eagles"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#e0e0e0;-webkit-text-size-adjust:100%}
+#root{max-width:1440px;margin:0 auto}
+
+/* chrome */
+.topbar{background:#161616;border-bottom:1px solid #2a2a2a;padding:9px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:15px;font-weight:700;color:#fff;white-space:nowrap}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.saved-badge{font-size:11px;color:#50a050;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.tb-btn{font-family:inherit;font-size:12px;padding:6px 11px;border-radius:5px;border:1px solid #2e2e2e;background:transparent;color:#999;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:all .12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.tb-btn:hover{background:#222;color:#fff;border-color:#444}
+.tb-btn:active{opacity:.65}
+.tb-btn.tb-load{border-color:#1a3a6a;color:#5090e0}
+.tb-btn.tb-load:hover{background:#0e1a32}
+.tb-btn.tb-save{border-color:#2a4a1a;color:#80c040}
+.tb-btn.tb-save:hover{background:#1a2a10}
+#state-file-input{display:none}
+.tab-bar{display:flex;background:#161616;border-bottom:1px solid #252525;overflow-x:auto;-webkit-overflow-scrolling:touch;position:sticky;top:44px;z-index:99}
+.tab3{padding:11px 18px;font-size:13px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;color:#666;font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;transition:color .15s}
+.tab3.on{color:#fff;border-bottom-color:#fff}
+.tab3:hover:not(.on){color:#bbb}
+.pane{padding:14px}
+
+/* form */
+.lbl{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:3px;display:block}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg input,.fg select,.fg textarea{font-family:inherit;font-size:16px;border:1px solid #2e2e2e;border-radius:6px;padding:9px 11px;background:#111;color:#e0e0e0;outline:none;width:100%;-webkit-appearance:none;appearance:none;transition:border-color .15s}
+.fg input[type=date]{color-scheme:dark}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:#444}
+.fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.fg select option{background:#1c1c1c;font-size:16px}
+.fg textarea{resize:vertical;min-height:50px;font-size:14px;line-height:1.5}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.g4{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.mb8{margin-bottom:8px}.mb10{margin-bottom:10px}
+
+/* buttons */
+.b{font-family:inherit;font-size:13px;padding:9px 14px;border-radius:6px;border:1px solid #2e2e2e;background:transparent;color:#bbb;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:40px;transition:background .12s,color .12s;user-select:none}
+.b:active{opacity:.65}
+.bp{background:#fff;color:#111;border-color:#fff;font-weight:600}
+.bp:hover{background:#e8e8e8}
+.bd{color:#d05050;border-color:#2e1a1a}
+.bd:hover{background:#1a0a0a}
+.bsm{padding:6px 9px;font-size:12px;min-height:32px}
+.bfull{width:100%}
+.bsec{background:#e87820;color:#fff;border-color:#e87820;font-weight:600}
+.bsec:hover{background:#c86010}
+
+/* session card */
+.sc-card{background:#1c1c1c;border:1px solid #272727;border-radius:10px;padding:16px;margin-bottom:12px}
+.sc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sc-title{font-size:14px;font-weight:700;color:#fff}
+
+/* block */
+.blk-wrap{border-radius:8px;overflow:hidden;border:1px solid #2a2a2a;margin-bottom:10px}
+.blk-bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:9px 12px}
+.blk-sel{font-family:inherit;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;border:none;border-radius:4px;padding:5px 26px 5px 9px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='currentColor' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;outline:none;cursor:pointer}
+.blk-mini-input{font-family:inherit;font-size:12px;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:4px 6px;background:rgba(0,0,0,.3);color:inherit;outline:none;width:50px;-webkit-appearance:none;text-align:center}
+.blk-mini-lbl{font-size:10px;color:#666;white-space:nowrap}
+.blk-zone-sel{font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.05em;border:1px solid rgba(255,255,255,.15);border-radius:4px;padding:4px 22px 4px 7px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' stroke='currentColor' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;outline:none;cursor:pointer;color:inherit}
+.blk-body{background:#141414;padding:12px 14px}
+.blk-idx{font-size:10px;color:#666;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.blk-spacer{flex:1}
+
+/* block colours */
+.bt-wu .blk-bar{background:#1c2a10}.bt-wu .blk-sel{background:#253318;color:#80c040}.bt-wu .blk-zone-sel{background:#1c2a10}
+.bt-st .blk-bar{background:#0e1a32}.bt-st .blk-sel{background:#162240;color:#5090e0}.bt-st .blk-zone-sel{background:#0e1a32}
+.bt-ca .blk-bar{background:#0c1e14}.bt-ca .blk-sel{background:#162c20;color:#40b878}.bt-ca .blk-zone-sel{background:#0c1e14}
+.bt-mo .blk-bar{background:#180e2c}.bt-mo .blk-sel{background:#261640;color:#9070d8}.bt-mo .blk-zone-sel{background:#180e2c}
+.bt-hi .blk-bar{background:#220c0c}.bt-hi .blk-sel{background:#3a1414;color:#e06848}.bt-hi .blk-zone-sel{background:#220c0c}
+.bt-mc .blk-bar{background:#221406}.bt-mc .blk-sel{background:#3a2010;color:#e0a030}.bt-mc .blk-zone-sel{background:#221406}
+.bt-ft .blk-bar{background:#22061a}.bt-ft .blk-sel{background:#3a1030;color:#e040b0}.bt-ft .blk-zone-sel{background:#22061a}
+.bt-am .blk-bar{background:#061820}.bt-am .blk-sel{background:#0e2e3a;color:#30c0d8}.bt-am .blk-zone-sel{background:#061820}
+.bt-re .blk-bar{background:#161616}.bt-re .blk-sel{background:#222;color:#666}.bt-re .blk-zone-sel{background:#161616}
+
+/* exercise */
+.ex-card{background:#1a1a1a;border:1px solid #252525;border-radius:6px;padding:10px;margin-bottom:8px}
+.ex-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ex-num{font-size:10px;color:#444;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ex-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+
+/* intensity */
+.int-block{background:#111;border:1px solid #202020;border-radius:6px;padding:10px 11px;margin-top:8px}
+.int-tabs{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap}
+.itb{font-family:inherit;font-size:11px;padding:5px 10px;border-radius:4px;border:1px solid #2a2a2a;background:#161616;color:#666;cursor:pointer;min-height:30px;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.itb.iact{background:#222c18;color:#80c040;border-color:#3a5020}
+.gblock{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gst{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:5px}
+.unit-row{display:flex;gap:8px;align-items:flex-end}
+.unit-row .fg:first-child{flex:1}
+
+/* add block */
+.add-blk-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:8px;border:1.5px dashed #383838;background:transparent;color:#666;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin-bottom:12px}
+.add-blk-btn:hover{border-color:#666;color:#bbb;background:#181818}
+
+/* week overview */
+.week-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:12px;padding-bottom:4px}
+.week-grid{display:grid;grid-template-columns:repeat(7,minmax(200px,1fr));gap:1px;background:#252525;border-radius:8px;overflow:hidden;border:1px solid #252525;min-width:1400px}
+.wg-col{background:#161616}
+.wg-head{padding:8px 10px 6px;border-bottom:1px solid #1e1e1e;display:flex;align-items:baseline;justify-content:space-between}
+.wg-day{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.06em}
+.wg-sub{font-size:10px;color:#444}
+.wg-sc{background:#1c1c1c;border:1px solid #252525;border-radius:6px;margin:6px;padding:8px;cursor:pointer;transition:border-color .12s}
+.wg-sc:hover{border-color:#3a3a3a}
+.wg-sc-name{font-size:12px;font-weight:600;color:#ddd;margin-bottom:5px;line-height:1.3}
+.wg-pill{display:inline-flex;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;margin:0 2px 2px 0}
+.wg-ex{font-size:10px;color:#484848;margin-top:2px;line-height:1.4}
+.wg-add{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:#333;padding:7px;margin:4px 6px;border:1px dashed #222;border-radius:5px;cursor:pointer;transition:all .15s}
+.wg-add:hover{color:#888;border-color:#444}
+.hint-txt{font-size:11px;color:#444;margin-bottom:8px}
+
+/* pill colours */
+.p-wu{background:#253318;color:#80c040;border:1px solid #3a5520}
+.p-st{background:#162240;color:#5090e0;border:1px solid #1e3870}
+.p-ca{background:#162c20;color:#40b878;border:1px solid #1e5030}
+.p-mo{background:#261640;color:#9070d8;border:1px solid #4a2880}
+.p-hi{background:#3a1414;color:#e06848;border:1px solid #601e1e}
+.p-mc{background:#3a2010;color:#e0a030;border:1px solid #604010}
+.p-ft{background:#3a1030;color:#e040b0;border:1px solid #601050}
+.p-am{background:#0e2e3a;color:#30c0d8;border:1px solid #106080}
+.p-re{background:#222;color:#666;border:1px solid #333}
+
+/* ── publisher controls ── */
+.pub-controls{background:#1c1c1c;border:1px solid #272727;border-radius:10px;padding:14px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.pub-view-tabs{display:flex;gap:6px;margin-bottom:12px}
+.pvt{font-family:inherit;font-size:12px;padding:7px 14px;border-radius:5px;border:1px solid #2e2e2e;background:transparent;color:#888;cursor:pointer;transition:all .12s}
+.pvt.on{background:#e87820;color:#fff;border-color:#e87820;font-weight:600}
+
+/* ── daily view — Eagles TV style — all font sizes use calc(Xpx * var(--fs,1)) ── */
+.dv-wrap{background:#000;color:#fff;width:1920px;height:1080px;display:flex;flex-direction:column;overflow:hidden;font-family:'Arial Black',Arial,sans-serif}
+.dv-topbar{background:#0a0a0a;display:flex;align-items:center;justify-content:space-between;padding:14px 36px;border-bottom:2px solid #1a1a1a;flex-shrink:0}
+.dv-top-left{display:flex;align-items:center;gap:18px}
+.dv-logo-placeholder{width:64px;height:64px;border-radius:4px;background:#1a1a1a;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:10px;color:#555;text-align:center;line-height:1.3}
+.dv-gym-name{font-size:calc(28px * var(--fs,1));font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.1em}
+.dv-top-right{text-align:right}
+.dv-date-label{font-size:calc(16px * var(--fs,1));color:#e87820;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.dv-main-training{font-size:calc(14px * var(--fs,1));color:#888;margin-top:3px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.dv-zones{display:grid;grid-template-columns:1fr 1fr 1fr;flex:1;overflow:hidden;border-top:2px solid #1a1a1a}
+.dv-zone{display:flex;flex-direction:column;border-right:2px solid #1a1a1a;padding:22px 32px;overflow:hidden}
+.dv-zone:last-child{border-right:none}
+.dv-zone-header{display:flex;flex-direction:column;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #1e1e1e;flex-shrink:0}
+.dv-zone-num{font-size:calc(11px * var(--fs,1) * var(--bts,1));color:#444;font-weight:900;letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px}
+.dv-zone-type{font-size:calc(22px * var(--fs,1) * var(--bts,1));font-weight:900;text-transform:uppercase;letter-spacing:.08em;line-height:1;color:#e87820}
+.dv-zone-subtitle{font-size:calc(22px * var(--fs,1) * var(--bts,1));font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#e87820;line-height:1.1;margin-top:2px}
+.dv-zone-meta{font-size:calc(20px * var(--fs,1) * var(--zfs,1));color:#e87820;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-top:6px}
+.dv-zone-body{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.dv-block-in-zone{margin-bottom:16px}
+.dv-block-type-label{font-size:calc(18px * var(--fs,1) * var(--bts,1));font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;color:#e87820;display:flex;align-items:center;gap:10px}
+.dv-block-cap{font-size:calc(15px * var(--fs,1) * var(--bts,1));color:#e87820;font-weight:900}
+.dv-ex-item{margin-bottom:10px}
+.dv-ex-name{font-size:calc(22px * var(--fs,1) * var(--zfs,1));font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.05em;line-height:1.15}
+.dv-ex-vol{font-size:calc(19px * var(--fs,1) * var(--zfs,1));margin-top:3px;font-weight:900;color:#f5c842;text-transform:uppercase;letter-spacing:.04em}
+.dv-ex-note{font-size:calc(14px * var(--fs,1) * var(--zfs,1));color:#888;margin-top:2px;font-style:italic;font-weight:400}
+.dv-block-notes{font-size:calc(14px * var(--fs,1) * var(--zfs,1));color:#888;margin-top:8px;line-height:1.6;font-weight:400;font-style:italic;border-top:1px solid #1a1a1a;padding-top:6px}
+.dv-empty-zone{display:flex;align-items:center;justify-content:center;height:100%;font-size:calc(12px * var(--fs,1) * var(--zfs,1));color:#1e1e1e;text-transform:uppercase;letter-spacing:.1em}
+.dv-rounds-label{font-size:calc(24px * var(--fs,1) * var(--bts,1));font-weight:900;color:#f5c842;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+/* preview wrapper — scales the 1920px card down to fit the screen */
+.dv-preview-wrap{width:100%;overflow:hidden;border-radius:8px;background:#000;position:relative}
+.dv-preview-inner{transform-origin:top left;width:1920px}
+
+/* ── weekly view ── Eagles dark style ── */
+.weekly-wrap{background:#000;color:#fff;border-radius:0;width:1920px;overflow:hidden}
+.wk-header{
+  background:#0a0a0a;padding:18px 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:2px solid #1a1a1a
+}
+.wk-title{
+  font-size:22px;font-weight:900;color:#fff;
+  text-transform:uppercase;letter-spacing:.08em;
+  font-family:'Arial Black',Arial,sans-serif
+}
+.wk-sub{font-size:14px;color:#e87820;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.wk-week-row{display:grid;grid-template-columns:56px repeat(7,1fr);border-bottom:1px solid #1a1a1a}
+.wk-week-num{
+  background:#0a0a0a;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:900;color:#333;
+  border-right:1px solid #1a1a1a;padding:8px 4px;
+  font-family:'Arial Black',Arial,sans-serif
+}
+.wk-day-cell{
+  border-right:1px solid #1a1a1a;padding:14px 14px;
+  min-height:100px;cursor:pointer;transition:background .12s
+}
+.wk-day-cell:hover{background:#0e0e0e}
+.wk-day-cell.empty{cursor:default}.wk-day-cell.empty:hover{background:transparent}
+.wk-day-num{
+  font-size:13px;color:#444;margin-bottom:6px;
+  font-weight:900;font-family:'Arial Black',Arial,sans-serif
+}
+.wk-day-num.today{color:#e87820}
+.wk-day-training{
+  font-size:14px;font-weight:900;color:#fff;
+  line-height:1.4;text-transform:uppercase;
+  letter-spacing:.04em;font-family:'Arial Black',Arial,sans-serif
+}
+.wk-day-blocks{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.wk-col-head-row{
+  display:grid;grid-template-columns:56px repeat(7,1fr);
+  background:#0a0a0a;border-bottom:1px solid #222
+}
+.wk-col-head{
+  padding:10px 14px;font-size:12px;font-weight:900;
+  color:#e87820;text-transform:uppercase;letter-spacing:.1em;
+  border-right:1px solid #1a1a1a;
+  font-family:'Arial Black',Arial,sans-serif
+}
+
+.empty2{text-align:center;padding:3rem;color:#555;font-size:13px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,120,32,.5)}50%{box-shadow:0 0 0 6px rgba(232,120,32,0)}}
+.drag-handle{cursor:grab;color:#444;padding:0 6px;display:flex;align-items:center;font-size:16px;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.drag-handle:active{cursor:grabbing;color:#e87820}
+.blk-wrap.drag-over{border-color:#e87820;box-shadow:0 0 0 2px rgba(232,120,32,.3)}
+.ex-card.drag-over{border-color:#e87820}
+.sc-card.drag-over-session{border-color:#e87820;box-shadow:0 0 0 2px rgba(232,120,32,.2)}
+.mic-btn{font-family:inherit;font-size:13px;padding:0;width:32px;height:32px;border-radius:50%;border:1px solid #2e2e2e;background:transparent;color:#666;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.mic-btn:hover{border-color:#e87820;color:#e87820}
+.mic-btn.listening{background:#e87820;border-color:#e87820;color:#000;animation:mic-pulse 1.2s ease-in-out infinite}
+.mic-btn:disabled{opacity:.3;cursor:not-allowed}
+.input-mic-row{display:flex;gap:6px;align-items:center;width:100%}
+.input-mic-row input,.input-mic-row textarea{flex:1;min-width:0}
+
+@media(max-width:600px){
+  .pane{padding:10px}.sc-card{padding:12px}
+  .g2,.g4{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+  .ex-row{grid-template-columns:1fr 1fr}
+  .topbar{padding:10px 12px}.tab3{padding:10px 13px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const {useState,useRef,useEffect,useCallback}=React;
+const DAYS=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+const DSHORT=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
+// ── Runtime config — populated from config.json, falls back to defaults ──
+const APP_CONFIG={
+  gymName:'Eagles',
+  fontScale:1.5,
+  zoneScales:[1,1,1],
+  blockTitleScales:[1,1,1],
+  logoScale:1,
+  blockNames:['-','WOD','Skill','Core','Acessórios','LPO','Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso']
+};
+
+const DEFAULT_TYPES=['Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso'];
+const TYPES=DEFAULT_TYPES; // kept for colour maps; block name pool comes from APP_CONFIG.blockNames
+const ZONES=['Zona 01','Zona 02','Zona 03'];
+
+// EN→PT type name map — keeps imported English states working
+const TYPE_MAP={'Warm-Up':'Aquecimento','Strength':'Força','Mobility':'Mobilidade','Rest':'Descanso','EMOM':'EMOM','Zone 01':'Zona 01','Zone 02':'Zona 02','Zone 03':'Zona 03'};
+const normaliseType=t=>TYPE_MAP[t]||t;
+const normaliseZone=z=>TYPE_MAP[z]||z;
+
+const BTC={'Aquecimento':'bt-wu','Warm-Up':'bt-wu',Força:'bt-st',Strength:'bt-st',Cardio:'bt-ca',Mobilidade:'bt-mo',Mobility:'bt-mo',HIIT:'bt-hi',MetCon:'bt-mc',EMOM:'bt-mc','For Time':'bt-ft',AMRAP:'bt-am',Descanso:'bt-re',Rest:'bt-re'};
+const PLC={'Aquecimento':'p-wu','Warm-Up':'p-wu',Força:'p-st',Strength:'p-st',Cardio:'p-ca',Mobilidade:'p-mo',Mobility:'p-mo',HIIT:'p-hi',MetCon:'p-mc',EMOM:'p-mc','For Time':'p-ft',AMRAP:'p-am',Descanso:'p-re',Rest:'p-re'};
+const ECOL={
+  'Aquecimento':{text:'#e87820',bg:'#1a0e04'},'Warm-Up':{text:'#e87820',bg:'#1a0e04'},
+  Força:{text:'#e87820',bg:'#1a0e04'},Strength:{text:'#e87820',bg:'#1a0e04'},
+  Cardio:{text:'#f5c842',bg:'#1a1604'},
+  Mobilidade:{text:'#e87820',bg:'#1a0e04'},Mobility:{text:'#e87820',bg:'#1a0e04'},
+  HIIT:{text:'#f5c842',bg:'#1a1604'},
+  MetCon:{text:'#f5c842',bg:'#1a1604'},
+  EMOM:{text:'#f5c842',bg:'#1a1604'},
+  'For Time':{text:'#e87820',bg:'#1a0e04'},
+  AMRAP:{text:'#f5c842',bg:'#1a1604'},
+  Descanso:{text:'#888',bg:'#111'},Rest:{text:'#888',bg:'#111'}
+};
+
+const LS_KEY='gym_v9';
+const migrateTypes=sessions=>{
+  const out={};
+  Object.keys(sessions).forEach(k=>{
+    out[k]=(sessions[k]||[]).map(s=>({
+      ...s,
+      blocks:(s.blocks||[]).map(b=>({...b,type:normaliseType(b.type),zone:normaliseZone(b.zone)}))
+    }));
+  });
+  return out;
+};
+const loadLS=()=>{try{const d=localStorage.getItem(LS_KEY);return d?migrateTypes(JSON.parse(d)):{}}catch{return{}}};
+const saveLS=d=>{try{localStorage.setItem(LS_KEY,JSON.stringify(d))}catch{}};
+const uid=()=>Date.now()+Math.random();
+
+// ── Speech recognition hook ───────────────────────────────
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition||null;
+
+function useSpeech(onResult,onEnd){
+  const recRef=useRef(null);
+  const [listening,setListening]=useState(false);
+
+  const start=useCallback(()=>{
+    if(!SpeechRecognition){alert('Reconhecimento de voz não suportado neste navegador. Use Chrome ou Safari.');return;}
+    if(listening){
+      recRef.current?.stop();
+      return;
+    }
+    const rec=new SpeechRecognition();
+    rec.lang='pt-BR';
+    rec.continuous=true;
+    rec.interimResults=false;
+    rec.onresult=e=>{
+      const transcript=Array.from(e.results)
+        .slice(e.resultIndex)
+        .filter(r=>r.isFinal)
+        .map(r=>r[0].transcript)
+        .join(' ');
+      if(transcript.trim()) onResult(transcript.trim());
+    };
+    rec.onend=()=>{setListening(false);onEnd&&onEnd();};
+    rec.onerror=e=>{
+      if(e.error!=='aborted') console.warn('Speech error:',e.error);
+      setListening(false);
+    };
+    recRef.current=rec;
+    rec.start();
+    setListening(true);
+  },[listening,onResult,onEnd]);
+
+  const stop=useCallback(()=>{
+    recRef.current?.stop();
+    setListening(false);
+  },[]);
+
+  useEffect(()=>()=>recRef.current?.stop(),[]);
+  return {listening,start,stop,supported:!!SpeechRecognition};
+}
+
+// ── MicButton — reusable mic trigger for any field ────────
+function MicButton({onTranscript,style}){
+  const {listening,start,supported}=useSpeech(
+    txt=>onTranscript(txt),
+    null
+  );
+  if(!supported) return null;
+  return React.createElement('button',{
+    type:'button',
+    className:`mic-btn ${listening?'listening':''}`,
+    onClick:start,
+    title:listening?'Parar gravação':'Ditar (toque para falar)',
+    style:style||{}
+  },
+    React.createElement('i',{
+      className:listening?'ti ti-microphone-off':'ti ti-microphone',
+      'aria-hidden':'true',
+      style:{fontSize:'14px'}
+    })
+  );
+}
+const toISO=d=>{
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+};
+const todayISO=()=>toISO(new Date());
+
+function fmtIntensity(ins){
+  if(!ins?.mode)return null;
+  if(ins.mode==='pct') return ins.pct?`${ins.pct}% RM`:null;
+  if(ins.mode==='gender'){
+    const p=[];
+    ['Masculino','Feminino'].forEach(g=>{
+      const unit=ins[`${g}_unit`]||'kg';
+      const vals=['RX','Inter','SC'].map(k=>ins[`${g}_${k}`]).filter(Boolean);
+      if(vals.length) p.push(`${g==='Masculino'?'M':'F'}: ${vals.join('/')} ${unit}`);
+    });
+    return p.join(' | ')||null;
+  }
+  if(ins.mode==='cardio') return ins.cardioVal?(ins.cardioVal+(ins.cardioUnit||'m')):null;
+  return null;
+}
+
+// ── IntensityInput ────────────────────────────────────────
+function IntensityInput({value,onChange}){
+  const [mode,setMode]=useState(value?.mode||'none');
+  const v=value||{};
+  const upd=p=>onChange({...v,mode,...p});
+  const setM=m=>{setMode(m);onChange(m==='none'?null:{mode:m});};
+  const inlineSelStyle={fontFamily:'inherit',fontSize:'14px',border:'1px solid #2e2e2e',borderRadius:'5px',padding:'8px 28px 8px 9px',background:'#111',color:'#e0e0e0',outline:'none',WebkitAppearance:'none',appearance:'none',backgroundImage:'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'7\'%3E%3Cpath d=\'M1 1l4 4 4-4\' stroke=\'%23666\' stroke-width=\'1.5\' fill=\'none\' stroke-linecap=\'round\'/%3E%3C/svg%3E")',backgroundRepeat:'no-repeat',backgroundPosition:'right 8px center',cursor:'pointer',width:'100%'};
+  return React.createElement('div',{className:'int-block'},
+    React.createElement('span',{className:'lbl',style:{marginBottom:'6px'}},'Intensidade / Carga'),
+    React.createElement('div',{className:'int-tabs'},
+      [['none','—'],['pct','% do RM'],['gender','Masculino / Feminino'],['cardio','Cardio']].map(([m,l])=>
+        React.createElement('button',{key:m,type:'button',className:`itb ${mode===m?'iact':''}`,onClick:()=>setM(m)},l)
+      )
+    ),
+    mode==='none'&&React.createElement('div',{style:{fontSize:'12px',color:'#444',padding:'2px 0'}},'Sem intensidade definida.'),
+    mode==='pct'&&React.createElement('div',{className:'fg'},
+      React.createElement('span',{className:'lbl'},'Porcentagem do RM'),
+      React.createElement('input',{type:'number',min:1,max:110,placeholder:'ex: 80',value:v.pct||'',onChange:e=>upd({pct:e.target.value})})
+    ),
+    mode==='gender'&&React.createElement('div',{className:'gblock'},
+      ['Masculino','Feminino'].map(g=>
+        React.createElement('div',{key:g},
+          React.createElement('div',{className:'gst'},g),
+          React.createElement('div',{className:'fg',style:{marginBottom:'6px'}},
+            React.createElement('span',{className:'lbl'},'Unidade'),
+            React.createElement('select',{style:inlineSelStyle,value:v[`${g}_unit`]||'kg',onChange:e=>upd({[`${g}_unit`]:e.target.value})},
+              React.createElement('option',{value:'kg'},'kg'),
+              React.createElement('option',{value:'lb'},'lb')
+            )
+          ),
+          ['RX','Inter','SC'].map(cat=>
+            React.createElement('div',{key:cat,className:'fg',style:{marginBottom:'6px'}},
+              React.createElement('span',{className:'lbl'},cat),
+              React.createElement('input',{type:'number',placeholder:'0',value:v[`${g}_${cat}`]||'',onChange:e=>upd({[`${g}_${cat}`]:e.target.value})})
+            )
+          )
+        )
+      )
+    ),
+    mode==='cardio'&&React.createElement('div',{className:'unit-row'},
+      React.createElement('div',{className:'fg'},
+        React.createElement('span',{className:'lbl'},'Quantidade'),
+        React.createElement('input',{type:'number',placeholder:'e.g. 400',value:v.cardioVal||'',onChange:e=>upd({cardioVal:e.target.value})})
+      ),
+      React.createElement('div',{className:'fg',style:{width:'110px'}},
+        React.createElement('span',{className:'lbl'},'Unidade'),
+        React.createElement('select',{style:{...inlineSelStyle,width:'110px'},value:v.cardioUnit||'m',onChange:e=>upd({cardioUnit:e.target.value})},
+          React.createElement('option',{value:'m'},'metros'),
+          React.createElement('option',{value:'cal'},'calorias')
+        )
+      )
+    )
+  );
+}
+
+const emptyEx=()=>({id:uid(),name:'',rounds:'',sets:'',reps:'',intensity:null,note:''});
+const emptyBlock=()=>({id:uid(),label:APP_CONFIG.blockNames[0]||'-',type:'Força',zone:'Zona 01',duration:'',rounds:'',notes:'',exercises:[emptyEx()]});
+const emptyS=()=>({id:uid(),date:todayISO(),mainTraining:'',blocks:[emptyBlock()]});
+
+// ── BlockEditor ───────────────────────────────────────────
+function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete}){
+  const updEx=(id,f,val)=>onUpdate({...block,exercises:block.exercises.map(x=>x.id===id?{...x,[f]:val}:x)});
+  const addEx=()=>onUpdate({...block,exercises:[...block.exercises,emptyEx()]});
+  const delEx=id=>onUpdate({...block,exercises:block.exercises.filter(x=>x.id!==id)});
+  const updIns=(id,ins)=>onUpdate({...block,exercises:block.exercises.map(x=>x.id===id?{...x,intensity:ins}:x)});
+  const cls=BTC[block.type]||'bt-st';
+  const miniStyle={fontFamily:'inherit',fontSize:'11px',border:'1px solid rgba(255,255,255,.1)',borderRadius:'4px',padding:'4px 6px',background:'rgba(0,0,0,.3)',color:'inherit',outline:'none',width:'50px',WebkitAppearance:'none',textAlign:'center'};
+
+  // drag state stored in refs — no re-render during drag
+  const dragExIdx=useRef(null);
+  const [dragOverExIdx,setDragOverExIdx]=useState(null);
+
+  const reorderEx=(fromIdx,toIdx)=>{
+    if(fromIdx===toIdx||fromIdx===null||toIdx===null) return;
+    const exs=[...block.exercises];
+    const [moved]=exs.splice(fromIdx,1);
+    exs.splice(toIdx,0,moved);
+    onUpdate({...block,exercises:exs});
+  };
+
+  return React.createElement('div',{className:`blk-wrap ${cls}`},
+    React.createElement('div',{className:'blk-bar'},
+      // Block index
+      React.createElement('span',{className:'blk-idx'},`Bloco ${idx+1}`),
+      // Label selector — WOD, Skill, - etc.
+      React.createElement('select',{
+        className:'blk-sel',
+        value:block.label||'-',
+        onChange:e=>onUpdate({...block,label:e.target.value})
+      }, (blockNames||APP_CONFIG.blockNames).map(l=>React.createElement('option',{key:l,style:{background:'#1c1c1c',color:'#e0e0e0'}},l))),
+      // Type selector
+      React.createElement('select',{
+        className:'blk-sel',
+        value:block.type,
+        onChange:e=>onUpdate({...block,type:e.target.value})
+      }, TYPES.map(t=>React.createElement('option',{key:t,style:{background:'#1c1c1c',color:'#e0e0e0'}},t))),
+      // Zone selector
+      React.createElement('select',{
+        className:'blk-zone-sel',
+        value:block.zone||'Zona 01',
+        onChange:e=>onUpdate({...block,zone:e.target.value})
+      }, ZONES.map(z=>React.createElement('option',{key:z,style:{background:'#1c1c1c',color:'#e0e0e0'}},z))),
+      // Rounds
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'4px'}},
+        React.createElement('span',{className:'blk-mini-lbl'},'Rounds'),
+        React.createElement('input',{type:'number',min:1,placeholder:'—',value:block.rounds||'',
+          onChange:e=>onUpdate({...block,rounds:e.target.value}),style:miniStyle})
+      ),
+      // Cap
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'4px'}},
+        React.createElement('span',{className:'blk-mini-lbl'},"Cap'"),
+        React.createElement('input',{type:'number',min:1,placeholder:'—',value:block.duration||'',
+          onChange:e=>onUpdate({...block,duration:e.target.value}),style:miniStyle})
+      ),
+      React.createElement('div',{className:'blk-spacer'}),
+      total>1&&React.createElement('button',{
+        type:'button',className:'b bd bsm',
+        style:{padding:'3px 8px',minHeight:'26px',fontSize:'11px'},
+        onClick:onDelete
+      }, React.createElement('i',{className:'ti ti-trash','aria-hidden':'true'}))
+    ),
+    React.createElement('div',{className:'blk-body'},
+      block.exercises.map((ex,ei)=>
+        React.createElement('div',{
+          key:ex.id,
+          className:'ex-card',
+          style:{
+            borderColor:dragOverExIdx===ei?'#e87820':'',
+            boxShadow:dragOverExIdx===ei?'0 0 0 2px rgba(232,120,32,.35)':'',
+            opacity:dragExIdx.current===ei?0.45:1,
+            transition:'opacity .1s,border-color .1s'
+          },
+          onDragOver:e=>{e.preventDefault();setDragOverExIdx(ei);},
+          onDragLeave:()=>setDragOverExIdx(null),
+          onDrop:e=>{
+            e.preventDefault();
+            setDragOverExIdx(null);
+            reorderEx(dragExIdx.current,ei);
+            dragExIdx.current=null;
+          }
+        },
+          React.createElement('div',{className:'ex-card-hdr'},
+            React.createElement('i',{
+              className:'ti ti-grip-vertical drag-handle',
+              'aria-hidden':'true',
+              title:'Arrastar para reordenar',
+              draggable:true,
+              style:{cursor:'grab',fontSize:'16px',color:'#555',padding:'0 4px',flexShrink:0},
+              onDragStart:e=>{
+                e.stopPropagation();
+                dragExIdx.current=ei;
+                e.dataTransfer.effectAllowed='move';
+                e.dataTransfer.setData('text/plain',String(ei));
+              },
+              onDragEnd:()=>{dragExIdx.current=null;setDragOverExIdx(null);}
+            }),
+            React.createElement('span',{className:'ex-num'},`Exercício ${ei+1}`),
+            block.exercises.length>1&&React.createElement('button',{
+              type:'button',className:'b bd bsm',style:{padding:'2px 7px',minHeight:'22px',fontSize:'11px'},
+              onClick:()=>delEx(ex.id)
+            }, React.createElement('i',{className:'ti ti-x','aria-hidden':'true'}))
+          ),
+          React.createElement('div',{className:'g2',style:{marginBottom:'8px'}},
+            React.createElement('div',{className:'fg'},
+              React.createElement('span',{className:'lbl'},'Nome do exercício'),
+              React.createElement('div',{className:'input-mic-row'},
+                React.createElement('input',{placeholder:'ex: Levantamento Terra',value:ex.name,onChange:e=>updEx(ex.id,'name',e.target.value)}),
+                React.createElement(MicButton,{onTranscript:txt=>updEx(ex.id,'name',(ex.name?ex.name+' ':'')+txt)})
+              )
+            ),
+            React.createElement('div',{className:'g2',style:{marginBottom:0}},
+              React.createElement('div',{className:'fg'},
+                React.createElement('span',{className:'lbl'},'Séries'),
+                React.createElement('input',{type:'number',placeholder:'3',value:ex.sets||'',onChange:e=>updEx(ex.id,'sets',e.target.value)})
+              ),
+              React.createElement('div',{className:'fg'},
+                React.createElement('span',{className:'lbl'},'Reps'),
+                React.createElement('input',{placeholder:'10',value:ex.reps||'',onChange:e=>updEx(ex.id,'reps',e.target.value)})
+              )
+            )
+          ),
+          React.createElement(IntensityInput,{value:ex.intensity,onChange:ins=>updIns(ex.id,ins)}),
+          React.createElement('div',{className:'fg',style:{marginTop:'8px'}},
+            React.createElement('span',{className:'lbl'},'Observação'),
+            React.createElement('div',{className:'input-mic-row'},
+              React.createElement('textarea',{
+                placeholder:'Dica, variação...',style:{minHeight:'38px',flex:1},
+                value:ex.note||'',onChange:e=>updEx(ex.id,'note',e.target.value)
+              }),
+              React.createElement(MicButton,{onTranscript:txt=>updEx(ex.id,'note',(ex.note?ex.note+' ':'')+txt),style:{alignSelf:'flex-start',marginTop:'2px'}})
+            )
+          )
+        )
+      ),
+      React.createElement('div',{style:{display:'flex',gap:'6px',marginBottom:'10px'}},
+        React.createElement('button',{type:'button',className:'b bsm',style:{flex:1},onClick:addEx},
+          React.createElement('i',{className:'ti ti-plus','aria-hidden':'true'}),' Adicionar exercício'
+        ),
+        block.exercises.length>0&&React.createElement('button',{
+          type:'button',className:'b bsm',style:{flex:1},
+          onClick:()=>{
+            const last=block.exercises[block.exercises.length-1];
+            onUpdate({...block,exercises:[...block.exercises,{...last,id:uid()}]});
+          }
+        },
+          React.createElement('i',{className:'ti ti-copy','aria-hidden':'true'}),' Copiar último'
+        )
+      ),
+      React.createElement('div',{className:'fg'},
+        React.createElement('span',{className:'lbl'},'Notas do bloco / time cap / detalhes'),
+        React.createElement('div',{className:'input-mic-row'},
+          React.createElement('textarea',{
+            placeholder:"ex: 4 Rounds · Buy-in: 5 BMU / 10 Pull-up · CAP 15'",
+            style:{flex:1},
+            value:block.notes,onChange:e=>onUpdate({...block,notes:e.target.value})
+          }),
+          React.createElement(MicButton,{onTranscript:txt=>onUpdate({...block,notes:(block.notes?block.notes+' ':'')+txt}),style:{alignSelf:'flex-start',marginTop:'2px'}})
+        )
+      )
+    )
+  );
+}
+
+// ── TrainingCreator ───────────────────────────────────────
+function TrainingCreator({sessions,setSessions,blockNames}){
+  const [form,setForm]=useState(emptyS());
+  const [blocks,setBlocks]=useState([emptyBlock()]);
+  const [editing,setEditing]=useState(null); // {dateKey, id}
+  const formRef=useRef();
+
+  const startEdit=(s,dateKey)=>{
+    setForm({...s,date:dateKey});
+    setBlocks(s.blocks?.length?s.blocks:[emptyBlock()]);
+    setEditing({dateKey,id:s.id});
+    setTimeout(()=>formRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),60);
+  };
+  const cancel=()=>{setForm(emptyS());setBlocks([emptyBlock()]);setEditing(null);};
+
+  const saveS=()=>{
+    const dateKey=form.date||todayISO();
+    const session={...form,date:dateKey,blocks,id:editing?.id||form.id};
+    setSessions(prev=>{
+      const next={...prev};
+      if(editing){
+        const oldKey=editing.dateKey;
+        if(oldKey!==dateKey){
+          next[oldKey]=(next[oldKey]||[]).filter(s=>s.id!==editing.id);
+        }
+        if((next[dateKey]||[]).some(s=>s.id===editing.id)){
+          next[dateKey]=next[dateKey].map(s=>s.id===editing.id?session:s);
+        }else{
+          next[dateKey]=[...(next[dateKey]||[]),session];
+        }
+      }else{
+        next[dateKey]=[...(next[dateKey]||[]),session];
+      }
+      return next;
+    });
+    cancel();
+  };
+
+  const del=(dateKey,id)=>setSessions(prev=>{
+    const n={...prev};
+    n[dateKey]=(n[dateKey]||[]).filter(s=>s.id!==id);
+    return n;
+  });
+
+  const addBlock=()=>setBlocks(b=>[...b,emptyBlock()]);
+  const updBlock=(id,upd)=>setBlocks(b=>b.map(x=>x.id===id?upd:x));
+  const delBlock=id=>setBlocks(b=>b.length>1?b.filter(x=>x.id!==id):b);
+
+  // block drag — index refs, no state to avoid re-render during drag
+  const dragBlkIdx=useRef(null);
+  const [dragOverBlkIdx,setDragOverBlkIdx]=useState(null);
+  const reorderBlocks=(fromIdx,toIdx)=>{
+    if(fromIdx===toIdx||fromIdx===null||toIdx===null) return;
+    setBlocks(prev=>{
+      const arr=[...prev];
+      const [mv]=arr.splice(fromIdx,1);
+      arr.splice(toIdx,0,mv);
+      return arr;
+    });
+  };
+
+  // week navigation state — 0 = current week
+  const [weekOffset,setWeekOffset]=useState(0);
+  // build week starting Sunday
+  const getSundayWeek=(offset)=>{
+    const d=new Date();
+    const dow=d.getDay(); // 0=Sun
+    d.setDate(d.getDate()-dow+(offset*7));
+    return Array.from({length:7},(_,i)=>{const w=new Date(d);w.setDate(d.getDate()+i);return w;});
+  };
+  const weekDates=getSundayWeek(weekOffset);
+  const WEEK_DAYS=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
+  const totalSessions=Object.values(sessions).flat().length;
+  const weekLabel=`${weekDates[0].getDate()}/${weekDates[0].getMonth()+1} – ${weekDates[6].getDate()}/${weekDates[6].getMonth()+1}/${weekDates[6].getFullYear()}`;
+
+  return React.createElement('div',null,
+    React.createElement('div',{className:'sc-card',ref:formRef},
+      React.createElement('div',{className:'sc-hdr'},
+        React.createElement('span',{className:'sc-title'},editing?'Editar sessão':'Nova sessão'),
+        editing&&React.createElement('button',{type:'button',className:'b bsm',onClick:cancel},'Cancelar')
+      ),
+      React.createElement('div',{className:'g2'},
+        React.createElement('div',{className:'fg'},
+          React.createElement('span',{className:'lbl'},'Data'),
+          React.createElement('input',{
+            type:'date',
+            value:form.date||todayISO(),
+            onChange:e=>setForm(f=>({...f,date:e.target.value}))
+          })
+        ),
+        React.createElement('div',{className:'fg'},
+          React.createElement('span',{className:'lbl'},'Treino Principal'),
+          React.createElement('div',{className:'input-mic-row'},
+            React.createElement('input',{
+              placeholder:'ex: Parte superior + glúteos',
+              value:form.mainTraining||'',
+              onChange:e=>setForm(f=>({...f,mainTraining:e.target.value}))
+            }),
+            React.createElement(MicButton,{onTranscript:txt=>setForm(f=>({...f,mainTraining:(f.mainTraining?f.mainTraining+' ':'')+txt}))})
+          )
+        )
+      ),
+      React.createElement('div',{style:{borderTop:'1px solid #242424',paddingTop:'14px',marginTop:'4px'}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px'}},
+          React.createElement('span',{style:{fontSize:'12px',fontWeight:'700',color:'#888',textTransform:'uppercase',letterSpacing:'.06em'}},
+            `${blocks.length} Bloco${blocks.length!==1?'s':''}`
+          ),
+          React.createElement('span',{style:{fontSize:'11px',color:'#333'}},'Defina a zona de cada bloco para a visualização diária')
+        ),
+        blocks.map((bl,i)=>
+          React.createElement('div',{
+            key:bl.id,
+            style:{
+              borderRadius:'8px',
+              outline:dragOverBlkIdx===i?'2px solid #e87820':'none',
+              outlineOffset:'2px',
+              opacity:dragBlkIdx.current===i?0.4:1,
+              transition:'opacity .1s'
+            },
+            onDragOver:e=>{e.preventDefault();setDragOverBlkIdx(i);},
+            onDragLeave:e=>{
+              // only clear if leaving this block entirely
+              if(!e.currentTarget.contains(e.relatedTarget)) setDragOverBlkIdx(null);
+            },
+            onDrop:e=>{
+              e.preventDefault();
+              setDragOverBlkIdx(null);
+              reorderBlocks(dragBlkIdx.current,i);
+              dragBlkIdx.current=null;
+            }
+          },
+            React.createElement('div',{style:{display:'flex',alignItems:'flex-start',gap:'4px'}},
+              React.createElement('div',{
+                title:'Arrastar para reordenar bloco',
+                draggable:true,
+                style:{cursor:'grab',color:'#444',padding:'14px 4px 0',fontSize:'18px',flexShrink:0,userSelect:'none'},
+                onDragStart:e=>{
+                  dragBlkIdx.current=i;
+                  e.dataTransfer.effectAllowed='move';
+                  e.dataTransfer.setData('text/plain',String(i));
+                },
+                onDragEnd:()=>{dragBlkIdx.current=null;setDragOverBlkIdx(null);}
+              },'⠿'),
+              React.createElement('div',{style:{flex:1,minWidth:0}},
+                React.createElement(BlockEditor,{
+                  block:bl,idx:i,total:blocks.length,
+                  onUpdate:upd=>updBlock(bl.id,upd),
+                  onDelete:()=>delBlock(bl.id)
+                })
+              )
+            )
+          )
+        ),
+        React.createElement('div',{style:{display:'flex',gap:'6px'}},
+          React.createElement('button',{type:'button',className:'add-blk-btn',style:{flex:1,marginBottom:0},onClick:addBlock},
+            React.createElement('i',{className:'ti ti-layout-grid-add',style:{fontSize:'16px'},'aria-hidden':'true'}),
+            ' Adicionar bloco'
+          ),
+          React.createElement('button',{
+            type:'button',className:'add-blk-btn',style:{flex:1,marginBottom:0},
+            onClick:()=>{
+              const last=blocks[blocks.length-1];
+              if(!last)return;
+              const copy={...last,id:uid(),exercises:(last.exercises||[]).map(ex=>({...ex,id:uid()}))};
+              setBlocks(b=>[...b,copy]);
+            }
+          },
+            React.createElement('i',{className:'ti ti-copy',style:{fontSize:'16px'},'aria-hidden':'true'}),
+            ' Copiar último bloco'
+          )
+        )
+      ),
+      React.createElement('button',{type:'button',className:'b bp bfull',onClick:saveS},
+        React.createElement('i',{className:'ti ti-check','aria-hidden':'true'}),
+        editing?' Save changes':' Save session'
+      )
+    ),
+
+    // current-week overview grid
+    totalSessions>0&&React.createElement('div',null,
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'8px',flexWrap:'wrap'}},
+        React.createElement('button',{type:'button',className:'b bsm',onClick:()=>setWeekOffset(o=>o-1)},
+          React.createElement('i',{className:'ti ti-chevron-left','aria-hidden':'true'})
+        ),
+        React.createElement('span',{style:{fontSize:'12px',color:'#aaa',fontWeight:'600'}},weekLabel),
+        React.createElement('button',{type:'button',className:'b bsm',onClick:()=>setWeekOffset(o=>o+1)},
+          React.createElement('i',{className:'ti ti-chevron-right','aria-hidden':'true'})
+        ),
+        weekOffset!==0&&React.createElement('button',{type:'button',className:'b bsm',style:{fontSize:'11px',color:'#e87820',borderColor:'#e87820'},onClick:()=>setWeekOffset(0)},
+          'Hoje'
+        ),
+        React.createElement('span',{style:{fontSize:'11px',color:'#444',marginLeft:'4px'}},'Toque para editar · deslize para rolar')
+      ),
+      React.createElement('div',{className:'week-scroll'},
+        React.createElement('div',{className:'week-grid'},
+          weekDates.map((date,di)=>{
+            const dateKey=toISO(date);
+            const list=sessions[dateKey]||[];
+            return React.createElement('div',{key:dateKey,className:'wg-col'},
+              React.createElement('div',{className:'wg-head'},
+                React.createElement('span',{className:'wg-day'},WEEK_DAYS[di]+' '+date.getDate()),
+                list.length>0&&React.createElement('span',{className:'wg-sub'},`${list.length}s`)
+              ),
+              list.map((s,si)=>
+                React.createElement('div',{
+                  key:s.id,className:'wg-sc',
+                  draggable:true,
+                  onClick:()=>startEdit(s,dateKey),
+                  onDragStart:e=>{e.dataTransfer.setData('sess-id',s.id);e.dataTransfer.setData('sess-date',dateKey);e.dataTransfer.effectAllowed='move';e.stopPropagation();},
+                  onDragOver:e=>{e.preventDefault();e.currentTarget.classList.add('drag-over');e.stopPropagation();},
+                  onDragLeave:e=>{e.currentTarget.classList.remove('drag-over');},
+                  onDrop:e=>{
+                    e.preventDefault();e.stopPropagation();
+                    e.currentTarget.classList.remove('drag-over');
+                    const dragId=e.dataTransfer.getData('sess-id');
+                    const dragDate=e.dataTransfer.getData('sess-date');
+                    if(!dragId) return;
+                    if(dragDate===dateKey&&dragId!==s.id){
+                      // reorder within same day
+                      setSessions(prev=>{
+                        const n={...prev};
+                        const arr=[...(n[dateKey]||[])];
+                        const from=arr.findIndex(x=>x.id===dragId);
+                        const to=arr.findIndex(x=>x.id===s.id);
+                        if(from<0||to<0) return prev;
+                        const [mv]=arr.splice(from,1);arr.splice(to,0,mv);
+                        n[dateKey]=arr;return n;
+                      });
+                    } else if(dragDate!==dateKey){
+                      // move session to different day
+                      setSessions(prev=>{
+                        const n={...prev};
+                        const dragSess=(n[dragDate]||[]).find(x=>x.id===dragId);
+                        if(!dragSess) return prev;
+                        n[dragDate]=(n[dragDate]||[]).filter(x=>x.id!==dragId);
+                        const updated={...dragSess,date:dateKey};
+                        n[dateKey]=[...(n[dateKey]||[]),updated];
+                        return n;
+                      });
+                    }
+                  }
+                },
+                  React.createElement('div',{style:{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:'4px',marginBottom:'5px'}},
+                    React.createElement('span',{className:'wg-sc-name'},s.mainTraining||'—'),
+                    React.createElement('button',{
+                      type:'button',className:'b bd',
+                      style:{padding:'2px 6px',fontSize:'10px',minHeight:'20px',flexShrink:0},
+                      onClick:e=>{e.stopPropagation();del(dateKey,s.id);}
+                    }, React.createElement('i',{className:'ti ti-x','aria-hidden':'true'}))
+                  ),
+                  (s.blocks||[]).map(bl=>
+                    React.createElement('div',{key:bl.id,style:{marginBottom:'3px'}},
+                      React.createElement('span',{className:`wg-pill ${PLC[bl.type]||'p-st'}`},bl.type),
+                      React.createElement('span',{style:{fontSize:'9px',color:'#3a3a3a',marginLeft:'4px'}},bl.zone||'Z1')
+                    )
+                  )
+                )
+              ),
+              React.createElement('div',{className:'wg-add',onClick:()=>{
+                setForm(f=>({...f,date:dateKey}));
+                setTimeout(()=>formRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),60);
+              }},
+                React.createElement('i',{className:'ti ti-plus','aria-hidden':'true'}),' add'
+              )
+            );
+          })
+        )
+      )
+    )
+  );
+}
+
+// ── helpers for publisher ─────────────────────────────────
+function getWeeksOfMonth(year,month){
+  const weeks=[];
+  let cursor=new Date(year,month,1);
+  const dow=cursor.getDay(); // 0=Sun
+  cursor.setDate(cursor.getDate()-dow); // back to Sunday
+  const endOfMonth=new Date(year,month+1,0);
+  while(cursor<=endOfMonth){
+    const week=[];
+    for(let i=0;i<7;i++){week.push(new Date(cursor));cursor.setDate(cursor.getDate()+1);}
+    weeks.push(week);
+  }
+  return weeks;
+}
+
+// ── DailyExportView — Eagles TV layout ───────────────────
+function DailyExportView({sessions,label,weekDates,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale}){
+  const daysList=weekDates.map((date,i)=>({
+    date,dateKey:toISO(date),di:i,
+    sessions:sessions[toISO(date)]||[]
+  })).filter(d=>d.sessions.length>0);
+
+  // if a specific date is selected show that day, otherwise first active day
+  const day=selectedDate
+    ? daysList.find(d=>d.dateKey===selectedDate)||daysList[0]
+    : daysList[0];
+
+  const fs=fontScale||1;
+
+  if(!day) return React.createElement('div',{className:'dv-wrap',style:{'--fs':fs}},
+    React.createElement('div',{className:'dv-empty-zone'},'Sem sessões nesta semana')
+  );
+
+  const s=day.sessions[0];
+  const dateObj=day.date;
+  const weekday=dateObj.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase();
+  const dateNum=dateObj.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  // group blocks by zone
+  const byZone={};
+  ZONES.forEach(z=>{byZone[z]=[];});
+  (s.blocks||[]).forEach(bl=>{
+    const z=bl.zone||'Zone 01';
+    if(!byZone[z])byZone[z]=[];
+    byZone[z].push(bl);
+  });
+
+  return React.createElement('div',{className:'dv-wrap',style:{'--fs':fs}},
+    // ── top bar ──
+    React.createElement('div',{className:'dv-topbar'},
+      React.createElement('div',{className:'dv-top-left'},
+        logoDataUrl&&React.createElement('div',{style:{
+          width:`${Math.round(64*(logoScale||1))}px`,
+          height:`${Math.round(64*(logoScale||1))}px`,
+          background:'transparent',
+          overflow:'hidden',
+          flexShrink:0,
+          borderRadius:'4px'
+        }},
+          React.createElement('img',{src:logoDataUrl,style:{width:'100%',height:'100%',objectFit:'contain',display:'block'}})
+        ),
+        React.createElement('span',{className:'dv-gym-name'},gymName||'Eagles')
+      ),
+      React.createElement('div',{className:'dv-top-right'},
+        React.createElement('div',{className:'dv-date-label'},weekday+' · '+dateNum),
+        s.mainTraining&&React.createElement('div',{className:'dv-main-training'},s.mainTraining),
+        label&&React.createElement('div',{style:{fontSize:'13px',color:'#555',marginTop:'3px',textTransform:'uppercase',letterSpacing:'.06em'}},label)
+      )
+    ),
+    // ── 3 equal zones ──
+    React.createElement('div',{className:'dv-zones'},
+      ZONES.map((zoneName,zi)=>{
+        const zoneBlocks=byZone[zoneName]||[];
+        // pick the primary type from first block for the zone header colour
+        const primaryBlock=zoneBlocks[0]||null;
+        const ec0=primaryBlock?ECOL[primaryBlock.type]||ECOL.Strength:null;
+
+        return React.createElement('div',{key:zoneName,className:'dv-zone',style:{'--zfs':zoneScales?.[zi]||1,'--bts':blockTitleScales?.[zi]||1}},
+          // ── zone header — equal weight, no ZONA label in final output ──
+          React.createElement('div',{className:'dv-zone-header'},
+            ec0
+              ? React.createElement('div',null,
+                  React.createElement('div',{className:'dv-zone-type'},
+                    (zoneBlocks[0].label&&zoneBlocks[0].label!=='-')?zoneBlocks[0].label:zoneBlocks[0].type
+                  ),
+                  (primaryBlock&&primaryBlock.duration)&&
+                    React.createElement('div',{className:'dv-zone-subtitle'},
+                      `CAP ${primaryBlock.duration}'`
+                    ),
+                  (primaryBlock&&primaryBlock.rounds)&&
+                    React.createElement('div',{className:'dv-rounds-label'},
+                      `${primaryBlock.rounds} ROUNDS`
+                    )
+                )
+              : React.createElement('div',{className:'dv-zone-type',style:{color:'#1a1a1a',fontSize:'calc(22px * var(--fs,1))'}},'\u2014')
+          ),
+          // ── zone body ──
+          zoneBlocks.length===0
+            ? React.createElement('div',{className:'dv-empty-zone'},'—')
+            : React.createElement('div',{className:'dv-zone-body'},
+                zoneBlocks.map((bl,bli)=>{
+                  const ec=ECOL[bl.type]||ECOL.Strength;
+                  return React.createElement('div',{key:bl.id,className:'dv-block-in-zone'},
+                    // secondary block label (only if >1 block in zone)
+                    bli>0&&React.createElement('div',{className:'dv-block-type-label'},
+                      bl.type,
+                      (bl.rounds||bl.duration)&&React.createElement('span',{className:'dv-block-cap'},
+                        [bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ')
+                      )
+                    ),
+                    // exercises — name + note only, intensity moved to block footer
+                    bl.exercises.filter(e=>e.name).map(ex=>{
+                      const ins=fmtIntensity(ex.intensity);
+                      const isCardio=ex.intensity?.mode==='cardio';
+                      const cardioPrefix=isCardio&&ex.intensity?.cardioVal
+                        ?`${ex.intensity.cardioVal}${ex.intensity.cardioUnit||'m'}`
+                        :'';
+                      const volPrefix=ex.sets&&ex.reps
+                        ?`${ex.sets}×${ex.reps}`
+                        :ex.reps||'';
+                      const prefix=cardioPrefix||volPrefix;
+                      const line=[prefix,ex.name.toUpperCase()].filter(Boolean).join(' ');
+                      return React.createElement('div',{key:ex.id,className:'dv-ex-item'},
+                        React.createElement('div',{className:'dv-ex-name'},line),
+                        ex.note&&React.createElement('div',{className:'dv-ex-note'},ex.note)
+                      );
+                    }),
+                    // ── intensity footer — all unique loads at end of block ──
+                    (()=>{
+                      const loads=[...new Set(bl.exercises.filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio').map(e=>fmtIntensity(e.intensity)))];
+                      return loads.length>0&&React.createElement('div',{className:'dv-block-notes',style:{borderTop:'1px solid #1a1a1a',marginTop:'6px',paddingTop:'6px',color:'#f5c842',fontStyle:'normal',fontWeight:700}},
+                        loads.join(' · ')
+                      );
+                    })(),
+                    bl.notes&&React.createElement('div',{className:'dv-block-notes'},bl.notes)
+                  );
+                })
+              )
+        );
+      })
+    )
+  );
+}
+
+// ── WeeklyExportView ──────────────────────────────────────
+function WeeklyExportView({sessions,label,year,month,onDayClick}){
+  const weeks=getWeeksOfMonth(year,month);
+  const monthName=new Date(year,month,1).toLocaleString('default',{month:'long',year:'numeric'});
+  const today=new Date();
+  return React.createElement('div',{className:'weekly-wrap'},
+    React.createElement('div',{className:'wk-header'},
+      React.createElement('div',{className:'wk-title'},'Grade de Treinos · ',monthName),
+      label&&React.createElement('div',{className:'wk-sub'},label)
+    ),
+    React.createElement('div',{className:'wk-col-head-row'},
+      React.createElement('div',{className:'wk-col-head',style:{color:'#333',textAlign:'center'}},'WK'),
+      DSHORT.map((d,di)=>React.createElement('div',{key:d,className:'wk-col-head'},d))
+    ),
+    weeks.map((week,wi)=>
+      React.createElement('div',{key:wi,className:'wk-week-row'},
+        React.createElement('div',{className:'wk-week-num'},wi+1),
+        week.map((date,di)=>{
+          const dateKey=toISO(date);
+          const inMonth=date.getMonth()===month;
+          const daySessions=sessions[dateKey]||[];
+          const s=daySessions[0]||null;
+          const isToday=date.toDateString()===today.toDateString();
+          return React.createElement('div',{
+            key:di,
+            className:`wk-day-cell ${!s?'empty':''}`,
+            onClick:s&&onDayClick?()=>onDayClick(week,date):undefined
+          },
+            React.createElement('div',{className:`wk-day-num${isToday?' today':''}`},
+              inMonth?date.getDate():''
+            ),
+            s&&React.createElement('div',null,
+              React.createElement('div',{className:'wk-day-training',style:{color:inMonth?'#ddd':'#444'}},
+                s.mainTraining||'—'
+              ),
+              React.createElement('div',{className:'wk-day-blocks'},
+                (s.blocks||[]).slice(0,4).map(bl=>
+                  React.createElement('span',{key:bl.id,className:`wg-pill ${PLC[bl.type]||'p-st'}`,style:{fontSize:'9px',padding:'1px 5px'}},bl.type)
+                )
+              )
+            )
+          );
+        })
+      )
+    )
+  );
+}
+
+
+// ── WeeklyCalendarExportView — 1920×1080 single week Mon-Fri ─────────────────
+function WeeklyCalendarExportView({sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates}){
+  const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const ls=logoScale||1;
+  const fs=fontScale||1;
+  const today=new Date();
+  // weekDates is a 7-element array (Sun-Sat). Show Mon(1)-Fri(5) only.
+  const SHOW=[1,2,3,4,5];
+  const DAY_LABELS=['SEG','TER','QUA','QUI','SEX'];
+  // derive month label from the week — use Wednesday to avoid edge cases
+  const midDate=weekDates[3];
+  const weekStart=weekDates[1];
+  const weekEnd=weekDates[5];
+  const fmt=d=>d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const weekLabel=`${fmt(weekStart)} – ${fmt(weekEnd)}`;
+
+  return React.createElement('div',{style:{
+    background:'#000',color:'#fff',
+    width:'1920px',height:'1080px',
+    display:'flex',flexDirection:'column',
+    fontFamily:"'Arial Black',Arial,sans-serif",
+    overflow:'hidden',
+    '--fs':fs
+  }},
+    // header
+    React.createElement('div',{style:{
+      background:'#0a0a0a',display:'flex',alignItems:'center',justifyContent:'space-between',
+      padding:'16px 40px',borderBottom:'2px solid #1a1a1a',flexShrink:0
+    }},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'18px'}},
+        logoDataUrl&&React.createElement('div',{style:{
+          width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,
+          background:'transparent',
+          overflow:'hidden',borderRadius:'4px',flexShrink:0
+        }},
+          React.createElement('img',{src:logoDataUrl,style:{width:'100%',height:'100%',objectFit:'contain',display:'block'}})
+        ),
+        React.createElement('span',{style:{fontSize:`calc(32px * var(--fs,1))`,fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},
+          gymName||'Eagles'
+        )
+      ),
+      React.createElement('div',{style:{textAlign:'right'}},
+        React.createElement('div',{style:{fontSize:`calc(32px * var(--fs,1))`,fontWeight:900,color:'#e87820',textTransform:'uppercase',letterSpacing:'.1em',lineHeight:1}},
+          weekLabel
+        ),
+        React.createElement('div',{style:{fontSize:`calc(18px * var(--fs,1))`,color:'#666',marginTop:'4px',letterSpacing:'.06em',textTransform:'uppercase'}},
+          monthNames[midDate.getMonth()]+' '+midDate.getFullYear()
+        ),
+        label&&React.createElement('div',{style:{fontSize:`calc(14px * var(--fs,1))`,color:'#444',marginTop:'2px',letterSpacing:'.06em',textTransform:'uppercase'}},label)
+      )
+    ),
+    // day headers
+    React.createElement('div',{style:{
+      display:'grid',gridTemplateColumns:'repeat(5,1fr)',
+      background:'#0d0d0d',borderBottom:'1px solid #1a1a1a',flexShrink:0
+    }},
+      SHOW.map((dayIdx,ci)=>{
+        const date=weekDates[dayIdx];
+        const dateNum=date.getDate();
+        const inMonth=date.getMonth()===month;
+        const isToday=date.toDateString()===today.toDateString();
+        return React.createElement('div',{key:ci,style:{
+          padding:'10px 20px',
+          borderRight:ci<4?'1px solid #1a1a1a':'none',
+          display:'flex',alignItems:'baseline',gap:'10px'
+        }},
+          React.createElement('span',{style:{
+            fontSize:`calc(16px * var(--fs,1))`,fontWeight:900,
+            color:'#e87820',textTransform:'uppercase',letterSpacing:'.1em'
+          }},DAY_LABELS[ci]),
+          React.createElement('span',{style:{
+            fontSize:`calc(20px * var(--fs,1))`,fontWeight:900,
+            color:isToday?'#e87820':inMonth?'#555':'#333'
+          }},inMonth?dateNum:'')
+        );
+      })
+    ),
+    // day columns — full detail
+    React.createElement('div',{style:{
+      display:'grid',gridTemplateColumns:'repeat(5,1fr)',
+      flex:1,overflow:'hidden'
+    }},
+      SHOW.map((dayIdx,ci)=>{
+        const date=weekDates[dayIdx];
+        const dateKey=toISO(date);
+        const inMonth=date.getMonth()===month;
+        const daySessions=sessions[dateKey]||[];
+        const s=daySessions[0]||null;
+        return React.createElement('div',{key:ci,style:{
+          borderRight:ci<4?'1px solid #1a1a1a':'none',
+          padding:'14px 20px',
+          background:s&&inMonth?'#060606':'#000',
+          display:'flex',flexDirection:'column',
+          overflow:'hidden'
+        }},
+          s&&inMonth
+            ?React.createElement('div',{style:{flex:1,overflow:'hidden',display:'flex',flexDirection:'column'}},
+                // Main training title
+                React.createElement('div',{style:{
+                  fontSize:`calc(14px * var(--fs,1))`,fontWeight:900,color:'#fff',
+                  textTransform:'uppercase',letterSpacing:'.05em',
+                  lineHeight:1.2,marginBottom:'10px',flexShrink:0,
+                  borderBottom:'1px solid #1a1a1a',paddingBottom:'8px'
+                }},s.mainTraining||'—'),
+                // All blocks
+                React.createElement('div',{style:{flex:1,overflow:'hidden',display:'flex',flexDirection:'column',gap:'8px'}},
+                  (s.blocks||[]).map(bl=>{
+                    const ec=ECOL[bl.type]||ECOL['Força'];
+                    const meta=[bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
+                    const exs=bl.exercises?.filter(e=>e.name)||[];
+                    return React.createElement('div',{key:bl.id,style:{
+                      borderLeft:`2px solid ${ec.text}`,
+                      paddingLeft:'8px',flexShrink:0
+                    }},
+                      React.createElement('div',{style:{
+                        fontSize:`calc(12px * var(--fs,1))`,fontWeight:900,
+                        color:ec.text,textTransform:'uppercase',
+                        letterSpacing:'.07em',lineHeight:1.2
+                      }},bl.type+(meta?` · ${meta}`:'')),
+                      exs.slice(0,4).map(ex=>{
+                        const ins=fmtIntensity(ex.intensity);
+                        const vol=ex.sets&&ex.reps?`${ex.sets}×${ex.reps}`:ex.reps||'';
+                        return React.createElement('div',{key:ex.id,style:{marginTop:'3px'}},
+                          React.createElement('div',{style:{
+                            fontSize:`calc(13px * var(--fs,1))`,fontWeight:900,
+                            color:'#fff',textTransform:'uppercase',letterSpacing:'.04em',lineHeight:1.15
+                          }},ex.name)
+                        );
+                      }),
+                      bl.notes&&React.createElement('div',{style:{
+                        fontSize:`calc(10px * var(--fs,1))`,color:'#555',
+                        marginTop:'3px',fontStyle:'italic',fontWeight:400,lineHeight:1.4
+                      }},bl.notes)
+                    );
+                  })
+                )
+              )
+            :React.createElement('div',{style:{color:'#1a1a1a',fontSize:`calc(12px * var(--fs,1))`,textTransform:'uppercase',letterSpacing:'.1em',marginTop:'8px'}},'—')
+        );
+      })
+    )
+  );
+}
+
+// ── CalendarExportView — 1920×1080 Eagles calendar ───────
+function CalendarExportView({sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale}){
+  const weeks=getWeeksOfMonth(year,month);
+  const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const monthName=monthNames[month];
+  const today=new Date();
+  const ls=logoScale||1;
+
+  // weekday indices to show: 1=Mon to 5=Fri (skip 0=Sun and 6=Sat)
+  const SHOW_DAYS=[1,2,3,4,5];
+  const CAL_DAY_LABELS=['SEG','TER','QUA','QUI','SEX'];
+  const fs=fontScale||1;
+
+  return React.createElement('div',{style:{
+    background:'#000',color:'#fff',
+    width:'1920px',height:'1080px',
+    display:'flex',flexDirection:'column',
+    fontFamily:"'Arial Black',Arial,sans-serif",
+    overflow:'hidden',
+    '--fs':fs
+  }},
+    // ── header bar ──
+    React.createElement('div',{style:{
+      background:'#0a0a0a',
+      display:'flex',alignItems:'center',justifyContent:'space-between',
+      padding:'16px 40px',
+      borderBottom:'2px solid #1a1a1a',
+      flexShrink:0
+    }},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'18px'}},
+        logoDataUrl&&React.createElement('div',{style:{
+          width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,
+          background:'transparent',
+          overflow:'hidden',borderRadius:'4px',flexShrink:0
+        }},
+          React.createElement('img',{src:logoDataUrl,style:{width:'100%',height:'100%',objectFit:'contain',display:'block'}})
+        ),
+        React.createElement('span',{style:{fontSize:`calc(32px * var(--fs,1))`,fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},
+          gymName||'Eagles'
+        )
+      ),
+      React.createElement('div',{style:{textAlign:'right'}},
+        React.createElement('div',{style:{fontSize:`calc(36px * var(--fs,1))`,fontWeight:900,color:'#e87820',textTransform:'uppercase',letterSpacing:'.1em',lineHeight:1}},
+          monthName+' '+year
+        ),
+        label&&React.createElement('div',{style:{fontSize:`calc(16px * var(--fs,1))`,color:'#666',marginTop:'4px',letterSpacing:'.06em',textTransform:'uppercase'}},label)
+      )
+    ),
+    // ── day-of-week header — SEG to SEX only ──
+    React.createElement('div',{style:{
+      display:'grid',gridTemplateColumns:'repeat(5,1fr)',
+      background:'#0d0d0d',borderBottom:'1px solid #1a1a1a',flexShrink:0
+    }},
+      CAL_DAY_LABELS.map((d,i)=>React.createElement('div',{key:d,style:{
+        padding:'10px 16px',
+        fontSize:`calc(16px * var(--fs,1))`,fontWeight:900,color:'#e87820',
+        textTransform:'uppercase',letterSpacing:'.1em',
+        borderRight:i<4?'1px solid #1a1a1a':'none'
+      }},d))
+    ),
+    // ── weeks grid — 5 columns ──
+    React.createElement('div',{style:{display:'flex',flexDirection:'column',flex:1,overflow:'hidden'}},
+      weeks.map((week,wi)=>{
+        // filter to Mon-Fri only
+        const weekdays=SHOW_DAYS.map(di=>({date:week[di],di}));
+        return React.createElement('div',{key:wi,style:{
+          display:'grid',gridTemplateColumns:'repeat(5,1fr)',
+          flex:1,borderBottom:wi<weeks.length-1?'1px solid #1a1a1a':'none'
+        }},
+          weekdays.map(({date,di},ci)=>{
+            const dateKey=toISO(date);
+            const inMonth=date.getMonth()===month;
+            const s=(sessions[dateKey]||[])[0]||null;
+            const isToday=date.toDateString()===today.toDateString();
+            return React.createElement('div',{key:di,style:{
+              borderRight:ci<4?'1px solid #1a1a1a':'none',
+              padding:'10px 14px',
+              background:inMonth?(s?'#080808':'#000'):'#030303',
+              display:'flex',flexDirection:'column',
+              overflow:'hidden'
+            }},
+              // date number
+              React.createElement('div',{style:{
+                fontSize:`calc(22px * var(--fs,1))`,fontWeight:900,
+                color:isToday?'#e87820':inMonth?'#666':'#222',
+                marginBottom:'6px',lineHeight:1,flexShrink:0
+              }},inMonth?date.getDate():''),
+              // session content
+              s&&inMonth&&React.createElement('div',{style:{flex:1,overflow:'hidden',display:'flex',flexDirection:'column',gap:'4px'}},
+                React.createElement('div',{style:{
+                  fontSize:`calc(15px * var(--fs,1))`,fontWeight:900,color:'#fff',
+                  textTransform:'uppercase',letterSpacing:'.04em',
+                  lineHeight:1.2,marginBottom:'4px'
+                }},s.mainTraining||'—'),
+                (s.blocks||[]).map(bl=>{
+                  const ec=ECOL[bl.type]||ECOL['Força'];
+                  const exNames=bl.exercises?.filter(e=>e.name).slice(0,4).map(e=>e.name).join(', ');
+                  return React.createElement('div',{key:bl.id,style:{
+                    borderLeft:`2px solid ${ec.text}`,
+                    paddingLeft:'6px',marginBottom:'3px'
+                  }},
+                    React.createElement('div',{style:{fontSize:`calc(12px * var(--fs,1))`,fontWeight:900,color:ec.text,textTransform:'uppercase',letterSpacing:'.06em',lineHeight:1.2}},bl.type),
+                    exNames&&React.createElement('div',{style:{fontSize:`calc(11px * var(--fs,1))`,color:'#666',lineHeight:1.3,marginTop:'1px'}},exNames)
+                  );
+                })
+              )
+            );
+          })
+        );
+      })
+    )
+  );
+}
+
+// ── SchedulePublisher ─────────────────────────────────────
+function SchedulePublisher({sessions}){
+  const dailyRef=useRef();
+  const weeklyRef=useRef();
+  const exportDailyRef=useRef();
+  const exportWeeklyRef=useRef();
+  const exportCalendarRef=useRef();
+  const exportWeeklyCalRef=useRef();
+  const exportMobileARef=useRef();
+  const exportMobileBRef=useRef();
+  const previewWrapRef=useRef();
+  const logoInputRef=useRef();
+  const [view,setView]=useState('weekly');
+  const [exportTarget,setExportTarget]=useState('daily');
+  const [previewTarget,setPreviewTarget]=useState('daily'); // 'daily'|'semanal'|'calendar'
+  const [selectedWeekIdx,setSelectedWeekIdx]=useState(0); // which week of the month for semanal
+  const [label,setLabel]=useState('');
+  const [gymName,setGymName]=useState('Eagles');
+  const [logoDataUrl,setLogoDataUrl]=useState(null);
+  const [logoScale,setLogoScale]=useState(1);
+  const [exporting,setExporting]=useState(false);
+  const [selectedWeek,setSelectedWeek]=useState(null);
+  const [selectedDate,setSelectedDate]=useState(null);
+  const [fontScale,setFontScale]=useState(1.5);
+  const [zoneScales,setZoneScales]=useState([1,1,1]);
+  const [blockTitleScales,setBlockTitleScales]=useState([1,1,1]);
+  const [previewOpen,setPreviewOpen]=useState(false);
+  const [previewScale,setPreviewScale]=useState(1);
+  const now=new Date();
+  const [month,setMonth]=useState(now.getMonth());
+  const [year,setYear]=useState(now.getFullYear());
+  const hasAny=Object.values(sessions).some(arr=>arr.length>0);
+
+  const handleLogoUpload=e=>{
+    const file=e.target.files?.[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>setLogoDataUrl(ev.target.result);
+    reader.readAsDataURL(file);
+    e.target.value='';
+  };
+
+  // compute the CSS scale so the 1920px card fits the preview container
+  useEffect(()=>{
+    if(!previewOpen||!previewWrapRef.current)return;
+    const w=previewWrapRef.current.offsetWidth||800;
+    setPreviewScale(w/1920);
+  },[previewOpen]);
+
+  const doExport=async(target)=>{
+    const tgt=target||exportTarget;
+    const el=tgt==='calendar'?exportCalendarRef.current:tgt==='semanal'?exportWeeklyCalRef.current:exportDailyRef.current;
+    if(!el){alert('Nada para exportar ainda.');return;}
+    setExporting(true);
+    await new Promise(r=>setTimeout(r,250));
+    try{
+      const W=1920,H=tgt==='calendar'?1080:1080;
+      const c=await html2canvas(el,{scale:1,backgroundColor:'#000',useCORS:true,logging:false,width:W,height:H,windowWidth:W});
+      const out=document.createElement('canvas');
+      out.width=W;out.height=H;
+      const ctx=out.getContext('2d');
+      ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+      ctx.drawImage(c,0,0,W,H);
+      const a=document.createElement('a');
+      const DAY_EN=['sun','mon','tue','wed','thu','fri','sat'];
+      const padD=n=>String(n).padStart(2,'0');
+      const fmtDate=d=>`${padD(d.getDate())}${padD(d.getMonth()+1)}${d.getFullYear()}`;
+      let filename;
+      if(tgt==='daily'){
+        const dateStr=selectedDate||toISO(currentWeekDates[1]);
+        const d=new Date(dateStr+'T12:00:00');
+        filename=`eagles-daily-training-${DAY_EN[d.getDay()]}-${fmtDate(d)}`;
+      } else if(tgt==='semanal'){
+        const wks=getWeeksOfMonth(year,month);
+        const wk=wks[selectedWeekIdx]||currentWeekDates;
+        const mon=wk[1];const fri=wk[5];
+        filename=`eagles-weekly-program-${padD(mon.getDate())}${padD(mon.getMonth()+1)}to${padD(fri.getDate())}${padD(fri.getMonth()+1)}`;
+      } else {
+        const mnames=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+        filename=`eagles-calendar-${mnames[month]}-${year}`;
+      }
+      a.download=`${filename}.png`;
+      a.href=out.toDataURL('image/png');
+      a.click();
+    }catch(e){console.error(e);alert('Falha na exportação — tente novamente.');}
+    setExporting(false);
+  };
+
+  const doMobileExport=async(variant)=>{
+    const el=variant==='A'?exportMobileARef.current:exportMobileBRef.current;
+    if(!el){alert('Nada para exportar ainda.');return;}
+    setExporting(true);
+    await new Promise(r=>setTimeout(r,250));
+    try{
+      const W=1080;
+      const H=el.scrollHeight||1920;
+      const c=await html2canvas(el,{scale:2,backgroundColor:'#000',useCORS:true,logging:false,width:W,height:H,windowWidth:W});
+      const out=document.createElement('canvas');
+      out.width=W*2;out.height=H*2;
+      const ctx=out.getContext('2d');
+      ctx.fillStyle='#000';ctx.fillRect(0,0,out.width,out.height);
+      ctx.drawImage(c,0,0);
+      const DAY_EN=['sun','mon','tue','wed','thu','fri','sat'];
+      const padD=n=>String(n).padStart(2,'0');
+      const dateStr=selectedDate||toISO(currentWeekDates[1]);
+      const d=new Date(dateStr+'T12:00:00');
+      const fname=`eagles-mobile-${variant==='A'?'eagles':'megaman'}-${DAY_EN[d.getDay()]}-${padD(d.getDate())}${padD(d.getMonth()+1)}${d.getFullYear()}`;
+      const a=document.createElement('a');
+      a.download=`${fname}.png`;
+      a.href=out.toDataURL('image/png');
+      a.click();
+    }catch(e){console.error(e);alert('Falha na exportação — tente novamente.');}
+    setExporting(false);
+  };
+
+  const handleDayClick=(week,date)=>{
+    setSelectedWeek(week);
+    setSelectedDate(toISO(date));
+    setView('daily');
+  };
+
+  const defaultWeek=Array.from({length:7},(_,i)=>{
+    const d=new Date();const dow=d.getDay(); // 0=Sun
+    d.setDate(d.getDate()-dow+i); // back to Sunday of current week
+    return d;
+  });
+
+  // all dates that have sessions, sorted
+  const allSessionDates=Object.keys(sessions).filter(k=>sessions[k]?.length>0).sort();
+
+  const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  if(!hasAny)return React.createElement('div',{className:'empty2'},
+    React.createElement('i',{className:'ti ti-calendar',style:{fontSize:'32px',display:'block',marginBottom:'10px',color:'#444'},'aria-hidden':'true'}),
+    'Nenhuma sessão ainda.',React.createElement('br'),
+    React.createElement('span',{style:{color:'#444',fontSize:'12px'}},'Adicione no Criador de Treinos.')
+  );
+
+  const currentWeekDates=selectedWeek||defaultWeek;
+
+  return React.createElement('div',null,
+
+    // ── controls bar ──
+    React.createElement('div',{className:'pub-controls'},
+      // hidden file input
+      React.createElement('input',{
+        type:'file',ref:logoInputRef,accept:'image/*',
+        style:{display:'none'},onChange:handleLogoUpload
+      }),
+      // logo upload
+      React.createElement('div',{className:'fg',style:{minWidth:'80px',alignItems:'center'}},
+        React.createElement('span',{className:'lbl'},'Logo'),
+        React.createElement('div',{
+          onClick:()=>logoInputRef.current?.click(),
+          title:'Clique para enviar o logo',
+          style:{
+            width:'64px',height:'64px',borderRadius:'6px',
+            border:logoDataUrl?'2px solid #e87820':'1.5px dashed #444',
+            background:'#111',cursor:'pointer',
+            overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center',
+            transition:'border-color .15s',flexShrink:0
+          }
+        },
+          logoDataUrl
+            ? React.createElement('img',{src:logoDataUrl,style:{width:'100%',height:'100%',objectFit:'contain'}})
+            : React.createElement('div',{style:{display:'flex',flexDirection:'column',alignItems:'center',gap:'3px'}},
+                React.createElement('i',{className:'ti ti-upload',style:{fontSize:'18px',color:'#555'},'aria-hidden':'true'}),
+                React.createElement('span',{style:{fontSize:'9px',color:'#555',textTransform:'uppercase',letterSpacing:'.05em'}})
+              )
+        ),
+        logoDataUrl&&React.createElement('button',{
+          type:'button',className:'b bd bsm',
+          style:{marginTop:'4px',padding:'2px 6px',fontSize:'10px',minHeight:'22px'},
+          onClick:()=>setLogoDataUrl(null)
+        },React.createElement('i',{className:'ti ti-x','aria-hidden':'true'}),' Remover')
+      ),
+      // logo scale — only shown when a logo is uploaded
+      logoDataUrl&&React.createElement('div',{className:'fg',style:{minWidth:'160px'}},
+        React.createElement('span',{className:'lbl'},`Escala do logo — ${logoScale.toFixed(2)}×`),
+        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+          React.createElement('button',{type:'button',className:'b bsm',style:{padding:'4px 8px',minHeight:'28px'},
+            onClick:()=>setLogoScale(s=>Math.max(0.25,Math.round((s-0.05)*100)/100))
+          },'−'),
+          React.createElement('input',{
+            type:'range',min:'0.25',max:'4',step:'0.05',
+            value:logoScale,
+            onChange:e=>setLogoScale(parseFloat(e.target.value)),
+            style:{flex:1,accentColor:'#e87820'}
+          }),
+          React.createElement('button',{type:'button',className:'b bsm',style:{padding:'4px 8px',minHeight:'28px'},
+            onClick:()=>setLogoScale(s=>Math.min(4,Math.round((s+0.05)*100)/100))
+          },'+')
+        )
+      ),
+      React.createElement('div',{className:'fg',style:{flex:'1',minWidth:'140px'}},
+        React.createElement('span',{className:'lbl'},'Nome da academia'),
+        React.createElement('input',{placeholder:'Eagles',value:gymName,onChange:e=>setGymName(e.target.value)})
+      ),
+      React.createElement('div',{className:'fg',style:{flex:'1',minWidth:'140px'}},
+        React.createElement('span',{className:'lbl'},'Rótulo do período'),
+        React.createElement('div',{className:'input-mic-row'},
+          React.createElement('input',{placeholder:'ex: Semana 4',value:label,onChange:e=>setLabel(e.target.value)}),
+          React.createElement(MicButton,{onTranscript:txt=>setLabel(l=>(l?l+' ':'')+txt)})
+        )
+      ),
+      // font scale
+      React.createElement('div',{className:'fg',style:{minWidth:'180px'}},
+        React.createElement('span',{className:'lbl'},`Escala da fonte — ${fontScale.toFixed(2)}×`),
+        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+          React.createElement('button',{type:'button',className:'b bsm',style:{padding:'4px 8px',minHeight:'28px'},
+            onClick:()=>setFontScale(f=>Math.max(0.5,Math.round((f-0.05)*100)/100))
+          },'−'),
+          React.createElement('input',{
+            type:'range',min:'0.5',max:'3',step:'0.05',
+            value:fontScale,
+            onChange:e=>setFontScale(parseFloat(e.target.value)),
+            style:{flex:1,accentColor:'#e87820'}
+          }),
+          React.createElement('button',{type:'button',className:'b bsm',style:{padding:'4px 8px',minHeight:'28px'},
+            onClick:()=>setFontScale(f=>Math.min(3,Math.round((f+0.05)*100)/100))
+          },'+')
+        )
+      ),
+      // month nav
+      React.createElement('div',{style:{display:'flex',gap:'6px',alignItems:'center'}},
+        React.createElement('button',{type:'button',className:'b bsm',onClick:()=>{const d=new Date(year,month-1,1);setMonth(d.getMonth());setYear(d.getFullYear());}},
+          React.createElement('i',{className:'ti ti-chevron-left','aria-hidden':'true'})
+        ),
+        React.createElement('span',{style:{fontSize:'13px',color:'#ccc',padding:'0 6px',whiteSpace:'nowrap',lineHeight:'1',display:'flex',alignItems:'center'}},`${monthNames[month]} ${year}`),
+        React.createElement('button',{type:'button',className:'b bsm',onClick:()=>{const d=new Date(year,month+1,1);setMonth(d.getMonth());setYear(d.getFullYear());}},
+          React.createElement('i',{className:'ti ti-chevron-right','aria-hidden':'true'})
+        )
+      ),
+      // preview + export
+      React.createElement('div',{style:{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}},
+        React.createElement('button',{
+          type:'button',
+          className:'b',
+          style:{borderColor:'#e87820',color:previewOpen?'#000':'#e87820',background:previewOpen?'#e87820':'transparent'},
+          onClick:()=>setPreviewOpen(p=>!p)
+        },
+          React.createElement('i',{className:'ti ti-eye','aria-hidden':'true'}),
+          previewOpen?' Fechar':' Pré-visualizar'
+        ),
+        React.createElement('button',{
+          type:'button',className:'b bsec',style:{fontSize:'12px'},
+          onClick:()=>{setExportTarget('daily');doExport('daily');},disabled:exporting
+        }, React.createElement('i',{className:'ti ti-download','aria-hidden':'true'}),' Diário'),
+        React.createElement('button',{
+          type:'button',className:'b bsec',style:{fontSize:'12px'},
+          onClick:()=>{setExportTarget('semanal');doExport('semanal');},disabled:exporting
+        }, React.createElement('i',{className:'ti ti-table-column','aria-hidden':'true'}),' Semanal'),
+        React.createElement('button',{
+          type:'button',className:'b bsec',style:{fontSize:'12px'},
+          onClick:()=>{setExportTarget('calendar');doExport('calendar');},disabled:exporting
+        }, React.createElement('i',{className:'ti ti-calendar-down','aria-hidden':'true'}),' Calendário'),
+        React.createElement('button',{
+          type:'button',className:'b bsm',
+          style:{fontSize:'12px',background:'#e87820',color:'#000',borderColor:'#e87820',fontWeight:700},
+          onClick:()=>doMobileExport('A'),disabled:exporting
+        }, React.createElement('i',{className:'ti ti-device-mobile','aria-hidden':'true'}),' Mobile Eagles'),
+        React.createElement('button',{
+          type:'button',className:'b bsm',
+          style:{fontSize:'12px',background:'#00b8d4',color:'#000',borderColor:'#00b8d4',fontWeight:700},
+          onClick:()=>doMobileExport('B'),disabled:exporting
+        }, React.createElement('i',{className:'ti ti-device-mobile','aria-hidden':'true'}),' Mobile Mega Man'),
+        exporting&&React.createElement('span',{style:{fontSize:'11px',color:'#e87820'}},'Exportando...')
+      )
+    ),
+
+    // ── live preview panel ──
+    previewOpen&&React.createElement('div',null,
+      // ── preview type toggle + quick export — ALWAYS ON TOP ──
+      React.createElement('div',{style:{display:'flex',gap:'6px',marginBottom:'8px',flexWrap:'wrap',alignItems:'center'}},
+        React.createElement('button',{type:'button',className:`pvt ${previewTarget==='daily'?'on':''}`,onClick:()=>setPreviewTarget('daily')},'Diário'),
+        React.createElement('button',{type:'button',className:`pvt ${previewTarget==='semanal'?'on':''}`,onClick:()=>setPreviewTarget('semanal')},'Semanal'),
+        React.createElement('button',{type:'button',className:`pvt ${previewTarget==='calendar'?'on':''}`,onClick:()=>setPreviewTarget('calendar')},'Calendário'),
+        React.createElement('button',{type:'button',
+          className:`pvt ${previewTarget==='mobileA'?'on':''}`,
+          style:previewTarget==='mobileA'?{background:'#e87820',borderColor:'#e87820',color:'#000'}:{color:'#e87820',borderColor:'#e87820'},
+          onClick:()=>setPreviewTarget('mobileA')},'Mobile Eagles'),
+        React.createElement('button',{type:'button',
+          className:`pvt ${previewTarget==='mobileB'?'on':''}`,
+          style:previewTarget==='mobileB'?{background:'#00b8d4',borderColor:'#00b8d4',color:'#000'}:{color:'#00b8d4',borderColor:'#00b8d4'},
+          onClick:()=>setPreviewTarget('mobileB')},'Mobile Mega Man'),
+        React.createElement('button',{
+          type:'button',className:'b bsec bsm',
+          style:{marginLeft:'auto',fontSize:'12px'},
+          onClick:()=>previewTarget==='mobileA'?doMobileExport('A'):previewTarget==='mobileB'?doMobileExport('B'):doExport(previewTarget),
+          disabled:exporting
+        },
+          React.createElement('i',{className:'ti ti-download','aria-hidden':'true'}),
+          ` Baixar ${previewTarget==='daily'?'Diário':previewTarget==='semanal'?'Semanal':previewTarget==='calendar'?'Calendário':previewTarget==='mobileA'?'Mobile Eagles':'Mobile Mega Man'}`
+        )
+      ),
+      // ── week picker — for semanal ──
+      previewTarget==='semanal'&&React.createElement('div',{
+        style:{display:'flex',gap:'6px',flexWrap:'wrap',marginBottom:'8px',alignItems:'center'}
+      },
+        React.createElement('span',{style:{fontSize:'11px',color:'#555',marginRight:'4px',textTransform:'uppercase',letterSpacing:'.06em'}},'Semana:'),
+        getWeeksOfMonth(year,month).map((week,wi)=>{
+          const mon=week[1];const fri=week[5];
+          const fmt=d=>d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+          const active=selectedWeekIdx===wi;
+          return React.createElement('button',{
+            key:wi,type:'button',className:'b bsm',
+            style:{background:active?'#e87820':'transparent',color:active?'#000':'#e87820',borderColor:'#e87820',fontSize:'11px',padding:'5px 10px'},
+            onClick:()=>setSelectedWeekIdx(wi)
+          },`${fmt(mon)}–${fmt(fri)}`);
+        })
+      ),
+      // ── zone sliders — only for daily preview ──
+      previewTarget==='daily'&&React.createElement('div',{style:{
+        display:'flex',gap:'10px',marginBottom:'8px',flexWrap:'wrap',
+        background:'#161616',border:'1px solid #252525',borderRadius:'6px',
+        padding:'10px 12px'
+      }},
+        React.createElement('span',{style:{fontSize:'10px',color:'#555',textTransform:'uppercase',letterSpacing:'.07em',width:'100%',marginBottom:'2px'}},'Tamanho da fonte — por zona'),
+        [0,1,2].map(zi=>
+          React.createElement('div',{key:zi,className:'fg',style:{flex:1,minWidth:'140px'}},
+            React.createElement('span',{className:'lbl',style:{color:'#e87820'}},
+              `Zona 0${zi+1} — ${zoneScales[zi].toFixed(2)}×`
+            ),
+            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px'}},
+              React.createElement('button',{type:'button',className:'b bsm',style:{padding:'3px 7px',minHeight:'26px'},
+                onClick:()=>setZoneScales(s=>{const n=[...s];n[zi]=Math.max(0.3,Math.round((n[zi]-0.05)*100)/100);return n;})
+              },'−'),
+              React.createElement('input',{
+                type:'range',min:'0.3',max:'3',step:'0.05',
+                value:zoneScales[zi],
+                onChange:e=>setZoneScales(s=>{const n=[...s];n[zi]=parseFloat(e.target.value);return n;}),
+                style:{flex:1,accentColor:'#e87820'}
+              }),
+              React.createElement('button',{type:'button',className:'b bsm',style:{padding:'3px 7px',minHeight:'26px'},
+                onClick:()=>setZoneScales(s=>{const n=[...s];n[zi]=Math.min(3,Math.round((n[zi]+0.05)*100)/100);return n;})
+              },'+')
+            )
+          )
+        )
+      ),
+      // ── block title sliders — only for daily preview ──
+      previewTarget==='daily'&&React.createElement('div',{style:{
+        display:'flex',gap:'10px',marginBottom:'8px',flexWrap:'wrap',
+        background:'#161616',border:'1px solid #252525',borderRadius:'6px',
+        padding:'10px 12px'
+      }},
+        React.createElement('span',{style:{fontSize:'10px',color:'#555',textTransform:'uppercase',letterSpacing:'.07em',width:'100%',marginBottom:'2px'}},'Tamanho do título do bloco — por zona'),
+        [0,1,2].map(zi=>
+          React.createElement('div',{key:zi,className:'fg',style:{flex:1,minWidth:'140px'}},
+            React.createElement('span',{className:'lbl',style:{color:'#f5c842'}},
+              `Título Zona 0${zi+1} — ${blockTitleScales[zi].toFixed(2)}×`
+            ),
+            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px'}},
+              React.createElement('button',{type:'button',className:'b bsm',style:{padding:'3px 7px',minHeight:'26px'},
+                onClick:()=>setBlockTitleScales(s=>{const n=[...s];n[zi]=Math.max(0.3,Math.round((n[zi]-0.05)*100)/100);return n;})
+              },'−'),
+              React.createElement('input',{
+                type:'range',min:'0.3',max:'3',step:'0.05',
+                value:blockTitleScales[zi],
+                onChange:e=>setBlockTitleScales(s=>{const n=[...s];n[zi]=parseFloat(e.target.value);return n;}),
+                style:{flex:1,accentColor:'#f5c842'}
+              }),
+              React.createElement('button',{type:'button',className:'b bsm',style:{padding:'3px 7px',minHeight:'26px'},
+                onClick:()=>setBlockTitleScales(s=>{const n=[...s];n[zi]=Math.min(3,Math.round((n[zi]+0.05)*100)/100);return n;})
+              },'+')
+            )
+          )
+        )
+      ),
+      (previewTarget==='daily'||previewTarget==='mobileA'||previewTarget==='mobileB')&&allSessionDates.length>0&&React.createElement('div',{
+        style:{display:'flex',gap:'6px',flexWrap:'wrap',marginBottom:'8px',alignItems:'center'}
+      },
+        React.createElement('span',{style:{fontSize:'11px',color:'#555',marginRight:'4px',textTransform:'uppercase',letterSpacing:'.06em'}},'Dia:'),
+        allSessionDates.map(dateKey=>{
+          const d=new Date(dateKey+'T12:00:00');
+          const lbl=d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
+          const active=selectedDate===dateKey;
+          return React.createElement('button',{
+            key:dateKey,type:'button',
+            className:'b bsm',
+            style:{background:active?'#e87820':'transparent',color:active?'#000':'#e87820',borderColor:'#e87820',fontSize:'11px',padding:'5px 10px'},
+            onClick:()=>{
+              setSelectedDate(dateKey);
+              const weeks=getWeeksOfMonth(new Date(dateKey+'T12:00:00').getFullYear(),new Date(dateKey+'T12:00:00').getMonth());
+              const wk=weeks.find(w=>w.some(d=>toISO(d)===dateKey));
+              if(wk) setSelectedWeek(wk);
+            }
+          },lbl);
+        })
+      ),
+      React.createElement('div',{
+        ref:previewWrapRef,
+        style:{width:'100%',marginBottom:'12px',borderRadius:'8px',overflow:'hidden',background:'#000',position:'relative'}
+      },
+        React.createElement('div',{style:{
+          transform:`scale(${(previewTarget==='mobileA'||previewTarget==='mobileB')?(previewWrapRef.current?.offsetWidth||800)/1080:previewScale})`,
+          transformOrigin:'top left',
+          width:(previewTarget==='mobileA'||previewTarget==='mobileB')?'1080px':'1920px',
+          pointerEvents:'none'
+        }},
+          previewTarget==='daily'
+            ?React.createElement(DailyExportView,{sessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates})
+            :previewTarget==='semanal'
+            ?React.createElement(WeeklyCalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates})
+            :previewTarget==='mobileA'
+            ?React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale})
+            :previewTarget==='mobileB'
+            ?React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale})
+            :React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale})
+        ),
+        React.createElement('div',{style:{height:`${(previewTarget==='mobileA'||previewTarget==='mobileB')?'auto':1080}px`,...((previewTarget==='mobileA'||previewTarget==='mobileB')?{}:{marginTop:`-${1080*previewScale}px`}),pointerEvents:'none'}})
+      )
+    ),
+
+    // ── view tabs (hidden when preview is open) ──
+    !previewOpen&&React.createElement('div',{className:'pub-view-tabs'},
+      React.createElement('button',{type:'button',className:`pvt ${view==='weekly'?'on':''}`,onClick:()=>setView('weekly')},'Mensal / Semanal'),
+      React.createElement('button',{type:'button',className:`pvt ${view==='daily'?'on':''}`,onClick:()=>setView('daily')},'Visualização Diária')
+    ),
+
+    !previewOpen&&view==='daily'&&React.createElement('button',{
+      type:'button',className:'b bsm',style:{marginBottom:'10px'},
+      onClick:()=>setView('weekly')
+    }, React.createElement('i',{className:'ti ti-arrow-left','aria-hidden':'true'}),' Voltar ao mensal'),
+
+    // ── hidden export targets — always rendered, off-screen, dedicated refs ──
+    React.createElement('div',{style:{position:'fixed',left:'-9999px',top:'-9999px',pointerEvents:'none',zIndex:-1,overflow:'hidden'}},
+      React.createElement('div',{ref:exportDailyRef},
+        React.createElement(DailyExportView,{sessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates})
+      ),
+      React.createElement('div',{ref:exportWeeklyRef},
+        React.createElement(WeeklyExportView,{sessions,label,year,month,onDayClick:()=>{}})
+      ),
+      React.createElement('div',{ref:exportWeeklyCalRef},
+        React.createElement(WeeklyCalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates})
+      ),
+      React.createElement('div',{ref:exportCalendarRef},
+        React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale})
+      ),
+      React.createElement('div',{ref:exportMobileARef,style:{width:'1080px'}},
+        React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale})
+      ),
+      React.createElement('div',{ref:exportMobileBRef,style:{width:'1080px'}},
+        React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale})
+      )
+    ),
+
+    // ── weekly view (visible when not previewing) ──
+    !previewOpen&&React.createElement('div',{style:{overflowX:'auto',WebkitOverflowScrolling:'touch',borderRadius:'8px'}},
+      view==='weekly'&&React.createElement('div',{ref:weeklyRef},
+        React.createElement(WeeklyExportView,{sessions,label,year,month,onDayClick:handleDayClick})
+      ),
+      view==='daily'&&React.createElement('div',{ref:dailyRef},
+        React.createElement(DailyExportView,{
+          sessions,label,gymName,fontScale,selectedDate,logoDataUrl,logoScale,
+          weekDates:currentWeekDates
+        })
+      )
+    )
+  );
+}
+
+
+// ── helpers shared by both mobile views ─────────────────
+function buildMobileSession(sessions, selectedDate, currentWeekDates){
+  // find session for selected date, fallback to first active day in week
+  if(selectedDate){
+    const s=(sessions[selectedDate]||[])[0]||null;
+    if(s) return {s, dateKey:selectedDate, date:new Date(selectedDate+'T12:00:00')};
+  }
+  for(let i=1;i<=5;i++){
+    const d=currentWeekDates[i];
+    const key=toISO(d);
+    const s=(sessions[key]||[])[0]||null;
+    if(s) return {s, dateKey:key, date:d};
+  }
+  return null;
+}
+
+function MobileBlockA({bl}){
+  const hasLabel=bl.label&&bl.label!=='-';
+  const title=hasLabel?bl.label:bl.type;
+  const meta=[bl.rounds&&`${bl.rounds} RDS`, bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
+  const loads=[...new Set((bl.exercises||[]).filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio').map(e=>fmtIntensity(e.intensity)))];
+  return React.createElement('div',{style:{borderBottom:'1px solid #1a1a1a'}},
+    React.createElement('div',{style:{padding:'10px 20px 6px'}},
+      React.createElement('div',{style:{fontSize:'18px',fontWeight:900,color:'#e87820',textTransform:'uppercase',letterSpacing:'.07em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},title),
+      meta&&React.createElement('div',{style:{fontSize:'12px',color:'#e87820',fontWeight:700,textTransform:'uppercase',marginTop:'2px',fontFamily:"'Arial Black',Arial,sans-serif"}},meta)
+    ),
+    React.createElement('div',{style:{padding:'0 20px 14px'}},
+      (bl.exercises||[]).filter(e=>e.name).map((ex,ei)=>{
+        const isCardio=ex.intensity?.mode==='cardio';
+        const cardioPrefix=isCardio&&ex.intensity?.cardioVal?`${ex.intensity.cardioVal}${ex.intensity.cardioUnit||'m'}`:'';
+        const volPrefix=ex.sets&&ex.reps?`${ex.sets}×${ex.reps}`:ex.reps||'';
+        const prefix=cardioPrefix||volPrefix;
+        const line=[prefix,ex.name.toUpperCase()].filter(Boolean).join(' ');
+        return React.createElement('div',{key:ex.id,style:{padding:'6px 0',borderBottom:'1px solid #111'}},
+          React.createElement('div',{style:{fontSize:'17px',fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},line),
+          ex.note&&React.createElement('div',{style:{fontSize:'12px',color:'#888',fontStyle:'italic',marginTop:'2px'}},ex.note)
+        );
+      }),
+      loads.length>0&&React.createElement('div',{style:{fontSize:'13px',fontWeight:700,color:'#f5c842',marginTop:'7px',fontFamily:"'Arial Black',Arial,sans-serif"}},loads.join(' · ')),
+      bl.notes&&React.createElement('div',{style:{fontSize:'12px',color:'#888',fontStyle:'italic',marginTop:'5px',paddingTop:'5px',borderTop:'1px solid #1a1a1a'}},bl.notes)
+    )
+  );
+}
+
+function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale}){
+  const found=buildMobileSession(sessions,selectedDate,currentWeekDates);
+  if(!found) return React.createElement('div',{style:{background:'#000',color:'#555',padding:'40px',textAlign:'center',fontFamily:"'Arial Black',Arial,sans-serif"}},'—');
+  const {s,date}=found;
+  const weekday=date.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase();
+  const dateNum=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const ls=logoScale||1;
+  return React.createElement('div',{style:{background:'#000',width:'1080px',fontFamily:"'Arial Black',Arial,sans-serif"}},
+    React.createElement('div',{style:{background:'#0a0a0a',padding:'22px 28px 18px',borderBottom:'2px solid #1a1a1a',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'16px'}},
+        logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
+        React.createElement('span',{style:{fontSize:'30px',fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.08em'}},gymName||'Eagles')
+      ),
+      React.createElement('div',{style:{textAlign:'right'}},
+        React.createElement('div',{style:{fontSize:'18px',color:'#e87820',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
+        s.mainTraining&&React.createElement('div',{style:{fontSize:'13px',color:'#666',textTransform:'uppercase',letterSpacing:'.06em',marginTop:'2px'}},s.mainTraining)
+      )
+    ),
+    (s.blocks||[]).map(bl=>React.createElement(MobileBlockA,{key:bl.id,bl}))
+  );
+}
+
+function MobileBlockB({bl}){
+  const hasLabel=bl.label&&bl.label!=='-';
+  const title=hasLabel?bl.label:bl.type;
+  const meta=[bl.rounds&&`${bl.rounds} RDS`, bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
+  const loads=[...new Set((bl.exercises||[]).filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio').map(e=>fmtIntensity(e.intensity)))];
+  return React.createElement('div',{style:{borderBottom:'2px solid #0d2a30'}},
+    React.createElement('div',{style:{background:'#050e14',padding:'10px 20px',borderTop:'3px solid #00b8d4',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+      React.createElement('div',{style:{fontSize:'16px',fontWeight:900,color:'#00b8d4',textTransform:'uppercase',letterSpacing:'.1em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},title),
+      meta&&React.createElement('span',{style:{fontSize:'12px',fontWeight:900,color:'#000',background:'#00b8d4',padding:'3px 10px',borderRadius:'2px',fontFamily:"'Courier New',monospace",whiteSpace:'nowrap'}},meta)
+    ),
+    React.createElement('div',{style:{background:'#000',padding:'8px 20px 14px'}},
+      (bl.exercises||[]).filter(e=>e.name).map((ex,ei)=>{
+        const isCardio=ex.intensity?.mode==='cardio';
+        const cardioPrefix=isCardio&&ex.intensity?.cardioVal?`${ex.intensity.cardioVal}${ex.intensity.cardioUnit||'m'}`:'';
+        const volPrefix=ex.sets&&ex.reps?`${ex.sets}×${ex.reps}`:ex.reps||'';
+        const prefix=cardioPrefix||volPrefix;
+        const line=[prefix,ex.name.toUpperCase()].filter(Boolean).join(' ');
+        return React.createElement('div',{key:ex.id,style:{padding:'6px 0',borderBottom:'1px solid #0d1e1e'}},
+          React.createElement('div',{style:{fontSize:'17px',fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},line),
+          ex.note&&React.createElement('div',{style:{fontSize:'11px',color:'#3a6a80',fontStyle:'italic',marginTop:'2px'}},ex.note)
+        );
+      }),
+      loads.length>0&&React.createElement('div',{style:{fontSize:'13px',fontWeight:700,color:'#ffd700',marginTop:'7px',fontFamily:"'Courier New',monospace",display:'inline-block',background:'#060f10',border:'1px solid #1a3a40',padding:'3px 9px'}},loads.join(' · ')),
+      bl.notes&&React.createElement('div',{style:{fontSize:'12px',color:'#3a6a80',marginTop:'5px',paddingTop:'5px',borderTop:'1px solid #0d1e1e',fontFamily:"'Courier New',monospace"}},bl.notes)
+    )
+  );
+}
+
+function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale}){
+  const found=buildMobileSession(sessions,selectedDate,currentWeekDates);
+  if(!found) return React.createElement('div',{style:{background:'#000',color:'#1a4a50',padding:'40px',textAlign:'center',fontFamily:"'Courier New',monospace"}},'—');
+  const {s,date}=found;
+  const weekday=date.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase();
+  const dateNum=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const ls=logoScale||1;
+  return React.createElement('div',{style:{background:'#000',width:'1080px',fontFamily:"'Courier New',monospace"}},
+    React.createElement('div',{style:{background:'#000',padding:'22px 28px 18px',borderBottom:'3px solid #00b8d4',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'16px'}},
+        logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
+        React.createElement('span',{style:{fontSize:'30px',fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},gymName||'Eagles')
+      ),
+      React.createElement('div',{style:{textAlign:'right'}},
+        React.createElement('div',{style:{fontSize:'16px',color:'#00b8d4',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
+        s.mainTraining&&React.createElement('div',{style:{fontSize:'12px',color:'#3a6a80',textTransform:'uppercase',letterSpacing:'.06em',marginTop:'2px'}},s.mainTraining)
+      )
+    ),
+    (s.blocks||[]).map(bl=>React.createElement(MobileBlockB,{key:bl.id,bl}))
+  );
+}
+
+// ── TextParser — Criar Treino por Texto ──────────────────
+function TextParser({sessions,setSessions,setTab}){
+  const [text,setText]=useState('');
+  const [date,setDate]=useState(todayISO());
+  const [status,setStatus]=useState(null); // null | 'loading' | 'ok' | 'err'
+  const [errMsg,setErrMsg]=useState('');
+  const [preview,setPreview]=useState(null); // parsed session object before confirm
+
+  const SYSTEM_PROMPT=`Você é um assistente de programação de treinos CrossFit. 
+O usuário vai colar o texto de uma sessão de treino e você deve converter em JSON exato.
+
+Retorne SOMENTE um objeto JSON válido com esta estrutura (sem texto extra, sem markdown):
+{
+  "mainTraining": "string resumindo os focos do treino (ex: Força + Deadlift RM)",
+  "blocks": [
+    {
+      "type": "string — use EXATAMENTE um destes valores: Aquecimento, Força, Cardio, Mobilidade, HIIT, MetCon, For Time, AMRAP, Descanso",
+      "zone": "string — Zona 01, Zona 02, ou Zona 03 (distribua: aquecimento/mobilidade=Zona 01, skill/força=Zona 02, WOD=Zona 03)",
+      "rounds": "string ou vazio",
+      "duration": "string com número de minutos do time cap, ou vazio",
+      "notes": "string com detalhes do bloco (time cap, buy-in, meta, rondas detalhadas, etc.) ou vazio",
+      "exercises": [
+        {
+          "name": "string com nome do exercício",
+          "rounds": "string ou vazio",
+          "sets": "string ou vazio",
+          "reps": "string (pode ser '10', '5/5', '50-40-30-20-10', 'MAX', etc.) ou vazio",
+          "intensity": {
+            "mode": "pct | gender | cardio | null",
+            // se mode=pct: "pct": "número"
+            // se mode=gender: "Masculino_unit":"kg","Masculino_RX":"val","Masculino_Inter":"val","Masculino_SC":"val","Feminino_unit":"kg","Feminino_RX":"val","Feminino_Inter":"val","Feminino_SC":"val"
+            // se mode=cardio: "cardioVal":"número","cardioUnit":"m" ou "cal"
+          },
+          "note": "string com observação ou vazio"
+        }
+      ]
+    }
+  ]
+}
+
+Regras importantes:
+- Para exercícios com %RM (ex: "1x4 60%", "3x1 90%"), use mode=pct e coloque a porcentagem em pct
+- Para exercícios com cargas masculino/feminino (ex: "RX: 60/45kg"), use mode=gender
+- Para exercícios de corrida/cardio com distância/calorias, use mode=cardio
+- Se não houver carga/intensidade, use intensity=null
+- Separe blocos logicamente: aquecimento, mobilidade, skill, força, condicionamento, WOD são blocos separados
+- Coloque detalhes de estrutura (buy-in, meta, EMOM, AMRAP etc.) em notes do bloco
+- Para séries progressivas (1x4, 1x3, 1x2, 3x1) crie um exercício por série com a % correspondente
+- mainTraining deve ser curto, ex: "Força + Deadlift RM" ou "Ginástico + Front Squat + Annie"`;
+
+  const parse=async()=>{
+    if(!text.trim())return;
+    setStatus('loading');
+    setPreview(null);
+    setErrMsg('');
+    try{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:4000,
+          system:SYSTEM_PROMPT,
+          messages:[{role:'user',content:`Data do treino: ${date}\n\nTexto do treino:\n${text}`}]
+        })
+      });
+      const data=await res.json();
+      const raw=data.content?.find(b=>b.type==='text')?.text||'';
+      // strip any accidental markdown fences
+      const clean=raw.replace(/```json|```/g,'').trim();
+      const parsed=JSON.parse(clean);
+      // stamp ids and date
+      const session={
+        id:uid(),
+        date,
+        mainTraining:parsed.mainTraining||'',
+        blocks:(parsed.blocks||[]).map(bl=>({
+          ...emptyBlock(),
+          ...bl,
+          id:uid(),
+          type:normaliseType(bl.type),
+          zone:normaliseZone(bl.zone||'Zona 01'),
+          exercises:(bl.exercises||[]).map(ex=>({
+            ...emptyEx(),
+            ...ex,
+            id:uid()
+          }))
+        }))
+      };
+      setPreview(session);
+      setStatus('ok');
+    }catch(e){
+      console.error(e);
+      setErrMsg('Não foi possível interpretar o texto. Verifique o formato e tente novamente.');
+      setStatus('err');
+    }
+  };
+
+  const confirm=()=>{
+    if(!preview)return;
+    setSessions(prev=>{
+      const next={...prev};
+      const key=preview.date;
+      next[key]=[...(next[key]||[]),preview];
+      return next;
+    });
+    setText('');
+    setPreview(null);
+    setStatus(null);
+    setTab('creator');
+  };
+
+  const discard=()=>{setPreview(null);setStatus(null);};
+
+  return React.createElement('div',null,
+    // ── header card ──
+    React.createElement('div',{className:'sc-card'},
+      React.createElement('div',{className:'sc-hdr'},
+        React.createElement('span',{className:'sc-title'},'Criar Treino por Texto'),
+        React.createElement('span',{style:{fontSize:'12px',color:'#444'}},'Cole o texto do treino e a IA interpreta automaticamente')
+      ),
+      React.createElement('div',{className:'g2'},
+        React.createElement('div',{className:'fg'},
+          React.createElement('span',{className:'lbl'},'Data do treino'),
+          React.createElement('input',{type:'date',value:date,onChange:e=>setDate(e.target.value)})
+        )
+      ),
+      React.createElement('div',{className:'fg',style:{marginBottom:'12px'}},
+        React.createElement('span',{className:'lbl'},'Texto do treino'),
+        React.createElement('textarea',{
+          placeholder:'Cole aqui o texto do treino...\n\nEx:\nWarm up\n2 rounds\n5x Deadlift\n5x Bom-dia\n\nSkill Força Tc 18\'\nDeadlift (RM)\n1x4 60%\n1x3 70%\n...',
+          value:text,
+          onChange:e=>setText(e.target.value),
+          style:{minHeight:'200px',fontFamily:'monospace',fontSize:'14px',lineHeight:'1.6'}
+        })
+      ),
+      React.createElement('div',{style:{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}},
+        React.createElement('button',{
+          type:'button',
+          className:'b bsec bfull',
+          onClick:parse,
+          disabled:status==='loading'||!text.trim(),
+          style:{maxWidth:'240px'}
+        },
+          status==='loading'
+            ? React.createElement('span',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+                React.createElement('i',{className:'ti ti-loader-2',style:{animation:'spin 1s linear infinite'},'aria-hidden':'true'}),
+                ' Interpretando...'
+              )
+            : React.createElement('span',{style:{display:'flex',alignItems:'center',gap:'6px'}},
+                React.createElement('i',{className:'ti ti-sparkles','aria-hidden':'true'}),
+                ' Interpretar com IA'
+              )
+        ),
+        status==='err'&&React.createElement('span',{style:{fontSize:'12px',color:'#d05050'}},errMsg)
+      )
+    ),
+
+    // ── preview card ──
+    preview&&React.createElement('div',{className:'sc-card',style:{borderColor:'#2a4a1a'}},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px',flexWrap:'wrap',gap:'8px'}},
+        React.createElement('div',null,
+          React.createElement('span',{className:'sc-title',style:{color:'#80c040'}},'✓ Treino interpretado'),
+          React.createElement('div',{style:{fontSize:'12px',color:'#555',marginTop:'3px'}},
+            `${preview.blocks.length} bloco${preview.blocks.length!==1?'s':''} · ${preview.blocks.reduce((a,b)=>a+(b.exercises||[]).filter(e=>e.name).length,0)} exercícios`
+          )
+        ),
+        React.createElement('div',{style:{display:'flex',gap:'8px'}},
+          React.createElement('button',{type:'button',className:'b bd',onClick:discard},
+            React.createElement('i',{className:'ti ti-x','aria-hidden':'true'}),' Descartar'
+          ),
+          React.createElement('button',{type:'button',className:'b bp',style:{background:'#80c040',borderColor:'#80c040',color:'#000'},onClick:confirm},
+            React.createElement('i',{className:'ti ti-check','aria-hidden':'true'}),' Adicionar ao calendário'
+          )
+        )
+      ),
+      // session summary
+      React.createElement('div',{style:{fontSize:'14px',fontWeight:'600',color:'#fff',marginBottom:'12px'}},
+        preview.mainTraining||'—',
+        React.createElement('span',{style:{fontSize:'12px',color:'#555',fontWeight:'400',marginLeft:'8px'}},preview.date)
+      ),
+      preview.blocks.map((bl,i)=>
+        React.createElement('div',{key:bl.id,style:{
+          background:'#111',border:'1px solid #252525',borderRadius:'6px',
+          padding:'10px 12px',marginBottom:'8px',
+          borderLeft:`3px solid ${ECOL[bl.type]?.text||'#e87820'}`
+        }},
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'6px',flexWrap:'wrap'}},
+            React.createElement('span',{className:`wg-pill ${PLC[bl.type]||'p-st'}`},bl.type),
+            React.createElement('span',{style:{fontSize:'11px',color:'#555'}},bl.zone),
+            bl.rounds&&React.createElement('span',{style:{fontSize:'11px',color:'#f5c842',fontWeight:'700'}},`${bl.rounds} rounds`),
+            bl.duration&&React.createElement('span',{style:{fontSize:'11px',color:'#e87820',fontWeight:'700'}},`CAP ${bl.duration}'`)
+          ),
+          bl.exercises.filter(e=>e.name).map(ex=>{
+            const ins=fmtIntensity(ex.intensity);
+            const vol=[ex.rounds&&`${ex.rounds}rds`,ex.sets&&ex.reps?`${ex.sets}×${ex.reps}`:ex.reps?ex.reps:null].filter(Boolean).join(' ');
+            return React.createElement('div',{key:ex.id,style:{fontSize:'13px',color:'#ccc',padding:'3px 0',borderBottom:'1px solid #1a1a1a',display:'flex',alignItems:'baseline',gap:'8px',flexWrap:'wrap'}},
+              React.createElement('span',{style:{fontWeight:'600',color:'#fff'}},ex.name),
+              vol&&React.createElement('span',{style:{color:'#f5c842',fontSize:'12px'}},vol),
+              ins&&React.createElement('span',{style:{color:'#e87820',fontSize:'12px'}},`@ ${ins}`),
+              ex.note&&React.createElement('span',{style:{color:'#555',fontSize:'11px',fontStyle:'italic'}},ex.note)
+            );
+          }),
+          bl.notes&&React.createElement('div',{style:{fontSize:'11px',color:'#666',marginTop:'6px',fontStyle:'italic',borderTop:'1px solid #1a1a1a',paddingTop:'6px'}},bl.notes)
+        )
+      )
+    )
+  );
+}
+
+// ── App ───────────────────────────────────────────────────
+function App(){
+  const [tab,setTab]=useState('creator');
+  const [sessions,setSessions]=useState(loadLS);
+  const [saved,setSaved]=useState(false);
+  const [toast,setToast]=useState(null);
+  const [blockNames,setBlockNames]=useState(APP_CONFIG.blockNames);
+  const [configLoaded,setConfigLoaded]=useState(false);
+  const fileInputRef=useRef();
+
+  // ── Load config.json on first empty-state visit ──
+  useEffect(()=>{
+    if(configLoaded) return;
+    setConfigLoaded(true);
+    const isEmpty=Object.keys(loadLS()).length===0;
+    // Only fetch if on a served origin (not file://)
+    if(!isEmpty||window.location.protocol==='file:') return;
+    fetch('./config.json')
+      .then(r=>r.ok?r.json():null)
+      .catch(()=>null)
+      .then(cfg=>{
+        if(!cfg) return;
+        if(cfg.blockNames&&Array.isArray(cfg.blockNames)){
+          APP_CONFIG.blockNames=cfg.blockNames;
+          setBlockNames(cfg.blockNames);
+        }
+        // Apply other config defaults only on truly empty state
+        if(cfg.gymName) APP_CONFIG.gymName=cfg.gymName;
+        if(cfg.fontScale) APP_CONFIG.fontScale=cfg.fontScale;
+        if(cfg.logoScale) APP_CONFIG.logoScale=cfg.logoScale;
+        if(cfg.zoneScales) APP_CONFIG.zoneScales=cfg.zoneScales;
+        if(cfg.blockTitleScales) APP_CONFIG.blockTitleScales=cfg.blockTitleScales;
+      });
+  },[]);
+
+  useEffect(()=>{
+    saveLS(sessions);setSaved(true);
+    const t=setTimeout(()=>setSaved(false),1400);
+    return()=>clearTimeout(t);
+  },[sessions]);
+
+  const showToast=(msg,type='ok')=>{
+    setToast({msg,type});
+    setTimeout(()=>setToast(null),2800);
+  };
+
+  // ── Export state as .json ──
+  const handleSaveState=()=>{
+    const state={
+      version:1,
+      exportedAt:new Date().toISOString(),
+      sessions
+    };
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    const date=toISO(new Date());
+    a.download=`grade-treino-${date}.json`;
+    a.href=URL.createObjectURL(blob);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast('Estado salvo — compartilhe o arquivo .json com o professor.');
+  };
+
+  // ── Import state from .json ──
+  const handleLoadState=e=>{
+    const file=e.target.files?.[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const parsed=JSON.parse(ev.target.result);
+        const incoming=parsed.version&&parsed.sessions?parsed.sessions:parsed;
+        if(typeof incoming!=='object'||Array.isArray(incoming))
+          throw new Error('Invalid format');
+        // ── migrate EN type/zone names → PT ──
+        const migrated={};
+        Object.keys(incoming).forEach(dateKey=>{
+          migrated[dateKey]=(incoming[dateKey]||[]).map(session=>({
+            ...session,
+            blocks:(session.blocks||[]).map(bl=>({
+              ...bl,
+              type:normaliseType(bl.type),
+              zone:normaliseZone(bl.zone)
+            }))
+          }));
+        });
+        setSessions(migrated);
+        saveLS(migrated);
+        showToast('Estado carregado com sucesso.');
+      }catch(err){
+        showToast('Não foi possível carregar o arquivo — verifique se é um .json válido.','err');
+      }
+      e.target.value='';
+    };
+    reader.readAsText(file);
+  };
+
+  return React.createElement('div',null,
+    // hidden file input for load
+    React.createElement('input',{
+      type:'file',id:'state-file-input',ref:fileInputRef,
+      accept:'.json,application/json',
+      onChange:handleLoadState
+    }),
+
+    // toast notification
+    toast&&React.createElement('div',{style:{
+      position:'fixed',bottom:'20px',left:'50%',transform:'translateX(-50%)',
+      background:toast.type==='err'?'#3a1010':'#102010',
+      border:`1px solid ${toast.type==='err'?'#8a3030':'#306030'}`,
+      color:toast.type==='err'?'#e08080':'#80c080',
+      padding:'10px 18px',borderRadius:'8px',fontSize:'13px',
+      zIndex:9999,whiteSpace:'nowrap',boxShadow:'0 4px 20px rgba(0,0,0,.6)',
+      display:'flex',alignItems:'center',gap:'8px'
+    }},
+      React.createElement('i',{className:`ti ti-${toast.type==='err'?'alert-circle':'circle-check'}`,'aria-hidden':'true'}),
+      toast.msg
+    ),
+
+    React.createElement('div',{className:'topbar'},
+      React.createElement('span',{className:'topbar-title'},'Criador de Treinos'),
+      React.createElement('div',{className:'topbar-right'},
+        saved&&React.createElement('span',{className:'saved-badge'},
+          React.createElement('i',{className:'ti ti-device-floppy','aria-hidden':'true',style:{fontSize:'12px'}}),' Salvo automaticamente'
+        ),
+        React.createElement('button',{
+          type:'button',className:'tb-btn',
+          style:{borderColor:'#6a1a1a',color:'#d05050'},
+          onClick:()=>{
+            if(!window.confirm('Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.'))return;
+            setSessions({});
+            saveLS({});
+            showToast('Estado limpo.');
+          },
+          title:'Apagar todos os treinos do estado atual'
+        },
+          React.createElement('i',{className:'ti ti-trash','aria-hidden':'true'}),
+          ' Limpar estado'
+        ),
+        React.createElement('button',{
+          type:'button',className:'tb-btn tb-load',
+          onClick:()=>fileInputRef.current?.click(),
+          title:'Carregar um arquivo .json salvo anteriormente'
+        },
+          React.createElement('i',{className:'ti ti-folder-open','aria-hidden':'true'}),
+          ' Carregar estado'
+        ),
+        React.createElement('button',{
+          type:'button',className:'tb-btn tb-save',
+          onClick:handleSaveState,
+          title:'Export current schedule as a .json file to share or backup'
+        },
+          React.createElement('i',{className:'ti ti-download','aria-hidden':'true'}),
+          ' Salvar estado'
+        )
+      )
+    ),
+    React.createElement('div',{className:'tab-bar'},
+      [['creator','ti-edit','Criador de Treinos'],['parser','ti-sparkles','Criar por Texto'],['publisher','ti-calendar','Publicador de Grade']].map(([id,icon,lbl])=>
+        React.createElement('button',{key:id,type:'button',className:`tab3 ${tab===id?'on':''}`,onClick:()=>setTab(id)},
+          React.createElement('i',{className:`ti ${icon}`,'aria-hidden':'true'}),lbl
+        )
+      )
+    ),
+    React.createElement('div',{className:'pane'},
+      tab==='creator'
+        ?React.createElement(TrainingCreator,{sessions,setSessions,blockNames})
+        :tab==='parser'
+        ?React.createElement(TextParser,{sessions,setSessions,setTab})
+        :React.createElement(SchedulePublisher,{sessions})
+    )
+  );
+}
+ReactDOM.render(React.createElement(App),document.getElementById('root'));
+
+// ── Register service worker for PWA offline support ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js')
+      .catch(e=>console.log('SW registration failed:',e));
+  });
+}
+</script>
+</body>
+</html>

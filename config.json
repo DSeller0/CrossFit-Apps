@@ -1,0 +1,25 @@
+{
+  "gymName": "Eagles",
+  "fontScale": 1.5,
+  "logoScale": 1.0,
+  "zoneScales": [1, 1, 1],
+  "blockTitleScales": [1, 1, 1],
+  "blockNames": [
+    "-",
+    "WOD",
+    "Skill",
+    "Core",
+    "Acessórios",
+    "LPO",
+    "Aquecimento",
+    "Força",
+    "Cardio",
+    "Mobilidade",
+    "HIIT",
+    "MetCon",
+    "EMOM",
+    "For Time",
+    "AMRAP",
+    "Descanso"
+  ]
+}
