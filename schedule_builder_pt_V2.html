@@ -267,6 +267,7 @@ const APP_CONFIG={
   zoneScales:[1,1,1],
   blockTitleScales:[1,1,1],
   logoScale:1,
+  mobileMegaManBg:'#000000',
   blockNames:['-','WOD','Skill','Core','Acessórios','LPO','Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso']
 };
 
@@ -1749,9 +1750,9 @@ function SchedulePublisher({sessions}){
             :previewTarget==='semanal'
             ?React.createElement(WeeklyCalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates})
             :previewTarget==='mobileA'
-            ?React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale})
+            ?React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale})
             :previewTarget==='mobileB'
-            ?React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale})
+            ?React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale})
             :React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale})
         ),
         React.createElement('div',{style:{height:`${(previewTarget==='mobileA'||previewTarget==='mobileB')?'auto':1080}px`,...((previewTarget==='mobileA'||previewTarget==='mobileB')?{}:{marginTop:`-${1080*previewScale}px`}),pointerEvents:'none'}})
@@ -1784,10 +1785,10 @@ function SchedulePublisher({sessions}){
         React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale})
       ),
       React.createElement('div',{ref:exportMobileARef,style:{width:'1080px'}},
-        React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale})
+        React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale})
       ),
       React.createElement('div',{ref:exportMobileBRef,style:{width:'1080px'}},
-        React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale})
+        React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale})
       )
     ),
 
@@ -1809,7 +1810,6 @@ function SchedulePublisher({sessions}){
 
 // ── helpers shared by both mobile views ─────────────────
 function buildMobileSession(sessions, selectedDate, currentWeekDates){
-  // find session for selected date, fallback to first active day in week
   if(selectedDate){
     const s=(sessions[selectedDate]||[])[0]||null;
     if(s) return {s, dateKey:selectedDate, date:new Date(selectedDate+'T12:00:00')};
@@ -1823,103 +1823,115 @@ function buildMobileSession(sessions, selectedDate, currentWeekDates){
   return null;
 }
 
-function MobileBlockA({bl}){
+// fs helper — returns calc string
+const mfs=(px,fs)=>`${Math.round(px*fs)}px`;
+
+function MobileBlockA({bl,fs}){
+  const f=fs||1;
+  const pad=Math.round(20*f);
   const hasLabel=bl.label&&bl.label!=='-';
   const title=hasLabel?bl.label:bl.type;
   const meta=[bl.rounds&&`${bl.rounds} RDS`, bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
   const loads=[...new Set((bl.exercises||[]).filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio').map(e=>fmtIntensity(e.intensity)))];
   return React.createElement('div',{style:{borderBottom:'1px solid #1a1a1a'}},
-    React.createElement('div',{style:{padding:'10px 20px 6px'}},
-      React.createElement('div',{style:{fontSize:'18px',fontWeight:900,color:'#e87820',textTransform:'uppercase',letterSpacing:'.07em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},title),
-      meta&&React.createElement('div',{style:{fontSize:'12px',color:'#e87820',fontWeight:700,textTransform:'uppercase',marginTop:'2px',fontFamily:"'Arial Black',Arial,sans-serif"}},meta)
+    React.createElement('div',{style:{padding:`${Math.round(10*f)}px ${pad}px ${Math.round(6*f)}px`}},
+      React.createElement('div',{style:{fontSize:mfs(18,f),fontWeight:900,color:'#e87820',textTransform:'uppercase',letterSpacing:'.07em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},title),
+      meta&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'#e87820',fontWeight:700,textTransform:'uppercase',marginTop:mfs(2,f),fontFamily:"'Arial Black',Arial,sans-serif"}},meta)
     ),
-    React.createElement('div',{style:{padding:'0 20px 14px'}},
+    React.createElement('div',{style:{padding:`0 ${pad}px ${Math.round(14*f)}px`}},
       (bl.exercises||[]).filter(e=>e.name).map((ex,ei)=>{
         const isCardio=ex.intensity?.mode==='cardio';
         const cardioPrefix=isCardio&&ex.intensity?.cardioVal?`${ex.intensity.cardioVal}${ex.intensity.cardioUnit||'m'}`:'';
         const volPrefix=ex.sets&&ex.reps?`${ex.sets}×${ex.reps}`:ex.reps||'';
         const prefix=cardioPrefix||volPrefix;
         const line=[prefix,ex.name.toUpperCase()].filter(Boolean).join(' ');
-        return React.createElement('div',{key:ex.id,style:{padding:'6px 0',borderBottom:'1px solid #111'}},
-          React.createElement('div',{style:{fontSize:'17px',fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},line),
-          ex.note&&React.createElement('div',{style:{fontSize:'12px',color:'#888',fontStyle:'italic',marginTop:'2px'}},ex.note)
+        return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:'1px solid #111'}},
+          React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},line),
+          ex.note&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'#888',fontStyle:'italic',marginTop:mfs(2,f)}},ex.note)
         );
       }),
-      loads.length>0&&React.createElement('div',{style:{fontSize:'13px',fontWeight:700,color:'#f5c842',marginTop:'7px',fontFamily:"'Arial Black',Arial,sans-serif"}},loads.join(' · ')),
-      bl.notes&&React.createElement('div',{style:{fontSize:'12px',color:'#888',fontStyle:'italic',marginTop:'5px',paddingTop:'5px',borderTop:'1px solid #1a1a1a'}},bl.notes)
+      loads.length>0&&React.createElement('div',{style:{fontSize:mfs(13,f),fontWeight:700,color:'#f5c842',marginTop:mfs(7,f),fontFamily:"'Arial Black',Arial,sans-serif"}},loads.join(' · ')),
+      bl.notes&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'#888',fontStyle:'italic',marginTop:mfs(5,f),paddingTop:mfs(5,f),borderTop:'1px solid #1a1a1a'}},bl.notes)
     )
   );
 }
 
-function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale}){
+function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale}){
   const found=buildMobileSession(sessions,selectedDate,currentWeekDates);
+  const f=fontScale||1;
+  const pad=Math.round(28*f);
   if(!found) return React.createElement('div',{style:{background:'#000',color:'#555',padding:'40px',textAlign:'center',fontFamily:"'Arial Black',Arial,sans-serif"}},'—');
   const {s,date}=found;
   const weekday=date.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase();
   const dateNum=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
   const ls=logoScale||1;
   return React.createElement('div',{style:{background:'#000',width:'1080px',fontFamily:"'Arial Black',Arial,sans-serif"}},
-    React.createElement('div',{style:{background:'#0a0a0a',padding:'22px 28px 18px',borderBottom:'2px solid #1a1a1a',display:'flex',alignItems:'center',justifyContent:'space-between'}},
-      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'16px'}},
+    React.createElement('div',{style:{background:'#0a0a0a',padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:'2px solid #1a1a1a',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(16,f)}},
         logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
-        React.createElement('span',{style:{fontSize:'30px',fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.08em'}},gymName||'Eagles')
+        React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.08em'}},gymName||'Eagles')
       ),
       React.createElement('div',{style:{textAlign:'right'}},
-        React.createElement('div',{style:{fontSize:'18px',color:'#e87820',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
-        s.mainTraining&&React.createElement('div',{style:{fontSize:'13px',color:'#666',textTransform:'uppercase',letterSpacing:'.06em',marginTop:'2px'}},s.mainTraining)
+        React.createElement('div',{style:{fontSize:mfs(18,f),color:'#e87820',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
+        s.mainTraining&&React.createElement('div',{style:{fontSize:mfs(13,f),color:'#666',textTransform:'uppercase',letterSpacing:'.06em',marginTop:mfs(2,f)}},s.mainTraining)
       )
     ),
-    (s.blocks||[]).map(bl=>React.createElement(MobileBlockA,{key:bl.id,bl}))
+    (s.blocks||[]).map(bl=>React.createElement(MobileBlockA,{key:bl.id,bl,fs:f}))
   );
 }
 
-function MobileBlockB({bl}){
+function MobileBlockB({bl,fs}){
+  const f=fs||1;
+  const pad=Math.round(20*f);
   const hasLabel=bl.label&&bl.label!=='-';
   const title=hasLabel?bl.label:bl.type;
   const meta=[bl.rounds&&`${bl.rounds} RDS`, bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
   const loads=[...new Set((bl.exercises||[]).filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio').map(e=>fmtIntensity(e.intensity)))];
   return React.createElement('div',{style:{borderBottom:'2px solid #0d2a30'}},
-    React.createElement('div',{style:{background:'#050e14',padding:'10px 20px',borderTop:'3px solid #00b8d4',display:'flex',alignItems:'center',justifyContent:'space-between'}},
-      React.createElement('div',{style:{fontSize:'16px',fontWeight:900,color:'#00b8d4',textTransform:'uppercase',letterSpacing:'.1em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},title),
-      meta&&React.createElement('span',{style:{fontSize:'12px',fontWeight:900,color:'#000',background:'#00b8d4',padding:'3px 10px',borderRadius:'2px',fontFamily:"'Courier New',monospace",whiteSpace:'nowrap'}},meta)
+    React.createElement('div',{style:{background:'#050e14',padding:`${Math.round(10*f)}px ${pad}px`,borderTop:`${Math.max(2,Math.round(3*f))}px solid #00b8d4`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
+      React.createElement('div',{style:{fontSize:mfs(16,f),fontWeight:900,color:'#00b8d4',textTransform:'uppercase',letterSpacing:'.1em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},title),
+      meta&&React.createElement('span',{style:{fontSize:mfs(12,f),fontWeight:900,color:'#000',background:'#00b8d4',padding:`${Math.round(3*f)}px ${Math.round(10*f)}px`,borderRadius:'2px',fontFamily:"'Courier New',monospace",whiteSpace:'nowrap'}},meta)
     ),
-    React.createElement('div',{style:{background:'#000',padding:'8px 20px 14px'}},
+    React.createElement('div',{style:{background:APP_CONFIG.mobileMegaManBg||'#000',padding:`${Math.round(8*f)}px ${pad}px ${Math.round(14*f)}px`}},
       (bl.exercises||[]).filter(e=>e.name).map((ex,ei)=>{
         const isCardio=ex.intensity?.mode==='cardio';
         const cardioPrefix=isCardio&&ex.intensity?.cardioVal?`${ex.intensity.cardioVal}${ex.intensity.cardioUnit||'m'}`:'';
         const volPrefix=ex.sets&&ex.reps?`${ex.sets}×${ex.reps}`:ex.reps||'';
         const prefix=cardioPrefix||volPrefix;
         const line=[prefix,ex.name.toUpperCase()].filter(Boolean).join(' ');
-        return React.createElement('div',{key:ex.id,style:{padding:'6px 0',borderBottom:'1px solid #0d1e1e'}},
-          React.createElement('div',{style:{fontSize:'17px',fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},line),
-          ex.note&&React.createElement('div',{style:{fontSize:'11px',color:'#3a6a80',fontStyle:'italic',marginTop:'2px'}},ex.note)
+        return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:'1px solid #0d1e1e'}},
+          React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},line),
+          ex.note&&React.createElement('div',{style:{fontSize:mfs(11,f),color:'#3a6a80',fontStyle:'italic',marginTop:mfs(2,f)}},ex.note)
         );
       }),
-      loads.length>0&&React.createElement('div',{style:{fontSize:'13px',fontWeight:700,color:'#ffd700',marginTop:'7px',fontFamily:"'Courier New',monospace",display:'inline-block',background:'#060f10',border:'1px solid #1a3a40',padding:'3px 9px'}},loads.join(' · ')),
-      bl.notes&&React.createElement('div',{style:{fontSize:'12px',color:'#3a6a80',marginTop:'5px',paddingTop:'5px',borderTop:'1px solid #0d1e1e',fontFamily:"'Courier New',monospace"}},bl.notes)
+      loads.length>0&&React.createElement('div',{style:{fontSize:mfs(13,f),fontWeight:700,color:'#ffd700',marginTop:mfs(7,f),fontFamily:"'Courier New',monospace",display:'inline-block',background:'#060f10',border:'1px solid #1a3a40',padding:`${Math.round(3*f)}px ${Math.round(9*f)}px`}},loads.join(' · ')),
+      bl.notes&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'#3a6a80',marginTop:mfs(5,f),paddingTop:mfs(5,f),borderTop:'1px solid #0d1e1e',fontFamily:"'Courier New',monospace"}},bl.notes)
     )
   );
 }
 
-function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale}){
+function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale}){
   const found=buildMobileSession(sessions,selectedDate,currentWeekDates);
+  const f=fontScale||1;
+  const pad=Math.round(28*f);
   if(!found) return React.createElement('div',{style:{background:'#000',color:'#1a4a50',padding:'40px',textAlign:'center',fontFamily:"'Courier New',monospace"}},'—');
   const {s,date}=found;
   const weekday=date.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase();
   const dateNum=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
   const ls=logoScale||1;
-  return React.createElement('div',{style:{background:'#000',width:'1080px',fontFamily:"'Courier New',monospace"}},
-    React.createElement('div',{style:{background:'#000',padding:'22px 28px 18px',borderBottom:'3px solid #00b8d4',display:'flex',alignItems:'center',justifyContent:'space-between'}},
-      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'16px'}},
+  const bg=APP_CONFIG.mobileMegaManBg||'#000000';
+  return React.createElement('div',{style:{background:bg,width:'1080px',fontFamily:"'Courier New',monospace"}},
+    React.createElement('div',{style:{background:bg,padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:`${Math.max(2,Math.round(3*f))}px solid #00b8d4`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(16,f)}},
         logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
-        React.createElement('span',{style:{fontSize:'30px',fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},gymName||'Eagles')
+        React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},gymName||'Eagles')
       ),
       React.createElement('div',{style:{textAlign:'right'}},
-        React.createElement('div',{style:{fontSize:'16px',color:'#00b8d4',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
-        s.mainTraining&&React.createElement('div',{style:{fontSize:'12px',color:'#3a6a80',textTransform:'uppercase',letterSpacing:'.06em',marginTop:'2px'}},s.mainTraining)
+        React.createElement('div',{style:{fontSize:mfs(18,f),color:'#00b8d4',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
+        s.mainTraining&&React.createElement('div',{style:{fontSize:mfs(12,f),color:'#3a6a80',textTransform:'uppercase',letterSpacing:'.06em',marginTop:mfs(2,f)}},s.mainTraining)
       )
     ),
-    (s.blocks||[]).map(bl=>React.createElement(MobileBlockB,{key:bl.id,bl}))
+    (s.blocks||[]).map(bl=>React.createElement(MobileBlockB,{key:bl.id,bl,fs:f}))
   );
 }
 
@@ -2155,6 +2167,7 @@ function App(){
       .catch(()=>null)
       .then(cfg=>{
         if(!cfg) return;
+        if(cfg.mobileMegaManBg) APP_CONFIG.mobileMegaManBg=cfg.mobileMegaManBg;
         if(cfg.blockNames&&Array.isArray(cfg.blockNames)){
           APP_CONFIG.blockNames=cfg.blockNames;
           setBlockNames(cfg.blockNames);
