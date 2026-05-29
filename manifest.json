@@ -2,7 +2,7 @@
   "name": "Eagles — Criador de Treinos",
   "short_name": "Eagles Treinos",
   "description": "Criador e publicador de treinos Eagles CrossFit",
-  "start_url": "https://dseller0.github.io/CrossFit-Apps/schedule_builder_V2.1_pt.html",
+  "start_url": "https://dseller0.github.io/CrossFit-Apps/schedule_builder_pt_V2.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
