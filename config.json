@@ -1,4 +1,5 @@
 {
+  "appTitle": "Eagles — Treinos",
   "gymName": "Eagles",
   "fontScale": 1.5,
   "logoScale": 1.0,
@@ -7,6 +8,8 @@
   "mobileEaglesBg": "#000000",
   "mobileMegaManBg": "#0a1a5c",
   "mobileExerciseNoteColor": "#4a9aaa",
+  "restDayLabel": "Descanso",
+  "mobileWeeklyLabels": ["Mobile Semanal Eagles", "Mobile Semanal Medrado"],
   "athleteLevels": ["Iniciante", "Intermediário", "Avançado", "Competidor"],
   "athleteGoals": ["Saúde geral", "Força", "Condicionamento", "Competição"],
   "blockColors": {

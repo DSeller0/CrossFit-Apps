@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-<title>Eagles — Treinos</title>
+<title>Eagles — Treinos</title><!-- overridden by APP_CONFIG.appTitle at runtime -->
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json"/>
@@ -130,7 +130,16 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .wg-sc-name{font-size:12px;font-weight:600;color:#ddd;margin-bottom:5px;line-height:1.3}
 .wg-pill{display:inline-flex;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;margin:0 2px 2px 0}
 .wg-ex{font-size:10px;color:#484848;margin-top:2px;line-height:1.4}
-.wg-add{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:#333;padding:7px;margin:4px 6px;border:1px dashed #222;border-radius:5px;cursor:pointer;transition:all .15s}
+.wg-add{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:#333;padding:7px;margin:2px 6px;border:1px dashed #222;border-radius:5px;cursor:pointer;transition:all .15s;flex:1}
+.wg-add-row{display:flex;gap:4px;margin:4px 6px}
+.wg-copy{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:#333;padding:7px;border:1px dashed #222;border-radius:5px;cursor:pointer;transition:all .15s;flex:1}
+.wg-copy:hover{color:#e87820;border-color:#e87820}
+.alvo-wrap{display:flex;gap:4px;align-items:center}
+.alvo-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px}
+.confirm-box{background:#1c1c1c;border:1px solid #2e2e2e;border-radius:10px;padding:22px;max-width:360px;width:100%}
+.confirm-msg{font-size:14px;color:#ccc;line-height:1.6;margin-bottom:16px}
+.confirm-btns{display:flex;gap:8px;justify-content:flex-end}
 .wg-add:hover{color:#888;border-color:#444}
 .hint-txt{font-size:11px;color:#444;margin-bottom:8px}
 
@@ -400,6 +409,7 @@ const {useState,useRef,useEffect,useCallback}=React;
 const DAYS=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
 const DSHORT=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
 // ── Runtime config — populated from config.json, falls back to defaults ──
+// Set title immediately — will be overridden after config fetch if needed
 const APP_CONFIG={
   gymName:'Eagles',
   fontScale:1.5,
@@ -412,8 +422,12 @@ const APP_CONFIG={
   athleteLevels:['Iniciante','Intermediário','Avançado','Competidor'],
   athleteGoals:['Saúde geral','Força','Condicionamento','Competição'],
   blockColors:{},
-  blockNames:['-','WOD','Skill','Core','Acessórios','LPO','Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso']
+  blockNames:['-','WOD','Skill','Core','Acessórios','LPO','Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso'],
+  appTitle:'Eagles — Treinos',
+  restDayLabel:'Descanso',
+  mobileWeeklyLabels:['Mobile Semanal Eagles','Mobile Semanal Medrado']
 };
+document.title=APP_CONFIG.appTitle;
 
 const DEFAULT_TYPES=['Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso'];
 const TYPES=DEFAULT_TYPES; // kept for colour maps; block name pool comes from APP_CONFIG.blockNames
@@ -567,11 +581,15 @@ function buildProgressionLines(ex){
     const rawUnit=s.unit||'% RM';
     const unit=rawUnit==='%'||rawUnit==='% do RM'?'% RM':rawUnit;
     const existing=groups.find(g=>g.reps===reps&&g.unit===unit);
-    if(existing){ if(s.load) existing.loads.push(s.load); }
-    else groups.push({reps,unit,loads:s.load?[s.load]:[]});
+    if(existing){
+      existing.count++;
+      if(s.load) existing.loads.push(s.load);
+    } else {
+      groups.push({reps,unit,loads:s.load?[s.load]:[],count:1});
+    }
   });
   return groups.map(g=>{
-    const repsPrefix=sets&&g.reps?`${sets}×${g.reps}`:g.reps;
+    const repsPrefix=g.count&&g.reps?`${g.count}×${g.reps}`:g.reps;
     const nameLine=[repsPrefix,name].filter(Boolean).join(' ');
     const loadStr=g.loads.length?`${g.loads.join('/')} ${g.unit}`:'';
     return {nameLine,loadStr};
@@ -953,6 +971,7 @@ function TrainingCreator({sessions,setSessions,blockNames}){
 
   // week navigation state — 0 = current week
   const [weekOffset,setWeekOffset]=useState(0);
+  const [pendingDate,setPendingDate]=useState(null); // {newDate, oldDate} for confirm dialog
   // build week starting Sunday
   const getSundayWeek=(offset)=>{
     const d=new Date();
@@ -966,6 +985,21 @@ function TrainingCreator({sessions,setSessions,blockNames}){
   const weekLabel=`${weekDates[0].getDate()}/${weekDates[0].getMonth()+1} – ${weekDates[6].getDate()}/${weekDates[6].getMonth()+1}/${weekDates[6].getFullYear()}`;
 
   return React.createElement('div',null,
+    // ── date change confirm dialog ──
+    pendingDate&&React.createElement('div',{className:'confirm-overlay'},
+      React.createElement('div',{className:'confirm-box'},
+        React.createElement('div',{className:'confirm-msg'},
+          `Mover sessão de ${new Date(pendingDate.oldDate+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})} para ${new Date(pendingDate.newDate+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})}?`
+        ),
+        React.createElement('div',{className:'confirm-btns'},
+          React.createElement('button',{type:'button',className:'b bsm',onClick:()=>setPendingDate(null)},'Cancelar'),
+          React.createElement('button',{type:'button',className:'b bp bsm',onClick:()=>{
+            setForm(f=>({...f,date:pendingDate.newDate}));
+            setPendingDate(null);
+          }},'Confirmar')
+        )
+      )
+    ),
     React.createElement('div',{className:'sc-card',ref:formRef},
       React.createElement('div',{className:'sc-hdr'},
         React.createElement('span',{className:'sc-title'},editing?'Editar sessão':'Nova sessão'),
@@ -977,17 +1011,39 @@ function TrainingCreator({sessions,setSessions,blockNames}){
           React.createElement('input',{
             type:'date',
             value:form.date||todayISO(),
-            onChange:e=>setForm(f=>({...f,date:e.target.value}))
+            onChange:e=>{
+              const newDate=e.target.value;
+              const oldDate=form.date||todayISO();
+              if(editing&&newDate!==oldDate){
+                // intercept — show confirm dialog
+                setPendingDate({newDate,oldDate});
+                e.target.value=oldDate; // revert input visually until confirmed
+              }else{
+                setForm(f=>({...f,date:newDate}));
+              }
+            }
           })
         ),
         React.createElement('div',{className:'fg'},
-          React.createElement('span',{className:'lbl'},'Treino Principal'),
+          React.createElement('span',{className:'lbl'},'Alvo'),
           React.createElement('div',{className:'input-mic-row'},
-            React.createElement('input',{
-              placeholder:'ex: Parte superior + glúteos',
-              value:form.mainTraining||'',
-              onChange:e=>setForm(f=>({...f,mainTraining:e.target.value}))
-            }),
+            React.createElement('div',{style:{display:'flex',gap:'6px',flex:1}},
+              React.createElement('input',{
+                placeholder:'ex: Turma A / nome do atleta',
+                value:form.mainTraining||'',
+                onChange:e=>setForm(f=>({...f,mainTraining:e.target.value})),
+                style:{flex:1}
+              }),
+              React.createElement('select',{
+                value:'',
+                onChange:e=>{if(e.target.value)setForm(f=>({...f,mainTraining:e.target.value}));},
+                style:{width:'36px',fontFamily:'inherit',fontSize:'13px',background:'#111',border:'1px solid #2e2e2e',borderRadius:'5px',color:'#888',cursor:'pointer',flexShrink:0,padding:'0 4px'},
+                title:'Selecionar atleta'
+              },
+                React.createElement('option',{value:''},'👤'),
+                loadAthletes().map(a=>React.createElement('option',{key:a.id,value:a.name},a.name))
+              )
+            ),
             React.createElement(MicButton,{onTranscript:txt=>setForm(f=>({...f,mainTraining:(f.mainTraining?f.mainTraining+' ':'')+txt}))})
           )
         )
@@ -1148,11 +1204,31 @@ function TrainingCreator({sessions,setSessions,blockNames}){
                   )
                 )
               ),
-              React.createElement('div',{className:'wg-add',onClick:()=>{
-                setForm(f=>({...f,date:dateKey}));
-                setTimeout(()=>formRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),60);
-              }},
-                React.createElement('i',{className:'ti ti-plus','aria-hidden':'true'}),' add'
+              React.createElement('div',{className:'wg-add-row'},
+                React.createElement('div',{className:'wg-add',onClick:()=>{
+                  setForm(f=>({...f,date:dateKey}));
+                  setTimeout(()=>formRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),60);
+                }},
+                  React.createElement('i',{className:'ti ti-plus','aria-hidden':'true'}),' add'
+                ),
+                React.createElement('div',{className:'wg-copy',onClick:()=>{
+                  const daySess=(sessions[dateKey]||[]);
+                  if(!daySess.length) return;
+                  const last=daySess[daySess.length-1];
+                  const copied={
+                    ...last,
+                    id:uid(),
+                    date:dateKey,
+                    mainTraining:'',
+                    blocks:(last.blocks||[]).map(bl=>({
+                      ...bl,id:uid(),
+                      exercises:(bl.exercises||[]).map(ex=>({...ex,id:uid()}))
+                    }))
+                  };
+                  setSessions(prev=>{const n={...prev};n[dateKey]=[...(n[dateKey]||[]),copied];return n;});
+                }},
+                  React.createElement('i',{className:'ti ti-copy','aria-hidden':'true'}),' copy'
+                )
               )
             );
           })
@@ -1646,78 +1722,107 @@ function SchedulePublisher({sessions}){
   const exportWeeklyCalRef=useRef();
   const exportMobileARef=useRef();
   const exportMobileBRef=useRef();
+  const exportMobileWeeklyARef=useRef();
+  const exportMobileWeeklyBRef=useRef();
   const previewWrapRef=useRef();
   const logoInputRef=useRef();
   const [view,setView]=useState('weekly');
   const [exportTarget,setExportTarget]=useState('daily');
   const [previewTarget,setPreviewTarget]=useState('semanal'); // 'semanal'|'calendar'|'mobileA'|'mobileB'
   const [selectedWeekIdx,setSelectedWeekIdx]=useState(0); // which week of the month for semanal
-  const [label,setLabel]=useState('');
-  const [gymName,setGymName]=useState('');
+  const [gymName,setGymName]=useState(loadSettings().gymName||'');
+  const [label,setLabel]=useState(loadSettings().label||'');
+  const [filterAthlete,setFilterAthlete]=useState(null); // null = all, athlete obj = filter
   const [logoDataUrl,setLogoDataUrl]=useState(null);
   const [logoScale,setLogoScale]=useState(1);
   const [exporting,setExporting]=useState(false);
   const [selectedWeek,setSelectedWeek]=useState(null);
   const [selectedDate,setSelectedDate]=useState(null);
-  const [fontScale,setFontScale]=useState(1.5);
-  const [zoneScales,setZoneScales]=useState([1,1,1]);
-  const [blockTitleScales,setBlockTitleScales]=useState([1,1,1]);
+  // ── Load persisted settings ──
+  const _savedSettings=loadSettings();
+  const [fontScale,setFontScale]=useState(_savedSettings.fontScale??1.5);
+  const [zoneScales,setZoneScales]=useState(_savedSettings.zoneScales||[1,1,1]);
+  const [blockTitleScales,setBlockTitleScales]=useState(_savedSettings.blockTitleScales||[1,1,1]);
   const [previewOpen,setPreviewOpen]=useState(false);
   const [settingsOpen,setSettingsOpen]=useState(false);
   const [eaglesBg,setEaglesBg]=useState(APP_CONFIG.mobileEaglesBg||'#000000');
   const [megaManBg,setMegaManBg]=useState(APP_CONFIG.mobileMegaManBg||'#0a1a5c');
   const [noteColor,setNoteColor]=useState(APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa');
   // ── Settings: which view is being configured ──
-  const [settingsView,setSettingsView]=useState('mobileEagles');
+  const [settingsView,setSettingsView]=useState('daily');
 
-  // Daily view colours
-  const [dvBg,setDvBg]=useState('#000000');
-  const [dvGymName,setDvGymName]=useState('#ffffff');
-  const [dvDate,setDvDate]=useState('#e87820');
-  const [dvMainTraining,setDvMainTraining]=useState('#888888');
-  const [dvZoneType,setDvZoneType]=useState('#e87820');
-  const [dvCap,setDvCap]=useState('#e87820');
-  const [dvRounds,setDvRounds]=useState('#f5c842');
-  const [dvExName,setDvExName]=useState('#ffffff');
-  const [dvIntensity,setDvIntensity]=useState('#f5c842');
-  const [dvNote,setDvNote]=useState('#888888');
-  const [dvBlockNotes,setDvBlockNotes]=useState('#888888');
-  const [dvDivider,setDvDivider]=useState('#1a1a1a');
+  // Daily view colours — seeded from saved settings
+  const _sc=_savedSettings.colors||{};
+  const [dvBg,setDvBg]=useState(_sc.dvBg||'#000000');
+  const [dvGymName,setDvGymName]=useState(_sc.dvGymName||'#ffffff');
+  const [dvDate,setDvDate]=useState(_sc.dvDate||'#e87820');
+  const [dvMainTraining,setDvMainTraining]=useState(_sc.dvMainTraining||'#888888');
+  const [dvZoneType,setDvZoneType]=useState(_sc.dvZoneType||'#e87820');
+  const [dvCap,setDvCap]=useState(_sc.dvCap||'#e87820');
+  const [dvRounds,setDvRounds]=useState(_sc.dvRounds||'#f5c842');
+  const [dvExName,setDvExName]=useState(_sc.dvExName||'#ffffff');
+  const [dvIntensity,setDvIntensity]=useState(_sc.dvIntensity||'#f5c842');
+  const [dvNote,setDvNote]=useState(_sc.dvNote||'#888888');
+  const [dvBlockNotes,setDvBlockNotes]=useState(_sc.dvBlockNotes||'#888888');
+  const [dvDivider,setDvDivider]=useState(_sc.dvDivider||'#1a1a1a');
 
   // Weekly/Calendar colours (shared)
-  const [wkBg,setWkBg]=useState('#000000');
-  const [wkHeader,setWkHeader]=useState('#e87820');
-  const [wkDateNum,setWkDateNum]=useState('#666666');
-  const [wkMainTraining,setWkMainTraining]=useState('#ffffff');
-  const [wkBlockType,setWkBlockType]=useState('#e87820');
-  const [wkExName,setWkExName]=useState('#666666');
-  const [wkDivider,setWkDivider]=useState('#1a1a1a');
+  const [wkBg,setWkBg]=useState(_sc.wkBg||'#000000');
+  const [wkHeader,setWkHeader]=useState(_sc.wkHeader||'#e87820');
+  const [wkDateNum,setWkDateNum]=useState(_sc.wkDateNum||'#666666');
+  const [wkMainTraining,setWkMainTraining]=useState(_sc.wkMainTraining||'#ffffff');
+  const [wkBlockType,setWkBlockType]=useState(_sc.wkBlockType||'#e87820');
+  const [wkExName,setWkExName]=useState(_sc.wkExName||'#666666');
+  const [wkDivider,setWkDivider]=useState(_sc.wkDivider||'#1a1a1a');
 
   // Eagles colours
-  const [eaGymName,setEaGymName]=useState('#ffffff');
-  const [eaDate,setEaDate]=useState('#e87820');
-  const [eaSubtitle,setEaSubtitle]=useState('#666666');
-  const [eaBlockType,setEaBlockType]=useState('#00b8d4');
-  const [eaBlockMeta,setEaBlockMeta]=useState('#00b8d4');
-  const [eaExName,setEaExName]=useState('#ffffff');
-  const [eaIntensity,setEaIntensity]=useState('#ffd700');
-  const [eaBlockHdr,setEaBlockHdr]=useState('rgba(0,184,212,0.12)');
-  const [eaDivider,setEaDivider]=useState('rgba(0,184,212,0.1)');
+  const [eaGymName,setEaGymName]=useState(_sc.eaGymName||'#ffffff');
+  const [eaDate,setEaDate]=useState(_sc.eaDate||'#e87820');
+  const [eaSubtitle,setEaSubtitle]=useState(_sc.eaSubtitle||'#666666');
+  const [eaBlockType,setEaBlockType]=useState(_sc.eaBlockType||'#00b8d4');
+  const [eaBlockMeta,setEaBlockMeta]=useState(_sc.eaBlockMeta||'#00b8d4');
+  const [eaExName,setEaExName]=useState(_sc.eaExName||'#ffffff');
+  const [eaIntensity,setEaIntensity]=useState(_sc.eaIntensity||'#ffd700');
+  const [eaBlockHdr,setEaBlockHdr]=useState(_sc.eaBlockHdr||'rgba(0,184,212,0.12)');
+  const [eaDivider,setEaDivider]=useState(_sc.eaDivider||'rgba(0,184,212,0.1)');
   // Mega Man colours
-  const [mmGymName,setMmGymName]=useState('#ffffff');
-  const [mmDate,setMmDate]=useState('#00b8d4');
-  const [mmSubtitle,setMmSubtitle]=useState('#3a6a80');
-  const [mmBlockType,setMmBlockType]=useState('#00b8d4');
-  const [mmBlockMetaBg,setMmBlockMetaBg]=useState('#00b8d4');
-  const [mmBlockMetaText,setMmBlockMetaText]=useState('#000000');
-  const [mmExName,setMmExName]=useState('#ffffff');
-  const [mmIntensity,setMmIntensity]=useState('#ffd700');
-  const [mmBlockHdr,setMmBlockHdr]=useState('rgba(0,184,212,0.12)');
-  const [mmDivider,setMmDivider]=useState('rgba(0,184,212,0.1)');
+  const [mmGymName,setMmGymName]=useState(_sc.mmGymName||'#ffffff');
+  const [mmDate,setMmDate]=useState(_sc.mmDate||'#00b8d4');
+  const [mmSubtitle,setMmSubtitle]=useState(_sc.mmSubtitle||'#3a6a80');
+  const [mmBlockType,setMmBlockType]=useState(_sc.mmBlockType||'#00b8d4');
+  const [mmBlockMetaBg,setMmBlockMetaBg]=useState(_sc.mmBlockMetaBg||'#00b8d4');
+  const [mmBlockMetaText,setMmBlockMetaText]=useState(_sc.mmBlockMetaText||'#000000');
+  const [mmExName,setMmExName]=useState(_sc.mmExName||'#ffffff');
+  const [mmIntensity,setMmIntensity]=useState(_sc.mmIntensity||'#ffd700');
+  const [mmBlockHdr,setMmBlockHdr]=useState(_sc.mmBlockHdr||'rgba(0,184,212,0.12)');
+  const [mmDivider,setMmDivider]=useState(_sc.mmDivider||'rgba(0,184,212,0.1)');
   const [previewScale,setPreviewScale]=useState(1);
   useEffect(()=>{APP_CONFIG.mobileEaglesBg=eaglesBg;},[eaglesBg]);
   useEffect(()=>{APP_CONFIG.mobileMegaManBg=megaManBg;},[megaManBg]);
   useEffect(()=>{APP_CONFIG.mobileExerciseNoteColor=noteColor;},[noteColor]);
+
+  // ── Persist all publisher settings to localStorage ──
+  useEffect(()=>{
+    saveSettings({
+      fontScale,zoneScales,blockTitleScales,gymName,label,
+      colors:{
+        dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvCap,dvRounds,
+        dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
+        wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
+        eaGymName,eaDate,eaSubtitle,eaBlockType,eaBlockMeta,eaExName,
+        eaIntensity,eaBlockHdr,eaDivider,eaglesBg,megaManBg,noteColor,
+        mmGymName,mmDate,mmSubtitle,mmBlockType,mmBlockMetaBg,mmBlockMetaText,
+        mmExName,mmIntensity,mmBlockHdr,mmDivider
+      }
+    });
+  },[fontScale,zoneScales,blockTitleScales,gymName,label,
+     dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvCap,dvRounds,
+     dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
+     wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
+     eaGymName,eaDate,eaSubtitle,eaBlockType,eaBlockMeta,eaExName,
+     eaIntensity,eaBlockHdr,eaDivider,eaglesBg,megaManBg,noteColor,
+     mmGymName,mmDate,mmSubtitle,mmBlockType,mmBlockMetaBg,mmBlockMetaText,
+     mmExName,mmIntensity,mmBlockHdr,mmDivider]);
   const now=new Date();
   const [month,setMonth]=useState(now.getMonth());
   const [year,setYear]=useState(now.getFullYear());
@@ -1805,6 +1910,31 @@ function SchedulePublisher({sessions}){
     setExporting(false);
   };
 
+  const doMobileWeeklyExport=async(variant)=>{
+    const el=variant==='A'?exportMobileWeeklyARef.current:exportMobileWeeklyBRef.current;
+    if(!el){alert('Nada para exportar ainda.');return;}
+    setExporting(true);
+    await new Promise(r=>setTimeout(r,250));
+    try{
+      const W=1080;const H=el.scrollHeight||3000;
+      const cv=await html2canvas(el,{scale:2,backgroundColor:variant==='A'?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000'),useCORS:true,logging:false,width:W,height:H,windowWidth:W});
+      const out=document.createElement('canvas');
+      out.width=W*2;out.height=H*2;
+      const ctx=out.getContext('2d');
+      ctx.fillStyle=variant==='A'?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000');
+      ctx.fillRect(0,0,out.width,out.height);
+      ctx.drawImage(cv,0,0);
+      const wk=getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates;
+      const mon=wk[1];const fri=wk[5];
+      const padD=n=>String(n).padStart(2,'0');
+      const labels=APP_CONFIG.mobileWeeklyLabels||['Mobile Semanal Eagles','Mobile Semanal Medrado'];
+      const lbl=(labels[variant==='A'?0:1]||'').replace(/[^a-zA-Z0-9\-_\u00C0-\u024F]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,40).toLowerCase();
+      const fname=`eagles-${lbl}-${padD(mon.getDate())}${padD(mon.getMonth()+1)}to${padD(fri.getDate())}${padD(fri.getMonth()+1)}`;
+      const a=document.createElement('a');a.download=`${fname}.png`;a.href=out.toDataURL('image/png');a.click();
+    }catch(e){console.error(e);alert('Falha na exportação — tente novamente.');}
+    setExporting(false);
+  };
+
   const handleDayClick=(week,date)=>{
     setSelectedWeek(week);
     setSelectedDate(toISO(date));
@@ -1818,7 +1948,11 @@ function SchedulePublisher({sessions}){
   });
 
   // all dates that have sessions, sorted
-  const allSessionDates=Object.keys(sessions).filter(k=>sessions[k]?.length>0).sort();
+  // Apply athlete filter — only show sessions matching filterAthlete.name
+  const filteredSessions=filterAthlete
+    ?Object.fromEntries(Object.entries(sessions).map(([k,v])=>[k,v.filter(s=>s.mainTraining===filterAthlete.name)]))
+    :sessions;
+  const allSessionDates=Object.keys(filteredSessions).filter(k=>filteredSessions[k]?.length>0).sort();
 
   const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
@@ -1886,7 +2020,24 @@ function SchedulePublisher({sessions}){
       ),
       React.createElement('div',{className:'fg',style:{flex:'1',minWidth:'140px'}},
         React.createElement('span',{className:'lbl'},'Nome da academia'),
-        React.createElement('input',{placeholder:'Eagles',value:gymName,onChange:e=>setGymName(e.target.value)})
+        React.createElement('div',{style:{display:'flex',gap:'6px'}},
+          React.createElement('input',{placeholder:'Eagles',value:gymName,onChange:e=>setGymName(e.target.value),style:{flex:1}}),
+          React.createElement('select',{
+            value:filterAthlete?.id||'',
+            onChange:e=>{
+              const athletes=loadAthletes();
+              const a=athletes.find(x=>x.id===e.target.value)||null;
+              setFilterAthlete(a);
+              if(a) setGymName(a.name);
+              else setGymName('');
+            },
+            style:{width:'36px',fontFamily:'inherit',fontSize:'13px',background:'#111',border:'1px solid #2e2e2e',borderRadius:'5px',color:'#888',cursor:'pointer',flexShrink:0,padding:'0 4px'},
+            title:'Filtrar por atleta'
+          },
+            React.createElement('option',{value:''},'👤'),
+            loadAthletes().map(a=>React.createElement('option',{key:a.id,value:a.id},a.name))
+          )
+        )
       ),
       React.createElement('div',{className:'fg',style:{flex:'1',minWidth:'140px'}},
         React.createElement('span',{className:'lbl'},'Rótulo do período'),
@@ -1937,7 +2088,7 @@ function SchedulePublisher({sessions}){
           type:'button',className:'b bsm',
           title:'Configurações',
           onClick:()=>setSettingsOpen(true)
-        }, React.createElement('i',{className:'ti ti-settings','aria-hidden':'true'})),
+        }, React.createElement('i',{className:'ti ti-settings','aria-hidden':'true'}),' Cores'),
         React.createElement('button',{
           type:'button',className:'b bsec',style:{fontSize:'12px'},
           onClick:()=>{setExportTarget('daily');doExport('daily');},disabled:exporting
@@ -1960,6 +2111,16 @@ function SchedulePublisher({sessions}){
           style:{fontSize:'12px',background:'#00b8d4',color:'#000',borderColor:'#00b8d4',fontWeight:700},
           onClick:()=>doMobileExport('B'),disabled:exporting
         }, React.createElement('i',{className:'ti ti-device-mobile','aria-hidden':'true'}),' Mobile Mega Man'),
+        React.createElement('button',{
+          type:'button',className:'b bsm',
+          style:{fontSize:'11px',background:'#e87820',color:'#000',borderColor:'#e87820',fontWeight:700},
+          onClick:()=>doMobileWeeklyExport('A'),disabled:exporting
+        }, React.createElement('i',{className:'ti ti-layout-list','aria-hidden':'true'}),' ',(APP_CONFIG.mobileWeeklyLabels?.[0]||'Mobile Semanal Eagles').slice(0,15)),
+        React.createElement('button',{
+          type:'button',className:'b bsm',
+          style:{fontSize:'11px',background:'#00b8d4',color:'#000',borderColor:'#00b8d4',fontWeight:700},
+          onClick:()=>doMobileWeeklyExport('B'),disabled:exporting
+        }, React.createElement('i',{className:'ti ti-layout-list','aria-hidden':'true'}),' ',(APP_CONFIG.mobileWeeklyLabels?.[1]||'Mobile Semanal Medrado').slice(0,15)),
         exporting&&React.createElement('span',{style:{fontSize:'11px',color:'#e87820'}},'Exportando...')
       )
     ),
@@ -1979,18 +2140,28 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
           className:`pvt ${previewTarget==='mobileB'?'on':''}`,
           style:previewTarget==='mobileB'?{background:'#00b8d4',borderColor:'#00b8d4',color:'#000'}:{color:'#00b8d4',borderColor:'#00b8d4'},
           onClick:()=>setPreviewTarget('mobileB')},'Mobile Mega Man'),
+        React.createElement('button',{type:'button',
+          className:`pvt ${previewTarget==='mobileWeeklyA'?'on':''}`,
+          style:previewTarget==='mobileWeeklyA'?{background:'#e87820',borderColor:'#e87820',color:'#000'}:{color:'#e87820',borderColor:'#e87820'},
+          onClick:()=>setPreviewTarget('mobileWeeklyA')},
+          (APP_CONFIG.mobileWeeklyLabels?.[0]||'Mobile Semanal Eagles').slice(0,15)),
+        React.createElement('button',{type:'button',
+          className:`pvt ${previewTarget==='mobileWeeklyB'?'on':''}`,
+          style:previewTarget==='mobileWeeklyB'?{background:'#00b8d4',borderColor:'#00b8d4',color:'#000'}:{color:'#00b8d4',borderColor:'#00b8d4'},
+          onClick:()=>setPreviewTarget('mobileWeeklyB')},
+          (APP_CONFIG.mobileWeeklyLabels?.[1]||'Mobile Semanal Medrado').slice(0,15)),
         React.createElement('button',{
           type:'button',className:'b bsec bsm',
           style:{marginLeft:'auto',fontSize:'12px'},
-          onClick:()=>previewTarget==='mobileA'?doMobileExport('A'):previewTarget==='mobileB'?doMobileExport('B'):doExport(previewTarget),
+          onClick:()=>previewTarget==='mobileA'?doMobileExport('A'):previewTarget==='mobileB'?doMobileExport('B'):previewTarget==='mobileWeeklyA'?doMobileWeeklyExport('A'):previewTarget==='mobileWeeklyB'?doMobileWeeklyExport('B'):doExport(previewTarget),
           disabled:exporting
         },
           React.createElement('i',{className:'ti ti-download','aria-hidden':'true'}),
-          ` Baixar ${previewTarget==='daily'?'Diário':previewTarget==='semanal'?'Semanal':previewTarget==='calendar'?'Calendário':previewTarget==='mobileA'?'Mobile Eagles':'Mobile Mega Man'}`
+          ` Baixar ${previewTarget==='daily'?'Diário':previewTarget==='semanal'?'Semanal':previewTarget==='calendar'?'Calendário':previewTarget==='mobileA'?'Mobile Eagles':previewTarget==='mobileB'?'Mobile Mega Man':previewTarget==='mobileWeeklyA'?(APP_CONFIG.mobileWeeklyLabels?.[0]||'Semanal Eagles').slice(0,15):(APP_CONFIG.mobileWeeklyLabels?.[1]||'Semanal Medrado').slice(0,15)}`
         )
       ),
-      // ── week picker — for semanal ──
-      previewTarget==='semanal'&&React.createElement('div',{
+      // ── week picker — for semanal and mobile weekly ──
+      (previewTarget==='semanal'||previewTarget==='mobileWeeklyA'||previewTarget==='mobileWeeklyB')&&React.createElement('div',{
         style:{display:'flex',gap:'6px',flexWrap:'wrap',marginBottom:'8px',alignItems:'center'}
       },
         React.createElement('span',{style:{fontSize:'11px',color:'#555',marginRight:'4px',textTransform:'uppercase',letterSpacing:'.06em'}},'Semana:'),
@@ -2095,14 +2266,18 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
           pointerEvents:'none'
         }},
           previewTarget==='daily'
-            ?React.createElement(DailyExportView,{sessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
+            ?React.createElement(DailyExportView,{sessions:filteredSessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
             :previewTarget==='semanal'
-            ?React.createElement(WeeklyCalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
+            ?React.createElement(WeeklyCalendarExportView,{sessions:filteredSessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
+            :previewTarget==='mobileWeeklyA'
+            ?React.createElement(MobileWeeklyExportView,{sessions:filteredSessions,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,variant:'A'})
+            :previewTarget==='mobileWeeklyB'
+            ?React.createElement(MobileWeeklyExportView,{sessions:filteredSessions,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,variant:'B'})
             :previewTarget==='mobileA'
-            ?React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg,colors:{gymName:eaGymName,date:eaDate,subtitle:eaSubtitle,blockType:eaBlockType,blockMeta:eaBlockMeta,exName:eaExName,intensity:eaIntensity,blockHdr:eaBlockHdr,divider:eaDivider,note:noteColor}})
+            ?React.createElement(MobileEaglesExportView,{sessions:filteredSessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg,colors:{gymName:eaGymName,date:eaDate,subtitle:eaSubtitle,blockType:eaBlockType,blockMeta:eaBlockMeta,exName:eaExName,intensity:eaIntensity,blockHdr:eaBlockHdr,divider:eaDivider,note:noteColor}})
             :previewTarget==='mobileB'
-            ?React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg,colors:{gymName:mmGymName,date:mmDate,subtitle:mmSubtitle,blockType:mmBlockType,blockMetaBg:mmBlockMetaBg,blockMetaText:mmBlockMetaText,exName:mmExName,intensity:mmIntensity,blockHdr:mmBlockHdr,divider:mmDivider,note:noteColor}})
-            :React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
+            ?React.createElement(MobileMegaManExportView,{sessions:filteredSessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg,colors:{gymName:mmGymName,date:mmDate,subtitle:mmSubtitle,blockType:mmBlockType,blockMetaBg:mmBlockMetaBg,blockMetaText:mmBlockMetaText,exName:mmExName,intensity:mmIntensity,blockHdr:mmBlockHdr,divider:mmDivider,note:noteColor}})
+            :React.createElement(CalendarExportView,{sessions:filteredSessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
         ),
         React.createElement('div',{style:{height:`${(previewTarget==='mobileA'||previewTarget==='mobileB')?'auto':1080}px`,...((previewTarget==='mobileA'||previewTarget==='mobileB')?{}:{marginTop:`-${1080*previewScale}px`}),pointerEvents:'none'}})
       )
@@ -2230,29 +2405,29 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
         // ── hidden export targets — always rendered, off-screen, dedicated refs ──
     React.createElement('div',{style:{position:'fixed',left:'-9999px',top:'-9999px',pointerEvents:'none',zIndex:-1,overflow:'hidden'}},
       React.createElement('div',{ref:exportDailyRef},
-        React.createElement(DailyExportView,{sessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
+        React.createElement(DailyExportView,{sessions:filteredSessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
       ),
       React.createElement('div',{ref:exportWeeklyRef},
-        React.createElement(WeeklyExportView,{sessions,label,year,month,onDayClick:()=>{}})
+        React.createElement(WeeklyExportView,{sessions:filteredSessions,label,year,month,onDayClick:()=>{}})
       ),
       React.createElement('div',{ref:exportWeeklyCalRef},
-        React.createElement(WeeklyCalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
+        React.createElement(WeeklyCalendarExportView,{sessions:filteredSessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
       ),
       React.createElement('div',{ref:exportCalendarRef},
-        React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
+        React.createElement(CalendarExportView,{sessions:filteredSessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
       ),
       React.createElement('div',{ref:exportMobileARef,style:{width:'1080px'}},
-        React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg,colors:{gymName:eaGymName,date:eaDate,subtitle:eaSubtitle,blockType:eaBlockType,blockMeta:eaBlockMeta,exName:eaExName,intensity:eaIntensity,blockHdr:eaBlockHdr,divider:eaDivider,note:noteColor}})
+        React.createElement(MobileEaglesExportView,{sessions:filteredSessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg,colors:{gymName:eaGymName,date:eaDate,subtitle:eaSubtitle,blockType:eaBlockType,blockMeta:eaBlockMeta,exName:eaExName,intensity:eaIntensity,blockHdr:eaBlockHdr,divider:eaDivider,note:noteColor}})
       ),
       React.createElement('div',{ref:exportMobileBRef,style:{width:'1080px'}},
-        React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg,colors:{gymName:mmGymName,date:mmDate,subtitle:mmSubtitle,blockType:mmBlockType,blockMetaBg:mmBlockMetaBg,blockMetaText:mmBlockMetaText,exName:mmExName,intensity:mmIntensity,blockHdr:mmBlockHdr,divider:mmDivider,note:noteColor}})
+        React.createElement(MobileMegaManExportView,{sessions:filteredSessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg,colors:{gymName:mmGymName,date:mmDate,subtitle:mmSubtitle,blockType:mmBlockType,blockMetaBg:mmBlockMetaBg,blockMetaText:mmBlockMetaText,exName:mmExName,intensity:mmIntensity,blockHdr:mmBlockHdr,divider:mmDivider,note:noteColor}})
       )
     ),
 
     // ── weekly view (visible when not previewing) ──
     !previewOpen&&React.createElement('div',{style:{overflowX:'auto',WebkitOverflowScrolling:'touch',borderRadius:'8px'}},
       React.createElement('div',{ref:weeklyRef},
-        React.createElement(WeeklyExportView,{sessions,label,year,month,onDayClick:handleDayClick})
+        React.createElement(WeeklyExportView,{sessions:filteredSessions,label,year,month,onDayClick:handleDayClick})
       ),
 
     )
@@ -2509,7 +2684,7 @@ function SparkLine({values}){
 
 // ── RosterView ────────────────────────────────────────────
 function RosterView({athletes,setAthletes}){
-  const [form,setForm]=useState({name:'',level:'Iniciante',goal:'Saúde geral',notes:''});
+  const [form,setForm]=useState({name:'',level:'Iniciante',goal:'Saúde geral',notes:'',color:'#e87820'});
   const [editing,setEditing]=useState(null);
 
   const save=()=>{
@@ -2557,6 +2732,20 @@ function RosterView({athletes,setAthletes}){
           React.createElement('input',{placeholder:'ex: Joelho direito',value:form.notes,onChange:e=>setForm(f=>({...f,notes:e.target.value}))})
         )
       ),
+      React.createElement('div',{className:'fg mb10'},
+        React.createElement('span',{className:'lbl'},'Cor do atleta'),
+        React.createElement('div',{className:'color-row'},
+          React.createElement('div',{
+            className:'color-swatch',
+            style:{background:form.color||'#e87820'},
+            onClick:()=>document.getElementById('picker-athlete-form')?.click()
+          }),
+          React.createElement('input',{type:'color',id:'picker-athlete-form',value:form.color||'#e87820',onChange:e=>setForm(f=>({...f,color:e.target.value})),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
+          React.createElement('input',{type:'text',className:'color-input',value:form.color||'#e87820',
+            onChange:e=>{if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))setForm(f=>({...f,color:e.target.value}));}
+          })
+        )
+      ),
       React.createElement('button',{type:'button',className:'b bp bfull',onClick:save},
         React.createElement('i',{className:'ti ti-check'}),editing?' Salvar':' Adicionar atleta'
       )
@@ -2567,6 +2756,7 @@ function RosterView({athletes,setAthletes}){
         React.createElement('div',{key:a.id,className:'athlete-card'},
           React.createElement('div',null,
             React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+              React.createElement('div',{style:{width:'10px',height:'10px',borderRadius:'50%',background:a.color||'#e87820',flexShrink:0}}),
               React.createElement('span',{className:'athlete-name'},a.name),
               React.createElement('span',{className:`level-badge ${LEVEL_CLS[a.level]||'lv-ini'}`},a.level)
             ),
@@ -2596,12 +2786,16 @@ function LogView({athletes,sessions}){
   const [flag,setFlag]=useState(false);
   const [saved,setSaved]=useState(false);
 
-  const session=(sessions[date]||[])[0]||null;
+  const [selectedSessionIdx,setSelectedSessionIdx]=useState(0);
+  const daySessions=sessions[date]||[];
+  const session=daySessions[selectedSessionIdx]||daySessions[0]||null;
 
   // init block logs when session or athlete changes
+  useEffect(()=>{setSelectedSessionIdx(0);},[date]);
+
   useEffect(()=>{
     if(!session) return;
-    const existing=results.find(r=>r.date===date&&r.athleteId===athleteId);
+    const existing=results.find(r=>r.date===date&&r.athleteId===athleteId&&(r.sessionId===session.id||!r.sessionId));
     if(existing){
       // Re-seed exerciseRows from session if missing (backwards compat)
       const WOD_TYPES_EXIST=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
@@ -2650,7 +2844,7 @@ function LogView({athletes,sessions}){
       coachNote,flagForReview:flag,
       sessionId:session?.id||null
     };
-    const updated=[...results.filter(r=>!(r.date===date&&r.athleteId===athleteId)),entry];
+    const updated=[...results.filter(r=>!(r.date===date&&r.athleteId===athleteId&&(r.sessionId===session?.id||(!r.sessionId&&!session?.id)))),entry];
     setResults(updated);saveResults(updated);
     setSaved(true);setTimeout(()=>setSaved(false),1800);
   };
@@ -2684,6 +2878,14 @@ function LogView({athletes,sessions}){
             React.createElement('option',{value:''},'— Selecionar —'),
             athletes.map(a=>React.createElement('option',{key:a.id,value:a.id},a.name))
           )
+        )
+      ),
+      daySessions.length>1&&React.createElement('div',{className:'fg mb10'},
+        React.createElement('span',{className:'lbl'},'Sessão'),
+        React.createElement('select',{value:selectedSessionIdx,onChange:e=>setSelectedSessionIdx(parseInt(e.target.value))},
+          daySessions.map((s,i)=>React.createElement('option',{key:s.id,value:i},
+            `Sessão ${i+1}${s.mainTraining?' — '+s.mainTraining:''}`
+          ))
         )
       ),
       // presence
@@ -3078,6 +3280,133 @@ function ResultsTab({sessions}){
 }
 
 
+
+// ── MobileWeeklySingleDay — renders one day section ─────────────────────────
+function MobileWeeklySingleDay({date,sessions,f,col,variant,monthNames}){
+  const dateKey=toISO(date);
+  const s=(sessions[dateKey]||[])[0]||null;
+  const dow=['DOM','SEG','TER','QUA','QUI','SEX','SAB'][date.getDay()];
+  const dateNum=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const restLabel=APP_CONFIG.restDayLabel||'Descanso';
+  const pad=Math.round(18*f);
+  const isA=variant==='A';
+  const cyan='#00b8d4';
+  const orange='#e87820';
+  const hdrAccent=isA?orange:cyan;
+  const fontFamily=isA?"'Arial Black',Arial,sans-serif":"'Courier New',monospace";
+  const bg=isA?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000');
+
+  return React.createElement('div',null,
+    // day header
+    React.createElement('div',{style:{
+      background:isA?'#111':'#050e14',
+      padding:`${Math.round(8*f)}px ${pad}px`,
+      borderTop:`${Math.max(2,Math.round(3*f))}px solid ${hdrAccent}`,
+      display:'flex',alignItems:'baseline',justifyContent:'space-between'
+    }},
+      React.createElement('span',{style:{
+        fontSize:mfs(15,f),fontWeight:900,color:hdrAccent,
+        textTransform:'uppercase',letterSpacing:'.1em',fontFamily
+      }},dow),
+      React.createElement('span',{style:{
+        fontSize:mfs(12,f),fontWeight:700,color:isA?'#555':'#3a6a80',fontFamily
+      }},dateNum)
+    ),
+    // content
+    s
+      ? React.createElement('div',{style:{background:bg}},
+          (s.blocks||[]).map(bl=>{
+            const hasLabel=bl.label&&bl.label!=='-';
+            const title=hasLabel?bl.label:bl.type;
+            const meta=[bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
+            const exNames=(bl.exercises||[]).filter(e=>e.name);
+            return React.createElement('div',{key:bl.id},
+              // block header
+              React.createElement('div',{style:{
+                background:`rgba(0,184,212,0.12)`,
+                padding:`${Math.round(6*f)}px ${pad}px`,
+                display:'flex',alignItems:'center',justifyContent:'space-between'
+              }},
+                React.createElement('span',{style:{
+                  fontSize:mfs(13,f),fontWeight:900,color:cyan,
+                  textTransform:'uppercase',letterSpacing:'.08em',fontFamily
+                }},title),
+                meta&&React.createElement('span',{style:{
+                  fontSize:mfs(11,f),fontWeight:900,color:'#000',
+                  background:cyan,padding:`${Math.round(2*f)}px ${Math.round(7*f)}px`,
+                  borderRadius:'2px',fontFamily
+                }},meta)
+              ),
+              // exercise names only
+              exNames.map(ex=>{
+                const repsDisplay=ex.reps
+                  ?(ex.reps.includes(',')?ex.reps.split(',').map(r=>r.trim()).join('-'):ex.reps)
+                  :'';
+                const prefix=ex.sets&&repsDisplay?`${ex.sets}×${repsDisplay}`:repsDisplay;
+                const line=[prefix,ex.name.toUpperCase()].filter(Boolean).join(' ');
+                return React.createElement('div',{key:ex.id,style:{
+                  padding:`${Math.round(5*f)}px ${pad}px`,
+                  borderBottom:`1px solid rgba(0,184,212,0.08)`,
+                  fontSize:mfs(14,f),fontWeight:900,color:'#fff',
+                  textTransform:'uppercase',letterSpacing:'.04em',fontFamily,lineHeight:1.2
+                }},line);
+              })
+            );
+          })
+        )
+      : React.createElement('div',{style:{
+          background:bg,
+          padding:`${Math.round(10*f)}px ${pad}px`,
+          fontSize:mfs(12,f),color:'#333',
+          textTransform:'uppercase',letterSpacing:'.08em',fontFamily
+        }},`— ${restLabel}`)
+  );
+}
+
+// ── MobileWeeklyExportView — full week stacked ────────────────────────────────
+function MobileWeeklyExportView({sessions,gymName,logoDataUrl,logoScale,fontScale,weekDates,variant}){
+  const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const f=fontScale||1;
+  const ls=logoScale||1;
+  const pad=Math.round(22*f);
+  const isA=variant==='A';
+  const cyan='#00b8d4';
+  const bg=isA?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000');
+  const fontFamily=isA?"'Arial Black',Arial,sans-serif":"'Courier New',monospace";
+  // weekDates is 7-element Sun-first array — display Mon(1)→Sun(0) wrapping
+  const orderedDays=[1,2,3,4,5,6,0].map(i=>weekDates[i]);
+  const mon=weekDates[1];const sun=weekDates[0];
+  const weekLabel=`${mon.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${sun.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`;
+  const midDate=weekDates[3];
+
+  return React.createElement('div',{style:{background:bg,width:'1080px',fontFamily}},
+    // topbar
+    React.createElement('div',{style:{
+      background:bg,
+      padding:`${Math.round(22*f)}px ${pad}px ${Math.round(16*f)}px`,
+      borderBottom:`${Math.max(2,Math.round(3*f))}px solid ${cyan}`,
+      display:'flex',alignItems:'center',justifyContent:'space-between'
+    }},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(14,f)}},
+        logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(48*ls)}px`,height:`${Math.round(48*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
+        React.createElement('span',{style:{fontSize:mfs(28,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.08em',fontFamily}},gymName||'Eagles')
+      ),
+      React.createElement('div',{style:{textAlign:'right'}},
+        React.createElement('div',{style:{fontSize:mfs(16,f),fontWeight:900,color:cyan,textTransform:'uppercase',letterSpacing:'.1em',fontFamily}},weekLabel),
+        React.createElement('div',{style:{fontSize:mfs(12,f),color:isA?'#555':'#3a6a80',marginTop:mfs(2,f),textTransform:'uppercase',letterSpacing:'.06em',fontFamily}},
+          monthNames[midDate.getMonth()]+' '+midDate.getFullYear()
+        )
+      )
+    ),
+    // days
+    orderedDays.map((date,i)=>
+      React.createElement(MobileWeeklySingleDay,{
+        key:i,date,sessions,f,col:{},variant,monthNames
+      })
+    )
+  );
+}
+
 // ── TextParser — Criar Treino por Texto ──────────────────
 function TextParser({sessions,setSessions,setTab}){
   const [text,setText]=useState('');
@@ -3294,6 +3623,10 @@ const LS_ATHLETES='eagles_athletes_v1';
 const LS_RESULTS='eagles_results_v1';
 const loadAthletes=()=>{try{const d=localStorage.getItem(LS_ATHLETES);return d?JSON.parse(d):[]}catch{return[]}};
 const saveAthletes=d=>{try{localStorage.setItem(LS_ATHLETES,JSON.stringify(d))}catch{}};
+const LS_SETTINGS='eagles_settings_v1';
+const loadSettings=()=>{try{const d=localStorage.getItem(LS_SETTINGS);return d?JSON.parse(d):{}}catch{return{}}};
+const saveSettings=d=>{try{localStorage.setItem(LS_SETTINGS,JSON.stringify(d))}catch{}};
+
 const loadResults=()=>{try{const d=localStorage.getItem(LS_RESULTS);const p=d?JSON.parse(d):[];return Array.isArray(p)?p:[];}catch{return[]}};
 const saveResults=d=>{try{localStorage.setItem(LS_RESULTS,JSON.stringify(d))}catch{}};
 
@@ -3810,6 +4143,9 @@ function App(){
         if(cfg.athleteLevels&&Array.isArray(cfg.athleteLevels)) APP_CONFIG.athleteLevels=cfg.athleteLevels;
         if(cfg.athleteGoals&&Array.isArray(cfg.athleteGoals)) APP_CONFIG.athleteGoals=cfg.athleteGoals;
         if(cfg.blockColors&&typeof cfg.blockColors==='object') APP_CONFIG.blockColors={...APP_CONFIG.blockColors,...cfg.blockColors};
+        if(cfg.appTitle){APP_CONFIG.appTitle=cfg.appTitle;document.title=cfg.appTitle;}
+        if(cfg.restDayLabel) APP_CONFIG.restDayLabel=cfg.restDayLabel;
+        if(cfg.mobileWeeklyLabels&&Array.isArray(cfg.mobileWeeklyLabels)) APP_CONFIG.mobileWeeklyLabels=cfg.mobileWeeklyLabels;
         if(cfg.blockNames&&Array.isArray(cfg.blockNames)){
           APP_CONFIG.blockNames=cfg.blockNames;
           setBlockNames(cfg.blockNames);
@@ -3837,7 +4173,7 @@ function App(){
 
   // ── Export state as .json ──
   const handleSaveState=(customName)=>{
-    const state={version:1,exportedAt:new Date().toISOString(),sessions};
+    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings()};
     const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
     const a=document.createElement('a');
     const date=toISO(new Date());
@@ -3875,6 +4211,12 @@ function App(){
         });
         setSessions(migrated);
         saveLS(migrated);
+        // restore publisher settings if present
+        if(parsed.settings&&typeof parsed.settings==='object'){
+          saveSettings(parsed.settings);
+          // force page reload so all SchedulePublisher states re-init from localStorage
+          setTimeout(()=>window.location.reload(),300);
+        }
         showToast('Estado carregado com sucesso.');
       }catch(err){
         showToast('Não foi possível carregar o arquivo — verifique se é um .json válido.','err');
@@ -3983,8 +4325,8 @@ function App(){
 }
 ReactDOM.render(React.createElement(App),document.getElementById('root'));
 
-// ── Register service worker for PWA offline support ──
-if('serviceWorker' in navigator){
+// ── Service worker — only on GitHub Pages (not local/sandbox) ──
+if('serviceWorker' in navigator && location.protocol==='https:' && !location.hostname.includes('claudeusercontent')){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('sw.js')
       .catch(e=>console.log('SW registration failed:',e));
@@ -4238,6 +4580,7 @@ function TrainingCreator({sessions,setSessions,blockNames}){
 
   // week navigation state — 0 = current week
   const [weekOffset,setWeekOffset]=useState(0);
+  const [pendingDate,setPendingDate]=useState(null); // {newDate, oldDate} for confirm dialog
   // build week starting Sunday
   const getSundayWeek=(offset)=>{
     const d=new Date();
@@ -4251,6 +4594,21 @@ function TrainingCreator({sessions,setSessions,blockNames}){
   const weekLabel=`${weekDates[0].getDate()}/${weekDates[0].getMonth()+1} – ${weekDates[6].getDate()}/${weekDates[6].getMonth()+1}/${weekDates[6].getFullYear()}`;
 
   return React.createElement('div',null,
+    // ── date change confirm dialog ──
+    pendingDate&&React.createElement('div',{className:'confirm-overlay'},
+      React.createElement('div',{className:'confirm-box'},
+        React.createElement('div',{className:'confirm-msg'},
+          `Mover sessão de ${new Date(pendingDate.oldDate+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})} para ${new Date(pendingDate.newDate+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})}?`
+        ),
+        React.createElement('div',{className:'confirm-btns'},
+          React.createElement('button',{type:'button',className:'b bsm',onClick:()=>setPendingDate(null)},'Cancelar'),
+          React.createElement('button',{type:'button',className:'b bp bsm',onClick:()=>{
+            setForm(f=>({...f,date:pendingDate.newDate}));
+            setPendingDate(null);
+          }},'Confirmar')
+        )
+      )
+    ),
     React.createElement('div',{className:'sc-card',ref:formRef},
       React.createElement('div',{className:'sc-hdr'},
         React.createElement('span',{className:'sc-title'},editing?'Editar sessão':'Nova sessão'),
@@ -4262,17 +4620,39 @@ function TrainingCreator({sessions,setSessions,blockNames}){
           React.createElement('input',{
             type:'date',
             value:form.date||todayISO(),
-            onChange:e=>setForm(f=>({...f,date:e.target.value}))
+            onChange:e=>{
+              const newDate=e.target.value;
+              const oldDate=form.date||todayISO();
+              if(editing&&newDate!==oldDate){
+                // intercept — show confirm dialog
+                setPendingDate({newDate,oldDate});
+                e.target.value=oldDate; // revert input visually until confirmed
+              }else{
+                setForm(f=>({...f,date:newDate}));
+              }
+            }
           })
         ),
         React.createElement('div',{className:'fg'},
-          React.createElement('span',{className:'lbl'},'Treino Principal'),
+          React.createElement('span',{className:'lbl'},'Alvo'),
           React.createElement('div',{className:'input-mic-row'},
-            React.createElement('input',{
-              placeholder:'ex: Parte superior + glúteos',
-              value:form.mainTraining||'',
-              onChange:e=>setForm(f=>({...f,mainTraining:e.target.value}))
-            }),
+            React.createElement('div',{style:{display:'flex',gap:'6px',flex:1}},
+              React.createElement('input',{
+                placeholder:'ex: Turma A / nome do atleta',
+                value:form.mainTraining||'',
+                onChange:e=>setForm(f=>({...f,mainTraining:e.target.value})),
+                style:{flex:1}
+              }),
+              React.createElement('select',{
+                value:'',
+                onChange:e=>{if(e.target.value)setForm(f=>({...f,mainTraining:e.target.value}));},
+                style:{width:'36px',fontFamily:'inherit',fontSize:'13px',background:'#111',border:'1px solid #2e2e2e',borderRadius:'5px',color:'#888',cursor:'pointer',flexShrink:0,padding:'0 4px'},
+                title:'Selecionar atleta'
+              },
+                React.createElement('option',{value:''},'👤'),
+                loadAthletes().map(a=>React.createElement('option',{key:a.id,value:a.name},a.name))
+              )
+            ),
             React.createElement(MicButton,{onTranscript:txt=>setForm(f=>({...f,mainTraining:(f.mainTraining?f.mainTraining+' ':'')+txt}))})
           )
         )
@@ -4433,11 +4813,31 @@ function TrainingCreator({sessions,setSessions,blockNames}){
                   )
                 )
               ),
-              React.createElement('div',{className:'wg-add',onClick:()=>{
-                setForm(f=>({...f,date:dateKey}));
-                setTimeout(()=>formRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),60);
-              }},
-                React.createElement('i',{className:'ti ti-plus','aria-hidden':'true'}),' add'
+              React.createElement('div',{className:'wg-add-row'},
+                React.createElement('div',{className:'wg-add',onClick:()=>{
+                  setForm(f=>({...f,date:dateKey}));
+                  setTimeout(()=>formRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),60);
+                }},
+                  React.createElement('i',{className:'ti ti-plus','aria-hidden':'true'}),' add'
+                ),
+                React.createElement('div',{className:'wg-copy',onClick:()=>{
+                  const daySess=(sessions[dateKey]||[]);
+                  if(!daySess.length) return;
+                  const last=daySess[daySess.length-1];
+                  const copied={
+                    ...last,
+                    id:uid(),
+                    date:dateKey,
+                    mainTraining:'',
+                    blocks:(last.blocks||[]).map(bl=>({
+                      ...bl,id:uid(),
+                      exercises:(bl.exercises||[]).map(ex=>({...ex,id:uid()}))
+                    }))
+                  };
+                  setSessions(prev=>{const n={...prev};n[dateKey]=[...(n[dateKey]||[]),copied];return n;});
+                }},
+                  React.createElement('i',{className:'ti ti-copy','aria-hidden':'true'}),' copy'
+                )
               )
             );
           })
@@ -4931,14 +5331,17 @@ function SchedulePublisher({sessions}){
   const exportWeeklyCalRef=useRef();
   const exportMobileARef=useRef();
   const exportMobileBRef=useRef();
+  const exportMobileWeeklyARef=useRef();
+  const exportMobileWeeklyBRef=useRef();
   const previewWrapRef=useRef();
   const logoInputRef=useRef();
   const [view,setView]=useState('weekly');
   const [exportTarget,setExportTarget]=useState('daily');
   const [previewTarget,setPreviewTarget]=useState('semanal'); // 'semanal'|'calendar'|'mobileA'|'mobileB'
   const [selectedWeekIdx,setSelectedWeekIdx]=useState(0); // which week of the month for semanal
-  const [label,setLabel]=useState('');
-  const [gymName,setGymName]=useState('');
+  const [gymName,setGymName]=useState(loadSettings().gymName||'');
+  const [label,setLabel]=useState(loadSettings().label||'');
+  const [filterAthlete,setFilterAthlete]=useState(null); // null = all, athlete obj = filter
   const [logoDataUrl,setLogoDataUrl]=useState(null);
   const [logoScale,setLogoScale]=useState(1);
   const [exporting,setExporting]=useState(false);
@@ -4953,7 +5356,7 @@ function SchedulePublisher({sessions}){
   const [megaManBg,setMegaManBg]=useState(APP_CONFIG.mobileMegaManBg||'#0a1a5c');
   const [noteColor,setNoteColor]=useState(APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa');
   // ── Settings: which view is being configured ──
-  const [settingsView,setSettingsView]=useState('mobileEagles');
+  const [settingsView,setSettingsView]=useState('daily');
 
   // Daily view colours
   const [dvBg,setDvBg]=useState('#000000');
@@ -5003,6 +5406,29 @@ function SchedulePublisher({sessions}){
   useEffect(()=>{APP_CONFIG.mobileEaglesBg=eaglesBg;},[eaglesBg]);
   useEffect(()=>{APP_CONFIG.mobileMegaManBg=megaManBg;},[megaManBg]);
   useEffect(()=>{APP_CONFIG.mobileExerciseNoteColor=noteColor;},[noteColor]);
+
+  // ── Persist all publisher settings to localStorage ──
+  useEffect(()=>{
+    saveSettings({
+      fontScale,zoneScales,blockTitleScales,gymName,label,
+      colors:{
+        dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvCap,dvRounds,
+        dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
+        wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
+        eaGymName,eaDate,eaSubtitle,eaBlockType,eaBlockMeta,eaExName,
+        eaIntensity,eaBlockHdr,eaDivider,eaglesBg,megaManBg,noteColor,
+        mmGymName,mmDate,mmSubtitle,mmBlockType,mmBlockMetaBg,mmBlockMetaText,
+        mmExName,mmIntensity,mmBlockHdr,mmDivider
+      }
+    });
+  },[fontScale,zoneScales,blockTitleScales,gymName,label,
+     dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvCap,dvRounds,
+     dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
+     wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
+     eaGymName,eaDate,eaSubtitle,eaBlockType,eaBlockMeta,eaExName,
+     eaIntensity,eaBlockHdr,eaDivider,eaglesBg,megaManBg,noteColor,
+     mmGymName,mmDate,mmSubtitle,mmBlockType,mmBlockMetaBg,mmBlockMetaText,
+     mmExName,mmIntensity,mmBlockHdr,mmDivider]);
   const now=new Date();
   const [month,setMonth]=useState(now.getMonth());
   const [year,setYear]=useState(now.getFullYear());
@@ -5090,6 +5516,31 @@ function SchedulePublisher({sessions}){
     setExporting(false);
   };
 
+  const doMobileWeeklyExport=async(variant)=>{
+    const el=variant==='A'?exportMobileWeeklyARef.current:exportMobileWeeklyBRef.current;
+    if(!el){alert('Nada para exportar ainda.');return;}
+    setExporting(true);
+    await new Promise(r=>setTimeout(r,250));
+    try{
+      const W=1080;const H=el.scrollHeight||3000;
+      const cv=await html2canvas(el,{scale:2,backgroundColor:variant==='A'?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000'),useCORS:true,logging:false,width:W,height:H,windowWidth:W});
+      const out=document.createElement('canvas');
+      out.width=W*2;out.height=H*2;
+      const ctx=out.getContext('2d');
+      ctx.fillStyle=variant==='A'?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000');
+      ctx.fillRect(0,0,out.width,out.height);
+      ctx.drawImage(cv,0,0);
+      const wk=getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates;
+      const mon=wk[1];const fri=wk[5];
+      const padD=n=>String(n).padStart(2,'0');
+      const labels=APP_CONFIG.mobileWeeklyLabels||['Mobile Semanal Eagles','Mobile Semanal Medrado'];
+      const lbl=(labels[variant==='A'?0:1]||'').replace(/[^a-zA-Z0-9\-_\u00C0-\u024F]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,40).toLowerCase();
+      const fname=`eagles-${lbl}-${padD(mon.getDate())}${padD(mon.getMonth()+1)}to${padD(fri.getDate())}${padD(fri.getMonth()+1)}`;
+      const a=document.createElement('a');a.download=`${fname}.png`;a.href=out.toDataURL('image/png');a.click();
+    }catch(e){console.error(e);alert('Falha na exportação — tente novamente.');}
+    setExporting(false);
+  };
+
   const handleDayClick=(week,date)=>{
     setSelectedWeek(week);
     setSelectedDate(toISO(date));
@@ -5103,7 +5554,11 @@ function SchedulePublisher({sessions}){
   });
 
   // all dates that have sessions, sorted
-  const allSessionDates=Object.keys(sessions).filter(k=>sessions[k]?.length>0).sort();
+  // Apply athlete filter — only show sessions matching filterAthlete.name
+  const filteredSessions=filterAthlete
+    ?Object.fromEntries(Object.entries(sessions).map(([k,v])=>[k,v.filter(s=>s.mainTraining===filterAthlete.name)]))
+    :sessions;
+  const allSessionDates=Object.keys(filteredSessions).filter(k=>filteredSessions[k]?.length>0).sort();
 
   const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
@@ -5171,7 +5626,24 @@ function SchedulePublisher({sessions}){
       ),
       React.createElement('div',{className:'fg',style:{flex:'1',minWidth:'140px'}},
         React.createElement('span',{className:'lbl'},'Nome da academia'),
-        React.createElement('input',{placeholder:'Eagles',value:gymName,onChange:e=>setGymName(e.target.value)})
+        React.createElement('div',{style:{display:'flex',gap:'6px'}},
+          React.createElement('input',{placeholder:'Eagles',value:gymName,onChange:e=>setGymName(e.target.value),style:{flex:1}}),
+          React.createElement('select',{
+            value:filterAthlete?.id||'',
+            onChange:e=>{
+              const athletes=loadAthletes();
+              const a=athletes.find(x=>x.id===e.target.value)||null;
+              setFilterAthlete(a);
+              if(a) setGymName(a.name);
+              else setGymName('');
+            },
+            style:{width:'36px',fontFamily:'inherit',fontSize:'13px',background:'#111',border:'1px solid #2e2e2e',borderRadius:'5px',color:'#888',cursor:'pointer',flexShrink:0,padding:'0 4px'},
+            title:'Filtrar por atleta'
+          },
+            React.createElement('option',{value:''},'👤'),
+            loadAthletes().map(a=>React.createElement('option',{key:a.id,value:a.id},a.name))
+          )
+        )
       ),
       React.createElement('div',{className:'fg',style:{flex:'1',minWidth:'140px'}},
         React.createElement('span',{className:'lbl'},'Rótulo do período'),
@@ -5222,7 +5694,7 @@ function SchedulePublisher({sessions}){
           type:'button',className:'b bsm',
           title:'Configurações',
           onClick:()=>setSettingsOpen(true)
-        }, React.createElement('i',{className:'ti ti-settings','aria-hidden':'true'})),
+        }, React.createElement('i',{className:'ti ti-settings','aria-hidden':'true'}),' Cores'),
         React.createElement('button',{
           type:'button',className:'b bsec',style:{fontSize:'12px'},
           onClick:()=>{setExportTarget('daily');doExport('daily');},disabled:exporting
@@ -5245,6 +5717,16 @@ function SchedulePublisher({sessions}){
           style:{fontSize:'12px',background:'#00b8d4',color:'#000',borderColor:'#00b8d4',fontWeight:700},
           onClick:()=>doMobileExport('B'),disabled:exporting
         }, React.createElement('i',{className:'ti ti-device-mobile','aria-hidden':'true'}),' Mobile Mega Man'),
+        React.createElement('button',{
+          type:'button',className:'b bsm',
+          style:{fontSize:'11px',background:'#e87820',color:'#000',borderColor:'#e87820',fontWeight:700},
+          onClick:()=>doMobileWeeklyExport('A'),disabled:exporting
+        }, React.createElement('i',{className:'ti ti-layout-list','aria-hidden':'true'}),' ',(APP_CONFIG.mobileWeeklyLabels?.[0]||'Mobile Semanal Eagles').slice(0,15)),
+        React.createElement('button',{
+          type:'button',className:'b bsm',
+          style:{fontSize:'11px',background:'#00b8d4',color:'#000',borderColor:'#00b8d4',fontWeight:700},
+          onClick:()=>doMobileWeeklyExport('B'),disabled:exporting
+        }, React.createElement('i',{className:'ti ti-layout-list','aria-hidden':'true'}),' ',(APP_CONFIG.mobileWeeklyLabels?.[1]||'Mobile Semanal Medrado').slice(0,15)),
         exporting&&React.createElement('span',{style:{fontSize:'11px',color:'#e87820'}},'Exportando...')
       )
     ),
@@ -5264,18 +5746,28 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
           className:`pvt ${previewTarget==='mobileB'?'on':''}`,
           style:previewTarget==='mobileB'?{background:'#00b8d4',borderColor:'#00b8d4',color:'#000'}:{color:'#00b8d4',borderColor:'#00b8d4'},
           onClick:()=>setPreviewTarget('mobileB')},'Mobile Mega Man'),
+        React.createElement('button',{type:'button',
+          className:`pvt ${previewTarget==='mobileWeeklyA'?'on':''}`,
+          style:previewTarget==='mobileWeeklyA'?{background:'#e87820',borderColor:'#e87820',color:'#000'}:{color:'#e87820',borderColor:'#e87820'},
+          onClick:()=>setPreviewTarget('mobileWeeklyA')},
+          (APP_CONFIG.mobileWeeklyLabels?.[0]||'Mobile Semanal Eagles').slice(0,15)),
+        React.createElement('button',{type:'button',
+          className:`pvt ${previewTarget==='mobileWeeklyB'?'on':''}`,
+          style:previewTarget==='mobileWeeklyB'?{background:'#00b8d4',borderColor:'#00b8d4',color:'#000'}:{color:'#00b8d4',borderColor:'#00b8d4'},
+          onClick:()=>setPreviewTarget('mobileWeeklyB')},
+          (APP_CONFIG.mobileWeeklyLabels?.[1]||'Mobile Semanal Medrado').slice(0,15)),
         React.createElement('button',{
           type:'button',className:'b bsec bsm',
           style:{marginLeft:'auto',fontSize:'12px'},
-          onClick:()=>previewTarget==='mobileA'?doMobileExport('A'):previewTarget==='mobileB'?doMobileExport('B'):doExport(previewTarget),
+          onClick:()=>previewTarget==='mobileA'?doMobileExport('A'):previewTarget==='mobileB'?doMobileExport('B'):previewTarget==='mobileWeeklyA'?doMobileWeeklyExport('A'):previewTarget==='mobileWeeklyB'?doMobileWeeklyExport('B'):doExport(previewTarget),
           disabled:exporting
         },
           React.createElement('i',{className:'ti ti-download','aria-hidden':'true'}),
-          ` Baixar ${previewTarget==='daily'?'Diário':previewTarget==='semanal'?'Semanal':previewTarget==='calendar'?'Calendário':previewTarget==='mobileA'?'Mobile Eagles':'Mobile Mega Man'}`
+          ` Baixar ${previewTarget==='daily'?'Diário':previewTarget==='semanal'?'Semanal':previewTarget==='calendar'?'Calendário':previewTarget==='mobileA'?'Mobile Eagles':previewTarget==='mobileB'?'Mobile Mega Man':previewTarget==='mobileWeeklyA'?(APP_CONFIG.mobileWeeklyLabels?.[0]||'Semanal Eagles').slice(0,15):(APP_CONFIG.mobileWeeklyLabels?.[1]||'Semanal Medrado').slice(0,15)}`
         )
       ),
-      // ── week picker — for semanal ──
-      previewTarget==='semanal'&&React.createElement('div',{
+      // ── week picker — for semanal and mobile weekly ──
+      (previewTarget==='semanal'||previewTarget==='mobileWeeklyA'||previewTarget==='mobileWeeklyB')&&React.createElement('div',{
         style:{display:'flex',gap:'6px',flexWrap:'wrap',marginBottom:'8px',alignItems:'center'}
       },
         React.createElement('span',{style:{fontSize:'11px',color:'#555',marginRight:'4px',textTransform:'uppercase',letterSpacing:'.06em'}},'Semana:'),
@@ -5380,14 +5872,18 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
           pointerEvents:'none'
         }},
           previewTarget==='daily'
-            ?React.createElement(DailyExportView,{sessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
+            ?React.createElement(DailyExportView,{sessions:filteredSessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
             :previewTarget==='semanal'
-            ?React.createElement(WeeklyCalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
+            ?React.createElement(WeeklyCalendarExportView,{sessions:filteredSessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
+            :previewTarget==='mobileWeeklyA'
+            ?React.createElement(MobileWeeklyExportView,{sessions:filteredSessions,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,variant:'A'})
+            :previewTarget==='mobileWeeklyB'
+            ?React.createElement(MobileWeeklyExportView,{sessions:filteredSessions,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,variant:'B'})
             :previewTarget==='mobileA'
-            ?React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg,colors:{gymName:eaGymName,date:eaDate,subtitle:eaSubtitle,blockType:eaBlockType,blockMeta:eaBlockMeta,exName:eaExName,intensity:eaIntensity,blockHdr:eaBlockHdr,divider:eaDivider,note:noteColor}})
+            ?React.createElement(MobileEaglesExportView,{sessions:filteredSessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg,colors:{gymName:eaGymName,date:eaDate,subtitle:eaSubtitle,blockType:eaBlockType,blockMeta:eaBlockMeta,exName:eaExName,intensity:eaIntensity,blockHdr:eaBlockHdr,divider:eaDivider,note:noteColor}})
             :previewTarget==='mobileB'
-            ?React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg,colors:{gymName:mmGymName,date:mmDate,subtitle:mmSubtitle,blockType:mmBlockType,blockMetaBg:mmBlockMetaBg,blockMetaText:mmBlockMetaText,exName:mmExName,intensity:mmIntensity,blockHdr:mmBlockHdr,divider:mmDivider,note:noteColor}})
-            :React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
+            ?React.createElement(MobileMegaManExportView,{sessions:filteredSessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg,colors:{gymName:mmGymName,date:mmDate,subtitle:mmSubtitle,blockType:mmBlockType,blockMetaBg:mmBlockMetaBg,blockMetaText:mmBlockMetaText,exName:mmExName,intensity:mmIntensity,blockHdr:mmBlockHdr,divider:mmDivider,note:noteColor}})
+            :React.createElement(CalendarExportView,{sessions:filteredSessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
         ),
         React.createElement('div',{style:{height:`${(previewTarget==='mobileA'||previewTarget==='mobileB')?'auto':1080}px`,...((previewTarget==='mobileA'||previewTarget==='mobileB')?{}:{marginTop:`-${1080*previewScale}px`}),pointerEvents:'none'}})
       )
@@ -5515,29 +6011,29 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
         // ── hidden export targets — always rendered, off-screen, dedicated refs ──
     React.createElement('div',{style:{position:'fixed',left:'-9999px',top:'-9999px',pointerEvents:'none',zIndex:-1,overflow:'hidden'}},
       React.createElement('div',{ref:exportDailyRef},
-        React.createElement(DailyExportView,{sessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
+        React.createElement(DailyExportView,{sessions:filteredSessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
       ),
       React.createElement('div',{ref:exportWeeklyRef},
-        React.createElement(WeeklyExportView,{sessions,label,year,month,onDayClick:()=>{}})
+        React.createElement(WeeklyExportView,{sessions:filteredSessions,label,year,month,onDayClick:()=>{}})
       ),
       React.createElement('div',{ref:exportWeeklyCalRef},
-        React.createElement(WeeklyCalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
+        React.createElement(WeeklyCalendarExportView,{sessions:filteredSessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
       ),
       React.createElement('div',{ref:exportCalendarRef},
-        React.createElement(CalendarExportView,{sessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
+        React.createElement(CalendarExportView,{sessions:filteredSessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
       ),
       React.createElement('div',{ref:exportMobileARef,style:{width:'1080px'}},
-        React.createElement(MobileEaglesExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg,colors:{gymName:eaGymName,date:eaDate,subtitle:eaSubtitle,blockType:eaBlockType,blockMeta:eaBlockMeta,exName:eaExName,intensity:eaIntensity,blockHdr:eaBlockHdr,divider:eaDivider,note:noteColor}})
+        React.createElement(MobileEaglesExportView,{sessions:filteredSessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:eaglesBg,colors:{gymName:eaGymName,date:eaDate,subtitle:eaSubtitle,blockType:eaBlockType,blockMeta:eaBlockMeta,exName:eaExName,intensity:eaIntensity,blockHdr:eaBlockHdr,divider:eaDivider,note:noteColor}})
       ),
       React.createElement('div',{ref:exportMobileBRef,style:{width:'1080px'}},
-        React.createElement(MobileMegaManExportView,{sessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg,colors:{gymName:mmGymName,date:mmDate,subtitle:mmSubtitle,blockType:mmBlockType,blockMetaBg:mmBlockMetaBg,blockMetaText:mmBlockMetaText,exName:mmExName,intensity:mmIntensity,blockHdr:mmBlockHdr,divider:mmDivider,note:noteColor}})
+        React.createElement(MobileMegaManExportView,{sessions:filteredSessions,selectedDate,currentWeekDates,gymName,logoDataUrl,logoScale,fontScale,bgOverride:megaManBg,colors:{gymName:mmGymName,date:mmDate,subtitle:mmSubtitle,blockType:mmBlockType,blockMetaBg:mmBlockMetaBg,blockMetaText:mmBlockMetaText,exName:mmExName,intensity:mmIntensity,blockHdr:mmBlockHdr,divider:mmDivider,note:noteColor}})
       )
     ),
 
     // ── weekly view (visible when not previewing) ──
     !previewOpen&&React.createElement('div',{style:{overflowX:'auto',WebkitOverflowScrolling:'touch',borderRadius:'8px'}},
       React.createElement('div',{ref:weeklyRef},
-        React.createElement(WeeklyExportView,{sessions,label,year,month,onDayClick:handleDayClick})
+        React.createElement(WeeklyExportView,{sessions:filteredSessions,label,year,month,onDayClick:handleDayClick})
       ),
 
     )
@@ -5803,6 +6299,9 @@ function App(){
         if(cfg.athleteLevels&&Array.isArray(cfg.athleteLevels)) APP_CONFIG.athleteLevels=cfg.athleteLevels;
         if(cfg.athleteGoals&&Array.isArray(cfg.athleteGoals)) APP_CONFIG.athleteGoals=cfg.athleteGoals;
         if(cfg.blockColors&&typeof cfg.blockColors==='object') APP_CONFIG.blockColors={...APP_CONFIG.blockColors,...cfg.blockColors};
+        if(cfg.appTitle){APP_CONFIG.appTitle=cfg.appTitle;document.title=cfg.appTitle;}
+        if(cfg.restDayLabel) APP_CONFIG.restDayLabel=cfg.restDayLabel;
+        if(cfg.mobileWeeklyLabels&&Array.isArray(cfg.mobileWeeklyLabels)) APP_CONFIG.mobileWeeklyLabels=cfg.mobileWeeklyLabels;
         if(cfg.blockNames&&Array.isArray(cfg.blockNames)){
           APP_CONFIG.blockNames=cfg.blockNames;
           setBlockNames(cfg.blockNames);
@@ -5830,7 +6329,7 @@ function App(){
 
   // ── Export state as .json ──
   const handleSaveState=(customName)=>{
-    const state={version:1,exportedAt:new Date().toISOString(),sessions};
+    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings()};
     const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
     const a=document.createElement('a');
     const date=toISO(new Date());
@@ -5868,6 +6367,12 @@ function App(){
         });
         setSessions(migrated);
         saveLS(migrated);
+        // restore publisher settings if present
+        if(parsed.settings&&typeof parsed.settings==='object'){
+          saveSettings(parsed.settings);
+          // force page reload so all SchedulePublisher states re-init from localStorage
+          setTimeout(()=>window.location.reload(),300);
+        }
         showToast('Estado carregado com sucesso.');
       }catch(err){
         showToast('Não foi possível carregar o arquivo — verifique se é um .json válido.','err');
@@ -5976,8 +6481,8 @@ function App(){
 }
 ReactDOM.render(React.createElement(App),document.getElementById('root'));
 
-// ── Register service worker for PWA offline support ──
-if('serviceWorker' in navigator){
+// ── Service worker — only on GitHub Pages (not local/sandbox) ──
+if('serviceWorker' in navigator && location.protocol==='https:' && !location.hostname.includes('claudeusercontent')){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('sw.js')
       .catch(e=>console.log('SW registration failed:',e));
