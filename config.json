@@ -1,11 +1,11 @@
 {
-  "appTitle": "Eagles — Treinos",
-  "appDescription": "",
-  "scheduleTitle": "Eagles — Treinos",
-  "leaderboardTitle": "Eagles — Treinos",
+  "appTitle": "MEDRADO — Treinos",
+  "appDescription": "MUDEI O NOME, RECEBA!",
+  "scheduleTitle": "MEDRADO — Treinos",
+  "leaderboardTitle": "MEDRADO — Treinos",
   "themeAccent": "#4ac8c0",
   "themeAccentText": "#000000",
-  "gymName": "Eagles",
+  "gymName": "Team Medrado",
   "fontScale": 1.5,
   "logoScale": 1,
   "zoneScales": [
@@ -21,7 +21,7 @@
   "mobileEaglesBg": "#1a1410",
   "mobileMegaManBg": "#1a1410",
   "mobileExerciseNoteColor": "#4a9aaa",
-  "restDayLabel": "Descanso",
+  "restDayLabel": "Tocar Grama!",
   "mobileWeeklyLabels": [
     "Mobile Semanal Eagles",
     "Mobile Semanal Medrado"
