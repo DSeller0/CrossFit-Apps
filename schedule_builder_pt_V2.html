@@ -77,13 +77,13 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 /* buttons */
 .b{font-family:inherit;font-size:13px;padding:9px 14px;border-radius:6px;border:1px solid #2e2e2e;background:transparent;color:#bbb;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:40px;transition:background .12s,color .12s;user-select:none}
 .b:active{opacity:.65}
-.bp{background:#fff;color:#111;border-color:#fff;font-weight:600}
+.bp{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
 .bp:hover{background:#e8e8e8}
 .bd{color:#d05050;border-color:#2e1a1a}
 .bd:hover{background:#1a0a0a}
 .bsm{padding:6px 9px;font-size:12px;min-height:32px}
 .bfull{width:100%}
-.bsec{background:#e87820;color:#fff;border-color:#e87820;font-weight:600}
+.bsec{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
 .bsec:hover{background:#c86010}
 
 /* session card */
@@ -173,7 +173,7 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .pub-controls{background:#1c1c1c;border:1px solid #272727;border-radius:10px;padding:14px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .pub-view-tabs{display:flex;gap:6px;margin-bottom:12px}
 .pvt{font-family:inherit;font-size:12px;padding:7px 14px;border-radius:5px;border:1px solid #2e2e2e;background:transparent;color:#888;cursor:pointer;transition:all .12s}
-.pvt.on{background:#e87820;color:#fff;border-color:#e87820;font-weight:600}
+.pvt.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
 
 /* ── daily view — Eagles TV style — all font sizes use calc(Xpx * var(--fs,1)) ── */
 .dv-wrap{background:#000;color:#fff;width:1920px;height:1080px;display:flex;flex-direction:column;overflow:hidden;font-family:var(--export-font)}
@@ -264,7 +264,7 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .res-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
 .res-section-title{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
 .athlete-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;border:1px solid #2e2e2e;background:#111;cursor:pointer;font-size:13px;color:#ccc;transition:all .12s;-webkit-tap-highlight-color:transparent;margin:3px}
-.athlete-chip.active{background:#e87820;color:#000;border-color:#e87820;font-weight:700}
+.athlete-chip.active{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:700}
 .athlete-chip:hover:not(.active){border-color:#444;color:#fff}
 .rpe-track{display:flex;gap:4px;flex-wrap:wrap}
 .rpe-btn{width:36px;height:36px;border-radius:5px;border:1px solid #2e2e2e;background:#111;color:#888;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;font-family:inherit;-webkit-tap-highlight-color:transparent}
@@ -277,7 +277,7 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .res-block-hdr{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px}
 .kpi-card{background:#141414;border:1px solid #222;border-radius:8px;padding:12px}
-.kpi-val{font-size:28px;font-weight:900;color:#e87820;font-family:var(--export-font);line-height:1}
+.kpi-val{font-size:28px;font-weight:900;color:var(--theme-accent);font-family:var(--export-font);line-height:1}
 .kpi-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
 .kpi-sub{font-size:12px;color:#888;margin-top:3px}
 .mini-bar{height:6px;background:#222;border-radius:3px;margin-top:6px;overflow:hidden}
@@ -2152,7 +2152,7 @@ function SchedulePublisher({sessions}){
       React.createElement('div',{style:{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}},
         React.createElement('button',{
           type:'button',className:'b',
-          style:{borderColor:'#e87820',color:previewOpen?'#000':'#e87820',background:previewOpen?'#e87820':'transparent'},
+          style:{borderColor:'var(--theme-accent)',color:previewOpen?'var(--theme-accent-text)':'var(--theme-accent)',background:previewOpen?'var(--theme-accent)':'transparent'},
           onClick:()=>setPreviewOpen(p=>!p)
         },
           React.createElement('i',{className:'ti ti-eye','aria-hidden':'true'}),
@@ -2177,7 +2177,7 @@ function SchedulePublisher({sessions}){
         }, React.createElement('i',{className:'ti ti-calendar-down','aria-hidden':'true'}),' Calendário'),
         React.createElement('button',{
           type:'button',className:'b bsm',
-          style:{fontSize:'12px',background:'#e87820',color:'#000',borderColor:'#e87820',fontWeight:700},
+          style:{fontSize:'12px',background:'var(--theme-accent)',color:'var(--theme-accent-text)',borderColor:'var(--theme-accent)',fontWeight:700},
           onClick:()=>doMobileExport('A'),disabled:exporting
         }, React.createElement('i',{className:'ti ti-device-mobile','aria-hidden':'true'}),' Mobile Eagles'),
         React.createElement('button',{
@@ -2187,7 +2187,7 @@ function SchedulePublisher({sessions}){
         }, React.createElement('i',{className:'ti ti-device-mobile','aria-hidden':'true'}),' Mobile Mega Man'),
         React.createElement('button',{
           type:'button',className:'b bsm',
-          style:{fontSize:'11px',background:'#e87820',color:'#000',borderColor:'#e87820',fontWeight:700},
+          style:{fontSize:'11px',background:'var(--theme-accent)',color:'var(--theme-accent-text)',borderColor:'var(--theme-accent)',fontWeight:700},
           onClick:()=>doMobileWeeklyExport('A'),disabled:exporting
         }, React.createElement('i',{className:'ti ti-layout-list','aria-hidden':'true'}),' ',(APP_CONFIG.mobileWeeklyLabels?.[0]||'Mobile Semanal Eagles').slice(0,15)),
         React.createElement('button',{
@@ -2208,7 +2208,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
         React.createElement('button',{type:'button',className:`pvt ${previewTarget==='calendar'?'on':''}`,onClick:()=>setPreviewTarget('calendar')},'Calendário'),
         React.createElement('button',{type:'button',
           className:`pvt ${previewTarget==='mobileA'?'on':''}`,
-          style:previewTarget==='mobileA'?{background:'#e87820',borderColor:'#e87820',color:'#000'}:{color:'#e87820',borderColor:'#e87820'},
+          style:previewTarget==='mobileA'?{background:'var(--theme-accent)',borderColor:'var(--theme-accent)',color:'var(--theme-accent-text)'}:{color:'var(--theme-accent)',borderColor:'var(--theme-accent)'},
           onClick:()=>setPreviewTarget('mobileA')},'Mobile Eagles'),
         React.createElement('button',{type:'button',
           className:`pvt ${previewTarget==='mobileB'?'on':''}`,
@@ -2216,7 +2216,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
           onClick:()=>setPreviewTarget('mobileB')},'Mobile Mega Man'),
         React.createElement('button',{type:'button',
           className:`pvt ${previewTarget==='mobileWeeklyA'?'on':''}`,
-          style:previewTarget==='mobileWeeklyA'?{background:'#e87820',borderColor:'#e87820',color:'#000'}:{color:'#e87820',borderColor:'#e87820'},
+          style:previewTarget==='mobileWeeklyA'?{background:'var(--theme-accent)',borderColor:'var(--theme-accent)',color:'var(--theme-accent-text)'}:{color:'var(--theme-accent)',borderColor:'var(--theme-accent)'},
           onClick:()=>setPreviewTarget('mobileWeeklyA')},
           (APP_CONFIG.mobileWeeklyLabels?.[0]||'Mobile Semanal Eagles').slice(0,15)),
         React.createElement('button',{type:'button',
@@ -2245,7 +2245,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
           const active=selectedWeekIdx===wi;
           return React.createElement('button',{
             key:wi,type:'button',className:'b bsm',
-            style:{background:active?'#e87820':'transparent',color:active?'#000':'#e87820',borderColor:'#e87820',fontSize:'11px',padding:'5px 10px'},
+            style:{background:active?'var(--theme-accent)':'transparent',color:active?'var(--theme-accent-text)':'var(--theme-accent)',borderColor:'var(--theme-accent)',fontSize:'11px',padding:'5px 10px'},
             onClick:()=>setSelectedWeekIdx(wi)
           },`${fmt(mon)}–${fmt(fri)}`);
         })
@@ -2319,7 +2319,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
           return React.createElement('button',{
             key:dateKey,type:'button',
             className:'b bsm',
-            style:{background:active?'#e87820':'transparent',color:active?'#000':'#e87820',borderColor:'#e87820',fontSize:'11px',padding:'5px 10px'},
+            style:{background:active?'var(--theme-accent)':'transparent',color:active?'var(--theme-accent-text)':'var(--theme-accent)',borderColor:'var(--theme-accent)',fontSize:'11px',padding:'5px 10px'},
             onClick:()=>{
               setSelectedDate(dateKey);
               const weeks=getWeeksOfMonth(new Date(dateKey+'T12:00:00').getFullYear(),new Date(dateKey+'T12:00:00').getMonth());
@@ -2477,7 +2477,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
           React.createElement('div',{style:{display:'flex',gap:'6px'}},
             [2,3].map(s=>React.createElement('button',{
               key:s,type:'button',className:'b bsm',
-              style:{background:exportScale===s?'#e87820':'transparent',color:exportScale===s?'#000':'#888',borderColor:exportScale===s?'#e87820':'#2e2e2e'},
+              style:{background:exportScale===s?'var(--theme-accent)':'transparent',color:exportScale===s?'var(--theme-accent-text)':'#888',borderColor:exportScale===s?'var(--theme-accent)':'#2e2e2e'},
               onClick:()=>setExportScale(s)
             },`${s}× ${s===2?'(2160px)':'(3240px)'}`))
           )
@@ -3465,7 +3465,7 @@ function LogView({athletes,sessions}){
         React.createElement('div',{style:{display:'flex',gap:'8px',flexWrap:'wrap'}},
           PRESENCE.map(p=>React.createElement('button',{
             key:p,type:'button',className:'b bsm',
-            style:{background:presence===p?'#e87820':'transparent',color:presence===p?'#000':'#bbb',borderColor:presence===p?'#e87820':'#2e2e2e'},
+            style:{background:presence===p?'var(--theme-accent)':'transparent',color:presence===p?'var(--theme-accent-text)':'#bbb',borderColor:presence===p?'var(--theme-accent)':'#2e2e2e'},
             onClick:()=>setPresence(p)
           },p))
         )
@@ -4513,7 +4513,7 @@ function ResultadosTab({sessions}){
         React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'12px'}},
           React.createElement('span',{style:{fontSize:'14px',fontWeight:700,color:'#fff'}},'Roster'),
           React.createElement('button',{type:'button',className:'b bsm',
-            style:{borderColor:'#e87820',color:'#e87820'},
+            style:{borderColor:'var(--theme-accent)',color:'var(--theme-accent)'},
             onClick:()=>setShowAddAthlete(p=>!p)
           }, React.createElement('i',{className:'ti ti-plus'}), showAddAthlete?' Cancelar':' Novo atleta')
         ),
@@ -4703,7 +4703,7 @@ function ResultadosTab({sessions}){
               React.createElement('div',{style:{display:'flex',gap:'3px',alignItems:'flex-end',height:'32px'}},
                 sorted.map((e,i)=>
                   React.createElement('div',{key:i,style:{
-                    flex:1,background:'#e87820',borderRadius:'2px 2px 0 0',
+                    flex:1,background:'var(--theme-accent)',borderRadius:'2px 2px 0 0',
                     height:`${max>0?(e.load/max*100):0}%`,
                     minHeight:'4px',opacity:.6+.4*(e.load/max),
                     title:`${e.date}: ${e.load}kg`
@@ -4753,7 +4753,7 @@ function App(){
     const isEmpty=Object.keys(loadLS()).length===0;
     // Only fetch if on a served origin (not file://)
     if(!isEmpty||window.location.protocol==='file:') return;
-    fetch('./config.json')
+    fetch('./config.json?v='+Date.now())
       .then(r=>r.ok?r.json():null)
       .catch(()=>null)
       .then(cfg=>{
