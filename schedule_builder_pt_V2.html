@@ -25,6 +25,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#e0e0e0;-webkit-text-size-adjust:100%}
+:root{--theme-accent:#00b8d4;--theme-accent-text:#000000}
 #root{max-width:1440px;margin:0 auto}
 
 /* chrome */
@@ -45,6 +46,17 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .tab3.on{color:#fff;border-bottom-color:#fff}
 .tab3:hover:not(.on){color:#bbb}
 .pane{padding:14px}
+/* ── Themed panes — Resultados + Publicador ── */
+.res-pane .b.bp,.pub-pane .b.bp{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
+.res-pane .b.bsec,.pub-pane .b.bsec{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
+.res-pane .res-tab.on,.pub-pane .pvt.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
+.res-pane .log-block-title,.pub-pane .pub-section-title{color:var(--theme-accent)}
+.res-pane .kpi-val{color:var(--theme-accent)}
+.res-pane .athlete-chip.active{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
+.res-pane .rpe-hp-slider::-webkit-slider-thumb,.pub-pane .rpe-hp-slider::-webkit-slider-thumb{background:var(--theme-accent)}
+.res-pane input[type=range],.pub-pane input[type=range]{accent-color:var(--theme-accent)}
+.res-pane .sc-card.drag-over-session,.pub-pane .blk-wrap.drag-over{border-color:var(--theme-accent)}
+.res-pane a,.pub-pane a{color:var(--theme-accent)}
 
 /* form */
 .lbl{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:3px;display:block}
@@ -279,6 +291,13 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 
 @keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,120,32,.5)}50%{box-shadow:0 0 0 6px rgba(232,120,32,0)}}
 .drag-handle{cursor:grab;color:#444;padding:0 6px;display:flex;align-items:center;font-size:16px;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.drag-handle.dnd-disabled{cursor:default;opacity:.2;pointer-events:none}
+.collapse-btn{font-family:inherit;font-size:13px;background:transparent;border:none;color:#555;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .12s;flex-shrink:0;line-height:1;display:flex;align-items:center}
+.collapse-btn:hover{color:#bbb}
+.blk-collapsed .blk-body{display:none}
+.collapse-all-row{display:flex;gap:6px;margin-bottom:8px}
+.collapse-all-btn{font-family:inherit;font-size:11px;color:#555;background:transparent;border:1px solid #252525;border-radius:4px;padding:4px 10px;cursor:pointer;transition:all .12s}
+.collapse-all-btn:hover{color:#aaa;border-color:#444}
 .drag-handle:active{cursor:grabbing;color:#e87820}
 .blk-wrap.drag-over{border-color:#e87820;box-shadow:0 0 0 2px rgba(232,120,32,.3)}
 .ex-card.drag-over{border-color:#e87820}
@@ -400,6 +419,9 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .pd-atrasado{background:#e0a030}
 .flag-icon{color:#e05050;font-size:13px}
 .empty-state{text-align:center;padding:2rem;color:#555;font-size:13px}
+
+/* ── Leaderboard ── */
+.lb-empty{text-align:center;padding:2rem;color:#333;font-family:'Courier New',monospace;font-size:13px}
 </style>
 </head>
 <body>
@@ -424,10 +446,15 @@ const APP_CONFIG={
   blockColors:{},
   blockNames:['-','WOD','Skill','Core','Acessórios','LPO','Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso'],
   appTitle:'Eagles — Treinos',
+  themeAccent:'#00b8d4',
+  themeAccentText:'#000000',
+  exportScale:2,
   restDayLabel:'Descanso',
   mobileWeeklyLabels:['Mobile Semanal Eagles','Mobile Semanal Medrado']
 };
 document.title=APP_CONFIG.appTitle;
+document.documentElement.style.setProperty('--theme-accent',APP_CONFIG.themeAccent);
+document.documentElement.style.setProperty('--theme-accent-text',APP_CONFIG.themeAccentText);
 
 const DEFAULT_TYPES=['Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso'];
 const TYPES=DEFAULT_TYPES; // kept for colour maps; block name pool comes from APP_CONFIG.blockNames
@@ -710,7 +737,7 @@ const emptyBlock=()=>({id:uid(),label:APP_CONFIG.blockNames[0]||'-',type:APP_CON
 const emptyS=()=>({id:uid(),date:todayISO(),mainTraining:'',blocks:[emptyBlock()]});
 
 // ── BlockEditor ───────────────────────────────────────────
-function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete}){
+function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete,collapsed,onToggleCollapse}){
   const updEx=(id,f,val)=>onUpdate({...block,exercises:block.exercises.map(x=>{
     if(x.id!==id) return x;
     const updated={...x,[f]:val};
@@ -744,6 +771,16 @@ function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete}){
 
   return React.createElement('div',{className:`blk-wrap ${cls}`},
     React.createElement('div',{className:'blk-bar'},
+      // Collapse toggle — drag handle only active when collapsed
+      React.createElement('span',{
+        className:`drag-handle${collapsed?'':' dnd-disabled'}`,
+        title:collapsed?'Arrastar para reordenar':'Recolher bloco para arrastar'
+      }, React.createElement('i',{className:'ti ti-grip-vertical'})),
+      React.createElement('button',{
+        type:'button',className:'collapse-btn',
+        onClick:onToggleCollapse,
+        title:collapsed?'Expandir':'Recolher'
+      }, React.createElement('i',{className:`ti ${collapsed?'ti-chevron-right':'ti-chevron-down'}`})),
       // Block index
       React.createElement('span',{className:'blk-idx'},`Bloco ${idx+1}`),
       // Label selector — WOD, Skill, - etc.
@@ -799,7 +836,7 @@ function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete}){
         onClick:onDelete
       }, React.createElement('i',{className:'ti ti-trash','aria-hidden':'true'}))
     ),
-    React.createElement('div',{className:'blk-body'},
+    !collapsed&&React.createElement('div',{className:'blk-body'},
       block.exercises.map((ex,ei)=>
         React.createElement('div',{
           key:ex.id,
@@ -971,7 +1008,8 @@ function TrainingCreator({sessions,setSessions,blockNames}){
 
   // week navigation state — 0 = current week
   const [weekOffset,setWeekOffset]=useState(0);
-  const [pendingDate,setPendingDate]=useState(null); // {newDate, oldDate} for confirm dialog
+  const [pendingDate,setPendingDate]=useState(null);
+  const [collapsedBlocks,setCollapsedBlocks]=useState({}); // {blockId: true} // {newDate, oldDate} for confirm dialog
   // build week starting Sunday
   const getSundayWeek=(offset)=>{
     const d=new Date();
@@ -1049,11 +1087,18 @@ function TrainingCreator({sessions,setSessions,blockNames}){
         )
       ),
       React.createElement('div',{style:{borderTop:'1px solid #242424',paddingTop:'14px',marginTop:'4px'}},
-        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px'}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}},
           React.createElement('span',{style:{fontSize:'12px',fontWeight:'700',color:'#888',textTransform:'uppercase',letterSpacing:'.06em'}},
             `${blocks.length} Bloco${blocks.length!==1?'s':''}`
           ),
-          React.createElement('span',{style:{fontSize:'11px',color:'#333'}},'Defina a zona de cada bloco para a visualização diária')
+          React.createElement('div',{className:'collapse-all-row',style:{margin:0}},
+            React.createElement('button',{type:'button',className:'collapse-all-btn',
+              onClick:()=>setCollapsedBlocks(Object.fromEntries(blocks.map(b=>[b.id,true])))
+            }, React.createElement('i',{className:'ti ti-arrows-minimize'}),' Recolher'),
+            React.createElement('button',{type:'button',className:'collapse-all-btn',
+              onClick:()=>setCollapsedBlocks({})
+            }, React.createElement('i',{className:'ti ti-arrows-maximize'}),' Expandir')
+          )
         ),
         blocks.map((bl,i)=>
           React.createElement('div',{
@@ -1093,7 +1138,9 @@ function TrainingCreator({sessions,setSessions,blockNames}){
                 React.createElement(BlockEditor,{
                   block:bl,idx:i,total:blocks.length,
                   onUpdate:upd=>updBlock(bl.id,upd),
-                  onDelete:()=>delBlock(bl.id)
+                  onDelete:()=>delBlock(bl.id),
+              collapsed:!!collapsedBlocks[bl.id],
+              onToggleCollapse:()=>setCollapsedBlocks(p=>({...p,[bl.id]:!p[bl.id]}))
                 })
               )
             )
@@ -1740,6 +1787,7 @@ function SchedulePublisher({sessions}){
   const [selectedDate,setSelectedDate]=useState(null);
   // ── Load persisted settings ──
   const _savedSettings=loadSettings();
+  const [exportScale,setExportScale]=useState(_savedSettings.exportScale||2);
   const [fontScale,setFontScale]=useState(_savedSettings.fontScale??1.5);
   const [zoneScales,setZoneScales]=useState(_savedSettings.zoneScales||[1,1,1]);
   const [blockTitleScales,setBlockTitleScales]=useState(_savedSettings.blockTitleScales||[1,1,1]);
@@ -1797,6 +1845,7 @@ function SchedulePublisher({sessions}){
   const [mmBlockHdr,setMmBlockHdr]=useState(_sc.mmBlockHdr||'rgba(0,184,212,0.12)');
   const [mmDivider,setMmDivider]=useState(_sc.mmDivider||'rgba(0,184,212,0.1)');
   const [previewScale,setPreviewScale]=useState(1);
+  useEffect(()=>{APP_CONFIG.exportScale=exportScale;},[exportScale]);
   useEffect(()=>{APP_CONFIG.mobileEaglesBg=eaglesBg;},[eaglesBg]);
   useEffect(()=>{APP_CONFIG.mobileMegaManBg=megaManBg;},[megaManBg]);
   useEffect(()=>{APP_CONFIG.mobileExerciseNoteColor=noteColor;},[noteColor]);
@@ -1804,7 +1853,7 @@ function SchedulePublisher({sessions}){
   // ── Persist all publisher settings to localStorage ──
   useEffect(()=>{
     saveSettings({
-      fontScale,zoneScales,blockTitleScales,gymName,label,
+      fontScale,zoneScales,blockTitleScales,gymName,label,exportScale,
       colors:{
         dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvCap,dvRounds,
         dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
@@ -1815,7 +1864,7 @@ function SchedulePublisher({sessions}){
         mmExName,mmIntensity,mmBlockHdr,mmDivider
       }
     });
-  },[fontScale,zoneScales,blockTitleScales,gymName,label,
+  },[fontScale,zoneScales,blockTitleScales,gymName,label,exportScale,
      dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvCap,dvRounds,
      dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
      wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
@@ -1917,7 +1966,7 @@ function SchedulePublisher({sessions}){
     await new Promise(r=>setTimeout(r,250));
     try{
       const W=1080;const H=el.scrollHeight||3000;
-      const cv=await html2canvas(el,{scale:2,backgroundColor:variant==='A'?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000'),useCORS:true,logging:false,width:W,height:H,windowWidth:W});
+      const cv=await html2canvas(el,{scale:APP_CONFIG.exportScale||2,backgroundColor:variant==='A'?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000'),useCORS:true,logging:false,width:W,height:H,windowWidth:W});
       const out=document.createElement('canvas');
       out.width=W*2;out.height=H*2;
       const ctx=out.getContext('2d');
@@ -2397,7 +2446,17 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
             return (sections[settingsView]||[]).map(row);
           })()
         ),
-        React.createElement('div',{style:{padding:'8px 16px',fontSize:'11px',color:'#444',borderTop:'1px solid #252525'}},
+        React.createElement('div',{style:{padding:'10px 16px',borderTop:'1px solid #252525'}},
+          React.createElement('div',{style:{fontSize:'11px',color:'#555',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'8px'}},'Resolução do export'),
+          React.createElement('div',{style:{display:'flex',gap:'6px'}},
+            [2,3].map(s=>React.createElement('button',{
+              key:s,type:'button',className:'b bsm',
+              style:{background:exportScale===s?'#e87820':'transparent',color:exportScale===s?'#000':'#888',borderColor:exportScale===s?'#e87820':'#2e2e2e'},
+              onClick:()=>setExportScale(s)
+            },`${s}× ${s===2?'(2160px)':'(3240px)'}`))
+          )
+        ),
+        React.createElement('div',{style:{padding:'6px 16px 10px',fontSize:'11px',color:'#444'}},
           'Arraste pelo topo para mover. Cores também configuráveis em config.json no GitHub.'
         )
       )
@@ -2593,6 +2652,176 @@ function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName
       )
     ),
     (s.blocks||[]).map(bl=>React.createElement(MobileBlockB,{key:bl.id,bl,fs:f,colors:col}))
+  );
+}
+
+
+
+// ── Leaderboard helpers ───────────────────────────────────────────────────────
+const WOD_BLOCK_TYPES=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
+
+function rankResults(results,blockType){
+  // sort by performance: For Time → time asc; AMRAP/EMOM → rounds desc then reps desc
+  const isForTime=blockType==='For Time';
+  return [...results].sort((a,b)=>{
+    if(isForTime){
+      // parse time mm:ss → seconds; missing = infinity
+      const toSecs=s=>{if(!s)return Infinity;const p=s.split(':');return p.length===2?parseInt(p[0])*60+parseInt(p[1]):parseInt(s)||Infinity;};
+      return toSecs(a.perfTime)-toSecs(b.perfTime);
+    }else{
+      // rounds desc, then reps desc
+      const ra=parseInt(a.perfRounds)||0,rb=parseInt(b.perfRounds)||0;
+      if(ra!==rb)return rb-ra;
+      return (parseInt(b.perfReps)||0)-(parseInt(a.perfReps)||0);
+    }
+  });
+}
+
+function getPerformanceStr(r,blockType){
+  const isForTime=blockType==='For Time';
+  if(isForTime) return r.perfTime||'—';
+  const parts=[];
+  if(r.perfRounds) parts.push(`${r.perfRounds} rds`);
+  if(r.perfReps) parts.push(`${r.perfReps} reps`);
+  return parts.join(' + ')||'—';
+}
+
+function LeaderboardView({athletes,sessions}){
+  const [results]=useState(loadResults);
+  const [selWod,setSelWod]=useState('');
+  const [scaleFilter,setScaleFilter]=useState('Todos');
+  const [imgRef]=useState(()=>React.createRef());
+
+  // Build WOD list: all blocks that are WOD type and have results
+  const wodList=React.useMemo(()=>{
+    const list=[];
+    Object.entries(sessions).sort(([a],[b])=>b.localeCompare(a)).forEach(([dateKey,daySessions])=>{
+      (daySessions||[]).forEach(sess=>{
+        (sess.blocks||[]).filter(bl=>WOD_BLOCK_TYPES.includes(bl.label)||WOD_BLOCK_TYPES.includes(bl.type)).forEach(bl=>{
+          const hasResults=results.some(r=>r.date===dateKey&&r.sessionId===sess.id&&r.presence==='Presente'&&(r.blocks||[]).some(rb=>rb.blockId===bl.id&&(rb.perfTime||rb.perfRounds||rb.perfReps)));
+          if(hasResults){
+            const dt=new Date(dateKey+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
+            const label=bl.label&&bl.label!=='-'?bl.label:bl.type;
+            const meta=[bl.rounds&&`${bl.rounds}rds`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' ');
+            list.push({key:`${dateKey}|${sess.id}|${bl.id}`,dateKey,sessId:sess.id,blId:bl.id,blType:bl.type,blLabel:label,meta,sessName:sess.mainTraining||'',dt});
+          }
+        });
+      });
+    });
+    return list;
+  },[sessions,results]);
+
+  const selWodObj=wodList.find(w=>w.key===selWod)||null;
+
+  // Get ranked results for selected WOD
+  const wodResults=React.useMemo(()=>{
+    if(!selWodObj) return [];
+    return results.filter(r=>
+      r.date===selWodObj.dateKey&&
+      r.sessionId===selWodObj.sessId&&
+      r.presence==='Presente'
+    ).map(r=>{
+      const blk=(r.blocks||[]).find(b=>b.blockId===selWodObj.blId)||null;
+      return blk?{...r,perfTime:blk.perfTime,perfRounds:blk.perfRounds,perfReps:blk.perfReps,scale:blk.scale||'-'}:null;
+    }).filter(r=>r&&(r.perfTime||r.perfRounds||r.perfReps));
+  },[selWodObj,results]);
+
+  const scales=['Todos','RX','Inter','SC','Adaptado'];
+  const filtered=scaleFilter==='Todos'?wodResults:wodResults.filter(r=>r.scale===scaleFilter);
+  const ranked=selWodObj?rankResults(filtered,selWodObj.blType):[];
+
+  const podiumColors=['#ffd700','#c0c0c0','#cd7f32'];
+  const podiumLabels=['1º','2º','3º'];
+
+  const doExportLeaderboard=async()=>{
+    const el=imgRef.current;if(!el)return;
+    const cv=await html2canvas(el,{scale:APP_CONFIG.exportScale||2,backgroundColor:APP_CONFIG.mobileMegaManBg||'#000',useCORS:true,logging:false,width:1080,height:el.scrollHeight,windowWidth:1080});
+    const out=document.createElement('canvas');out.width=cv.width;out.height=cv.height;
+    const ctx=out.getContext('2d');ctx.drawImage(cv,0,0);
+    const a=document.createElement('a');
+    const lbl=selWodObj?`${selWodObj.dt}-${selWodObj.blLabel}-${scaleFilter}`.replace(/[^a-zA-Z0-9\-]/g,'-').toLowerCase():'leaderboard';
+    a.download=`eagles-leaderboard-${lbl}.png`;a.href=out.toDataURL('image/png');a.click();
+  };
+
+  return React.createElement('div',null,
+    // WOD selector
+    React.createElement('div',{className:'sc-card',style:{padding:'12px',marginBottom:'10px'}},
+      React.createElement('div',{className:'g2'},
+        React.createElement('div',{className:'fg'},
+          React.createElement('span',{className:'lbl'},'Selecionar WOD'),
+          React.createElement('select',{value:selWod,onChange:e=>setSelWod(e.target.value)},
+            React.createElement('option',{value:''},'— Selecionar WOD —'),
+            wodList.map(w=>React.createElement('option',{key:w.key,value:w.key},
+              `${w.dt} ${w.sessName?'('+w.sessName+') ':''}- ${w.blLabel}${w.meta?' · '+w.meta:''}`
+            ))
+          )
+        ),
+        React.createElement('div',{className:'fg'},
+          React.createElement('span',{className:'lbl'},'Escala'),
+          React.createElement('div',{style:{display:'flex',gap:'4px',flexWrap:'wrap'}},
+            scales.map(s=>React.createElement('button',{
+              key:s,type:'button',className:'b bsm',
+              style:{background:scaleFilter===s?'var(--theme-accent)':'transparent',color:scaleFilter===s?'var(--theme-accent-text)':'#888',borderColor:scaleFilter===s?'var(--theme-accent)':'#2e2e2e',fontSize:'11px'},
+              onClick:()=>setScaleFilter(s)
+            },s))
+          )
+        )
+      )
+    ),
+    // Leaderboard table
+    selWodObj&&React.createElement('div',null,
+      // Render target for image export
+      React.createElement('div',{ref:imgRef,style:{background:APP_CONFIG.mobileMegaManBg||'#000',width:'1080px',transform:`scale(${Math.min(1,(window.innerWidth-28)/1080)})`,transformOrigin:'top left',marginBottom:`-${1080*(1-Math.min(1,(window.innerWidth-28)/1080))}px`}},
+        // Header
+        React.createElement('div',{style:{background:'#000',padding:'20px 28px 16px',borderBottom:`3px solid ${APP_CONFIG.themeAccent||'#00b8d4'}`}},
+          React.createElement('div',{style:{fontFamily:"'Courier New',monospace",fontSize:'22px',fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},'Leaderboard'),
+          React.createElement('div',{style:{fontFamily:"'Courier New',monospace",fontSize:'14px',color:APP_CONFIG.themeAccent||'#00b8d4',marginTop:'4px',textTransform:'uppercase',letterSpacing:'.06em'}},
+            `${selWodObj.dt} · ${selWodObj.blLabel}${selWodObj.meta?' · '+selWodObj.meta:''}${scaleFilter!=='Todos'?' · '+scaleFilter:''}`
+          )
+        ),
+        // Rows
+        React.createElement('div',{style:{padding:'12px 0'}},
+          ranked.length===0
+            ?React.createElement('div',{style:{padding:'20px 28px',color:'#333',fontFamily:"'Courier New',monospace",fontSize:'13px'}},'Nenhum resultado para esta seleção.')
+            :ranked.map((r,ri)=>{
+              const ath=athletes.find(a=>a.id===r.athleteId);
+              const perf=getPerformanceStr(r,selWodObj.blType);
+              const isPodium=ri<3;
+              const podColor=isPodium?podiumColors[ri]:null;
+              return React.createElement('div',{key:r.id,style:{
+                display:'flex',alignItems:'center',gap:'16px',
+                padding:'12px 28px',
+                borderBottom:'1px solid #0d1e1e',
+                background:isPodium?`rgba(${ri===0?'255,215,0':ri===1?'192,192,192':'205,127,50'},0.06)`:ri%2===0?'#020809':'#000'
+              }},
+                // rank
+                React.createElement('div',{style:{fontFamily:"'Courier New',monospace",fontSize:'18px',fontWeight:900,color:podColor||'#333',width:'32px',flexShrink:0,textAlign:'center'}},
+                  isPodium?podiumLabels[ri]:`${ri+1}º`
+                ),
+                // colour dot + name
+                React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',flex:1,minWidth:0}},
+                  React.createElement('div',{style:{width:'10px',height:'10px',borderRadius:'50%',background:ath?.color||'#555',flexShrink:0}}),
+                  React.createElement('span',{style:{fontFamily:"'Courier New',monospace",fontSize:'16px',fontWeight:700,color:'#fff',textTransform:'uppercase',letterSpacing:'.04em',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},
+                    ath?.name||'—'
+                  )
+                ),
+                // scale badge
+                r.scale&&r.scale!=='-'&&React.createElement('span',{style:{fontFamily:"'Courier New',monospace",fontSize:'11px',fontWeight:700,color:APP_CONFIG.themeAccent||'#00b8d4',background:'rgba(0,184,212,0.1)',border:`1px solid ${APP_CONFIG.themeAccent||'#00b8d4'}`,borderRadius:'3px',padding:'2px 8px',flexShrink:0}},r.scale),
+                // performance
+                React.createElement('div',{style:{fontFamily:"'Courier New',monospace",fontSize:'16px',fontWeight:900,color:isPodium?podColor:'#fff',flexShrink:0,textAlign:'right'}},perf)
+              );
+            })
+        )
+      ),
+      // Export button (outside render target)
+      React.createElement('button',{
+        type:'button',className:'b bsec',style:{marginTop:'10px',width:'100%'},
+        onClick:doExportLeaderboard,disabled:ranked.length===0
+      },
+        React.createElement('i',{className:'ti ti-download'}),' Gerar imagem do leaderboard'
+      )
+    ),
+    !selWodObj&&React.createElement('div',{className:'empty-state'},'Selecione um WOD para ver o ranking.')
   );
 }
 
@@ -3267,7 +3496,7 @@ function ResultsTab({sessions}){
 
   return React.createElement('div',null,
     React.createElement('div',{className:'res-tabs'},
-      [['log','ti-pencil','Registrar'],['history','ti-chart-bar','Histórico / KPIs'],['roster','ti-users','Atletas']].map(([id,icon,lbl])=>
+      [['log','ti-pencil','Registrar'],['history','ti-chart-bar','Histórico / KPIs'],['leaderboard','ti-trophy','Leaderboard'],['roster','ti-users','Atletas']].map(([id,icon,lbl])=>
         React.createElement('button',{key:id,type:'button',className:`res-tab ${subView===id?'on':''}`,onClick:()=>setSubView(id)},
           React.createElement('i',{className:`ti ${icon}`}), ' '+lbl
         )
@@ -3275,7 +3504,8 @@ function ResultsTab({sessions}){
     ),
     subView==='log'&&React.createElement(LogView,{athletes,sessions}),
     subView==='roster'&&React.createElement(RosterView,{athletes,setAthletes}),
-    subView==='history'&&React.createElement(HistoryView,{athletes,sessions})
+    subView==='history'&&React.createElement(HistoryView,{athletes,sessions}),
+    subView==='leaderboard'&&React.createElement(LeaderboardView,{athletes,sessions})
   );
 }
 
@@ -4144,6 +4374,8 @@ function App(){
         if(cfg.athleteGoals&&Array.isArray(cfg.athleteGoals)) APP_CONFIG.athleteGoals=cfg.athleteGoals;
         if(cfg.blockColors&&typeof cfg.blockColors==='object') APP_CONFIG.blockColors={...APP_CONFIG.blockColors,...cfg.blockColors};
         if(cfg.appTitle){APP_CONFIG.appTitle=cfg.appTitle;document.title=cfg.appTitle;}
+        if(cfg.themeAccent){APP_CONFIG.themeAccent=cfg.themeAccent;document.documentElement.style.setProperty('--theme-accent',cfg.themeAccent);}
+        if(cfg.themeAccentText){APP_CONFIG.themeAccentText=cfg.themeAccentText;document.documentElement.style.setProperty('--theme-accent-text',cfg.themeAccentText);}
         if(cfg.restDayLabel) APP_CONFIG.restDayLabel=cfg.restDayLabel;
         if(cfg.mobileWeeklyLabels&&Array.isArray(cfg.mobileWeeklyLabels)) APP_CONFIG.mobileWeeklyLabels=cfg.mobileWeeklyLabels;
         if(cfg.blockNames&&Array.isArray(cfg.blockNames)){
@@ -4173,7 +4405,7 @@ function App(){
 
   // ── Export state as .json ──
   const handleSaveState=(customName)=>{
-    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings()};
+    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings(),results:loadResults(),athletes:loadAthletes()};
     const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
     const a=document.createElement('a');
     const date=toISO(new Date());
@@ -4318,8 +4550,8 @@ function App(){
         :tab==='parser'
         ?React.createElement(TextParser,{sessions,setSessions,setTab})
         :tab==='results'
-        ?React.createElement(ResultsTab,{sessions})
-        :React.createElement(SchedulePublisher,{sessions})
+        ?React.createElement('div',{className:'res-pane'},React.createElement(ResultsTab,{sessions}))
+        :React.createElement('div',{className:'pub-pane'},React.createElement(SchedulePublisher,{sessions}))
     )
   );
 }
@@ -4334,7 +4566,7 @@ if('serviceWorker' in navigator && location.protocol==='https:' && !location.hos
 }
 
 // ── BlockEditor ───────────────────────────────────────────
-function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete}){
+function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete,collapsed,onToggleCollapse}){
   const updEx=(id,f,val)=>onUpdate({...block,exercises:block.exercises.map(x=>x.id===id?{...x,[f]:val}:x)});
   const addEx=()=>onUpdate({...block,exercises:[...block.exercises,emptyEx()]});
   const delEx=id=>onUpdate({...block,exercises:block.exercises.filter(x=>x.id!==id)});
@@ -4356,6 +4588,16 @@ function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete}){
 
   return React.createElement('div',{className:`blk-wrap ${cls}`},
     React.createElement('div',{className:'blk-bar'},
+      // Collapse toggle — drag handle only active when collapsed
+      React.createElement('span',{
+        className:`drag-handle${collapsed?'':' dnd-disabled'}`,
+        title:collapsed?'Arrastar para reordenar':'Recolher bloco para arrastar'
+      }, React.createElement('i',{className:'ti ti-grip-vertical'})),
+      React.createElement('button',{
+        type:'button',className:'collapse-btn',
+        onClick:onToggleCollapse,
+        title:collapsed?'Expandir':'Recolher'
+      }, React.createElement('i',{className:`ti ${collapsed?'ti-chevron-right':'ti-chevron-down'}`})),
       // Block index
       React.createElement('span',{className:'blk-idx'},`Bloco ${idx+1}`),
       // Label selector — WOD, Skill, - etc.
@@ -4580,7 +4822,8 @@ function TrainingCreator({sessions,setSessions,blockNames}){
 
   // week navigation state — 0 = current week
   const [weekOffset,setWeekOffset]=useState(0);
-  const [pendingDate,setPendingDate]=useState(null); // {newDate, oldDate} for confirm dialog
+  const [pendingDate,setPendingDate]=useState(null);
+  const [collapsedBlocks,setCollapsedBlocks]=useState({}); // {blockId: true} // {newDate, oldDate} for confirm dialog
   // build week starting Sunday
   const getSundayWeek=(offset)=>{
     const d=new Date();
@@ -4658,11 +4901,18 @@ function TrainingCreator({sessions,setSessions,blockNames}){
         )
       ),
       React.createElement('div',{style:{borderTop:'1px solid #242424',paddingTop:'14px',marginTop:'4px'}},
-        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px'}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}},
           React.createElement('span',{style:{fontSize:'12px',fontWeight:'700',color:'#888',textTransform:'uppercase',letterSpacing:'.06em'}},
             `${blocks.length} Bloco${blocks.length!==1?'s':''}`
           ),
-          React.createElement('span',{style:{fontSize:'11px',color:'#333'}},'Defina a zona de cada bloco para a visualização diária')
+          React.createElement('div',{className:'collapse-all-row',style:{margin:0}},
+            React.createElement('button',{type:'button',className:'collapse-all-btn',
+              onClick:()=>setCollapsedBlocks(Object.fromEntries(blocks.map(b=>[b.id,true])))
+            }, React.createElement('i',{className:'ti ti-arrows-minimize'}),' Recolher'),
+            React.createElement('button',{type:'button',className:'collapse-all-btn',
+              onClick:()=>setCollapsedBlocks({})
+            }, React.createElement('i',{className:'ti ti-arrows-maximize'}),' Expandir')
+          )
         ),
         blocks.map((bl,i)=>
           React.createElement('div',{
@@ -4702,7 +4952,9 @@ function TrainingCreator({sessions,setSessions,blockNames}){
                 React.createElement(BlockEditor,{
                   block:bl,idx:i,total:blocks.length,
                   onUpdate:upd=>updBlock(bl.id,upd),
-                  onDelete:()=>delBlock(bl.id)
+                  onDelete:()=>delBlock(bl.id),
+              collapsed:!!collapsedBlocks[bl.id],
+              onToggleCollapse:()=>setCollapsedBlocks(p=>({...p,[bl.id]:!p[bl.id]}))
                 })
               )
             )
@@ -5403,6 +5655,7 @@ function SchedulePublisher({sessions}){
   const [mmBlockHdr,setMmBlockHdr]=useState('rgba(0,184,212,0.12)');
   const [mmDivider,setMmDivider]=useState('rgba(0,184,212,0.1)');
   const [previewScale,setPreviewScale]=useState(1);
+  useEffect(()=>{APP_CONFIG.exportScale=exportScale;},[exportScale]);
   useEffect(()=>{APP_CONFIG.mobileEaglesBg=eaglesBg;},[eaglesBg]);
   useEffect(()=>{APP_CONFIG.mobileMegaManBg=megaManBg;},[megaManBg]);
   useEffect(()=>{APP_CONFIG.mobileExerciseNoteColor=noteColor;},[noteColor]);
@@ -5410,7 +5663,7 @@ function SchedulePublisher({sessions}){
   // ── Persist all publisher settings to localStorage ──
   useEffect(()=>{
     saveSettings({
-      fontScale,zoneScales,blockTitleScales,gymName,label,
+      fontScale,zoneScales,blockTitleScales,gymName,label,exportScale,
       colors:{
         dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvCap,dvRounds,
         dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
@@ -5421,7 +5674,7 @@ function SchedulePublisher({sessions}){
         mmExName,mmIntensity,mmBlockHdr,mmDivider
       }
     });
-  },[fontScale,zoneScales,blockTitleScales,gymName,label,
+  },[fontScale,zoneScales,blockTitleScales,gymName,label,exportScale,
      dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvCap,dvRounds,
      dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
      wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
@@ -5523,7 +5776,7 @@ function SchedulePublisher({sessions}){
     await new Promise(r=>setTimeout(r,250));
     try{
       const W=1080;const H=el.scrollHeight||3000;
-      const cv=await html2canvas(el,{scale:2,backgroundColor:variant==='A'?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000'),useCORS:true,logging:false,width:W,height:H,windowWidth:W});
+      const cv=await html2canvas(el,{scale:APP_CONFIG.exportScale||2,backgroundColor:variant==='A'?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000'),useCORS:true,logging:false,width:W,height:H,windowWidth:W});
       const out=document.createElement('canvas');
       out.width=W*2;out.height=H*2;
       const ctx=out.getContext('2d');
@@ -6003,7 +6256,17 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
             return (sections[settingsView]||[]).map(row);
           })()
         ),
-        React.createElement('div',{style:{padding:'8px 16px',fontSize:'11px',color:'#444',borderTop:'1px solid #252525'}},
+        React.createElement('div',{style:{padding:'10px 16px',borderTop:'1px solid #252525'}},
+          React.createElement('div',{style:{fontSize:'11px',color:'#555',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'8px'}},'Resolução do export'),
+          React.createElement('div',{style:{display:'flex',gap:'6px'}},
+            [2,3].map(s=>React.createElement('button',{
+              key:s,type:'button',className:'b bsm',
+              style:{background:exportScale===s?'#e87820':'transparent',color:exportScale===s?'#000':'#888',borderColor:exportScale===s?'#e87820':'#2e2e2e'},
+              onClick:()=>setExportScale(s)
+            },`${s}× ${s===2?'(2160px)':'(3240px)'}`))
+          )
+        ),
+        React.createElement('div',{style:{padding:'6px 16px 10px',fontSize:'11px',color:'#444'}},
           'Arraste pelo topo para mover. Cores também configuráveis em config.json no GitHub.'
         )
       )
@@ -6300,6 +6563,8 @@ function App(){
         if(cfg.athleteGoals&&Array.isArray(cfg.athleteGoals)) APP_CONFIG.athleteGoals=cfg.athleteGoals;
         if(cfg.blockColors&&typeof cfg.blockColors==='object') APP_CONFIG.blockColors={...APP_CONFIG.blockColors,...cfg.blockColors};
         if(cfg.appTitle){APP_CONFIG.appTitle=cfg.appTitle;document.title=cfg.appTitle;}
+        if(cfg.themeAccent){APP_CONFIG.themeAccent=cfg.themeAccent;document.documentElement.style.setProperty('--theme-accent',cfg.themeAccent);}
+        if(cfg.themeAccentText){APP_CONFIG.themeAccentText=cfg.themeAccentText;document.documentElement.style.setProperty('--theme-accent-text',cfg.themeAccentText);}
         if(cfg.restDayLabel) APP_CONFIG.restDayLabel=cfg.restDayLabel;
         if(cfg.mobileWeeklyLabels&&Array.isArray(cfg.mobileWeeklyLabels)) APP_CONFIG.mobileWeeklyLabels=cfg.mobileWeeklyLabels;
         if(cfg.blockNames&&Array.isArray(cfg.blockNames)){
@@ -6329,7 +6594,7 @@ function App(){
 
   // ── Export state as .json ──
   const handleSaveState=(customName)=>{
-    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings()};
+    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings(),results:loadResults(),athletes:loadAthletes()};
     const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
     const a=document.createElement('a');
     const date=toISO(new Date());
@@ -6474,8 +6739,8 @@ function App(){
         :tab==='parser'
         ?React.createElement(TextParser,{sessions,setSessions,setTab})
         :tab==='results'
-        ?React.createElement(ResultsTab,{sessions})
-        :React.createElement(SchedulePublisher,{sessions})
+        ?React.createElement('div',{className:'res-pane'},React.createElement(ResultsTab,{sessions}))
+        :React.createElement('div',{className:'pub-pane'},React.createElement(SchedulePublisher,{sessions}))
     )
   );
 }
