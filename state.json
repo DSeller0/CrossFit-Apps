@@ -1,0 +1,412 @@
+{
+  "version": 2,
+  "exportedAt": "2026-06-06T17:40:18.732Z",
+  "sessions": {
+    "2026-06-06": [
+      {
+        "id": 1780767147533.7788,
+        "date": "2026-06-06",
+        "mainTraining": "Teste leaderboard + schedule",
+        "blocks": [
+          {
+            "id": 1780767147534.356,
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "20",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": 1780767147534.5566,
+                "name": "Voadora no Cachorro",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": 1780767171951.4753,
+                "name": "Voadora no Cachorro",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": 1780767172967.4014,
+                "name": "Voadora no Cachorro",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": 1780767175621.4426,
+            "label": "WOD",
+            "type": "AMRAP",
+            "zone": "Zona 01",
+            "duration": "20",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": 1780767175621.7024,
+                "name": "Voadora na agua",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": 1780767198184.3142,
+                "name": "Voadora na agua",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": 1780767199580.3748,
+                "name": "Voadora na agua",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "settings": {
+    "fontScale": 1.5,
+    "zoneScales": [
+      1,
+      1,
+      1
+    ],
+    "blockTitleScales": [
+      1,
+      1,
+      1
+    ],
+    "gymName": "",
+    "label": "",
+    "colors": {
+      "dvBg": "#000000",
+      "dvGymName": "#ffffff",
+      "dvDate": "#e87820",
+      "dvMainTraining": "#888888",
+      "dvZoneType": "#e87820",
+      "dvCap": "#e87820",
+      "dvRounds": "#f5c842",
+      "dvExName": "#ffffff",
+      "dvIntensity": "#f5c842",
+      "dvNote": "#888888",
+      "dvBlockNotes": "#888888",
+      "dvDivider": "#1a1a1a",
+      "wkBg": "#000000",
+      "wkHeader": "#e87820",
+      "wkDateNum": "#666666",
+      "wkMainTraining": "#ffffff",
+      "wkBlockType": "#e87820",
+      "wkExName": "#666666",
+      "wkDivider": "#1a1a1a",
+      "eaGymName": "#ffffff",
+      "eaDate": "#e87820",
+      "eaSubtitle": "#666666",
+      "eaBlockType": "#00b8d4",
+      "eaBlockMeta": "#00b8d4",
+      "eaExName": "#ffffff",
+      "eaIntensity": "#ffd700",
+      "eaBlockHdr": "rgba(0,184,212,0.12)",
+      "eaDivider": "rgba(0,184,212,0.1)",
+      "eaglesBg": "#000000",
+      "megaManBg": "#0a1a5c",
+      "noteColor": "#4a9aaa",
+      "mmGymName": "#ffffff",
+      "mmDate": "#00b8d4",
+      "mmSubtitle": "#3a6a80",
+      "mmBlockType": "#00b8d4",
+      "mmBlockMetaBg": "#00b8d4",
+      "mmBlockMetaText": "#000000",
+      "mmExName": "#ffffff",
+      "mmIntensity": "#ffd700",
+      "mmBlockHdr": "rgba(0,184,212,0.12)",
+      "mmDivider": "rgba(0,184,212,0.1)"
+    }
+  },
+  "lbColors": {
+    "lbBg": "#000000",
+    "lbRowAlt": "#020809",
+    "lbP1Bg": "rgba(255,215,0,0.06)",
+    "lbP2Bg": "rgba(192,192,192,0.05)",
+    "lbP3Bg": "rgba(205,127,50,0.05)",
+    "lbDivider": "#0d1e1e",
+    "lbHdrBg": "#000000",
+    "lbHdrBorder": "#00b8d4",
+    "lbHdrTitle": "#ffffff",
+    "lbHdrSub": "#00b8d4",
+    "lbRank": "#333333",
+    "lbP1": "#ffd700",
+    "lbP2": "#c0c0c0",
+    "lbP3": "#cd7f32",
+    "lbName": "#ffffff",
+    "lbScaleText": "#00b8d4",
+    "lbScaleBg": "rgba(0,184,212,0.1)",
+    "lbScaleBorder": "#00b8d4",
+    "lbPerf": "#ffffff",
+    "lbFilterBg": "#00b8d4",
+    "lbFilterText": "#000000"
+  },
+  "results": [
+    {
+      "id": "mq2n0jtkb4ehqkdfj6q",
+      "date": "2026-06-06",
+      "athleteId": "mq2mzl5aih9c8wm6rqa",
+      "presence": "Presente",
+      "blocks": [
+        {
+          "blockId": 1780767147534.356,
+          "blockType": "For Time",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 7,
+          "note": "",
+          "goal": "10:00",
+          "perfTime": "10:00",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Voadora no Cachorro",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora no Cachorro",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora no Cachorro",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        },
+        {
+          "blockId": 1780767175621.4426,
+          "blockType": "AMRAP",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 7,
+          "note": "",
+          "goal": "10",
+          "perfTime": "",
+          "perfRounds": "10",
+          "perfReps": "8",
+          "exerciseRows": [
+            {
+              "name": "Voadora na agua",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora na agua",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora na agua",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false,
+      "sessionId": 1780767147533.7788
+    },
+    {
+      "id": "mq2n19osvn6smvo1q9",
+      "date": "2026-06-06",
+      "athleteId": "mq2mzsag0dkfowfynaw",
+      "presence": "Presente",
+      "blocks": [
+        {
+          "blockId": 1780767147534.356,
+          "blockType": "For Time",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 7,
+          "note": "",
+          "goal": "10:00",
+          "perfTime": "08:00",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Voadora no Cachorro",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora no Cachorro",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora no Cachorro",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        },
+        {
+          "blockId": 1780767175621.4426,
+          "blockType": "AMRAP",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 7,
+          "note": "",
+          "goal": "10",
+          "perfTime": "",
+          "perfRounds": "20",
+          "perfReps": "120",
+          "exerciseRows": [
+            {
+              "name": "Voadora na agua",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora na agua",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora na agua",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false,
+      "sessionId": 1780767147533.7788
+    },
+    {
+      "id": "mq2n2265tyeionu4ts",
+      "date": "2026-06-06",
+      "athleteId": "mq2mzzxe638ebxfuf84",
+      "presence": "Presente",
+      "blocks": [
+        {
+          "blockId": 1780767147534.356,
+          "blockType": "For Time",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 7,
+          "note": "",
+          "goal": "10:00",
+          "perfTime": "00:01",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Voadora no Cachorro",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora no Cachorro",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora no Cachorro",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        },
+        {
+          "blockId": 1780767175621.4426,
+          "blockType": "AMRAP",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 7,
+          "note": "",
+          "goal": "10",
+          "perfTime": "",
+          "perfRounds": "432",
+          "perfReps": "500",
+          "exerciseRows": [
+            {
+              "name": "Voadora na agua",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora na agua",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Voadora na agua",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false,
+      "sessionId": 1780767147533.7788
+    }
+  ],
+  "athletes": [
+    {
+      "name": "Arthur",
+      "level": "Competidor",
+      "goal": "Competição",
+      "notes": "",
+      "color": "#8000ff",
+      "id": "mq2mzl5aih9c8wm6rqa",
+      "since": "2026-06-06"
+    },
+    {
+      "name": "Paulo",
+      "level": "Competidor",
+      "goal": "Competição",
+      "notes": "",
+      "color": "#2bff00",
+      "id": "mq2mzsag0dkfowfynaw",
+      "since": "2026-06-06"
+    },
+    {
+      "name": "Medrado",
+      "level": "Competidor",
+      "goal": "Competição",
+      "notes": "",
+      "color": "#ff0000",
+      "id": "mq2mzzxe638ebxfuf84",
+      "since": "2026-06-06"
+    }
+  ]
+}
