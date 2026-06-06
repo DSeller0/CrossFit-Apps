@@ -380,18 +380,19 @@ function setAthlete(val){selectedAthlete=val;expandedDays.clear();render();}
 async function init(){
   try{
     const [cfgRes,stateRes]=await Promise.all([
-      fetch('./config.json').catch(()=>null),
+      fetch('./config.json?v='+Date.now()).catch(()=>null),
       fetch('./state.json')
     ]);
     if(cfgRes?.ok){
       cfg=await cfgRes.json();
+      // flatten nested colors if present (backwards compat)
+      if(cfg.colors&&typeof cfg.colors==='object') cfg={...cfg,...cfg.colors};
       if(cfg.scheduleTitle||cfg.appTitle) document.title=cfg.scheduleTitle||cfg.appTitle;
       // Apply wk* colour scheme from config (matches Semanal export)
       const r=document.documentElement.style;
       if(cfg.themeAccent)     r.setProperty('--accent',cfg.themeAccent);
       if(cfg.themeAccentText) r.setProperty('--accent-text',cfg.themeAccentText);
-      if(cfg.wkBg)            r.setProperty('--bg',cfg.wkBg);
-      if(cfg.wkBg)            r.setProperty('--bg2',cfg.wkBg);
+      if(cfg.wkBg){r.setProperty('--bg',cfg.wkBg);r.setProperty('--bg2',cfg.wkBg);}
       if(cfg.fontFamily){
         r.setProperty('--sc-font',cfg.fontFamily);
         if(cfg.googleFontsUrl){const gf=document.getElementById('gfonts-sc');if(gf)gf.href=cfg.googleFontsUrl;}

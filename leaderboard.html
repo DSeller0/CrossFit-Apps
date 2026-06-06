@@ -99,6 +99,8 @@ function buildWodList(){
 
 function render(){
   if(!state){document.getElementById('app').innerHTML='<div class="loading">Carregando...</div>';return;}
+  // flatten nested colors in config if present
+  if(cfg.colors&&typeof cfg.colors==='object') Object.assign(cfg,cfg.colors);
   const {athletes=[],results=[],settings={},lbColors={}}=state;
   // Apply config overrides
   if(cfg.themeAccent) document.documentElement.style.setProperty('--accent',cfg.themeAccent);
@@ -222,7 +224,7 @@ function applyUrlParams(){
 
 // Fetch config + state
 Promise.all([
-  fetch('./config.json').then(r=>r.ok?r.json():{}).catch(()=>({})),
+  fetch('./config.json?v='+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({})),
   fetch('./state.json').then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
 ]).then(([cfgData,stateData])=>{
   cfg=cfgData;

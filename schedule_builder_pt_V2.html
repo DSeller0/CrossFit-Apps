@@ -826,7 +826,19 @@ function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete,collapsed,onT
     onUpdate({...block,exercises:exs});
   };
 
-  return React.createElement('div',{className:`blk-wrap ${cls}`},
+  return React.createElement('div',{
+    className:`blk-wrap ${cls}`,
+    onDragOver:e=>{e.preventDefault();if(dragBlkIdx?.current!==null&&dragBlkIdx?.current!==blockIdx)setDragOverBlkIdx&&setDragOverBlkIdx(blockIdx);},
+    onDragLeave:e=>{if(!e.currentTarget.contains(e.relatedTarget))setDragOverBlkIdx&&setDragOverBlkIdx(null);},
+    onDrop:e=>{
+      e.preventDefault();
+      const from=dragBlkIdx?.current;
+      setDragOverBlkIdx&&setDragOverBlkIdx(null);
+      if(from!==null&&from!==undefined&&from!==blockIdx)reorderBlocks&&reorderBlocks(from,blockIdx);
+      if(dragBlkIdx)dragBlkIdx.current=null;
+    },
+    style:{outline:dragOverBlkIdx===blockIdx?'2px solid var(--theme-accent)':'none',outlineOffset:'2px',borderRadius:'8px',transition:'outline .1s'}
+  },
     React.createElement('div',{className:'blk-bar'},
       // Collapse toggle — drag handle only active when collapsed
       React.createElement('span',{
