@@ -1416,9 +1416,9 @@ function DailyExportView({sessions,label,weekDates,gymName,fontScale,zoneScales,
                   const ec=ECOL[bl.type]||ECOL.Strength;
                   return React.createElement('div',{key:bl.id,className:'dv-block-in-zone'},
                     // secondary block label (only if >1 block in zone)
-                    bli>0&&React.createElement('div',{className:'dv-block-type-label'},
+                    bli>0&&React.createElement('div',{className:'dv-block-type-label',style:{color:dv.blockLabel||ec.text||'#e87820'}},
                       bl.type,
-                      (bl.rounds||bl.duration)&&React.createElement('span',{className:'dv-block-cap'},
+                      (bl.rounds||bl.duration)&&React.createElement('span',{className:'dv-block-cap',style:{color:dv.blockLabel||ec.text||'#e87820'}},
                         [bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ')
                       )
                     ),
@@ -1629,15 +1629,16 @@ function WeeklyCalendarExportView({sessions,label,year,month,gymName,logoDataUrl
                 React.createElement('div',{style:{flex:1,overflow:'hidden',display:'flex',flexDirection:'column',gap:'8px'}},
                   (s.blocks||[]).map(bl=>{
                     const ec=ECOL[bl.type]||ECOL['Força'];
+                    const blCol=wk.blockType||ec.text;
                     const meta=[bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
                     const exs=bl.exercises?.filter(e=>e.name)||[];
                     return React.createElement('div',{key:bl.id,style:{
-                      borderLeft:`2px solid ${ec.text}`,
+                      borderLeft:`2px solid ${blCol}`,
                       paddingLeft:'8px',flexShrink:0
                     }},
                       React.createElement('div',{style:{
                         fontSize:`calc(12px * var(--fs,1))`,fontWeight:900,
-                        color:ec.text,textTransform:'uppercase',
+                        color:blCol,textTransform:'uppercase',
                         letterSpacing:'.07em',lineHeight:1.2
                       }},bl.type+(meta?` · ${meta}`:'')),
                       exs.slice(0,4).map(ex=>{
@@ -1827,6 +1828,7 @@ function SchedulePublisher({sessions}){
   const [dvDate,setDvDate]=useState(_sc.dvDate||'#e87820');
   const [dvMainTraining,setDvMainTraining]=useState(_sc.dvMainTraining||'#888888');
   const [dvZoneType,setDvZoneType]=useState(_sc.dvZoneType||'#e87820');
+  const [dvBlockLabel,setDvBlockLabel]=useState(_sc.dvBlockLabel||'#e87820');
   const [dvCap,setDvCap]=useState(_sc.dvCap||'#e87820');
   const [dvRounds,setDvRounds]=useState(_sc.dvRounds||'#f5c842');
   const [dvExName,setDvExName]=useState(_sc.dvExName||'#ffffff');
@@ -1876,7 +1878,7 @@ function SchedulePublisher({sessions}){
     saveSettings({
       fontScale,zoneScales,blockTitleScales,gymName,label,exportScale,
       colors:{
-        dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvCap,dvRounds,
+        dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvBlockLabel,dvCap,dvRounds,
         dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
         wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
         eaGymName,eaDate,eaSubtitle,eaBlockType,eaBlockMeta,eaExName,
@@ -1886,7 +1888,7 @@ function SchedulePublisher({sessions}){
       }
     });
   },[fontScale,zoneScales,blockTitleScales,gymName,label,exportScale,
-     dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvCap,dvRounds,
+     dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvBlockLabel,dvCap,dvRounds,
      dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
      wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
      eaGymName,eaDate,eaSubtitle,eaBlockType,eaBlockMeta,eaExName,
@@ -2336,7 +2338,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
           pointerEvents:'none'
         }},
           previewTarget==='daily'
-            ?React.createElement(DailyExportView,{sessions:filteredSessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
+            ?React.createElement(DailyExportView,{sessions:filteredSessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,blockLabel:dvBlockLabel,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
             :previewTarget==='semanal'
             ?React.createElement(WeeklyCalendarExportView,{sessions:filteredSessions,label,year,month,gymName,logoDataUrl,logoScale,fontScale,weekDates:getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates,wkColors:{bg:wkBg,header:wkHeader,dateNum:wkDateNum,mainTraining:wkMainTraining,blockType:wkBlockType,exName:wkExName,divider:wkDivider}})
             :previewTarget==='mobileWeeklyA'
@@ -2410,7 +2412,8 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
                 ['Nome da academia',dvGymName,setDvGymName,'dv-gn'],
                 ['Data / dia',dvDate,setDvDate,'dv-dt'],
                 ['Treino principal',dvMainTraining,setDvMainTraining,'dv-mt'],
-                ['Tipo do bloco',dvZoneType,setDvZoneType,'dv-zt'],
+                ['Tipo do bloco (zona)',dvZoneType,setDvZoneType,'dv-zt'],
+            ['Tipo do bloco (sub-bloco)',dvBlockLabel,setDvBlockLabel,'dv-bl'],
                 ['CAP / Rounds label',dvCap,setDvCap,'dv-cp'],
                 ['Rounds valor',dvRounds,setDvRounds,'dv-rd'],
                 ['Nome do exercício',dvExName,setDvExName,'dv-en'],
@@ -2478,6 +2481,77 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
           )
         ),
         React.createElement('div',{style:{padding:'8px 16px',borderTop:'1px solid #252525',display:'flex',gap:'8px'}},
+          // ── Load config ──
+          React.createElement('button',{type:'button',className:'b bsm',style:{flex:1},
+            onClick:()=>{
+              const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+              inp.onchange=e=>{
+                const file=e.target.files[0];if(!file)return;
+                const reader=new FileReader();
+                reader.onload=ev=>{
+                  try{
+                    const cfg=JSON.parse(ev.target.result);
+                    const set=(key,setter,val)=>{if(val!==undefined)setter(val);};
+                    // Semanal/Calendar colours
+                    set('wkBg',setWkBg,cfg.wkBg);
+                    set('wkHeader',setWkHeader,cfg.wkHeader);
+                    set('wkDateNum',setWkDateNum,cfg.wkDateNum);
+                    set('wkMainTraining',setWkMainTraining,cfg.wkMainTraining);
+                    set('wkBlockType',setWkBlockType,cfg.wkBlockType);
+                    set('wkExName',setWkExName,cfg.wkExName);
+                    set('wkDivider',setWkDivider,cfg.wkDivider);
+                    // Daily colours
+                    set('dvBg',setDvBg,cfg.dvBg);
+                    set('dvGymName',setDvGymName,cfg.dvGymName);
+                    set('dvDate',setDvDate,cfg.dvDate);
+                    set('dvMainTraining',setDvMainTraining,cfg.dvMainTraining);
+                    set('dvZoneType',setDvZoneType,cfg.dvZoneType);
+                    set('dvBlockLabel',setDvBlockLabel,cfg.dvBlockLabel);
+                    set('dvCap',setDvCap,cfg.dvCap);
+                    set('dvRounds',setDvRounds,cfg.dvRounds);
+                    set('dvExName',setDvExName,cfg.dvExName);
+                    set('dvIntensity',setDvIntensity,cfg.dvIntensity);
+                    set('dvNote',setDvNote,cfg.dvNote);
+                    set('dvBlockNotes',setDvBlockNotes,cfg.dvBlockNotes);
+                    set('dvDivider',setDvDivider,cfg.dvDivider);
+                    // Mobile Eagles
+                    set('eaGymName',setEaGymName,cfg.eaGymName);
+                    set('eaDate',setEaDate,cfg.eaDate);
+                    set('eaSubtitle',setEaSubtitle,cfg.eaSubtitle);
+                    set('eaBlockType',setEaBlockType,cfg.eaBlockType);
+                    set('eaBlockMeta',setEaBlockMeta,cfg.eaBlockMeta);
+                    set('eaExName',setEaExName,cfg.eaExName);
+                    set('eaIntensity',setEaIntensity,cfg.eaIntensity);
+                    set('eaBlockHdr',setEaBlockHdr,cfg.eaBlockHdr);
+                    set('eaDivider',setEaDivider,cfg.eaDivider);
+                    if(cfg.mobileEaglesBg) setEaglesBg(cfg.mobileEaglesBg);
+                    // Mobile Mega Man
+                    set('mmGymName',setMmGymName,cfg.mmGymName);
+                    set('mmDate',setMmDate,cfg.mmDate);
+                    set('mmSubtitle',setMmSubtitle,cfg.mmSubtitle);
+                    set('mmBlockType',setMmBlockType,cfg.mmBlockType);
+                    set('mmBlockMetaBg',setMmBlockMetaBg,cfg.mmBlockMetaBg);
+                    set('mmBlockMetaText',setMmBlockMetaText,cfg.mmBlockMetaText);
+                    set('mmExName',setMmExName,cfg.mmExName);
+                    set('mmIntensity',setMmIntensity,cfg.mmIntensity);
+                    set('mmBlockHdr',setMmBlockHdr,cfg.mmBlockHdr);
+                    set('mmDivider',setMmDivider,cfg.mmDivider);
+                    if(cfg.mobileMegaManBg) setMegaManBg(cfg.mobileMegaManBg);
+                    // App-level
+                    if(cfg.themeAccent){APP_CONFIG.themeAccent=cfg.themeAccent;document.documentElement.style.setProperty('--theme-accent',cfg.themeAccent);}
+                    if(cfg.themeAccentText){APP_CONFIG.themeAccentText=cfg.themeAccentText;document.documentElement.style.setProperty('--theme-accent-text',cfg.themeAccentText);}
+                    if(cfg.fontScale) setFontScale(cfg.fontScale);
+                    if(cfg.exportScale) setExportScale(cfg.exportScale);
+                    if(cfg.gymName) setGymName(cfg.gymName);
+                    alert('Config carregada! Verifique o preview e salve se estiver correto.');
+                  }catch(err){alert('Erro ao ler o arquivo: '+err.message);}
+                };
+                reader.readAsText(file);
+              };
+              inp.click();
+            }
+          }, React.createElement('i',{className:'ti ti-upload'}),' Carregar config'),
+          // ── Save config ──
           React.createElement('button',{type:'button',className:'b bsm',style:{flex:1},
             onClick:()=>{
               const exportCfg={
@@ -2500,7 +2574,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
                 athleteLevels:APP_CONFIG.athleteLevels,
                 athleteGoals:APP_CONFIG.athleteGoals,
                 wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
-                dvBg,dvGymName,dvDate,dvMainTraining:dvMainTraining,dvZoneType,dvCap,dvRounds,
+                dvBg,dvGymName,dvDate,dvMainTraining:dvMainTraining,dvZoneType,dvBlockLabel,dvCap,dvRounds,
                 dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
                 eaGymName,eaDate,eaSubtitle,eaBlockType,eaBlockMeta,eaExName,eaIntensity,eaBlockHdr,eaDivider,
                 mmGymName,mmDate,mmSubtitle,mmBlockType,mmBlockMetaBg,mmBlockMetaText,mmExName,mmIntensity,mmBlockHdr,mmDivider
@@ -2520,7 +2594,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
         // ── hidden export targets — always rendered, off-screen, dedicated refs ──
     React.createElement('div',{style:{position:'fixed',left:'-9999px',top:'-9999px',pointerEvents:'none',zIndex:-1,overflow:'hidden'}},
       React.createElement('div',{ref:exportDailyRef},
-        React.createElement(DailyExportView,{sessions:filteredSessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
+        React.createElement(DailyExportView,{sessions:filteredSessions,label,gymName,fontScale,zoneScales,blockTitleScales,selectedDate,logoDataUrl,logoScale,weekDates:currentWeekDates,dvColors:{bg:dvBg,gymName:dvGymName,date:dvDate,mainTraining:dvMainTraining,zoneType:dvZoneType,blockLabel:dvBlockLabel,cap:dvCap,rounds:dvRounds,exName:dvExName,intensity:dvIntensity,note:dvNote,blockNotes:dvBlockNotes,divider:dvDivider}})
       ),
       React.createElement('div',{ref:exportWeeklyRef},
         React.createElement(WeeklyExportView,{sessions:filteredSessions,label,year,month,onDayClick:()=>{}})
@@ -2896,6 +2970,35 @@ function LeaderboardView({athletes,sessions}){
           ].map(colorRow)
         ),
         React.createElement('div',{style:{padding:'8px 16px',borderTop:'1px solid #252525',display:'flex',gap:'8px'}},
+          React.createElement('button',{type:'button',className:'b bsm',style:{flex:1},
+            onClick:()=>{
+              const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+              inp.onchange=e=>{
+                const file=e.target.files[0];if(!file)return;
+                const reader=new FileReader();
+                reader.onload=ev=>{
+                  try{
+                    const cfg=JSON.parse(ev.target.result);
+                    const lb=cfg.lbColors||cfg;
+                    const set=(key,setter)=>{if(lb[key]!==undefined)setter(lb[key]);};
+                    set('lbBg',setLbBg);set('lbRowAlt',setLbRowAlt);
+                    set('lbP1Bg',setLbP1Bg);set('lbP2Bg',setLbP2Bg);set('lbP3Bg',setLbP3Bg);
+                    set('lbDivider',setLbDivider);set('lbHdrBg',setLbHdrBg);
+                    set('lbHdrBorder',setLbHdrBorder);set('lbHdrTitle',setLbHdrTitle);
+                    set('lbHdrSub',setLbHdrSub);set('lbRank',setLbRank);
+                    set('lbP1',setLbP1);set('lbP2',setLbP2);set('lbP3',setLbP3);
+                    set('lbName',setLbName);set('lbScaleText',setLbScaleText);
+                    set('lbScaleBg',setLbScaleBg);set('lbScaleBorder',setLbScaleBorder);
+                    set('lbPerf',setLbPerf);set('lbFilterBg',setLbFilterBg);
+                    set('lbFilterText',setLbFilterText);
+                    alert('Config do leaderboard carregada!');
+                  }catch(err){alert('Erro ao ler o arquivo: '+err.message);}
+                };
+                reader.readAsText(file);
+              };
+              inp.click();
+            }
+          }, React.createElement('i',{className:'ti ti-upload'}),' Carregar config'),
           React.createElement('button',{type:'button',className:'b bsm',style:{flex:1},
             onClick:()=>{
               const savedSettings=loadSettings();
