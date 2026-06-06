@@ -1,8 +1,8 @@
 {
-  "appTitle": "Eagles — Treinos",
+  "appTitle": "Cone — Treinos",
   "themeAccent": "#00b8d4",
   "themeAccentText": "#000000",
-  "gymName": "Eagles",
+  "gymName": "Team Medrado",
   "blockColors": {
     "WOD": "#e87820",
     "Skill": "#e87820",
@@ -50,9 +50,9 @@
     "Condicionamento",
     "Competição"
   ],
-  "restDayLabel": "Descanso",
+  "restDayLabel": "TOCAR GRAMA!",
   "mobileWeeklyLabels": [
-    "Mobile Semanal Eagles",
+    "Mobile Semanal Default",
     "Mobile Semanal Medrado"
   ],
   "lbColors": {
@@ -119,9 +119,9 @@
   "mmDivider": "rgba(74,200,192,0.1)",
   "mobileEaglesBg": "#1a1410",
   "mobileMegaManBg": "#1a1410",
-  "appDescription": "Criador e publicador de treinos Eagles",
-  "scheduleTitle": "Eagles — Treinos",
-  "leaderboardTitle": "Eagles — Leaderboard",
+  "appDescription": "Criador e publicador de treinos Cone",
+  "scheduleTitle": "Cone — Treinos",
+  "leaderboardTitle": "Cone — Leaderboard",
   "fontFamily": "'Raleway',sans-serif",
   "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;900&display=swap",
   "fontScale": 1.5,
