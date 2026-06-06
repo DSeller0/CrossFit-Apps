@@ -1,7 +1,7 @@
 {
-  "name": "Eagles — Criador de Treinos",
-  "short_name": "Eagles Treinos",
-  "description": "Criador e publicador de treinos Eagles",
+  "name": "Cone — Criador de Treinos",
+  "short_name": "Cone Treinos",
+  "description": "Criador e publicador de treinos Cone",
   "start_url": "./schedule_builder_pt_V2.html",
   "scope": "./",
   "display": "standalone",
