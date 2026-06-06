@@ -1,17 +1,40 @@
 {
-  "appTitle": "Para de reclamar do nome Medrado!",
-  "gymName": "Team Medrado",
+  "appTitle": "Eagles — Treinos",
+  "themeAccent": "#00b8d4",
+  "themeAccentText": "#000000",
+  "gymName": "Eagles",
   "fontScale": 1.5,
   "logoScale": 1.0,
-  "zoneScales": [1, 1, 1],
-  "blockTitleScales": [1, 1, 1],
+  "zoneScales": [
+    1,
+    1,
+    1
+  ],
+  "blockTitleScales": [
+    1,
+    1,
+    1
+  ],
   "mobileEaglesBg": "#000000",
   "mobileMegaManBg": "#0a1a5c",
   "mobileExerciseNoteColor": "#4a9aaa",
   "restDayLabel": "Descanso",
-  "mobileWeeklyLabels": ["Mobile Semanal Eagles", "Mobile Semanal Medrado"],
-  "athleteLevels": ["Iniciante", "Intermediário", "Avançado", "Competidor"],
-  "athleteGoals": ["Saúde geral", "Força", "Condicionamento", "Competição"],
+  "mobileWeeklyLabels": [
+    "Mobile Semanal Eagles",
+    "Mobile Semanal Medrado"
+  ],
+  "athleteLevels": [
+    "Iniciante",
+    "Intermediário",
+    "Avançado",
+    "Competidor"
+  ],
+  "athleteGoals": [
+    "Saúde geral",
+    "Força",
+    "Condicionamento",
+    "Competição"
+  ],
   "blockColors": {
     "WOD": "#e87820",
     "Skill": "#e87820",
@@ -30,8 +53,24 @@
     "Descanso": "#888888"
   },
   "blockNames": [
-    "-", "WOD", "Skill", "Core", "Acessórios", "LPO",
-    "Aquecimento", "Força", "Cardio", "Mobilidade",
-    "HIIT", "MetCon", "EMOM", "For Time", "AMRAP", "Descanso"
-  ]
+    "-",
+    "WOD",
+    "Skill",
+    "Core",
+    "Acessórios",
+    "LPO",
+    "Aquecimento",
+    "Força",
+    "Cardio",
+    "Mobilidade",
+    "HIIT",
+    "MetCon",
+    "EMOM",
+    "For Time",
+    "AMRAP",
+    "Descanso"
+  ],
+  "appDescription": "Criador e publicador de treinos Eagles",
+  "scheduleTitle": "Eagles — Treinos",
+  "leaderboardTitle": "Eagles — Leaderboard"
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Eagles — Treinos</title>
+<title>Eagles — Treinos</title><!-- set from config.scheduleTitle at runtime -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -130,7 +130,7 @@ function blockColor(label,type){
     MetCon:'#f5c842',HIIT:'#f5c842',LPO:'#00b8d4',Core:'#888',Força:'#888',
     Skill:'#888',Acessórios:'#888',Aquecimento:'#888',Cardio:'#888',
     Mobilidade:'#888',Descanso:'#444'};
-  return defaults[name]||'#555';
+  return defaults[name]||cfg.wkBlockType||'#555';
 }
 
 function sessionsForDay(dateKey){
@@ -379,7 +379,20 @@ async function init(){
       fetch('./config.json').catch(()=>null),
       fetch('./state.json')
     ]);
-    if(cfgRes?.ok) cfg=await cfgRes.json();
+    if(cfgRes?.ok){
+      cfg=await cfgRes.json();
+      if(cfg.scheduleTitle||cfg.appTitle) document.title=cfg.scheduleTitle||cfg.appTitle;
+      // Apply wk* colour scheme from config (matches Semanal export)
+      const r=document.documentElement.style;
+      if(cfg.themeAccent)     r.setProperty('--accent',cfg.themeAccent);
+      if(cfg.themeAccentText) r.setProperty('--accent-text',cfg.themeAccentText);
+      if(cfg.wkBg)            r.setProperty('--bg',cfg.wkBg);
+      if(cfg.wkBg)            r.setProperty('--bg2',cfg.wkBg);
+      if(cfg.wkDivider)       r.setProperty('--border',cfg.wkDivider);
+      if(cfg.wkHeader)        r.setProperty('--accent',cfg.wkHeader);
+      if(cfg.wkDateNum)       r.setProperty('--sub',cfg.wkDateNum);
+      if(cfg.wkExName)        r.setProperty('--text',cfg.wkExName);
+    }
     if(!stateRes.ok) throw new Error(`HTTP ${stateRes.status}`);
     state=await stateRes.json();
     render();

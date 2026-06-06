@@ -13,11 +13,11 @@
 <!-- iOS Safari PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Eagles Treinos"/>
+<meta name="apple-mobile-web-app-title" id="meta-app-title" content="Eagles Treinos"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
 
 <!-- Description for sharing -->
-<meta name="description" content="Criador e publicador de treinos Eagles"/>
+<meta name="description" id="meta-description" content="Criador e publicador de treinos Eagles"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -2477,7 +2477,42 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
             },`${s}× ${s===2?'(2160px)':'(3240px)'}`))
           )
         ),
-        React.createElement('div',{style:{padding:'6px 16px 10px',fontSize:'11px',color:'#444'}},
+        React.createElement('div',{style:{padding:'8px 16px',borderTop:'1px solid #252525',display:'flex',gap:'8px'}},
+          React.createElement('button',{type:'button',className:'b bsm',style:{flex:1},
+            onClick:()=>{
+              const exportCfg={
+                appTitle:APP_CONFIG.appTitle,
+                appDescription:APP_CONFIG.appDescription||'',
+                scheduleTitle:APP_CONFIG.scheduleTitle||APP_CONFIG.appTitle,
+                leaderboardTitle:APP_CONFIG.leaderboardTitle||APP_CONFIG.appTitle,
+                themeAccent:APP_CONFIG.themeAccent,
+                themeAccentText:APP_CONFIG.themeAccentText,
+                gymName:gymName||APP_CONFIG.gymName,
+                fontScale,logoScale:APP_CONFIG.logoScale||1,
+                zoneScales,blockTitleScales,
+                mobileEaglesBg:eaglesBg,mobileMegaManBg:megaManBg,
+                mobileExerciseNoteColor:noteColor,
+                restDayLabel:APP_CONFIG.restDayLabel,
+                mobileWeeklyLabels:APP_CONFIG.mobileWeeklyLabels,
+                exportScale,
+                blockColors:APP_CONFIG.blockColors||{},
+                blockNames:APP_CONFIG.blockNames,
+                athleteLevels:APP_CONFIG.athleteLevels,
+                athleteGoals:APP_CONFIG.athleteGoals,
+                wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
+                dvBg,dvGymName,dvDate,dvMainTraining:dvMainTraining,dvZoneType,dvCap,dvRounds,
+                dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
+                eaGymName,eaDate,eaSubtitle,eaBlockType,eaBlockMeta,eaExName,eaIntensity,eaBlockHdr,eaDivider,
+                mmGymName,mmDate,mmSubtitle,mmBlockType,mmBlockMetaBg,mmBlockMetaText,mmExName,mmIntensity,mmBlockHdr,mmDivider
+              };
+              const fname=(window.prompt('Nome do arquivo (sem extensão):','config')||'config').replace(/[^a-zA-Z0-9_-]/g,'-')||'config';
+              const blob=new Blob([JSON.stringify(exportCfg,null,2)],{type:'application/json'});
+              const a=document.createElement('a');a.download=fname+'.json';
+              a.href=URL.createObjectURL(blob);a.click();URL.revokeObjectURL(a.href);
+            }
+          }, React.createElement('i',{className:'ti ti-download'}),' Salvar config.json')
+        ),
+        React.createElement('div',{style:{padding:'4px 16px 10px',fontSize:'11px',color:'#444'}},
           'Arraste pelo topo para mover. Cores também configuráveis em config.json no GitHub.'
         )
       )
@@ -2860,7 +2895,32 @@ function LeaderboardView({athletes,sessions}){
             ['Filtro ativo — texto',lbFilterText,setLbFilterText,'ftxt'],
           ].map(colorRow)
         ),
-        React.createElement('div',{style:{padding:'8px 16px 12px',fontSize:'11px',color:'#444',borderTop:'1px solid #252525'}},
+        React.createElement('div',{style:{padding:'8px 16px',borderTop:'1px solid #252525',display:'flex',gap:'8px'}},
+          React.createElement('button',{type:'button',className:'b bsm',style:{flex:1},
+            onClick:()=>{
+              const savedSettings=loadSettings();
+              const exportCfg={
+                ...savedSettings,
+                appTitle:APP_CONFIG.appTitle,
+                themeAccent:APP_CONFIG.themeAccent,
+                themeAccentText:APP_CONFIG.themeAccentText,
+                gymName:APP_CONFIG.gymName,
+                blockColors:APP_CONFIG.blockColors||{},
+                blockNames:APP_CONFIG.blockNames,
+                athleteLevels:APP_CONFIG.athleteLevels,
+                athleteGoals:APP_CONFIG.athleteGoals,
+                restDayLabel:APP_CONFIG.restDayLabel,
+                mobileWeeklyLabels:APP_CONFIG.mobileWeeklyLabels,
+                lbColors:lbc
+              };
+              const fname=(window.prompt('Nome do arquivo (sem extensão):','config')||'config').replace(/[^a-zA-Z0-9_-]/g,'-')||'config';
+              const blob=new Blob([JSON.stringify(exportCfg,null,2)],{type:'application/json'});
+              const a=document.createElement('a');a.download=fname+'.json';
+              a.href=URL.createObjectURL(blob);a.click();URL.revokeObjectURL(a.href);
+            }
+          }, React.createElement('i',{className:'ti ti-download'}),' Salvar config.json')
+        ),
+        React.createElement('div',{style:{padding:'4px 16px 10px',fontSize:'11px',color:'#444'}},
           'Cores salvas automaticamente e incluídas no estado exportado.')
       )
     ),
@@ -4527,7 +4587,16 @@ function App(){
         if(cfg.athleteLevels&&Array.isArray(cfg.athleteLevels)) APP_CONFIG.athleteLevels=cfg.athleteLevels;
         if(cfg.athleteGoals&&Array.isArray(cfg.athleteGoals)) APP_CONFIG.athleteGoals=cfg.athleteGoals;
         if(cfg.blockColors&&typeof cfg.blockColors==='object') APP_CONFIG.blockColors={...APP_CONFIG.blockColors,...cfg.blockColors};
-        if(cfg.appTitle){APP_CONFIG.appTitle=cfg.appTitle;document.title=cfg.appTitle;}
+        if(cfg.appTitle){
+          APP_CONFIG.appTitle=cfg.appTitle;
+          document.title=cfg.appTitle;
+          const mt=document.getElementById('meta-app-title');
+          if(mt) mt.content=cfg.appTitle;
+        }
+        if(cfg.appDescription){
+          const md=document.getElementById('meta-description');
+          if(md) md.content=cfg.appDescription;
+        }
         if(cfg.themeAccent){APP_CONFIG.themeAccent=cfg.themeAccent;document.documentElement.style.setProperty('--theme-accent',cfg.themeAccent);}
         if(cfg.themeAccentText){APP_CONFIG.themeAccentText=cfg.themeAccentText;document.documentElement.style.setProperty('--theme-accent-text',cfg.themeAccentText);}
         if(cfg.restDayLabel) APP_CONFIG.restDayLabel=cfg.restDayLabel;
