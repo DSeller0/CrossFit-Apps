@@ -1,133 +1,46 @@
 {
   "version": 2,
-  "exportedAt": "2026-06-06T17:49:39.701Z",
+  "exportedAt": "2026-06-06T19:43:59.927Z",
   "sessions": {
-    "2026-06-06": [
+    "2026-06-08": [
       {
-        "id": 1780767147533.7788,
-        "date": "2026-06-06",
-        "mainTraining": "Teste leaderboard + schedule",
-        "blocks": [
-          {
-            "id": 1780767147534.356,
-            "label": "WOD",
-            "type": "For Time",
-            "zone": "Zona 01",
-            "duration": "20",
-            "rounds": "",
-            "notes": "",
-            "ladderMode": false,
-            "exercises": [
-              {
-                "id": 1780767147534.5566,
-                "name": "Voadora no Cachorro",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": 1780767171951.4753,
-                "name": "Voadora no Cachorro",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": 1780767172967.4014,
-                "name": "Voadora no Cachorro",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              }
-            ]
-          },
-          {
-            "id": 1780767175621.4426,
-            "label": "WOD",
-            "type": "AMRAP",
-            "zone": "Zona 01",
-            "duration": "20",
-            "rounds": "",
-            "notes": "",
-            "ladderMode": false,
-            "exercises": [
-              {
-                "id": 1780767175621.7024,
-                "name": "Voadora na agua",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": 1780767198184.3142,
-                "name": "Voadora na agua",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": 1780767199580.3748,
-                "name": "Voadora na agua",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    "2026-06-05": [
-      {
-        "id": "mq2ndcwvf95d13bzcrp",
-        "date": "2026-06-05",
+        "id": "mq2qqhtsk59d6uq299",
+        "date": "2026-06-08",
         "mainTraining": "",
         "blocks": [
           {
-            "id": "mq2ndcwv4gk170pszbe",
-            "label": "WOD",
-            "type": "For Time",
+            "id": "mq2qqhts4rxaie2p05o",
+            "label": "-",
+            "type": "Core",
             "zone": "Zona 01",
-            "duration": "20",
-            "rounds": "",
+            "duration": "7",
+            "rounds": "15",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "mq2ndcwv7meono0ftje",
-                "name": "Voadora no Cachorro",
+                "id": "mq2qqhts7xeaq508iz5",
+                "name": "GHD",
                 "sets": "",
-                "reps": "10",
+                "reps": "15",
                 "intensity": null,
                 "note": "",
                 "progression": null
               },
               {
-                "id": "mq2ndcwvrv58otenfu",
-                "name": "Voadora no Cachorro",
+                "id": "mq2qrpor47lc963tt9t",
+                "name": "Lenhador Chaotic",
                 "sets": "",
-                "reps": "10",
+                "reps": "15",
                 "intensity": null,
                 "note": "",
                 "progression": null
               },
               {
-                "id": "mq2ndcwvluoo4g5jhnc",
-                "name": "Voadora no Cachorro",
+                "id": "mq2qs4lgcyv0i3jt00a",
+                "name": "KB Over Leg",
                 "sets": "",
-                "reps": "10",
+                "reps": "20",
                 "intensity": null,
                 "note": "",
                 "progression": null
@@ -135,18 +48,36 @@
             ]
           },
           {
-            "id": "mq2ndcwvpz41on5r2da",
-            "label": "WOD",
-            "type": "AMRAP",
+            "id": "mq2qsiqo7g8j84mrkop",
+            "label": "-",
+            "type": "Acessórios",
             "zone": "Zona 01",
-            "duration": "20",
-            "rounds": "",
+            "duration": "15",
+            "rounds": "4",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "mq2ndcwvdg6nzrofmqw",
-                "name": "Voadora na agua",
+                "id": "mq2qsiqolh8dvyhtlz",
+                "name": "Heavy S Pull-Up",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "mq2qt9ffbklqfzu2pk5",
+                "name": "Gorila Row",
+                "sets": "",
+                "reps": "16",
+                "intensity": null,
+                "note": "8 cada braco.",
+                "progression": null
+              },
+              {
+                "id": "mq2qtyng8lbzcafv1gw",
+                "name": "Flexao Nordica",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -154,108 +85,229 @@
                 "progression": null
               },
               {
-                "id": "mq2ndcwv9rvvoqoekdp",
-                "name": "Voadora na agua",
+                "id": "mq2qu4kbx1qqdy43d6h",
+                "name": "Hip Thruster",
                 "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": "mq2ndcwvqxn8z9dmidq",
-                "name": "Voadora na agua",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
+                "reps": "12",
+                "intensity": {
+                  "mode": "pct",
+                  "pct": "50"
+                },
+                "note": "RM de Front Squat",
                 "progression": null
               }
             ]
-          }
-        ]
-      }
-    ],
-    "2026-06-04": [
-      {
-        "id": "mq2nds4euih1wf9clmf",
-        "date": "2026-06-04",
-        "mainTraining": "",
-        "blocks": [
+          },
           {
-            "id": "mq2nds4ea7o7k01lpz",
-            "label": "WOD",
-            "type": "For Time",
-            "zone": "Zona 01",
-            "duration": "20",
+            "id": "mq2qurnom686hzxdhhn",
+            "label": "-",
+            "type": "LPO",
+            "zone": "Zona 02",
+            "duration": "",
             "rounds": "",
-            "notes": "",
+            "notes": "Executar cada movimento a cada 2'30''",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "mq2nds4ex3s5ripvtxg",
-                "name": "Voadora no Cachorro",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
+                "id": "mq2qurno2zmekws3c59",
+                "name": "Clean Pull",
+                "sets": "3",
+                "reps": "3",
+                "intensity": {
+                  "mode": "progression",
+                  "steps": [
+                    {
+                      "reps": "3",
+                      "load": "100",
+                      "unit": "% do RM"
+                    },
+                    {
+                      "reps": "3",
+                      "load": "105",
+                      "unit": "% do RM"
+                    },
+                    {
+                      "reps": "3",
+                      "load": "110",
+                      "unit": "% do RM"
+                    }
+                  ]
+                },
                 "note": "",
                 "progression": null
               },
               {
-                "id": "mq2nds4eaaxc4eo6hdp",
-                "name": "Voadora no Cachorro",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
+                "id": "mq2qwsi4xjzebb31sfn",
+                "name": "1 Muscle Clean + 3 Front Squat 3''",
+                "sets": "3",
+                "reps": "",
+                "intensity": {
+                  "mode": "progression",
+                  "steps": [
+                    {
+                      "reps": "1",
+                      "load": "50",
+                      "unit": "% do RM"
+                    },
+                    {
+                      "reps": "1",
+                      "load": "60",
+                      "unit": "% do RM"
+                    },
+                    {
+                      "reps": "1",
+                      "load": "70",
+                      "unit": "% do RM"
+                    }
+                  ]
+                },
                 "note": "",
                 "progression": null
               },
               {
-                "id": "mq2nds4ev4cfcccy1vj",
-                "name": "Voadora no Cachorro",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
+                "id": "mq2qygrsiywkmoofxqi",
+                "name": "1 Power Clean + 1 Hang Squat Clean",
+                "sets": "3",
+                "reps": "",
+                "intensity": {
+                  "mode": "progression",
+                  "steps": [
+                    {
+                      "reps": "1",
+                      "load": "80",
+                      "unit": "% do RM"
+                    },
+                    {
+                      "reps": "1",
+                      "load": "85",
+                      "unit": "% do RM"
+                    },
+                    {
+                      "reps": "1",
+                      "load": "90",
+                      "unit": "% do RM"
+                    }
+                  ]
+                },
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "mq2qzdbr6pdojlbl4ga",
+                "name": "Backsquat",
+                "sets": "5",
+                "reps": "5",
+                "intensity": {
+                  "mode": "progression",
+                  "steps": [
+                    {
+                      "reps": "5",
+                      "load": "60",
+                      "unit": "% do RM"
+                    },
+                    {
+                      "reps": "5",
+                      "load": "65",
+                      "unit": "% do RM"
+                    },
+                    {
+                      "reps": "5",
+                      "load": "70",
+                      "unit": "% do RM"
+                    },
+                    {
+                      "reps": "5",
+                      "load": "75",
+                      "unit": "% do RM"
+                    },
+                    {
+                      "reps": "5",
+                      "load": "80",
+                      "unit": "% do RM"
+                    }
+                  ]
+                },
                 "note": "",
                 "progression": null
               }
             ]
           },
           {
-            "id": "mq2nds4egxvbxy6m9zi",
+            "id": "mq2r02qop68prmzyy4h",
             "label": "WOD",
             "type": "AMRAP",
-            "zone": "Zona 01",
-            "duration": "20",
+            "zone": "Zona 03",
+            "duration": "14",
+            "rounds": "",
+            "notes": "Meta: 4 Rounds.",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "mq2r02qoer51b68q6gf",
+                "name": "Dual DB Squat Clean",
+                "sets": "",
+                "reps": "6",
+                "intensity": {
+                  "mode": "gender",
+                  "Masculino_RX": "22.5",
+                  "Masculino_Inter": "15",
+                  "Masculino_SC": "10",
+                  "Feminino_RX": "15",
+                  "Feminino_Inter": "10",
+                  "Feminino_SC": "7.5"
+                },
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "mq2r11ucr7thf4mr56g",
+                "name": "Burpee Box Jump Over",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "mq2r1as86hfapwk9qpv",
+                "name": "BMU",
+                "sets": "",
+                "reps": "6",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "mq2r1he2hngkqmaea87",
+                "name": "Run",
+                "sets": "",
+                "reps": "",
+                "intensity": {
+                  "mode": "cardio",
+                  "cardioVal": "103"
+                },
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "mq2r2b8gfxslgc7xjyr",
+            "label": "-",
+            "type": "Cardio",
+            "zone": "Zona 03",
+            "duration": "40",
             "rounds": "",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "mq2nds4eu3mwx8xr9t",
-                "name": "Voadora na agua",
+                "id": "mq2r2b8geza2uj0wj7w",
+                "name": "RUN!",
                 "sets": "",
-                "reps": "10",
+                "reps": "",
                 "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": "mq2nds4exbxc9xll5t",
-                "name": "Voadora na agua",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": "mq2nds4exsmms8ijvfm",
-                "name": "Voadora na agua",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
+                "note": "Z2",
                 "progression": null
               }
             ]
@@ -278,14 +330,15 @@
     ],
     "gymName": "",
     "label": "",
+    "exportScale": 2,
     "colors": {
       "dvBg": "#000000",
       "dvGymName": "#ffffff",
-      "dvDate": "#e87820",
+      "dvDate": "#6b75ff",
       "dvMainTraining": "#888888",
-      "dvZoneType": "#e87820",
-      "dvCap": "#e87820",
-      "dvRounds": "#f5c842",
+      "dvZoneType": "#47acd7",
+      "dvCap": "#2192e8",
+      "dvRounds": "#949494",
       "dvExName": "#ffffff",
       "dvIntensity": "#f5c842",
       "dvNote": "#888888",
@@ -295,11 +348,11 @@
       "wkHeader": "#e87820",
       "wkDateNum": "#666666",
       "wkMainTraining": "#ffffff",
-      "wkBlockType": "#e87820",
+      "wkBlockType": "#704829",
       "wkExName": "#666666",
       "wkDivider": "#1a1a1a",
       "eaGymName": "#ffffff",
-      "eaDate": "#e87820",
+      "eaDate": "#654329",
       "eaSubtitle": "#666666",
       "eaBlockType": "#00b8d4",
       "eaBlockMeta": "#00b8d4",
@@ -322,7 +375,29 @@
       "mmDivider": "rgba(0,184,212,0.1)"
     }
   },
-  "lbColors": {},
+  "lbColors": {
+    "lbBg": "#000000",
+    "lbRowAlt": "#020809",
+    "lbP1Bg": "rgba(255,215,0,0.06)",
+    "lbP2Bg": "rgba(192,192,192,0.05)",
+    "lbP3Bg": "rgba(205,127,50,0.05)",
+    "lbDivider": "#0d1e1e",
+    "lbHdrBg": "#000000",
+    "lbHdrBorder": "#00b8d4",
+    "lbHdrTitle": "#ffffff",
+    "lbHdrSub": "#00b8d4",
+    "lbRank": "#333333",
+    "lbP1": "#ffd700",
+    "lbP2": "#c0c0c0",
+    "lbP3": "#cd7f32",
+    "lbName": "#ffffff",
+    "lbScaleText": "#00b8d4",
+    "lbScaleBg": "rgba(0,184,212,0.1)",
+    "lbScaleBorder": "#00b8d4",
+    "lbPerf": "#ffffff",
+    "lbFilterBg": "#00b8d4",
+    "lbFilterText": "#000000"
+  },
   "results": [],
   "athletes": []
 }
