@@ -4767,7 +4767,6 @@ function App(){
         if(cfg.fontFamily){
           APP_CONFIG.fontFamily=cfg.fontFamily;
           document.documentElement.style.setProperty('--export-font',cfg.fontFamily);
-          // update Google Fonts link if needed
           const gf=document.getElementById('gfonts');
           if(gf&&cfg.googleFontsUrl) gf.href=cfg.googleFontsUrl;
         }
@@ -4789,13 +4788,50 @@ function App(){
           APP_CONFIG.blockNames=cfg.blockNames;
           setBlockNames(cfg.blockNames);
         }
-        // Apply other config defaults only on truly empty state
-        // don't override gymName from config — leave blank as default
-    // if(cfg.gymName) APP_CONFIG.gymName=cfg.gymName;
         if(cfg.fontScale) APP_CONFIG.fontScale=cfg.fontScale;
         if(cfg.logoScale) APP_CONFIG.logoScale=cfg.logoScale;
         if(cfg.zoneScales) APP_CONFIG.zoneScales=cfg.zoneScales;
         if(cfg.blockTitleScales) APP_CONFIG.blockTitleScales=cfg.blockTitleScales;
+
+        // ── Sync config colours to localStorage so SchedulePublisher picks them up ──
+        // Only update keys that exist in config and are colour values
+        // Merge with existing settings (don't overwrite user-customised values unless config is newer)
+        const COLOUR_KEYS=['dvBg','dvGymName','dvDate','dvMainTraining','dvZoneType','dvBlockLabel',
+          'dvCap','dvRounds','dvExName','dvIntensity','dvNote','dvBlockNotes','dvDivider',
+          'wkBg','wkHeader','wkDateNum','wkMainTraining','wkBlockType','wkExName','wkDivider',
+          'eaGymName','eaDate','eaSubtitle','eaBlockType','eaBlockMeta','eaExName',
+          'eaIntensity','eaBlockHdr','eaDivider',
+          'mmGymName','mmDate','mmSubtitle','mmBlockType','mmBlockMetaBg','mmBlockMetaText',
+          'mmExName','mmIntensity','mmBlockHdr','mmDivider',
+          'fontScale','exportScale'];
+        const existing=loadSettings();
+        const hasStoredColours=COLOUR_KEYS.some(k=>existing[k]||existing.colors?.[k]);
+        const cfgHasColours=COLOUR_KEYS.some(k=>cfg[k]);
+        if(cfgHasColours){
+          const merged={...existing};
+          // always apply config colour keys — config is the source of truth
+          COLOUR_KEYS.forEach(k=>{if(cfg[k]!==undefined) merged[k]=cfg[k];});
+          if(cfg.mobileEaglesBg) merged.eaglesBg=cfg.mobileEaglesBg;
+          if(cfg.mobileMegaManBg) merged.megaManBg=cfg.mobileMegaManBg;
+          if(cfg.mobileExerciseNoteColor) merged.noteColor=cfg.mobileExerciseNoteColor;
+          if(cfg.gymName) merged.gymName=cfg.gymName;
+          saveSettings(merged);
+          // if this was a fresh load (no stored colours), reload so states re-init
+          if(!hasStoredColours){
+            window.location.reload();
+            return;
+          }
+        }
+        // Sync lbColors if present
+        if(cfg.lbColors&&typeof cfg.lbColors==='object'){
+          try{
+            const existingLb=JSON.parse(localStorage.getItem('eagles_lb_colors_v1')||'{}');
+            if(!Object.keys(existingLb).length){
+              localStorage.setItem('eagles_lb_colors_v1',JSON.stringify(cfg.lbColors));
+              if(!hasStoredColours) return; // already reloading above
+            }
+          }catch{}
+        }
       });
   },[]);
 

@@ -1,13 +1,13 @@
 {
-  "name": "Medrado — Criador de Treinos",
-  "short_name": "Medrado Treinos",
-  "description": "Criador e publicador de treinos",
-  "start_url": "https://dseller0.github.io/CrossFit-Apps/schedule_builder_pt_V2.html",
+  "name": "Eagles — Criador de Treinos",
+  "short_name": "Eagles Treinos",
+  "description": "Criador e publicador de treinos Eagles",
+  "start_url": "./schedule_builder_pt_V2.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0a0a0a",
-  "theme_color": "#e87820",
+  "theme_color": "#00b8d4",
   "icons": [
     {
       "src": "icon-192.png",

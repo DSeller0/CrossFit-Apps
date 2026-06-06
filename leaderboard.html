@@ -5,18 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Eagles — Leaderboard</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link id="gfonts-lb" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Raleway:wght@400;600;700;900&display=swap"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--accent:#00b8d4;--accent-text:#000;--bg:#000;--bg2:#050e14}
-html,body{background:#0a0a0a;min-height:100vh;font-family:'Courier New',monospace;color:#e0e0e0}
+:root{--accent:#00b8d4;--accent-text:#000;--bg:#000;--bg2:#050e14;--lb-font:'Courier New',monospace}
+html,body{background:#0a0a0a;min-height:100vh;font-family:var(--lb-font);color:#e0e0e0}
 .wrap{max-width:680px;margin:0 auto;padding:16px}
 .topbar{background:#000;border-bottom:3px solid var(--accent);padding:18px 20px;margin-bottom:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .topbar-gym{font-size:22px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.1em}
 .topbar-sub{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
 .controls{background:#0a0a0a;border-bottom:1px solid #111;padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:10}
-.sel{font-family:'Courier New',monospace;font-size:13px;background:#111;border:1px solid #1e1e1e;color:#ccc;border-radius:5px;padding:6px 10px;outline:none;flex:1;min-width:160px}
+.sel{font-family:var(--lb-font);font-size:13px;background:#111;border:1px solid #1e1e1e;color:#ccc;border-radius:5px;padding:6px 10px;outline:none;flex:1;min-width:160px}
 .filter-row{display:flex;gap:4px;flex-wrap:wrap}
-.fb{font-family:'Courier New',monospace;font-size:11px;padding:5px 10px;border-radius:4px;border:1px solid #1e1e1e;background:transparent;color:#666;cursor:pointer;transition:all .12s}
+.fb{font-family:var(--lb-font);font-size:11px;padding:5px 10px;border-radius:4px;border:1px solid #1e1e1e;background:transparent;color:#666;cursor:pointer;transition:all .12s}
 .fb.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:700}
 .lb-header{background:#000;padding:16px 20px 12px;border-bottom:1px solid #0d1e1e}
 .lb-title{font-size:16px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.06em}
@@ -49,6 +52,7 @@ const PODIUM_COLORS=['#ffd700','#c0c0c0','#cd7f32'];
 const PODIUM_LABELS=['1º','2º','3º'];
 const WOD_TYPES=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
 
+let cfg={};
 let state=null;
 let selWod='';
 let scaleFilter='Todos';
@@ -96,6 +100,13 @@ function buildWodList(){
 function render(){
   if(!state){document.getElementById('app').innerHTML='<div class="loading">Carregando...</div>';return;}
   const {athletes=[],results=[],settings={},lbColors={}}=state;
+  // Apply config overrides
+  if(cfg.themeAccent) document.documentElement.style.setProperty('--accent',cfg.themeAccent);
+  if(cfg.fontFamily){
+    document.documentElement.style.setProperty('--lb-font',cfg.fontFamily);
+    if(cfg.googleFontsUrl){const gf=document.getElementById('gfonts-lb');if(gf)gf.href=cfg.googleFontsUrl;}
+  }
+  if(cfg.themeAccentText) document.documentElement.style.setProperty('--accent-text',cfg.themeAccentText);
   const lbc={
     lbBg:lbColors.lbBg||'#000000',
     lbRowAlt:lbColors.lbRowAlt||'#020809',
@@ -123,7 +134,7 @@ function render(){
   document.documentElement.style.setProperty('--accent',accent);
   document.body.style.background='#0a0a0a';
 
-  const gymName=settings.gymName||'Eagles';
+  const gymName=cfg.gymName||settings.gymName||'Eagles';
   const wodList=buildWodList();
   const selObj=wodList.find(w=>w.key===selWod)||null;
 
@@ -209,13 +220,19 @@ function applyUrlParams(){
   }
 }
 
-// Fetch state.json from same directory
-fetch('./state.json')
-  .then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
-  .then(data=>{state=data;applyUrlParams();render();})
-  .catch(err=>{
-    document.getElementById('app').innerHTML=`<div class="error"><i class="ti ti-alert-circle"></i><br><br>Não foi possível carregar os resultados.<br><small>Verifique se o arquivo state.json está na mesma pasta.<br>${err.message}</small></div>`;
-  });
+// Fetch config + state
+Promise.all([
+  fetch('./config.json').then(r=>r.ok?r.json():{}).catch(()=>({})),
+  fetch('./state.json').then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
+]).then(([cfgData,stateData])=>{
+  cfg=cfgData;
+  state=stateData;
+  if(cfg.leaderboardTitle||cfg.appTitle) document.title=cfg.leaderboardTitle||cfg.appTitle;
+  applyUrlParams();
+  render();
+}).catch(err=>{
+  document.getElementById('app').innerHTML=`<div class="error"><i class="ti ti-alert-circle"></i><br><br>Não foi possível carregar os resultados.<br><small>Verifique se o arquivo state.json está na mesma pasta.<br>${err.message}</small></div>`;
+});
 </script>
 </body>
 </html>
