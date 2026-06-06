@@ -1,8 +1,8 @@
 {
-  "appTitle": "Eagles — Treinos",
+  "appTitle": "Hadouken",
   "themeAccent": "#00b8d4",
   "themeAccentText": "#000000",
-  "gymName": "Eagles",
+  "gymName": "Team Medrado",
   "fontScale": 1.5,
   "logoScale": 1.0,
   "zoneScales": [
@@ -20,7 +20,7 @@
   "mobileExerciseNoteColor": "#4a9aaa",
   "restDayLabel": "Descanso",
   "mobileWeeklyLabels": [
-    "Mobile Semanal Eagles",
+    "Mobile Semanal Default",
     "Mobile Semanal Medrado"
   ],
   "athleteLevels": [
@@ -70,7 +70,7 @@
     "AMRAP",
     "Descanso"
   ],
-  "appDescription": "Criador e publicador de treinos Eagles",
-  "scheduleTitle": "Eagles — Treinos",
-  "leaderboardTitle": "Eagles — Leaderboard"
+  "appDescription": "Criador e publicador de treinos",
+  "scheduleTitle": "Cone — Treinos",
+  "leaderboardTitle": "Cone — Leaderboard"
 }
