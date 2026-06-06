@@ -22,10 +22,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link id="gfonts" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Raleway:wght@400;600;700;900&display=swap"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#e0e0e0;-webkit-text-size-adjust:100%}
-:root{--theme-accent:#00b8d4;--theme-accent-text:#000000}
+:root{--theme-accent:#00b8d4;--theme-accent-text:#000000;--export-font:'Arial Black',Arial,sans-serif}
 #root{max-width:1440px;margin:0 auto}
 
 /* chrome */
@@ -173,7 +176,7 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .pvt.on{background:#e87820;color:#fff;border-color:#e87820;font-weight:600}
 
 /* ── daily view — Eagles TV style — all font sizes use calc(Xpx * var(--fs,1)) ── */
-.dv-wrap{background:#000;color:#fff;width:1920px;height:1080px;display:flex;flex-direction:column;overflow:hidden;font-family:'Arial Black',Arial,sans-serif}
+.dv-wrap{background:#000;color:#fff;width:1920px;height:1080px;display:flex;flex-direction:column;overflow:hidden;font-family:var(--export-font)}
 .dv-topbar{background:#0a0a0a;display:flex;align-items:center;justify-content:space-between;padding:14px 36px;border-bottom:2px solid #1a1a1a;flex-shrink:0}
 .dv-top-left{display:flex;align-items:center;gap:18px}
 .dv-logo-placeholder{width:64px;height:64px;border-radius:4px;background:#1a1a1a;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:10px;color:#555;text-align:center;line-height:1.3}
@@ -214,7 +217,7 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .wk-title{
   font-size:22px;font-weight:900;color:#fff;
   text-transform:uppercase;letter-spacing:.08em;
-  font-family:'Arial Black',Arial,sans-serif
+  font-family:var(--export-font)
 }
 .wk-sub{font-size:14px;color:#e87820;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
 .wk-week-row{display:grid;grid-template-columns:56px repeat(7,1fr);border-bottom:1px solid #1a1a1a}
@@ -222,7 +225,7 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
   background:#0a0a0a;display:flex;align-items:center;justify-content:center;
   font-size:13px;font-weight:900;color:#333;
   border-right:1px solid #1a1a1a;padding:8px 4px;
-  font-family:'Arial Black',Arial,sans-serif
+  font-family:var(--export-font)
 }
 .wk-day-cell{
   border-right:1px solid #1a1a1a;padding:14px 14px;
@@ -232,13 +235,13 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .wk-day-cell.empty{cursor:default}.wk-day-cell.empty:hover{background:transparent}
 .wk-day-num{
   font-size:13px;color:#444;margin-bottom:6px;
-  font-weight:900;font-family:'Arial Black',Arial,sans-serif
+  font-weight:900;font-family:var(--export-font)
 }
 .wk-day-num.today{color:#e87820}
 .wk-day-training{
   font-size:14px;font-weight:900;color:#fff;
   line-height:1.4;text-transform:uppercase;
-  letter-spacing:.04em;font-family:'Arial Black',Arial,sans-serif
+  letter-spacing:.04em;font-family:var(--export-font)
 }
 .wk-day-blocks{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .wk-col-head-row{
@@ -249,7 +252,7 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
   padding:10px 14px;font-size:12px;font-weight:900;
   color:#e87820;text-transform:uppercase;letter-spacing:.1em;
   border-right:1px solid #1a1a1a;
-  font-family:'Arial Black',Arial,sans-serif
+  font-family:var(--export-font)
 }
 
 .empty2{text-align:center;padding:3rem;color:#555;font-size:13px}
@@ -274,7 +277,7 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .res-block-hdr{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px}
 .kpi-card{background:#141414;border:1px solid #222;border-radius:8px;padding:12px}
-.kpi-val{font-size:28px;font-weight:900;color:#e87820;font-family:'Arial Black',Arial,sans-serif;line-height:1}
+.kpi-val{font-size:28px;font-weight:900;color:#e87820;font-family:var(--export-font);line-height:1}
 .kpi-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
 .kpi-sub{font-size:12px;color:#888;margin-top:3px}
 .mini-bar{height:6px;background:#222;border-radius:3px;margin-top:6px;overflow:hidden}
@@ -421,7 +424,7 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .empty-state{text-align:center;padding:2rem;color:#555;font-size:13px}
 
 /* ── Leaderboard ── */
-.lb-empty{text-align:center;padding:2rem;color:#333;font-family:'Courier New',monospace;font-size:13px}
+.lb-empty{text-align:center;padding:2rem;color:#333;font-family:var(--export-font);font-size:13px}
 
 /* ── Leaderboard colour variables ── */
 :root{
@@ -471,6 +474,7 @@ const APP_CONFIG={
   blockColors:{},
   blockNames:['-','WOD','Skill','Core','Acessórios','LPO','Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso'],
   appTitle:'Eagles — Treinos',
+  fontFamily:"'Arial Black',Arial,sans-serif",
   themeAccent:'#00b8d4',
   themeAccentText:'#000000',
   exportScale:2,
@@ -501,6 +505,8 @@ const APP_CONFIG={
   mobileWeeklyLabels:['Mobile Semanal Eagles','Mobile Semanal Medrado']
 };
 document.title=APP_CONFIG.appTitle;
+function GF(){return APP_CONFIG.fontFamily||"'Arial Black',Arial,sans-serif";}
+document.documentElement.style.setProperty('--export-font',GF());
 document.documentElement.style.setProperty('--theme-accent',APP_CONFIG.themeAccent);
 document.documentElement.style.setProperty('--theme-accent-text',APP_CONFIG.themeAccentText);
 
@@ -2540,6 +2546,11 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
                     // App-level
                     if(cfg.themeAccent){APP_CONFIG.themeAccent=cfg.themeAccent;document.documentElement.style.setProperty('--theme-accent',cfg.themeAccent);}
                     if(cfg.themeAccentText){APP_CONFIG.themeAccentText=cfg.themeAccentText;document.documentElement.style.setProperty('--theme-accent-text',cfg.themeAccentText);}
+                    if(cfg.fontFamily){
+                      APP_CONFIG.fontFamily=cfg.fontFamily;
+                      document.documentElement.style.setProperty('--export-font',cfg.fontFamily);
+                      if(cfg.googleFontsUrl){const gf=document.getElementById('gfonts');if(gf)gf.href=cfg.googleFontsUrl;}
+                    }
                     if(cfg.fontScale) setFontScale(cfg.fontScale);
                     if(cfg.exportScale) setExportScale(cfg.exportScale);
                     if(cfg.gymName) setGymName(cfg.gymName);
@@ -2559,6 +2570,8 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
                 appDescription:APP_CONFIG.appDescription||'',
                 scheduleTitle:APP_CONFIG.scheduleTitle||APP_CONFIG.appTitle,
                 leaderboardTitle:APP_CONFIG.leaderboardTitle||APP_CONFIG.appTitle,
+                fontFamily:APP_CONFIG.fontFamily||"'Arial Black',Arial,sans-serif",
+                googleFontsUrl:APP_CONFIG.googleFontsUrl||'',
                 themeAccent:APP_CONFIG.themeAccent,
                 themeAccentText:APP_CONFIG.themeAccentText,
                 gymName:gymName||APP_CONFIG.gymName,
@@ -2655,8 +2668,8 @@ function MobileBlockA({bl,fs,bg,colors}){
   const blockBg=bg||APP_CONFIG.mobileEaglesBg||'#000';
   return React.createElement('div',{style:{borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
     React.createElement('div',{style:{background:col.blockHdr||'rgba(0,184,212,0.12)',padding:`${Math.round(10*f)}px ${pad}px ${Math.round(6*f)}px`,borderTop:`2px solid #00b8d4`}},
-      React.createElement('div',{style:{fontSize:mfs(18,f),fontWeight:900,color:col.blockType||'#00b8d4',textTransform:'uppercase',letterSpacing:'.07em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},title),
-      meta&&React.createElement('div',{style:{fontSize:mfs(12,f),color:col.blockMeta||'#00b8d4',fontWeight:700,textTransform:'uppercase',marginTop:mfs(2,f),fontFamily:"'Arial Black',Arial,sans-serif"}},meta)
+      React.createElement('div',{style:{fontSize:mfs(18,f),fontWeight:900,color:col.blockType||'#00b8d4',textTransform:'uppercase',letterSpacing:'.07em',fontFamily:GF(),lineHeight:1.2}},title),
+      meta&&React.createElement('div',{style:{fontSize:mfs(12,f),color:col.blockMeta||'#00b8d4',fontWeight:700,textTransform:'uppercase',marginTop:mfs(2,f),fontFamily:GF()}},meta)
     ),
     React.createElement('div',{style:{background:blockBg,padding:`${Math.round(4*f)}px ${pad}px ${Math.round(14*f)}px`}},
       (bl.exercises||[]).filter(e=>e.name).map((ex,ei)=>{
@@ -2668,20 +2681,20 @@ function MobileBlockA({bl,fs,bg,colors}){
         if(isProg){
           const progLines=buildProgressionLines(ex);
           if(!progLines||!progLines.length) return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
-            React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},line)
+            React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:GF(),lineHeight:1.2}},line)
           );
           return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
             progLines.map((pl,si)=>React.createElement('div',{key:si,style:{marginTop:si>0?mfs(4,f):'0'}},
-              React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},pl.nameLine),
-              pl.loadStr&&React.createElement('div',{style:{display:'inline-block',fontSize:mfs(13,f),fontWeight:700,color:'#ffd700',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(255,215,0,0.25)',borderRadius:'3px',padding:`${Math.round(2*f)}px ${Math.round(8*f)}px`,marginTop:mfs(3,f),fontFamily:"'Arial Black',Arial,sans-serif"}},pl.loadStr)
+              React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:GF(),lineHeight:1.2}},pl.nameLine),
+              pl.loadStr&&React.createElement('div',{style:{display:'inline-block',fontSize:mfs(13,f),fontWeight:700,color:'#ffd700',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(255,215,0,0.25)',borderRadius:'3px',padding:`${Math.round(2*f)}px ${Math.round(8*f)}px`,marginTop:mfs(3,f),fontFamily:GF()}},pl.loadStr)
             )),
             ex.note&&React.createElement('div',{style:{fontSize:mfs(12,f),color:APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa',fontStyle:'italic',marginTop:mfs(2,f)}},ex.note)
           );
         }
         const ins=fmtIntensity(ex.intensity);
         return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
-          React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:"'Arial Black',Arial,sans-serif",lineHeight:1.2}},line),
-          ins&&React.createElement('div',{style:{display:'inline-block',fontSize:mfs(13,f),fontWeight:700,color:'#ffd700',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(255,215,0,0.25)',borderRadius:'3px',padding:`${Math.round(2*f)}px ${Math.round(8*f)}px`,marginTop:mfs(3,f),fontFamily:"'Arial Black',Arial,sans-serif"}},ins),
+          React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.04em',fontFamily:GF(),lineHeight:1.2}},line),
+          ins&&React.createElement('div',{style:{display:'inline-block',fontSize:mfs(13,f),fontWeight:700,color:'#ffd700',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(255,215,0,0.25)',borderRadius:'3px',padding:`${Math.round(2*f)}px ${Math.round(8*f)}px`,marginTop:mfs(3,f),fontFamily:GF()}},ins),
           ex.note&&React.createElement('div',{style:{fontSize:mfs(12,f),color:APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa',fontStyle:'italic',marginTop:mfs(2,f)}},ex.note)
         );
       }),
@@ -2695,13 +2708,13 @@ function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,
   const found=buildMobileSession(sessions,selectedDate,currentWeekDates);
   const f=fontScale||1;
   const pad=Math.round(28*f);
-  if(!found) return React.createElement('div',{style:{background:'#000',color:'#555',padding:'40px',textAlign:'center',fontFamily:"'Arial Black',Arial,sans-serif"}},'—');
+  if(!found) return React.createElement('div',{style:{background:'#000',color:'#555',padding:'40px',textAlign:'center',fontFamily:GF()}},'—');
   const {s,date}=found;
   const weekday=date.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase();
   const dateNum=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
   const ls=logoScale||1;
   const bgA=bgOverride||APP_CONFIG.mobileEaglesBg||'#000000';
-  return React.createElement('div',{style:{background:bgA,width:'1080px',fontFamily:"'Arial Black',Arial,sans-serif"}},
+  return React.createElement('div',{style:{background:bgA,width:'1080px',fontFamily:GF()}},
     React.createElement('div',{style:{background:bgA,padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:'2px solid rgba(255,255,255,0.08)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(16,f)}},
         logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
@@ -2726,8 +2739,8 @@ function MobileBlockB({bl,fs,colors}){
   const loads=[...new Set((bl.exercises||[]).filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio'&&e.intensity?.mode!=='progression').map(e=>fmtIntensity(e.intensity)))];
   return React.createElement('div',{style:{borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
     React.createElement('div',{style:{background:col.blockHdr||'rgba(0,184,212,0.12)',padding:`${Math.round(10*f)}px ${pad}px`,borderTop:`${Math.max(2,Math.round(3*f))}px solid ${col.blockType||'#00b8d4'}`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
-      React.createElement('div',{style:{fontSize:mfs(16,f),fontWeight:900,color:col.blockType||'#00b8d4',textTransform:'uppercase',letterSpacing:'.1em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},title),
-      meta&&React.createElement('span',{style:{fontSize:mfs(12,f),fontWeight:900,color:col.blockMetaText||'#000',background:col.blockMetaBg||'#00b8d4',padding:`${Math.round(3*f)}px ${Math.round(10*f)}px`,borderRadius:'2px',fontFamily:"'Courier New',monospace",whiteSpace:'nowrap'}},meta)
+      React.createElement('div',{style:{fontSize:mfs(16,f),fontWeight:900,color:col.blockType||'#00b8d4',textTransform:'uppercase',letterSpacing:'.1em',fontFamily:GF(),lineHeight:1.2}},title),
+      meta&&React.createElement('span',{style:{fontSize:mfs(12,f),fontWeight:900,color:col.blockMetaText||'#000',background:col.blockMetaBg||'#00b8d4',padding:`${Math.round(3*f)}px ${Math.round(10*f)}px`,borderRadius:'2px',fontFamily:GF(),whiteSpace:'nowrap'}},meta)
     ),
     React.createElement('div',{style:{background:APP_CONFIG.mobileMegaManBg||'#000',padding:`${Math.round(8*f)}px ${pad}px ${Math.round(14*f)}px`}},
       (bl.exercises||[]).filter(e=>e.name).map((ex,ei)=>{
@@ -2739,24 +2752,24 @@ function MobileBlockB({bl,fs,colors}){
         if(isProg){
           const progLines=buildProgressionLines(ex);
           if(!progLines||!progLines.length) return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
-            React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},line)
+            React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:GF(),lineHeight:1.2}},line)
           );
           return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
             progLines.map((pl,si)=>React.createElement('div',{key:si,style:{marginTop:si>0?mfs(4,f):'0'}},
-              React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},pl.nameLine),
-              pl.loadStr&&React.createElement('div',{style:{display:'inline-block',fontSize:mfs(13,f),fontWeight:700,color:'#ffd700',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(255,215,0,0.25)',borderRadius:'3px',padding:`${Math.round(2*f)}px ${Math.round(8*f)}px`,marginTop:mfs(3,f),fontFamily:"'Courier New',monospace"}},pl.loadStr)
+              React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:GF(),lineHeight:1.2}},pl.nameLine),
+              pl.loadStr&&React.createElement('div',{style:{display:'inline-block',fontSize:mfs(13,f),fontWeight:700,color:'#ffd700',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(255,215,0,0.25)',borderRadius:'3px',padding:`${Math.round(2*f)}px ${Math.round(8*f)}px`,marginTop:mfs(3,f),fontFamily:GF()}},pl.loadStr)
             )),
             ex.note&&React.createElement('div',{style:{fontSize:mfs(11,f),color:APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa',fontStyle:'italic',marginTop:mfs(2,f)}},ex.note)
           );
         }
         const ins=fmtIntensity(ex.intensity);
         return React.createElement('div',{key:ex.id,style:{padding:`${Math.round(6*f)}px 0`,borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
-          React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:"'Courier New',monospace",lineHeight:1.2}},line),
-          ins&&React.createElement('div',{style:{display:'inline-block',fontSize:mfs(13,f),fontWeight:700,color:'#ffd700',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(255,215,0,0.25)',borderRadius:'3px',padding:`${Math.round(2*f)}px ${Math.round(8*f)}px`,marginTop:mfs(3,f),fontFamily:"'Courier New',monospace"}},ins),
+          React.createElement('div',{style:{fontSize:mfs(17,f),fontWeight:900,color:col.exName||'#fff',textTransform:'uppercase',letterSpacing:'.05em',fontFamily:GF(),lineHeight:1.2}},line),
+          ins&&React.createElement('div',{style:{display:'inline-block',fontSize:mfs(13,f),fontWeight:700,color:'#ffd700',background:'rgba(0,0,0,0.35)',border:'1px solid rgba(255,215,0,0.25)',borderRadius:'3px',padding:`${Math.round(2*f)}px ${Math.round(8*f)}px`,marginTop:mfs(3,f),fontFamily:GF()}},ins),
           ex.note&&React.createElement('div',{style:{fontSize:mfs(11,f),color:APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa',fontStyle:'italic',marginTop:mfs(2,f)}},ex.note)
         );
       }),
-      bl.notes&&React.createElement('div',{style:{fontSize:mfs(12,f),color:APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa',marginTop:mfs(5,f),paddingTop:mfs(5,f),borderTop:'1px solid rgba(0,184,212,0.15)',fontFamily:"'Courier New',monospace"}},bl.notes)
+      bl.notes&&React.createElement('div',{style:{fontSize:mfs(12,f),color:APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa',marginTop:mfs(5,f),paddingTop:mfs(5,f),borderTop:'1px solid rgba(0,184,212,0.15)',fontFamily:GF()}},bl.notes)
     )
   );
 }
@@ -2766,13 +2779,13 @@ function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName
   const found=buildMobileSession(sessions,selectedDate,currentWeekDates);
   const f=fontScale||1;
   const pad=Math.round(28*f);
-  if(!found) return React.createElement('div',{style:{background:'#000',color:'#1a4a50',padding:'40px',textAlign:'center',fontFamily:"'Courier New',monospace"}},'—');
+  if(!found) return React.createElement('div',{style:{background:'#000',color:'#1a4a50',padding:'40px',textAlign:'center',fontFamily:GF()}},'—');
   const {s,date}=found;
   const weekday=date.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase();
   const dateNum=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
   const ls=logoScale||1;
   const bg=bgOverride||APP_CONFIG.mobileMegaManBg||'#0a1a5c';
-  return React.createElement('div',{style:{background:bg,width:'1080px',fontFamily:"'Courier New',monospace"}},
+  return React.createElement('div',{style:{background:bg,width:'1080px',fontFamily:GF()}},
     React.createElement('div',{style:{background:bg,padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:`${Math.max(2,Math.round(3*f))}px solid rgba(0,184,212,0.8)`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(16,f)}},
         logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
@@ -2981,6 +2994,7 @@ function LeaderboardView({athletes,sessions}){
                 reader.onload=ev=>{
                   try{
                     const cfg=JSON.parse(ev.target.result);
+                    // ── Leaderboard colours (in scope — LeaderboardView owns these) ──
                     const lb=cfg.lbColors||cfg;
                     const set=(key,setter)=>{if(lb[key]!==undefined)setter(lb[key]);};
                     set('lbBg',setLbBg);set('lbRowAlt',setLbRowAlt);
@@ -2993,7 +3007,68 @@ function LeaderboardView({athletes,sessions}){
                     set('lbScaleBg',setLbScaleBg);set('lbScaleBorder',setLbScaleBorder);
                     set('lbPerf',setLbPerf);set('lbFilterBg',setLbFilterBg);
                     set('lbFilterText',setLbFilterText);
-                    alert('Config do leaderboard carregada!');
+                    // ── Publisher colours — persist to localStorage then reload ──
+                    // SchedulePublisher re-initialises from localStorage on reload
+                    const existing=loadSettings();
+                    const merged={
+                      ...existing,
+                      ...(cfg.fontScale!==undefined&&{fontScale:cfg.fontScale}),
+                      ...(cfg.exportScale!==undefined&&{exportScale:cfg.exportScale}),
+                      ...(cfg.gymName!==undefined&&{gymName:cfg.gymName}),
+                      colors:{
+                        ...(existing.colors||{}),
+                        ...(cfg.wkBg&&{wkBg:cfg.wkBg}),
+                        ...(cfg.wkHeader&&{wkHeader:cfg.wkHeader}),
+                        ...(cfg.wkDateNum&&{wkDateNum:cfg.wkDateNum}),
+                        ...(cfg.wkMainTraining&&{wkMainTraining:cfg.wkMainTraining}),
+                        ...(cfg.wkBlockType&&{wkBlockType:cfg.wkBlockType}),
+                        ...(cfg.wkExName&&{wkExName:cfg.wkExName}),
+                        ...(cfg.wkDivider&&{wkDivider:cfg.wkDivider}),
+                        ...(cfg.dvBg&&{dvBg:cfg.dvBg}),
+                        ...(cfg.dvGymName&&{dvGymName:cfg.dvGymName}),
+                        ...(cfg.dvDate&&{dvDate:cfg.dvDate}),
+                        ...(cfg.dvMainTraining&&{dvMainTraining:cfg.dvMainTraining}),
+                        ...(cfg.dvZoneType&&{dvZoneType:cfg.dvZoneType}),
+                        ...(cfg.dvBlockLabel&&{dvBlockLabel:cfg.dvBlockLabel}),
+                        ...(cfg.dvCap&&{dvCap:cfg.dvCap}),
+                        ...(cfg.dvRounds&&{dvRounds:cfg.dvRounds}),
+                        ...(cfg.dvExName&&{dvExName:cfg.dvExName}),
+                        ...(cfg.dvIntensity&&{dvIntensity:cfg.dvIntensity}),
+                        ...(cfg.dvNote&&{dvNote:cfg.dvNote}),
+                        ...(cfg.dvBlockNotes&&{dvBlockNotes:cfg.dvBlockNotes}),
+                        ...(cfg.dvDivider&&{dvDivider:cfg.dvDivider}),
+                        ...(cfg.eaGymName&&{eaGymName:cfg.eaGymName}),
+                        ...(cfg.eaDate&&{eaDate:cfg.eaDate}),
+                        ...(cfg.eaSubtitle&&{eaSubtitle:cfg.eaSubtitle}),
+                        ...(cfg.eaBlockType&&{eaBlockType:cfg.eaBlockType}),
+                        ...(cfg.eaBlockMeta&&{eaBlockMeta:cfg.eaBlockMeta}),
+                        ...(cfg.eaExName&&{eaExName:cfg.eaExName}),
+                        ...(cfg.eaIntensity&&{eaIntensity:cfg.eaIntensity}),
+                        ...(cfg.eaBlockHdr&&{eaBlockHdr:cfg.eaBlockHdr}),
+                        ...(cfg.eaDivider&&{eaDivider:cfg.eaDivider}),
+                        ...(cfg.mobileEaglesBg&&{eaglesBg:cfg.mobileEaglesBg}),
+                        ...(cfg.mmGymName&&{mmGymName:cfg.mmGymName}),
+                        ...(cfg.mmDate&&{mmDate:cfg.mmDate}),
+                        ...(cfg.mmSubtitle&&{mmSubtitle:cfg.mmSubtitle}),
+                        ...(cfg.mmBlockType&&{mmBlockType:cfg.mmBlockType}),
+                        ...(cfg.mmBlockMetaBg&&{mmBlockMetaBg:cfg.mmBlockMetaBg}),
+                        ...(cfg.mmBlockMetaText&&{mmBlockMetaText:cfg.mmBlockMetaText}),
+                        ...(cfg.mmExName&&{mmExName:cfg.mmExName}),
+                        ...(cfg.mmIntensity&&{mmIntensity:cfg.mmIntensity}),
+                        ...(cfg.mmBlockHdr&&{mmBlockHdr:cfg.mmBlockHdr}),
+                        ...(cfg.mmDivider&&{mmDivider:cfg.mmDivider}),
+                        ...(cfg.mobileMegaManBg&&{megaManBg:cfg.mobileMegaManBg}),
+                      }
+                    };
+                    saveSettings(merged);
+                    if(cfg.themeAccent) APP_CONFIG.themeAccent=cfg.themeAccent;
+                    if(cfg.themeAccentText) APP_CONFIG.themeAccentText=cfg.themeAccentText;
+                    if(cfg.fontFamily) APP_CONFIG.fontFamily=cfg.fontFamily;
+                    if(cfg.googleFontsUrl) APP_CONFIG.googleFontsUrl=cfg.googleFontsUrl;
+                    // save lb colours to their own key too
+                    try{localStorage.setItem('eagles_lb_colors_v1',JSON.stringify(lbc));}catch{}
+                    alert('Config completa carregada! A página irá recarregar para aplicar todas as cores.');
+                    setTimeout(()=>window.location.reload(),300);
                   }catch(err){alert('Erro ao ler o arquivo: '+err.message);}
                 };
                 reader.readAsText(file);
@@ -3062,13 +3137,13 @@ function LeaderboardView({athletes,sessions}){
     selObj?React.createElement('div',null,
       React.createElement('div',{ref:imgRef,style:{background:lbBg,width:'1080px',transform:`scale(${Math.min(1,(window.innerWidth-28)/1080)})`,transformOrigin:'top left',marginBottom:`${-1080*(1-Math.min(1,(window.innerWidth-28)/1080))}px`}},
         React.createElement('div',{style:{background:lbHdrBg,padding:'20px 28px 16px',borderBottom:`3px solid ${lbHdrBorder}`}},
-          React.createElement('div',{style:{fontFamily:"'Courier New',monospace",fontSize:'22px',fontWeight:900,color:lbHdrTitle,textTransform:'uppercase',letterSpacing:'.1em'}},'Leaderboard'),
-          React.createElement('div',{style:{fontFamily:"'Courier New',monospace",fontSize:'14px',color:lbHdrSub,marginTop:'4px',textTransform:'uppercase',letterSpacing:'.06em'}},
+          React.createElement('div',{style:{fontFamily:GF(),fontSize:'22px',fontWeight:900,color:lbHdrTitle,textTransform:'uppercase',letterSpacing:'.1em'}},'Leaderboard'),
+          React.createElement('div',{style:{fontFamily:GF(),fontSize:'14px',color:lbHdrSub,marginTop:'4px',textTransform:'uppercase',letterSpacing:'.06em'}},
             `${selObj.dt} · ${selObj.blLabel}${selObj.meta?' · '+selObj.meta:''}${scaleFilter!=='Todos'?' · '+scaleFilter:''}`)
         ),
         React.createElement('div',{style:{padding:'8px 0'}},
           ranked.length===0
-            ?React.createElement('div',{style:{padding:'20px 28px',color:'#333',fontFamily:"'Courier New',monospace",fontSize:'13px'}},'Nenhum resultado.')
+            ?React.createElement('div',{style:{padding:'20px 28px',color:'#333',fontFamily:GF(),fontSize:'13px'}},'Nenhum resultado.')
             :ranked.map((r,ri)=>{
               const ath=athletes.find(a=>String(a.id)===String(r.athleteId));
               const perf=getPerformanceStr(r,selObj.blType);
@@ -3079,14 +3154,14 @@ function LeaderboardView({athletes,sessions}){
                 borderBottom:`1px solid ${lbDivider}`,
                 background:isPodium?podBgs[ri]:ri%2===0?lbRowAlt:lbBg
               }},
-                React.createElement('div',{style:{fontFamily:"'Courier New',monospace",fontSize:'18px',fontWeight:900,color:pColor||lbRank,width:'32px',flexShrink:0,textAlign:'center'}},
+                React.createElement('div',{style:{fontFamily:GF(),fontSize:'18px',fontWeight:900,color:pColor||lbRank,width:'32px',flexShrink:0,textAlign:'center'}},
                   isPodium?podLabels[ri]:`${ri+1}º`),
                 React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',flex:1,minWidth:0}},
                   React.createElement('div',{style:{width:'10px',height:'10px',borderRadius:'50%',background:ath?.color||'#555',flexShrink:0}}),
-                  React.createElement('span',{style:{fontFamily:"'Courier New',monospace",fontSize:'16px',fontWeight:700,color:lbName,textTransform:'uppercase',letterSpacing:'.04em',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},ath?.name||'—')
+                  React.createElement('span',{style:{fontFamily:GF(),fontSize:'16px',fontWeight:700,color:lbName,textTransform:'uppercase',letterSpacing:'.04em',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},ath?.name||'—')
                 ),
-                r.scale&&r.scale!=='-'&&React.createElement('span',{style:{fontFamily:"'Courier New',monospace",fontSize:'11px',fontWeight:700,color:lbScaleText,background:lbScaleBg,border:`1px solid ${lbScaleBorder}`,borderRadius:'3px',padding:'2px 8px',flexShrink:0}},r.scale),
-                React.createElement('div',{style:{fontFamily:"'Courier New',monospace",fontSize:'16px',fontWeight:900,color:pColor||lbPerf,flexShrink:0,textAlign:'right'}},perf)
+                r.scale&&r.scale!=='-'&&React.createElement('span',{style:{fontFamily:GF(),fontSize:'11px',fontWeight:700,color:lbScaleText,background:lbScaleBg,border:`1px solid ${lbScaleBorder}`,borderRadius:'3px',padding:'2px 8px',flexShrink:0}},r.scale),
+                React.createElement('div',{style:{fontFamily:GF(),fontSize:'16px',fontWeight:900,color:pColor||lbPerf,flexShrink:0,textAlign:'right'}},perf)
               );
             })
         )
@@ -3841,7 +3916,7 @@ function MobileWeeklySingleDay({date,sessions,f,col,variant,monthNames}){
   const cyan='#00b8d4';
   const orange='#e87820';
   const hdrAccent=isA?orange:cyan;
-  const fontFamily=isA?"'Arial Black',Arial,sans-serif":"'Courier New',monospace";
+  const fontFamily=GF();
   const bg=isA?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000');
 
   return React.createElement('div',null,
@@ -3920,7 +3995,7 @@ function MobileWeeklyExportView({sessions,gymName,logoDataUrl,logoScale,fontScal
   const isA=variant==='A';
   const cyan='#00b8d4';
   const bg=isA?(APP_CONFIG.mobileEaglesBg||'#000'):(APP_CONFIG.mobileMegaManBg||'#000');
-  const fontFamily=isA?"'Arial Black',Arial,sans-serif":"'Courier New',monospace";
+  const fontFamily=GF();
   // weekDates is 7-element Sun-first array — display Mon(1)→Sun(0) wrapping
   const orderedDays=[1,2,3,4,5,6,0].map(i=>weekDates[i]);
   const mon=weekDates[1];const sun=weekDates[0];
@@ -4694,6 +4769,13 @@ function App(){
         if(cfg.athleteLevels&&Array.isArray(cfg.athleteLevels)) APP_CONFIG.athleteLevels=cfg.athleteLevels;
         if(cfg.athleteGoals&&Array.isArray(cfg.athleteGoals)) APP_CONFIG.athleteGoals=cfg.athleteGoals;
         if(cfg.blockColors&&typeof cfg.blockColors==='object') APP_CONFIG.blockColors={...APP_CONFIG.blockColors,...cfg.blockColors};
+        if(cfg.fontFamily){
+          APP_CONFIG.fontFamily=cfg.fontFamily;
+          document.documentElement.style.setProperty('--export-font',cfg.fontFamily);
+          // update Google Fonts link if needed
+          const gf=document.getElementById('gfonts');
+          if(gf&&cfg.googleFontsUrl) gf.href=cfg.googleFontsUrl;
+        }
         if(cfg.appTitle){
           APP_CONFIG.appTitle=cfg.appTitle;
           document.title=cfg.appTitle;
