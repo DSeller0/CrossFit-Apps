@@ -1824,11 +1824,9 @@ function SchedulePublisher({sessions}){
   const [eaglesBg,setEaglesBg]=useState(APP_CONFIG.mobileEaglesBg||'#000000');
   const [megaManBg,setMegaManBg]=useState(APP_CONFIG.mobileMegaManBg||'#0a1a5c');
   const [noteColor,setNoteColor]=useState(APP_CONFIG.mobileExerciseNoteColor||'#4a9aaa');
-  // ── Settings: which view is being configured ──
+  // ── Load persisted settings — flat keys, fallback to nested colors for old data ──
+  const _sc={...(_savedSettings.colors||{}),..._savedSettings};
   const [settingsView,setSettingsView]=useState('daily');
-
-  // Daily view colours — seeded from saved settings
-  const _sc=_savedSettings.colors||{};
   const [dvBg,setDvBg]=useState(_sc.dvBg||'#000000');
   const [dvGymName,setDvGymName]=useState(_sc.dvGymName||'#ffffff');
   const [dvDate,setDvDate]=useState(_sc.dvDate||'#e87820');
@@ -1883,15 +1881,13 @@ function SchedulePublisher({sessions}){
   useEffect(()=>{
     saveSettings({
       fontScale,zoneScales,blockTitleScales,gymName,label,exportScale,
-      colors:{
-        dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvBlockLabel,dvCap,dvRounds,
-        dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
-        wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
-        eaGymName,eaDate,eaSubtitle,eaBlockType,eaBlockMeta,eaExName,
-        eaIntensity,eaBlockHdr,eaDivider,eaglesBg,megaManBg,noteColor,
-        mmGymName,mmDate,mmSubtitle,mmBlockType,mmBlockMetaBg,mmBlockMetaText,
-        mmExName,mmIntensity,mmBlockHdr,mmDivider
-      }
+      dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvBlockLabel,dvCap,dvRounds,
+      dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
+      wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
+      eaGymName,eaDate,eaSubtitle,eaBlockType,eaBlockMeta,eaExName,
+      eaIntensity,eaBlockHdr,eaDivider,eaglesBg,megaManBg,noteColor,
+      mmGymName,mmDate,mmSubtitle,mmBlockType,mmBlockMetaBg,mmBlockMetaText,
+      mmExName,mmIntensity,mmBlockHdr,mmDivider
     });
   },[fontScale,zoneScales,blockTitleScales,gymName,label,exportScale,
      dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvBlockLabel,dvCap,dvRounds,
@@ -3010,55 +3006,54 @@ function LeaderboardView({athletes,sessions}){
                     // ── Publisher colours — persist to localStorage then reload ──
                     // SchedulePublisher re-initialises from localStorage on reload
                     const existing=loadSettings();
+                    // flatten colours directly into merged (no nested colors key)
+                    const src=cfg.colors?{...cfg,...cfg.colors}:cfg;
                     const merged={
                       ...existing,
-                      ...(cfg.fontScale!==undefined&&{fontScale:cfg.fontScale}),
-                      ...(cfg.exportScale!==undefined&&{exportScale:cfg.exportScale}),
-                      ...(cfg.gymName!==undefined&&{gymName:cfg.gymName}),
-                      colors:{
-                        ...(existing.colors||{}),
-                        ...(cfg.wkBg&&{wkBg:cfg.wkBg}),
-                        ...(cfg.wkHeader&&{wkHeader:cfg.wkHeader}),
-                        ...(cfg.wkDateNum&&{wkDateNum:cfg.wkDateNum}),
-                        ...(cfg.wkMainTraining&&{wkMainTraining:cfg.wkMainTraining}),
-                        ...(cfg.wkBlockType&&{wkBlockType:cfg.wkBlockType}),
-                        ...(cfg.wkExName&&{wkExName:cfg.wkExName}),
-                        ...(cfg.wkDivider&&{wkDivider:cfg.wkDivider}),
-                        ...(cfg.dvBg&&{dvBg:cfg.dvBg}),
-                        ...(cfg.dvGymName&&{dvGymName:cfg.dvGymName}),
-                        ...(cfg.dvDate&&{dvDate:cfg.dvDate}),
-                        ...(cfg.dvMainTraining&&{dvMainTraining:cfg.dvMainTraining}),
-                        ...(cfg.dvZoneType&&{dvZoneType:cfg.dvZoneType}),
-                        ...(cfg.dvBlockLabel&&{dvBlockLabel:cfg.dvBlockLabel}),
-                        ...(cfg.dvCap&&{dvCap:cfg.dvCap}),
-                        ...(cfg.dvRounds&&{dvRounds:cfg.dvRounds}),
-                        ...(cfg.dvExName&&{dvExName:cfg.dvExName}),
-                        ...(cfg.dvIntensity&&{dvIntensity:cfg.dvIntensity}),
-                        ...(cfg.dvNote&&{dvNote:cfg.dvNote}),
-                        ...(cfg.dvBlockNotes&&{dvBlockNotes:cfg.dvBlockNotes}),
-                        ...(cfg.dvDivider&&{dvDivider:cfg.dvDivider}),
-                        ...(cfg.eaGymName&&{eaGymName:cfg.eaGymName}),
-                        ...(cfg.eaDate&&{eaDate:cfg.eaDate}),
-                        ...(cfg.eaSubtitle&&{eaSubtitle:cfg.eaSubtitle}),
-                        ...(cfg.eaBlockType&&{eaBlockType:cfg.eaBlockType}),
-                        ...(cfg.eaBlockMeta&&{eaBlockMeta:cfg.eaBlockMeta}),
-                        ...(cfg.eaExName&&{eaExName:cfg.eaExName}),
-                        ...(cfg.eaIntensity&&{eaIntensity:cfg.eaIntensity}),
-                        ...(cfg.eaBlockHdr&&{eaBlockHdr:cfg.eaBlockHdr}),
-                        ...(cfg.eaDivider&&{eaDivider:cfg.eaDivider}),
-                        ...(cfg.mobileEaglesBg&&{eaglesBg:cfg.mobileEaglesBg}),
-                        ...(cfg.mmGymName&&{mmGymName:cfg.mmGymName}),
-                        ...(cfg.mmDate&&{mmDate:cfg.mmDate}),
-                        ...(cfg.mmSubtitle&&{mmSubtitle:cfg.mmSubtitle}),
-                        ...(cfg.mmBlockType&&{mmBlockType:cfg.mmBlockType}),
-                        ...(cfg.mmBlockMetaBg&&{mmBlockMetaBg:cfg.mmBlockMetaBg}),
-                        ...(cfg.mmBlockMetaText&&{mmBlockMetaText:cfg.mmBlockMetaText}),
-                        ...(cfg.mmExName&&{mmExName:cfg.mmExName}),
-                        ...(cfg.mmIntensity&&{mmIntensity:cfg.mmIntensity}),
-                        ...(cfg.mmBlockHdr&&{mmBlockHdr:cfg.mmBlockHdr}),
-                        ...(cfg.mmDivider&&{mmDivider:cfg.mmDivider}),
-                        ...(cfg.mobileMegaManBg&&{megaManBg:cfg.mobileMegaManBg}),
-                      }
+                      ...(src.fontScale!==undefined&&{fontScale:src.fontScale}),
+                      ...(src.exportScale!==undefined&&{exportScale:src.exportScale}),
+                      ...(src.gymName!==undefined&&{gymName:src.gymName}),
+                      ...(src.wkBg&&{wkBg:src.wkBg}),
+                      ...(src.wkHeader&&{wkHeader:src.wkHeader}),
+                      ...(src.wkDateNum&&{wkDateNum:src.wkDateNum}),
+                      ...(src.wkMainTraining&&{wkMainTraining:src.wkMainTraining}),
+                      ...(src.wkBlockType&&{wkBlockType:src.wkBlockType}),
+                      ...(src.wkExName&&{wkExName:src.wkExName}),
+                      ...(src.wkDivider&&{wkDivider:src.wkDivider}),
+                      ...(src.dvBg&&{dvBg:src.dvBg}),
+                      ...(src.dvGymName&&{dvGymName:src.dvGymName}),
+                      ...(src.dvDate&&{dvDate:src.dvDate}),
+                      ...(src.dvMainTraining&&{dvMainTraining:src.dvMainTraining}),
+                      ...(src.dvZoneType&&{dvZoneType:src.dvZoneType}),
+                      ...(src.dvBlockLabel&&{dvBlockLabel:src.dvBlockLabel}),
+                      ...(src.dvCap&&{dvCap:src.dvCap}),
+                      ...(src.dvRounds&&{dvRounds:src.dvRounds}),
+                      ...(src.dvExName&&{dvExName:src.dvExName}),
+                      ...(src.dvIntensity&&{dvIntensity:src.dvIntensity}),
+                      ...(src.dvNote&&{dvNote:src.dvNote}),
+                      ...(src.dvBlockNotes&&{dvBlockNotes:src.dvBlockNotes}),
+                      ...(src.dvDivider&&{dvDivider:src.dvDivider}),
+                      ...(src.eaGymName&&{eaGymName:src.eaGymName}),
+                      ...(src.eaDate&&{eaDate:src.eaDate}),
+                      ...(src.eaSubtitle&&{eaSubtitle:src.eaSubtitle}),
+                      ...(src.eaBlockType&&{eaBlockType:src.eaBlockType}),
+                      ...(src.eaBlockMeta&&{eaBlockMeta:src.eaBlockMeta}),
+                      ...(src.eaExName&&{eaExName:src.eaExName}),
+                      ...(src.eaIntensity&&{eaIntensity:src.eaIntensity}),
+                      ...(src.eaBlockHdr&&{eaBlockHdr:src.eaBlockHdr}),
+                      ...(src.eaDivider&&{eaDivider:src.eaDivider}),
+                      ...((src.mobileEaglesBg||src.eaglesBg)&&{eaglesBg:src.mobileEaglesBg||src.eaglesBg}),
+                      ...(src.mmGymName&&{mmGymName:src.mmGymName}),
+                      ...(src.mmDate&&{mmDate:src.mmDate}),
+                      ...(src.mmSubtitle&&{mmSubtitle:src.mmSubtitle}),
+                      ...(src.mmBlockType&&{mmBlockType:src.mmBlockType}),
+                      ...(src.mmBlockMetaBg&&{mmBlockMetaBg:src.mmBlockMetaBg}),
+                      ...(src.mmBlockMetaText&&{mmBlockMetaText:src.mmBlockMetaText}),
+                      ...(src.mmExName&&{mmExName:src.mmExName}),
+                      ...(src.mmIntensity&&{mmIntensity:src.mmIntensity}),
+                      ...(src.mmBlockHdr&&{mmBlockHdr:src.mmBlockHdr}),
+                      ...(src.mmDivider&&{mmDivider:src.mmDivider}),
+                      ...((src.mobileMegaManBg||src.megaManBg)&&{megaManBg:src.mobileMegaManBg||src.megaManBg}),
                     };
                     saveSettings(merged);
                     if(cfg.themeAccent) APP_CONFIG.themeAccent=cfg.themeAccent;

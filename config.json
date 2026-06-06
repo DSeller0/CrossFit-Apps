@@ -3,38 +3,6 @@
   "themeAccent": "#00b8d4",
   "themeAccentText": "#000000",
   "gymName": "Eagles",
-  "fontScale": 1.5,
-  "logoScale": 1.0,
-  "zoneScales": [
-    1,
-    1,
-    1
-  ],
-  "blockTitleScales": [
-    1,
-    1,
-    1
-  ],
-  "mobileEaglesBg": "#000000",
-  "mobileMegaManBg": "#0a1a5c",
-  "mobileExerciseNoteColor": "#4a9aaa",
-  "restDayLabel": "Descanso",
-  "mobileWeeklyLabels": [
-    "Mobile Semanal Eagles",
-    "Mobile Semanal Medrado"
-  ],
-  "athleteLevels": [
-    "Iniciante",
-    "Intermediário",
-    "Avançado",
-    "Competidor"
-  ],
-  "athleteGoals": [
-    "Saúde geral",
-    "Força",
-    "Condicionamento",
-    "Competição"
-  ],
   "blockColors": {
     "WOD": "#e87820",
     "Skill": "#e87820",
@@ -70,9 +38,104 @@
     "AMRAP",
     "Descanso"
   ],
+  "athleteLevels": [
+    "Iniciante",
+    "Intermediário",
+    "Avançado",
+    "Competidor"
+  ],
+  "athleteGoals": [
+    "Saúde geral",
+    "Força",
+    "Condicionamento",
+    "Competição"
+  ],
+  "restDayLabel": "Descanso",
+  "mobileWeeklyLabels": [
+    "Mobile Semanal Eagles",
+    "Mobile Semanal Medrado"
+  ],
+  "lbColors": {
+    "lbBg": "#000000",
+    "lbRowAlt": "#020809",
+    "lbP1Bg": "rgba(255,215,0,0.06)",
+    "lbP2Bg": "rgba(192,192,192,0.05)",
+    "lbP3Bg": "rgba(205,127,50,0.05)",
+    "lbDivider": "#0d1e1e",
+    "lbHdrBg": "#000000",
+    "lbHdrBorder": "#00b8d4",
+    "lbHdrTitle": "#ffffff",
+    "lbHdrSub": "#00b8d4",
+    "lbRank": "#333333",
+    "lbP1": "#ffd700",
+    "lbP2": "#c0c0c0",
+    "lbP3": "#cd7f32",
+    "lbName": "#ffffff",
+    "lbScaleText": "#00b8d4",
+    "lbScaleBg": "rgba(0,184,212,0.1)",
+    "lbScaleBorder": "#00b8d4",
+    "lbPerf": "#ffffff",
+    "lbFilterBg": "#00b8d4",
+    "lbFilterText": "#000000"
+  },
+  "wkBg": "#1a1410",
+  "wkHeader": "#4ac8c0",
+  "wkDateNum": "#887060",
+  "wkMainTraining": "#f0e8d0",
+  "wkBlockType": "#68d8a0",
+  "wkExName": "#f0e8d0",
+  "wkDivider": "#3a3028",
+  "dvBg": "#1a1410",
+  "dvGymName": "#f0e8d0",
+  "dvDate": "#4ac8c0",
+  "dvMainTraining": "#887060",
+  "dvZoneType": "#68d8a0",
+  "dvBlockLabel": "#4ac8c0",
+  "dvCap": "#4ac8c0",
+  "dvRounds": "#d8a840",
+  "dvExName": "#f0e8d0",
+  "dvIntensity": "#d8a840",
+  "dvNote": "#887060",
+  "dvBlockNotes": "#887060",
+  "dvDivider": "#3a3028",
+  "eaGymName": "#f0e8d0",
+  "eaDate": "#4ac8c0",
+  "eaSubtitle": "#887060",
+  "eaBlockType": "#68d8a0",
+  "eaBlockMeta": "#68d8a0",
+  "eaExName": "#f0e8d0",
+  "eaIntensity": "#d8a840",
+  "eaBlockHdr": "rgba(74,200,192,0.12)",
+  "eaDivider": "rgba(74,200,192,0.1)",
+  "mmGymName": "#f0e8d0",
+  "mmDate": "#4ac8c0",
+  "mmSubtitle": "#887060",
+  "mmBlockType": "#68d8a0",
+  "mmBlockMetaBg": "#4ac8c0",
+  "mmBlockMetaText": "#000000",
+  "mmExName": "#f0e8d0",
+  "mmIntensity": "#d8a840",
+  "mmBlockHdr": "rgba(74,200,192,0.12)",
+  "mmDivider": "rgba(74,200,192,0.1)",
+  "mobileEaglesBg": "#1a1410",
+  "mobileMegaManBg": "#1a1410",
   "appDescription": "Criador e publicador de treinos Eagles",
   "scheduleTitle": "Eagles — Treinos",
   "leaderboardTitle": "Eagles — Leaderboard",
-  "fontFamily": "'Arial Black',Arial,sans-serif",
-  "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Raleway:wght@400;600;700;900&display=swap"
+  "fontFamily": "'Raleway',sans-serif",
+  "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;900&display=swap",
+  "fontScale": 1.5,
+  "logoScale": 1.0,
+  "zoneScales": [
+    1,
+    1,
+    1
+  ],
+  "blockTitleScales": [
+    1,
+    1,
+    1
+  ],
+  "mobileExerciseNoteColor": "#4a9aaa",
+  "exportScale": 2
 }
