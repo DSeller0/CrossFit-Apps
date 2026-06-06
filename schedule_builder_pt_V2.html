@@ -2574,12 +2574,14 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
                 athleteLevels:APP_CONFIG.athleteLevels,
                 athleteGoals:APP_CONFIG.athleteGoals,
                 wkBg,wkHeader,wkDateNum,wkMainTraining,wkBlockType,wkExName,wkDivider,
-                dvBg,dvGymName,dvDate,dvMainTraining:dvMainTraining,dvZoneType,dvBlockLabel,dvCap,dvRounds,
+                dvBg,dvGymName,dvDate,dvMainTraining,dvZoneType,dvBlockLabel,dvCap,dvRounds,
                 dvExName,dvIntensity,dvNote,dvBlockNotes,dvDivider,
                 eaGymName,eaDate,eaSubtitle,eaBlockType,eaBlockMeta,eaExName,eaIntensity,eaBlockHdr,eaDivider,
                 mmGymName,mmDate,mmSubtitle,mmBlockType,mmBlockMetaBg,mmBlockMetaText,mmExName,mmIntensity,mmBlockHdr,mmDivider
               };
-              const fname=(window.prompt('Nome do arquivo (sem extensão):','config')||'config').replace(/[^a-zA-Z0-9_-]/g,'-')||'config';
+              const raw=window.prompt('Nome do arquivo (sem extensão):','config');
+              if(raw===null) return; // user cancelled
+              const fname=(raw.trim().replace(/[^a-zA-Z0-9_-]/g,'-')||'config');
               const blob=new Blob([JSON.stringify(exportCfg,null,2)],{type:'application/json'});
               const a=document.createElement('a');a.download=fname+'.json';
               a.href=URL.createObjectURL(blob);a.click();URL.revokeObjectURL(a.href);
@@ -3016,7 +3018,9 @@ function LeaderboardView({athletes,sessions}){
                 mobileWeeklyLabels:APP_CONFIG.mobileWeeklyLabels,
                 lbColors:lbc
               };
-              const fname=(window.prompt('Nome do arquivo (sem extensão):','config')||'config').replace(/[^a-zA-Z0-9_-]/g,'-')||'config';
+              const raw2=window.prompt('Nome do arquivo (sem extensão):','config');
+              if(raw2===null) return;
+              const fname=(raw2.trim().replace(/[^a-zA-Z0-9_-]/g,'-')||'config');
               const blob=new Blob([JSON.stringify(exportCfg,null,2)],{type:'application/json'});
               const a=document.createElement('a');a.download=fname+'.json';
               a.href=URL.createObjectURL(blob);a.click();URL.revokeObjectURL(a.href);
