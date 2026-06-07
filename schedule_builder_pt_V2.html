@@ -474,7 +474,12 @@ const APP_CONFIG={
   blockColors:{},
   blockNames:['-','WOD','Skill','Core','Acessórios','LPO','Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso'],
   appTitle:'Eagles — Treinos',
+  appDescription:'Criador e publicador de treinos Eagles',
+  scheduleTitle:'Eagles — Treinos',
+  leaderboardTitle:'Eagles — Leaderboard',
   fontFamily:"'Arial Black',Arial,sans-serif",
+  googleFontsUrl:'https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Raleway:wght@400;600;700;900&display=swap',
+  logo:'icon-192.png',
   themeAccent:'#00b8d4',
   themeAccentText:'#000000',
   exportScale:2,
@@ -2578,6 +2583,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
                 appDescription:APP_CONFIG.appDescription||'',
                 scheduleTitle:APP_CONFIG.scheduleTitle||APP_CONFIG.appTitle,
                 leaderboardTitle:APP_CONFIG.leaderboardTitle||APP_CONFIG.appTitle,
+                logo:APP_CONFIG.logo||'icon-192.png',
                 fontFamily:APP_CONFIG.fontFamily||"'Arial Black',Arial,sans-serif",
                 googleFontsUrl:APP_CONFIG.googleFontsUrl||'',
                 themeAccent:APP_CONFIG.themeAccent,
@@ -3089,6 +3095,7 @@ function LeaderboardView({athletes,sessions}){
               const exportCfg={
                 ...savedSettings,
                 appTitle:APP_CONFIG.appTitle,
+                logo:APP_CONFIG.logo||'icon-192.png',
                 themeAccent:APP_CONFIG.themeAccent,
                 themeAccentText:APP_CONFIG.themeAccentText,
                 gymName:APP_CONFIG.gymName,
@@ -4782,6 +4789,11 @@ function App(){
           const gf=document.getElementById('gfonts');
           if(gf&&cfg.googleFontsUrl) gf.href=cfg.googleFontsUrl;
         }
+        if(cfg.scheduleTitle) APP_CONFIG.scheduleTitle=cfg.scheduleTitle;
+        if(cfg.leaderboardTitle) APP_CONFIG.leaderboardTitle=cfg.leaderboardTitle;
+        if(cfg.appDescription) APP_CONFIG.appDescription=cfg.appDescription;
+        if(cfg.googleFontsUrl) APP_CONFIG.googleFontsUrl=cfg.googleFontsUrl;
+        if(cfg.logo) APP_CONFIG.logo=cfg.logo;
         if(cfg.appTitle){
           APP_CONFIG.appTitle=cfg.appTitle;
           document.title=cfg.appTitle;

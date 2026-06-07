@@ -137,5 +137,6 @@
     1
   ],
   "mobileExerciseNoteColor": "#4a9aaa",
-  "exportScale": 2
+  "exportScale": 2,
+  "logo": "icon-192.png"
 }
