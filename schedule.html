@@ -129,12 +129,20 @@ function getWeek(offset){
 
 function blockColor(label,type){
   const name=label&&label!=='-'?label:type;
-  if(cfg.blockColors&&cfg.blockColors[name]) return cfg.blockColors[name];
+  // try exact match first, then case-insensitive, then accent-insensitive
+  const normalize=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const normName=normalize(name);
+  if(cfg.blockColors){
+    if(cfg.blockColors[name]) return cfg.blockColors[name];
+    const key=Object.keys(cfg.blockColors).find(k=>normalize(k)===normName);
+    if(key) return cfg.blockColors[key];
+  }
   const defaults={WOD:'#e87820','For Time':'#e87820',AMRAP:'#f5c842',EMOM:'#f5c842',
     MetCon:'#f5c842',HIIT:'#f5c842',LPO:'#00b8d4',Core:'#888',Força:'#888',
     Skill:'#888',Acessórios:'#888',Aquecimento:'#888',Cardio:'#888',
     Mobilidade:'#888',Descanso:'#444'};
-  return defaults[name]||cfg.wkBlockType||'#555';
+  const defKey=Object.keys(defaults).find(k=>normalize(k)===normName);
+  return (defKey?defaults[defKey]:null)||cfg.wkBlockType||'#555';
 }
 
 function sessionsForDay(dateKey){
