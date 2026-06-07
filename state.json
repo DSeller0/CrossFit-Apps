@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-06-06T23:46:38.954Z",
+  "exportedAt": "2026-06-07T00:18:39.077Z",
   "sessions": {
     "2026-06-06": [
       {
@@ -861,8 +861,8 @@
     "eaIntensity": "#d8a840",
     "eaBlockHdr": "rgba(74,200,192,0.12)",
     "eaDivider": "rgba(74,200,192,0.1)",
-    "eaglesBg": "#1a1410",
-    "megaManBg": "#1a1410",
+    "eaglesBg": "#000000",
+    "megaManBg": "#0a1a5c",
     "noteColor": "#4a9aaa",
     "mmGymName": "#f0e8d0",
     "mmDate": "#4ac8c0",
