@@ -121,24 +121,15 @@ function getWeekDates(offset){
 
 function getWeek(offset){
   const now=new Date();
-  const day=now.getDay();
-  const mon=new Date(now);
-  mon.setDate(now.getDate()-(day===0?6:day-1)+(offset*7));
-  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d;});
+  const day=now.getDay(); // 0=Sun
+  const sun=new Date(now);
+  sun.setDate(now.getDate()-day+(offset*7)); // rewind to Sunday
+  return Array.from({length:7},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return d;});
 }
 
 function blockColor(label,type){
-  const name=label&&label!=='-'?label:type;
-  const normalize=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-  const normName=normalize(name);
-  // blockColors acts as per-type OVERRIDE on top of the wk* scheme
-  if(cfg.blockColors){
-    if(cfg.blockColors[name]) return cfg.blockColors[name];
-    const key=Object.keys(cfg.blockColors).find(k=>normalize(k)===normName);
-    if(key) return cfg.blockColors[key];
-  }
-  // default: use wkBlockType from the Semanal colour scheme
-  // this keeps schedule.html in sync with the Publicador de Grade
+  // always use wkBlockType — keeps schedule in sync with Publicador de Grade Semanal scheme
+  // blockColors is intentionally ignored here to avoid config colour overrides
   return cfg.wkBlockType||'#68d8a0';
 }
 
