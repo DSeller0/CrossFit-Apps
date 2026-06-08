@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Eagles — Treinos</title><!-- set from config.scheduleTitle at runtime -->
+<title>Cone — Treinos</title><!-- set from config.scheduleTitle at runtime -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -219,7 +219,7 @@ function render(){
   const today=toISO(new Date());
   const athletes=(state.athletes||[]);
   const restLabel=cfg.restDayLabel||'Descanso';
-  const gymName=cfg.gymName||state.settings?.gymName||'Eagles';
+  const gymName=cfg.gymName||state.settings?.gymName||'Cone';
   const logoFile=cfg.logo||'icon-192.png';
 
   // Apply CSS vars on every render so they're never lost
