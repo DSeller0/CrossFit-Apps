@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-<title>Eagles — Treinos</title><!-- overridden by APP_CONFIG.appTitle at runtime -->
+<title>Cone — Treinos</title><!-- overridden by APP_CONFIG.appTitle at runtime -->
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json"/>
@@ -13,11 +13,11 @@
 <!-- iOS Safari PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" id="meta-app-title" content="Eagles Treinos"/>
+<meta name="apple-mobile-web-app-title" id="meta-app-title" content="Cone Treinos"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
 
 <!-- Description for sharing -->
-<meta name="description" id="meta-description" content="Criador e publicador de treinos Eagles"/>
+<meta name="description" id="meta-description" content="Criador e publicador de treinos Cone"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -475,7 +475,7 @@ const DSHORT=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
 // ── Runtime config — populated from config.json, falls back to defaults ──
 // Set title immediately — will be overridden after config fetch if needed
 const APP_CONFIG={
-  gymName:'Eagles',
+  gymName:'Cone',
   fontScale:1.5,
   zoneScales:[1,1,1],
   blockTitleScales:[1,1,1],
@@ -487,10 +487,10 @@ const APP_CONFIG={
   athleteGoals:['Saúde geral','Força','Condicionamento','Competição'],
   blockColors:{},
   blockNames:['-','WOD','Skill','Core','Acessórios','LPO','Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Descanso'],
-  appTitle:'Eagles — Treinos',
-  appDescription:'Criador e publicador de treinos Eagles',
-  scheduleTitle:'Eagles — Treinos',
-  leaderboardTitle:'Eagles — Leaderboard',
+  appTitle:'Cone — Treinos',
+  appDescription:'Criador e publicador de treinos Cone',
+  scheduleTitle:'Cone — Treinos',
+  leaderboardTitle:'Cone — Leaderboard',
   fontFamily:"'Arial Black',Arial,sans-serif",
   googleFontsUrl:'https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Raleway:wght@400;600;700;900&display=swap',
   logo:'icon-192.png',
@@ -521,7 +521,7 @@ const APP_CONFIG={
     filterActiveText:'#000000'
   },
   restDayLabel:'Descanso',
-  mobileWeeklyLabels:['Mobile Semanal Eagles','Mobile Semanal Medrado']
+  mobileWeeklyLabels:['Mobile Semanal Cone','Mobile Semanal Medrado']
 };
 document.title=APP_CONFIG.appTitle;
 function GF(){return APP_CONFIG.fontFamily||"'Arial Black',Arial,sans-serif";}
@@ -1482,7 +1482,7 @@ function DailyExportView({sessions,label,weekDates,gymName,fontScale,zoneScales,
         }},
           React.createElement('img',{src:logoDataUrl,style:{width:'100%',height:'100%',objectFit:'contain',display:'block'}})
         ),
-        React.createElement('span',{className:'dv-gym-name',style:{color:dv.gymName||'#fff'}},gymName||'Eagles')
+        React.createElement('span',{className:'dv-gym-name',style:{color:dv.gymName||'#fff'}},gymName||'Cone')
       ),
       React.createElement('div',{className:'dv-top-right'},
         React.createElement('div',{className:'dv-date-label',style:{color:dv.date||'#e87820'}},weekday+' · '+dateNum),
@@ -1673,7 +1673,7 @@ function WeeklyCalendarExportView({sessions,label,year,month,gymName,logoDataUrl
           React.createElement('img',{src:logoDataUrl,style:{width:'100%',height:'100%',objectFit:'contain',display:'block'}})
         ),
         React.createElement('span',{style:{fontSize:`calc(32px * var(--fs,1))`,fontWeight:900,color:wk.gymName||'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},
-          gymName||'Eagles'
+          gymName||'Cone'
         )
       ),
       React.createElement('div',{style:{textAlign:'right'}},
@@ -1819,7 +1819,7 @@ function CalendarExportView({sessions,label,year,month,gymName,logoDataUrl,logoS
           React.createElement('img',{src:logoDataUrl,style:{width:'100%',height:'100%',objectFit:'contain',display:'block'}})
         ),
         React.createElement('span',{style:{fontSize:`calc(32px * var(--fs,1))`,fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},
-          gymName||'Eagles'
+          gymName||'Cone'
         )
       ),
       React.createElement('div',{style:{textAlign:'right'}},
@@ -2109,7 +2109,7 @@ function SchedulePublisher({sessions}){
       const wk=getWeeksOfMonth(year,month)[selectedWeekIdx]||currentWeekDates;
       const mon=wk[1];const fri=wk[5];
       const padD=n=>String(n).padStart(2,'0');
-      const labels=APP_CONFIG.mobileWeeklyLabels||['Mobile Semanal Eagles','Mobile Semanal Medrado'];
+      const labels=APP_CONFIG.mobileWeeklyLabels||['Mobile Semanal Cone','Mobile Semanal Medrado'];
       const lbl=(labels[variant==='A'?0:1]||'').replace(/[^a-zA-Z0-9\-_\u00C0-\u024F]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,40).toLowerCase();
       const fname=`eagles-${lbl}-${padD(mon.getDate())}${padD(mon.getMonth()+1)}to${padD(fri.getDate())}${padD(fri.getMonth()+1)}`;
       const a=document.createElement('a');a.download=`${fname}.png`;a.href=out.toDataURL('image/png');a.click();
@@ -2203,7 +2203,7 @@ function SchedulePublisher({sessions}){
       React.createElement('div',{className:'fg',style:{flex:'1',minWidth:'140px'}},
         React.createElement('span',{className:'lbl'},'Nome da academia'),
         React.createElement('div',{style:{display:'flex',gap:'6px'}},
-          React.createElement('input',{placeholder:'Eagles',value:gymName,onChange:e=>setGymName(e.target.value),style:{flex:1}}),
+          React.createElement('input',{placeholder:'Cone',value:gymName,onChange:e=>setGymName(e.target.value),style:{flex:1}}),
           React.createElement('select',{
             value:filterAthlete?.id||'',
             onChange:e=>{
@@ -2297,7 +2297,7 @@ function SchedulePublisher({sessions}){
           type:'button',className:'b bsm',
           style:{fontSize:'11px',background:'var(--theme-accent)',color:'var(--theme-accent-text)',borderColor:'var(--theme-accent)',fontWeight:700},
           onClick:()=>doMobileWeeklyExport('A'),disabled:exporting
-        }, React.createElement('i',{className:'ti ti-layout-list','aria-hidden':'true'}),' ',(APP_CONFIG.mobileWeeklyLabels?.[0]||'Mobile Semanal Eagles').slice(0,15)),
+        }, React.createElement('i',{className:'ti ti-layout-list','aria-hidden':'true'}),' ',(APP_CONFIG.mobileWeeklyLabels?.[0]||'Mobile Semanal Cone').slice(0,15)),
         React.createElement('button',{
           type:'button',className:'b bsm',
           style:{fontSize:'11px',background:'#00b8d4',color:'#000',borderColor:'#00b8d4',fontWeight:700},
@@ -2317,7 +2317,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
         React.createElement('button',{type:'button',
           className:`pvt ${previewTarget==='mobileA'?'on':''}`,
           style:previewTarget==='mobileA'?{background:'var(--theme-accent)',borderColor:'var(--theme-accent)',color:'var(--theme-accent-text)'}:{color:'var(--theme-accent)',borderColor:'var(--theme-accent)'},
-          onClick:()=>setPreviewTarget('mobileA')},'Mobile Eagles'),
+          onClick:()=>setPreviewTarget('mobileA')},'Mobile Cone'),
         React.createElement('button',{type:'button',
           className:`pvt ${previewTarget==='mobileB'?'on':''}`,
           style:previewTarget==='mobileB'?{background:'#00b8d4',borderColor:'#00b8d4',color:'#000'}:{color:'#00b8d4',borderColor:'#00b8d4'},
@@ -2326,7 +2326,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
           className:`pvt ${previewTarget==='mobileWeeklyA'?'on':''}`,
           style:previewTarget==='mobileWeeklyA'?{background:'var(--theme-accent)',borderColor:'var(--theme-accent)',color:'var(--theme-accent-text)'}:{color:'var(--theme-accent)',borderColor:'var(--theme-accent)'},
           onClick:()=>setPreviewTarget('mobileWeeklyA')},
-          (APP_CONFIG.mobileWeeklyLabels?.[0]||'Mobile Semanal Eagles').slice(0,15)),
+          (APP_CONFIG.mobileWeeklyLabels?.[0]||'Mobile Semanal Cone').slice(0,15)),
         React.createElement('button',{type:'button',
           className:`pvt ${previewTarget==='mobileWeeklyB'?'on':''}`,
           style:previewTarget==='mobileWeeklyB'?{background:'#00b8d4',borderColor:'#00b8d4',color:'#000'}:{color:'#00b8d4',borderColor:'#00b8d4'},
@@ -2495,7 +2495,7 @@ React.createElement('button',{type:'button',className:`pvt ${previewTarget==='da
             React.createElement('option',{value:'daily'},'Diário'),
             React.createElement('option',{value:'semanal'},'Semanal'),
             React.createElement('option',{value:'calendar'},'Calendário'),
-            React.createElement('option',{value:'mobileEagles'},'Mobile Eagles'),
+            React.createElement('option',{value:'mobileEagles'},'Mobile Cone'),
             React.createElement('option',{value:'megaMan'},'Mobile Mega Man')
           ),
           React.createElement('button',{
@@ -2823,7 +2823,7 @@ function MobileEaglesExportView({sessions,selectedDate,currentWeekDates,gymName,
     React.createElement('div',{style:{background:bgA,padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:'2px solid rgba(255,255,255,0.08)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(16,f)}},
         logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
-        React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:col.gymName||'#fff',textTransform:'uppercase',letterSpacing:'.08em'}},gymName||'Eagles')
+        React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:col.gymName||'#fff',textTransform:'uppercase',letterSpacing:'.08em'}},gymName||'Cone')
       ),
       React.createElement('div',{style:{textAlign:'right'}},
         React.createElement('div',{style:{fontSize:mfs(18,f),color:col.date||'#e87820',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
@@ -2894,7 +2894,7 @@ function MobileMegaManExportView({sessions,selectedDate,currentWeekDates,gymName
     React.createElement('div',{style:{background:bg,padding:`${Math.round(22*f)}px ${pad}px ${Math.round(18*f)}px`,borderBottom:`${Math.max(2,Math.round(3*f))}px solid rgba(0,184,212,0.8)`,display:'flex',alignItems:'center',justifyContent:'space-between'}},
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(16,f)}},
         logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(56*ls)}px`,height:`${Math.round(56*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
-        React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:col.gymName||'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},gymName||'Eagles')
+        React.createElement('span',{style:{fontSize:mfs(30,f),fontWeight:900,color:col.gymName||'#fff',textTransform:'uppercase',letterSpacing:'.1em'}},gymName||'Cone')
       ),
       React.createElement('div',{style:{textAlign:'right'}},
         React.createElement('div',{style:{fontSize:mfs(18,f),color:col.date||'#00b8d4',fontWeight:900,textTransform:'uppercase',letterSpacing:'.1em'}},`${weekday} · ${dateNum}`),
@@ -4117,7 +4117,7 @@ function MobileWeeklyExportView({sessions,gymName,logoDataUrl,logoScale,fontScal
     }},
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:mfs(14,f)}},
         logoDataUrl&&React.createElement('img',{src:logoDataUrl,style:{width:`${Math.round(48*ls)}px`,height:`${Math.round(48*ls)}px`,objectFit:'contain',borderRadius:'4px'}}),
-        React.createElement('span',{style:{fontSize:mfs(28,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.08em',fontFamily}},gymName||'Eagles')
+        React.createElement('span',{style:{fontSize:mfs(28,f),fontWeight:900,color:'#fff',textTransform:'uppercase',letterSpacing:'.08em',fontFamily}},gymName||'Cone')
       ),
       React.createElement('div',{style:{textAlign:'right'}},
         React.createElement('div',{style:{fontSize:mfs(16,f),fontWeight:900,color:cyan,textTransform:'uppercase',letterSpacing:'.1em',fontFamily}},weekLabel),
@@ -4132,6 +4132,442 @@ function MobileWeeklyExportView({sessions,gymName,logoDataUrl,logoScale,fontScal
         key:i,date,sessions,f,col:{},variant,monthNames
       })
     )
+  );
+}
+
+
+
+
+// ── PR Helpers ────────────────────────────────────────────────────────────────
+function toSecs(t){
+  if(!t) return Infinity;
+  const p=String(t).split(':');
+  return p.length===2?parseInt(p[0])*60+parseInt(p[1]):parseInt(t)||Infinity;
+}
+function fmtTime(secs){
+  const m=Math.floor(secs/60),s=secs%60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function prBest(pr){
+  if(!pr.results||!pr.results.length) return null;
+  if(pr.type==='time') return pr.results.reduce((b,r)=>toSecs(r.value)<toSecs(b.value)?r:b);
+  return pr.results.reduce((b,r)=>Number(r.value)>Number(b.value)?r:b);
+}
+function prDelta(pr){
+  if(!pr.results||pr.results.length<2) return null;
+  const sorted=[...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const last=sorted[sorted.length-1];
+  const prev=sorted[sorted.length-2];
+  if(pr.type==='time'){
+    const diff=toSecs(prev.value)-toSecs(last.value);
+    if(diff===0) return {label:'=',good:null};
+    return {label:(diff>0?'-':'+')+(diff<0?fmtTime(-diff):fmtTime(diff)),good:diff>0};
+  }
+  const diff=Number(last.value)-Number(prev.value);
+  if(diff===0) return {label:'=',good:null};
+  const unit=pr.type==='load'?(pr.unit||'kg'):'reps';
+  return {label:(diff>0?'+':'')+diff+' '+unit,good:diff>0};
+}
+function prPct(pr){
+  const best=prBest(pr);
+  if(!best||!pr.target) return null;
+  if(pr.type==='time'){
+    const targetSecs=toSecs(pr.target);
+    const firstSecs=pr.results.length>0?toSecs([...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date))[0].value):targetSecs*2;
+    if(firstSecs<=targetSecs) return 100;
+    const bestSecs=toSecs(best.value);
+    return Math.min(100,Math.round((firstSecs-bestSecs)/(firstSecs-targetSecs)*100));
+  }
+  const targetNum=Number(pr.target);
+  if(!targetNum) return null;
+  return Math.min(100,Math.round(Number(best.value)/targetNum*100));
+}
+
+// ── PR Modal ──────────────────────────────────────────────────────────────────
+function PrModal({onSave,onClose,editPr}){
+  const [category,setCategory]=useState(editPr?.category||'');
+  const [name,setName]=useState(editPr?.name||'');
+  const [type,setType]=useState(editPr?.type||'load');
+  const [unit,setUnit]=useState(editPr?.unit||'kg');
+  const [target,setTarget]=useState(editPr?.target||'');
+  const [date,setDate]=useState(()=>{
+    const d=new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  });
+  const [value,setValue]=useState('');
+
+  const registry=loadRegistry()||{};
+  const blockTypes=Object.keys(registry);
+  const exercises=category?registry[category]||[]:Object.values(registry).flat();
+
+  const isEdit=!!editPr;
+
+  const save=()=>{
+    if(!name.trim()||(!isEdit&&!value)) return;
+    const result=isEdit?null:{value:type==='time'?value:Number(value),date};
+    onSave({
+      id:editPr?.id||uid(),name:name.trim(),category,type,unit:type==='load'?unit:null,
+      target:target?(type==='time'?target:Number(target)):null,
+      results:isEdit?editPr.results:(result?[result]:[])
+    });
+  };
+
+  return React.createElement('div',{className:'settings-overlay',onClick:onClose},
+    React.createElement('div',{className:'settings-modal',style:{maxWidth:'420px'},
+      onClick:e=>e.stopPropagation()},
+      React.createElement('div',{className:'settings-drag-hdr'},
+        React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#fff'}},
+          isEdit?'Editar PR':'Registrar PR'),
+        React.createElement('button',{type:'button',className:'b bd bsm',
+          style:{marginLeft:'auto',padding:'3px 8px',minHeight:'24px'},onClick:onClose},
+          React.createElement('i',{className:'ti ti-x'}))
+      ),
+      React.createElement('div',{style:{padding:'14px 16px',display:'flex',flexDirection:'column',gap:'10px'}},
+        // Category + Exercise
+        React.createElement('div',{className:'g2'},
+          React.createElement('div',{className:'fg'},
+            React.createElement('span',{className:'lbl'},'Categoria'),
+            React.createElement('select',{value:category,onChange:e=>{setCategory(e.target.value);setName('');}},
+              React.createElement('option',{value:''},'— Sem categoria —'),
+              blockTypes.map(bt=>React.createElement('option',{key:bt,value:bt},bt))
+            )
+          ),
+          React.createElement('div',{className:'fg'},
+            React.createElement('span',{className:'lbl'},'Exercício / WOD'),
+            React.createElement(ExerciseCombobox,{
+              value:name,onChange:setName,
+              blockLabel:category,placeholder:'Ex: Fran, Back Squat...'
+            })
+          )
+        ),
+        // Type selector
+        React.createElement('div',{className:'fg'},
+          React.createElement('span',{className:'lbl'},'Tipo'),
+          React.createElement('div',{style:{display:'flex',gap:'6px'}},
+            [['load','Carga'],['time','Tempo'],['reps','Reps']].map(([t,lbl])=>
+              React.createElement('button',{key:t,type:'button',className:'b bsm',
+                style:{flex:1,background:type===t?'var(--theme-accent)':'transparent',
+                  color:type===t?'var(--theme-accent-text)':'#888',
+                  borderColor:type===t?'var(--theme-accent)':'#2e2e2e'},
+                onClick:()=>setType(t)},lbl)
+            )
+          )
+        ),
+        // Value + unit (only for new, not edit)
+        !isEdit&&React.createElement('div',{className:'g2'},
+          React.createElement('div',{className:'fg'},
+            React.createElement('span',{className:'lbl'},type==='time'?'Tempo (mm:ss)':type==='reps'?'Reps':'Carga'),
+            React.createElement('input',{className:'ex-input',
+              placeholder:type==='time'?'03:45':type==='reps'?'25':'120',
+              value,onChange:e=>setValue(e.target.value)})
+          ),
+          type==='load'&&React.createElement('div',{className:'fg'},
+            React.createElement('span',{className:'lbl'},'Unidade'),
+            React.createElement('div',{style:{display:'flex',gap:'6px'}},
+              ['kg','lb'].map(u=>React.createElement('button',{key:u,type:'button',className:'b bsm',
+                style:{flex:1,background:unit===u?'var(--theme-accent)':'transparent',
+                  color:unit===u?'var(--theme-accent-text)':'#888',
+                  borderColor:unit===u?'var(--theme-accent)':'#2e2e2e'},
+                onClick:()=>setUnit(u)},u))
+            )
+          )
+        ),
+        // Target (optional)
+        React.createElement('div',{className:'fg'},
+          React.createElement('span',{className:'lbl'},'Meta (opcional)'),
+          React.createElement('input',{className:'ex-input',
+            placeholder:type==='time'?'03:00':type==='reps'?'30':'140',
+            value:target,onChange:e=>setTarget(e.target.value)})
+        ),
+        // Date (only for new)
+        !isEdit&&React.createElement('div',{className:'fg'},
+          React.createElement('span',{className:'lbl'},'Data'),
+          React.createElement('input',{type:'date',className:'ex-input',value:date,onChange:e=>setDate(e.target.value)})
+        ),
+        // Buttons
+        React.createElement('div',{style:{display:'flex',gap:'8px',marginTop:'4px'}},
+          React.createElement('button',{type:'button',className:'b bsec',style:{flex:1},
+            disabled:!name.trim()||(!isEdit&&!value),onClick:save},
+            React.createElement('i',{className:'ti ti-check'}),' Salvar'),
+          React.createElement('button',{type:'button',className:'b bd bsm',onClick:onClose},'Cancelar')
+        )
+      )
+    )
+  );
+}
+
+// ── Add Result Modal (log new attempt on existing PR) ─────────────────────────
+function AddResultModal({pr,onSave,onClose}){
+  const [value,setValue]=useState('');
+  const [date,setDate]=useState(()=>{
+    const d=new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  });
+  const best=prBest(pr);
+  const bestLabel=pr.type==='time'?best?.value:(best?.value?(best.value+(pr.unit?' '+pr.unit:'')):'—');
+  const isPR=value&&(pr.type==='time'?toSecs(value)<toSecs(best?.value):Number(value)>Number(best?.value));
+
+  return React.createElement('div',{className:'settings-overlay',onClick:onClose},
+    React.createElement('div',{className:'settings-modal',style:{maxWidth:'360px'},onClick:e=>e.stopPropagation()},
+      React.createElement('div',{className:'settings-drag-hdr'},
+        React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#fff'}},
+          `Registrar resultado — ${pr.name}`),
+        React.createElement('button',{type:'button',className:'b bd bsm',
+          style:{marginLeft:'auto',padding:'3px 8px',minHeight:'24px'},onClick:onClose},
+          React.createElement('i',{className:'ti ti-x'}))
+      ),
+      React.createElement('div',{style:{padding:'14px 16px',display:'flex',flexDirection:'column',gap:'10px'}},
+        best&&React.createElement('div',{style:{fontSize:'12px',color:'#666',padding:'6px 10px',background:'#0d0d0d',borderRadius:'5px'}},
+          `Melhor atual: ${bestLabel}`),
+        React.createElement('div',{className:'g2'},
+          React.createElement('div',{className:'fg'},
+            React.createElement('span',{className:'lbl'},pr.type==='time'?'Tempo (mm:ss)':pr.type==='reps'?'Reps':'Carga'),
+            React.createElement('input',{className:'ex-input',
+              placeholder:pr.type==='time'?'03:45':pr.type==='reps'?'25':'120',
+              value,onChange:e=>setValue(e.target.value),autoFocus:true})
+          ),
+          React.createElement('div',{className:'fg'},
+            React.createElement('span',{className:'lbl'},'Data'),
+            React.createElement('input',{type:'date',className:'ex-input',value:date,onChange:e=>setDate(e.target.value)})
+          )
+        ),
+        isPR&&React.createElement('div',{style:{fontSize:'12px',color:'#f5c842',fontWeight:700,textAlign:'center'}},
+          '🏆 Novo PR!'),
+        React.createElement('div',{style:{display:'flex',gap:'8px'}},
+          React.createElement('button',{type:'button',className:'b bsec',style:{flex:1},
+            disabled:!value,onClick:()=>onSave({value:pr.type==='time'?value:Number(value),date})},
+            React.createElement('i',{className:'ti ti-check'}),' Registrar'),
+          React.createElement('button',{type:'button',className:'b bd bsm',onClick:onClose},'Cancelar')
+        )
+      )
+    )
+  );
+}
+
+// ── PR Row component ──────────────────────────────────────────────────────────
+function PrRow({pr,onAddResult,onEdit,onDelete,showActions}){
+  const best=prBest(pr);
+  const delta=prDelta(pr);
+  const pct=prPct(pr);
+  const color='var(--theme-accent)';
+
+  const bestLabel=best?(pr.type==='load'?`${best.value} ${pr.unit||'kg'}`:pr.type==='reps'?`${best.value} reps`:best.value):'—';
+  const targetLabel=pr.target?(pr.type==='load'?`${pr.target} ${pr.unit||'kg'}`:pr.type==='reps'?`${pr.target} reps`:pr.target):null;
+  const bestDate=best?new Date(best.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):null;
+  const arrowGood=delta?.good;
+  const typeIcon=pr.type==='time'?'ti-clock':pr.type==='reps'?'ti-repeat':'ti-barbell';
+
+  return React.createElement('div',{style:{
+    display:'flex',alignItems:'center',gap:'10px',padding:'10px 0',
+    borderBottom:'1px solid #1a1a1a'
+  }},
+    // Icon + name + category
+    React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px',minWidth:'140px',flexShrink:0}},
+      React.createElement('i',{className:`ti ${typeIcon}`,style:{color:'#555',fontSize:'13px',flexShrink:0}}),
+      React.createElement('div',null,
+        React.createElement('div',{style:{fontSize:'13px',fontWeight:700,color:'#ddd',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:'130px'}},pr.name),
+        pr.category&&React.createElement('div',{style:{fontSize:'10px',color:'#555'}},pr.category)
+      )
+    ),
+    // Progress bar
+    pct!==null
+      ?React.createElement('div',{style:{flex:1,display:'flex',flexDirection:'column',gap:'2px'}},
+          React.createElement('div',{style:{display:'flex',gap:'2px'}},
+            Array.from({length:10},(_,bi)=>{
+              const fill=pct>=(bi+1)*10?1:pct>bi*10?(pct-bi*10)/10:0;
+              return React.createElement('div',{key:bi,style:{
+                flex:1,height:'14px',borderRadius:'2px',background:'#1a1a1a',
+                border:'1px solid #252525',position:'relative',overflow:'hidden'
+              }},fill>0&&React.createElement('div',{style:{
+                position:'absolute',top:0,left:0,bottom:0,
+                width:`${fill*100}%`,
+                background:fill===1?'var(--theme-accent)':'var(--theme-accent)99'
+              }}))
+            })
+          ),
+          React.createElement('div',{style:{display:'flex',justifyContent:'space-between',fontSize:'9px',color:'#444'}},
+            React.createElement('span','0'),
+            targetLabel&&React.createElement('span',{style:{color:'#555'}},`Meta: ${targetLabel}`)
+          )
+        )
+      :React.createElement('div',{style:{flex:1}}),
+    // Best value
+    React.createElement('div',{style:{textAlign:'right',flexShrink:0,minWidth:'70px'}},
+      React.createElement('div',{style:{fontSize:'14px',fontWeight:900,color:'#fff'}},bestLabel),
+      bestDate&&React.createElement('div',{style:{fontSize:'10px',color:'#555'}},bestDate)
+    ),
+    // Delta
+    delta&&React.createElement('div',{style:{
+      fontSize:'11px',fontWeight:700,flexShrink:0,minWidth:'52px',textAlign:'right',
+      color:delta.good===true?'#4caf50':delta.good===false?'#ef5350':'#666'
+    }},
+      delta.good===true?'↑':delta.good===false?'↓':'',
+      ' '+delta.label
+    ),
+    // Actions
+    showActions&&React.createElement('div',{style:{display:'flex',gap:'4px',flexShrink:0}},
+      React.createElement('button',{type:'button',className:'b bsm',
+        style:{padding:'3px 6px',minHeight:'22px',fontSize:'11px'},
+        onClick:onAddResult,title:'Registrar resultado'},
+        React.createElement('i',{className:'ti ti-plus'})),
+      React.createElement('button',{type:'button',className:'b bd bsm',
+        style:{padding:'3px 6px',minHeight:'22px',fontSize:'11px',opacity:.6},
+        onClick:onEdit,title:'Editar'},
+        React.createElement('i',{className:'ti ti-pencil'})),
+      React.createElement('button',{type:'button',className:'b bd bsm',
+        style:{padding:'3px 6px',minHeight:'22px',fontSize:'11px',opacity:.5},
+        onClick:onDelete,title:'Remover'},
+        React.createElement('i',{className:'ti ti-trash'}))
+    )
+  );
+}
+
+
+
+// ── PR Card (max 5, full width) ───────────────────────────────────────────────
+function PrCard({athId,goalsData,persist,onViewAll}){
+  const [showModal,setShowModal]=useState(false);
+  const [addResultFor,setAddResultFor]=useState(null);
+  const [editingPr,setEditingPr]=useState(null);
+
+  const prs=(goalsData.prs||{})[athId]||[];
+  // show 5 most recently updated
+  const sorted=[...prs].sort((a,b)=>{
+    const aDate=a.results?.length?a.results[a.results.length-1].date:'';
+    const bDate=b.results?.length?b.results[b.results.length-1].date:'';
+    return bDate.localeCompare(aDate);
+  });
+  const shown=sorted.slice(0,5);
+
+  const savePr=(pr)=>{
+    const existing=prs.find(p=>p.id===pr.id);
+    const updated=existing?prs.map(p=>p.id===pr.id?pr:p):[...prs,pr];
+    persist({...goalsData,prs:{...(goalsData.prs||{}),[athId]:updated}});
+    setShowModal(false);setEditingPr(null);
+  };
+
+  const addResult=(prId,result)=>{
+    const updated=prs.map(p=>{
+      if(p.id!==prId) return p;
+      const results=[...p.results,result];
+      // keep last 5 only
+      const trimmed=results.slice(-5);
+      return {...p,results:trimmed};
+    });
+    persist({...goalsData,prs:{...(goalsData.prs||{}),[athId]:updated}});
+    setAddResultFor(null);
+  };
+
+  const deletePr=(prId)=>{
+    if(!window.confirm('Remover este PR?')) return;
+    persist({...goalsData,prs:{...(goalsData.prs||{}),[athId]:prs.filter(p=>p.id!==prId)}});
+  };
+
+  return React.createElement('div',{style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'14px',marginBottom:'14px'}},
+    // Header
+    React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'12px'}},
+      React.createElement('span',{style:{fontSize:'10px',fontWeight:700,color:'#555',textTransform:'uppercase',letterSpacing:'.08em'}},'PRs'),
+      React.createElement('button',{type:'button',className:'b bsm',onClick:()=>setShowModal(true)},
+        React.createElement('i',{className:'ti ti-plus'}),' Registrar PR')
+    ),
+    // Rows
+    shown.length===0
+      ?React.createElement('div',{style:{fontSize:'13px',color:'#333',fontStyle:'italic',padding:'8px 0'}},'Nenhum PR registrado. Clique em "+ Registrar PR" para começar.')
+      :shown.map(pr=>React.createElement(PrRow,{key:pr.id,pr,showActions:true,
+          onAddResult:()=>setAddResultFor(pr),
+          onEdit:()=>setEditingPr(pr),
+          onDelete:()=>deletePr(pr.id)
+        })
+      ),
+    // Footer
+    prs.length>5&&React.createElement('div',{style:{textAlign:'right',marginTop:'8px'}},
+      React.createElement('button',{type:'button',className:'b bd bsm',onClick:onViewAll},
+        `Ver todos (${prs.length}) →`)
+    ),
+    // Modals
+    (showModal||editingPr)&&React.createElement(PrModal,{
+      editPr:editingPr||null,
+      onSave:savePr,
+      onClose:()=>{setShowModal(false);setEditingPr(null);}
+    }),
+    addResultFor&&React.createElement(AddResultModal,{
+      pr:addResultFor,
+      onSave:(result)=>addResult(addResultFor.id,result),
+      onClose:()=>setAddResultFor(null)
+    })
+  );
+}
+
+// ── PR Sub-view (all PRs grouped by category) ─────────────────────────────────
+function PrSubView({athId,goalsData,persist,onBack}){
+  const [showModal,setShowModal]=useState(false);
+  const [addResultFor,setAddResultFor]=useState(null);
+  const [editingPr,setEditingPr]=useState(null);
+
+  const prs=(goalsData.prs||{})[athId]||[];
+
+  const savePr=(pr)=>{
+    const existing=prs.find(p=>p.id===pr.id);
+    const updated=existing?prs.map(p=>p.id===pr.id?pr:p):[...prs,pr];
+    persist({...goalsData,prs:{...(goalsData.prs||{}),[athId]:updated}});
+    setShowModal(false);setEditingPr(null);
+  };
+
+  const addResult=(prId,result)=>{
+    const updated=prs.map(p=>{
+      if(p.id!==prId) return p;
+      const results=[...p.results,result].slice(-5);
+      return {...p,results};
+    });
+    persist({...goalsData,prs:{...(goalsData.prs||{}),[athId]:updated}});
+    setAddResultFor(null);
+  };
+
+  const deletePr=(prId)=>{
+    if(!window.confirm('Remover este PR?')) return;
+    persist({...goalsData,prs:{...(goalsData.prs||{}),[athId]:prs.filter(p=>p.id!==prId)}});
+  };
+
+  // group by category
+  const grouped={};
+  prs.forEach(pr=>{
+    const cat=pr.category||'Sem categoria';
+    if(!grouped[cat]) grouped[cat]=[];
+    grouped[cat].push(pr);
+  });
+
+  return React.createElement('div',{style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'14px'}},
+    React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px'}},
+      React.createElement('button',{type:'button',className:'b bd bsm',onClick:onBack},
+        React.createElement('i',{className:'ti ti-arrow-left'}),' Voltar'),
+      React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#fff',flex:1}},'Todos os PRs'),
+      React.createElement('button',{type:'button',className:'b bsm',onClick:()=>setShowModal(true)},
+        React.createElement('i',{className:'ti ti-plus'}),' Novo PR')
+    ),
+    prs.length===0
+      ?React.createElement('div',{style:{fontSize:'13px',color:'#333',fontStyle:'italic',padding:'8px 0'}},'Nenhum PR registrado.')
+      :Object.entries(grouped).map(([cat,catPrs])=>
+          React.createElement('div',{key:cat,style:{marginBottom:'16px'}},
+            React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',
+              textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'6px',
+              paddingBottom:'4px',borderBottom:'1px solid #1a1a1a'}},cat),
+            catPrs.map(pr=>React.createElement(PrRow,{key:pr.id,pr,showActions:true,
+              onAddResult:()=>setAddResultFor(pr),
+              onEdit:()=>setEditingPr(pr),
+              onDelete:()=>deletePr(pr.id)
+            }))
+          )
+        ),
+    (showModal||editingPr)&&React.createElement(PrModal,{
+      editPr:editingPr||null,
+      onSave:savePr,
+      onClose:()=>{setShowModal(false);setEditingPr(null);}
+    }),
+    addResultFor&&React.createElement(AddResultModal,{
+      pr:addResultFor,
+      onSave:(result)=>addResult(addResultFor.id,result),
+      onClose:()=>setAddResultFor(null)
+    })
   );
 }
 
@@ -4451,9 +4887,10 @@ function RecentWods({results,sessions}){
 function AthleteTab({sessions,results}){
   const [athletes]=useState(loadAthletes);
   const [goalsData,setGoalsDataState]=useState(loadGoalsData);
-  const [selAthlete,setSelAthleteState]=useState(null); // null = landing view
+  const [selAthlete,setSelAthleteState]=useState(null);
   const [editMode,setEditMode]=useState(false);
-  const [configuringGoal,setConfiguringGoal]=useState(null); // goalId or 'new'
+  const [configuringGoal,setConfiguringGoal]=useState(null);
+  const [showPrAll,setShowPrAll]=useState(false);
 
   const persist=d=>{setGoalsDataState(d);saveGoalsData(d);};
 
@@ -4560,12 +4997,12 @@ function AthleteTab({sessions,results}){
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px',flex:1}},
         React.createElement('div',{style:{width:'10px',height:'10px',borderRadius:'50%',background:athColor,flexShrink:0}}),
         React.createElement('select',{value:selAthlete,className:'ex-input',style:{flex:1,maxWidth:'200px'},
-          onChange:e=>{setSelAthleteState(e.target.value);setEditMode(false);setConfiguringGoal(null);}},
+          onChange:e=>{setSelAthleteState(e.target.value);setEditMode(false);setConfiguringGoal(null);setShowPrAll(false);}},
           athletes.map(a=>React.createElement('option',{key:a.id,value:a.id},a.name))
         )
       ),
       React.createElement('button',{type:'button',className:`b ${editMode?'bsec':'bd'} bsm`,
-        onClick:()=>{setEditMode(e=>!e);setConfiguringGoal(null);}},
+        onClick:()=>{setEditMode(e=>!e);setConfiguringGoal(null);setShowPrAll(false);}},
         React.createElement('i',{className:`ti ${editMode?'ti-check':'ti-edit'}`}),
         editMode?' Concluir edição':' Editar'),
       !editMode&&athGoals.length<3&&React.createElement('button',{type:'button',className:'b bsm',onClick:addGoal},
@@ -4593,8 +5030,12 @@ function AthleteTab({sessions,results}){
       )
     ),
 
+    // PR card or sub-view
+    showPrAll
+      ?React.createElement(PrSubView,{athId:selAthlete,goalsData,persist,onBack:()=>setShowPrAll(false)})
+      :React.createElement(PrCard,{athId:selAthlete,goalsData,persist,onViewAll:()=>setShowPrAll(true)}),
     // Goals section
-    React.createElement('div',{style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'12px'}},
+    !showPrAll&&React.createElement('div',{style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'12px'}},
       React.createElement('div',{style:{fontSize:'10px',color:'#555',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'12px'}},'Objetivos'),
       athGoals.length===0
         ?React.createElement('div',{style:{color:'#333',fontSize:'13px',padding:'8px 0',fontStyle:'italic'}},
@@ -5188,7 +5629,7 @@ const saveAthletes=d=>{try{localStorage.setItem(LS_ATHLETES,JSON.stringify(d))}c
 const LS_SETTINGS='eagles_settings_v1';
 const LS_REGISTRY='eagles_block_registry_v1';
 const LS_GOALS='eagles_athlete_goals_v1';
-const loadGoalsData=()=>{try{const d=localStorage.getItem(LS_GOALS);return d?JSON.parse(d):{athleteGoals:{},radarValues:{},radarAxes:['Força','Resistência','Mobilidade','Técnica','Potência']};}catch{return{athleteGoals:{},radarValues:{},radarAxes:['Força','Resistência','Mobilidade','Técnica','Potência']};}};
+const loadGoalsData=()=>{try{const d=localStorage.getItem(LS_GOALS);return d?JSON.parse(d):{athleteGoals:{},radarValues:{},radarAxes:['Força','Resistência','Mobilidade','Técnica','Potência'],prs:{}};}catch{return{athleteGoals:{},radarValues:{},radarAxes:['Força','Resistência','Mobilidade','Técnica','Potência'],prs:{}};}};
 const saveGoalsData=d=>{try{localStorage.setItem(LS_GOALS,JSON.stringify(d));}catch{}};
 const loadRegistry=()=>{try{const d=localStorage.getItem(LS_REGISTRY);return d?JSON.parse(d):null;}catch{return null;}};
 const saveRegistry=d=>{try{localStorage.setItem(LS_REGISTRY,JSON.stringify(d));}catch{}};
