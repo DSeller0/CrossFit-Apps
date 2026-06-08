@@ -4575,77 +4575,6 @@ function PrSubView({athId,goalsData,persist,onBack}){
 
 // ── Athlete Tracking Tab ─────────────────────────────────────────────────────
 
-// Pentagon SVG radar chart
-function PentagonRadar({values,axes,color,editMode,onValueChange,onAxisChange}){
-  const cx=190,cy=175,r=105;
-  const N=5;
-  const angle=i=>((i*2*Math.PI/N)-(Math.PI/2));
-  const pt=(i,radius)=>({
-    x:cx+radius*Math.cos(angle(i)),
-    y:cy+radius*Math.sin(angle(i))
-  });
-  const gridLevels=[0.2,0.4,0.6,0.8,1.0];
-  const [editAxis,setEditAxis]=useState(null);
-
-  const polyPts=values.map((_,i)=>pt(i,(values[i]||0)/100*r));
-  const polyStr=polyPts.map(p=>`${p.x},${p.y}`).join(' ');
-
-  return React.createElement('div',{style:{display:'flex',flexDirection:'column',alignItems:'center'}},
-    React.createElement('svg',{viewBox:'0 0 380 350',width:'100%',style:{maxWidth:'340px'}},
-      // grid
-      gridLevels.map((lvl,li)=>
-        React.createElement('polygon',{key:li,
-          points:Array.from({length:N},(_,i)=>pt(i,r*lvl)).map(p=>`${p.x},${p.y}`).join(' '),
-          fill:'none',stroke:'#2a2a2a',strokeWidth:'1'})
-      ),
-      // axes
-      Array.from({length:N},(_,i)=>
-        React.createElement('line',{key:i,x1:cx,y1:cy,x2:pt(i,r).x,y2:pt(i,r).y,stroke:'#2a2a2a',strokeWidth:'1'})
-      ),
-      // filled polygon
-      React.createElement('polygon',{points:polyStr,
-        fill:color+'66',stroke:color,strokeWidth:'2',strokeLinejoin:'round'}),
-      // value dots
-      polyPts.map((p,i)=>React.createElement('circle',{key:i,cx:p.x,cy:p.y,r:'4',fill:color})),
-      // axis labels
-      Array.from({length:N},(_,i)=>{
-        const p=pt(i,r+36);
-        const anchor=p.x<cx-15?'end':p.x>cx+15?'start':'middle';
-        return React.createElement('text',{key:i,x:p.x,y:p.y,
-          textAnchor:anchor,dominantBaseline:'middle',
-          fontSize:'12',fill:'#aaa',fontFamily:'inherit',
-          style:{cursor:editMode?'pointer':'default'},
-          onClick:editMode?()=>setEditAxis(i):undefined
-        },axes[i]||`Eixo ${i+1}`);
-      })
-    ),
-    // Edit axis names warning
-    editMode&&React.createElement('div',{style:{fontSize:'10px',color:'#f5c842',textAlign:'center',marginBottom:'6px',padding:'0 8px'}},
-      '⚠ Alterar eixos afeta todos os atletas'
-    ),
-    // Value sliders + axis name inputs
-    editMode&&React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px',width:'100%',maxWidth:'280px'}},
-      axes.map((ax,i)=>
-        React.createElement('div',{key:i,style:{display:'flex',flexDirection:'column',gap:'3px'}},
-          React.createElement('input',{
-            className:'ex-input',value:ax,
-            style:{fontSize:'11px',padding:'4px 6px'},
-            onChange:e=>onAxisChange(i,e.target.value)
-          }),
-          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'4px'}},
-            React.createElement('input',{type:'number',min:0,max:100,
-              className:'ex-input',value:values[i]||0,
-              style:{fontSize:'12px',padding:'4px 6px',width:'60px'},
-              onChange:e=>onValueChange(i,Math.min(100,Math.max(0,parseInt(e.target.value)||0)))
-            }),
-            React.createElement('span',{style:{fontSize:'10px',color:'#555'}},'/100')
-          )
-        )
-      )
-    )
-  );
-}
-
 // HP bar component
 function HpBar({goal,color,editMode,onAddSession,onMilestoneHit,onConfigure,onDelete}){
   const [expanded,setExpanded]=useState(false);
@@ -4897,19 +4826,9 @@ function AthleteTab({sessions,results}){
   const ath=athletes.find(a=>a.id===selAthlete)||null;
   const athColor=ath?.color||'#00b8d4';
   const athGoals=(goalsData.athleteGoals||{})[selAthlete]||[];
-  const radarVals=(goalsData.radarValues||{})[selAthlete]||[50,50,50,50,50];
-  const radarAxes=goalsData.radarAxes||['Força','Resistência','Mobilidade','Técnica','Potência'];
   const athResults=(results||[]).filter(r=>String(r.athleteId)===String(selAthlete));
 
-  const setRadarVal=(i,v)=>{
-    const vals=[...radarVals];vals[i]=v;
-    const d={...goalsData,radarValues:{...(goalsData.radarValues||{}),[selAthlete]:vals}};
-    persist(d);
-  };
-  const setRadarAxis=(i,v)=>{
-    const axes=[...radarAxes];axes[i]=v;
-    persist({...goalsData,radarAxes:axes});
-  };
+
 
   const addGoal=()=>{
     if(athGoals.length>=3) return;
@@ -5009,24 +4928,13 @@ function AthleteTab({sessions,results}){
         React.createElement('i',{className:'ti ti-plus'}),' Objetivo')
     ),
 
-    // Two-column layout: pentagon + right panel
+    // Heatmap + recent WODs side by side
     React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px',marginBottom:'16px'}},
-      // Pentagon
       React.createElement('div',{style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'12px'}},
-        React.createElement('div',{style:{fontSize:'10px',color:'#555',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'8px'}},'Perfil do Atleta'),
-        React.createElement(PentagonRadar,{
-          values:radarVals,axes:radarAxes,color:athColor,
-          editMode,onValueChange:setRadarVal,onAxisChange:setRadarAxis
-        })
+        React.createElement(AttendanceHeatmap,{results:athResults,sessions})
       ),
-      // Right: heatmap + recent WODs
-      React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'12px'}},
-        React.createElement('div',{style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'12px'}},
-          React.createElement(AttendanceHeatmap,{results:athResults,sessions})
-        ),
-        React.createElement('div',{style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'12px'}},
-          React.createElement(RecentWods,{results:athResults,sessions})
-        )
+      React.createElement('div',{style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'12px'}},
+        React.createElement(RecentWods,{results:athResults,sessions})
       )
     ),
 
@@ -5629,7 +5537,7 @@ const saveAthletes=d=>{try{localStorage.setItem(LS_ATHLETES,JSON.stringify(d))}c
 const LS_SETTINGS='eagles_settings_v1';
 const LS_REGISTRY='eagles_block_registry_v1';
 const LS_GOALS='eagles_athlete_goals_v1';
-const loadGoalsData=()=>{try{const d=localStorage.getItem(LS_GOALS);return d?JSON.parse(d):{athleteGoals:{},radarValues:{},radarAxes:['Força','Resistência','Mobilidade','Técnica','Potência'],prs:{}};}catch{return{athleteGoals:{},radarValues:{},radarAxes:['Força','Resistência','Mobilidade','Técnica','Potência'],prs:{}};}};
+const loadGoalsData=()=>{try{const d=localStorage.getItem(LS_GOALS);return d?JSON.parse(d):{athleteGoals:{},prs:{}};}catch{return{athleteGoals:{},prs:{}};}};
 const saveGoalsData=d=>{try{localStorage.setItem(LS_GOALS,JSON.stringify(d));}catch{}};
 const loadRegistry=()=>{try{const d=localStorage.getItem(LS_REGISTRY);return d?JSON.parse(d):null;}catch{return null;}};
 const saveRegistry=d=>{try{localStorage.setItem(LS_REGISTRY,JSON.stringify(d));}catch{}};

@@ -53,9 +53,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 @media(max-width:600px){.two-col{grid-template-columns:1fr}.athlete-grid{grid-template-columns:1fr}}
 
-/* pentagon */
-.radar-wrap{display:flex;justify-content:center}
-
 /* hp bars */
 .goal-row{margin-bottom:14px}
 .goal-row:last-child{margin-bottom:0}
@@ -91,10 +88,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 .wod-perf{font-weight:700;color:#fff;min-width:50px;text-align:right;flex-shrink:0}
 .wod-rpe{color:var(--sub);font-size:11px;flex-shrink:0}
 
-/* radar axes legend */
-.radar-legend{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px}
-.radar-leg-item{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#888;padding:3px 6px;background:#0d0d0d;border-radius:4px}
-.radar-leg-val{font-weight:700;color:var(--text)}
 
 /* loading/error */
 .loading{text-align:center;padding:60px 20px;color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.1em}
@@ -129,35 +122,6 @@ function applyConfig(){
     document.body.style.fontFamily=cfg.fontFamily;
     if(cfg.googleFontsUrl){const gf=document.getElementById('gfonts');if(gf)gf.href=cfg.googleFontsUrl;}
   }
-}
-
-// ── Pentagon SVG ──────────────────────────────────────────────────────────────
-function pentagonSVG(values,axes,color){
-  const cx=190,cy=175,r=105,N=5;
-  const angle=i=>(i*2*Math.PI/N)-(Math.PI/2);
-  const pt=(i,rad)=>({x:cx+rad*Math.cos(angle(i)),y:cy+rad*Math.sin(angle(i))});
-  const gridLevels=[0.2,0.4,0.6,0.8,1.0];
-  const polyPts=values.map((v,i)=>pt(i,(v||0)/100*r));
-  const polyStr=polyPts.map(p=>`${p.x},${p.y}`).join(' ');
-
-  const gridPolys=gridLevels.map(lvl=>
-    `<polygon points="${Array.from({length:N},(_,i)=>pt(i,r*lvl)).map(p=>`${p.x},${p.y}`).join(' ')}" fill="none" stroke="#2a2a2a" stroke-width="1"/>`
-  ).join('');
-  const axisLines=Array.from({length:N},(_,i)=>
-    `<line x1="${cx}" y1="${cy}" x2="${pt(i,r).x}" y2="${pt(i,r).y}" stroke="#2a2a2a" stroke-width="1"/>`
-  ).join('');
-  const labels=Array.from({length:N},(_,i)=>{
-    const p=pt(i,r+36);
-    const anchor=p.x<cx-15?'end':p.x>cx+15?'start':'middle';
-    return `<text x="${p.x}" y="${p.y}" text-anchor="${anchor}" dominant-baseline="middle" font-size="12" fill="#aaa" font-family="inherit">${axes[i]||`Eixo ${i+1}`}</text>`;
-  }).join('');
-  const dots=polyPts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="4" fill="${color}"/>`).join('');
-
-  return `<svg viewBox="0 0 380 350" width="100%" style="max-width:320px">
-    ${gridPolys}${axisLines}
-    <polygon points="${polyStr}" fill="${color}66" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
-    ${dots}${labels}
-  </svg>`;
 }
 
 // ── HP bar HTML ───────────────────────────────────────────────────────────────
@@ -309,14 +273,7 @@ function render(){
   if(!ath){selAthlete=null;render();return;}
   const color=ath.color||'#555';
   const athGoals=(goalsData.athleteGoals||{})[ath.id]||[];
-  const radarVals=(goalsData.radarValues||{})[ath.id]||[50,50,50,50,50];
-  const radarAxes=goalsData.radarAxes||['Força','Resistência','Mobilidade','Técnica','Potência'];
   const athResults=results.filter(r=>String(r.athleteId)===String(ath.id));
-
-  const radarLegend=radarAxes.map((ax,i)=>`
-    <div class="radar-leg-item">
-      <span>${ax}</span><span class="radar-leg-val">${radarVals[i]||0}</span>
-    </div>`).join('');
 
   const goals=athGoals.length===0
     ?'<div style="font-size:13px;color:#333;font-style:italic">Nenhum objetivo definido.</div>'
@@ -330,19 +287,12 @@ function render(){
     </div>
     <div class="two-col">
       <div class="section">
-        <div class="section-title">Perfil do Atleta</div>
-        <div class="radar-wrap">${pentagonSVG(radarVals,radarAxes,color)}</div>
-        <div class="radar-legend">${radarLegend}</div>
+        <div class="section-title">Últimas 8 Semanas</div>
+        ${heatmapHTML(athResults,sessions)}
       </div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="section">
-          <div class="section-title">Últimas 8 Semanas</div>
-          ${heatmapHTML(athResults,sessions)}
-        </div>
-        <div class="section">
-          <div class="section-title">Últimos WODs</div>
-          ${recentWodsHTML(athResults,sessions)}
-        </div>
+      <div class="section">
+        <div class="section-title">Últimos WODs</div>
+        ${recentWodsHTML(athResults,sessions)}
       </div>
     </div>
     <div class="section">
