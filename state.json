@@ -1,34 +1,25 @@
 {
   "version": 2,
-  "exportedAt": "2026-06-08T08:00:00.000Z",
+  "exportedAt": "2026-06-09T08:00:00.000Z",
   "sessions": {
     "2026-06-08": [
       {
-        "id": "19ea6c28229fc3d1d",
+        "id": "19ea85307c3962c16",
         "date": "2026-06-08",
         "mainTraining": "Segunda",
         "blocks": [
           {
-            "id": "19ea6c282293151af",
+            "id": "19ea85307c3cef6a1",
             "label": "Força",
             "type": "Força",
             "zone": "Zona 02",
-            "duration": "15",
-            "rounds": "5",
+            "duration": "",
+            "rounds": "4",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c2822978bbff",
-                "name": "Strict Press",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": "19ea6c2822949b703",
+                "id": "19ea85307c3766e2b",
                 "name": "Deadlift",
                 "sets": "",
                 "reps": "10",
@@ -37,7 +28,16 @@
                 "progression": null
               },
               {
-                "id": "19ea6c28229a7ed02",
+                "id": "19ea85307c39016d9",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19ea85307c3cc3583",
                 "name": "Bench Press",
                 "sets": "",
                 "reps": "10",
@@ -48,18 +48,18 @@
             ]
           },
           {
-            "id": "19ea6c282295708c7",
+            "id": "19ea85307c3c07a5f",
             "label": "LPO",
             "type": "LPO",
             "zone": "Zona 01",
-            "duration": "15",
-            "rounds": "3",
+            "duration": "",
+            "rounds": "5",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c2822948c380",
-                "name": "Muscle Clean",
+                "id": "19ea85307c3d5a0b6",
+                "name": "Hang Power Clean",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -67,8 +67,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c2822975f6e2",
-                "name": "Push Jerk",
+                "id": "19ea85307c36627e2",
+                "name": "Clean & Jerk",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -76,7 +76,7 @@
                 "progression": null
               },
               {
-                "id": "19ea6c2822989f1ce",
+                "id": "19ea85307c351bf1a",
                 "name": "Clean Pull",
                 "sets": "",
                 "reps": "10",
@@ -87,18 +87,18 @@
             ]
           },
           {
-            "id": "19ea6c282293cca5b",
+            "id": "19ea85307c3ee9913",
             "label": "WOD",
             "type": "For Time",
             "zone": "Zona 01",
-            "duration": "20",
+            "duration": "12",
             "rounds": "",
-            "notes": "Goal: sub 20'",
+            "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c282293819d9",
-                "name": "Box Jump",
+                "id": "19ea85307c375412f",
+                "name": "T2B",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -106,8 +106,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c282296375aa",
-                "name": "Pull-Up",
+                "id": "19ea85307c3a0e6e9",
+                "name": "Kettlebell Swing",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -115,8 +115,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c282295ac902",
-                "name": "Burpee",
+                "id": "19ea85307c3ce5c85",
+                "name": "HSPU",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -130,23 +130,23 @@
     ],
     "2026-06-09": [
       {
-        "id": "19ea6c28229ab6ad1",
+        "id": "19ea85307c3e08dbf",
         "date": "2026-06-09",
         "mainTraining": "Terça",
         "blocks": [
           {
-            "id": "19ea6c2822936565f",
-            "label": "Força",
-            "type": "Força",
-            "zone": "Zona 02",
-            "duration": "15",
+            "id": "19ea85307c37a8e2e",
+            "label": "Core",
+            "type": "Core",
+            "zone": "Zona 03",
+            "duration": "",
             "rounds": "3",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c28229de57b1",
-                "name": "Push Press",
+                "id": "19ea85307c330142f",
+                "name": "Plank",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -154,8 +154,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c28229b13b67",
-                "name": "Hip Thrust",
+                "id": "19ea85307c3a92fdf",
+                "name": "Toes to Bar",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -163,8 +163,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c2822940c036",
-                "name": "Romanian Deadlift",
+                "id": "19ea85307c356d84e",
+                "name": "Hollow Hold",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -174,18 +174,18 @@
             ]
           },
           {
-            "id": "19ea6c28229a5d675",
-            "label": "LPO",
-            "type": "LPO",
-            "zone": "Zona 01",
-            "duration": "15",
-            "rounds": "4",
+            "id": "19ea85307c32d8a9c",
+            "label": "Acessórios",
+            "type": "Acessórios",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "3",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c28229a39f38",
-                "name": "Power Snatch",
+                "id": "19ea85307c31d4e7b",
+                "name": "Gorilla Row",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -193,8 +193,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c282297ba1c",
-                "name": "Overhead Squat",
+                "id": "19ea85307c3138d2",
+                "name": "Ring Dips",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -202,8 +202,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c2822964409e",
-                "name": "Split Jerk",
+                "id": "19ea85307c34b08f0",
+                "name": "Nordic Curl",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -213,18 +213,18 @@
             ]
           },
           {
-            "id": "19ea6c2822963205c",
+            "id": "19ea85307c32aec67",
             "label": "WOD",
-            "type": "For Time",
+            "type": "AMRAP",
             "zone": "Zona 01",
-            "duration": "20",
+            "duration": "15",
             "rounds": "",
-            "notes": "Goal: sub 20'",
+            "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c2822962a881",
-                "name": "Row (Cal)",
+                "id": "19ea85307c3be1f4",
+                "name": "Kettlebell Swing",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -232,8 +232,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c28229c77898",
-                "name": "Wall Ball",
+                "id": "19ea85307c3ac95b3",
+                "name": "Box Jump",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -241,8 +241,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c282296190b0",
-                "name": "T2B",
+                "id": "19ea85307c3fcb6c4",
+                "name": "Burpee",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -256,22 +256,31 @@
     ],
     "2026-06-10": [
       {
-        "id": "19ea6c28229d13275",
+        "id": "19ea85307c3ca0244",
         "date": "2026-06-10",
         "mainTraining": "Quarta",
         "blocks": [
           {
-            "id": "19ea6c28229b7e69d",
+            "id": "19ea85307c37b1ab4",
             "label": "Força",
             "type": "Força",
             "zone": "Zona 02",
-            "duration": "12",
+            "duration": "",
             "rounds": "5",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c28229901022",
+                "id": "19ea85307c3e4de81",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19ea85307c37fcaa4",
                 "name": "Bench Press",
                 "sets": "",
                 "reps": "10",
@@ -280,38 +289,29 @@
                 "progression": null
               },
               {
-                "id": "19ea6c28229e820a1",
+                "id": "19ea85307c31f618a",
                 "name": "Front Squat",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
                 "note": "",
                 "progression": null
-              },
-              {
-                "id": "19ea6c28229b3089d",
-                "name": "Deadlift",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
               }
             ]
           },
           {
-            "id": "19ea6c28229dbe372",
-            "label": "LPO",
-            "type": "LPO",
-            "zone": "Zona 01",
-            "duration": "15",
-            "rounds": "4",
+            "id": "19ea85307c36696a6",
+            "label": "Cardio",
+            "type": "Cardio",
+            "zone": "Zona 03",
+            "duration": "",
+            "rounds": "3",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c28229c2ee85",
-                "name": "Push Jerk",
+                "id": "19ea85307c3ca708a",
+                "name": "Row 500m",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -319,8 +319,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c28229ce760e",
-                "name": "Snatch Balance",
+                "id": "19ea85307c38b66b4",
+                "name": "Run 400m",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -328,8 +328,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c2822999bc76",
-                "name": "Muscle Clean",
+                "id": "19ea85307c374971f",
+                "name": "Double Under",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -339,26 +339,17 @@
             ]
           },
           {
-            "id": "19ea6c28229991e9c",
+            "id": "19ea85307c334df7a",
             "label": "WOD",
             "type": "For Time",
             "zone": "Zona 01",
             "duration": "14",
             "rounds": "",
-            "notes": "Goal: sub 14'",
+            "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c28229ad0e4f",
-                "name": "Pull-Up",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": "19ea6c282292b36fa",
+                "id": "19ea85307c3aa6541",
                 "name": "Burpee",
                 "sets": "",
                 "reps": "10",
@@ -367,8 +358,17 @@
                 "progression": null
               },
               {
-                "id": "19ea6c28229d75be4",
-                "name": "Thruster",
+                "id": "19ea85307c3bf3dc1",
+                "name": "HSPU",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19ea85307c3937c84",
+                "name": "Box Jump",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -382,62 +382,23 @@
     ],
     "2026-06-11": [
       {
-        "id": "19ea6c28229553e87",
+        "id": "19ea85307c32f2843",
         "date": "2026-06-11",
         "mainTraining": "Quinta",
         "blocks": [
           {
-            "id": "19ea6c282299ac32e",
-            "label": "Força",
-            "type": "Força",
-            "zone": "Zona 02",
-            "duration": "15",
-            "rounds": "4",
-            "notes": "",
-            "ladderMode": false,
-            "exercises": [
-              {
-                "id": "19ea6c282294fe848",
-                "name": "Hip Thrust",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": "19ea6c28229440267",
-                "name": "Pendlay Row",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": "19ea6c2822931bf55",
-                "name": "Bulgarian Split Squat",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              }
-            ]
-          },
-          {
-            "id": "19ea6c282299c60a0",
+            "id": "19ea85307c3c5ba81",
             "label": "LPO",
             "type": "LPO",
             "zone": "Zona 01",
-            "duration": "12",
+            "duration": "",
             "rounds": "3",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c28229cd818b",
-                "name": "Overhead Squat",
+                "id": "19ea85307c328c8bd",
+                "name": "Snatch Balance",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -445,8 +406,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c28229cc363b",
-                "name": "Hang Squat Clean",
+                "id": "19ea85307c3744167",
+                "name": "Push Jerk",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -454,8 +415,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c28229991824",
-                "name": "Split Jerk",
+                "id": "19ea85307c3e1c2f9",
+                "name": "Power Snatch",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -465,18 +426,18 @@
             ]
           },
           {
-            "id": "19ea6c28229992f65",
-            "label": "WOD",
-            "type": "For Time",
-            "zone": "Zona 01",
-            "duration": "15",
-            "rounds": "",
-            "notes": "Goal: sub 15'",
+            "id": "19ea85307c3c0f2ea",
+            "label": "Core",
+            "type": "Core",
+            "zone": "Zona 03",
+            "duration": "",
+            "rounds": "5",
+            "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c28229433f7",
-                "name": "T2B",
+                "id": "19ea85307c3eeb545",
+                "name": "Plank",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -484,7 +445,46 @@
                 "progression": null
               },
               {
-                "id": "19ea6c28229fda9e8",
+                "id": "19ea85307c340d748",
+                "name": "GHD",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19ea85307c3a38aed",
+                "name": "Toes to Bar",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19ea85307c3820a9e",
+            "label": "WOD",
+            "type": "EMOM",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19ea85307c38e67b8",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19ea85307c3279d8",
                 "name": "HSPU",
                 "sets": "",
                 "reps": "10",
@@ -493,8 +493,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c2822983642f",
-                "name": "Row (Cal)",
+                "id": "19ea85307c3ceacb2",
+                "name": "Burpee",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -508,22 +508,31 @@
     ],
     "2026-06-12": [
       {
-        "id": "19ea6c28229e060e",
+        "id": "19ea85307c3d009c2",
         "date": "2026-06-12",
         "mainTraining": "Sexta",
         "blocks": [
           {
-            "id": "19ea6c2822a3a4ed7",
+            "id": "19ea85307c376e3ba",
             "label": "Força",
             "type": "Força",
             "zone": "Zona 02",
-            "duration": "12",
-            "rounds": "4",
+            "duration": "",
+            "rounds": "5",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c2822a8d2014",
+                "id": "19ea85307c31dca21",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19ea85307c33dc313",
                 "name": "Strict Press",
                 "sets": "",
                 "reps": "10",
@@ -532,17 +541,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c2822afcc7a8",
-                "name": "Front Squat",
-                "sets": "",
-                "reps": "10",
-                "intensity": null,
-                "note": "",
-                "progression": null
-              },
-              {
-                "id": "19ea6c2822a2d953d",
-                "name": "Back Squat",
+                "id": "19ea85307c38d1972",
+                "name": "Bench Press",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -552,18 +552,18 @@
             ]
           },
           {
-            "id": "19ea6c2822acc7d0e",
-            "label": "LPO",
-            "type": "LPO",
-            "zone": "Zona 01",
-            "duration": "15",
-            "rounds": "4",
+            "id": "19ea85307c3dfc667",
+            "label": "Acessórios",
+            "type": "Acessórios",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "5",
             "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c2822a2f7616",
-                "name": "Muscle Clean",
+                "id": "19ea85307c3dbd336",
+                "name": "Ring Dips",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -571,8 +571,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c2822af0035",
-                "name": "Push Jerk",
+                "id": "19ea85307c398f55b",
+                "name": "Heavy S Pull-Up",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -580,8 +580,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c2822aaab465",
-                "name": "Snatch Balance",
+                "id": "19ea85307c3b39d62",
+                "name": "Hip Thruster",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -591,18 +591,18 @@
             ]
           },
           {
-            "id": "19ea6c2822ad1e2b2",
+            "id": "19ea85307c3c1ac4a",
             "label": "WOD",
             "type": "For Time",
             "zone": "Zona 01",
             "duration": "20",
             "rounds": "",
-            "notes": "Goal: sub 20'",
+            "notes": "",
             "ladderMode": false,
             "exercises": [
               {
-                "id": "19ea6c2822a85c3f4",
-                "name": "Burpee",
+                "id": "19ea85307c3251771",
+                "name": "Thruster",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -610,7 +610,7 @@
                 "progression": null
               },
               {
-                "id": "19ea6c2822aae06b5",
+                "id": "19ea85307c34d0254",
                 "name": "Pull-Up",
                 "sets": "",
                 "reps": "10",
@@ -619,8 +619,8 @@
                 "progression": null
               },
               {
-                "id": "19ea6c2822a9449bb",
-                "name": "Thruster",
+                "id": "19ea85307c39550df",
+                "name": "Burpee",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -659,1077 +659,37 @@
   },
   "results": [
     {
-      "id": "19ea6c2822aab7bc8",
+      "id": "19ea85307c3a07635",
       "date": "2026-06-08",
-      "athleteId": "19ea6c28229c2ebb3",
+      "athleteId": "19ea85307c31d9886",
       "presence": "Presente",
-      "sessionId": "19ea6c28229fc3d1d",
+      "sessionId": "19ea85307c3962c16",
       "blocks": [
         {
-          "blockId": "19ea6c282293cca5b",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 9,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "18:05",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Box Jump",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822ac47e05",
-      "date": "2026-06-08",
-      "athleteId": "19ea6c28229173f2",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229fc3d1d",
-      "blocks": [
-        {
-          "blockId": "19ea6c282293cca5b",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 10,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "09:56",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Box Jump",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "SC",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a3d4313",
-      "date": "2026-06-08",
-      "athleteId": "19ea6c28229e9f90f",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229fc3d1d",
-      "blocks": [
-        {
-          "blockId": "19ea6c282293cca5b",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 6,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "10:08",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Box Jump",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a1bf159",
-      "date": "2026-06-08",
-      "athleteId": "19ea6c282293e237e",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229fc3d1d",
-      "blocks": [
-        {
-          "blockId": "19ea6c282293cca5b",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 8,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "16:29",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Box Jump",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "RX",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a835e31",
-      "date": "2026-06-08",
-      "athleteId": "19ea6c282292c5480",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229fc3d1d",
-      "blocks": [
-        {
-          "blockId": "19ea6c282293cca5b",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 9,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "14:24",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Box Jump",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822ac10160",
-      "date": "2026-06-08",
-      "athleteId": "19ea6c282292c5c43",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229fc3d1d",
-      "blocks": [
-        {
-          "blockId": "19ea6c282293cca5b",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 8,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "13:26",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Box Jump",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822ace8172",
-      "date": "2026-06-08",
-      "athleteId": "19ea6c28229cdefb",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229fc3d1d",
-      "blocks": [
-        {
-          "blockId": "19ea6c282293cca5b",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 6,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "15:15",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Box Jump",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822aa4c573",
-      "date": "2026-06-08",
-      "athleteId": "19ea6c2822978d1da",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229fc3d1d",
-      "blocks": [
-        {
-          "blockId": "19ea6c282293cca5b",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 10,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "08:10",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Box Jump",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "RX",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822ae12c99",
-      "date": "2026-06-08",
-      "athleteId": "19ea6c2822996ac5d",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229fc3d1d",
-      "blocks": [
-        {
-          "blockId": "19ea6c282293cca5b",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 6,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "18:01",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Box Jump",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "SC",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a10e124",
-      "date": "2026-06-08",
-      "athleteId": "19ea6c28229763932",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229fc3d1d",
-      "blocks": [
-        {
-          "blockId": "19ea6c282293cca5b",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 8,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "18:05",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Box Jump",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a336463",
-      "date": "2026-06-09",
-      "athleteId": "19ea6c28229c2ebb3",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229ab6ad1",
-      "blocks": [
-        {
-          "blockId": "19ea6c2822963205c",
+          "blockId": "19ea85307c3ee9913",
           "blockType": "WOD",
           "blockLabel": "WOD",
           "load": "",
           "rpe": 7,
           "note": "",
-          "goal": "20:00",
-          "perfTime": "16:46",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Row (Cal)",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Wall Ball",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "T2B",
-              "scale": "SC",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822ac08c6e",
-      "date": "2026-06-09",
-      "athleteId": "19ea6c28229173f2",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229ab6ad1",
-      "blocks": [
-        {
-          "blockId": "19ea6c2822963205c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 7,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "10:54",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Row (Cal)",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Wall Ball",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "T2B",
-              "scale": "RX",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822ad912",
-      "date": "2026-06-09",
-      "athleteId": "19ea6c282293e237e",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229ab6ad1",
-      "blocks": [
-        {
-          "blockId": "19ea6c2822963205c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 8,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "10:09",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Row (Cal)",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Wall Ball",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "T2B",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a4ea052",
-      "date": "2026-06-09",
-      "athleteId": "19ea6c282292c5c43",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229ab6ad1",
-      "blocks": [
-        {
-          "blockId": "19ea6c2822963205c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 8,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "14:56",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Row (Cal)",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Wall Ball",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "T2B",
-              "scale": "SC",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822afd153f",
-      "date": "2026-06-09",
-      "athleteId": "19ea6c28229cdefb",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229ab6ad1",
-      "blocks": [
-        {
-          "blockId": "19ea6c2822963205c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 10,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "16:02",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Row (Cal)",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Wall Ball",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "T2B",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a24ad21",
-      "date": "2026-06-09",
-      "athleteId": "19ea6c2822978d1da",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229ab6ad1",
-      "blocks": [
-        {
-          "blockId": "19ea6c2822963205c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 10,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "09:36",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Row (Cal)",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Wall Ball",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "T2B",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a122608",
-      "date": "2026-06-09",
-      "athleteId": "19ea6c2822996ac5d",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229ab6ad1",
-      "blocks": [
-        {
-          "blockId": "19ea6c2822963205c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 6,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "17:27",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Row (Cal)",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Wall Ball",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "T2B",
-              "scale": "SC",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822aab0917",
-      "date": "2026-06-09",
-      "athleteId": "19ea6c28229763932",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229ab6ad1",
-      "blocks": [
-        {
-          "blockId": "19ea6c2822963205c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 7,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "13:42",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Row (Cal)",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Wall Ball",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "T2B",
-              "scale": "SC",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a1595e7",
-      "date": "2026-06-10",
-      "athleteId": "19ea6c28229173f2",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229d13275",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229991e9c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 10,
-          "note": "",
-          "goal": "14:00",
-          "perfTime": "05:43",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Pull-Up",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a9ba4c6",
-      "date": "2026-06-10",
-      "athleteId": "19ea6c28229e9f90f",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229d13275",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229991e9c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 6,
-          "note": "",
-          "goal": "14:00",
-          "perfTime": "11:25",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
-              "scale": "RX",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822aeb7683",
-      "date": "2026-06-10",
-      "athleteId": "19ea6c282293e237e",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229d13275",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229991e9c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 7,
-          "note": "",
-          "goal": "14:00",
-          "perfTime": "10:48",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Pull-Up",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
-              "scale": "SC",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822aaff7a6",
-      "date": "2026-06-10",
-      "athleteId": "19ea6c282292c5480",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229d13275",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229991e9c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 7,
-          "note": "",
-          "goal": "14:00",
-          "perfTime": "06:46",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a5ab328",
-      "date": "2026-06-10",
-      "athleteId": "19ea6c282292c5c43",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229d13275",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229991e9c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 8,
-          "note": "",
-          "goal": "14:00",
-          "perfTime": "05:52",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
-              "scale": "RX",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822aae7c7b",
-      "date": "2026-06-10",
-      "athleteId": "19ea6c28229cdefb",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229d13275",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229991e9c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 8,
-          "note": "",
-          "goal": "14:00",
-          "perfTime": "05:47",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a431111",
-      "date": "2026-06-10",
-      "athleteId": "19ea6c2822978d1da",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229d13275",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229991e9c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 8,
-          "note": "",
-          "goal": "14:00",
-          "perfTime": "07:45",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Pull-Up",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
-              "scale": "SC",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a74f448",
-      "date": "2026-06-10",
-      "athleteId": "19ea6c2822996ac5d",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229d13275",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229991e9c",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 9,
-          "note": "",
-          "goal": "14:00",
-          "perfTime": "11:45",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Burpee",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
-              "scale": "RX",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a14896b",
-      "date": "2026-06-11",
-      "athleteId": "19ea6c28229c2ebb3",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229553e87",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229992f65",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 7,
-          "note": "",
-          "goal": "15:00",
-          "perfTime": "10:41",
+          "goal": "12:00",
+          "perfTime": "09:05",
           "perfRounds": "",
           "perfReps": "",
           "exerciseRows": [
             {
               "name": "T2B",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Kettlebell Swing",
               "scale": "Inter",
               "load": ""
             },
             {
               "name": "HSPU",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Row (Cal)",
-              "scale": "Inter",
+              "scale": "SC",
               "load": ""
             }
           ]
@@ -1739,36 +699,316 @@
       "flagForReview": false
     },
     {
-      "id": "19ea6c2822aee8c49",
-      "date": "2026-06-11",
-      "athleteId": "19ea6c28229173f2",
+      "id": "19ea85307c382dd15",
+      "date": "2026-06-08",
+      "athleteId": "19ea85307c32c8ba2",
       "presence": "Presente",
-      "sessionId": "19ea6c28229553e87",
+      "sessionId": "19ea85307c3962c16",
       "blocks": [
         {
-          "blockId": "19ea6c28229992f65",
+          "blockId": "19ea85307c3ee9913",
           "blockType": "WOD",
           "blockLabel": "WOD",
           "load": "",
-          "rpe": 8,
+          "rpe": 6,
           "note": "",
-          "goal": "15:00",
-          "perfTime": "10:26",
+          "goal": "12:00",
+          "perfTime": "06:00",
           "perfRounds": "",
           "perfReps": "",
           "exerciseRows": [
             {
               "name": "T2B",
-              "scale": "Inter",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Kettlebell Swing",
+              "scale": "RX",
               "load": ""
             },
             {
               "name": "HSPU",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c34517e5",
+      "date": "2026-06-08",
+      "athleteId": "19ea85307c3922118",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3962c16",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3ee9913",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 8,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "09:08",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "T2B",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "Kettlebell Swing",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "SC",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": true
+    },
+    {
+      "id": "19ea85307c398d95a",
+      "date": "2026-06-08",
+      "athleteId": "19ea85307c3dfd7ce",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3962c16",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3ee9913",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 7,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "05:17",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "T2B",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Kettlebell Swing",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3888255",
+      "date": "2026-06-08",
+      "athleteId": "19ea85307c33e3cc7",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3962c16",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3ee9913",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 8,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "08:43",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "T2B",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Kettlebell Swing",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3223338",
+      "date": "2026-06-08",
+      "athleteId": "19ea85307c3139694",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3962c16",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3ee9913",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 6,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "05:46",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "T2B",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "Kettlebell Swing",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "SC",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3382b8a",
+      "date": "2026-06-08",
+      "athleteId": "19ea85307c3f9230f",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3962c16",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3ee9913",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 9,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "07:36",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "T2B",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "Kettlebell Swing",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "SC",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3db415f",
+      "date": "2026-06-08",
+      "athleteId": "19ea85307c35eb64e",
+      "presence": "Atrasado",
+      "sessionId": "19ea85307c3962c16",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3ee9913",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 8,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "06:10",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "T2B",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "Kettlebell Swing",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "SC",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3995bc6",
+      "date": "2026-06-09",
+      "athleteId": "19ea85307c31d9886",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3e08dbf",
+      "blocks": [
+        {
+          "blockId": "19ea85307c32aec67",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 10,
+          "note": "",
+          "goal": "15:00",
+          "perfTime": "12:05",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
               "scale": "Inter",
               "load": ""
             },
             {
-              "name": "Row (Cal)",
+              "name": "Box Jump",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
               "scale": "Inter",
               "load": ""
             }
@@ -1779,18 +1019,18 @@
       "flagForReview": false
     },
     {
-      "id": "19ea6c2822a9c69be",
-      "date": "2026-06-11",
-      "athleteId": "19ea6c282292c5480",
+      "id": "19ea85307c3bd2cab",
+      "date": "2026-06-09",
+      "athleteId": "19ea85307c3922118",
       "presence": "Presente",
-      "sessionId": "19ea6c28229553e87",
+      "sessionId": "19ea85307c3e08dbf",
       "blocks": [
         {
-          "blockId": "19ea6c28229992f65",
+          "blockId": "19ea85307c32aec67",
           "blockType": "WOD",
           "blockLabel": "WOD",
           "load": "",
-          "rpe": 8,
+          "rpe": 7,
           "note": "",
           "goal": "15:00",
           "perfTime": "13:40",
@@ -1798,219 +1038,19 @@
           "perfReps": "",
           "exerciseRows": [
             {
-              "name": "T2B",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "HSPU",
+              "name": "Kettlebell Swing",
               "scale": "Inter",
               "load": ""
             },
             {
-              "name": "Row (Cal)",
-              "scale": "RX",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a4f72a3",
-      "date": "2026-06-11",
-      "athleteId": "19ea6c282292c5c43",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229553e87",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229992f65",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 10,
-          "note": "",
-          "goal": "15:00",
-          "perfTime": "06:09",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "T2B",
+              "name": "Box Jump",
               "scale": "Inter",
               "load": ""
             },
-            {
-              "name": "HSPU",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Row (Cal)",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a1425f9",
-      "date": "2026-06-11",
-      "athleteId": "19ea6c28229cdefb",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229553e87",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229992f65",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 10,
-          "note": "",
-          "goal": "15:00",
-          "perfTime": "12:25",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "T2B",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "HSPU",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Row (Cal)",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a701340",
-      "date": "2026-06-11",
-      "athleteId": "19ea6c2822996ac5d",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229553e87",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229992f65",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 9,
-          "note": "",
-          "goal": "15:00",
-          "perfTime": "11:27",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "T2B",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "HSPU",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Row (Cal)",
-              "scale": "SC",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822aacbead",
-      "date": "2026-06-11",
-      "athleteId": "19ea6c28229763932",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229553e87",
-      "blocks": [
-        {
-          "blockId": "19ea6c28229992f65",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 10,
-          "note": "",
-          "goal": "15:00",
-          "perfTime": "11:02",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "T2B",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "HSPU",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Row (Cal)",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a97931f",
-      "date": "2026-06-12",
-      "athleteId": "19ea6c28229c2ebb3",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229e060e",
-      "blocks": [
-        {
-          "blockId": "19ea6c2822ad1e2b2",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 10,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "10:03",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
             {
               "name": "Burpee",
               "scale": "Inter",
               "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "SC",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
-              "scale": "Inter",
-              "load": ""
             }
           ]
         }
@@ -2019,116 +1059,36 @@
       "flagForReview": false
     },
     {
-      "id": "19ea6c2822a7b63fe",
-      "date": "2026-06-12",
-      "athleteId": "19ea6c28229173f2",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229e060e",
+      "id": "19ea85307c3ae25dc",
+      "date": "2026-06-09",
+      "athleteId": "19ea85307c3dfd7ce",
+      "presence": "Atrasado",
+      "sessionId": "19ea85307c3e08dbf",
       "blocks": [
         {
-          "blockId": "19ea6c2822ad1e2b2",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 9,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "17:33",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Burpee",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822ace4ccd",
-      "date": "2026-06-12",
-      "athleteId": "19ea6c28229e9f90f",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229e060e",
-      "blocks": [
-        {
-          "blockId": "19ea6c2822ad1e2b2",
-          "blockType": "WOD",
-          "blockLabel": "WOD",
-          "load": "",
-          "rpe": 7,
-          "note": "",
-          "goal": "20:00",
-          "perfTime": "11:53",
-          "perfRounds": "",
-          "perfReps": "",
-          "exerciseRows": [
-            {
-              "name": "Burpee",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "Inter",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
-              "scale": "Inter",
-              "load": ""
-            }
-          ]
-        }
-      ],
-      "coachNote": "",
-      "flagForReview": false
-    },
-    {
-      "id": "19ea6c2822a251a43",
-      "date": "2026-06-12",
-      "athleteId": "19ea6c282293e237e",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229e060e",
-      "blocks": [
-        {
-          "blockId": "19ea6c2822ad1e2b2",
+          "blockId": "19ea85307c32aec67",
           "blockType": "WOD",
           "blockLabel": "WOD",
           "load": "",
           "rpe": 8,
           "note": "",
-          "goal": "20:00",
-          "perfTime": "09:38",
+          "goal": "15:00",
+          "perfTime": "11:31",
           "perfRounds": "",
           "perfReps": "",
           "exerciseRows": [
             {
+              "name": "Kettlebell Swing",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
               "name": "Burpee",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
               "scale": "RX",
               "load": ""
             }
@@ -2136,39 +1096,79 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": true
     },
     {
-      "id": "19ea6c2822ac305b1",
-      "date": "2026-06-12",
-      "athleteId": "19ea6c282292c5480",
+      "id": "19ea85307c3bcb1f9",
+      "date": "2026-06-09",
+      "athleteId": "19ea85307c31e27a5",
       "presence": "Presente",
-      "sessionId": "19ea6c28229e060e",
+      "sessionId": "19ea85307c3e08dbf",
       "blocks": [
         {
-          "blockId": "19ea6c2822ad1e2b2",
+          "blockId": "19ea85307c32aec67",
           "blockType": "WOD",
           "blockLabel": "WOD",
           "load": "",
           "rpe": 10,
           "note": "",
-          "goal": "20:00",
-          "perfTime": "17:40",
+          "goal": "15:00",
+          "perfTime": "06:53",
           "perfRounds": "",
           "perfReps": "",
           "exerciseRows": [
             {
+              "name": "Kettlebell Swing",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "RX",
+              "load": ""
+            },
+            {
               "name": "Burpee",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3c6715f",
+      "date": "2026-06-09",
+      "athleteId": "19ea85307c33e3cc7",
+      "presence": "Atrasado",
+      "sessionId": "19ea85307c3e08dbf",
+      "blocks": [
+        {
+          "blockId": "19ea85307c32aec67",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 8,
+          "note": "",
+          "goal": "15:00",
+          "perfTime": "09:51",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
               "scale": "Inter",
               "load": ""
             },
             {
-              "name": "Pull-Up",
+              "name": "Box Jump",
               "scale": "Inter",
               "load": ""
             },
             {
-              "name": "Thruster",
+              "name": "Burpee",
               "scale": "Inter",
               "load": ""
             }
@@ -2179,36 +1179,36 @@
       "flagForReview": false
     },
     {
-      "id": "19ea6c2822a98d03d",
-      "date": "2026-06-12",
-      "athleteId": "19ea6c28229cdefb",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229e060e",
+      "id": "19ea85307c339856",
+      "date": "2026-06-09",
+      "athleteId": "19ea85307c3139694",
+      "presence": "Atrasado",
+      "sessionId": "19ea85307c3e08dbf",
       "blocks": [
         {
-          "blockId": "19ea6c2822ad1e2b2",
+          "blockId": "19ea85307c32aec67",
           "blockType": "WOD",
           "blockLabel": "WOD",
           "load": "",
           "rpe": 6,
           "note": "",
-          "goal": "20:00",
-          "perfTime": "08:36",
+          "goal": "15:00",
+          "perfTime": "12:41",
           "perfRounds": "",
           "perfReps": "",
           "exerciseRows": [
             {
+              "name": "Kettlebell Swing",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
               "name": "Burpee",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Pull-Up",
-              "scale": "RX",
-              "load": ""
-            },
-            {
-              "name": "Thruster",
               "scale": "Inter",
               "load": ""
             }
@@ -2219,27 +1219,747 @@
       "flagForReview": false
     },
     {
-      "id": "19ea6c2822af0f54b",
-      "date": "2026-06-12",
-      "athleteId": "19ea6c2822978d1da",
+      "id": "19ea85307c39e15b5",
+      "date": "2026-06-09",
+      "athleteId": "19ea85307c3f9230f",
       "presence": "Presente",
-      "sessionId": "19ea6c28229e060e",
+      "sessionId": "19ea85307c3e08dbf",
       "blocks": [
         {
-          "blockId": "19ea6c2822ad1e2b2",
+          "blockId": "19ea85307c32aec67",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 8,
+          "note": "",
+          "goal": "15:00",
+          "perfTime": "11:51",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c35f10ba",
+      "date": "2026-06-10",
+      "athleteId": "19ea85307c31d9886",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3ca0244",
+      "blocks": [
+        {
+          "blockId": "19ea85307c334df7a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 10,
+          "note": "",
+          "goal": "14:00",
+          "perfTime": "06:09",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Burpee",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": true
+    },
+    {
+      "id": "19ea85307c319b303",
+      "date": "2026-06-10",
+      "athleteId": "19ea85307c32c8ba2",
+      "presence": "Atrasado",
+      "sessionId": "19ea85307c3ca0244",
+      "blocks": [
+        {
+          "blockId": "19ea85307c334df7a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 6,
+          "note": "",
+          "goal": "14:00",
+          "perfTime": "08:26",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Burpee",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "Inter",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c38c9fb6",
+      "date": "2026-06-10",
+      "athleteId": "19ea85307c3922118",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3ca0244",
+      "blocks": [
+        {
+          "blockId": "19ea85307c334df7a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 8,
+          "note": "",
+          "goal": "14:00",
+          "perfTime": "05:53",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Burpee",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "Inter",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3174772",
+      "date": "2026-06-10",
+      "athleteId": "19ea85307c3dfd7ce",
+      "presence": "Atrasado",
+      "sessionId": "19ea85307c3ca0244",
+      "blocks": [
+        {
+          "blockId": "19ea85307c334df7a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 8,
+          "note": "",
+          "goal": "14:00",
+          "perfTime": "05:55",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Burpee",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "Inter",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3c75bca",
+      "date": "2026-06-10",
+      "athleteId": "19ea85307c31e27a5",
+      "presence": "Atrasado",
+      "sessionId": "19ea85307c3ca0244",
+      "blocks": [
+        {
+          "blockId": "19ea85307c334df7a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 6,
+          "note": "",
+          "goal": "14:00",
+          "perfTime": "06:33",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Burpee",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c339415c",
+      "date": "2026-06-10",
+      "athleteId": "19ea85307c33e3cc7",
+      "presence": "Atrasado",
+      "sessionId": "19ea85307c3ca0244",
+      "blocks": [
+        {
+          "blockId": "19ea85307c334df7a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 6,
+          "note": "",
+          "goal": "14:00",
+          "perfTime": "08:13",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Burpee",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "Inter",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3b78399",
+      "date": "2026-06-10",
+      "athleteId": "19ea85307c3139694",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3ca0244",
+      "blocks": [
+        {
+          "blockId": "19ea85307c334df7a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 7,
+          "note": "",
+          "goal": "14:00",
+          "perfTime": "12:12",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Burpee",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3e759c7",
+      "date": "2026-06-10",
+      "athleteId": "19ea85307c3f9230f",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3ca0244",
+      "blocks": [
+        {
+          "blockId": "19ea85307c334df7a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 6,
+          "note": "",
+          "goal": "14:00",
+          "perfTime": "06:03",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Burpee",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Box Jump",
+              "scale": "Inter",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3fb6867",
+      "date": "2026-06-11",
+      "athleteId": "19ea85307c31d9886",
+      "presence": "Presente",
+      "sessionId": "19ea85307c32f2843",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3820a9e",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 6,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "08:39",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "SC",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c33387fa",
+      "date": "2026-06-11",
+      "athleteId": "19ea85307c32c8ba2",
+      "presence": "Presente",
+      "sessionId": "19ea85307c32f2843",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3820a9e",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 8,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "04:57",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "SC",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3b6d786",
+      "date": "2026-06-11",
+      "athleteId": "19ea85307c3922118",
+      "presence": "Presente",
+      "sessionId": "19ea85307c32f2843",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3820a9e",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 7,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "11:18",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3325f95",
+      "date": "2026-06-11",
+      "athleteId": "19ea85307c3dfd7ce",
+      "presence": "Presente",
+      "sessionId": "19ea85307c32f2843",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3820a9e",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 10,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "07:31",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3723ee2",
+      "date": "2026-06-11",
+      "athleteId": "19ea85307c3ff0041",
+      "presence": "Presente",
+      "sessionId": "19ea85307c32f2843",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3820a9e",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 8,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "05:35",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "Inter",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c39456f3",
+      "date": "2026-06-11",
+      "athleteId": "19ea85307c31e27a5",
+      "presence": "Presente",
+      "sessionId": "19ea85307c32f2843",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3820a9e",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 7,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "10:44",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
+              "scale": "SC",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "SC",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c36b87e5",
+      "date": "2026-06-11",
+      "athleteId": "19ea85307c33e3cc7",
+      "presence": "Presente",
+      "sessionId": "19ea85307c32f2843",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3820a9e",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 7,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "07:47",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "Inter",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3d306ab",
+      "date": "2026-06-11",
+      "athleteId": "19ea85307c3f9230f",
+      "presence": "Presente",
+      "sessionId": "19ea85307c32f2843",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3820a9e",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 6,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "08:26",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "Inter",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c33aa424",
+      "date": "2026-06-11",
+      "athleteId": "19ea85307c35eb64e",
+      "presence": "Presente",
+      "sessionId": "19ea85307c32f2843",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3820a9e",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 6,
+          "note": "",
+          "goal": "12:00",
+          "perfTime": "10:12",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Kettlebell Swing",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "HSPU",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c39fba0c",
+      "date": "2026-06-12",
+      "athleteId": "19ea85307c31d9886",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3d009c2",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3c1ac4a",
           "blockType": "WOD",
           "blockLabel": "WOD",
           "load": "",
           "rpe": 9,
           "note": "",
           "goal": "20:00",
-          "perfTime": "17:55",
+          "perfTime": "11:17",
           "perfRounds": "",
           "perfReps": "",
           "exerciseRows": [
             {
-              "name": "Burpee",
-              "scale": "RX",
+              "name": "Thruster",
+              "scale": "Inter",
               "load": ""
             },
             {
@@ -2248,8 +1968,8 @@
               "load": ""
             },
             {
-              "name": "Thruster",
-              "scale": "Inter",
+              "name": "Burpee",
+              "scale": "RX",
               "load": ""
             }
           ]
@@ -2259,37 +1979,37 @@
       "flagForReview": false
     },
     {
-      "id": "19ea6c2822a188e9a",
+      "id": "19ea85307c3aac5d5",
       "date": "2026-06-12",
-      "athleteId": "19ea6c2822996ac5d",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229e060e",
+      "athleteId": "19ea85307c32c8ba2",
+      "presence": "Atrasado",
+      "sessionId": "19ea85307c3d009c2",
       "blocks": [
         {
-          "blockId": "19ea6c2822ad1e2b2",
+          "blockId": "19ea85307c3c1ac4a",
           "blockType": "WOD",
           "blockLabel": "WOD",
           "load": "",
-          "rpe": 8,
+          "rpe": 9,
           "note": "",
           "goal": "20:00",
-          "perfTime": "14:42",
+          "perfTime": "13:16",
           "perfRounds": "",
           "perfReps": "",
           "exerciseRows": [
             {
-              "name": "Burpee",
-              "scale": "SC",
+              "name": "Thruster",
+              "scale": "Inter",
               "load": ""
             },
             {
               "name": "Pull-Up",
-              "scale": "SC",
+              "scale": "Inter",
               "load": ""
             },
             {
-              "name": "Thruster",
-              "scale": "Inter",
+              "name": "Burpee",
+              "scale": "SC",
               "load": ""
             }
           ]
@@ -2299,26 +2019,66 @@
       "flagForReview": false
     },
     {
-      "id": "19ea6c2822a77086b",
+      "id": "19ea85307c3e62ef",
       "date": "2026-06-12",
-      "athleteId": "19ea6c28229763932",
-      "presence": "Presente",
-      "sessionId": "19ea6c28229e060e",
+      "athleteId": "19ea85307c3922118",
+      "presence": "Atrasado",
+      "sessionId": "19ea85307c3d009c2",
       "blocks": [
         {
-          "blockId": "19ea6c2822ad1e2b2",
+          "blockId": "19ea85307c3c1ac4a",
           "blockType": "WOD",
           "blockLabel": "WOD",
           "load": "",
-          "rpe": 8,
+          "rpe": 10,
           "note": "",
           "goal": "20:00",
-          "perfTime": "14:30",
+          "perfTime": "09:20",
           "perfRounds": "",
           "perfReps": "",
           "exerciseRows": [
             {
+              "name": "Thruster",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Pull-Up",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
               "name": "Burpee",
+              "scale": "Inter",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": true
+    },
+    {
+      "id": "19ea85307c3a8b64",
+      "date": "2026-06-12",
+      "athleteId": "19ea85307c3dfd7ce",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3d009c2",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3c1ac4a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 9,
+          "note": "",
+          "goal": "20:00",
+          "perfTime": "13:30",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Thruster",
               "scale": "RX",
               "load": ""
             },
@@ -2328,8 +2088,128 @@
               "load": ""
             },
             {
+              "name": "Burpee",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3a2b6cb",
+      "date": "2026-06-12",
+      "athleteId": "19ea85307c33e3cc7",
+      "presence": "Atrasado",
+      "sessionId": "19ea85307c3d009c2",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3c1ac4a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 9,
+          "note": "",
+          "goal": "20:00",
+          "perfTime": "14:36",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Thruster",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Pull-Up",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "SC",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": true
+    },
+    {
+      "id": "19ea85307c38b9d08",
+      "date": "2026-06-12",
+      "athleteId": "19ea85307c3139694",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3d009c2",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3c1ac4a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 10,
+          "note": "",
+          "goal": "20:00",
+          "perfTime": "12:44",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
               "name": "Thruster",
               "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Pull-Up",
+              "scale": "RX",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "RX",
+              "load": ""
+            }
+          ]
+        }
+      ],
+      "coachNote": "",
+      "flagForReview": false
+    },
+    {
+      "id": "19ea85307c3c69acd",
+      "date": "2026-06-12",
+      "athleteId": "19ea85307c35eb64e",
+      "presence": "Presente",
+      "sessionId": "19ea85307c3d009c2",
+      "blocks": [
+        {
+          "blockId": "19ea85307c3c1ac4a",
+          "blockType": "WOD",
+          "blockLabel": "WOD",
+          "load": "",
+          "rpe": 9,
+          "note": "",
+          "goal": "20:00",
+          "perfTime": "11:45",
+          "perfRounds": "",
+          "perfReps": "",
+          "exerciseRows": [
+            {
+              "name": "Thruster",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Pull-Up",
+              "scale": "Inter",
+              "load": ""
+            },
+            {
+              "name": "Burpee",
+              "scale": "Inter",
               "load": ""
             }
           ]
@@ -2341,94 +2221,712 @@
   ],
   "athletes": [
     {
-      "name": "Arthur",
+      "name": "Jinx",
       "level": "Intermediário",
-      "goal": "Força",
-      "notes": "",
-      "color": "#ae00d1",
-      "id": "19ea6c28229c2ebb3",
-      "since": "2026-06-01"
-    },
-    {
-      "name": "Paulo",
-      "level": "Avançado",
-      "goal": "Força",
-      "notes": "",
-      "color": "#00e60f",
-      "id": "19ea6c28229173f2",
-      "since": "2026-06-01"
-    },
-    {
-      "name": "Medrado",
-      "level": "Avançado",
-      "goal": "Força",
-      "notes": "",
-      "color": "#ff4444",
-      "id": "19ea6c28229e9f90f",
-      "since": "2026-06-01"
-    },
-    {
-      "name": "Bruce Wayne",
-      "level": "Competidor",
       "goal": "Saúde geral",
       "notes": "",
-      "color": "#000000",
-      "id": "19ea6c282293e237e",
+      "color": "#ff2d6e",
+      "id": "19ea85307c31d9886",
       "since": "2026-06-01"
     },
     {
-      "name": "Sua Mae",
-      "level": "Competidor",
-      "goal": "Condicionamento",
-      "notes": "",
-      "color": "#725f4f",
-      "id": "19ea6c282292c5480",
-      "since": "2026-06-01"
-    },
-    {
-      "name": "Seu Cachorro",
-      "level": "Competidor",
+      "name": "Thresh",
+      "level": "Avançado",
       "goal": "Competição",
       "notes": "",
-      "color": "#e2dad4",
-      "id": "19ea6c282292c5c43",
+      "color": "#00e5ff",
+      "id": "19ea85307c32c8ba2",
       "since": "2026-06-01"
     },
     {
-      "name": "Diana Prince",
+      "name": "Yasuo",
+      "level": "Intermediário",
+      "goal": "Força",
+      "notes": "",
+      "color": "#b0b0b0",
+      "id": "19ea85307c3922118",
+      "since": "2026-06-01"
+    },
+    {
+      "name": "Lux",
+      "level": "Avançado",
+      "goal": "Competição",
+      "notes": "",
+      "color": "#ffe066",
+      "id": "19ea85307c3dfd7ce",
+      "since": "2026-06-01"
+    },
+    {
+      "name": "Vi",
       "level": "Iniciante",
-      "goal": "Competição",
+      "goal": "Força",
       "notes": "",
-      "color": "#0099ff",
-      "id": "19ea6c28229cdefb",
+      "color": "#e040fb",
+      "id": "19ea85307c3ff0041",
       "since": "2026-06-01"
     },
     {
-      "name": "Clark Kent",
+      "name": "Ekko",
       "level": "Avançado",
       "goal": "Força",
       "notes": "",
-      "color": "#ff9900",
-      "id": "19ea6c2822978d1da",
+      "color": "#00e676",
+      "id": "19ea85307c31e27a5",
       "since": "2026-06-01"
     },
     {
-      "name": "Barry Allen",
+      "name": "Caitlyn",
       "level": "Intermediário",
-      "goal": "Condicionamento",
+      "goal": "Saúde geral",
       "notes": "",
-      "color": "#00ffcc",
-      "id": "19ea6c2822996ac5d",
+      "color": "#64b5f6",
+      "id": "19ea85307c33e3cc7",
       "since": "2026-06-01"
     },
     {
-      "name": "Hal Jordan",
-      "level": "Iniciante",
+      "name": "Ahri",
+      "level": "Avançado",
       "goal": "Condicionamento",
       "notes": "",
-      "color": "#ff00aa",
-      "id": "19ea6c28229763932",
+      "color": "#ff8a65",
+      "id": "19ea85307c3139694",
+      "since": "2026-06-01"
+    },
+    {
+      "name": "Zed",
+      "level": "Competidor",
+      "goal": "Força",
+      "notes": "",
+      "color": "#ff6d00",
+      "id": "19ea85307c3f9230f",
+      "since": "2026-06-01"
+    },
+    {
+      "name": "Sett",
+      "level": "Competidor",
+      "goal": "Força",
+      "notes": "",
+      "color": "#ef5350",
+      "id": "19ea85307c35eb64e",
       "since": "2026-06-01"
     }
-  ]
+  ],
+  "exerciseRegistry": {
+    "WOD": [
+      "Thruster",
+      "Pull-Up",
+      "Box Jump",
+      "Burpee",
+      "Kettlebell Swing",
+      "Wall Ball",
+      "T2B",
+      "HSPU",
+      "Double Under",
+      "Row (Cal)"
+    ],
+    "Força": [
+      "Back Squat",
+      "Deadlift",
+      "Bench Press",
+      "Strict Press",
+      "Front Squat",
+      "Romanian Deadlift",
+      "Bulgarian Split Squat",
+      "Hip Thrust"
+    ],
+    "LPO": [
+      "Clean Pull",
+      "Hang Power Clean",
+      "Push Jerk",
+      "Power Snatch",
+      "Clean & Jerk",
+      "Snatch Balance",
+      "Muscle Clean",
+      "Split Jerk"
+    ],
+    "Core": [
+      "GHD",
+      "Plank",
+      "L-Sit",
+      "Hollow Hold",
+      "Ab Wheel",
+      "Toes to Bar",
+      "Sit-Up",
+      "Russian Twist"
+    ],
+    "Acessórios": [
+      "Heavy S Pull-Up",
+      "Gorilla Row",
+      "Hip Thruster",
+      "Ring Dips",
+      "Nordic Curl",
+      "Pendlay Row",
+      "Dumbbell Press"
+    ],
+    "Cardio": [
+      "Run 400m",
+      "Row 500m",
+      "Bike 1km",
+      "Double Under",
+      "Ski 300m",
+      "Jump Rope",
+      "Echo Bike"
+    ],
+    "Aquecimento": [
+      "Inchworm",
+      "World Greatest Stretch",
+      "Hip Circle",
+      "Shoulder Pass-Through",
+      "Samson Stretch"
+    ],
+    "Mobilidade": [
+      "Pigeon Pose",
+      "Couch Stretch",
+      "Banded Shoulder",
+      "Thoracic Extension",
+      "Ankle Mobility"
+    ]
+  },
+  "athleteGoalsData": {
+    "athleteGoals": {
+      "19ea85307c31d9886": [
+        {
+          "id": "19ea85307c3df8494",
+          "name": "Aprender BMU",
+          "totalSessions": 20,
+          "completedSessions": 12,
+          "milestones": [
+            {
+              "label": "Primeiro negativo",
+              "pct": 20,
+              "hit": true
+            },
+            {
+              "label": "Ring support estável",
+              "pct": 40,
+              "hit": true
+            },
+            {
+              "label": "Primeiro BMU",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        },
+        {
+          "id": "19ea85307c38e009",
+          "name": "Handstand Walk",
+          "totalSessions": 25,
+          "completedSessions": 10,
+          "milestones": [
+            {
+              "label": "Wall walk 5 reps",
+              "pct": 20,
+              "hit": true
+            },
+            {
+              "label": "Kick up contra parede",
+              "pct": 40,
+              "hit": true
+            },
+            {
+              "label": "5m livre",
+              "pct": 80,
+              "hit": false
+            },
+            {
+              "label": "10m livre",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        },
+        {
+          "id": "19ea85307c3e7bd5e",
+          "name": "Snatch técnico",
+          "totalSessions": 15,
+          "completedSessions": 2,
+          "milestones": [
+            {
+              "label": "Posição de recepção",
+              "pct": 30,
+              "hit": false
+            },
+            {
+              "label": "Power Snatch 40kg",
+              "pct": 60,
+              "hit": false
+            },
+            {
+              "label": "Squat Snatch 50kg",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        }
+      ],
+      "19ea85307c32c8ba2": [
+        {
+          "id": "19ea85307c32f8578",
+          "name": "Handstand Walk",
+          "totalSessions": 25,
+          "completedSessions": 1,
+          "milestones": [
+            {
+              "label": "Wall walk 5 reps",
+              "pct": 20,
+              "hit": false
+            },
+            {
+              "label": "Kick up contra parede",
+              "pct": 40,
+              "hit": false
+            },
+            {
+              "label": "5m livre",
+              "pct": 80,
+              "hit": false
+            },
+            {
+              "label": "10m livre",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        },
+        {
+          "id": "19ea85307c34d3e17",
+          "name": "Muscle Up",
+          "totalSessions": 18,
+          "completedSessions": 16,
+          "milestones": [
+            {
+              "label": "False grip pull up",
+              "pct": 20,
+              "hit": true
+            },
+            {
+              "label": "Transição na caixa",
+              "pct": 50,
+              "hit": false
+            },
+            {
+              "label": "Primeiro MU",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        },
+        {
+          "id": "19ea85307c3eb9904",
+          "name": "Aprender BMU",
+          "totalSessions": 20,
+          "completedSessions": 6,
+          "milestones": [
+            {
+              "label": "Primeiro negativo",
+              "pct": 20,
+              "hit": true
+            },
+            {
+              "label": "Ring support estável",
+              "pct": 40,
+              "hit": false
+            },
+            {
+              "label": "Primeiro BMU",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        }
+      ],
+      "19ea85307c3922118": [
+        {
+          "id": "19ea85307c3d89b62",
+          "name": "Handstand Walk",
+          "totalSessions": 25,
+          "completedSessions": 14,
+          "milestones": [
+            {
+              "label": "Wall walk 5 reps",
+              "pct": 20,
+              "hit": true
+            },
+            {
+              "label": "Kick up contra parede",
+              "pct": 40,
+              "hit": true
+            },
+            {
+              "label": "5m livre",
+              "pct": 80,
+              "hit": false
+            },
+            {
+              "label": "10m livre",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        }
+      ],
+      "19ea85307c3dfd7ce": [
+        {
+          "id": "19ea85307c38671c",
+          "name": "Dobrar o Fran",
+          "totalSessions": 12,
+          "completedSessions": 10,
+          "milestones": [
+            {
+              "label": "Sub 10min",
+              "pct": 40,
+              "hit": true
+            },
+            {
+              "label": "Sub 7min",
+              "pct": 70,
+              "hit": false
+            },
+            {
+              "label": "Sub 5min",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        }
+      ],
+      "19ea85307c3ff0041": [
+        {
+          "id": "19ea85307c411794d",
+          "name": "Dobrar o Fran",
+          "totalSessions": 12,
+          "completedSessions": 4,
+          "milestones": [
+            {
+              "label": "Sub 10min",
+              "pct": 40,
+              "hit": false
+            },
+            {
+              "label": "Sub 7min",
+              "pct": 70,
+              "hit": false
+            },
+            {
+              "label": "Sub 5min",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        },
+        {
+          "id": "19ea85307c440d5ad",
+          "name": "Aprender BMU",
+          "totalSessions": 20,
+          "completedSessions": 13,
+          "milestones": [
+            {
+              "label": "Primeiro negativo",
+              "pct": 20,
+              "hit": true
+            },
+            {
+              "label": "Ring support estável",
+              "pct": 40,
+              "hit": false
+            },
+            {
+              "label": "Primeiro BMU",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        }
+      ],
+      "19ea85307c31e27a5": [
+        {
+          "id": "19ea85307c492535d",
+          "name": "Handstand Walk",
+          "totalSessions": 25,
+          "completedSessions": 2,
+          "milestones": [
+            {
+              "label": "Wall walk 5 reps",
+              "pct": 20,
+              "hit": false
+            },
+            {
+              "label": "Kick up contra parede",
+              "pct": 40,
+              "hit": false
+            },
+            {
+              "label": "5m livre",
+              "pct": 80,
+              "hit": false
+            },
+            {
+              "label": "10m livre",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        },
+        {
+          "id": "19ea85307c4590518",
+          "name": "Aprender BMU",
+          "totalSessions": 20,
+          "completedSessions": 11,
+          "milestones": [
+            {
+              "label": "Primeiro negativo",
+              "pct": 20,
+              "hit": true
+            },
+            {
+              "label": "Ring support estável",
+              "pct": 40,
+              "hit": true
+            },
+            {
+              "label": "Primeiro BMU",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        }
+      ],
+      "19ea85307c33e3cc7": [
+        {
+          "id": "19ea85307c45bb39a",
+          "name": "Snatch técnico",
+          "totalSessions": 15,
+          "completedSessions": 1,
+          "milestones": [
+            {
+              "label": "Posição de recepção",
+              "pct": 30,
+              "hit": false
+            },
+            {
+              "label": "Power Snatch 40kg",
+              "pct": 60,
+              "hit": false
+            },
+            {
+              "label": "Squat Snatch 50kg",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        },
+        {
+          "id": "19ea85307c4a5acb9",
+          "name": "Dobrar o Fran",
+          "totalSessions": 12,
+          "completedSessions": 6,
+          "milestones": [
+            {
+              "label": "Sub 10min",
+              "pct": 40,
+              "hit": true
+            },
+            {
+              "label": "Sub 7min",
+              "pct": 70,
+              "hit": false
+            },
+            {
+              "label": "Sub 5min",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        }
+      ],
+      "19ea85307c3139694": [
+        {
+          "id": "19ea85307c4e297cb",
+          "name": "Aprender BMU",
+          "totalSessions": 20,
+          "completedSessions": 3,
+          "milestones": [
+            {
+              "label": "Primeiro negativo",
+              "pct": 20,
+              "hit": false
+            },
+            {
+              "label": "Ring support estável",
+              "pct": 40,
+              "hit": false
+            },
+            {
+              "label": "Primeiro BMU",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        },
+        {
+          "id": "19ea85307c4864e9f",
+          "name": "Handstand Walk",
+          "totalSessions": 25,
+          "completedSessions": 0,
+          "milestones": [
+            {
+              "label": "Wall walk 5 reps",
+              "pct": 20,
+              "hit": false
+            },
+            {
+              "label": "Kick up contra parede",
+              "pct": 40,
+              "hit": false
+            },
+            {
+              "label": "5m livre",
+              "pct": 80,
+              "hit": false
+            },
+            {
+              "label": "10m livre",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        }
+      ],
+      "19ea85307c3f9230f": [
+        {
+          "id": "19ea85307c4cc7f59",
+          "name": "Muscle Up",
+          "totalSessions": 18,
+          "completedSessions": 5,
+          "milestones": [
+            {
+              "label": "False grip pull up",
+              "pct": 20,
+              "hit": false
+            },
+            {
+              "label": "Transição na caixa",
+              "pct": 50,
+              "hit": false
+            },
+            {
+              "label": "Primeiro MU",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        }
+      ],
+      "19ea85307c35eb64e": [
+        {
+          "id": "19ea85307c416e3f9",
+          "name": "Aprender BMU",
+          "totalSessions": 20,
+          "completedSessions": 8,
+          "milestones": [
+            {
+              "label": "Primeiro negativo",
+              "pct": 20,
+              "hit": true
+            },
+            {
+              "label": "Ring support estável",
+              "pct": 40,
+              "hit": true
+            },
+            {
+              "label": "Primeiro BMU",
+              "pct": 100,
+              "hit": false
+            }
+          ]
+        }
+      ]
+    },
+    "radarValues": {
+      "19ea85307c31d9886": [
+        27,
+        64,
+        24,
+        59,
+        20
+      ],
+      "19ea85307c32c8ba2": [
+        22,
+        57,
+        31,
+        92,
+        36
+      ],
+      "19ea85307c3922118": [
+        61,
+        74,
+        20,
+        62,
+        46
+      ],
+      "19ea85307c3dfd7ce": [
+        72,
+        61,
+        56,
+        64,
+        47
+      ],
+      "19ea85307c3ff0041": [
+        90,
+        79,
+        45,
+        80,
+        42
+      ],
+      "19ea85307c31e27a5": [
+        55,
+        91,
+        39,
+        70,
+        87
+      ],
+      "19ea85307c33e3cc7": [
+        22,
+        40,
+        76,
+        25,
+        35
+      ],
+      "19ea85307c3139694": [
+        66,
+        49,
+        91,
+        40,
+        85
+      ],
+      "19ea85307c3f9230f": [
+        80,
+        86,
+        43,
+        43,
+        71
+      ],
+      "19ea85307c35eb64e": [
+        27,
+        77,
+        92,
+        85,
+        70
+      ]
+    },
+    "radarAxes": [
+      "Força",
+      "Resistência",
+      "Mobilidade",
+      "Técnica",
+      "Potência"
+    ]
+  }
 }

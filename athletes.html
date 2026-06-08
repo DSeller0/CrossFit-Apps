@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Eagles — Atletas</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link id="gfonts" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;900&display=swap"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#00b8d4;--accent-text:#000;--bg:#0a0a0a;--bg2:#111;
+  --border:#1e1e1e;--text:#e0e0e0;--sub:#666;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;-webkit-text-size-adjust:100%}
+
+/* scrollbars */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#1a1410;border-radius:3px}
+::-webkit-scrollbar-thumb{background:#3a3028;border-radius:3px;border:1px solid #4ac8c0}
+::-webkit-scrollbar-thumb:hover{background:#4ac8c0}
+*{scrollbar-width:thin;scrollbar-color:#3a3028 #1a1410}
+
+/* topbar */
+.topbar{background:#000;border-bottom:2px solid var(--accent);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.topbar-logo{width:34px;height:34px;object-fit:contain;border-radius:4px}
+.topbar-gym{font-size:17px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.08em;font-family:var(--font)}
+.back-btn{background:transparent;border:1px solid #2e2e2e;color:var(--sub);font-size:13px;padding:5px 12px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font);transition:all .12s}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* grid */
+.page{padding:16px 20px;max-width:1200px;margin:0 auto}
+.athlete-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.ath-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .12s}
+.ath-card:hover{border-color:#444}
+.ath-card-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ath-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.ath-name{font-size:15px;font-weight:700;color:#fff;flex:1}
+.ath-pct{font-size:13px;color:var(--sub)}
+.hp-mini{display:flex;gap:2px}
+.hp-block{flex:1;height:8px;border-radius:1px;background:#1a1a1a;border:1px solid #252525;position:relative;overflow:hidden}
+.hp-fill{position:absolute;top:0;left:0;bottom:0;transition:width .3s}
+.no-goals{font-size:11px;color:#333;font-style:italic;padding:4px 0}
+
+/* detail */
+.detail-page{padding:16px 20px;max-width:900px;margin:0 auto}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px}
+.section-title{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}.athlete-grid{grid-template-columns:1fr}}
+
+/* pentagon */
+.radar-wrap{display:flex;justify-content:center}
+
+/* hp bars */
+.goal-row{margin-bottom:14px}
+.goal-row:last-child{margin-bottom:0}
+.goal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.goal-name{font-size:13px;font-weight:700;color:#ccc}
+.goal-count{font-size:11px;color:var(--sub)}
+.hp-bar{display:flex;gap:2px;cursor:pointer;position:relative}
+.hp-bar-block{flex:1;height:20px;border-radius:2px;background:#1a1a1a;border:1px solid #252525;position:relative;overflow:hidden}
+.hp-bar-fill{position:absolute;top:0;left:0;bottom:0;transition:width .3s}
+.hp-tick{position:absolute;top:0;bottom:0;width:2px;background:#f5c842;z-index:1}
+.milestone-pcts{position:relative;height:14px;margin-top:2px}
+.milestone-pct-label{position:absolute;transform:translateX(-50%);font-size:8px;color:#f5c842;white-space:nowrap}
+.milestones-panel{margin-top:8px;padding:10px 12px;background:#0d0d0d;border-radius:6px;border:1px solid #1e1e1e}
+.milestone-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #1a1a1a;font-size:12px}
+.milestone-row:last-child{border-bottom:none}
+.milestone-check{width:14px;height:14px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.milestone-check.hit{background:#1a3a1a;color:#4caf50}
+.milestone-check.miss{background:#1a1a1a;border:1px solid #333}
+
+/* heatmap */
+.heatmap-grid{display:grid;gap:2px}
+.hm-cell{height:10px;border-radius:1px}
+.hm-legend{display:flex;gap:10px;margin-top:5px;flex-wrap:wrap}
+.hm-leg-item{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--sub)}
+.hm-leg-dot{width:8px;height:8px;border-radius:1px}
+
+/* wod table */
+.wod-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;font-size:12px}
+.wod-row:last-child{border-bottom:none}
+.wod-date{color:#888;min-width:76px;flex-shrink:0}
+.wod-sess{flex:1;color:#bbb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scale-badge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;flex-shrink:0}
+.wod-perf{font-weight:700;color:#fff;min-width:50px;text-align:right;flex-shrink:0}
+.wod-rpe{color:var(--sub);font-size:11px;flex-shrink:0}
+
+/* radar axes legend */
+.radar-legend{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px}
+.radar-leg-item{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#888;padding:3px 6px;background:#0d0d0d;border-radius:4px}
+.radar-leg-val{font-weight:700;color:var(--text)}
+
+/* loading/error */
+.loading{text-align:center;padding:60px 20px;color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.1em}
+.error{text-align:center;padding:40px 20px;color:#e05050;font-size:13px;line-height:1.8}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading"><i class="ti ti-loader"></i> Carregando...</div></div>
+<script>
+let cfg={}, state={}, selAthlete=null;
+let expandedGoals=new Set();
+
+const SCALE_RANK={RX:4,Inter:3,SC:2,Adaptado:1};
+const SCALE_NAMES={4:'RX',3:'Inter',2:'SC',1:'Adaptado'};
+const SCALE_COLORS={RX:'#00b8d4',Inter:'#f5c842',SC:'#e87820',Adaptado:'#888'};
+const WOD_TYPES=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
+const HM_COLORS={present:'#3a7a3a',late:'#f5c842',absent:'#7a1a1a',none:'#1a1a1a'};
+
+function snapPct(p){return Math.round(p/10)*10;}
+
+function applyConfig(){
+  const r=document.documentElement.style;
+  if(cfg.themeAccent) r.setProperty('--accent',cfg.themeAccent);
+  if(cfg.themeAccentText) r.setProperty('--accent-text',cfg.themeAccentText);
+  if(cfg.wkBg){r.setProperty('--bg',cfg.wkBg);r.setProperty('--bg2',cfg.wkBg);}
+  if(cfg.wkDivider) r.setProperty('--border',cfg.wkDivider);
+  if(cfg.wkHeader) r.setProperty('--accent',cfg.wkHeader);
+  if(cfg.wkDateNum) r.setProperty('--sub',cfg.wkDateNum);
+  if(cfg.wkExName) r.setProperty('--text',cfg.wkExName);
+  if(cfg.fontFamily){
+    r.setProperty('--font',cfg.fontFamily);
+    document.body.style.fontFamily=cfg.fontFamily;
+    if(cfg.googleFontsUrl){const gf=document.getElementById('gfonts');if(gf)gf.href=cfg.googleFontsUrl;}
+  }
+}
+
+// ── Pentagon SVG ──────────────────────────────────────────────────────────────
+function pentagonSVG(values,axes,color){
+  const cx=190,cy=175,r=105,N=5;
+  const angle=i=>(i*2*Math.PI/N)-(Math.PI/2);
+  const pt=(i,rad)=>({x:cx+rad*Math.cos(angle(i)),y:cy+rad*Math.sin(angle(i))});
+  const gridLevels=[0.2,0.4,0.6,0.8,1.0];
+  const polyPts=values.map((v,i)=>pt(i,(v||0)/100*r));
+  const polyStr=polyPts.map(p=>`${p.x},${p.y}`).join(' ');
+
+  const gridPolys=gridLevels.map(lvl=>
+    `<polygon points="${Array.from({length:N},(_,i)=>pt(i,r*lvl)).map(p=>`${p.x},${p.y}`).join(' ')}" fill="none" stroke="#2a2a2a" stroke-width="1"/>`
+  ).join('');
+  const axisLines=Array.from({length:N},(_,i)=>
+    `<line x1="${cx}" y1="${cy}" x2="${pt(i,r).x}" y2="${pt(i,r).y}" stroke="#2a2a2a" stroke-width="1"/>`
+  ).join('');
+  const labels=Array.from({length:N},(_,i)=>{
+    const p=pt(i,r+36);
+    const anchor=p.x<cx-15?'end':p.x>cx+15?'start':'middle';
+    return `<text x="${p.x}" y="${p.y}" text-anchor="${anchor}" dominant-baseline="middle" font-size="12" fill="#aaa" font-family="inherit">${axes[i]||`Eixo ${i+1}`}</text>`;
+  }).join('');
+  const dots=polyPts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="4" fill="${color}"/>`).join('');
+
+  return `<svg viewBox="0 0 380 350" width="100%" style="max-width:320px">
+    ${gridPolys}${axisLines}
+    <polygon points="${polyStr}" fill="${color}66" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
+    ${dots}${labels}
+  </svg>`;
+}
+
+// ── HP bar HTML ───────────────────────────────────────────────────────────────
+function hpBarHTML(goal,color,goalId){
+  const pct=goal.totalSessions>0?(goal.completedSessions/goal.totalSessions)*100:0;
+  const blocks=Array.from({length:10},(_,bi)=>{
+    const blockStart=bi*10,blockEnd=(bi+1)*10;
+    let fill=0;
+    if(pct>=blockEnd) fill=1;
+    else if(pct>blockStart) fill=(pct-blockStart)/10;
+    const hasMilestone=(goal.milestones||[]).some(m=>snapPct(m.pct)===blockEnd);
+    const fillStyle=fill>0?`<div class="hp-bar-fill" style="width:${fill*100}%;background:${fill===1?color:color+'99'}"></div>`:'';
+    const tickStyle=hasMilestone?`<div class="hp-tick" style="right:1px"></div>`:'';
+    return `<div class="hp-bar-block">${fillStyle}${tickStyle}</div>`;
+  }).join('');
+
+  const milePcts=(goal.milestones||[]).map(m=>
+    `<div class="milestone-pct-label" style="left:${snapPct(m.pct)}%">${snapPct(m.pct)}%</div>`
+  ).join('');
+
+  const isExpanded=expandedGoals.has(goalId);
+  const milestonesPanel=isExpanded?`
+    <div class="milestones-panel">
+      ${(goal.milestones||[]).length===0
+        ?'<div style="font-size:12px;color:#333">Nenhum milestone configurado.</div>'
+        :(goal.milestones||[]).map(m=>`
+          <div class="milestone-row">
+            <div class="milestone-check ${m.hit?'hit':'miss'}">${m.hit?'✓':''}</div>
+            <span style="flex:1;color:${m.hit?'#555':'#ccc'};${m.hit?'text-decoration:line-through':''}">${m.label}</span>
+            <span style="color:#555">${snapPct(m.pct)}%</span>
+          </div>`).join('')}
+    </div>`:'' ;
+
+  return `
+    <div class="goal-row">
+      <div class="goal-header">
+        <span class="goal-name">${goal.name}</span>
+        <span class="goal-count">${goal.completedSessions}/${goal.totalSessions} sessões</span>
+      </div>
+      <div class="hp-bar" onclick="toggleGoal('${goalId}')">${blocks}</div>
+      <div class="milestone-pcts">${milePcts}</div>
+      ${milestonesPanel}
+    </div>`;
+}
+
+// ── Heatmap HTML ──────────────────────────────────────────────────────────────
+function heatmapHTML(athResults,sessions){
+  const weeks=8;
+  const today=new Date();
+  const days=[];
+  for(let i=weeks*7-1;i>=0;i--){const d=new Date(today);d.setDate(today.getDate()-i);days.push(d);}
+  const getStatus=date=>{
+    const key=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    const r=athResults.find(r=>r.date===key);
+    if(!r) return sessions[key]?'absent':'none';
+    if(r.presence==='Presente') return 'present';
+    if(r.presence==='Atrasado') return 'late';
+    return 'absent';
+  };
+  const cols=Array.from({length:weeks},(_,wi)=>
+    `<div style="display:flex;flex-direction:column;gap:2px">${
+      days.slice(wi*7,(wi+1)*7).map(d=>
+        `<div class="hm-cell" style="background:${HM_COLORS[getStatus(d)]}" title="${d.toLocaleDateString('pt-BR')}"></div>`
+      ).join('')
+    }</div>`
+  ).join('');
+  const legend=[['present','Presente'],['late','Atrasado'],['absent','Faltou'],['none','Sem aula']].map(([k,lbl])=>
+    `<div class="hm-leg-item"><div class="hm-leg-dot" style="background:${HM_COLORS[k]}"></div>${lbl}</div>`
+  ).join('');
+  return `
+    <div style="display:flex;gap:2px">${cols}</div>
+    <div class="hm-legend">${legend}</div>`;
+}
+
+// ── Recent WODs HTML ──────────────────────────────────────────────────────────
+function recentWodsHTML(athResults,sessions){
+  const wods=athResults
+    .filter(r=>r.presence==='Presente'&&(r.blocks||[]).some(b=>WOD_TYPES.includes(b.blockType)||WOD_TYPES.includes(b.blockLabel)))
+    .sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  if(!wods.length) return '<div style="font-size:12px;color:#333;padding:6px 0">Nenhum WOD registrado.</div>';
+  return wods.map(r=>{
+    const d=new Date(r.date+'T12:00:00');
+    const dt=d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
+    const sess=(state.sessions||{})[r.date]?.[0];
+    const wb=(r.blocks||[]).find(b=>WOD_TYPES.includes(b.blockType)||WOD_TYPES.includes(b.blockLabel));
+    if(!wb) return '';
+    const exRows=wb.exerciseRows||[];
+    let minRank=4;
+    exRows.forEach(row=>{const rank=SCALE_RANK[row.scale]??0;if(rank<minRank)minRank=rank;});
+    const scale=exRows.length>0?SCALE_NAMES[minRank]:(wb.scale||'—');
+    const col=SCALE_COLORS[scale]||'#888';
+    const perf=wb.perfTime||(wb.perfRounds?`${wb.perfRounds}rds`:null)||'—';
+    return `<div class="wod-row">
+      <span class="wod-date">${dt}</span>
+      <span class="wod-sess">${sess?.mainTraining||wb.blockLabel||'WOD'}</span>
+      <span class="scale-badge" style="color:${col};background:${col}18;border:1px solid ${col}55">${scale}</span>
+      <span class="wod-perf">${perf}</span>
+      ${wb.rpe?`<span class="wod-rpe">RPE${wb.rpe}</span>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render(){
+  applyConfig();
+  const athletes=state.athletes||[];
+  const goalsData=state.athleteGoalsData||{};
+  const gymName=cfg.gymName||state.settings?.gymName||'Eagles';
+  const logoFile=cfg.logo||'icon-192.png';
+  const sessions=state.sessions||{};
+  const results=state.results||[];
+
+  const topbar=`<div class="topbar">
+    <div class="topbar-left">
+      <img src="${logoFile}" class="topbar-logo" onerror="this.style.display='none'" alt=""/>
+      <span class="topbar-gym">${gymName}</span>
+    </div>
+    ${selAthlete?`<button class="back-btn" onclick="goBack()"><i class="ti ti-arrow-left"></i> Todos</button>`:''}
+  </div>`;
+
+  // ── Landing ──────────────────────────────────────────────────────────────
+  if(!selAthlete){
+    const cards=athletes.map(a=>{
+      const goals=(goalsData.athleteGoals||{})[a.id]||[];
+      const pct=goals.length>0?Math.round(goals.reduce((s,g)=>s+(g.totalSessions>0?g.completedSessions/g.totalSessions:0),0)/goals.length*100):null;
+      const color=a.color||'#555';
+      const hpBlocks=pct!==null?`<div class="hp-mini">${Array.from({length:10},(_,bi)=>{
+        const fill=pct>=(bi+1)*10?1:pct>bi*10?(pct-bi*10)/10:0;
+        return `<div class="hp-block"><div class="hp-fill" style="width:${fill*100}%;background:${fill===1?color:color+'99'}"></div></div>`;
+      }).join('')}</div>`:`<div class="no-goals">${goals.length===0?'Nenhum objetivo definido':`${goals.length} objetivo${goals.length>1?'s':''}`}</div>`;
+      return `<div class="ath-card" style="border-left:3px solid ${color}" onclick="selectAthlete('${a.id}')">
+        <div class="ath-card-top">
+          <div class="ath-dot" style="background:${color}"></div>
+          <span class="ath-name">${a.name}</span>
+          ${pct!==null?`<span class="ath-pct">${pct}%</span>`:''}
+        </div>
+        ${hpBlocks}
+      </div>`;
+    }).join('');
+    document.getElementById('app').innerHTML=`${topbar}<div class="page">
+      <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Todos os Atletas</div>
+      <div class="athlete-grid">${cards||'<div style="color:#333;font-size:13px">Nenhum atleta registrado.</div>'}</div>
+    </div>`;
+    return;
+  }
+
+  // ── Detail ────────────────────────────────────────────────────────────────
+  const ath=athletes.find(a=>a.id===selAthlete);
+  if(!ath){selAthlete=null;render();return;}
+  const color=ath.color||'#555';
+  const athGoals=(goalsData.athleteGoals||{})[ath.id]||[];
+  const radarVals=(goalsData.radarValues||{})[ath.id]||[50,50,50,50,50];
+  const radarAxes=goalsData.radarAxes||['Força','Resistência','Mobilidade','Técnica','Potência'];
+  const athResults=results.filter(r=>String(r.athleteId)===String(ath.id));
+
+  const radarLegend=radarAxes.map((ax,i)=>`
+    <div class="radar-leg-item">
+      <span>${ax}</span><span class="radar-leg-val">${radarVals[i]||0}</span>
+    </div>`).join('');
+
+  const goals=athGoals.length===0
+    ?'<div style="font-size:13px;color:#333;font-style:italic">Nenhum objetivo definido.</div>'
+    :athGoals.map(g=>hpBarHTML(g,color,g.id)).join('');
+
+  document.getElementById('app').innerHTML=`${topbar}<div class="detail-page">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="width:12px;height:12px;border-radius:50%;background:${color};flex-shrink:0"></div>
+      <span style="font-size:20px;font-weight:900;color:#fff">${ath.name}</span>
+      <span style="font-size:12px;color:var(--sub);margin-left:4px">${ath.level||''}</span>
+    </div>
+    <div class="two-col">
+      <div class="section">
+        <div class="section-title">Perfil do Atleta</div>
+        <div class="radar-wrap">${pentagonSVG(radarVals,radarAxes,color)}</div>
+        <div class="radar-legend">${radarLegend}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="section">
+          <div class="section-title">Últimas 8 Semanas</div>
+          ${heatmapHTML(athResults,sessions)}
+        </div>
+        <div class="section">
+          <div class="section-title">Últimos WODs</div>
+          ${recentWodsHTML(athResults,sessions)}
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Objetivos</div>
+      ${goals}
+    </div>
+  </div>`;
+}
+
+function selectAthlete(id){selAthlete=id;expandedGoals.clear();render();}
+function goBack(){selAthlete=null;expandedGoals.clear();render();}
+function toggleGoal(id){
+  if(expandedGoals.has(id))expandedGoals.delete(id);
+  else expandedGoals.add(id);
+  render();
+}
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+Promise.all([
+  fetch('./config.json?v='+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({})),
+  fetch('./state.json').then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
+]).then(([c,s])=>{
+  cfg=c;
+  if(cfg.colors&&typeof cfg.colors==='object') cfg={...cfg,...cfg.colors};
+  state=s;
+  // URL param: ?athlete=ID
+  const p=new URLSearchParams(window.location.search);
+  if(p.get('athlete')) selAthlete=p.get('athlete');
+  render();
+}).catch(err=>{
+  document.getElementById('app').innerHTML=`<div class="error">
+    <i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>
+    Não foi possível carregar os dados.<br>
+    <small>${err.message}</small>
+  </div>`;
+});
+</script>
+</body>
+</html>
