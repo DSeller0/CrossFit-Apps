@@ -175,10 +175,11 @@ function heatmapHTML(athResults,sessions){
   for(let i=weeks*7-1;i>=0;i--){const d=new Date(today);d.setDate(today.getDate()-i);days.push(d);}
   const getStatus=date=>{
     const key=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-    const r=athResults.find(r=>r.date===key);
-    if(!r) return sessions[key]?'absent':'none';
-    if(r.presence==='Presente') return 'present';
-    if(r.presence==='Atrasado') return 'late';
+    const dayResults=athResults.filter(r=>r.date===key);
+    if(!dayResults.length) return 'none';
+    // if any result is Presente, show present
+    if(dayResults.some(r=>r.presence==='Presente')) return 'present';
+    if(dayResults.some(r=>r.presence==='Atrasado')) return 'late';
     return 'absent';
   };
   const cols=Array.from({length:weeks},(_,wi)=>

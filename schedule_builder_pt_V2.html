@@ -4734,10 +4734,10 @@ function AttendanceHeatmap({results,sessions}){
   }
   const getStatus=date=>{
     const key=date.toISOString().slice(0,10);
-    const r=results.find(r=>r.date===key);
-    if(!r) return sessions[key]?'absent':'none';
-    if(r.presence==='Presente') return 'present';
-    if(r.presence==='Atrasado') return 'late';
+    const dayResults=results.filter(r=>r.date===key);
+    if(!dayResults.length) return 'none';
+    if(dayResults.some(r=>r.presence==='Presente')) return 'present';
+    if(dayResults.some(r=>r.presence==='Atrasado')) return 'late';
     return 'absent';
   };
   const colors={present:'#3a7a3a',late:'#f5c842',absent:'#7a1a1a',none:'#1a1a1a'};
@@ -6203,6 +6203,8 @@ function App(){
         saveLS(migrated);
         if(parsed.exerciseRegistry&&typeof parsed.exerciseRegistry==='object'){saveRegistry(parsed.exerciseRegistry);}
         if(parsed.athleteGoalsData&&typeof parsed.athleteGoalsData==='object'){saveGoalsData(parsed.athleteGoalsData);}
+        if(parsed.athletes&&Array.isArray(parsed.athletes)&&parsed.athletes.length){saveAthletes(parsed.athletes);}
+        if(parsed.results&&Array.isArray(parsed.results)){saveResults(parsed.results);}
         // restore publisher settings if present
         if(parsed.settings&&typeof parsed.settings==='object'){
           saveSettings(parsed.settings);
