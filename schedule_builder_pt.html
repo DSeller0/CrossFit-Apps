@@ -4586,6 +4586,171 @@ function PrSubView({athId,goalsData,persist,onBack}){
 
 
 
+
+// ── Sessions Summary Panel ────────────────────────────────────────────────────
+function SessionsSummaryPanel({athName,sessions,results,expandedSessions,setExpandedSessions}){
+  const WOD_TYPES_S=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
+  const SCALE_RANK_S={RX:4,Inter:3,SC:2,Adaptado:1};
+  const SCALE_NAMES_S={4:'RX',3:'Inter',2:'SC',1:'Adaptado'};
+  const SCALE_COLORS_S={RX:'#4ac8c0',Inter:'#d8a840',SC:'#e87820',Adaptado:'#888'};
+  const DAY_PT_S=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+  const today=new Date();
+  const todayISO=today.toISOString().slice(0,10);
+  const future30=new Date(today);future30.setDate(today.getDate()+30);
+  const f30ISO=future30.toISOString().slice(0,10);
+
+  // Sessions assigned to this athlete
+  const allDates=Object.keys(sessions).sort();
+  const athSessions=[];
+  allDates.forEach(date=>{
+    (sessions[date]||[]).forEach(s=>{
+      if(s.mainTraining&&s.mainTraining===athName) athSessions.push({date,session:s});
+    });
+  });
+
+  const past=athSessions.filter(s=>s.date<=todayISO).slice(-2);
+  const future=athSessions.filter(s=>s.date>todayISO&&s.date<=f30ISO).slice(0,2);
+  const cards=[...past,...future];
+
+  if(!cards.length) return React.createElement('div',{style:{fontSize:'13px',color:'#555',fontStyle:'italic',padding:'8px 0'}},
+    'Nenhuma sessão atribuída a este atleta. Use o campo Alvo no Criador de Treinos.'
+  );
+
+  return React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'10px'}},
+    cards.map(({date,session})=>{
+      const isPast=date<=todayISO;
+      const isToday=date===todayISO;
+      const d=new Date(date+'T12:00:00');
+      const dow=DAY_PT_S[d.getDay()];
+      const dateLabel=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+      const key=date+'|'+session.id;
+      const expanded=expandedSessions.has(key);
+
+      // results is already filtered to this athlete (athResults from parent)
+      const myResult=results.find(r=>r.date===date&&r.sessionId===session.id);
+
+      const blockBadges=React.createElement('div',{style:{display:'flex',flexWrap:'wrap',gap:'3px',marginBottom:'6px'}},
+        (session.blocks||[]).map((bl,bi)=>{
+          const label=bl.label&&bl.label!=='-'?bl.label:bl.type;
+          return React.createElement('span',{key:bi,style:{
+            fontSize:'10px',fontWeight:700,padding:'2px 5px',borderRadius:'3px',
+            textTransform:'uppercase',letterSpacing:'.04em',
+            background:'rgba(74,200,192,.1)',color:'#4ac8c0',border:'1px solid rgba(74,200,192,.25)'
+          }},label);
+        })
+      );
+
+      // Status badge
+      let badgeEl;
+      if(isToday) badgeEl=React.createElement('span',{style:{fontSize:'9px',fontWeight:700,padding:'1px 5px',borderRadius:'3px',background:'var(--theme-accent)',color:'var(--theme-accent-text)',textTransform:'uppercase'}},'Hoje');
+      else if(isPast) badgeEl=React.createElement('span',{style:{fontSize:'9px',fontWeight:700,padding:'1px 5px',borderRadius:'3px',background:'rgba(104,216,160,.12)',color:'#68d8a0',border:'1px solid rgba(104,216,160,.3)',textTransform:'uppercase'}},'Feito');
+      else badgeEl=React.createElement('span',{style:{fontSize:'9px',fontWeight:700,padding:'1px 5px',borderRadius:'3px',background:'rgba(74,200,192,.1)',color:'#4ac8c0',border:'1px solid rgba(74,200,192,.25)',textTransform:'uppercase',borderStyle:'dashed'}},'Próxima');
+
+      // Result summary for past
+      let summaryEl=null;
+      if(isPast&&myResult){
+        const wb=(myResult.blocks||[]).find(b=>WOD_TYPES_S.includes(b.blockType)||WOD_TYPES_S.includes(b.blockLabel));
+        if(myResult.presence==='Ausente'){
+          summaryEl=React.createElement('div',{style:{fontSize:'11px',color:'#7a2020',marginTop:'2px'}},'Ausente');
+        } else if(myResult.presence==='Atrasado'){
+          summaryEl=React.createElement('div',{style:{fontSize:'11px',color:'#d8a840',marginTop:'2px'}},'Atrasado');
+        } else if(wb){
+          const exRows=wb.exerciseRows||[];
+          let minRank=4;
+          exRows.forEach(row=>{const rank=SCALE_RANK_S[row.scale]??0;if(rank<minRank)minRank=rank;});
+          const scale=exRows.length>0?SCALE_NAMES_S[minRank]:null;
+          const scaleCol=scale?SCALE_COLORS_S[scale]:'#888';
+          const perf=wb.perfTime||(wb.perfRounds?wb.perfRounds+'rds':null);
+          summaryEl=React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginTop:'2px',flexWrap:'wrap'}},
+            scale&&React.createElement('span',{style:{fontSize:'10px',fontWeight:700,padding:'1px 5px',borderRadius:'3px',color:scaleCol,background:scaleCol+'22',border:`1px solid ${scaleCol}44`}},scale),
+            perf&&React.createElement('span',{style:{fontSize:'11px',fontWeight:700,color:'#e0e0e0'}},perf),
+            wb.rpe&&React.createElement('span',{style:{fontSize:'11px',color:'#555'}},'RPE '+wb.rpe)
+          );
+        }
+      } else if(!isPast){
+        summaryEl=React.createElement('div',{style:{fontSize:'11px',color:'#4ac8c0',marginTop:'2px'}},'Próxima sessão →');
+      } else {
+        summaryEl=React.createElement('div',{style:{fontSize:'11px',color:'#444',marginTop:'2px'}},'Sem resultado');
+      }
+
+      // Expanded detail
+      let expandEl=null;
+      if(expanded){
+        const blocksDetail=(session.blocks||[]).map((bl,bi)=>{
+          const label=bl.label&&bl.label!=='-'?bl.label:bl.type;
+          const isWod=WOD_TYPES_S.includes(bl.label)||WOD_TYPES_S.includes(bl.type);
+          const exs=(bl.exercises||[]).filter(e=>e.name);
+          const athBl=myResult?(myResult.blocks||[]).find(b=>b.blockId===bl.id):null;
+          const exRows=athBl?.exerciseRows||[];
+
+          return React.createElement('div',{key:bi,style:{marginBottom:'10px'}},
+            React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'5px'}},label),
+            exs.map((ex,ei)=>{
+              const rowResult=exRows.find(r=>r.name===ex.name);
+              const sc=rowResult?.scale;
+              const scCol=sc?SCALE_COLORS_S[sc]:'#555';
+              return React.createElement('div',{key:ei,style:{display:'flex',alignItems:'center',gap:'8px',padding:'3px 0',fontSize:'12px'}},
+                React.createElement('span',{style:{flex:1,color:'#ccc'}},`${ex.sets?ex.sets+'×':''}${ex.reps?ex.reps+' ':''}${ex.name}`),
+                sc&&React.createElement('span',{style:{fontSize:'10px',fontWeight:700,padding:'1px 5px',borderRadius:'3px',color:scCol,background:scCol+'22',border:`1px solid ${scCol}44`}},sc)
+              );
+            }),
+            athBl?.rpe&&React.createElement('div',{style:{fontSize:'11px',color:'#555',marginTop:'3px'}},`RPE ${athBl.rpe}`),
+            athBl?.perfTime&&React.createElement('div',{style:{fontSize:'12px',fontWeight:700,color:'#e0e0e0',marginTop:'3px'}},athBl.perfTime),
+            isWod&&isPast&&React.createElement('a',{
+              href:`leaderboard.html?wod=${bl.id}&session=${session.id}&date=${date}`,
+              target:'_blank',
+              style:{display:'flex',alignItems:'center',gap:'5px',marginTop:'6px',padding:'5px 8px',
+                background:'rgba(74,200,192,.06)',border:'1px solid rgba(74,200,192,.25)',
+                borderRadius:'5px',color:'#4ac8c0',fontSize:'11px',fontWeight:700,
+                textDecoration:'none',textTransform:'uppercase',letterSpacing:'.05em'}
+            },React.createElement('i',{className:'ti ti-trophy'}),' Ver Leaderboard')
+          );
+        });
+
+        expandEl=React.createElement('div',{style:{borderTop:'1px solid #1e1e1e',padding:'10px 10px 4px'}},
+          ...blocksDetail
+        );
+      }
+
+      return React.createElement('div',{
+        key:key,
+        style:{
+          background:'#0d0d0d',
+          border:`1px solid ${isToday?'var(--theme-accent)':isPast?'#1e1e1e':'#1e1e1e'}`,
+          borderStyle:isPast?'solid':'dashed',
+          borderRadius:'8px',overflow:'hidden',cursor:'pointer',
+          transition:'border-color .12s',opacity:isPast?1:0.85
+        },
+        onMouseEnter:e=>e.currentTarget.style.borderColor='#333',
+        onMouseLeave:e=>e.currentTarget.style.borderColor=isToday?'var(--theme-accent)':'#1e1e1e',
+        onClick:()=>{
+          const s=new Set(expandedSessions);
+          if(s.has(key))s.delete(key);else s.add(key);
+          setExpandedSessions(s);
+        }
+      },
+        // header
+        React.createElement('div',{style:{padding:'8px 10px 6px',borderBottom:'1px solid #1a1a1a',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+          React.createElement('div',null,
+            React.createElement('div',{style:{fontSize:'11px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em'}},dow),
+            React.createElement('div',{style:{fontSize:'12px',color:'#888'}},dateLabel)
+          ),
+          badgeEl
+        ),
+        // body
+        React.createElement('div',{style:{padding:'8px 10px'}},
+          blockBadges,
+          summaryEl
+        ),
+        // expanded
+        expandEl
+      );
+    })
+  );
+}
+
+
 // ── Athlete Tracking Tab ─────────────────────────────────────────────────────
 
 // HP bar component
@@ -4833,6 +4998,7 @@ function AthleteTab({sessions,results}){
   const [editMode,setEditMode]=useState(false);
   const [configuringGoal,setConfiguringGoal]=useState(null);
   const [showPrAll,setShowPrAll]=useState(false);
+  const [expandedSessions,setExpandedSessions]=useState(()=>new Set());
 
   const persist=d=>{setGoalsDataState(d);saveGoalsData(d);};
 
@@ -4929,7 +5095,7 @@ function AthleteTab({sessions,results}){
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px',flex:1}},
         React.createElement('div',{style:{width:'10px',height:'10px',borderRadius:'50%',background:athColor,flexShrink:0}}),
         React.createElement('select',{value:selAthlete,className:'ex-input',style:{flex:1,maxWidth:'200px'},
-          onChange:e=>{setSelAthleteState(e.target.value);setEditMode(false);setConfiguringGoal(null);setShowPrAll(false);}},
+          onChange:e=>{setSelAthleteState(e.target.value);setEditMode(false);setConfiguringGoal(null);setShowPrAll(false);setExpandedSessions(new Set());}},
           athletes.map(a=>React.createElement('option',{key:a.id,value:a.id},a.name))
         )
       ),
@@ -4941,14 +5107,16 @@ function AthleteTab({sessions,results}){
         React.createElement('i',{className:'ti ti-plus'}),' Objetivo')
     ),
 
-    // Heatmap + recent WODs side by side
-    React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px',marginBottom:'16px'}},
-      React.createElement('div',{style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'12px'}},
-        React.createElement(AttendanceHeatmap,{results:athResults,sessions})
-      ),
-      React.createElement('div',{style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'12px'}},
-        React.createElement(RecentWods,{results:athResults,sessions})
-      )
+    // Sessions summary
+    React.createElement('div',{style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'12px',marginBottom:'16px'}},
+      React.createElement('div',{style:{fontSize:'10px',color:'#555',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'10px'}},'Sessões'),
+      React.createElement(SessionsSummaryPanel,{
+        athName:ath?.name||'',
+        sessions,
+        results:athResults,
+        expandedSessions,
+        setExpandedSessions
+      })
     ),
 
     // PR card or sub-view

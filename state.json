@@ -126,6 +126,484 @@
             ]
           }
         ]
+      },
+      {
+        "id": "19eadd74c3e669873",
+        "date": "2026-06-08",
+        "mainTraining": "Jinx",
+        "blocks": [
+          {
+            "id": "19eadd74c3e60207c",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3e930340",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e514048",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e137ad",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3e63c3ce",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3ee1a509",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ebe9a24",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e92ba40",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3e875e0b",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3e80c0ed",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e558fb4",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f513431",
+        "date": "2026-06-08",
+        "mainTraining": "Lux",
+        "blocks": [
+          {
+            "id": "19eadd74c3f9248e4",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f6121bd",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f765d2f",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe331fc",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fe0995f",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f9b9096",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f6663d9",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f9393e2",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f793501",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f7164ed",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f9eb7bf",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ffc21e9",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f5d8cd4",
+        "date": "2026-06-08",
+        "mainTraining": "Ekko",
+        "blocks": [
+          {
+            "id": "19eadd74c3fecad57",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f95b9e1",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f475e73",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f596d1e",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fb0b600",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f512a1d",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f903f8b",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f23fd54",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f20bf8e",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f982975",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f870120",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f272598",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f8078eb",
+        "date": "2026-06-08",
+        "mainTraining": "Zed",
+        "blocks": [
+          {
+            "id": "19eadd74c3f28bbc2",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fad6a24",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f2ada14",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb94e42",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3ffcc403",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fa00c57",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fa76f39",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f6fb88d",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f453a4",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f3f5953",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f11093e",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
       }
     ],
     "2026-06-09": [
@@ -243,6 +721,484 @@
               {
                 "id": "19ea85307c3fcb6c4",
                 "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3edf26fb",
+        "date": "2026-06-09",
+        "mainTraining": "Thresh",
+        "blocks": [
+          {
+            "id": "19eadd74c3e7cf19f",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fd88743",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f60d9df",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe44b92",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fd4a949",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f4a9637",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f729ba",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fd7e7df",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fbad3ab",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f5634ba",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f82eeb4",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ff791bf",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f604492",
+        "date": "2026-06-09",
+        "mainTraining": "Vi",
+        "blocks": [
+          {
+            "id": "19eadd74c3f252c14",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f31af2b",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f6e04be",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f9f7c0b",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f975759",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f667922",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f63ce2d",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fa5c18b",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fbb243f",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f466ec1",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f155bd5",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f4928ba",
+        "date": "2026-06-09",
+        "mainTraining": "Caitlyn",
+        "blocks": [
+          {
+            "id": "19eadd74c3f4ce5b5",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f8fbf7",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe041ee",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f22a8ea",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f64979b",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f6edbb1",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f340add",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f318625",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fe28f2",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fdc45e7",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f7374a7",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f4c8577",
+        "date": "2026-06-09",
+        "mainTraining": "Sett",
+        "blocks": [
+          {
+            "id": "19eadd74c3ff9b006",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fb3e6b2",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f7308a3",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f4e80b8",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f177e50",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f49a65f",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f215422",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f1cd37e",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f6be006",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3ffe148e",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f765db",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f22678",
+                "name": "Kettlebell Swing",
                 "sets": "",
                 "reps": "10",
                 "intensity": null,
@@ -378,6 +1334,484 @@
             ]
           }
         ]
+      },
+      {
+        "id": "19eadd74c3ec790f0",
+        "date": "2026-06-10",
+        "mainTraining": "Jinx",
+        "blocks": [
+          {
+            "id": "19eadd74c3e412b6d",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3ef92064",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e607a18",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e14b0e7",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3edfe2b9",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3eb469d9",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e33f4cb",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ebd4cad",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3e47cd46",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3ebe7a03",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ec1b474",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f80bef5",
+        "date": "2026-06-10",
+        "mainTraining": "Yasuo",
+        "blocks": [
+          {
+            "id": "19eadd74c3fd358",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fa17b51",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fc995a8",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f399e3",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fa884ff",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fec11da",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fc78f41",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f4110dc",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f11b0a0",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f752f54",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f18c847",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3fa5794c",
+        "date": "2026-06-10",
+        "mainTraining": "Ekko",
+        "blocks": [
+          {
+            "id": "19eadd74c3f750560",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f86a8f8",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe0afe1",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f36c3ae",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f676040",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f3164df",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f1375f3",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f865001",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f70ee7a",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f7b7ba5",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb680d",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f6d3b80",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3fecc6b6",
+        "date": "2026-06-10",
+        "mainTraining": "Ahri",
+        "blocks": [
+          {
+            "id": "19eadd74c3f16cb6c",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fa2c244",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fecb3a3",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f1f2f42",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f545ff2",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3ff00bfb",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fad08f4",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f40a61",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fb5120e",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f160bc5",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f76d94c",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f56d650",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
       }
     ],
     "2026-06-11": [
@@ -504,6 +1938,484 @@
             ]
           }
         ]
+      },
+      {
+        "id": "19eadd74c3f107701",
+        "date": "2026-06-11",
+        "mainTraining": "Thresh",
+        "blocks": [
+          {
+            "id": "19eadd74c3fea2897",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f91cfa4",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ffe218f",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f9eac4c",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fca0e48",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fb9c7",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f11c9d6",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fef9aab",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fd03036",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fe7332c",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fbf0d5d",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f5bb38a",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f57d569",
+        "date": "2026-06-11",
+        "mainTraining": "Lux",
+        "blocks": [
+          {
+            "id": "19eadd74c3f20276a",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f4e9555",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fdbbbf9",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f77d4db",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fc7ef7d",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f9e727c",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fcbfa4e",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f8887aa",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f26d7d7",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f593782",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fd65231",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f44cf3a",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3ffe8ed9",
+        "date": "2026-06-11",
+        "mainTraining": "Caitlyn",
+        "blocks": [
+          {
+            "id": "19eadd74c3f78b6c4",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f8014d",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fd5c832",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fc30f7b",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f547ebb",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f9461b7",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fa4ef40",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fbbcfcf",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f696a2b",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f584857",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fc3b862",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3fcdff0f",
+        "date": "2026-06-11",
+        "mainTraining": "Zed",
+        "blocks": [
+          {
+            "id": "19eadd74c3f2b7a39",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f6e91b2",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f149024",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f9fa3de",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f967b6f",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f3456a7",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fbe1823",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f42913c",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f9a22a8",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fcfbde4",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ffa304e",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
       }
     ],
     "2026-06-12": [
@@ -623,6 +2535,2884 @@
                 "name": "Burpee",
                 "sets": "",
                 "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f449ba3",
+        "date": "2026-06-12",
+        "mainTraining": "Yasuo",
+        "blocks": [
+          {
+            "id": "19eadd74c3fcf34ee",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f8f1495",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f482731",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f8cce41",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fb9e1bb",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f6c6f22",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fbebe09",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f939aee",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fc4e97b",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fa79f56",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe1cadb",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f79dc07",
+        "date": "2026-06-12",
+        "mainTraining": "Vi",
+        "blocks": [
+          {
+            "id": "19eadd74c3fa8e593",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f697c1b",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f549825",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fc6bc",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f74f9ce",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f9faf3e",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f47aff3",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f88a33f",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fc17679",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3ffe3a75",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f3523e9",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f466adb",
+        "date": "2026-06-12",
+        "mainTraining": "Ahri",
+        "blocks": [
+          {
+            "id": "19eadd74c3f5c6a7f",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fba4420",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f9efe99",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb6275b",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3ffbbb72",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fe25af3",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f7b7e42",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb67b2f",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f4b9d08",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f5675ff",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f712f87",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fa9ea24",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3fb8993a",
+        "date": "2026-06-12",
+        "mainTraining": "Sett",
+        "blocks": [
+          {
+            "id": "19eadd74c3f199d4a",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3ff68e2b",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb42692",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ffbe736",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f53ec54",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fc9a4f1",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f59ff02",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fee0b4f",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fe76229",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f57c46a",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f9caba2",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f590b13",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "2026-06-16": [
+      {
+        "id": "19eadd74c3e46a6aa",
+        "date": "2026-06-16",
+        "mainTraining": "Jinx",
+        "blocks": [
+          {
+            "id": "19eadd74c3e954133",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3efbdb8a",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e8475de",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ee14271",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3e83b4d3",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3ecd312c",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e778408",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e1445f0",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3eba317d",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3e8faf1c",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ee038df",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ec17529",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f230bb7",
+        "date": "2026-06-16",
+        "mainTraining": "Vi",
+        "blocks": [
+          {
+            "id": "19eadd74c3fdc33d8",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fa41e9d",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f3b4e17",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f8090ad",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3ff23ecf",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f4849d0",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f9ca0f8",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f31f9e6",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f2246f7",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f472243",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f30fc54",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f60a35a",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f416116",
+        "date": "2026-06-16",
+        "mainTraining": "Ekko",
+        "blocks": [
+          {
+            "id": "19eadd74c3f91aab",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f44ed95",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f294172",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f9b263b",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f340923",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f873870",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ffaf4a4",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f2e81bd",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fc84070",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fc7f40e",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f626878",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3fc0fc1d",
+        "date": "2026-06-16",
+        "mainTraining": "Sett",
+        "blocks": [
+          {
+            "id": "19eadd74c3f76ec6e",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f3c5802",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb41dc1",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f8e99ad",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f555f11",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f8b4777",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f41a04",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f25cc8c",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fbe6fbf",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f4216cb",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f875889",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "2026-06-17": [
+      {
+        "id": "19eadd74c3efe4bbf",
+        "date": "2026-06-17",
+        "mainTraining": "Jinx",
+        "blocks": [
+          {
+            "id": "19eadd74c3eb3ad17",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3e8449f1",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e5af9b",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ee674cc",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3ea86e23",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3e5caf9c",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e2b08da",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e8b6b98",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3ef8bf89",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3ec960c8",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e32b259",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3e416349",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3fdd5aa8",
+        "date": "2026-06-17",
+        "mainTraining": "Thresh",
+        "blocks": [
+          {
+            "id": "19eadd74c3fdc4d6a",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f6335b1",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f74aad5",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ffcc1a8",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f38da5b",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f3298df",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f74bc96",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f20190e",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f67cd5d",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fee82e",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f3c73a8",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f9921fa",
+        "date": "2026-06-17",
+        "mainTraining": "Ekko",
+        "blocks": [
+          {
+            "id": "19eadd74c3fdd8b0b",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f4b9db7",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb75ab3",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fd0b1c8",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fd5a45d",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f735df7",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ff6b4f7",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb4f297",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f9febdf",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f3f64d3",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f54a570",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f5b7bf4",
+        "date": "2026-06-17",
+        "mainTraining": "Caitlyn",
+        "blocks": [
+          {
+            "id": "19eadd74c3f2d083d",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f405931",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f7b52a3",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb0526f",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fdf15dc",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f8417cc",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f888903",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fa8fc65",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fe10516",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f1b675c",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f6a6310",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fbbcad6",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "2026-06-18": [
+      {
+        "id": "19eadd74c3f1bddf7",
+        "date": "2026-06-18",
+        "mainTraining": "Thresh",
+        "blocks": [
+          {
+            "id": "19eadd74c3f7f0170",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f9df2b9",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe83150",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fab226c",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f6c116d",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3ff5d78e",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb1ee3e",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fc6b21c",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f9dc8cb",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f6a4f7",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f44d379",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f423ab7",
+        "date": "2026-06-18",
+        "mainTraining": "Yasuo",
+        "blocks": [
+          {
+            "id": "19eadd74c3ffac07",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f6899fa",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f83d45d",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb624a8",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f9c1e97",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fc6e7ad",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f802bac",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f3de335",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f264664",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fb5d78d",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f76b588",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb046d",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f66d007",
+        "date": "2026-06-18",
+        "mainTraining": "Caitlyn",
+        "blocks": [
+          {
+            "id": "19eadd74c3fa2f901",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f908e13",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb41a7f",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f6193af",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f195ecd",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fb5094b",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fffcd63",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe33f18",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f330f1a",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f9a367e",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f7af87",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe9ac25",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3ff65ee3",
+        "date": "2026-06-18",
+        "mainTraining": "Ahri",
+        "blocks": [
+          {
+            "id": "19eadd74c3f737711",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fdfa280",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fbeaefd",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ff0c482",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f5c359a",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f4a85bb",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fefc40d",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f3921dd",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3ff3f30f",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fe4bfee",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fb0f88f",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "2026-06-19": [
+      {
+        "id": "19eadd74c3f19bf73",
+        "date": "2026-06-19",
+        "mainTraining": "Yasuo",
+        "blocks": [
+          {
+            "id": "19eadd74c3f158f6f",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f7b7fa4",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f45f199",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f92b509",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f36cc5c",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f76eeed",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f5e4299",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f3645b",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f53a58e",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f41547",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f2cb2d7",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f13bd9",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f9b91de",
+        "date": "2026-06-19",
+        "mainTraining": "Lux",
+        "blocks": [
+          {
+            "id": "19eadd74c3f949bd7",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f813689",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe7501d",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f21bea5",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f3b5478",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f9ace8c",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ffdfdc2",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ffdc02b",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f27c90",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f4a1618",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fa8f166",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f6b3c2e",
+        "date": "2026-06-19",
+        "mainTraining": "Ahri",
+        "blocks": [
+          {
+            "id": "19eadd74c3f85003a",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f8d16e1",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f80d574",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f4fb14f",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fe77903",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f3161e6",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f60e0fd",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe34f23",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f51a29e",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f54b405",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe279b8",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f8e78b7",
+        "date": "2026-06-19",
+        "mainTraining": "Zed",
+        "blocks": [
+          {
+            "id": "19eadd74c3fa64a37",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fbed32c",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fc8a21c",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ff31b82",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fa39009",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f12de43",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fe31873",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f15c742",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3ff6cd14",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f94d1d0",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f6280a5",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f8a6015",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "2026-06-23": [
+      {
+        "id": "19eadd74c3feda539",
+        "date": "2026-06-23",
+        "mainTraining": "Lux",
+        "blocks": [
+          {
+            "id": "19eadd74c3fca7e81",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3ff07b4b",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f8688c8",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f72d294",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f6003f4",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fc49fc1",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f250700",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f3c0c28",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f10b10",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f83e53c",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fc1c64f",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f503803",
+        "date": "2026-06-23",
+        "mainTraining": "Vi",
+        "blocks": [
+          {
+            "id": "19eadd74c3fd1a771",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fcc9fb7",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ffe9a6e",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f83e8de",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3fb1429",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f88f6f3",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f6f8b55",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f5961ec",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3ff23966",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "15",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f8f4ae3",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f1994be",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3ffe0e28",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3f3d0cda",
+        "date": "2026-06-23",
+        "mainTraining": "Zed",
+        "blocks": [
+          {
+            "id": "19eadd74c3f34b4b4",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f4d387",
+                "name": "Front Squat",
+                "sets": "",
+                "reps": "4",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f576ac2",
+                "name": "Bench Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fd9cce7",
+                "name": "Romanian Deadlift",
+                "sets": "",
+                "reps": "8",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f22989b",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fb46564",
+                "name": "Power Snatch",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f2b48b8",
+                "name": "Clean & Jerk",
+                "sets": "",
+                "reps": "2",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f93d4f1",
+                "name": "Clean Pull",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f714f91",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f608e7d",
+                "name": "Burpee",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f71b5c",
+                "name": "Box Jump",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f23894",
+                "name": "Kettlebell Swing",
+                "sets": "",
+                "reps": "10",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "19eadd74c3fa5d14d",
+        "date": "2026-06-23",
+        "mainTraining": "Sett",
+        "blocks": [
+          {
+            "id": "19eadd74c3fca1bc2",
+            "label": "Força",
+            "type": "Força",
+            "zone": "Zona 02",
+            "duration": "",
+            "rounds": "4",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f45ddea",
+                "name": "Back Squat",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f79ded5",
+                "name": "Strict Press",
+                "sets": "",
+                "reps": "5",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fc97c81",
+                "name": "Deadlift",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f677245",
+            "label": "LPO",
+            "type": "LPO",
+            "zone": "Zona 01",
+            "duration": "",
+            "rounds": "3",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3fcb8c4e",
+                "name": "Hang Power Clean",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3fa49e63",
+                "name": "Push Jerk",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f665061",
+                "name": "Snatch Balance",
+                "sets": "",
+                "reps": "3",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              }
+            ]
+          },
+          {
+            "id": "19eadd74c3f6ce8d7",
+            "label": "WOD",
+            "type": "For Time",
+            "zone": "Zona 01",
+            "duration": "12",
+            "rounds": "",
+            "notes": "",
+            "ladderMode": false,
+            "exercises": [
+              {
+                "id": "19eadd74c3f340747",
+                "name": "Thruster",
+                "sets": "",
+                "reps": "21-15-9",
+                "intensity": null,
+                "note": "",
+                "progression": null
+              },
+              {
+                "id": "19eadd74c3f50192b",
+                "name": "Pull-Up",
+                "sets": "",
+                "reps": "21-15-9",
                 "intensity": null,
                 "note": "",
                 "progression": null
