@@ -16,23 +16,17 @@
   --font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif
 }
 html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;-webkit-text-size-adjust:100%}
-
-/* scrollbars */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:#1a1410;border-radius:3px}
 ::-webkit-scrollbar-thumb{background:#3a3028;border-radius:3px;border:1px solid #4ac8c0}
 ::-webkit-scrollbar-thumb:hover{background:#4ac8c0}
 *{scrollbar-width:thin;scrollbar-color:#3a3028 #1a1410}
-
-/* topbar */
 .topbar{background:#000;border-bottom:2px solid var(--accent);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100}
 .topbar-left{display:flex;align-items:center;gap:10px}
 .topbar-logo{width:34px;height:34px;object-fit:contain;border-radius:4px}
 .topbar-gym{font-size:17px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.08em;font-family:var(--font)}
 .back-btn{background:transparent;border:1px solid #2e2e2e;color:var(--sub);font-size:13px;padding:5px 12px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font);transition:all .12s}
 .back-btn:hover{border-color:var(--accent);color:var(--accent)}
-
-/* grid */
 .page{padding:16px 20px;max-width:1200px;margin:0 auto}
 .athlete-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .ath-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .12s}
@@ -42,25 +36,21 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 .ath-name{font-size:15px;font-weight:700;color:#fff;flex:1}
 .ath-pct{font-size:13px;color:var(--sub)}
 .hp-mini{display:flex;gap:2px}
-.hp-block{flex:1;height:8px;border-radius:1px;background:#1a1a1a;border:1px solid #252525;position:relative;overflow:hidden}
+.hp-block{flex:1;height:8px;border-radius:1px;background:#222;border:1px solid #2e2e2e;position:relative;overflow:hidden}
 .hp-fill{position:absolute;top:0;left:0;bottom:0;transition:width .3s}
 .no-goals{font-size:11px;color:#333;font-style:italic;padding:4px 0}
-
-/* detail */
 .detail-page{padding:16px 20px;max-width:900px;margin:0 auto}
-.section{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px}
+.section{background:#151515;border:1px solid #252525;border-radius:10px;padding:16px;margin-bottom:14px}
 .section-title{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 @media(max-width:600px){.two-col{grid-template-columns:1fr}.athlete-grid{grid-template-columns:1fr}}
-
-/* hp bars */
 .goal-row{margin-bottom:14px}
 .goal-row:last-child{margin-bottom:0}
 .goal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .goal-name{font-size:13px;font-weight:700;color:#ccc}
 .goal-count{font-size:11px;color:var(--sub)}
-.hp-bar{display:flex;gap:2px;cursor:pointer;position:relative}
-.hp-bar-block{flex:1;height:20px;border-radius:2px;background:#1a1a1a;border:1px solid #252525;position:relative;overflow:hidden}
+.hp-bar{display:flex;gap:2px;cursor:pointer}
+.hp-bar-block{flex:1;height:20px;border-radius:2px;background:#222;border:1px solid #2e2e2e;position:relative;overflow:hidden}
 .hp-bar-fill{position:absolute;top:0;left:0;bottom:0;transition:width .3s}
 .hp-tick{position:absolute;top:0;bottom:0;width:2px;background:#f5c842;z-index:1}
 .milestone-pcts{position:relative;height:14px;margin-top:2px}
@@ -70,16 +60,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 .milestone-row:last-child{border-bottom:none}
 .milestone-check{width:14px;height:14px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
 .milestone-check.hit{background:#1a3a1a;color:#4caf50}
-.milestone-check.miss{background:#1a1a1a;border:1px solid #333}
-
-/* heatmap */
-.heatmap-grid{display:grid;gap:2px}
+.milestone-check.miss{background:#222;border:1px solid #333}
 .hm-cell{height:10px;border-radius:1px}
 .hm-legend{display:flex;gap:10px;margin-top:5px;flex-wrap:wrap}
 .hm-leg-item{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--sub)}
 .hm-leg-dot{width:8px;height:8px;border-radius:1px}
-
-/* wod table */
 .wod-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;font-size:12px}
 .wod-row:last-child{border-bottom:none}
 .wod-date{color:#888;min-width:76px;flex-shrink:0}
@@ -87,9 +72,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 .scale-badge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;flex-shrink:0}
 .wod-perf{font-weight:700;color:#fff;min-width:50px;text-align:right;flex-shrink:0}
 .wod-rpe{color:var(--sub);font-size:11px;flex-shrink:0}
-
-
-/* loading/error */
 .loading{text-align:center;padding:60px 20px;color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.1em}
 .error{text-align:center;padding:40px 20px;color:#e05050;font-size:13px;line-height:1.8}
 </style>
@@ -104,7 +86,8 @@ const SCALE_RANK={RX:4,Inter:3,SC:2,Adaptado:1};
 const SCALE_NAMES={4:'RX',3:'Inter',2:'SC',1:'Adaptado'};
 const SCALE_COLORS={RX:'#00b8d4',Inter:'#f5c842',SC:'#e87820',Adaptado:'#888'};
 const WOD_TYPES=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
-const HM_COLORS={present:'#3a7a3a',late:'#f5c842',absent:'#7a1a1a',none:'#1a1a1a'};
+// HM_COLORS: none uses #2e2a24 — visible against any dark warm background
+const HM_COLORS={present:'#3a7a3a',late:'#f5c842',absent:'#7a1a1a',none:'#2e2a24'};
 
 function snapPct(p){return Math.round(p/10)*10;}
 
@@ -112,7 +95,9 @@ function applyConfig(){
   const r=document.documentElement.style;
   if(cfg.themeAccent) r.setProperty('--accent',cfg.themeAccent);
   if(cfg.themeAccentText) r.setProperty('--accent-text',cfg.themeAccentText);
-  if(cfg.wkBg){r.setProperty('--bg',cfg.wkBg);r.setProperty('--bg2',cfg.wkBg);}
+  if(cfg.wkBg){r.setProperty('--bg',cfg.wkBg);}
+  // bg2 kept slightly lighter than bg for section contrast
+  if(cfg.wkBg) r.setProperty('--bg2',cfg.wkBg);
   if(cfg.wkDivider) r.setProperty('--border',cfg.wkDivider);
   if(cfg.wkHeader) r.setProperty('--accent',cfg.wkHeader);
   if(cfg.wkDateNum) r.setProperty('--sub',cfg.wkDateNum);
@@ -124,7 +109,6 @@ function applyConfig(){
   }
 }
 
-// ── HP bar HTML ───────────────────────────────────────────────────────────────
 function hpBarHTML(goal,color,goalId){
   const pct=goal.totalSessions>0?(goal.completedSessions/goal.totalSessions)*100:0;
   const blocks=Array.from({length:10},(_,bi)=>{
@@ -137,11 +121,9 @@ function hpBarHTML(goal,color,goalId){
     const tickStyle=hasMilestone?`<div class="hp-tick" style="right:1px"></div>`:'';
     return `<div class="hp-bar-block">${fillStyle}${tickStyle}</div>`;
   }).join('');
-
   const milePcts=(goal.milestones||[]).map(m=>
     `<div class="milestone-pct-label" style="left:${snapPct(m.pct)}%">${snapPct(m.pct)}%</div>`
   ).join('');
-
   const isExpanded=expandedGoals.has(goalId);
   const milestonesPanel=isExpanded?`
     <div class="milestones-panel">
@@ -153,21 +135,18 @@ function hpBarHTML(goal,color,goalId){
             <span style="flex:1;color:${m.hit?'#555':'#ccc'};${m.hit?'text-decoration:line-through':''}">${m.label}</span>
             <span style="color:#555">${snapPct(m.pct)}%</span>
           </div>`).join('')}
-    </div>`:'' ;
-
-  return `
-    <div class="goal-row">
-      <div class="goal-header">
-        <span class="goal-name">${goal.name}</span>
-        <span class="goal-count">${goal.completedSessions}/${goal.totalSessions} sessões</span>
-      </div>
-      <div class="hp-bar" onclick="toggleGoal('${goalId}')">${blocks}</div>
-      <div class="milestone-pcts">${milePcts}</div>
-      ${milestonesPanel}
-    </div>`;
+    </div>`:'';
+  return `<div class="goal-row">
+    <div class="goal-header">
+      <span class="goal-name">${goal.name}</span>
+      <span class="goal-count">${goal.completedSessions}/${goal.totalSessions} sessões</span>
+    </div>
+    <div class="hp-bar" onclick="toggleGoal('${goalId}')">${blocks}</div>
+    <div class="milestone-pcts">${milePcts}</div>
+    ${milestonesPanel}
+  </div>`;
 }
 
-// ── PR Helpers ────────────────────────────────────────────────────────────────
 function toSecs(t){if(!t)return Infinity;const p=String(t).split(':');return p.length===2?parseInt(p[0])*60+parseInt(p[1]):parseInt(t)||Infinity;}
 function prBest(pr){if(!pr.results||!pr.results.length)return null;if(pr.type==='time')return pr.results.reduce((b,r)=>toSecs(r.value)<toSecs(b.value)?r:b);return pr.results.reduce((b,r)=>Number(r.value)>Number(b.value)?r:b);}
 function prDelta(pr){if(!pr.results||pr.results.length<2)return null;const sorted=[...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date));const last=sorted[sorted.length-1],prev=sorted[sorted.length-2];if(pr.type==='time'){const diff=toSecs(prev.value)-toSecs(last.value);if(diff===0)return{label:'=',good:null};const abs=Math.abs(diff);const m=Math.floor(abs/60),s=abs%60;return{label:(diff>0?'-':'+')+`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`,good:diff>0};}const diff=Number(last.value)-Number(prev.value);if(diff===0)return{label:'=',good:null};const unit=pr.type==='load'?(pr.unit||'kg'):'reps';return{label:(diff>0?'+':'')+diff+' '+unit,good:diff>0};}
@@ -182,18 +161,14 @@ function prRowHTML(pr,color){
   const bestDate=best?new Date(best.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):null;
   const deltaColor=delta?.good===true?'#4caf50':delta?.good===false?'#ef5350':'#666';
   const arrow=delta?.good===true?'↑':delta?.good===false?'↓':'';
-
   const barBlocks=pct!==null?`<div style="display:flex;gap:2px;flex:1">${Array.from({length:10},(_,bi)=>{
     const fill=pct>=(bi+1)*10?1:pct>bi*10?(pct-bi*10)/10:0;
-    return `<div style="flex:1;height:14px;border-radius:2px;background:#1a1a1a;border:1px solid #252525;position:relative;overflow:hidden">${fill>0?`<div style="position:absolute;top:0;left:0;bottom:0;width:${fill*100}%;background:${fill===1?color:color+'99'}"></div>`:''}</div>`;
+    return `<div style="flex:1;height:14px;border-radius:2px;background:#222;border:1px solid #2e2e2e;position:relative;overflow:hidden">${fill>0?`<div style="position:absolute;top:0;left:0;bottom:0;width:${fill*100}%;background:${fill===1?color:color+'99'}"></div>`:''}</div>`;
   }).join('')}</div><div style="font-size:9px;color:#555;flex-shrink:0;margin-top:10px">Meta: ${targetLabel}</div>`:'<div style="flex:1"></div>';
-
-  return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1a1a1a">
-    <div style="display:flex;align-items:center;gap:6px;min-width:140px;flex-shrink:0">
-      <div>
-        <div style="font-size:13px;font-weight:700;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">${pr.name}</div>
-        ${pr.category?`<div style="font-size:10px;color:#555">${pr.category}</div>`:''}
-      </div>
+  return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #252525">
+    <div style="min-width:140px;flex-shrink:0">
+      <div style="font-size:13px;font-weight:700;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">${pr.name}</div>
+      ${pr.category?`<div style="font-size:10px;color:#555">${pr.category}</div>`:''}
     </div>
     <div style="flex:1;display:flex;flex-direction:column;gap:3px">${barBlocks}</div>
     <div style="text-align:right;flex-shrink:0;min-width:70px">
@@ -215,8 +190,7 @@ function prSectionHTML(athId,goalsData,color){
   return sorted.slice(0,5).map(pr=>prRowHTML(pr,color)).join('');
 }
 
-
-function heatmapHTML(athResults,sessions){
+function heatmapHTML(athResults){
   const weeks=8;
   const today=new Date();
   const days=[];
@@ -225,7 +199,6 @@ function heatmapHTML(athResults,sessions){
     const key=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
     const dayResults=athResults.filter(r=>r.date===key);
     if(!dayResults.length) return 'none';
-    // if any result is Presente, show present
     if(dayResults.some(r=>r.presence==='Presente')) return 'present';
     if(dayResults.some(r=>r.presence==='Atrasado')) return 'late';
     return 'absent';
@@ -240,13 +213,10 @@ function heatmapHTML(athResults,sessions){
   const legend=[['present','Presente'],['late','Atrasado'],['absent','Faltou'],['none','Sem aula']].map(([k,lbl])=>
     `<div class="hm-leg-item"><div class="hm-leg-dot" style="background:${HM_COLORS[k]}"></div>${lbl}</div>`
   ).join('');
-  return `
-    <div style="display:flex;gap:2px">${cols}</div>
-    <div class="hm-legend">${legend}</div>`;
+  return `<div style="display:flex;gap:2px">${cols}</div><div class="hm-legend">${legend}</div>`;
 }
 
-// ── Recent WODs HTML ──────────────────────────────────────────────────────────
-function recentWodsHTML(athResults,sessions){
+function recentWodsHTML(athResults){
   const wods=athResults
     .filter(r=>r.presence==='Presente'&&(r.blocks||[]).some(b=>WOD_TYPES.includes(b.blockType)||WOD_TYPES.includes(b.blockLabel)))
     .sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
@@ -273,14 +243,12 @@ function recentWodsHTML(athResults,sessions){
   }).join('');
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
 function render(){
   applyConfig();
   const athletes=state.athletes||[];
   const goalsData=state.athleteGoalsData||{};
   const gymName=cfg.gymName||state.settings?.gymName||'Cone';
   const logoFile=cfg.logo||'icon-192.png';
-  const sessions=state.sessions||{};
   const results=state.results||[];
 
   const topbar=`<div class="topbar">
@@ -291,7 +259,6 @@ function render(){
     ${selAthlete?`<button class="back-btn" onclick="goBack()"><i class="ti ti-arrow-left"></i> Todos</button>`:''}
   </div>`;
 
-  // ── Landing ──────────────────────────────────────────────────────────────
   if(!selAthlete){
     const cards=athletes.map(a=>{
       const goals=(goalsData.athleteGoals||{})[a.id]||[];
@@ -317,13 +284,11 @@ function render(){
     return;
   }
 
-  // ── Detail ────────────────────────────────────────────────────────────────
   const ath=athletes.find(a=>a.id===selAthlete);
   if(!ath){selAthlete=null;render();return;}
   const color=ath.color||'#555';
   const athGoals=(goalsData.athleteGoals||{})[ath.id]||[];
   const athResults=results.filter(r=>String(r.athleteId)===String(ath.id));
-
   const goals=athGoals.length===0
     ?'<div style="font-size:13px;color:#333;font-style:italic">Nenhum objetivo definido.</div>'
     :athGoals.map(g=>hpBarHTML(g,color,g.id)).join('');
@@ -337,11 +302,11 @@ function render(){
     <div class="two-col">
       <div class="section">
         <div class="section-title">Últimas 8 Semanas</div>
-        ${heatmapHTML(athResults,sessions)}
+        ${heatmapHTML(athResults)}
       </div>
       <div class="section">
         <div class="section-title">Últimos WODs</div>
-        ${recentWodsHTML(athResults,sessions)}
+        ${recentWodsHTML(athResults)}
       </div>
     </div>
     <div class="section">
@@ -363,7 +328,6 @@ function toggleGoal(id){
   render();
 }
 
-// ── Load ──────────────────────────────────────────────────────────────────────
 Promise.all([
   fetch('./config.json?v='+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({})),
   fetch('./state.json?v='+Date.now()).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
@@ -371,7 +335,6 @@ Promise.all([
   cfg=c;
   if(cfg.colors&&typeof cfg.colors==='object') cfg={...cfg,...cfg.colors};
   state=s;
-  // URL param: ?athlete=ID
   const p=new URLSearchParams(window.location.search);
   if(p.get('athlete')) selAthlete=p.get('athlete');
   render();
