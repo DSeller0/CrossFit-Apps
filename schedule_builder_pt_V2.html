@@ -4355,19 +4355,15 @@ function PrRow({pr,onAddResult,onEdit,onDelete,showActions}){
   const targetLabel=pr.target?(pr.type==='load'?`${pr.target} ${pr.unit||'kg'}`:pr.type==='reps'?`${pr.target} reps`:pr.target):null;
   const bestDate=best?new Date(best.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):null;
   const arrowGood=delta?.good;
-  const typeIcon=pr.type==='time'?'ti-clock':pr.type==='reps'?'ti-repeat':'ti-barbell';
 
   return React.createElement('div',{style:{
     display:'flex',alignItems:'center',gap:'10px',padding:'10px 0',
     borderBottom:'1px solid #1a1a1a'
   }},
-    // Icon + name + category
-    React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px',minWidth:'140px',flexShrink:0}},
-      React.createElement('i',{className:`ti ${typeIcon}`,style:{color:'#555',fontSize:'13px',flexShrink:0}}),
-      React.createElement('div',null,
-        React.createElement('div',{style:{fontSize:'13px',fontWeight:700,color:'#ddd',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:'130px'}},pr.name),
-        pr.category&&React.createElement('div',{style:{fontSize:'10px',color:'#555'}},pr.category)
-      )
+    // Name + category
+    React.createElement('div',{style:{minWidth:'140px',flexShrink:0}},
+      React.createElement('div',{style:{fontSize:'13px',fontWeight:700,color:'#ddd',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:'140px'}},pr.name),
+      pr.category&&React.createElement('div',{style:{fontSize:'10px',color:'#555'}},pr.category)
     ),
     // Progress bar
     pct!==null

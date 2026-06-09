@@ -177,7 +177,6 @@ function prRowHTML(pr,color){
   const best=prBest(pr);
   const delta=prDelta(pr);
   const pct=prPct(pr);
-  const typeIcon=pr.type==='time'?'ti-clock':pr.type==='reps'?'ti-repeat':'ti-barbell';
   const bestLabel=best?(pr.type==='load'?`${best.value} ${pr.unit||'kg'}`:pr.type==='reps'?`${best.value} reps`:best.value):'—';
   const targetLabel=pr.target?(pr.type==='load'?`${pr.target} ${pr.unit||'kg'}`:pr.type==='reps'?`${pr.target} reps`:pr.target):null;
   const bestDate=best?new Date(best.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):null;
@@ -191,9 +190,8 @@ function prRowHTML(pr,color){
 
   return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1a1a1a">
     <div style="display:flex;align-items:center;gap:6px;min-width:140px;flex-shrink:0">
-      <i class="ti ${typeIcon}" style="color:#555;font-size:13px;flex-shrink:0"></i>
       <div>
-        <div style="font-size:13px;font-weight:700;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">${pr.name}</div>
+        <div style="font-size:13px;font-weight:700;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">${pr.name}</div>
         ${pr.category?`<div style="font-size:10px;color:#555">${pr.category}</div>`:''}
       </div>
     </div>
@@ -368,7 +366,7 @@ function toggleGoal(id){
 // ── Load ──────────────────────────────────────────────────────────────────────
 Promise.all([
   fetch('./config.json?v='+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({})),
-  fetch('./state.json').then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
+  fetch('./state.json?v='+Date.now()).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
 ]).then(([c,s])=>{
   cfg=c;
   if(cfg.colors&&typeof cfg.colors==='object') cfg={...cfg,...cfg.colors};
