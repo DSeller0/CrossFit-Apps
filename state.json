@@ -696,7 +696,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd4e4cb82a",
@@ -736,7 +737,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4e6e606f",
@@ -776,7 +778,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4e11d450",
@@ -816,7 +819,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd4e649b96",
@@ -856,7 +860,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4e12e301",
@@ -896,7 +901,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": true
+      "flagForReview": true,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4eb30163",
@@ -936,7 +942,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4ecd1d97",
@@ -976,7 +983,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4e7dd132",
@@ -1016,7 +1024,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd4ed2970e",
@@ -1056,7 +1065,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4fe955a3",
@@ -1096,7 +1106,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd4f7245fa",
@@ -1136,7 +1147,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4fd4b0d9",
@@ -1176,7 +1188,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd4fc36c55",
@@ -1216,7 +1229,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4faa39a3",
@@ -1256,7 +1270,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4fa06c92",
@@ -1296,7 +1311,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd4f3356f5",
@@ -1336,7 +1352,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4fadeec4",
@@ -1376,7 +1393,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4f5b426d",
@@ -1416,7 +1434,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd4f2ba796",
@@ -1456,7 +1475,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4f6b7b2a",
@@ -1496,7 +1516,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4f9fb0d6",
@@ -1536,7 +1557,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4f1b2c73",
@@ -1576,7 +1598,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4fab67b",
@@ -1616,7 +1639,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4f1e487",
@@ -1656,7 +1680,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4fc1c70d",
@@ -1696,7 +1721,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd4f94e295",
@@ -1736,7 +1762,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd4fe4eaf2",
@@ -1776,7 +1803,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4f700a3c",
@@ -1816,7 +1844,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4f7b35f3",
@@ -1826,7 +1855,8 @@
       "sessionId": "19ea85307c3ca0244",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd4f3e5427",
@@ -1866,7 +1896,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4fe6da03",
@@ -1906,7 +1937,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4fec1817",
@@ -1946,7 +1978,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4fc14c2d",
@@ -1986,7 +2019,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4fb4e9c9",
@@ -2026,7 +2060,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4ff22ee0",
@@ -2066,7 +2101,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4fe43dcd",
@@ -2106,7 +2142,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4fcc51b6",
@@ -2146,7 +2183,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": true
+      "flagForReview": true,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4ff9789d",
@@ -2186,7 +2224,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd4faadafe",
@@ -2226,7 +2265,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4f53539",
@@ -2266,7 +2306,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4f58d684",
@@ -2306,7 +2347,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4fed105b",
@@ -2346,7 +2388,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4f30ec52",
@@ -2386,7 +2429,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd4f4fd734",
@@ -2426,7 +2470,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4fffefff",
@@ -2466,7 +2511,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4f91b0a8",
@@ -2506,7 +2552,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd4fd1c047",
@@ -2546,7 +2593,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd4f985c39",
@@ -2586,7 +2634,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd4f3d2415",
@@ -2626,7 +2675,8 @@
         }
       ],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5035abcf",
@@ -2636,7 +2686,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd505e39d4",
@@ -2646,7 +2697,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd508df65",
@@ -2656,7 +2708,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd5019a190",
@@ -2666,7 +2719,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50491201",
@@ -2676,7 +2730,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd50f5932c",
@@ -2686,7 +2741,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50725162",
@@ -2696,7 +2752,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd50caaa6",
@@ -2706,7 +2763,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5082f921",
@@ -2716,7 +2774,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50c21ac0",
@@ -2726,7 +2785,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50407e4b",
@@ -2736,7 +2796,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50ed06b6",
@@ -2746,7 +2807,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd50805065",
@@ -2756,7 +2818,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd501bd6a3",
@@ -2766,7 +2829,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5096b957",
@@ -2776,7 +2840,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd501c7b96",
@@ -2786,7 +2851,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5020aec7",
@@ -2796,7 +2862,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50983487",
@@ -2806,7 +2873,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50604ba9",
@@ -2816,7 +2884,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd508c5df3",
@@ -2826,7 +2895,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50dbb79d",
@@ -2836,7 +2906,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd50a2df14",
@@ -2846,7 +2917,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5075453a",
@@ -2856,7 +2928,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50797b36",
@@ -2866,7 +2939,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5094e3a5",
@@ -2876,7 +2950,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd5020a1b3",
@@ -2886,7 +2961,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50f90fc1",
@@ -2896,7 +2972,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50b4a7b4",
@@ -2906,7 +2983,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5092f8e1",
@@ -2916,7 +2994,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50c698a3",
@@ -2926,7 +3005,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd501f83ec",
@@ -2936,7 +3016,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50c6ea51",
@@ -2946,7 +3027,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd50ccd690",
@@ -2956,7 +3038,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5065605e",
@@ -2966,7 +3049,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd508c965e",
@@ -2976,7 +3060,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd508c92be",
@@ -2986,7 +3071,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5081ef6a",
@@ -2996,7 +3082,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd50134f06",
@@ -3006,7 +3093,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50b9724e",
@@ -3016,7 +3104,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd502050f7",
@@ -3026,7 +3115,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd508e00ee",
@@ -3036,7 +3126,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5097aa6f",
@@ -3046,7 +3137,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5072d1de",
@@ -3056,7 +3148,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5062b3b8",
@@ -3066,7 +3159,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd507f4dd0",
@@ -3076,7 +3170,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd50a8d0a",
@@ -3086,7 +3181,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5096fc88",
@@ -3096,7 +3192,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd506bba78",
@@ -3106,7 +3203,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd50eac45d",
@@ -3116,7 +3214,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5073e2c6",
@@ -3126,7 +3225,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5094c0bc",
@@ -3136,7 +3236,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5050e9a4",
@@ -3146,7 +3247,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd507a21f",
@@ -3156,7 +3258,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd50534b4a",
@@ -3166,7 +3269,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd503f2f55",
@@ -3176,7 +3280,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd505b19d6",
@@ -3186,7 +3291,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5048a079",
@@ -3196,7 +3302,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd505a65cc",
@@ -3206,7 +3313,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd504c2b7",
@@ -3216,7 +3324,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50787415",
@@ -3226,7 +3335,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5091eeeb",
@@ -3236,7 +3346,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5014a7cc",
@@ -3246,7 +3357,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd50479b67",
@@ -3256,7 +3368,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd50a2f14e",
@@ -3266,7 +3379,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd50d70b16",
@@ -3276,7 +3390,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd502993ae",
@@ -3286,7 +3401,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5055225",
@@ -3296,7 +3412,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5057b177",
@@ -3306,7 +3423,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd501677ed",
@@ -3316,7 +3434,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd5066f5ed",
@@ -3326,7 +3445,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd50d64280",
@@ -3336,7 +3456,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5030aa02",
@@ -3346,7 +3467,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd501dc521",
@@ -3356,7 +3478,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd508c92fe",
@@ -3366,7 +3489,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd509a9acd",
@@ -3376,7 +3500,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd50c7f74c",
@@ -3386,7 +3511,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd50593fbd",
@@ -3396,7 +3522,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd50f65620",
@@ -3406,7 +3533,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5098c65a",
@@ -3416,7 +3544,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd50ca4af1",
@@ -3426,7 +3555,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd51f46c30",
@@ -3436,7 +3566,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd51e0f1f6",
@@ -3446,7 +3577,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd518dbf29",
@@ -3456,7 +3588,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51924213",
@@ -3466,7 +3599,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51d95ad5",
@@ -3476,7 +3610,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd514496bb",
@@ -3486,7 +3621,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51cc58de",
@@ -3496,7 +3632,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd51d8fe1",
@@ -3506,7 +3643,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51c2b312",
@@ -3516,7 +3654,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5178908e",
@@ -3526,7 +3665,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51a71c35",
@@ -3536,7 +3676,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51dcbb9b",
@@ -3546,7 +3687,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51aa699a",
@@ -3556,7 +3698,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51d98088",
@@ -3566,7 +3709,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51b4d59a",
@@ -3576,7 +3720,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51d13d79",
@@ -3586,7 +3731,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51ee2dd6",
@@ -3596,7 +3742,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5154c4f",
@@ -3606,7 +3753,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd518e3434",
@@ -3616,7 +3764,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd5115c629",
@@ -3626,7 +3775,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd51ba993d",
@@ -3636,7 +3786,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd514055ba",
@@ -3646,7 +3797,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51e1f931",
@@ -3656,7 +3808,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51374672",
@@ -3666,7 +3819,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd512a6cbb",
@@ -3676,7 +3830,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd511a82e2",
@@ -3686,7 +3841,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd516717b7",
@@ -3696,7 +3852,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51d0d139",
@@ -3706,7 +3863,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd513e2bf9",
@@ -3716,7 +3874,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd5118625c",
@@ -3726,7 +3885,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd511f7a5c",
@@ -3736,7 +3896,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51cef481",
@@ -3746,7 +3907,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd51e4e7f2",
@@ -3756,7 +3918,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd51e115",
@@ -3766,7 +3929,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5137388b",
@@ -3776,7 +3940,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd511566f7",
@@ -3786,7 +3951,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd51cc7c5c",
@@ -3796,7 +3962,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd5131a34b",
@@ -3806,7 +3973,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51af547",
@@ -3816,7 +3984,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51872d74",
@@ -3826,7 +3995,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51c1fb09",
@@ -3836,7 +4006,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51941904",
@@ -3846,7 +4017,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51ac935f",
@@ -3856,7 +4028,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd5125a9a1",
@@ -3866,7 +4039,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51bbfa4f",
@@ -3876,7 +4050,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51c2204d",
@@ -3886,7 +4061,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd5165785f",
@@ -3896,7 +4072,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51b5cbeb",
@@ -3906,7 +4083,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd5136679c",
@@ -3916,7 +4094,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51d10312",
@@ -3926,7 +4105,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51d5cbcd",
@@ -3936,7 +4116,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd513efc9c",
@@ -3946,7 +4127,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd51201c73",
@@ -3956,7 +4138,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51971282",
@@ -3966,7 +4149,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd51c76fa8",
@@ -3976,7 +4160,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51542c2f",
@@ -3986,7 +4171,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd512569b",
@@ -3996,7 +4182,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51a4343e",
@@ -4006,7 +4193,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51ee47c",
@@ -4016,7 +4204,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd51f56182",
@@ -4026,7 +4215,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5115e626",
@@ -4036,7 +4226,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5133526f",
@@ -4046,7 +4237,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd515db70",
@@ -4056,7 +4248,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51382073",
@@ -4066,7 +4259,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51578836",
@@ -4076,7 +4270,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51b136da",
@@ -4086,7 +4281,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd511796b1",
@@ -4096,7 +4292,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51e93b3c",
@@ -4106,7 +4303,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51a55cc1",
@@ -4116,7 +4314,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5154d263",
@@ -4126,7 +4325,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5134331d",
@@ -4136,7 +4336,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd51dedee2",
@@ -4146,7 +4347,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd516411dd",
@@ -4156,7 +4358,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd51361854",
@@ -4166,7 +4369,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52639cf6",
@@ -4176,7 +4380,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd529a09fb",
@@ -4186,7 +4391,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5299b0c4",
@@ -4196,7 +4402,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52a3f65e",
@@ -4206,7 +4413,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd527d7773",
@@ -4216,7 +4424,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52a16bb",
@@ -4226,7 +4435,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52c54c3e",
@@ -4236,7 +4446,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52eb0f57",
@@ -4246,7 +4457,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd523a84b0",
@@ -4256,7 +4468,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd52cab8e6",
@@ -4266,7 +4479,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52bc373d",
@@ -4276,7 +4490,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52b3f373",
@@ -4286,7 +4501,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52a1b1af",
@@ -4296,7 +4512,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52e115cc",
@@ -4306,7 +4523,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd529e6774",
@@ -4316,7 +4534,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52589071",
@@ -4326,7 +4545,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd529db0ce",
@@ -4336,7 +4556,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52e4e29b",
@@ -4346,7 +4567,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5288a36a",
@@ -4356,7 +4578,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52ff48a0",
@@ -4366,7 +4589,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52a8b937",
@@ -4376,7 +4600,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd525febf",
@@ -4386,7 +4611,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd52bd527b",
@@ -4396,7 +4622,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52a795b9",
@@ -4406,7 +4633,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52fbef42",
@@ -4416,7 +4644,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52e8ea7d",
@@ -4426,7 +4655,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52f04ab",
@@ -4436,7 +4666,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd527b5263",
@@ -4446,7 +4677,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5287758e",
@@ -4456,7 +4688,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd525457f8",
@@ -4466,7 +4699,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5268c6b0",
@@ -4476,7 +4710,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52c11b4",
@@ -4486,7 +4721,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52264663",
@@ -4496,7 +4732,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52bc5424",
@@ -4506,7 +4743,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52378141",
@@ -4516,7 +4754,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd5221d46d",
@@ -4526,7 +4765,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52de46e0",
@@ -4536,7 +4776,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52f1571",
@@ -4546,7 +4787,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52596b7",
@@ -4556,7 +4798,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd525939dc",
@@ -4566,7 +4809,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd52124149",
@@ -4576,7 +4820,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52433bcc",
@@ -4586,7 +4831,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd526ff514",
@@ -4596,7 +4842,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5227dc4a",
@@ -4606,7 +4853,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5240fa07",
@@ -4616,7 +4864,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52e7851d",
@@ -4626,7 +4875,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52365fa6",
@@ -4636,7 +4886,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52865a22",
@@ -4646,7 +4897,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52401de8",
@@ -4656,7 +4908,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52f8a616",
@@ -4666,7 +4919,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd5278cb70",
@@ -4676,7 +4930,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52b4310f",
@@ -4686,7 +4941,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5293bf45",
@@ -4696,7 +4952,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52eeca21",
@@ -4706,7 +4963,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52a38207",
@@ -4716,7 +4974,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52f1ee2d",
@@ -4726,7 +4985,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5287a67b",
@@ -4736,7 +4996,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52f09cb3",
@@ -4746,7 +5007,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd526b0e07",
@@ -4756,7 +5018,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd522ac513",
@@ -4766,7 +5029,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52aa0fdd",
@@ -4776,7 +5040,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5261cd70",
@@ -4786,7 +5051,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd526b89d2",
@@ -4796,7 +5062,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd523fadfc",
@@ -4806,7 +5073,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd526d6c23",
@@ -4816,7 +5084,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5251a34c",
@@ -4826,7 +5095,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52748f80",
@@ -4836,7 +5106,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52a6761",
@@ -4846,7 +5117,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52d29eee",
@@ -4856,7 +5128,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5246b579",
@@ -4866,7 +5139,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5262ec74",
@@ -4876,7 +5150,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52a42c78",
@@ -4886,7 +5161,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52b7e57",
@@ -4896,7 +5172,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd523d97cf",
@@ -4906,7 +5183,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52f4b4a7",
@@ -4916,7 +5194,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5274d83a",
@@ -4926,7 +5205,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd529e07c",
@@ -4936,7 +5216,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52e2c702",
@@ -4946,7 +5227,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52990450",
@@ -4956,7 +5238,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52f4c8b9",
@@ -4966,7 +5249,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd522b9da5",
@@ -4976,7 +5260,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52a3eb",
@@ -4986,7 +5271,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52b86928",
@@ -4996,7 +5282,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52b88470",
@@ -5006,7 +5293,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52c869b5",
@@ -5016,7 +5304,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52aa6866",
@@ -5026,7 +5315,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52b4a0e5",
@@ -5036,7 +5326,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd521704c",
@@ -5046,7 +5337,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52bb2f31",
@@ -5056,7 +5348,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5243275",
@@ -5066,7 +5359,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52a6e9df",
@@ -5076,7 +5370,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52ef2ccf",
@@ -5086,7 +5381,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5249f7a1",
@@ -5096,7 +5392,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5271ca98",
@@ -5106,7 +5403,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52e0f108",
@@ -5116,7 +5414,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52aa7daf",
@@ -5126,7 +5425,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd52bf5ba4",
@@ -5136,7 +5436,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd522736cc",
@@ -5146,7 +5447,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52e5228c",
@@ -5156,7 +5458,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52186061",
@@ -5166,7 +5469,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd527abadb",
@@ -5176,7 +5480,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5255639b",
@@ -5186,7 +5491,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52842c52",
@@ -5196,7 +5502,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd52a468a8",
@@ -5206,7 +5513,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd522eaa5",
@@ -5216,7 +5524,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52ccb5d9",
@@ -5226,7 +5535,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5256550",
@@ -5236,7 +5546,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd527daa9b",
@@ -5246,7 +5557,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd529ebbf7",
@@ -5256,7 +5568,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd527fc638",
@@ -5266,7 +5579,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52935a2e",
@@ -5276,7 +5590,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52e08a00",
@@ -5286,7 +5601,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd5261ccbd",
@@ -5296,7 +5612,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5259c4f7",
@@ -5306,7 +5623,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52cb55d",
@@ -5316,7 +5634,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52254391",
@@ -5326,7 +5645,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd5270a410",
@@ -5336,7 +5656,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd52924168",
@@ -5346,7 +5667,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52c2733d",
@@ -5356,7 +5678,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52ae29a4",
@@ -5366,7 +5689,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd528d07e3",
@@ -5376,7 +5700,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52855984",
@@ -5386,7 +5711,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd525bc1e9",
@@ -5396,7 +5722,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52a1f00b",
@@ -5406,7 +5733,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52c2500f",
@@ -5416,7 +5744,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5275a3e4",
@@ -5426,7 +5755,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52b39a0b",
@@ -5436,7 +5766,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52e30cda",
@@ -5446,7 +5777,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5254dd98",
@@ -5456,7 +5788,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5249f3ec",
@@ -5466,7 +5799,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52bb4c07",
@@ -5476,7 +5810,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52e04b9f",
@@ -5486,7 +5821,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52ff0bd9",
@@ -5496,7 +5832,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5245cb72",
@@ -5506,7 +5843,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52594dc4",
@@ -5516,7 +5854,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52d5ea3b",
@@ -5526,7 +5865,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52a2fd7f",
@@ -5536,7 +5876,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd526fa75f",
@@ -5546,7 +5887,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 1
     },
     {
       "id": "19ea9a0dd5259f411",
@@ -5556,7 +5898,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd5292c2fe",
@@ -5566,7 +5909,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52d176de",
@@ -5576,7 +5920,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd528c777b",
@@ -5586,7 +5931,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd524988bd",
@@ -5596,7 +5942,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52db89e",
@@ -5606,7 +5953,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd523c18c0",
@@ -5616,7 +5964,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52705a77",
@@ -5626,7 +5975,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd529dbb43",
@@ -5636,7 +5986,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd525c69f9",
@@ -5646,7 +5997,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52cf591f",
@@ -5656,7 +6008,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd522e24cb",
@@ -5666,7 +6019,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52bda16f",
@@ -5676,7 +6030,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52fe7ebe",
@@ -5686,7 +6041,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd529c1af1",
@@ -5696,7 +6052,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd522dcc09",
@@ -5706,7 +6063,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd5251ffd4",
@@ -5716,7 +6074,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52e14544",
@@ -5726,7 +6085,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5283b74d",
@@ -5736,7 +6096,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52900f1d",
@@ -5746,7 +6107,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52c80807",
@@ -5756,7 +6118,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52f5ce6d",
@@ -5766,7 +6129,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52ac17eb",
@@ -5776,7 +6140,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd522f9853",
@@ -5786,7 +6151,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd5264af89",
@@ -5796,7 +6162,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52613df6",
@@ -5806,7 +6173,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52543fbc",
@@ -5816,7 +6184,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd525d65ae",
@@ -5826,7 +6195,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52dc40d6",
@@ -5836,7 +6206,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd527b13f",
@@ -5846,7 +6217,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52527a9a",
@@ -5856,7 +6228,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52c74cba",
@@ -5866,7 +6239,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52709569",
@@ -5876,7 +6250,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52b1dcd6",
@@ -5886,7 +6261,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52a67333",
@@ -5896,7 +6272,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52c45477",
@@ -5906,7 +6283,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52c541ba",
@@ -5916,7 +6294,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd528211ab",
@@ -5926,7 +6305,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd529bc9a6",
@@ -5936,7 +6316,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd52f42366",
@@ -5946,7 +6327,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd522d885f",
@@ -5956,7 +6338,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52808228",
@@ -5966,7 +6349,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52c0205b",
@@ -5976,7 +6360,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52a3a10d",
@@ -5986,7 +6371,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd528cc99e",
@@ -5996,7 +6382,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52fcd780",
@@ -6006,7 +6393,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd526512b1",
@@ -6016,7 +6404,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd529e5e9a",
@@ -6026,7 +6415,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52a351f4",
@@ -6036,7 +6426,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52d6a03",
@@ -6046,7 +6437,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 2
     },
     {
       "id": "19ea9a0dd52873400",
@@ -6056,7 +6448,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52c7617",
@@ -6066,7 +6459,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52a6fcb1",
@@ -6076,7 +6470,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd52eafd88",
@@ -6086,7 +6481,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     },
     {
       "id": "19ea9a0dd528dcab5",
@@ -6096,7 +6492,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52d8edf",
@@ -6106,7 +6503,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 4
     },
     {
       "id": "19ea9a0dd52212649",
@@ -6116,7 +6514,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 5
     },
     {
       "id": "19ea9a0dd5219ec8f",
@@ -6126,7 +6525,8 @@
       "sessionId": "",
       "blocks": [],
       "coachNote": "",
-      "flagForReview": false
+      "flagForReview": false,
+      "energyLevel": 3
     }
   ],
   "athletes": [
