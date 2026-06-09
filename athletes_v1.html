@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Cone — Atletas (V1 Teal)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link id="gfonts" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;900&display=swap"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#1a1410;
+  --bg2:#211c17;
+  --bg3:#2a231c;
+  --accent:#4ac8c0;
+  --accent-text:#000;
+  --green:#68d8a0;
+  --gold:#d8a840;
+  --cream:#f0e8d0;
+  --muted:#a89880;
+  --sub:#c8b090;
+  --divider:#3a3028;
+  --font:'Raleway',sans-serif;
+}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg);border-radius:3px}
+::-webkit-scrollbar-thumb{background:#3a3028;border-radius:3px;border:1px solid var(--accent)}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+*{scrollbar-width:thin;scrollbar-color:#3a3028 var(--bg)}
+
+/* topbar */
+.topbar{background:#0d0b09;border-bottom:2px solid var(--accent);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-gym{font-size:18px;font-weight:900;color:var(--cream);text-transform:uppercase;letter-spacing:.08em}
+.back-btn{background:transparent;border:1px solid var(--divider);color:var(--sub);font-size:13px;padding:6px 14px;border-radius:5px;cursor:pointer;font-family:var(--font);transition:all .12s;display:flex;align-items:center;gap:5px}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* landing grid */
+.page{padding:18px 20px;max-width:1200px;margin:0 auto}
+.section-label{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+.athlete-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.ath-card{background:var(--bg2);border:1px solid var(--divider);border-radius:10px;padding:16px;cursor:pointer;transition:all .12s}
+.ath-card:hover{border-color:var(--accent);background:var(--bg3)}
+.ath-card-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ath-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.ath-name{font-size:15px;font-weight:700;color:var(--cream);flex:1}
+.ath-pct{font-size:13px;color:var(--gold);font-weight:700}
+.hp-mini{display:flex;gap:2px}
+.hp-block{flex:1;height:9px;border-radius:2px;background:var(--bg3);border:1px solid var(--divider);position:relative;overflow:hidden}
+.hp-fill{position:absolute;top:0;left:0;bottom:0}
+.no-goals{font-size:12px;color:var(--muted);font-style:italic;padding:4px 0}
+
+/* detail */
+.detail-page{padding:18px 20px;max-width:920px;margin:0 auto}
+.ath-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ath-title{font-size:22px;font-weight:900;color:var(--cream)}
+.ath-level{font-size:13px;color:var(--gold);font-weight:600;padding:2px 8px;background:rgba(216,168,64,.12);border:1px solid rgba(216,168,64,.3);border-radius:4px}
+.section{background:var(--bg2);border:1px solid var(--divider);border-radius:10px;padding:18px;margin-bottom:14px}
+.section-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.09em;margin-bottom:14px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:620px){.two-col{grid-template-columns:1fr}.athlete-grid{grid-template-columns:1fr}}
+
+/* heatmap */
+.hm-cell{height:11px;border-radius:2px}
+.hm-legend{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+.hm-leg-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--sub)}
+.hm-leg-dot{width:9px;height:9px;border-radius:2px}
+
+/* wod table */
+.wod-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--divider);font-size:13px}
+.wod-row:last-child{border-bottom:none}
+.wod-date{color:var(--sub);min-width:80px;flex-shrink:0;font-size:12px}
+.wod-sess{flex:1;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scale-badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.wod-perf{font-weight:700;color:var(--cream);min-width:54px;text-align:right;flex-shrink:0}
+.wod-rpe{color:var(--muted);font-size:12px;flex-shrink:0}
+
+/* PR rows */
+.pr-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--divider)}
+.pr-row:last-child{border-bottom:none}
+.pr-info{min-width:150px;flex-shrink:0}
+.pr-name{font-size:14px;font-weight:700;color:var(--cream)}
+.pr-cat{font-size:12px;color:var(--gold);margin-top:2px;font-weight:600}
+.pr-bar-wrap{flex:1;display:flex;flex-direction:column;gap:3px}
+.pr-bar{display:flex;gap:2px}
+.pr-bar-block{flex:1;height:14px;border-radius:2px;background:var(--bg3);border:1px solid var(--divider);position:relative;overflow:hidden}
+.pr-bar-fill{position:absolute;top:0;left:0;bottom:0}
+.pr-meta{font-size:11px;color:var(--sub);margin-top:2px}
+.pr-best{text-align:right;flex-shrink:0;min-width:76px}
+.pr-value{font-size:15px;font-weight:900;color:var(--cream)}
+.pr-date{font-size:12px;color:var(--sub);margin-top:2px}
+.pr-delta{font-size:12px;font-weight:700;flex-shrink:0;min-width:56px;text-align:right}
+
+/* HP bars */
+.goal-row{margin-bottom:14px}
+.goal-row:last-child{margin-bottom:0}
+.goal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.goal-name{font-size:14px;font-weight:700;color:var(--cream)}
+.goal-count{font-size:13px;color:var(--gold);font-weight:600}
+.hp-bar{display:flex;gap:2px;cursor:pointer}
+.hp-bar-block{flex:1;height:22px;border-radius:2px;background:var(--bg3);border:1px solid var(--divider);position:relative;overflow:hidden}
+.hp-bar-fill{position:absolute;top:0;left:0;bottom:0}
+.hp-tick{position:absolute;top:0;bottom:0;width:2px;background:var(--gold);z-index:1}
+.milestone-pcts{position:relative;height:16px;margin-top:3px}
+.milestone-pct-label{position:absolute;transform:translateX(-50%);font-size:10px;color:var(--gold);white-space:nowrap;font-weight:600}
+.milestones-panel{margin-top:8px;padding:10px 14px;background:var(--bg);border-radius:6px;border:1px solid var(--divider)}
+.milestone-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--divider);font-size:13px}
+.milestone-row:last-child{border-bottom:none}
+.ms-check{width:16px;height:16px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px}
+.ms-check.hit{background:rgba(104,216,160,.15);color:#68d8a0;border:1px solid rgba(104,216,160,.4)}
+.ms-check.miss{background:var(--bg3);border:1px solid var(--divider)}
+.ms-label{flex:1;color:var(--cream)}
+.ms-label.done{color:var(--muted);text-decoration:line-through}
+.ms-pct{font-size:12px;color:var(--gold);font-weight:600}
+
+.loading{text-align:center;padding:60px 20px;color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.1em}
+.error{text-align:center;padding:40px 20px;color:#e05050;font-size:13px;line-height:1.8}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading"><i class="ti ti-loader"></i> Carregando...</div></div>
+<script>
+let cfg={},state={},selAthlete=null;
+let expandedGoals=new Set();
+const SCALE_RANK={RX:4,Inter:3,SC:2,Adaptado:1};
+const SCALE_NAMES={4:'RX',3:'Inter',2:'SC',1:'Adaptado'};
+const SCALE_COLORS={RX:'#4ac8c0',Inter:'#d8a840',SC:'#e87820',Adaptado:'#a89880'};
+const WOD_TYPES=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
+const HM_COLORS={present:'#2d6b45',late:'#a07820',absent:'#6b2020',none:'#2a231c'};
+
+function snapPct(p){return Math.round(p/10)*10;}
+
+function hpBarHTML(goal,color,goalId){
+  const pct=goal.totalSessions>0?(goal.completedSessions/goal.totalSessions)*100:0;
+  const blocks=Array.from({length:10},(_,bi)=>{
+    const bs=bi*10,be=(bi+1)*10;
+    let fill=0;
+    if(pct>=be)fill=1;
+    else if(pct>bs)fill=(pct-bs)/10;
+    const hasMile=(goal.milestones||[]).some(m=>snapPct(m.pct)===be);
+    return `<div class="hp-bar-block">${fill>0?`<div class="hp-bar-fill" style="width:${fill*100}%;background:${fill===1?color:color+'99'}"></div>`:''}${hasMile?`<div class="hp-tick"></div>`:''}</div>`;
+  }).join('');
+  const milePcts=(goal.milestones||[]).map(m=>`<div class="milestone-pct-label" style="left:${snapPct(m.pct)}%">${snapPct(m.pct)}%</div>`).join('');
+  const isExp=expandedGoals.has(goalId);
+  const mPanel=isExp?`<div class="milestones-panel">${(goal.milestones||[]).length===0?'<div style="font-size:13px;color:#555">Nenhum milestone.</div>':(goal.milestones||[]).map(m=>`<div class="milestone-row"><div class="ms-check ${m.hit?'hit':'miss'}">${m.hit?'✓':''}</div><span class="ms-label${m.hit?' done':''}">${m.label}</span><span class="ms-pct">${snapPct(m.pct)}%</span></div>`).join('')}</div>`:'';
+  return `<div class="goal-row"><div class="goal-header"><span class="goal-name">${goal.name}</span><span class="goal-count">${goal.completedSessions}/${goal.totalSessions} sessões</span></div><div class="hp-bar" onclick="toggleGoal('${goalId}')">${blocks}</div><div class="milestone-pcts">${milePcts}</div>${mPanel}</div>`;
+}
+
+function toSecs(t){if(!t)return Infinity;const p=String(t).split(':');return p.length===2?parseInt(p[0])*60+parseInt(p[1]):parseInt(t)||Infinity;}
+function prBest(pr){if(!pr.results||!pr.results.length)return null;if(pr.type==='time')return pr.results.reduce((b,r)=>toSecs(r.value)<toSecs(b.value)?r:b);return pr.results.reduce((b,r)=>Number(r.value)>Number(b.value)?r:b);}
+function prDelta(pr){if(!pr.results||pr.results.length<2)return null;const sorted=[...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date));const last=sorted[sorted.length-1],prev=sorted[sorted.length-2];if(pr.type==='time'){const diff=toSecs(prev.value)-toSecs(last.value);if(diff===0)return{label:'=',good:null};const abs=Math.abs(diff);const m=Math.floor(abs/60),s=abs%60;return{label:(diff>0?'-':'+')+`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`,good:diff>0};}const diff=Number(last.value)-Number(prev.value);if(diff===0)return{label:'=',good:null};const unit=pr.type==='load'?(pr.unit||'kg'):'reps';return{label:(diff>0?'+':'')+diff+' '+unit,good:diff>0};}
+function prPct(pr){const best=prBest(pr);if(!best||!pr.target)return null;if(pr.type==='time'){const ts=toSecs(pr.target);const fs=pr.results.length>0?toSecs([...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date))[0].value):ts*2;if(fs<=ts)return 100;return Math.min(100,Math.round((fs-toSecs(best.value))/(fs-ts)*100));}const tn=Number(pr.target);if(!tn)return null;return Math.min(100,Math.round(Number(best.value)/tn*100));}
+
+function prRowHTML(pr,color){
+  const best=prBest(pr);const delta=prDelta(pr);const pct=prPct(pr);
+  const bestLabel=best?(pr.type==='load'?`${best.value} ${pr.unit||'kg'}`:pr.type==='reps'?`${best.value} reps`:best.value):'—';
+  const targetLabel=pr.target?(pr.type==='load'?`${pr.target} ${pr.unit||'kg'}`:pr.type==='reps'?`${pr.target} reps`:pr.target):null;
+  const bestDate=best?new Date(best.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}):null;
+  const dc=delta?.good===true?'#68d8a0':delta?.good===false?'#e05050':'#a89880';
+  const arrow=delta?.good===true?'↑':delta?.good===false?'↓':'';
+  const barBlocks=pct!==null?`<div class="pr-bar">${Array.from({length:10},(_,bi)=>{const fill=pct>=(bi+1)*10?1:pct>bi*10?(pct-bi*10)/10:0;return `<div class="pr-bar-block">${fill>0?`<div class="pr-bar-fill" style="width:${fill*100}%;background:${fill===1?color:color+'99'}"></div>`:''}</div>`;}).join('')}</div><div class="pr-meta">Meta: ${targetLabel}</div>`:'';
+  return `<div class="pr-row"><div class="pr-info"><div class="pr-name">${pr.name}</div>${pr.category?`<div class="pr-cat">${pr.category}</div>`:''}</div><div class="pr-bar-wrap">${barBlocks}</div><div class="pr-best"><div class="pr-value">${bestLabel}</div>${bestDate?`<div class="pr-date">${bestDate}</div>`:''}</div>${delta?`<div class="pr-delta" style="color:${dc}">${arrow} ${delta.label}</div>`:'<div style="min-width:56px"></div>'}</div>`;
+}
+
+function prSectionHTML(athId,goalsData,color){
+  const prs=(goalsData.prs||{})[athId]||[];
+  if(!prs.length)return '<div style="font-size:13px;color:#a89880;font-style:italic">Nenhum PR registrado.</div>';
+  const sorted=[...prs].sort((a,b)=>{const ad=a.results?.length?a.results[a.results.length-1].date:'';const bd=b.results?.length?b.results[b.results.length-1].date:'';return bd.localeCompare(ad);});
+  return sorted.slice(0,5).map(pr=>prRowHTML(pr,color)).join('');
+}
+
+function heatmapHTML(athResults){
+  const weeks=8;const today=new Date();const days=[];
+  for(let i=weeks*7-1;i>=0;i--){const d=new Date(today);d.setDate(today.getDate()-i);days.push(d);}
+  const getStatus=date=>{
+    const key=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    const dr=athResults.filter(r=>r.date===key);
+    if(!dr.length)return'none';
+    if(dr.some(r=>r.presence==='Presente'))return'present';
+    if(dr.some(r=>r.presence==='Atrasado'))return'late';
+    return'absent';
+  };
+  const cols=Array.from({length:weeks},(_,wi)=>`<div style="display:flex;flex-direction:column;gap:2px">${days.slice(wi*7,(wi+1)*7).map(d=>`<div class="hm-cell" style="background:${HM_COLORS[getStatus(d)]}" title="${d.toLocaleDateString('pt-BR')}"></div>`).join('')}</div>`).join('');
+  const legend=[['present','Presente'],['late','Atrasado'],['absent','Faltou'],['none','Sem aula']].map(([k,l])=>`<div class="hm-leg-item"><div class="hm-leg-dot" style="background:${HM_COLORS[k]}"></div>${l}</div>`).join('');
+  return `<div style="display:flex;gap:2px">${cols}</div><div class="hm-legend">${legend}</div>`;
+}
+
+function recentWodsHTML(athResults){
+  const wods=athResults.filter(r=>r.presence==='Presente'&&(r.blocks||[]).some(b=>WOD_TYPES.includes(b.blockType)||WOD_TYPES.includes(b.blockLabel))).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  if(!wods.length)return'<div style="font-size:13px;color:#a89880;padding:6px 0">Nenhum WOD registrado.</div>';
+  return wods.map(r=>{
+    const d=new Date(r.date+'T12:00:00');const dt=d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
+    const sess=(state.sessions||{})[r.date]?.[0];
+    const wb=(r.blocks||[]).find(b=>WOD_TYPES.includes(b.blockType)||WOD_TYPES.includes(b.blockLabel));
+    if(!wb)return'';
+    const exRows=wb.exerciseRows||[];let minRank=4;
+    exRows.forEach(row=>{const rank=SCALE_RANK[row.scale]??0;if(rank<minRank)minRank=rank;});
+    const scale=exRows.length>0?SCALE_NAMES[minRank]:(wb.scale||'—');
+    const col=SCALE_COLORS[scale]||'#a89880';
+    const perf=wb.perfTime||(wb.perfRounds?`${wb.perfRounds}rds`:null)||'—';
+    return `<div class="wod-row"><span class="wod-date">${dt}</span><span class="wod-sess">${sess?.mainTraining||wb.blockLabel||'WOD'}</span><span class="scale-badge" style="color:${col};background:${col}22;border:1px solid ${col}55">${scale}</span><span class="wod-perf">${perf}</span>${wb.rpe?`<span class="wod-rpe">RPE${wb.rpe}</span>`:''}</div>`;
+  }).join('');
+}
+
+function render(){
+  const athletes=state.athletes||[];const goalsData=state.athleteGoalsData||{};
+  const gymName=cfg.gymName||state.settings?.gymName||'Cone';
+  const logoFile=cfg.logo||'icon-192.png';const results=state.results||[];
+  const topbar=`<div class="topbar"><div style="display:flex;align-items:center;gap:10px"><img src="${logoFile}" style="width:34px;height:34px;object-fit:contain;border-radius:4px" onerror="this.style.display='none'" alt=""/><span class="topbar-gym">${gymName}</span></div>${selAthlete?`<button class="back-btn" onclick="goBack()"><i class="ti ti-arrow-left"></i> Todos</button>`:''}</div>`;
+  if(!selAthlete){
+    const cards=athletes.map(a=>{
+      const goals=(goalsData.athleteGoals||{})[a.id]||[];
+      const pct=goals.length>0?Math.round(goals.reduce((s,g)=>s+(g.totalSessions>0?g.completedSessions/g.totalSessions:0),0)/goals.length*100):null;
+      const color=a.color||'#555';
+      const hpBlocks=pct!==null?`<div class="hp-mini">${Array.from({length:10},(_,bi)=>{const fill=pct>=(bi+1)*10?1:pct>bi*10?(pct-bi*10)/10:0;return`<div class="hp-block"><div class="hp-fill" style="width:${fill*100}%;background:${fill===1?color:color+'99'}"></div></div>`;}).join('')}</div>`:`<div class="no-goals">${goals.length===0?'Nenhum objetivo definido':`${goals.length} objetivo${goals.length>1?'s':''}`}</div>`;
+      return `<div class="ath-card" style="border-left:3px solid ${color}" onclick="selectAthlete('${a.id}')"><div class="ath-card-top"><div class="ath-dot" style="background:${color}"></div><span class="ath-name">${a.name}</span>${pct!==null?`<span class="ath-pct">${pct}%</span>`:''}</div>${hpBlocks}</div>`;
+    }).join('');
+    document.getElementById('app').innerHTML=`${topbar}<div class="page"><div class="section-label">Todos os Atletas</div><div class="athlete-grid">${cards||'<div style="color:#a89880">Nenhum atleta registrado.</div>'}</div></div>`;
+    return;
+  }
+  const ath=athletes.find(a=>a.id===selAthlete);
+  if(!ath){selAthlete=null;render();return;}
+  const color=ath.color||'#555';
+  const athGoals=(goalsData.athleteGoals||{})[ath.id]||[];
+  const athResults=results.filter(r=>String(r.athleteId)===String(ath.id));
+  const goals=athGoals.length===0?'<div style="font-size:13px;color:#a89880;font-style:italic">Nenhum objetivo definido.</div>':athGoals.map(g=>hpBarHTML(g,color,g.id)).join('');
+  document.getElementById('app').innerHTML=`${topbar}<div class="detail-page"><div class="ath-header"><div style="width:14px;height:14px;border-radius:50%;background:${color};flex-shrink:0"></div><span class="ath-title">${ath.name}</span>${ath.level?`<span class="ath-level">${ath.level}</span>`:''}</div><div class="two-col"><div class="section"><div class="section-title">Últimas 8 Semanas</div>${heatmapHTML(athResults)}</div><div class="section"><div class="section-title">Últimos WODs</div>${recentWodsHTML(athResults)}</div></div><div class="section"><div class="section-title">PRs</div>${prSectionHTML(ath.id,goalsData,color)}</div><div class="section"><div class="section-title">Objetivos</div>${goals}</div></div>`;
+}
+
+function selectAthlete(id){selAthlete=id;expandedGoals.clear();render();}
+function goBack(){selAthlete=null;expandedGoals.clear();render();}
+function toggleGoal(id){if(expandedGoals.has(id))expandedGoals.delete(id);else expandedGoals.add(id);render();}
+
+Promise.all([
+  fetch('./config.json?v='+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({})),
+  fetch('./state.json?v='+Date.now()).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
+]).then(([c,s])=>{
+  cfg=c;if(cfg.colors&&typeof cfg.colors==='object')cfg={...cfg,...cfg.colors};
+  state=s;
+  const p=new URLSearchParams(window.location.search);
+  if(p.get('athlete'))selAthlete=p.get('athlete');
+  render();
+}).catch(err=>{
+  document.getElementById('app').innerHTML=`<div class="error"><i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>Não foi possível carregar os dados.<br><small>${err.message}</small></div>`;
+});
+</script>
+</body>
+</html>
