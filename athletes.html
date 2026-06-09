@@ -167,7 +167,57 @@ function hpBarHTML(goal,color,goalId){
     </div>`;
 }
 
-// ── Heatmap HTML ──────────────────────────────────────────────────────────────
+// ── PR Helpers ────────────────────────────────────────────────────────────────
+function toSecs(t){if(!t)return Infinity;const p=String(t).split(':');return p.length===2?parseInt(p[0])*60+parseInt(p[1]):parseInt(t)||Infinity;}
+function prBest(pr){if(!pr.results||!pr.results.length)return null;if(pr.type==='time')return pr.results.reduce((b,r)=>toSecs(r.value)<toSecs(b.value)?r:b);return pr.results.reduce((b,r)=>Number(r.value)>Number(b.value)?r:b);}
+function prDelta(pr){if(!pr.results||pr.results.length<2)return null;const sorted=[...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date));const last=sorted[sorted.length-1],prev=sorted[sorted.length-2];if(pr.type==='time'){const diff=toSecs(prev.value)-toSecs(last.value);if(diff===0)return{label:'=',good:null};const abs=Math.abs(diff);const m=Math.floor(abs/60),s=abs%60;return{label:(diff>0?'-':'+')+`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`,good:diff>0};}const diff=Number(last.value)-Number(prev.value);if(diff===0)return{label:'=',good:null};const unit=pr.type==='load'?(pr.unit||'kg'):'reps';return{label:(diff>0?'+':'')+diff+' '+unit,good:diff>0};}
+function prPct(pr){const best=prBest(pr);if(!best||!pr.target)return null;if(pr.type==='time'){const targetSecs=toSecs(pr.target);const firstSecs=pr.results.length>0?toSecs([...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date))[0].value):targetSecs*2;if(firstSecs<=targetSecs)return 100;const bestSecs=toSecs(best.value);return Math.min(100,Math.round((firstSecs-bestSecs)/(firstSecs-targetSecs)*100));}const targetNum=Number(pr.target);if(!targetNum)return null;return Math.min(100,Math.round(Number(best.value)/targetNum*100));}
+
+function prRowHTML(pr,color){
+  const best=prBest(pr);
+  const delta=prDelta(pr);
+  const pct=prPct(pr);
+  const typeIcon=pr.type==='time'?'ti-clock':pr.type==='reps'?'ti-repeat':'ti-barbell';
+  const bestLabel=best?(pr.type==='load'?`${best.value} ${pr.unit||'kg'}`:pr.type==='reps'?`${best.value} reps`:best.value):'—';
+  const targetLabel=pr.target?(pr.type==='load'?`${pr.target} ${pr.unit||'kg'}`:pr.type==='reps'?`${pr.target} reps`:pr.target):null;
+  const bestDate=best?new Date(best.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):null;
+  const deltaColor=delta?.good===true?'#4caf50':delta?.good===false?'#ef5350':'#666';
+  const arrow=delta?.good===true?'↑':delta?.good===false?'↓':'';
+
+  const barBlocks=pct!==null?`<div style="display:flex;gap:2px;flex:1">${Array.from({length:10},(_,bi)=>{
+    const fill=pct>=(bi+1)*10?1:pct>bi*10?(pct-bi*10)/10:0;
+    return `<div style="flex:1;height:14px;border-radius:2px;background:#1a1a1a;border:1px solid #252525;position:relative;overflow:hidden">${fill>0?`<div style="position:absolute;top:0;left:0;bottom:0;width:${fill*100}%;background:${fill===1?color:color+'99'}"></div>`:''}</div>`;
+  }).join('')}</div><div style="font-size:9px;color:#555;flex-shrink:0;margin-top:10px">Meta: ${targetLabel}</div>`:'<div style="flex:1"></div>';
+
+  return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1a1a1a">
+    <div style="display:flex;align-items:center;gap:6px;min-width:140px;flex-shrink:0">
+      <i class="ti ${typeIcon}" style="color:#555;font-size:13px;flex-shrink:0"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">${pr.name}</div>
+        ${pr.category?`<div style="font-size:10px;color:#555">${pr.category}</div>`:''}
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:3px">${barBlocks}</div>
+    <div style="text-align:right;flex-shrink:0;min-width:70px">
+      <div style="font-size:14px;font-weight:900;color:#fff">${bestLabel}</div>
+      ${bestDate?`<div style="font-size:10px;color:#555">${bestDate}</div>`:''}
+    </div>
+    ${delta?`<div style="font-size:11px;font-weight:700;flex-shrink:0;min-width:52px;text-align:right;color:${deltaColor}">${arrow} ${delta.label}</div>`:'<div style="min-width:52px"></div>'}
+  </div>`;
+}
+
+function prSectionHTML(athId,goalsData,color){
+  const prs=(goalsData.prs||{})[athId]||[];
+  if(!prs.length) return '<div style="font-size:13px;color:#333;font-style:italic">Nenhum PR registrado.</div>';
+  const sorted=[...prs].sort((a,b)=>{
+    const aDate=a.results?.length?a.results[a.results.length-1].date:'';
+    const bDate=b.results?.length?b.results[b.results.length-1].date:'';
+    return bDate.localeCompare(aDate);
+  });
+  return sorted.slice(0,5).map(pr=>prRowHTML(pr,color)).join('');
+}
+
+
 function heatmapHTML(athResults,sessions){
   const weeks=8;
   const today=new Date();
@@ -295,6 +345,10 @@ function render(){
         <div class="section-title">Últimos WODs</div>
         ${recentWodsHTML(athResults,sessions)}
       </div>
+    </div>
+    <div class="section">
+      <div class="section-title">PRs</div>
+      ${prSectionHTML(ath.id,goalsData,color)}
     </div>
     <div class="section">
       <div class="section-title">Objetivos</div>
