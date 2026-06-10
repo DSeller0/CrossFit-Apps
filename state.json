@@ -12882,7 +12882,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       },
       {
         "id": "653db7b2a982a",
@@ -12894,7 +12895,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       },
       {
         "id": "653db7b32dd2d",
@@ -12908,7 +12910,8 @@
           "19ea85307c31d9886"
         ],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       }
     ],
     "2026-06-03": [
@@ -12922,7 +12925,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       },
       {
         "id": "653db7b2ef253",
@@ -12934,7 +12938,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       },
       {
         "id": "653db7b2f9efe",
@@ -12948,7 +12953,8 @@
           "19ea85307c32c8ba2"
         ],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       }
     ],
     "2026-06-04": [
@@ -12962,7 +12968,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       },
       {
         "id": "653db7b294b48",
@@ -12974,7 +12981,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       },
       {
         "id": "653db7b2e7e0a",
@@ -12988,7 +12996,8 @@
           "19ea85307c3922118"
         ],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       }
     ],
     "2026-06-05": [
@@ -13002,7 +13011,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       },
       {
         "id": "653db7b2cbe2e",
@@ -13014,7 +13024,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       },
       {
         "id": "653db7b36b1b4",
@@ -13028,7 +13039,8 @@
           "19ea85307c3dfd7ce"
         ],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       }
     ],
     "2026-06-06": [
@@ -13042,7 +13054,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       },
       {
         "id": "653db7b325283",
@@ -13054,7 +13067,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       },
       {
         "id": "653db7b33c14d",
@@ -13068,7 +13082,8 @@
           "19ea85307c3ff0041"
         ],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       }
     ],
     "2026-06-08": [
@@ -13084,7 +13099,8 @@
           "19ea85307c31d9886"
         ],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       },
       {
         "id": "653db7b34b242",
@@ -13098,7 +13114,8 @@
           "19ea85307c3dfd7ce"
         ],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       },
       {
         "id": "653db7b289a47",
@@ -13110,7 +13127,8 @@
         "sessionId": "19ea85307c3962c16",
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       },
       {
         "id": "653db7b348c66",
@@ -13122,7 +13140,8 @@
         "sessionId": "19ea85307c3962c16",
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       }
     ],
     "2026-06-09": [
@@ -13136,7 +13155,8 @@
         "sessionId": "19ea85307c3e08dbf",
         "athleteIds": [],
         "status": "completed",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       },
       {
         "id": "653db7b2c9589",
@@ -13148,7 +13168,8 @@
         "sessionId": "19ea85307c3e08dbf",
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       }
     ],
     "2026-06-10": [
@@ -13162,7 +13183,8 @@
         "sessionId": "19ea85307c3ca0244",
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       },
       {
         "id": "653db7b33f2d0",
@@ -13174,7 +13196,8 @@
         "sessionId": "19ea85307c3ca0244",
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       }
     ],
     "2026-06-11": [
@@ -13188,7 +13211,8 @@
         "sessionId": "19ea85307c32f2843",
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       },
       {
         "id": "653db7b2ef3b3",
@@ -13200,7 +13224,8 @@
         "sessionId": "19ea85307c32f2843",
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       }
     ],
     "2026-06-12": [
@@ -13214,7 +13239,8 @@
         "sessionId": "19ea85307c3d009c2",
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       },
       {
         "id": "653db7b28a98b",
@@ -13226,7 +13252,8 @@
         "sessionId": "19ea85307c3d009c2",
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       }
     ],
     "2026-06-16": [
@@ -13242,7 +13269,8 @@
           "19ea85307c31d9886"
         ],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       },
       {
         "id": "653db7b2c88d1",
@@ -13254,7 +13282,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       },
       {
         "id": "653db7b36564c",
@@ -13266,7 +13295,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       }
     ],
     "2026-06-17": [
@@ -13282,7 +13312,8 @@
           "19ea85307c31d9886"
         ],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       },
       {
         "id": "653db7b35745a",
@@ -13296,7 +13327,8 @@
           "19ea85307c32c8ba2"
         ],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       },
       {
         "id": "653db7b34c484",
@@ -13308,7 +13340,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       },
       {
         "id": "653db7b28f894",
@@ -13320,7 +13353,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       }
     ],
     "2026-06-18": [
@@ -13336,7 +13370,8 @@
           "19ea85307c32c8ba2"
         ],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       },
       {
         "id": "653db7b335527",
@@ -13350,7 +13385,8 @@
           "19ea85307c3922118"
         ],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       },
       {
         "id": "653db7b29ad17",
@@ -13362,7 +13398,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       },
       {
         "id": "653db7b2e4fe6",
@@ -13374,7 +13411,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       }
     ],
     "2026-06-19": [
@@ -13390,7 +13428,8 @@
           "19ea85307c3922118"
         ],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       },
       {
         "id": "653db7b3681fa",
@@ -13402,7 +13441,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       },
       {
         "id": "653db7b2c31e2",
@@ -13414,7 +13454,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       }
     ],
     "2026-06-23": [
@@ -13430,7 +13471,8 @@
           "19ea85307c3dfd7ce"
         ],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       },
       {
         "id": "653db7b352787",
@@ -13442,7 +13484,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       },
       {
         "id": "653db7b3086a2",
@@ -13454,7 +13497,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f909e4"
       }
     ],
     "2026-06-24": [
@@ -13470,7 +13514,8 @@
           "19ea85307c31e27a5"
         ],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       },
       {
         "id": "653db7b3375e4",
@@ -13482,7 +13527,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       },
       {
         "id": "653db7b2cd3a0",
@@ -13494,7 +13540,8 @@
         "sessionId": null,
         "athleteIds": [],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2f9565e"
       }
     ],
     "2026-06-25": [
@@ -13510,7 +13557,8 @@
           "19ea85307c3139694"
         ],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       },
       {
         "id": "653db7b2f5439",
@@ -13524,8 +13572,46 @@
           "19ea85307c3ff0041"
         ],
         "status": "scheduled",
-        "notes": ""
+        "notes": "",
+        "locationId": "653e4c2ed7b07"
       }
     ]
+  },
+  "locations": [
+    {
+      "id": "653e4c2f9565e",
+      "name": "Box 01",
+      "type": "box",
+      "color": "#4ac8c0",
+      "rate": 150,
+      "rateUnit": "per_session",
+      "currency": "R$",
+      "athleteIds": []
+    },
+    {
+      "id": "653e4c2f909e4",
+      "name": "Box 02",
+      "type": "box",
+      "color": "#68d8a0",
+      "rate": 120,
+      "rateUnit": "per_session",
+      "currency": "R$",
+      "athleteIds": []
+    },
+    {
+      "id": "653e4c2ed7b07",
+      "name": "Studio Norte",
+      "type": "personal",
+      "color": "#d8a840",
+      "rate": 200,
+      "rateUnit": "per_session",
+      "currency": "R$",
+      "athleteIds": []
+    }
+  ],
+  "coachProfile": {
+    "name": "Coach Zé",
+    "contact": "ze@cone.app",
+    "phone": "+55 11 99999-9999"
   }
 }

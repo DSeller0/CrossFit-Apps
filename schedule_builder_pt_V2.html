@@ -170,7 +170,46 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .p-re{background:#222;color:#666;border:1px solid #333}
 
 /* ── publisher controls ── */
-.agenda-pane{flex:0 0 40%}@media(max-width:640px){.agenda-pane{flex:0 0 50%}}.pub-controls{background:#1c1c1c;border:1px solid #272727;border-radius:10px;padding:14px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.agenda-wrap{height:600px}
+.agenda-pane-backdrop{display:none}
+.agenda-filter-btn{white-space:nowrap}
+.sess-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:700px){.sess-summary-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:380px){.sess-summary-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.agenda-filter-btn{padding:2px 5px;font-size:9px}}
+@media(min-width:481px){.agenda-pane-backdrop{display:none !important}}
+.agenda-header{gap:6px}
+.agenda-stats{font-size:11px}
+.agenda-week-row{min-height:80px}
+.agenda-day-hdrs .agenda-day-hdr{padding:5px 4px;font-size:9px;font-weight:700;color:var(--theme-accent);text-transform:uppercase;letter-spacing:.08em;text-align:center;border-right:1px solid #2a2318}
+@media(max-width:480px){.agenda-day-hdrs .agenda-day-hdr{padding:3px 2px;font-size:8px;letter-spacing:.02em}}
+.agenda-cell{min-height:80px}
+.cell-card-mini{display:none}
+.cell-card-full{display:flex;align-items:center}
+@media(max-width:540px){
+  .cell-card-mini{display:flex;align-items:center;gap:2px}
+  .cell-card-full{display:none}
+  .agenda-cell{padding:2px 1px}
+  .cell-card{padding:1px 2px !important;margin-bottom:1px !important}
+}
+@media(max-width:768px){.agenda-week-row{min-height:64px}.agenda-cell{min-height:64px;padding:3px}}
+@media(max-width:480px){.agenda-week-row{min-height:46px}.agenda-cell{min-height:46px;padding:2px}}
+@media(max-width:480px){.agenda-card-badges{display:none}}
+@media(max-width:480px){.agenda-stats{font-size:10px;gap:5px}}
+@media(max-width:480px){
+  .agenda-header{padding:6px 8px}
+  .agenda-header>span{font-size:12px !important;min-width:100px}
+}
+.agenda-pane{flex:0 0 40%}
+@media(max-width:768px){
+  .agenda-wrap{height:auto;min-height:420px}
+  .agenda-pane{flex:0 0 50%}
+}
+@media(max-width:480px){
+  .agenda-wrap{height:auto;min-height:360px}
+  .agenda-pane{position:fixed;top:0;right:0;bottom:0;width:85% !important;flex:none !important;z-index:500;box-shadow:-4px 0 20px rgba(0,0,0,.6);overflow-y:auto}
+  .agenda-grid-col{flex:1 1 100% !important}
+}.pub-controls{background:#1c1c1c;border:1px solid #272727;border-radius:10px;padding:14px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .pub-view-tabs{display:flex;gap:6px;margin-bottom:12px}
 .pvt{font-family:inherit;font-size:12px;padding:7px 14px;border-radius:5px;border:1px solid #2e2e2e;background:transparent;color:#888;cursor:pointer;transition:all .12s}
 .pvt.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
@@ -1955,12 +1994,505 @@ function CalendarExportView({sessions,label,year,month,gymName,logoDataUrl,logoS
 
 // ── SchedulePublisher ─────────────────────────────────────
 
+
+// ── LocaisTab ─────────────────────────────────────────────────────────────────
+function LocaisTab(){
+  const [locs,setLocs]=useState(loadLocations);
+  const [coach,setCoach]=useState(loadCoach);
+  const [selLoc,setSelLoc]=useState(null);
+  const [showForm,setShowForm]=useState(false);
+  const [editId,setEditId]=useState(null);
+  const [form,setForm]=useState({name:'',type:'box',color:'#4ac8c0',rate:'',rateUnit:'per_session',currency:'R$'});
+  const [confirmDel,setConfirmDel]=useState(null);
+  const athletes=loadAthletes();
+
+  useEffect(()=>{saveLocations(locs);},[locs]);
+  useEffect(()=>{saveCoach(coach);},[coach]);
+
+  const setF=(k,v)=>setForm(p=>({...p,[k]:v}));
+
+  const saveLoc=()=>{
+    if(!form.name.trim()) return;
+    if(editId){
+      setLocs(ls=>ls.map(l=>l.id===editId?{...l,...form,rate:Number(form.rate)||0}:l));
+    } else {
+      setLocs(ls=>[...ls,{...form,id:uid(),rate:Number(form.rate)||0,athleteIds:[]}]);
+    }
+    setShowForm(false);setEditId(null);setForm({name:'',type:'box',color:'#4ac8c0',rate:'',rateUnit:'per_session',currency:'R$'});
+  };
+
+  const deleteLoc=id=>{
+    setLocs(ls=>ls.filter(l=>l.id!==id));
+    if(selLoc===id)setSelLoc(null);
+    setConfirmDel(null);
+  };
+
+  const startEdit=loc=>{
+    setForm({name:loc.name,type:loc.type,color:loc.color||'#4ac8c0',rate:String(loc.rate||''),rateUnit:loc.rateUnit||'per_session',currency:loc.currency||'R$'});
+    setEditId(loc.id);setShowForm(true);
+  };
+
+  const toggleAthlete=(locId,athId)=>{
+    setLocs(ls=>ls.map(l=>{
+      if(l.id!==locId)return l;
+      const ids=l.athleteIds||[];
+      return{...l,athleteIds:ids.includes(athId)?ids.filter(x=>x!==athId):[...ids,athId]};
+    }));
+  };
+
+  const sel=locs.find(l=>l.id===selLoc)||null;
+
+  return React.createElement('div',{style:{display:'flex',gap:'0',height:'100%',minHeight:'500px'}},
+
+    // ── Confirm delete modal ─────────────────────────────────────────────────
+    confirmDel&&React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}},
+      React.createElement('div',{style:{background:'#0d0d0d',border:'1px solid #3a1010',borderRadius:'10px',padding:'20px',width:'300px',textAlign:'center'}},
+        React.createElement('i',{className:'ti ti-alert-triangle',style:{fontSize:'28px',color:'#e05050',display:'block',marginBottom:'10px'}}),
+        React.createElement('div',{style:{fontSize:'14px',color:'#ccc',fontWeight:700,marginBottom:'6px'}},`Remover "${locs.find(l=>l.id===confirmDel)?.name}"?`),
+        React.createElement('div',{style:{fontSize:'12px',color:'#555',marginBottom:'16px'}},'Eventos vinculados perdem a referência ao local.'),
+        React.createElement('div',{style:{display:'flex',gap:'8px'}},
+          React.createElement('button',{onClick:()=>deleteLoc(confirmDel),style:{flex:1,background:'#3a1010',border:'1px solid #6a2020',color:'#e05050',padding:'8px',borderRadius:'6px',cursor:'pointer',fontSize:'13px',fontWeight:700}},'Remover'),
+          React.createElement('button',{onClick:()=>setConfirmDel(null),style:{flex:1,background:'transparent',border:'1px solid #2e2e2e',color:'#888',padding:'8px',borderRadius:'6px',cursor:'pointer',fontSize:'13px'}},'Cancelar')
+        )
+      )
+    ),
+
+    // ── Location form modal ──────────────────────────────────────────────────
+    showForm&&React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'},onClick:()=>{setShowForm(false);setEditId(null);}},
+      React.createElement('div',{style:{background:'#0d0d0d',border:'1px solid #2e2e2e',borderRadius:'10px',padding:'18px',width:'340px',maxWidth:'90vw'},onClick:e=>e.stopPropagation()},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}},
+          React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#ccc'}},editId?'Editar local':'Novo local'),
+          React.createElement('button',{onClick:()=>{setShowForm(false);setEditId(null);},style:{background:'transparent',border:'none',color:'#555',cursor:'pointer',fontSize:'16px'}},'✕')
+        ),
+        // Name
+        React.createElement('div',{style:{marginBottom:'10px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Nome'),
+          React.createElement('input',{value:form.name,onChange:e=>setF('name',e.target.value),placeholder:'ex: Box 01',style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+        ),
+        // Type
+        React.createElement('div',{style:{marginBottom:'10px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Tipo'),
+          React.createElement('div',{style:{display:'flex',gap:'6px'}},
+            ['box','personal'].map(t=>React.createElement('button',{key:t,type:'button',
+              onClick:()=>setF('type',t),
+              style:{flex:1,padding:'6px',borderRadius:'5px',border:`1px solid ${form.type===t?'var(--theme-accent)':'#2e2e2e'}`,background:form.type===t?'rgba(74,200,192,.1)':'transparent',color:form.type===t?'var(--theme-accent)':'#555',cursor:'pointer',fontSize:'12px',fontWeight:700,textTransform:'uppercase'}
+            },t==='box'?'Aula / Box':'Personal'))
+          )
+        ),
+        // Rate row
+        React.createElement('div',{style:{display:'flex',gap:'8px',marginBottom:'10px'}},
+          React.createElement('div',{style:{flex:'0 0 54px'}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Moeda'),
+            React.createElement('input',{value:form.currency,onChange:e=>setF('currency',e.target.value),style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 6px',borderRadius:'5px',fontSize:'13px'}})
+          ),
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Taxa'),
+            React.createElement('input',{type:'number',value:form.rate,onChange:e=>setF('rate',e.target.value),placeholder:'0',min:0,style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+          ),
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Por'),
+            React.createElement('select',{value:form.rateUnit,onChange:e=>setF('rateUnit',e.target.value),style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 6px',borderRadius:'5px',fontSize:'12px'}},
+              React.createElement('option',{value:'per_session'},'Sessão'),
+              React.createElement('option',{value:'per_hour'},'Hora')
+            )
+          )
+        ),
+        // Colour
+        React.createElement('div',{style:{marginBottom:'14px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'5px'}},'Cor'),
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+            React.createElement('div',{style:{width:'26px',height:'26px',borderRadius:'50%',background:form.color,cursor:'pointer',border:'2px solid #2e2e2e',flexShrink:0},onClick:()=>document.getElementById('loc-color-picker')?.click()}),
+            React.createElement('input',{type:'color',id:'loc-color-picker',value:form.color,onChange:e=>setF('color',e.target.value),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
+            React.createElement('input',{type:'text',value:form.color,onChange:e=>{if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))setF('color',e.target.value);},style:{flex:1,background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+          )
+        ),
+        React.createElement('button',{onClick:saveLoc,style:{width:'100%',background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'9px',borderRadius:'6px',cursor:'pointer',fontSize:'13px',fontWeight:700}},editId?'Salvar alterações':'Adicionar local')
+      )
+    ),
+
+    // ── Left pane ────────────────────────────────────────────────────────────
+    React.createElement('div',{style:{width:'260px',flexShrink:0,borderRight:'1px solid #1e1e1e',display:'flex',flexDirection:'column',overflowY:'auto'}},
+
+      // Coach profile
+      React.createElement('div',{style:{padding:'12px',borderBottom:'1px solid #1e1e1e'}},
+        React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'8px'}},'Perfil do Coach'),
+        ['name','contact','phone'].map(k=>React.createElement('input',{key:k,
+          value:coach[k]||'',
+          onChange:e=>setCoach(p=>({...p,[k]:e.target.value})),
+          placeholder:k==='name'?'Nome do coach':k==='contact'?'E-mail':'Telefone',
+          style:{width:'100%',background:'#111',border:'1px solid #1e1e1e',color:'#ccc',padding:'5px 7px',borderRadius:'4px',fontSize:'12px',marginBottom:'4px'}
+        }))
+      ),
+
+      // Locations list header
+      React.createElement('div',{style:{padding:'10px 12px',borderBottom:'1px solid #1e1e1e',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+        React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em'}},'Locais'),
+        React.createElement('button',{type:'button',onClick:()=>{setEditId(null);setForm({name:'',type:'box',color:'#4ac8c0',rate:'',rateUnit:'per_session',currency:'R$'});setShowForm(true);},
+          style:{background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'3px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'11px',fontWeight:700,display:'flex',alignItems:'center',gap:'3px'}
+        },React.createElement('i',{className:'ti ti-plus'}),' Novo')
+      ),
+
+      // List
+      locs.length===0
+        ?React.createElement('div',{style:{padding:'16px',fontSize:'12px',color:'#333',textAlign:'center'}},'Nenhum local cadastrado.')
+        :locs.map(l=>React.createElement('div',{key:l.id,
+            onClick:()=>setSelLoc(selLoc===l.id?null:l.id),
+            style:{padding:'8px 12px',cursor:'pointer',borderBottom:'1px solid #1e1e1e',
+              background:selLoc===l.id?'rgba(74,200,192,.06)':'transparent',
+              borderLeft:`3px solid ${l.color||'#555'}`}
+          },
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px'}},
+            React.createElement('span',{style:{flex:1,fontSize:'13px',fontWeight:600,color:'#ccc'}},l.name),
+            React.createElement('span',{style:{fontSize:'9px',fontWeight:700,padding:'1px 4px',borderRadius:'3px',textTransform:'uppercase',background:l.type==='box'?'rgba(74,200,192,.1)':'rgba(216,168,64,.1)',color:l.type==='box'?'var(--theme-accent)':'#d8a840'}},l.type==='box'?'Box':'Personal'),
+            React.createElement('button',{type:'button',onClick:e=>{e.stopPropagation();startEdit(l);},style:{background:'transparent',border:'1px solid #2e2e2e',color:'#555',padding:'2px 5px',borderRadius:'3px',cursor:'pointer'}},React.createElement('i',{className:'ti ti-edit',style:{fontSize:'11px'}})),
+            React.createElement('button',{type:'button',onClick:e=>{e.stopPropagation();setConfirmDel(l.id);},style:{background:'transparent',border:'1px solid #2e2e2e',color:'#5a1a1a',padding:'2px 5px',borderRadius:'3px',cursor:'pointer'}},React.createElement('i',{className:'ti ti-trash',style:{fontSize:'11px'}}))
+          ),
+          React.createElement('div',{style:{fontSize:'11px',color:'#555',marginTop:'2px'}},
+            l.rate?`${l.currency||'R$'} ${l.rate}/${l.rateUnit==='per_hour'?'hora':'sessão'}`:'Sem taxa configurada'
+          )
+        ))
+    ),
+
+    // ── Right pane ───────────────────────────────────────────────────────────
+    React.createElement('div',{style:{flex:1,padding:'16px',overflowY:'auto'}},
+      !sel
+        ?React.createElement('div',{style:{color:'#333',fontSize:'13px',padding:'20px',textAlign:'center'}},'Selecione um local para configurar atletas.')
+        :React.createElement('div',null,
+          React.createElement('div',{style:{fontSize:'13px',fontWeight:700,color:'#ccc',marginBottom:'4px'}},sel.name),
+          React.createElement('div',{style:{fontSize:'11px',color:'#555',marginBottom:'16px'}},`${sel.type==='box'?'Aula / Box':'Personal'} · ${sel.rate?(sel.currency+' '+sel.rate+'/'+(sel.rateUnit==='per_hour'?'hora':'sessão')):'Sem taxa'}`),
+
+          sel.type==='box'
+            ?React.createElement('div',{style:{fontSize:'12px',color:'#555',fontStyle:'italic',padding:'12px',background:'#111',borderRadius:'6px',border:'1px solid #1e1e1e'}},
+              React.createElement('i',{className:'ti ti-info-circle',style:{marginRight:'6px',color:'#888'}}),
+              'Locais do tipo Box são para aulas em grupo. Atletas são registrados via resultado de cada aula.'
+            )
+            :React.createElement('div',null,
+              React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'8px'}},'Atletas vinculados'),
+              React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'4px'}},
+                athletes.map(a=>{
+                  const checked=(sel.athleteIds||[]).includes(a.id);
+                  return React.createElement('label',{key:a.id,style:{display:'flex',alignItems:'center',gap:'10px',padding:'7px 10px',borderRadius:'6px',cursor:'pointer',background:checked?'rgba(74,200,192,.06)':'transparent',border:`1px solid ${checked?'rgba(74,200,192,.2)':'#1e1e1e'}`}},
+                    React.createElement('input',{type:'checkbox',checked,onChange:()=>toggleAthlete(sel.id,a.id),style:{accentColor:a.color||'var(--theme-accent)',width:'14px',height:'14px'}}),
+                    React.createElement('span',{style:{width:'9px',height:'9px',borderRadius:'50%',background:a.color||'#555',flexShrink:0}}),
+                    React.createElement('span',{style:{fontSize:'13px',color:'#ccc',flex:1}},a.name),
+                    React.createElement('span',{style:{fontSize:'11px',color:'#555'}},a.level||'')
+                  );
+                })
+              )
+            )
+        )
+    )
+  );
+}
+
+
+
+// ── ReportModal ───────────────────────────────────────────────────────────────
+function ReportModal({events,sessions,onClose}){
+  const locations=loadLocations();
+  const coach=loadCoach();
+  const gymCfg=loadSettings();
+
+  const now=new Date();
+  const [yr,setYr]=useState(now.getFullYear());
+  const [mo,setMo]=useState(now.getMonth());
+  const [useRange,setUseRange]=useState(false);
+  const [rangeFrom,setRangeFrom]=useState(toISO(now));
+  const [rangeTo,setRangeTo]=useState(toISO(now));
+  const [typeFilter,setTypeFilter]=useState({aula:true,personal:true});
+  const [locFilter,setLocFilter]=useState(()=>Object.fromEntries((loadLocations()).map(l=>[l.id,true])));
+  const [statusFilter,setStatusFilter]=useState('completed'); // 'completed'|'all'
+  const [showDetails,setShowDetails]=useState(false);
+  const [showRate,setShowRate]=useState(true);
+  const [showHeader,setShowHeader]=useState(true);
+  const [generating,setGenerating]=useState(false);
+
+  const MONTHS_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  // ── Filter events ──────────────────────────────────────────────────────────
+  function filteredEvents(){
+    const from=useRange?rangeFrom:`${yr}-${String(mo+1).padStart(2,'0')}-01`;
+    const to=useRange?rangeTo:`${yr}-${String(mo+1).padStart(2,'0')}-${new Date(yr,mo+1,0).getDate()}`;
+    const result=[];
+    Object.entries(events).forEach(([date,evs])=>{
+      if(date<from||date>to)return;
+      evs.forEach(ev=>{
+        if(!typeFilter[ev.type])return;
+        if(ev.locationId&&!locFilter[ev.locationId])return;
+        if(statusFilter==='completed'&&ev.status!=='completed')return;
+        result.push({...ev,date});
+      });
+    });
+    return result.sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+  }
+
+  // ── Group by location ──────────────────────────────────────────────────────
+  function groupByLocation(evs){
+    const groups={};
+    evs.forEach(ev=>{
+      const locId=ev.locationId||'__unlabelled__';
+      if(!groups[locId])groups[locId]=[];
+      groups[locId].push(ev);
+    });
+    return groups;
+  }
+
+  // ── Format helpers ─────────────────────────────────────────────────────────
+  function fmtDate(iso){
+    const d=new Date(iso+'T12:00:00');
+    return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+  }
+  function fmtDur(min){return min>=60?`${Math.floor(min/60)}h${min%60?min%60+'min':''}`:min+'min';}
+  function calcTotal(evs,loc){
+    if(!loc||!loc.rate)return null;
+    const totalMin=evs.reduce((s,ev)=>s+(ev.durationMin||60),0);
+    const total=loc.rateUnit==='per_hour'?(totalMin/60)*loc.rate:evs.length*loc.rate;
+    return{total,currency:loc.currency||'R$'};
+  }
+
+  // ── Generate PDF ───────────────────────────────────────────────────────────
+  async function generatePDF(){
+    setGenerating(true);
+    const script=document.createElement('script');
+    script.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload=async()=>{
+      const autoTableScript=document.createElement('script');
+      autoTableScript.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
+      autoTableScript.onload=()=>{
+        try{
+          const {jsPDF}=window.jspdf;
+          const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+          const evs=filteredEvents();
+          const groups=groupByLocation(evs);
+          const period=useRange?`${fmtDate(rangeFrom)} – ${fmtDate(rangeTo)}`:MONTHS_PT[mo]+' '+yr;
+          const gymName=gymCfg.gymName||'Cone';
+          let y=15;
+
+          // ── Cover / summary page ──
+          if(showHeader){
+            doc.setFontSize(18);doc.setFont('helvetica','bold');
+            doc.setTextColor(30,30,30);
+            doc.text(gymName,14,y);y+=7;
+            doc.setFontSize(11);doc.setFont('helvetica','normal');
+            doc.setTextColor(80,80,80);
+            if(coach.name)doc.text('Coach: '+coach.name,14,y);y+=5;
+            if(coach.contact)doc.text(coach.contact,14,y);y+=5;
+            if(coach.phone)doc.text(coach.phone,14,y);y+=5;
+            doc.setFontSize(9);doc.setTextColor(150,150,150);
+            doc.text('Gerado em: '+new Date().toLocaleDateString('pt-BR'),14,y);y+=10;
+          }
+
+          doc.setFontSize(15);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
+          doc.text('Relatório — '+period,14,y);y+=8;
+
+          // Summary table
+          const summaryRows=[];
+          let grandTotal=0;let grandCurrency='R$';
+          Object.entries(groups).forEach(([locId,levs])=>{
+            const loc=locations.find(l=>l.id===locId);
+            const name=loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
+            const totalMin=levs.reduce((s,ev)=>s+(ev.durationMin||60),0);
+            const t=calcTotal(levs,loc);
+            if(t){grandTotal+=t.total;grandCurrency=t.currency;}
+            summaryRows.push([
+              name,
+              loc?.type==='box'?'Box':'Personal',
+              String(levs.length),
+              fmtDur(totalMin),
+              t?t.currency+' '+t.total.toLocaleString('pt-BR'):'-'
+            ]);
+          });
+
+          doc.autoTable({
+            startY:y,
+            head:[['Local','Tipo','Sessões','Tempo Total','Valor']],
+            body:summaryRows,
+            foot:showRate&&grandTotal>0?[['','','','Total',grandCurrency+' '+grandTotal.toLocaleString('pt-BR')]]:[],
+            styles:{fontSize:9,cellPadding:3},
+            headStyles:{fillColor:[30,30,30],textColor:255,fontStyle:'bold'},
+            footStyles:{fillColor:[245,245,245],fontStyle:'bold'},
+            columnStyles:{0:{cellWidth:60},1:{cellWidth:25},2:{cellWidth:22},3:{cellWidth:28},4:{cellWidth:35}},
+            margin:{left:14,right:14}
+          });
+          y=doc.lastAutoTable.finalY+14;
+
+          // ── Per-location sections ──
+          Object.entries(groups).forEach(([locId,levs])=>{
+            const loc=locations.find(l=>l.id===locId);
+            const name=loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
+
+            if(y>250){doc.addPage();y=15;}
+            doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
+            doc.text(name+' — '+period,14,y);y+=6;
+
+            const rows=levs.map(ev=>{
+              const daySess=sessions[ev.date]||[];
+              const linked=ev.sessionId?daySess.find(s=>s.id===ev.sessionId):null;
+              const blockLabels=linked?(linked.blocks||[]).map(b=>b.label&&b.label!=='-'?b.label:b.type).join(' · '):'';
+              const row=[fmtDate(ev.date),ev.time,fmtDur(ev.durationMin||60),ev.label||name];
+              if(showDetails)row.push(blockLabels||'-');
+              if(showRate&&loc?.rate)row.push((loc.currency||'R$')+' '+loc.rate);
+              return row;
+            });
+
+            const head=[['Data','Hora','Duração','Sessão']];
+            if(showDetails)head[0].push('Detalhes');
+            if(showRate&&loc?.rate)head[0].push('Valor');
+
+            doc.autoTable({
+              startY:y,head,body:rows,
+              styles:{fontSize:8,cellPadding:2},
+              headStyles:{fillColor:[50,50,50],textColor:255,fontStyle:'bold'},
+              margin:{left:14,right:14}
+            });
+            y=doc.lastAutoTable.finalY+4;
+
+            // Subtotal row
+            const t=calcTotal(levs,loc);
+            const totalMin=levs.reduce((s,ev)=>s+(ev.durationMin||60),0);
+            doc.setFontSize(9);doc.setFont('helvetica','italic');doc.setTextColor(100,100,100);
+            let sub=`${levs.length} sessão${levs.length!==1?'ões':''} · ${fmtDur(totalMin)}`;
+            if(t&&showRate)sub+=` · ${t.currency} ${t.total.toLocaleString('pt-BR')}`;
+            doc.text(sub,14,y);y+=10;
+          });
+
+          const filename=`relatorio-${period.replace(/\s/g,'-').toLowerCase()}.pdf`;
+          doc.save(filename);
+        }catch(err){console.error('PDF error:',err);alert('Erro ao gerar PDF: '+err.message);}
+        setGenerating(false);
+      };
+      document.head.appendChild(autoTableScript);
+    };
+    document.head.appendChild(script);
+  }
+
+  const evs=filteredEvents();
+  const groups=groupByLocation(evs);
+
+  return React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.8)',zIndex:3000,display:'flex',alignItems:'flex-start',justifyContent:'center',overflowY:'auto',padding:'20px 0'}},
+    React.createElement('div',{style:{background:'#0d0b08',border:'1px solid #2a2318',borderRadius:'10px',width:'540px',maxWidth:'95vw',padding:'20px'},onClick:e=>e.stopPropagation()},
+
+      // Header
+      React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'16px'}},
+        React.createElement('span',{style:{fontSize:'14px',fontWeight:700,color:'#c8b090'}},'Gerar Relatório'),
+        React.createElement('button',{onClick:onClose,style:{background:'transparent',border:'none',color:'#555',cursor:'pointer',fontSize:'18px'}},'✕')
+      ),
+
+      // Period
+      React.createElement('div',{style:{marginBottom:'12px'}},
+        React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'6px'}},'Período'),
+        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'6px'}},
+          React.createElement('button',{type:'button',onClick:()=>{if(mo===0){setMo(11);setYr(y=>y-1);}else setMo(m=>m-1);},style:{background:'transparent',border:'1px solid #2a2318',color:'#887060',padding:'3px 8px',borderRadius:'4px',cursor:'pointer'}},'‹'),
+          React.createElement('span',{style:{flex:1,textAlign:'center',fontSize:'13px',fontWeight:700,color:'#c8b090'}},MONTHS_PT[mo]+' '+yr),
+          React.createElement('button',{type:'button',onClick:()=>{if(mo===11){setMo(0);setYr(y=>y+1);}else setMo(m=>m+1);},style:{background:'transparent',border:'1px solid #2a2318',color:'#887060',padding:'3px 8px',borderRadius:'4px',cursor:'pointer'}},'›')
+        ),
+        React.createElement('label',{style:{display:'flex',alignItems:'center',gap:'6px',fontSize:'12px',color:'#887060',cursor:'pointer'}},
+          React.createElement('input',{type:'checkbox',checked:useRange,onChange:e=>setUseRange(e.target.checked),style:{accentColor:'var(--theme-accent)'}}),
+          'Intervalo personalizado'
+        ),
+        useRange&&React.createElement('div',{style:{display:'flex',gap:'8px',marginTop:'6px'}},
+          React.createElement('input',{type:'date',value:rangeFrom,onChange:e=>setRangeFrom(e.target.value),style:{flex:1,background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'5px 7px',borderRadius:'4px',fontSize:'12px'}}),
+          React.createElement('span',{style:{color:'#555',alignSelf:'center'}},'—'),
+          React.createElement('input',{type:'date',value:rangeTo,onChange:e=>setRangeTo(e.target.value),style:{flex:1,background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'5px 7px',borderRadius:'4px',fontSize:'12px'}})
+        )
+      ),
+
+      // Filters row
+      React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px',marginBottom:'12px'}},
+        // Type filter
+        React.createElement('div',null,
+          React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'6px'}},'Tipo'),
+          ['aula','personal'].map(t=>React.createElement('label',{key:t,style:{display:'flex',alignItems:'center',gap:'6px',fontSize:'12px',color:'#c8b090',cursor:'pointer',marginBottom:'4px'}},
+            React.createElement('input',{type:'checkbox',checked:typeFilter[t],onChange:()=>setTypeFilter(p=>({...p,[t]:!p[t]})),style:{accentColor:'var(--theme-accent)'}}),
+            t==='aula'?'Aulas':'Personal'
+          ))
+        ),
+        // Status filter
+        React.createElement('div',null,
+          React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'6px'}},'Status'),
+          ['completed','all'].map(s=>React.createElement('label',{key:s,style:{display:'flex',alignItems:'center',gap:'6px',fontSize:'12px',color:'#c8b090',cursor:'pointer',marginBottom:'4px'}},
+            React.createElement('input',{type:'radio',name:'statusF',checked:statusFilter===s,onChange:()=>setStatusFilter(s),style:{accentColor:'var(--theme-accent)'}}),
+            s==='completed'?'Concluídas':'Todas'
+          ))
+        )
+      ),
+
+      // Location filter
+      locations.length>0&&React.createElement('div',{style:{marginBottom:'12px'}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}},
+          React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em'}},'Locais'),
+          React.createElement('button',{type:'button',onClick:()=>setLocFilter(Object.fromEntries(locations.map(l=>[l.id,true]))),style:{background:'transparent',border:'none',color:'#555',fontSize:'10px',cursor:'pointer'}},'Todos')
+        ),
+        React.createElement('div',{style:{display:'flex',flexWrap:'wrap',gap:'5px'}},
+          locations.map(l=>React.createElement('label',{key:l.id,style:{display:'flex',alignItems:'center',gap:'5px',padding:'3px 8px',borderRadius:'4px',border:`1px solid ${locFilter[l.id]?(l.color||'var(--theme-accent)'):'#2a2318'}`,background:locFilter[l.id]?`${l.color||'#4ac8c0'}18`:'transparent',cursor:'pointer',fontSize:'11px',color:locFilter[l.id]?(l.color||'var(--theme-accent)'):'#555'}},
+            React.createElement('input',{type:'checkbox',checked:!!locFilter[l.id],onChange:()=>setLocFilter(p=>({...p,[l.id]:!p[l.id]})),style:{display:'none'}}),
+            l.name
+          ))
+        )
+      ),
+
+      // Options
+      React.createElement('div',{style:{marginBottom:'16px',padding:'10px 12px',background:'rgba(255,255,255,.02)',border:'1px solid #2a2318',borderRadius:'6px'}}  ,
+        React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'8px'}},'Opções'),
+        [
+          [showDetails,setShowDetails,'Mostrar detalhes da sessão (blocos/exercícios)'],
+          [showRate,setShowRate,'Incluir valor por sessão'],
+          [showHeader,setShowHeader,'Incluir cabeçalho (coach, academia, data)']
+        ].map(([val,setter,lbl],i)=>React.createElement('label',{key:i,style:{display:'flex',alignItems:'center',gap:'7px',fontSize:'12px',color:'#c8b090',cursor:'pointer',marginBottom:i<2?'6px':'0'}},
+          React.createElement('input',{type:'checkbox',checked:val,onChange:()=>setter(v=>!v),style:{accentColor:'var(--theme-accent)',width:'13px',height:'13px'}}),
+          lbl
+        ))
+      ),
+
+      // Preview summary
+      evs.length>0&&React.createElement('div',{style:{marginBottom:'16px',padding:'10px 12px',background:'#0a0908',border:'1px solid #2a2318',borderRadius:'6px'}},
+        React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'#554a3a',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'6px'}},'Pré-visualização'),
+        Object.entries(groups).map(([locId,levs])=>{
+          const loc=locations.find(l=>l.id===locId);
+          const name=loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
+          const t=calcTotal(levs,loc);
+          const totalMin=levs.reduce((s,ev)=>s+(ev.durationMin||60),0);
+          return React.createElement('div',{key:locId,style:{display:'flex',alignItems:'center',gap:'8px',padding:'4px 0',borderBottom:'1px solid #1a1610',fontSize:'12px'}},
+            React.createElement('span',{style:{flex:1,color:'#c8b090',fontWeight:600}},name),
+            React.createElement('span',{style:{color:'#887060'}},levs.length+' sessões'),
+            React.createElement('span',{style:{color:'#887060'}},fmtDur(totalMin)),
+            t&&showRate?React.createElement('span',{style:{color:'#d8a840',fontWeight:700}},t.currency+' '+t.total.toLocaleString('pt-BR')):null
+          );
+        }),
+        // Grand total
+        showRate&&React.createElement('div',{style:{display:'flex',justifyContent:'flex-end',marginTop:'6px',fontSize:'13px',fontWeight:700,color:'#68d8a0'}},
+          'Total: '+Object.entries(groups).reduce((acc,[locId,levs])=>{
+            const loc=locations.find(l=>l.id===locId);
+            const t=calcTotal(levs,loc);
+            if(t)acc+= t.total;
+            return acc;
+          },0).toLocaleString('pt-BR')
+        )
+      ),
+
+      evs.length===0&&React.createElement('div',{style:{textAlign:'center',padding:'16px',fontSize:'12px',color:'#554a3a',marginBottom:'16px'}},'Nenhum evento encontrado para os filtros selecionados.'),
+
+      // Generate button
+      React.createElement('button',{
+        onClick:generatePDF,
+        disabled:evs.length===0||generating,
+        style:{width:'100%',background:evs.length===0||generating?'#1a1a1a':'var(--theme-accent)',color:evs.length===0||generating?'#333':'var(--theme-accent-text)',border:'none',padding:'10px',borderRadius:'6px',cursor:evs.length===0||generating?'not-allowed':'pointer',fontSize:'13px',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}
+      },
+        React.createElement('i',{className:generating?'ti ti-loader':'ti ti-file-download'}),
+        generating?'Gerando PDF...':'Gerar PDF'
+      )
+    )
+  );
+}
+
+
 // ── AgendaView ────────────────────────────────────────────────────────────────
 function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResult}){
   const [year,setYear]=useState(new Date().getFullYear());
   const [month,setMonth]=useState(new Date().getMonth());
   const [filter,setFilter]=useState('all'); // 'all'|'scheduled'|'completed'
   const [selDay,setSelDay]=useState(null);
+  const [showReport,setShowReport]=useState(false);
   const [showForm,setShowForm]=useState(null); // null | {type:'aula'|'personal',eventId?:string}
   const [formData,setFormData]=useState({});
 
@@ -2077,11 +2609,12 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
 
     return React.createElement('div',{
       onClick:()=>setSelDay(isSelected?null:iso),
+      className:'agenda-cell',
       style:{
         borderRight:'1px solid #2a2318',
         padding:'5px',cursor:'pointer',
         background:isSelected?'rgba(74,200,192,.07)':isToday?'rgba(74,200,192,.04)':'transparent',
-        borderBottom:'none',transition:'background .1s',minHeight:'80px'
+        borderBottom:'none',transition:'background .1s'
       }
     },
       React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'3px'}},
@@ -2093,10 +2626,13 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
       allCards.slice(0,3).map((card,ci)=>{
         if(card.kind==='session'){
           const s=card.data;
-          return React.createElement('div',{key:'s'+ci,style:{marginBottom:'2px',padding:'2px 4px',borderRadius:'3px',borderLeft:'2px solid var(--theme-accent)',background:'rgba(74,200,192,.06)'}},
-            React.createElement('div',{style:{fontSize:'9px',fontWeight:700,color:'var(--theme-accent)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},
+          return React.createElement('div',{key:'s'+ci,className:'cell-card',style:{marginBottom:'2px',padding:'2px 4px',borderRadius:'3px',borderLeft:'2px solid var(--theme-accent)',background:'rgba(74,200,192,.06)'}},
+            React.createElement('div',{className:'cell-card-full',style:{fontSize:'9px',fontWeight:700,color:'var(--theme-accent)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},
               React.createElement('i',{className:'ti ti-calendar-event',style:{fontSize:'8px',marginRight:'2px'},'aria-hidden':'true'}),
               s.mainTraining||'Sessão'
+            ),
+            React.createElement('div',{className:'cell-card-mini'},
+              React.createElement('span',{style:{width:'5px',height:'5px',borderRadius:'50%',background:'var(--theme-accent)',display:'inline-block'}})
             )
           );
         }
@@ -2105,13 +2641,18 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
         const done=evStatus(ev)==='completed';
         const borderCol=isPers?'#d8a840':'var(--theme-accent)';
         const ath=isPers&&ev.athleteIds?.[0]?athletes.find(a=>a.id===ev.athleteIds[0]):null;
-        return React.createElement('div',{key:'e'+ci,style:{marginBottom:'2px',padding:'2px 4px',borderRadius:'3px',borderLeft:`2px solid ${borderCol}`,background:isPers?'rgba(216,168,64,.07)':'rgba(74,200,192,.06)',opacity:done?.75:1}},
-          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'3px'}},
+        return React.createElement('div',{key:'e'+ci,className:'cell-card',style:{marginBottom:'2px',padding:'2px 4px',borderRadius:'3px',borderLeft:`2px solid ${borderCol}`,background:isPers?'rgba(216,168,64,.07)':'rgba(74,200,192,.06)',opacity:done?.75:1}},
+          React.createElement('div',{className:'cell-card-full',style:{display:'flex',alignItems:'center',gap:'3px'}},
             done&&React.createElement('span',{style:{fontSize:'8px',color:'#68d8a0'}},'✓'),
             React.createElement('span',{style:{fontSize:'9px',color:'#888'}},ev.time),
             React.createElement('span',{style:{fontSize:'9px',fontWeight:700,color:isPers?'#d8a840':'#c8b090',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:'70px'}},
               ath?React.createElement('span',null,React.createElement('span',{style:{width:'5px',height:'5px',borderRadius:'50%',background:ath.color,display:'inline-block',marginRight:'2px'}}),ev.label):ev.label
             )
+          ),
+          React.createElement('div',{className:'cell-card-mini',style:{display:'flex',alignItems:'center',gap:'2px'}},
+            done&&React.createElement('span',{style:{fontSize:'8px',color:'#68d8a0'}},'✓'),
+            React.createElement('span',{style:{fontSize:'9px',color:'#666'}},ev.time),
+            React.createElement('span',{style:{width:'5px',height:'5px',borderRadius:'50%',background:ath?ath.color:borderCol,display:'inline-block',flexShrink:0}})
           )
         );
       }),
@@ -2280,6 +2821,7 @@ function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}
   const [fd,setFd]=useState(()=>({...initialData}));
   const isPers=showForm.type==='personal';
   const daySessions=(sessions[showForm.date]||[]);
+  const locs=loadLocations();
   const set=(k,v)=>setFd(p=>({...p,[k]:v}));
   const toggleAthlete=id=>setFd(p=>({...p,athleteIds:p.athleteIds?.includes(id)?p.athleteIds.filter(x=>x!==id):[...(p.athleteIds||[]),id]}));
 
@@ -2292,6 +2834,13 @@ function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}
       React.createElement('div',{style:{marginBottom:'10px'}},
         React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},isPers?'Nome / cliente':'Nome da turma'),
         React.createElement('input',{type:'text',value:fd.label||'',onChange:e=>set('label',e.target.value),placeholder:isPers?'Ex: Jinx':'Ex: Turma Manhã',style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}})
+      ),
+      locs.length>0&&React.createElement('div',{style:{marginBottom:'10px'}},
+        React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Local'),
+        React.createElement('select',{value:fd.locationId||'',onChange:e=>set('locationId',e.target.value||null),style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}},
+          React.createElement('option',{value:''},'Sem local'),
+          locs.map(l=>React.createElement('option',{key:l.id,value:l.id},l.name))
+        )
       ),
       React.createElement('div',{style:{display:'flex',gap:'8px',marginBottom:'10px'}},
         React.createElement('div',{style:{flex:1}},
@@ -2342,12 +2891,13 @@ function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}
   return React.createElement('div',{style:{display:'flex',flexDirection:'column',height:'100%'}},
 
     // Header bar
-    React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',borderBottom:'1px solid #2a2318',flexWrap:'wrap',flexShrink:0}},
+    React.createElement('div',{className:'agenda-header',style:{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',borderBottom:'1px solid #2a2318',flexWrap:'wrap',flexShrink:0}},
       React.createElement('button',{onClick:()=>{if(month===0){setMonth(11);setYear(y=>y-1);}else setMonth(m=>m-1);setSelDay(null);},style:{background:'transparent',border:'1px solid #2a2318',color:'#887060',padding:'4px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'12px'}},'‹'),
-      React.createElement('span',{style:{fontSize:'14px',fontWeight:700,color:'#c8b090',flex:1,minWidth:'120px',textTransform:'uppercase',letterSpacing:'.05em'}},`${MONTHS_PT[month]} ${year}`),
+      React.createElement('button',{onClick:()=>setShowReport(true),style:{background:'rgba(216,168,64,.1)',border:'1px solid rgba(216,168,64,.3)',color:'#d8a840',padding:'4px 10px',borderRadius:'4px',cursor:'pointer',fontSize:'11px',fontWeight:700,display:'flex',alignItems:'center',gap:'4px'}},React.createElement('i',{className:'ti ti-file-analytics'}),' Relatório'),
+      React.createElement('span',{style:{fontSize:'14px',fontWeight:700,color:'#c8b090',flex:'1 1 100px',minWidth:'80px',textTransform:'uppercase',letterSpacing:'.03em'}},`${MONTHS_PT[month]} ${year}`),
       React.createElement('button',{onClick:()=>{if(month===11){setMonth(0);setYear(y=>y+1);}else setMonth(m=>m+1);setSelDay(null);},style:{background:'transparent',border:'1px solid #2a2318',color:'#887060',padding:'4px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'12px'}},'›'),
       // Stats
-      React.createElement('div',{style:{display:'flex',gap:'10px',fontSize:'11px'}},
+      React.createElement('div',{className:'agenda-stats',style:{display:'flex',gap:'8px',fontSize:'11px',flexWrap:'wrap'}},
         React.createElement('span',{style:{color:'var(--theme-accent)'}},[completedAulas,'/',totalAulas,' aulas'].join('')),
         React.createElement('span',{style:{color:'#d8a840'}},[completedPersonal,'/',totalPersonal,' personal'].join('')),
         React.createElement('span',{style:{color:'#68d8a0'}},[totalCompleted,'/',totalEvs,' concluídas'].join(''))
@@ -2356,6 +2906,7 @@ function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}
       React.createElement('div',{style:{display:'flex',gap:'4px'}},
         ['all','scheduled','completed'].map(f=>React.createElement('button',{key:f,
           onClick:()=>setFilter(f),
+          className:'agenda-filter-btn',
           style:{background:filter===f?'var(--theme-accent)':'transparent',color:filter===f?'var(--theme-accent-text)':'#887060',border:`1px solid ${filter===f?'var(--theme-accent)':'#2a2318'}`,padding:'3px 7px',borderRadius:'4px',cursor:'pointer',fontSize:'10px',fontWeight:700,textTransform:'uppercase'}
         },f==='all'?'Todos':f==='scheduled'?'Agendado':'Completo'))
       )
@@ -2367,11 +2918,11 @@ function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}
       // Calendar grid
       React.createElement('div',{style:{flex:selDay?'0 0 60%':'1',minWidth:0,overflowY:'auto',borderRight:selDay?'1px solid #2a2318':'none'}},
         // Day headers
-        React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:'1px solid #2a2318',position:'sticky',top:0,background:'#0d0b08',zIndex:2}},
-          DAYS_PT_SHORT.map(d=>React.createElement('div',{key:d,style:{padding:'5px 6px',fontSize:'9px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',textAlign:'center',borderRight:'1px solid #2a2318'}},d))
+        React.createElement('div',{className:'agenda-day-hdrs',style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:'1px solid #2a2318',position:'sticky',top:0,background:'#0d0b08',zIndex:2}},
+          DAYS_PT_SHORT.map(d=>React.createElement('div',{key:d,className:'agenda-day-hdr'},d))
         ),
         // Weeks
-        weeks.map((week,wi)=>React.createElement('div',{key:wi,style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:'1px solid #2a2318'}},
+        weeks.map((week,wi)=>React.createElement('div',{key:wi,className:'agenda-week-row',style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:'1px solid #2a2318'}},
           week.map((day,di)=>day
             ?React.createElement(CellDay,{key:di,day})
             :React.createElement('div',{key:di,style:{borderRight:'1px solid #2a2318',background:'rgba(0,0,0,.3)',minHeight:'80px'}})
@@ -2380,10 +2931,18 @@ function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}
       ),
 
       // Day pane
-      selDay&&React.createElement('div',{className:'agenda-pane',style:{minWidth:0,overflowY:'auto',background:'#0d0b08'}},
+      React.createElement('div',{
+      className:'agenda-pane-backdrop',
+      style:{display:selDay?'block':'none',position:'fixed',inset:0,background:'rgba(0,0,0,.5)',zIndex:499},
+      onClick:()=>setSelDay(null)
+    }),
+    selDay&&React.createElement('div',{className:'agenda-pane',style:{minWidth:0,overflowY:'auto',background:'#0d0b08'}},
         React.createElement(DayPane)
       )
     ),
+
+    // Report modal
+    showReport&&React.createElement(ReportModal,{events,sessions,onClose:()=>setShowReport(false)}),
 
     // Event form modal
     React.createElement(EventForm)
@@ -2644,7 +3203,7 @@ function SchedulePublisher({sessions,events,setEvents,athletes,onEditSession,onL
   return React.createElement('div',null,
 
     // ── Agenda — always visible ──
-    React.createElement('div',{style:{height:'600px',display:'flex',flexDirection:'column',marginBottom:'12px',border:'1px solid #1e1e1e',borderRadius:'8px',overflow:'hidden'}},
+    React.createElement('div',{className:'agenda-wrap',style:{display:'flex',flexDirection:'column',marginBottom:'12px',border:'1px solid #1e1e1e',borderRadius:'8px',overflow:'hidden'}},
       React.createElement(AgendaView,{
         sessions,
         events:events||{},
@@ -3964,10 +4523,10 @@ function RosterView({athletes,setAthletes}){
 }
 
 // ── LogView ───────────────────────────────────────────────
-function LogView({athletes,sessions}){
+function LogView({athletes,sessions,preload,onPreloadConsumed}){
   const [results,setResults]=useState(loadResults);
-  const [date,setDate]=useState(todayISO());
-  const [athleteId,setAthleteId]=useState('');
+  const [date,setDate]=useState(()=>preload?.date||todayISO());
+  const [athleteId,setAthleteId]=useState(()=>preload?.athleteId||'');
   const [presence,setPresence]=useState('Presente');
   const [blockLogs,setBlockLogs]=useState([]);
   const [coachNote,setCoachNote]=useState('');
@@ -3976,6 +4535,14 @@ function LogView({athletes,sessions}){
   const [energyLevel,setEnergyLevel]=useState(3);
 
   const [selectedSessionIdx,setSelectedSessionIdx]=useState(0);
+
+  useEffect(()=>{
+    if(!preload)return;
+    if(preload.date) setDate(preload.date);
+    if(preload.athleteId) setAthleteId(preload.athleteId);
+    onPreloadConsumed&&onPreloadConsumed();
+  },[preload]);
+
   const daySessions=sessions[date]||[];
   const session=daySessions[selectedSessionIdx]||daySessions[0]||null;
 
@@ -4512,7 +5079,7 @@ function HistoryView({athletes,sessions}){
 }
 
 // ── ResultsTab (root) ─────────────────────────────────────
-function ResultsTab({sessions}){
+function ResultsTab({sessions,preload,onPreloadConsumed}){
   const [subView,setSubView]=useState('log'); // 'log'|'roster'|'history'
   const [athletes,setAthletes]=useState(loadAthletes);
 
@@ -4524,7 +5091,7 @@ function ResultsTab({sessions}){
         )
       )
     ),
-    subView==='log'&&React.createElement(LogView,{athletes,sessions}),
+    subView==='log'&&React.createElement(LogView,{athletes,sessions,preload,onPreloadConsumed}),
     subView==='roster'&&React.createElement(RosterView,{athletes,setAthletes}),
     subView==='history'&&React.createElement(HistoryView,{athletes,sessions}),
     subView==='leaderboard'&&React.createElement(LeaderboardView,{athletes,sessions})
@@ -5095,7 +5662,7 @@ function PrSubView({athId,goalsData,persist,onBack}){
 
 
 // ── Sessions Summary Panel ────────────────────────────────────────────────────
-function SessionsSummaryPanel({athName,sessions,results,expandedSessions,setExpandedSessions}){
+function SessionsSummaryPanel({athName,athId,sessions,results,expandedSessions,setExpandedSessions,onEditSession,onLogResult}){
   const WOD_TYPES_S=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
   const SCALE_RANK_S={RX:4,Inter:3,SC:2,Adaptado:1};
   const SCALE_NAMES_S={4:'RX',3:'Inter',2:'SC',1:'Adaptado'};
@@ -5124,7 +5691,7 @@ function SessionsSummaryPanel({athName,sessions,results,expandedSessions,setExpa
     'Nenhuma sessão atribuída a este atleta. Use o campo Alvo no Criador de Treinos.'
   );
 
-  return React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'10px'}},
+  return React.createElement('div',{className:'sess-summary-grid'},
     cards.map(({date,session})=>{
       const isPast=date<=todayISO;
       const isToday=date===todayISO;
@@ -5198,20 +5765,29 @@ function SessionsSummaryPanel({athName,sessions,results,expandedSessions,setExpa
               const sc=rowResult?.scale;
               const scCol=sc?SCALE_COLORS_S[sc]:'#555';
               return React.createElement('div',{key:ei,style:{display:'flex',alignItems:'center',gap:'8px',padding:'3px 0',fontSize:'12px'}},
-                React.createElement('span',{style:{flex:1,color:'#ccc'}},`${ex.sets?ex.sets+'×':''}${ex.reps?ex.reps+' ':''}${ex.name}`),
+                React.createElement('span',{style:{flex:1,color:'#ccc'}},ex.name),
                 sc&&React.createElement('span',{style:{fontSize:'10px',fontWeight:700,padding:'1px 5px',borderRadius:'3px',color:scCol,background:scCol+'22',border:`1px solid ${scCol}44`}},sc)
               );
             }),
             athBl?.rpe&&React.createElement('div',{style:{fontSize:'11px',color:'#555',marginTop:'3px'}},`RPE ${athBl.rpe}`),
             athBl?.perfTime&&React.createElement('div',{style:{fontSize:'12px',fontWeight:700,color:'#e0e0e0',marginTop:'3px'}},athBl.perfTime),
-            isWod&&isPast&&React.createElement('a',{
-              href:`leaderboard.html?wod=${bl.id}&session=${session.id}&date=${date}`,
-              target:'_blank',
-              style:{display:'flex',alignItems:'center',gap:'5px',marginTop:'6px',padding:'5px 8px',
-                background:'rgba(74,200,192,.06)',border:'1px solid rgba(74,200,192,.25)',
-                borderRadius:'5px',color:'#4ac8c0',fontSize:'11px',fontWeight:700,
-                textDecoration:'none',textTransform:'uppercase',letterSpacing:'.05em'}
-            },React.createElement('i',{className:'ti ti-trophy'}),' Ver Leaderboard')
+            React.createElement('div',{style:{display:'flex',gap:'5px',marginTop:'6px',flexWrap:'wrap'}},
+              onEditSession&&React.createElement('button',{
+                type:'button',
+                onClick:e=>{e.stopPropagation();onEditSession({...session,date,_dateKey:date});},
+                style:{display:'flex',alignItems:'center',gap:'4px',padding:'4px 8px',background:'transparent',
+                  border:'1px solid #2a2318',color:'#887060',borderRadius:'4px',cursor:'pointer',
+                  fontSize:'10px',fontWeight:700,fontFamily:'inherit'}
+              },React.createElement('i',{className:'ti ti-edit',style:{fontSize:'10px'}}),'Editar Sessão'),
+              onLogResult&&React.createElement('button',{
+                type:'button',
+                onClick:e=>{e.stopPropagation();onLogResult({athleteId:athId,date});},
+                style:{display:'flex',alignItems:'center',gap:'4px',padding:'4px 8px',
+                  background:'rgba(74,200,192,.08)',border:'1px solid rgba(74,200,192,.25)',
+                  color:'var(--theme-accent)',borderRadius:'4px',cursor:'pointer',
+                  fontSize:'10px',fontWeight:700,fontFamily:'inherit'}
+              },React.createElement('i',{className:'ti ti-clipboard-list',style:{fontSize:'10px'}}),'Lançar Resultado')
+            )
           );
         });
 
@@ -5498,7 +6074,7 @@ function RecentWods({results,sessions}){
 }
 
 // ── Main AthleteTab component ─────────────────────────────────────────────────
-function AthleteTab({sessions,results}){
+function AthleteTab({sessions,results,onEditSession,onLogResult}){
   const [athletes,setAthletes]=useState(loadAthletes);
   const [showAthForm,setShowAthForm]=useState(false);
   const [athForm,setAthForm]=useState({name:'',level:'Iniciante',goal:'Saúde geral',notes:'',color:'#e87820',since:todayISO()});
@@ -5703,10 +6279,13 @@ function AthleteTab({sessions,results}){
       React.createElement('div',{style:{fontSize:'10px',color:'#555',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'10px'}},'Sessões'),
       React.createElement(SessionsSummaryPanel,{
         athName:ath?.name||'',
+        athId:selAthlete,
         sessions,
         results:athResults,
         expandedSessions,
-        setExpandedSessions
+        setExpandedSessions,
+        onEditSession,
+        onLogResult
       })
     ),
 
@@ -6310,6 +6889,12 @@ const LS_SETTINGS='eagles_settings_v1';
 const LS_REGISTRY='eagles_block_registry_v1';
 const LS_GOALS='eagles_athlete_goals_v1';
 const LS_EVENTS='eagles_events_v1';
+const LS_LOCATIONS='eagles_locations_v1';
+const LS_COACH='eagles_coach_v1';
+const loadLocations=()=>{try{const d=localStorage.getItem(LS_LOCATIONS);return d?JSON.parse(d):[]}catch{return[]}};
+const saveLocations=d=>{try{localStorage.setItem(LS_LOCATIONS,JSON.stringify(d))}catch{}};
+const loadCoach=()=>{try{const d=localStorage.getItem(LS_COACH);return d?JSON.parse(d):{name:'',contact:'',phone:''}}catch{return{name:'',contact:'',phone:''}}};
+const saveCoach=d=>{try{localStorage.setItem(LS_COACH,JSON.stringify(d))}catch{}};
 const loadEvents=()=>{try{const d=localStorage.getItem(LS_EVENTS);return d?JSON.parse(d):{}}catch{return{}}};
 const saveEvents=d=>{try{localStorage.setItem(LS_EVENTS,JSON.stringify(d))}catch{}};
 const loadGoalsData=()=>{try{const d=localStorage.getItem(LS_GOALS);return d?JSON.parse(d):{athleteGoals:{},prs:{}};}catch{return{athleteGoals:{},prs:{}};}};
@@ -6824,6 +7409,7 @@ function App(){
   const [sessions,setSessions]=useState(loadLS);
   const [events,setEvents]=useState(loadEvents);
   const [creatorPreload,setCreatorPreload]=useState(null);
+  const [resultsPreload,setResultsPreload]=useState(null);
   const [saved,setSaved]=useState(false);
   const [energyLevel,setEnergyLevel]=useState(3);
   const [toast,setToast]=useState(null);
@@ -6959,7 +7545,7 @@ function App(){
   // ── Export state as .json ──
   const handleSaveState=(customName)=>{
     const lbcSaved=(()=>{try{const d=localStorage.getItem('eagles_lb_colors_v1');return d?JSON.parse(d):{}}catch{return{}}})();
-    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings(),lbColors:lbcSaved,results:loadResults(),athletes:loadAthletes(),exerciseRegistry:loadRegistry()||{},athleteGoalsData:loadGoalsData(),events:loadEvents()};
+    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings(),lbColors:lbcSaved,results:loadResults(),athletes:loadAthletes(),exerciseRegistry:loadRegistry()||{},athleteGoalsData:loadGoalsData(),events:loadEvents(),locations:loadLocations(),coachProfile:loadCoach()};
     const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
     const a=document.createElement('a');
     const date=toISO(new Date());
@@ -7002,6 +7588,8 @@ function App(){
         if(parsed.athletes&&Array.isArray(parsed.athletes)&&parsed.athletes.length){saveAthletes(parsed.athletes);}
         if(parsed.results&&Array.isArray(parsed.results)){saveResults(parsed.results);}
         if(parsed.events&&typeof parsed.events==='object'){saveEvents(parsed.events);}
+        if(parsed.locations&&Array.isArray(parsed.locations)){saveLocations(parsed.locations);}
+        if(parsed.coachProfile&&typeof parsed.coachProfile==='object'){saveCoach(parsed.coachProfile);}
         // restore publisher settings if present
         if(parsed.settings&&typeof parsed.settings==='object'){
           saveSettings(parsed.settings);
@@ -7097,7 +7685,7 @@ function App(){
     ),
     React.createElement('div',{className:'tab-bar'},
       [['creator','ti-edit','Criador de Treinos'],['parser','ti-sparkles','Criar por Texto'],['athletes','ti-chart-radar','Atletas'],
-        ['exercises','ti-tool','Exercícios'],['results','ti-chart-bar','Resultados'],['publisher','ti-calendar','Publicador de Grade']].map(([id,icon,lbl])=>
+        ['exercises','ti-tool','Exercícios'],['locations','ti-map-pin','Locais'],['results','ti-chart-bar','Resultados'],['publisher','ti-calendar','Publicador de Grade']].map(([id,icon,lbl])=>
         React.createElement('button',{key:id,type:'button',className:`tab3 ${tab===id?'on':''}`,onClick:()=>setTab(id)},
           React.createElement('i',{className:`ti ${icon}`,'aria-hidden':'true'}),lbl
         )
@@ -7109,12 +7697,14 @@ function App(){
         :tab==='parser'
         ?React.createElement(TextParser,{sessions,setSessions,setTab})
         :tab==='athletes'
-        ?React.createElement(AthleteTab,{sessions,results:loadResults()})
+        ?React.createElement(AthleteTab,{sessions,results:loadResults(),onEditSession:(s)=>{setCreatorPreload(s);setTab('creator');},onLogResult:({athleteId,date})=>{setResultsPreload({athleteId,date});setTab('results');}})
         :tab==='exercises'
         ?React.createElement(ExerciseTab,null)
+        :tab==='locations'
+        ?React.createElement(LocaisTab,null)
         :tab==='results'
-        ?React.createElement('div',{className:'res-pane'},React.createElement(ResultsTab,{sessions}))
-        :React.createElement('div',{className:'pub-pane'},React.createElement(SchedulePublisher,{sessions,events,setEvents,athletes:loadAthletes(),onEditSession:(s)=>{setCreatorPreload(s);setTab('creator');},onLogResult:({athleteId,date})=>{setTab('results');}}))
+        ?React.createElement('div',{className:'res-pane'},React.createElement(ResultsTab,{sessions,preload:resultsPreload,onPreloadConsumed:()=>setResultsPreload(null)}))
+        :React.createElement('div',{className:'pub-pane'},React.createElement(SchedulePublisher,{sessions,events,setEvents,athletes:loadAthletes(),onEditSession:(s)=>{setCreatorPreload(s);setTab('creator');},onLogResult:({athleteId,date})=>{setResultsPreload({athleteId,date});setTab('results');}}))
     )
   );
 }
