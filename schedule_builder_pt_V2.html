@@ -1896,7 +1896,441 @@ function CalendarExportView({sessions,label,year,month,gymName,logoDataUrl,logoS
 }
 
 // ── SchedulePublisher ─────────────────────────────────────
-function SchedulePublisher({sessions}){
+
+// ── AgendaView ────────────────────────────────────────────────────────────────
+function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResult}){
+  const [year,setYear]=useState(new Date().getFullYear());
+  const [month,setMonth]=useState(new Date().getMonth());
+  const [filter,setFilter]=useState('all'); // 'all'|'scheduled'|'completed'
+  const [selDay,setSelDay]=useState(null);
+  const [showForm,setShowForm]=useState(null); // null | {type:'aula'|'personal',eventId?:string}
+  const [formData,setFormData]=useState({});
+
+  const todayISO=toISO(new Date());
+  const MONTHS_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const DAYS_PT_SHORT=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const BLOCK_C={'Força':'#d8a840','LPO':'#4ac8c0','For Time':'#e87820','Core':'#68d8a0','Acessórios':'#c884f0','AMRAP':'#e87820','Cardio':'#64b5f6','EMOM':'#ff8a65','WOD':'#e87820','HIIT':'#ff6d00'};
+
+  // Derive event status from results
+  const results=loadResults();
+  function evStatus(ev){
+    if(ev.status==='completed') return 'completed';
+    if(ev.date<todayISO) return 'completed'; // past = done
+    if(ev.athleteIds&&ev.athleteIds.length){
+      const hasResult=ev.athleteIds.some(aid=>results.some(r=>r.athleteId===aid&&r.date===ev.date&&(r.sessionId===ev.sessionId||!ev.sessionId)));
+      if(hasResult) return 'completed';
+    }
+    return 'scheduled';
+  }
+
+  // Get events for a date, filtered
+  function dayEvents(iso){
+    const evs=(events[iso]||[]).filter(ev=>{
+      if(filter==='all') return true;
+      return filter===evStatus(ev);
+    });
+    return evs.sort((a,b)=>a.time.localeCompare(b.time));
+  }
+
+  // Sessions for a date that are NOT athlete-specific (gym-wide)
+  function dayGymSessions(iso){
+    return(sessions[iso]||[]).filter(s=>!athletes.some(a=>a.name===s.mainTraining));
+  }
+
+  // Month stats
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const totalCells=Math.ceil((firstDay+daysInMonth)/7)*7;
+  const cells=[];
+  for(let i=0;i<totalCells;i++){const d=i-firstDay+1;cells.push(d>=1&&d<=daysInMonth?d:null);}
+  const weeks=[];
+  for(let i=0;i<cells.length;i+=7)weeks.push(cells.slice(i,i+7));
+
+  let totalAulas=0,totalPersonal=0,totalCompleted=0;
+  cells.filter(Boolean).forEach(d=>{
+    const iso=toISO2(year,month,d);
+    const evs=events[iso]||[];
+    evs.forEach(ev=>{
+      if(ev.type==='aula')totalAulas++;
+      if(ev.type==='personal')totalPersonal++;
+      if(evStatus(ev)==='completed')totalCompleted++;
+    });
+  });
+  const totalEvs=totalAulas+totalPersonal;
+
+  function uid2(){return Math.random().toString(36).slice(2)+Date.now().toString(36);}
+  function toISO2(y,m,d){return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+
+  function saveEvent(ev){
+    setEvents(prev=>{
+      const d={...prev};
+      const list=[...(d[ev.date]||[])];
+      const idx=list.findIndex(e=>e.id===ev.id);
+      if(idx>=0)list[idx]=ev;else list.push(ev);
+      list.sort((a,b)=>a.time.localeCompare(b.time));
+      return{...d,[ev.date]:list};
+    });
+  }
+
+  function deleteEvent(date,id){
+    setEvents(prev=>{
+      const d={...prev};
+      d[date]=(d[date]||[]).filter(e=>e.id!==id);
+      if(!d[date].length)delete d[date];
+      return{...d};
+    });
+  }
+
+  function toggleStatus(date,id){
+    const ev=(events[date]||[]).find(e=>e.id===id);
+    if(!ev)return;
+    saveEvent({...ev,status:ev.status==='completed'?'scheduled':'completed'});
+  }
+
+  function openForm(type,date,existingEv){
+    const defaults=existingEv||{
+      id:uid2(),date,time:'07:00',durationMin:60,type,
+      label:type==='aula'?'Turma Manhã':'',
+      sessionId:null,athleteIds:[],status:'scheduled',notes:''
+    };
+    setFormData(defaults);
+    setShowForm({type,eventId:existingEv?.id||null,date});
+  }
+
+  function submitForm(){
+    saveEvent({...formData});
+    setShowForm(null);
+  }
+
+  // ── Grid cell ──────────────────────────────────────────────────────────────
+  function CellDay({day}){
+    const iso=toISO2(year,month,day);
+    const isToday=iso===todayISO;
+    const isPast=iso<todayISO;
+    const isSelected=selDay===iso;
+    const gymSessions=dayGymSessions(iso);
+    const evs=dayEvents(iso);
+
+    const allCards=[
+      ...gymSessions.map(s=>({kind:'session',data:s})),
+      ...evs.map(ev=>({kind:'event',data:ev}))
+    ];
+
+    return React.createElement('div',{
+      onClick:()=>setSelDay(isSelected?null:iso),
+      style:{
+        borderRight:'1px solid #2a2318',
+        padding:'5px',cursor:'pointer',
+        background:isSelected?'rgba(74,200,192,.07)':isToday?'rgba(74,200,192,.04)':'transparent',
+        borderBottom:'none',transition:'background .1s',minHeight:'80px'
+      }
+    },
+      React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'3px'}},
+        isToday
+          ?React.createElement('span',{style:{width:'20px',height:'20px',borderRadius:'50%',background:'var(--theme-accent)',color:'var(--theme-accent-text)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:900}},day)
+          :React.createElement('span',{style:{fontSize:'11px',color:isPast?'#554a3a':'#c8b090',fontWeight:isToday?700:400}},day),
+        allCards.length>0&&React.createElement('span',{style:{fontSize:'9px',color:'#554a3a'}},allCards.length)
+      ),
+      allCards.slice(0,3).map((card,ci)=>{
+        if(card.kind==='session'){
+          const s=card.data;
+          return React.createElement('div',{key:'s'+ci,style:{marginBottom:'2px',padding:'2px 4px',borderRadius:'3px',borderLeft:'2px solid var(--theme-accent)',background:'rgba(74,200,192,.06)'}},
+            React.createElement('div',{style:{fontSize:'9px',fontWeight:700,color:'var(--theme-accent)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},
+              React.createElement('i',{className:'ti ti-calendar-event',style:{fontSize:'8px',marginRight:'2px'},'aria-hidden':'true'}),
+              s.mainTraining||'Sessão'
+            )
+          );
+        }
+        const ev=card.data;
+        const isPers=ev.type==='personal';
+        const done=evStatus(ev)==='completed';
+        const borderCol=isPers?'#d8a840':'var(--theme-accent)';
+        const ath=isPers&&ev.athleteIds?.[0]?athletes.find(a=>a.id===ev.athleteIds[0]):null;
+        return React.createElement('div',{key:'e'+ci,style:{marginBottom:'2px',padding:'2px 4px',borderRadius:'3px',borderLeft:`2px solid ${borderCol}`,background:isPers?'rgba(216,168,64,.07)':'rgba(74,200,192,.06)',opacity:done?.75:1}},
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'3px'}},
+            done&&React.createElement('span',{style:{fontSize:'8px',color:'#68d8a0'}},'✓'),
+            React.createElement('span',{style:{fontSize:'9px',color:'#888'}},ev.time),
+            React.createElement('span',{style:{fontSize:'9px',fontWeight:700,color:isPers?'#d8a840':'#c8b090',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:'70px'}},
+              ath?React.createElement('span',null,React.createElement('span',{style:{width:'5px',height:'5px',borderRadius:'50%',background:ath.color,display:'inline-block',marginRight:'2px'}}),ev.label):ev.label
+            )
+          )
+        );
+      }),
+      allCards.length>3&&React.createElement('div',{style:{fontSize:'8px',color:'#554a3a',paddingLeft:'4px'}},`+${allCards.length-3} mais`)
+    );
+  }
+
+  // ── Day pane ───────────────────────────────────────────────────────────────
+  function DayPane(){
+    if(!selDay) return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:'#3a3028',fontSize:'12px',fontStyle:'italic',padding:'40px 0'}},'Clique num dia para ver detalhes');
+
+    const iso=selDay;
+    const d=new Date(iso+'T12:00:00');
+    const dateLabel=d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+    const gymSessions=dayGymSessions(iso);
+    const evs=(events[iso]||[]).sort((a,b)=>a.time.localeCompare(b.time));
+
+    // Collect all unique times for timeline
+    const times=[...new Set(evs.map(ev=>ev.time))].sort();
+
+    return React.createElement('div',{style:{height:'100%',display:'flex',flexDirection:'column'}},
+      // Pane header
+      React.createElement('div',{style:{padding:'10px 14px',borderBottom:'1px solid #2a2318',flexShrink:0}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}},
+          React.createElement('span',{style:{fontSize:'12px',fontWeight:700,color:'var(--theme-accent)',textTransform:'capitalize'}},dateLabel),
+          React.createElement('button',{onClick:()=>setSelDay(null),style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'2px 7px',borderRadius:'4px',cursor:'pointer',fontSize:'11px'}},'✕')
+        ),
+        React.createElement('div',{style:{display:'flex',gap:'5px',flexWrap:'wrap'}},
+          React.createElement('button',{
+            onClick:()=>openForm('aula',iso),
+            style:{background:'rgba(74,200,192,.08)',border:'1px solid rgba(74,200,192,.25)',color:'var(--theme-accent)',padding:'4px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'10px',fontWeight:700}
+          },React.createElement('i',{className:'ti ti-plus','aria-hidden':'true'}),' Aula'),
+          React.createElement('button',{
+            onClick:()=>openForm('personal',iso),
+            style:{background:'rgba(216,168,64,.08)',border:'1px solid rgba(216,168,64,.25)',color:'#d8a840',padding:'4px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'10px',fontWeight:700}
+          },React.createElement('i',{className:'ti ti-plus','aria-hidden':'true'}),' Personal')
+        )
+      ),
+
+      // Pane scroll body
+      React.createElement('div',{style:{flex:1,overflowY:'auto',padding:'10px 14px'}},
+
+        // Session of the day (gym-wide)
+        gymSessions.length>0&&React.createElement('div',{style:{marginBottom:'12px'}},
+          React.createElement('div',{style:{fontSize:'10px',color:'#554a3a',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'6px'}},'Sessão do dia'),
+          gymSessions.map((s,si)=>React.createElement('div',{key:si,style:{background:'#0d0b08',border:'1px solid #2a2318',borderTop:'2px solid var(--theme-accent)',borderRadius:'6px',padding:'8px 10px',marginBottom:'6px'}},
+            React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'5px'}},
+              React.createElement('span',{style:{fontSize:'12px',fontWeight:700,color:'#c8b090'}},s.mainTraining||'Sessão'),
+              React.createElement('div',{style:{display:'flex',gap:'4px'}},
+                onEditSession&&React.createElement('button',{
+                  onClick:(e)=>{e.stopPropagation();onEditSession(s);},
+                  style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'2px 6px',borderRadius:'3px',cursor:'pointer',fontSize:'10px',fontWeight:700}
+                },'Editar')
+              )
+            ),
+            React.createElement('div',{style:{display:'flex',gap:'3px',flexWrap:'wrap'}},
+              (s.blocks||[]).map((bl,bi)=>{
+                const lbl=bl.label&&bl.label!=='-'?bl.label:bl.type;
+                return React.createElement('span',{key:bi,style:{fontSize:'9px',fontWeight:700,padding:'1px 4px',borderRadius:'2px',background:(BLOCK_C[lbl]||BLOCK_C[bl.type]||'#555')+'22',color:BLOCK_C[lbl]||BLOCK_C[bl.type]||'#aaa',border:`1px solid ${(BLOCK_C[lbl]||BLOCK_C[bl.type]||'#555')}44`}},lbl);
+              })
+            )
+          ))
+        ),
+
+        // Timeline events
+        evs.length===0&&gymSessions.length===0&&React.createElement('div',{style:{color:'#3a3028',fontSize:'12px',fontStyle:'italic',padding:'20px 0 0'}},'Sem eventos. Use os botões acima para adicionar.'),
+
+        evs.length>0&&React.createElement('div',{style:{marginBottom:'6px'}},
+          React.createElement('div',{style:{fontSize:'10px',color:'#554a3a',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'8px'}},'Agenda'),
+          evs.map((ev,ei)=>{
+            const isPers=ev.type==='personal';
+            const done=evStatus(ev)==='completed';
+            const borderCol=isPers?'#d8a840':'var(--theme-accent)';
+            const athList=(ev.athleteIds||[]).map(id=>athletes.find(a=>a.id===id)).filter(Boolean);
+            const linkedSession=ev.sessionId?(sessions[iso]||[]).find(s=>s.id===ev.sessionId):null;
+
+            return React.createElement('div',{key:ev.id,style:{display:'flex',gap:'8px',marginBottom:'10px'}},
+              // Time column
+              React.createElement('div',{style:{minWidth:'36px',flexShrink:0,paddingTop:'8px'}},
+                React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'#887060'}},ev.time),
+                React.createElement('div',{style:{width:'1px',background:'#2a2318',margin:'3px auto 0',height:'calc(100% - 16px)',minHeight:'20px'}})
+              ),
+              // Event card
+              React.createElement('div',{style:{flex:1,background:'#0d0b08',border:`1px solid #2a2318`,borderTop:`2px solid ${borderCol}`,borderRadius:'6px',padding:'8px 10px',opacity:done?.8:1}},
+                // Card header
+                React.createElement('div',{style:{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:'5px'}},
+                  React.createElement('div',null,
+                    React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'5px'}},
+                      done&&React.createElement('i',{className:'ti ti-circle-check',style:{fontSize:'11px',color:'#68d8a0'},'aria-hidden':'true'}),
+                      React.createElement('span',{style:{fontSize:'12px',fontWeight:700,color:isPers?'#d8a840':'#c8b090'}},ev.label),
+                      React.createElement('span',{style:{fontSize:'9px',fontWeight:700,padding:'1px 4px',borderRadius:'3px',textTransform:'uppercase',background:isPers?'rgba(216,168,64,.12)':'rgba(74,200,192,.1)',color:isPers?'#d8a840':'var(--theme-accent)'}},isPers?'Personal':'Aula')
+                    ),
+                    React.createElement('div',{style:{fontSize:'10px',color:'#554a3a',marginTop:'1px'}},`${ev.time} · ${ev.durationMin}min`)
+                  ),
+                  React.createElement('div',{style:{display:'flex',gap:'3px',flexShrink:0}},
+                    React.createElement('button',{
+                      onClick:()=>toggleStatus(iso,ev.id),
+                      title:done?'Marcar como agendado':'Marcar como concluído',
+                      style:{background:'transparent',border:`1px solid ${done?'rgba(104,216,160,.3)':'#2a2318'}`,color:done?'#68d8a0':'#554a3a',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px',fontWeight:700}
+                    },done?'✓ Feito':'○ Ag.'),
+                    React.createElement('button',{
+                      onClick:()=>openForm(ev.type,iso,ev),
+                      style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px'}
+                    },React.createElement('i',{className:'ti ti-edit',style:{fontSize:'10px'},'aria-hidden':'true'})),
+                    React.createElement('button',{
+                      onClick:()=>{if(window.confirm('Remover este evento?'))deleteEvent(iso,ev.id);},
+                      style:{background:'transparent',border:'1px solid #2a2318',color:'#5a2020',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px'}
+                    },React.createElement('i',{className:'ti ti-trash',style:{fontSize:'10px'},'aria-hidden':'true'}))
+                  )
+                ),
+
+                // Athletes
+                athList.length>0&&React.createElement('div',{style:{display:'flex',gap:'4px',flexWrap:'wrap',marginBottom:'5px'}},
+                  athList.map((a,ai)=>React.createElement('span',{key:ai,style:{display:'flex',alignItems:'center',gap:'3px',fontSize:'10px',color:'#a89880'}},
+                    React.createElement('span',{style:{width:'6px',height:'6px',borderRadius:'50%',background:a.color,display:'inline-block'}}),
+                    a.name
+                  ))
+                ),
+
+                // Linked session blocks
+                linkedSession&&React.createElement('div',{style:{display:'flex',gap:'2px',flexWrap:'wrap',marginBottom:'5px'}},
+                  (linkedSession.blocks||[]).map((bl,bi)=>{
+                    const lbl=bl.label&&bl.label!=='-'?bl.label:bl.type;
+                    return React.createElement('span',{key:bi,style:{fontSize:'8px',fontWeight:700,padding:'1px 4px',borderRadius:'2px',background:(BLOCK_C[lbl]||'#555')+'22',color:BLOCK_C[lbl]||'#aaa',border:`1px solid ${(BLOCK_C[lbl]||'#555')}44`}},lbl);
+                  })
+                ),
+
+                // Action buttons
+                React.createElement('div',{style:{display:'flex',gap:'5px',marginTop:'6px'}},
+                  onEditSession&&linkedSession&&React.createElement('button',{
+                    onClick:()=>onEditSession(linkedSession),
+                    style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'3px 7px',borderRadius:'4px',cursor:'pointer',fontSize:'10px',fontWeight:700}
+                  },React.createElement('i',{className:'ti ti-edit',style:{fontSize:'10px',marginRight:'3px'},'aria-hidden':'true'}),'Editar Sessão'),
+                  onLogResult&&isPers&&athList.length>0&&React.createElement('button',{
+                    onClick:()=>onLogResult({athleteId:ev.athleteIds[0],date:iso}),
+                    style:{background:'rgba(74,200,192,.08)',border:'1px solid rgba(74,200,192,.25)',color:'var(--theme-accent)',padding:'3px 7px',borderRadius:'4px',cursor:'pointer',fontSize:'10px',fontWeight:700}
+                  },React.createElement('i',{className:'ti ti-clipboard-list',style:{fontSize:'10px',marginRight:'3px'},'aria-hidden':'true'}),'Resultado')
+                ),
+
+                // Notes
+                ev.notes&&React.createElement('div',{style:{fontSize:'10px',color:'#554a3a',marginTop:'5px',fontStyle:'italic'}},ev.notes)
+              )
+            );
+          })
+        )
+      )
+    );
+  }
+
+  // ── Event form ─────────────────────────────────────────────────────────────
+  function EventForm(){
+    if(!showForm) return null;
+    const isPers=showForm.type==='personal';
+    const daySessions=(sessions[showForm.date]||[]);
+    const fd=formData;
+    const set=(k,v)=>setFormData(p=>({...p,[k]:v}));
+    const toggleAthlete=id=>set('athleteIds',fd.athleteIds?.includes(id)?fd.athleteIds.filter(x=>x!==id):[...(fd.athleteIds||[]),id]);
+
+    return React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.7)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center'}},
+      React.createElement('div',{style:{background:'#0d0b08',border:'1px solid #2a2318',borderRadius:'10px',padding:'18px',width:'340px',maxWidth:'90vw',maxHeight:'80vh',overflowY:'auto'}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}},
+          React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#c8b090'}},(showForm.eventId?'Editar':'Novo')+' '+(isPers?'Personal':'Aula')),
+          React.createElement('button',{onClick:()=>setShowForm(null),style:{background:'transparent',border:'none',color:'#554a3a',cursor:'pointer',fontSize:'16px'}},'✕')
+        ),
+
+        // Label
+        React.createElement('div',{className:'fg',style:{marginBottom:'10px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},isPers?'Nome / cliente':'Nome da turma'),
+          React.createElement('input',{type:'text',value:fd.label||'',onChange:e=>set('label',e.target.value),placeholder:isPers?'Ex: Jinx':'Ex: Turma Manhã',style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}})
+        ),
+
+        // Time + Duration
+        React.createElement('div',{style:{display:'flex',gap:'8px',marginBottom:'10px'}},
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Horário'),
+            React.createElement('input',{type:'time',value:fd.time||'07:00',onChange:e=>set('time',e.target.value),style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}})
+          ),
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Duração (min)'),
+            React.createElement('input',{type:'number',value:fd.durationMin||60,onChange:e=>set('durationMin',Number(e.target.value)),min:15,max:240,step:15,style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}})
+          )
+        ),
+
+        // Session link
+        daySessions.length>0&&React.createElement('div',{style:{marginBottom:'10px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Sessão vinculada'),
+          React.createElement('select',{value:fd.sessionId||'',onChange:e=>set('sessionId',e.target.value||null),style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}},
+            React.createElement('option',{value:''},'Nenhuma'),
+            daySessions.map(s=>React.createElement('option',{key:s.id,value:s.id},s.mainTraining||'Sessão'))
+          )
+        ),
+
+        // Athletes (personal: required checkbox list; aula: optional)
+        React.createElement('div',{style:{marginBottom:'10px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'5px'}},isPers?'Atletas (obrigatório)':'Atletas presentes (opcional)'),
+          React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'4px',maxHeight:'120px',overflowY:'auto'}},
+            athletes.map(a=>React.createElement('label',{key:a.id,style:{display:'flex',alignItems:'center',gap:'6px',cursor:'pointer',fontSize:'12px',color:'#a89880'}},
+              React.createElement('input',{type:'checkbox',checked:(fd.athleteIds||[]).includes(a.id),onChange:()=>toggleAthlete(a.id),style:{accentColor:a.color}}),
+              React.createElement('span',{style:{width:'8px',height:'8px',borderRadius:'50%',background:a.color,flexShrink:0}}),
+              a.name
+            ))
+          )
+        ),
+
+        // Notes
+        React.createElement('div',{style:{marginBottom:'14px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Notas (opcional)'),
+          React.createElement('textarea',{value:fd.notes||'',onChange:e=>set('notes',e.target.value),rows:2,placeholder:'Observações...',style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px',resize:'vertical'}})
+        ),
+
+        React.createElement('div',{style:{display:'flex',gap:'6px'}},
+          React.createElement('button',{
+            onClick:submitForm,
+            style:{flex:1,background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'8px',borderRadius:'5px',cursor:'pointer',fontSize:'12px',fontWeight:700}
+          },'Salvar'),
+          React.createElement('button',{
+            onClick:()=>setShowForm(null),
+            style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'8px 14px',borderRadius:'5px',cursor:'pointer',fontSize:'12px'}
+          },'Cancelar')
+        )
+      )
+    );
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  return React.createElement('div',{style:{display:'flex',flexDirection:'column',height:'100%'}},
+
+    // Header bar
+    React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',borderBottom:'1px solid #2a2318',flexWrap:'wrap',flexShrink:0}},
+      React.createElement('button',{onClick:()=>{if(month===0){setMonth(11);setYear(y=>y-1);}else setMonth(m=>m-1);setSelDay(null);},style:{background:'transparent',border:'1px solid #2a2318',color:'#887060',padding:'4px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'12px'}},'‹'),
+      React.createElement('span',{style:{fontSize:'14px',fontWeight:700,color:'#c8b090',flex:1,minWidth:'120px',textTransform:'uppercase',letterSpacing:'.05em'}},`${MONTHS_PT[month]} ${year}`),
+      React.createElement('button',{onClick:()=>{if(month===11){setMonth(0);setYear(y=>y+1);}else setMonth(m=>m+1);setSelDay(null);},style:{background:'transparent',border:'1px solid #2a2318',color:'#887060',padding:'4px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'12px'}},'›'),
+      // Stats
+      React.createElement('div',{style:{display:'flex',gap:'10px',fontSize:'11px'}},
+        React.createElement('span',{style:{color:'var(--theme-accent)'}},[totalAulas,' aulas'].join('')),
+        React.createElement('span',{style:{color:'#d8a840'}},[totalPersonal,' personal'].join('')),
+        React.createElement('span',{style:{color:'#68d8a0'}},[totalCompleted,'/',totalEvs,' concluídas'].join(''))
+      ),
+      // Filter
+      React.createElement('div',{style:{display:'flex',gap:'4px'}},
+        ['all','scheduled','completed'].map(f=>React.createElement('button',{key:f,
+          onClick:()=>setFilter(f),
+          style:{background:filter===f?'var(--theme-accent)':'transparent',color:filter===f?'var(--theme-accent-text)':'#887060',border:`1px solid ${filter===f?'var(--theme-accent)':'#2a2318'}`,padding:'3px 7px',borderRadius:'4px',cursor:'pointer',fontSize:'10px',fontWeight:700,textTransform:'uppercase'}
+        },f==='all'?'Todos':f==='scheduled'?'Agendado':'Completo'))
+      )
+    ),
+
+    // Grid + pane layout
+    React.createElement('div',{style:{display:'flex',flex:1,minHeight:0,overflow:'hidden'}},
+
+      // Calendar grid
+      React.createElement('div',{style:{flex:selDay?'0 0 60%':'1',minWidth:0,overflowY:'auto',borderRight:selDay?'1px solid #2a2318':'none'}},
+        // Day headers
+        React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:'1px solid #2a2318',position:'sticky',top:0,background:'#0d0b08',zIndex:2}},
+          DAYS_PT_SHORT.map(d=>React.createElement('div',{key:d,style:{padding:'5px 6px',fontSize:'9px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',textAlign:'center',borderRight:'1px solid #2a2318'}},d))
+        ),
+        // Weeks
+        weeks.map((week,wi)=>React.createElement('div',{key:wi,style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:'1px solid #2a2318'}},
+          week.map((day,di)=>day
+            ?React.createElement(CellDay,{key:di,day})
+            :React.createElement('div',{key:di,style:{borderRight:'1px solid #2a2318',background:'rgba(0,0,0,.3)',minHeight:'80px'}})
+          )
+        ))
+      ),
+
+      // Day pane
+      selDay&&React.createElement('div',{style:{flex:'0 0 40%',minWidth:0,overflowY:'auto',background:'#0d0b08'}},
+        React.createElement(DayPane)
+      )
+    ),
+
+    // Event form modal
+    React.createElement(EventForm)
+  );
+}
+
+
+function SchedulePublisher({sessions,events,setEvents,athletes}){
   const dailyRef=useRef();
   const weeklyRef=useRef();
   const exportDailyRef=useRef();
@@ -2148,7 +2582,17 @@ function SchedulePublisher({sessions}){
 
   return React.createElement('div',null,
 
-    // ── controls bar ──
+    // ── Agenda — always visible ──
+    React.createElement('div',{style:{height:'600px',display:'flex',flexDirection:'column',marginBottom:'12px',border:'1px solid #1e1e1e',borderRadius:'8px',overflow:'hidden'}},
+      React.createElement(AgendaView,{
+        sessions,
+        events:events||{},
+        setEvents:setEvents||(()=>{}),
+        athletes:athletes||[]
+      })
+    ),
+
+    // ── controls bar (image export) ──
     React.createElement('div',{className:'pub-controls'},
       // hidden file input
       React.createElement('input',{
@@ -2313,7 +2757,7 @@ function SchedulePublisher({sessions}){
       React.createElement('div',{style:{display:'flex',gap:'6px',marginBottom:'8px',flexWrap:'wrap',alignItems:'center'}},
 React.createElement('button',{type:'button',className:`pvt ${previewTarget==='daily'?'on':''}`,onClick:()=>setPreviewTarget('daily')},'Diário'),
         React.createElement('button',{type:'button',className:`pvt ${previewTarget==='semanal'?'on':''}`,onClick:()=>setPreviewTarget('semanal')},'Semanal'),
-        React.createElement('button',{type:'button',className:`pvt ${previewTarget==='calendar'?'on':''}`,onClick:()=>setPreviewTarget('calendar')},'Calendário'),
+        React.createElement('button',{type:'button',className:`pvt ${previewTarget==='calendar'?'on':''}`,onClick:()=>setPreviewTarget('calendar')},'Exportar Mensal'),
         React.createElement('button',{type:'button',
           className:`pvt ${previewTarget==='mobileA'?'on':''}`,
           style:previewTarget==='mobileA'?{background:'var(--theme-accent)',borderColor:'var(--theme-accent)',color:'var(--theme-accent-text)'}:{color:'var(--theme-accent)',borderColor:'var(--theme-accent)'},
@@ -5718,6 +6162,9 @@ const saveAthletes=d=>{try{localStorage.setItem(LS_ATHLETES,JSON.stringify(d))}c
 const LS_SETTINGS='eagles_settings_v1';
 const LS_REGISTRY='eagles_block_registry_v1';
 const LS_GOALS='eagles_athlete_goals_v1';
+const LS_EVENTS='eagles_events_v1';
+const loadEvents=()=>{try{const d=localStorage.getItem(LS_EVENTS);return d?JSON.parse(d):{}}catch{return{}}};
+const saveEvents=d=>{try{localStorage.setItem(LS_EVENTS,JSON.stringify(d))}catch{}};
 const loadGoalsData=()=>{try{const d=localStorage.getItem(LS_GOALS);return d?JSON.parse(d):{athleteGoals:{},prs:{}};}catch{return{athleteGoals:{},prs:{}};}};
 const saveGoalsData=d=>{try{localStorage.setItem(LS_GOALS,JSON.stringify(d));}catch{}};
 const loadRegistry=()=>{try{const d=localStorage.getItem(LS_REGISTRY);return d?JSON.parse(d):null;}catch{return null;}};
@@ -6228,6 +6675,7 @@ function ResultadosTab({sessions}){
 function App(){
   const [tab,setTab]=useState('creator');
   const [sessions,setSessions]=useState(loadLS);
+  const [events,setEvents]=useState(loadEvents);
   const [saved,setSaved]=useState(false);
   const [energyLevel,setEnergyLevel]=useState(3);
   const [toast,setToast]=useState(null);
@@ -6331,6 +6779,8 @@ function App(){
       });
   },[]);
 
+  useEffect(()=>{saveEvents(events);},[events]);
+
   useEffect(()=>{
     saveLS(sessions);setSaved(true);
     const t=setTimeout(()=>setSaved(false),1400);
@@ -6345,7 +6795,7 @@ function App(){
   // ── Export state as .json ──
   const handleSaveState=(customName)=>{
     const lbcSaved=(()=>{try{const d=localStorage.getItem('eagles_lb_colors_v1');return d?JSON.parse(d):{}}catch{return{}}})();
-    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings(),lbColors:lbcSaved,results:loadResults(),athletes:loadAthletes(),exerciseRegistry:loadRegistry()||{},athleteGoalsData:loadGoalsData()};
+    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings(),lbColors:lbcSaved,results:loadResults(),athletes:loadAthletes(),exerciseRegistry:loadRegistry()||{},athleteGoalsData:loadGoalsData(),events:loadEvents()};
     const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
     const a=document.createElement('a');
     const date=toISO(new Date());
@@ -6387,6 +6837,7 @@ function App(){
         if(parsed.athleteGoalsData&&typeof parsed.athleteGoalsData==='object'){saveGoalsData(parsed.athleteGoalsData);}
         if(parsed.athletes&&Array.isArray(parsed.athletes)&&parsed.athletes.length){saveAthletes(parsed.athletes);}
         if(parsed.results&&Array.isArray(parsed.results)){saveResults(parsed.results);}
+        if(parsed.events&&typeof parsed.events==='object'){saveEvents(parsed.events);}
         // restore publisher settings if present
         if(parsed.settings&&typeof parsed.settings==='object'){
           saveSettings(parsed.settings);
@@ -6499,7 +6950,7 @@ function App(){
         ?React.createElement(ExerciseTab,null)
         :tab==='results'
         ?React.createElement('div',{className:'res-pane'},React.createElement(ResultsTab,{sessions}))
-        :React.createElement('div',{className:'pub-pane'},React.createElement(SchedulePublisher,{sessions}))
+        :React.createElement('div',{className:'pub-pane'},React.createElement(SchedulePublisher,{sessions,events,setEvents,athletes:loadAthletes()}))
     )
   );
 }

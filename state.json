@@ -12869,5 +12869,663 @@
         }
       ]
     }
+  },
+  "events": {
+    "2026-06-02": [
+      {
+        "id": "653db7b28dc85",
+        "date": "2026-06-02",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2a982a",
+        "date": "2026-06-02",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b32dd2d",
+        "date": "2026-06-02",
+        "time": "09:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Jinx",
+        "sessionId": null,
+        "athleteIds": [
+          "19ea85307c31d9886"
+        ],
+        "status": "completed",
+        "notes": ""
+      }
+    ],
+    "2026-06-03": [
+      {
+        "id": "653db7b2ed525",
+        "date": "2026-06-03",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2ef253",
+        "date": "2026-06-03",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2f9efe",
+        "date": "2026-06-03",
+        "time": "09:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Thresh",
+        "sessionId": null,
+        "athleteIds": [
+          "19ea85307c32c8ba2"
+        ],
+        "status": "completed",
+        "notes": ""
+      }
+    ],
+    "2026-06-04": [
+      {
+        "id": "653db7b2aa9a1",
+        "date": "2026-06-04",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b294b48",
+        "date": "2026-06-04",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2e7e0a",
+        "date": "2026-06-04",
+        "time": "09:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Yasuo",
+        "sessionId": null,
+        "athleteIds": [
+          "19ea85307c3922118"
+        ],
+        "status": "completed",
+        "notes": ""
+      }
+    ],
+    "2026-06-05": [
+      {
+        "id": "653db7b32f8a7",
+        "date": "2026-06-05",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2cbe2e",
+        "date": "2026-06-05",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b36b1b4",
+        "date": "2026-06-05",
+        "time": "10:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Lux",
+        "sessionId": null,
+        "athleteIds": [
+          "19ea85307c3dfd7ce"
+        ],
+        "status": "completed",
+        "notes": ""
+      }
+    ],
+    "2026-06-06": [
+      {
+        "id": "653db7b2c03cd",
+        "date": "2026-06-06",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b325283",
+        "date": "2026-06-06",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b33c14d",
+        "date": "2026-06-06",
+        "time": "09:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Vi",
+        "sessionId": null,
+        "athleteIds": [
+          "19ea85307c3ff0041"
+        ],
+        "status": "completed",
+        "notes": ""
+      }
+    ],
+    "2026-06-08": [
+      {
+        "id": "653db7b2b6f9d",
+        "date": "2026-06-08",
+        "time": "09:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Jinx",
+        "sessionId": "19eadd74c3e669873",
+        "athleteIds": [
+          "19ea85307c31d9886"
+        ],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b34b242",
+        "date": "2026-06-08",
+        "time": "10:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Lux",
+        "sessionId": "19eadd74c3f513431",
+        "athleteIds": [
+          "19ea85307c3dfd7ce"
+        ],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b289a47",
+        "date": "2026-06-08",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": "19ea85307c3962c16",
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b348c66",
+        "date": "2026-06-08",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": "19ea85307c3962c16",
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      }
+    ],
+    "2026-06-09": [
+      {
+        "id": "653db7b33dc6a",
+        "date": "2026-06-09",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": "19ea85307c3e08dbf",
+        "athleteIds": [],
+        "status": "completed",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2c9589",
+        "date": "2026-06-09",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": "19ea85307c3e08dbf",
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      }
+    ],
+    "2026-06-10": [
+      {
+        "id": "653db7b35352b",
+        "date": "2026-06-10",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": "19ea85307c3ca0244",
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b33f2d0",
+        "date": "2026-06-10",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": "19ea85307c3ca0244",
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      }
+    ],
+    "2026-06-11": [
+      {
+        "id": "653db7b34302e",
+        "date": "2026-06-11",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": "19ea85307c32f2843",
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2ef3b3",
+        "date": "2026-06-11",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": "19ea85307c32f2843",
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      }
+    ],
+    "2026-06-12": [
+      {
+        "id": "653db7b341e84",
+        "date": "2026-06-12",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": "19ea85307c3d009c2",
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b28a98b",
+        "date": "2026-06-12",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": "19ea85307c3d009c2",
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      }
+    ],
+    "2026-06-16": [
+      {
+        "id": "653db7b36cadb",
+        "date": "2026-06-16",
+        "time": "09:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Jinx",
+        "sessionId": "19eadd74c3e46a6aa",
+        "athleteIds": [
+          "19ea85307c31d9886"
+        ],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2c88d1",
+        "date": "2026-06-16",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b36564c",
+        "date": "2026-06-16",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      }
+    ],
+    "2026-06-17": [
+      {
+        "id": "653db7b31ff13",
+        "date": "2026-06-17",
+        "time": "07:30",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Jinx",
+        "sessionId": "19eadd74c3efe4bbf",
+        "athleteIds": [
+          "19ea85307c31d9886"
+        ],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b35745a",
+        "date": "2026-06-17",
+        "time": "09:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Thresh",
+        "sessionId": "19eadd74c3fdd5aa8",
+        "athleteIds": [
+          "19ea85307c32c8ba2"
+        ],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b34c484",
+        "date": "2026-06-17",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b28f894",
+        "date": "2026-06-17",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      }
+    ],
+    "2026-06-18": [
+      {
+        "id": "653db7b2d5b29",
+        "date": "2026-06-18",
+        "time": "09:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Thresh",
+        "sessionId": "19eadd74c3f1bddf7",
+        "athleteIds": [
+          "19ea85307c32c8ba2"
+        ],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b335527",
+        "date": "2026-06-18",
+        "time": "10:30",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Yasuo",
+        "sessionId": "19eadd74c3f423ab7",
+        "athleteIds": [
+          "19ea85307c3922118"
+        ],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b29ad17",
+        "date": "2026-06-18",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2e4fe6",
+        "date": "2026-06-18",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      }
+    ],
+    "2026-06-19": [
+      {
+        "id": "653db7b2d6af0",
+        "date": "2026-06-19",
+        "time": "08:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Yasuo",
+        "sessionId": "19eadd74c3f19bf73",
+        "athleteIds": [
+          "19ea85307c3922118"
+        ],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b3681fa",
+        "date": "2026-06-19",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2c31e2",
+        "date": "2026-06-19",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      }
+    ],
+    "2026-06-23": [
+      {
+        "id": "653db7b3080bf",
+        "date": "2026-06-23",
+        "time": "09:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Lux",
+        "sessionId": "19eadd74c3feda539",
+        "athleteIds": [
+          "19ea85307c3dfd7ce"
+        ],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b352787",
+        "date": "2026-06-23",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b3086a2",
+        "date": "2026-06-23",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      }
+    ],
+    "2026-06-24": [
+      {
+        "id": "653db7b326e5b",
+        "date": "2026-06-24",
+        "time": "10:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Ekko",
+        "sessionId": null,
+        "athleteIds": [
+          "19ea85307c31e27a5"
+        ],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b3375e4",
+        "date": "2026-06-24",
+        "time": "07:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Manhã",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2cd3a0",
+        "date": "2026-06-24",
+        "time": "18:00",
+        "durationMin": 60,
+        "type": "aula",
+        "label": "Turma Noite",
+        "sessionId": null,
+        "athleteIds": [],
+        "status": "scheduled",
+        "notes": ""
+      }
+    ],
+    "2026-06-25": [
+      {
+        "id": "653db7b30eda0",
+        "date": "2026-06-25",
+        "time": "09:00",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Ahri",
+        "sessionId": null,
+        "athleteIds": [
+          "19ea85307c3139694"
+        ],
+        "status": "scheduled",
+        "notes": ""
+      },
+      {
+        "id": "653db7b2f5439",
+        "date": "2026-06-25",
+        "time": "10:30",
+        "durationMin": 60,
+        "type": "personal",
+        "label": "Vi",
+        "sessionId": null,
+        "athleteIds": [
+          "19ea85307c3ff0041"
+        ],
+        "status": "scheduled",
+        "notes": ""
+      }
+    ]
   }
 }
