@@ -2360,7 +2360,8 @@ function ReportModal({events,sessions,onClose}){
             doc.text(sub,14,y);y+=10;
           });
 
-          const filename=`relatorio-${period.replace(/\s/g,'-').toLowerCase()}.pdf`;
+          const gymSlug=(gymCfg.gymName||'relatorio').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+          const filename=`${gymSlug}-relatorio-${period.replace(/\s/g,'-').toLowerCase()}.pdf`;
           doc.save(filename);
         }catch(err){console.error('PDF error:',err);alert('Erro ao gerar PDF: '+err.message);}
         setGenerating(false);
