@@ -3102,7 +3102,11 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
                     React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'5px'}},
                       done&&React.createElement('i',{className:'ti ti-circle-check',style:{fontSize:'11px',color:'#68d8a0'},'aria-hidden':'true'}),
                       React.createElement('span',{style:{fontSize:'12px',fontWeight:700,color:isPers?'#d8a840':'#c8b090'}},ev.label),
-                      React.createElement('span',{style:{fontSize:'9px',fontWeight:700,padding:'1px 4px',borderRadius:'3px',textTransform:'uppercase',background:isPers?'rgba(216,168,64,.12)':'rgba(74,200,192,.1)',color:isPers?'#d8a840':'var(--theme-accent)'}},isPers?'Personal':'Aula')
+                      React.createElement('span',{style:{fontSize:'9px',fontWeight:700,padding:'1px 4px',borderRadius:'3px',textTransform:'uppercase',background:isPers?'rgba(216,168,64,.12)':'rgba(74,200,192,.1)',color:isPers?'#d8a840':'var(--theme-accent)'}},isPers?'Personal':'Aula'),
+                      (()=>{
+                        const loc=ev.locationId?loadLocations().find(l=>l.id===ev.locationId):null;
+                        return loc?React.createElement('span',{style:{fontSize:'9px',fontWeight:700,padding:'1px 5px',borderRadius:'3px',background:(loc.color||'#555')+'22',color:loc.color||'#aaa',border:`1px solid ${(loc.color||'#555')}44`,maxWidth:'80px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},loc.name):null;
+                      })()
                     ),
                     React.createElement('div',{style:{fontSize:'10px',color:'#554a3a',marginTop:'1px'}},`${ev.time} · ${ev.durationMin}min`)
                   ),
@@ -3280,7 +3284,7 @@ function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}
         weeks.map((week,wi)=>React.createElement('div',{key:wi,className:'agenda-week-row',style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:'1px solid #2a2318'}},
           week.map((day,di)=>day
             ?React.createElement(CellDay,{key:di,day})
-            :React.createElement('div',{key:di,style:{borderRight:'1px solid #2a2318',background:'rgba(0,0,0,.3)',minHeight:'80px'}})
+            :React.createElement('div',{key:di,style:{borderRight:'1px solid #2a2318',background:'transparent',minHeight:'46px'}})
           )
         ))
       ),
