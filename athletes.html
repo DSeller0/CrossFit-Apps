@@ -315,11 +315,11 @@ function sessionsSummaryHTML(athName,results,sessions){
             const rowResult=exRows.find(r=>r.name===ex.name);
             const sc=rowResult?.scale||'';
             const scCol=SCALE_COLORS[sc]||'';
-            return `<div class="sess-ex-row"><span style="flex:1;color:var(--cream)">${ex.sets?ex.sets+'×':''}${ex.reps?ex.reps+' ':''} ${ex.name}</span>${sc?`<span class="sess-ex-scale" style="color:${scCol};background:${scCol}22;border:1px solid ${scCol}44">${sc}</span>`:''}</div>`;
+            return `<div class="sess-ex-row"><span style="flex:1;color:var(--cream)">${ex.name}</span>${sc?`<span class="sess-ex-scale" style="color:${scCol};background:${scCol}22;border:1px solid ${scCol}44">${sc}</span>`:''}</div>`;
           }).join('')}
           ${isPast&&athBl&&athBl.rpe?`<div style="font-size:11px;color:var(--muted);margin-top:4px">RPE ${athBl.rpe}</div>`:''}
           ${isPast&&athBl&&athBl.perfTime?`<div style="font-size:12px;font-weight:700;color:var(--cream);margin-top:4px">${athBl.perfTime}</div>`:''}
-          ${isWod&&isPast?`<a class="lb-link" href="leaderboard.html?wod=${bl.id}&session=${session.id}&date=${date}" target="_blank"><i class="ti ti-trophy"></i> Ver Leaderboard</a>`:''}
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><a style="display:flex;align-items:center;gap:4px;padding:4px 8px;background:rgba(74,200,192,.08);border:1px solid rgba(74,200,192,.3);border-radius:5px;color:var(--accent);font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:.05em" href="schedule_builder_pt_V2.html?editSession=${session.id}&editDate=${date}" target="_blank"><i class="ti ti-edit"></i> Editar Sessão</a><a style="display:flex;align-items:center;gap:4px;padding:4px 8px;background:rgba(216,168,64,.08);border:1px solid rgba(216,168,64,.3);border-radius:5px;color:var(--gold);font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:.05em" href="schedule_builder_pt_V2.html?tab=results&athlete=${selAthlete}&date=${date}" target="_blank"><i class="ti ti-clipboard-list"></i> Lançar Resultado</a></div>
         </div>`;
       }).join('');
       expandHTML=`<div class="sess-expand">${blocksDetail}</div>`;

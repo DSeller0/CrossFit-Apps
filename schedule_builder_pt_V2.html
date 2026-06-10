@@ -6929,6 +6929,22 @@ function App(){
 
   useEffect(()=>{saveEvents(events);},[events]);
 
+  // ── URL param deep-links (?tab=results&athlete=ID&date=DATE, ?editSession=ID&editDate=DATE) ──
+  useEffect(()=>{
+    const p=new URLSearchParams(window.location.search);
+    const tabParam=p.get('tab');
+    const editSessId=p.get('editSession');
+    const editDate=p.get('editDate');
+    if(editSessId&&editDate){
+      // find the session and preload into creator
+      const daySessions=loadLS()[editDate]||[];
+      const sess=daySessions.find(s=>s.id===editSessId);
+      if(sess){setCreatorPreload({...sess,date:editDate,_dateKey:editDate});setTab('creator');}
+    } else if(tabParam){
+      setTab(tabParam);
+    }
+  },[]);
+
   useEffect(()=>{
     saveLS(sessions);setSaved(true);
     const t=setTimeout(()=>setSaved(false),1400);
