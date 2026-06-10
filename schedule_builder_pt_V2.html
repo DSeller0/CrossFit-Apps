@@ -2455,6 +2455,8 @@ function ReportModal({events,sessions,onClose}){
   const [typeFilter,setTypeFilter]=useState({aula:true,personal:true});
   const [locAll,setLocAll]=useState(true);
   const [locSelected,setLocSelected]=useState(()=>new Set());
+  const [athAll,setAthAll]=useState(true);
+  const [athSelected,setAthSelected]=useState(()=>new Set());
   const [statusFilter,setStatusFilter]=useState('completed'); // 'completed'|'all'
   const [showDetails,setShowDetails]=useState(false);
   const [showRate,setShowRate]=useState(true);
@@ -2478,6 +2480,10 @@ function ReportModal({events,sessions,onClose}){
           if(!locSelected.has(ev.locationId))return;
         }
         if(statusFilter==='completed'&&ev.status!=='completed')return;
+        if(!athAll&&ev.type==='personal'){
+          const hasAth=(ev.athleteIds||[]).some(id=>athSelected.has(id));
+          if(!hasAth)return;
+        }
         result.push({...ev,date});
       });
     });
@@ -2487,10 +2493,18 @@ function ReportModal({events,sessions,onClose}){
   // ── Group by location ──────────────────────────────────────────────────────
   function groupByLocation(evs){
     const groups={};
+    const athletes=loadAthletes();
     evs.forEach(ev=>{
-      const locId=ev.locationId||'__unlabelled__';
-      if(!groups[locId])groups[locId]=[];
-      groups[locId].push(ev);
+      let key;
+      if(ev.type==='personal'&&!athAll){
+        // When filtering by athlete, group personal events by athlete name
+        const matchedAth=athletes.find(a=>athSelected.has(a.id)&&(ev.athleteIds||[]).includes(a.id));
+        key=matchedAth?'__ath__'+matchedAth.id:(ev.locationId||'__unlabelled__');
+      } else {
+        key=ev.locationId||'__unlabelled__';
+      }
+      if(!groups[key])groups[key]=[];
+      groups[key].push(ev);
     });
     return groups;
   }
@@ -2576,9 +2590,13 @@ function ReportModal({events,sessions,onClose}){
           let grandTotal=0;let grandCurrency='R$';
           Object.entries(groups).forEach(([locId,levs])=>{
             const loc=locations.find(l=>l.id===locId);
-            const name=loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
+            const athGroupId2=locId.startsWith('__ath__')?locId.slice(7):null;
+            const athGroup2=athGroupId2?loadAthletes().find(a=>a.id===athGroupId2):null;
+            const name=athGroup2?athGroup2.name:loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
             const totalMin=levs.reduce((s,ev)=>s+(ev.durationMin||60),0);
-            const t=calcTotal(levs,loc);
+            const _ag=typeof athGroup2!=='undefined'?athGroup2:typeof athGroup!=='undefined'?athGroup:null;
+            const locForCalc=loc||(_ag?locations.find(l=>l.type==='personal'&&(l.athleteIds||[]).includes(_ag.id)):null);
+          const t=calcTotal(levs,locForCalc);
             if(t){grandTotal+=t.total;grandCurrency=t.currency;}
             summaryRows.push([
               name,
@@ -2605,7 +2623,9 @@ function ReportModal({events,sessions,onClose}){
           // ── Per-location sections ──
           for(const [locId,levs] of Object.entries(groups)){
             const loc=locations.find(l=>l.id===locId);
-            const name=loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
+            const athGroupId2=locId.startsWith('__ath__')?locId.slice(7):null;
+            const athGroup2=athGroupId2?loadAthletes().find(a=>a.id===athGroupId2):null;
+            const name=athGroup2?athGroup2.name:loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
 
             if(y>250){doc.addPage();y=15;}
             doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
@@ -2634,7 +2654,9 @@ function ReportModal({events,sessions,onClose}){
             y=doc.lastAutoTable.finalY+4;
 
             // Subtotal row
-            const t=calcTotal(levs,loc);
+            const _ag=typeof athGroup2!=='undefined'?athGroup2:typeof athGroup!=='undefined'?athGroup:null;
+            const locForCalc=loc||(_ag?locations.find(l=>l.type==='personal'&&(l.athleteIds||[]).includes(_ag.id)):null);
+          const t=calcTotal(levs,locForCalc);
             const totalMin=levs.reduce((s,ev)=>s+(ev.durationMin||60),0);
             doc.setFontSize(9);doc.setFont('helvetica','italic');doc.setTextColor(100,100,100);
             let sub=`${levs.length} ${levs.length!==1?'sessões':'sessão'} · ${fmtDur(totalMin)}`;
@@ -2770,6 +2792,37 @@ function ReportModal({events,sessions,onClose}){
         )
       ),
 
+      // Athlete filter (only shown when personal type is checked)
+      typeFilter.personal&&React.createElement('div',{style:{marginBottom:'12px'}},
+        React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'#d8a840',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'6px'}},'Atletas'),
+        React.createElement('div',{style:{display:'flex',flexWrap:'wrap',gap:'5px'}},
+          React.createElement('button',{
+            type:'button',
+            onClick:()=>{setAthAll(true);setAthSelected(new Set());},
+            style:{padding:'3px 10px',borderRadius:'4px',border:`1px solid ${athAll?'#d8a840':'#2a2318'}`,background:athAll?'rgba(216,168,64,.15)':'transparent',cursor:'pointer',fontSize:'11px',fontWeight:700,color:athAll?'#d8a840':'#555'}
+          },'Todos'),
+          loadAthletes().map(a=>{
+            const active=!athAll&&athSelected.has(a.id);
+            return React.createElement('button',{
+              key:a.id,type:'button',
+              onClick:()=>{
+                setAthAll(false);
+                setAthSelected(prev=>{
+                  const s=new Set(prev);
+                  if(s.has(a.id))s.delete(a.id);else s.add(a.id);
+                  if(s.size===0){setAthAll(true);return new Set();}
+                  return s;
+                });
+              },
+              style:{display:'flex',alignItems:'center',gap:'4px',padding:'3px 8px',borderRadius:'4px',border:`1px solid ${active?(a.color||'#d8a840'):'#2a2318'}`,background:active?`${a.color||'#d8a840'}22`:'transparent',cursor:'pointer',fontSize:'11px',fontWeight:700,color:active?(a.color||'#d8a840'):'#555'}
+            },
+              React.createElement('span',{style:{width:'6px',height:'6px',borderRadius:'50%',background:a.color||'#555',display:'inline-block',flexShrink:0}}),
+              a.name
+            );
+          })
+        )
+      ),
+
       // Options
       React.createElement('div',{style:{marginBottom:'16px',padding:'10px 12px',background:'rgba(255,255,255,.02)',border:'1px solid #2a2318',borderRadius:'6px'}}  ,
         React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'8px'}},'Opções'),
@@ -2789,8 +2842,12 @@ function ReportModal({events,sessions,onClose}){
         React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'#554a3a',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'6px'}},'Pré-visualização'),
         Object.entries(groups).map(([locId,levs])=>{
           const loc=locations.find(l=>l.id===locId);
-          const name=loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
-          const t=calcTotal(levs,loc);
+          const athGroupId=locId.startsWith('__ath__')?locId.slice(7):null;
+          const athGroup=athGroupId?loadAthletes().find(a=>a.id===athGroupId):null;
+          const name=athGroup?athGroup.name:loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
+          const _ag=typeof athGroup2!=='undefined'?athGroup2:typeof athGroup!=='undefined'?athGroup:null;
+            const locForCalc=loc||(_ag?locations.find(l=>l.type==='personal'&&(l.athleteIds||[]).includes(_ag.id)):null);
+          const t=calcTotal(levs,locForCalc);
           const totalMin=levs.reduce((s,ev)=>s+(ev.durationMin||60),0);
           const previewCap=coach.pixTestCap&&Number(coach.pixTestCap)>0?Number(coach.pixTestCap):null;
           const previewAmt=t?(previewCap&&t.total>previewCap?previewCap:t.total):0;
@@ -2818,7 +2875,9 @@ function ReportModal({events,sessions,onClose}){
         showRate&&React.createElement('div',{style:{display:'flex',justifyContent:'flex-end',marginTop:'6px',fontSize:'13px',fontWeight:700,color:'#68d8a0'}},
           'Total: '+Object.entries(groups).reduce((acc,[locId,levs])=>{
             const loc=locations.find(l=>l.id===locId);
-            const t=calcTotal(levs,loc);
+            const _ag=typeof athGroup2!=='undefined'?athGroup2:typeof athGroup!=='undefined'?athGroup:null;
+            const locForCalc=loc||(_ag?locations.find(l=>l.type==='personal'&&(l.athleteIds||[]).includes(_ag.id)):null);
+          const t=calcTotal(levs,locForCalc);
             if(t)acc+= t.total;
             return acc;
           },0).toLocaleString('pt-BR')
@@ -4191,8 +4250,9 @@ function MobileBlockA({bl,fs,bg,colors}){
   const col=colors||{};
   const f=fs||1;
   const pad=Math.round(20*f);
-  const hasLabel=bl.label&&bl.label!=='-';
-  const title=hasLabel?bl.label:bl.type;
+  const _lbl=bl.label&&bl.label!=='-'?bl.label:null;
+  const _typ=bl.type&&bl.type!=='-'?bl.type:null;
+  const title=_lbl&&_typ&&_lbl!==_typ?`${_lbl} · ${_typ}`:_lbl||_typ||'';
   const meta=[bl.rounds&&`${bl.rounds} RDS`, bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
   const loads=[...new Set((bl.exercises||[]).filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio'&&e.intensity?.mode!=='progression').map(e=>fmtIntensity(e.intensity)))];
   const blockBg=bg||APP_CONFIG.mobileEaglesBg||'#000';
@@ -4263,8 +4323,9 @@ function MobileBlockB({bl,fs,colors}){
   const col=colors||{};
   const f=fs||1;
   const pad=Math.round(20*f);
-  const hasLabel=bl.label&&bl.label!=='-';
-  const title=hasLabel?bl.label:bl.type;
+  const _lbl=bl.label&&bl.label!=='-'?bl.label:null;
+  const _typ=bl.type&&bl.type!=='-'?bl.type:null;
+  const title=_lbl&&_typ&&_lbl!==_typ?`${_lbl} · ${_typ}`:_lbl||_typ||'';
   const meta=[bl.rounds&&`${bl.rounds} RDS`, bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
   const loads=[...new Set((bl.exercises||[]).filter(e=>e.name&&fmtIntensity(e.intensity)&&e.intensity?.mode!=='cardio'&&e.intensity?.mode!=='progression').map(e=>fmtIntensity(e.intensity)))];
   return React.createElement('div',{style:{borderBottom:`1px solid ${col.divider||'rgba(0,184,212,0.1)'}`}},
@@ -5494,8 +5555,9 @@ function MobileWeeklySingleDay({date,sessions,f,col,variant,monthNames}){
     s
       ? React.createElement('div',{style:{background:bg}},
           (s.blocks||[]).map(bl=>{
-            const hasLabel=bl.label&&bl.label!=='-';
-            const title=hasLabel?bl.label:bl.type;
+            const _lbl=bl.label&&bl.label!=='-'?bl.label:null;
+            const _typ=bl.type&&bl.type!=='-'?bl.type:null;
+            const title=_lbl&&_typ&&_lbl!==_typ?`${_lbl} · ${_typ}`:_lbl||_typ||'';
             const meta=[bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
             const exNames=(bl.exercises||[]).filter(e=>e.name);
             return React.createElement('div',{key:bl.id},
