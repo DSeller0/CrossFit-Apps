@@ -187,8 +187,8 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .cell-card-mini{display:none}
 .cell-card-full{display:flex;align-items:center}
 @media(max-width:540px){
-  .cell-card-mini{display:flex;align-items:center;gap:2px}
-  .cell-card-full{display:none}
+  .cell-card-mini{display:flex !important;align-items:center;gap:2px}
+  .cell-card-full{display:none !important}
   .agenda-cell{padding:2px 1px}
   .cell-card{padding:1px 2px !important;margin-bottom:1px !important}
 }
@@ -2200,7 +2200,8 @@ function ReportModal({events,sessions,onClose}){
   const [rangeFrom,setRangeFrom]=useState(toISO(now));
   const [rangeTo,setRangeTo]=useState(toISO(now));
   const [typeFilter,setTypeFilter]=useState({aula:true,personal:true});
-  const [locFilter,setLocFilter]=useState(()=>Object.fromEntries((loadLocations()).map(l=>[l.id,true])));
+  const [locAll,setLocAll]=useState(true);
+  const [locSelected,setLocSelected]=useState(()=>new Set());
   const [statusFilter,setStatusFilter]=useState('completed'); // 'completed'|'all'
   const [showDetails,setShowDetails]=useState(false);
   const [showRate,setShowRate]=useState(true);
@@ -2218,7 +2219,10 @@ function ReportModal({events,sessions,onClose}){
       if(date<from||date>to)return;
       evs.forEach(ev=>{
         if(!typeFilter[ev.type])return;
-        if(ev.locationId&&!locFilter[ev.locationId])return;
+        if(!locAll){
+          if(!ev.locationId)return; // unlabelled events excluded when filtering by location
+          if(!locSelected.has(ev.locationId))return;
+        }
         if(statusFilter==='completed'&&ev.status!=='completed')return;
         result.push({...ev,date});
       });
@@ -2419,15 +2423,31 @@ function ReportModal({events,sessions,onClose}){
 
       // Location filter
       locations.length>0&&React.createElement('div',{style:{marginBottom:'12px'}},
-        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}},
-          React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em'}},'Locais'),
-          React.createElement('button',{type:'button',onClick:()=>setLocFilter(Object.fromEntries(locations.map(l=>[l.id,true]))),style:{background:'transparent',border:'none',color:'#555',fontSize:'10px',cursor:'pointer'}},'Todos')
-        ),
+        React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'6px'}},'Locais'),
         React.createElement('div',{style:{display:'flex',flexWrap:'wrap',gap:'5px'}},
-          locations.map(l=>React.createElement('label',{key:l.id,style:{display:'flex',alignItems:'center',gap:'5px',padding:'3px 8px',borderRadius:'4px',border:`1px solid ${locFilter[l.id]?(l.color||'var(--theme-accent)'):'#2a2318'}`,background:locFilter[l.id]?`${l.color||'#4ac8c0'}18`:'transparent',cursor:'pointer',fontSize:'11px',color:locFilter[l.id]?(l.color||'var(--theme-accent)'):'#555'}},
-            React.createElement('input',{type:'checkbox',checked:!!locFilter[l.id],onChange:()=>setLocFilter(p=>({...p,[l.id]:!p[l.id]})),style:{display:'none'}}),
-            l.name
-          ))
+          // Todos pill
+          React.createElement('button',{
+            type:'button',
+            onClick:()=>{setLocAll(true);setLocSelected(new Set());},
+            style:{padding:'3px 10px',borderRadius:'4px',border:`1px solid ${locAll?'var(--theme-accent)':'#2a2318'}`,background:locAll?'rgba(74,200,192,.15)':'transparent',cursor:'pointer',fontSize:'11px',fontWeight:700,color:locAll?'var(--theme-accent)':'#555'}
+          },'Todos'),
+          // Individual location pills
+          locations.map(l=>{
+            const active=!locAll&&locSelected.has(l.id);
+            return React.createElement('button',{
+              key:l.id,type:'button',
+              onClick:()=>{
+                setLocAll(false);
+                setLocSelected(prev=>{
+                  const s=new Set(prev);
+                  if(s.has(l.id))s.delete(l.id);else s.add(l.id);
+                  if(s.size===0){setLocAll(true);return new Set();}
+                  return s;
+                });
+              },
+              style:{padding:'3px 10px',borderRadius:'4px',border:`1px solid ${active?(l.color||'var(--theme-accent)'):'#2a2318'}`,background:active?`${l.color||'#4ac8c0'}22`:'transparent',cursor:'pointer',fontSize:'11px',fontWeight:700,color:active?(l.color||'var(--theme-accent)'):'#555'}
+            },l.name);
+          })
         )
       ),
 
@@ -2627,7 +2647,7 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
         if(card.kind==='session'){
           const s=card.data;
           return React.createElement('div',{key:'s'+ci,className:'cell-card',style:{marginBottom:'2px',padding:'2px 4px',borderRadius:'3px',borderLeft:'2px solid var(--theme-accent)',background:'rgba(74,200,192,.06)'}},
-            React.createElement('div',{className:'cell-card-full',style:{fontSize:'9px',fontWeight:700,color:'var(--theme-accent)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},
+            React.createElement('div',{className:'cell-card-full',style:{fontSize:'9px',fontWeight:700,color:'var(--theme-accent)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',alignItems:'center'}},
               React.createElement('i',{className:'ti ti-calendar-event',style:{fontSize:'8px',marginRight:'2px'},'aria-hidden':'true'}),
               s.mainTraining||'Sessão'
             ),
@@ -2642,14 +2662,14 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
         const borderCol=isPers?'#d8a840':'var(--theme-accent)';
         const ath=isPers&&ev.athleteIds?.[0]?athletes.find(a=>a.id===ev.athleteIds[0]):null;
         return React.createElement('div',{key:'e'+ci,className:'cell-card',style:{marginBottom:'2px',padding:'2px 4px',borderRadius:'3px',borderLeft:`2px solid ${borderCol}`,background:isPers?'rgba(216,168,64,.07)':'rgba(74,200,192,.06)',opacity:done?.75:1}},
-          React.createElement('div',{className:'cell-card-full',style:{display:'flex',alignItems:'center',gap:'3px'}},
+          React.createElement('div',{className:'cell-card-full',style:{alignItems:'center',gap:'3px'}},
             done&&React.createElement('span',{style:{fontSize:'8px',color:'#68d8a0'}},'✓'),
             React.createElement('span',{style:{fontSize:'9px',color:'#888'}},ev.time),
             React.createElement('span',{style:{fontSize:'9px',fontWeight:700,color:isPers?'#d8a840':'#c8b090',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:'70px'}},
               ath?React.createElement('span',null,React.createElement('span',{style:{width:'5px',height:'5px',borderRadius:'50%',background:ath.color,display:'inline-block',marginRight:'2px'}}),ev.label):ev.label
             )
           ),
-          React.createElement('div',{className:'cell-card-mini',style:{display:'flex',alignItems:'center',gap:'2px'}},
+          React.createElement('div',{className:'cell-card-mini',style:{alignItems:'center',gap:'2px'}},
             done&&React.createElement('span',{style:{fontSize:'8px',color:'#68d8a0'}},'✓'),
             React.createElement('span',{style:{fontSize:'9px',color:'#666'}},ev.time),
             React.createElement('span',{style:{width:'5px',height:'5px',borderRadius:'50%',background:ath?ath.color:borderCol,display:'inline-block',flexShrink:0}})
