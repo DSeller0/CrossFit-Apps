@@ -2042,6 +2042,123 @@ function LocaisTab(){
 
   const sel=locs.find(l=>l.id===selLoc)||null;
 
+  const isMobile=useIsMobile();
+  const [expandedLoc,setExpandedLoc]=useState(null);
+
+  // ── Mobile accordion render ────────────────────────────────────────────────
+  if(isMobile) return React.createElement('div',{style:{padding:'10px',paddingBottom:'70px'}},
+
+    confirmDel&&React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}},
+      React.createElement('div',{style:{background:'#0d0d0d',border:'1px solid #3a1010',borderRadius:'10px',padding:'20px',width:'300px',textAlign:'center'}},
+        React.createElement('i',{className:'ti ti-alert-triangle',style:{fontSize:'28px',color:'#e05050',display:'block',marginBottom:'10px'}}),
+        React.createElement('div',{style:{fontSize:'14px',color:'#ccc',fontWeight:700,marginBottom:'6px'}},`Remover "${locs.find(l=>l.id===confirmDel)?.name}"?`),
+        React.createElement('div',{style:{fontSize:'12px',color:'#555',marginBottom:'16px'}},'Eventos vinculados perdem a referência ao local.'),
+        React.createElement('div',{style:{display:'flex',gap:'8px'}},
+          React.createElement('button',{onClick:()=>deleteLoc(confirmDel),style:{flex:1,background:'#3a1010',border:'1px solid #6a2020',color:'#e05050',padding:'8px',borderRadius:'6px',cursor:'pointer',fontSize:'13px',fontWeight:700}},'Remover'),
+          React.createElement('button',{onClick:()=>setConfirmDel(null),style:{flex:1,background:'transparent',border:'1px solid #2e2e2e',color:'#888',padding:'8px',borderRadius:'6px',cursor:'pointer',fontSize:'13px'}},'Cancelar')
+        )
+      )
+    ),
+
+    showForm&&React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'},onClick:()=>{setShowForm(false);setEditId(null);}},
+      React.createElement('div',{style:{background:'#0d0d0d',border:'1px solid #2e2e2e',borderRadius:'10px',padding:'18px',width:'340px',maxWidth:'92vw'},onClick:e=>e.stopPropagation()},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}},
+          React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#ccc'}},editId?'Editar local':'Novo local'),
+          React.createElement('button',{onClick:()=>{setShowForm(false);setEditId(null);},style:{background:'transparent',border:'none',color:'#555',cursor:'pointer',fontSize:'16px'}},'✕')
+        ),
+        React.createElement('div',{style:{marginBottom:'10px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Nome'),
+          React.createElement('input',{value:form.name,onChange:e=>setF('name',e.target.value),placeholder:'ex: Box 01',style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+        ),
+        React.createElement('div',{style:{marginBottom:'10px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Tipo'),
+          React.createElement('div',{style:{display:'flex',gap:'6px'}},
+            ['box','personal'].map(t=>React.createElement('button',{key:t,type:'button',onClick:()=>setF('type',t),style:{flex:1,padding:'6px',borderRadius:'5px',border:`1px solid ${form.type===t?'var(--theme-accent)':'#2e2e2e'}`,background:form.type===t?'rgba(74,200,192,.1)':'transparent',color:form.type===t?'var(--theme-accent)':'#555',cursor:'pointer',fontSize:'12px',fontWeight:700,textTransform:'uppercase'}},t==='box'?'Aula / Box':'Personal'))
+          )
+        ),
+        React.createElement('div',{style:{display:'flex',gap:'8px',marginBottom:'10px'}},
+          React.createElement('div',{style:{flex:'0 0 54px'}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Moeda'),
+            React.createElement('input',{value:form.currency,onChange:e=>setF('currency',e.target.value),style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 6px',borderRadius:'5px',fontSize:'13px'}})
+          ),
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Taxa'),
+            React.createElement('input',{type:'number',value:form.rate,onChange:e=>setF('rate',e.target.value),placeholder:'0',min:0,style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+          ),
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Por'),
+            React.createElement('select',{value:form.rateUnit,onChange:e=>setF('rateUnit',e.target.value),style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 6px',borderRadius:'5px',fontSize:'12px'}},
+              React.createElement('option',{value:'per_session'},'Sessão'),
+              React.createElement('option',{value:'per_hour'},'Hora')
+            )
+          )
+        ),
+        React.createElement('div',{style:{marginBottom:'14px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'5px'}},'Cor'),
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+            React.createElement('div',{style:{width:'26px',height:'26px',borderRadius:'50%',background:form.color,cursor:'pointer',border:'2px solid #2e2e2e',flexShrink:0},onClick:()=>document.getElementById('loc-color-picker-mob')?.click()}),
+            React.createElement('input',{type:'color',id:'loc-color-picker-mob',value:form.color,onChange:e=>setF('color',e.target.value),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
+            React.createElement('input',{type:'text',value:form.color,onChange:e=>{if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))setF('color',e.target.value);},style:{flex:1,background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+          )
+        ),
+        React.createElement('button',{onClick:saveLoc,style:{width:'100%',background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'9px',borderRadius:'6px',cursor:'pointer',fontSize:'13px',fontWeight:700}},editId?'Salvar alterações':'Adicionar local')
+      )
+    ),
+
+    // Coach profile
+    React.createElement('div',{style:{marginBottom:'12px',padding:'12px',background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px'}},
+      React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'8px'}},'Perfil do Coach'),
+      ['name','contact','phone'].map(k=>React.createElement('input',{key:k,
+        value:coach[k]||'',onChange:e=>setCoach(p=>({...p,[k]:e.target.value})),
+        placeholder:k==='name'?'Nome do coach':k==='contact'?'E-mail':'Telefone',
+        style:{width:'100%',background:'#0d0d0d',border:'1px solid #1e1e1e',color:'#ccc',padding:'6px 8px',borderRadius:'4px',fontSize:'12px',marginBottom:'4px'}
+      }))
+    ),
+
+    // Location accordion
+    React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}},
+      React.createElement('span',{style:{fontSize:'11px',fontWeight:700,color:'#888',textTransform:'uppercase',letterSpacing:'.07em'}},'Locais'),
+      React.createElement('button',{type:'button',onClick:()=>{setEditId(null);setForm({name:'',type:'box',color:'#4ac8c0',rate:'',rateUnit:'per_session',currency:'R$'});setShowForm(true);},style:{background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'4px 10px',borderRadius:'4px',cursor:'pointer',fontSize:'11px',fontWeight:700,display:'flex',alignItems:'center',gap:'3px'}},React.createElement('i',{className:'ti ti-plus'}),' Novo')
+    ),
+
+    locs.length===0
+      ?React.createElement('div',{style:{padding:'20px',textAlign:'center',fontSize:'12px',color:'#333'}},'Nenhum local cadastrado.')
+      :locs.map(l=>{
+          const isExp=expandedLoc===l.id;
+          return React.createElement('div',{key:l.id,style:{marginBottom:'4px',borderRadius:'7px',overflow:'hidden',border:`1px solid ${isExp?l.color+'55':'#1e1e1e'}`,borderLeft:`3px solid ${l.color||'#555'}`}},
+            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',padding:'9px 10px',background:isExp?'#161616':'#111',cursor:'pointer'},
+              onClick:()=>setExpandedLoc(isExp?null:l.id)},
+              React.createElement('div',{style:{width:'9px',height:'9px',borderRadius:'50%',background:l.color||'#555',flexShrink:0}}),
+              React.createElement('span',{style:{flex:1,fontSize:'13px',fontWeight:600,color:isExp?'#fff':'#bbb',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},l.name),
+              React.createElement('span',{style:{fontSize:'9px',fontWeight:700,padding:'1px 4px',borderRadius:'3px',textTransform:'uppercase',background:l.type==='box'?'rgba(74,200,192,.1)':'rgba(216,168,64,.1)',color:l.type==='box'?'var(--theme-accent)':'#d8a840',marginRight:'2px'}},l.type==='box'?'Box':'Personal'),
+              React.createElement('button',{type:'button',onClick:e=>{e.stopPropagation();startEdit(l);},style:{background:'transparent',border:'1px solid #2e2e2e',color:'#555',padding:'2px 5px',borderRadius:'3px',cursor:'pointer'}},React.createElement('i',{className:'ti ti-edit',style:{fontSize:'11px'}})),
+              React.createElement('button',{type:'button',onClick:e=>{e.stopPropagation();setConfirmDel(l.id);},style:{background:'transparent',border:'1px solid #2e2e2e',color:'#5a1a1a',padding:'2px 5px',borderRadius:'3px',cursor:'pointer'}},React.createElement('i',{className:'ti ti-trash',style:{fontSize:'11px'}})),
+              React.createElement('i',{className:`ti ti-chevron-${isExp?'down':'right'}`,style:{color:'#444',fontSize:'13px',flexShrink:0}})
+            ),
+            isExp&&React.createElement('div',{style:{padding:'10px',background:'#0d0d0d',borderTop:'1px solid #1e1e1e'}},
+              React.createElement('div',{style:{fontSize:'11px',color:'#555',marginBottom:'8px'}},`${l.rate?(l.currency||'R$')+' '+l.rate+'/'+(l.rateUnit==='per_hour'?'hora':'sessão'):'Sem taxa configurada'}`),
+              l.type==='box'
+                ?React.createElement('div',{style:{fontSize:'12px',color:'#555',fontStyle:'italic',padding:'10px',background:'#111',borderRadius:'5px',border:'1px solid #1e1e1e'}},
+                    React.createElement('i',{className:'ti ti-info-circle',style:{marginRight:'5px',color:'#888'}}),
+                    'Aulas em grupo. Atletas registrados via resultado de cada aula.')
+                :React.createElement('div',null,
+                    React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'6px'}},'Atletas vinculados'),
+                    athletes.map(a=>{
+                      const checked=(l.athleteIds||[]).includes(a.id);
+                      return React.createElement('label',{key:a.id,style:{display:'flex',alignItems:'center',gap:'8px',padding:'6px 8px',borderRadius:'5px',cursor:'pointer',background:checked?'rgba(74,200,192,.06)':'transparent',border:`1px solid ${checked?'rgba(74,200,192,.2)':'#1e1e1e'}`,marginBottom:'3px'}},
+                        React.createElement('input',{type:'checkbox',checked,onChange:()=>toggleAthlete(l.id,a.id),style:{accentColor:a.color||'var(--theme-accent)',width:'14px',height:'14px'}}),
+                        React.createElement('span',{style:{width:'8px',height:'8px',borderRadius:'50%',background:a.color||'#555',flexShrink:0}}),
+                        React.createElement('span',{style:{fontSize:'12px',color:'#ccc',flex:1}},a.name),
+                        React.createElement('span',{style:{fontSize:'11px',color:'#555'}},a.level||'')
+                      );
+                    })
+                  )
+            )
+          );
+        })
+  );
+
+  // ── desktop layout ─────────────────────────────────────────────────────────
   return React.createElement('div',{style:{display:'flex',gap:'0',height:'100%',minHeight:'500px'}},
 
     // ── Confirm delete modal ─────────────────────────────────────────────────
@@ -6340,6 +6457,20 @@ function AthleteTab({sessions,results,onEditSession,onLogResult}){
 
 
 // ── Exercise Registry Tab ────────────────────────────────────────────────────
+
+// ── useIsMobile hook ──────────────────────────────────────────────────────────
+function useIsMobile(breakpoint=600){
+  const [isMobile,setIsMobile]=useState(()=>typeof window!=='undefined'&&window.innerWidth<=breakpoint);
+  useEffect(()=>{
+    const mq=window.matchMedia(`(max-width:${breakpoint}px)`);
+    const handler=e=>setIsMobile(e.matches);
+    mq.addEventListener('change',handler);
+    setIsMobile(mq.matches);
+    return()=>mq.removeEventListener('change',handler);
+  },[breakpoint]);
+  return isMobile;
+}
+
 function ExerciseTab(){
   const [registry,setRegistryState]=useState(()=>initRegistry());
   const [selBlock,setSelBlock]=useState(null);
@@ -6353,6 +6484,8 @@ function ExerciseTab(){
   const [dragExIdx,setDragExIdx]=useState(null);
   const [dragOverExIdx,setDragOverExIdx]=useState(null);
   const [blockColors_,setBlockColors_]=useState(()=>({...APP_CONFIG.blockColors}));
+  const isMobile=useIsMobile();
+  const [expandedBlock,setExpandedBlock]=useState(null);
 
   const persist=(reg,cols)=>{
     saveRegistry(reg);
@@ -6512,6 +6645,148 @@ function ExerciseTab(){
   const exs=selBlock?(registry[selBlock]||[]):[];
   const blockCol=selBlock?(blockColors_[selBlock]||APP_CONFIG.themeAccent||'#00b8d4'):'#888';
 
+  // ── shared: exercise row renderer ─────────────────────────────────────────
+  const renderExRow=(blockName,ex,ei,exArr)=>React.createElement('div',{key:ei,
+    draggable:true,
+    onDragStart:()=>setDragExIdx(ei),
+    onDragEnd:()=>{setDragExIdx(null);setDragOverExIdx(null);},
+    onDragOver:e=>{e.preventDefault();setDragOverExIdx(ei);},
+    onDrop:e=>{e.preventDefault();reorderExs(dragExIdx,ei);setDragOverExIdx(null);},
+    style:{display:'flex',alignItems:'center',gap:'8px',padding:'7px 10px',
+      background:'#0d0d0d',border:`1px solid ${dragOverExIdx===ei?'var(--theme-accent)':'#1e1e1e'}`,
+      borderRadius:'5px',transition:'all .1s'}
+  },
+    React.createElement('i',{className:'ti ti-grip-vertical',style:{color:'#2a2a2a',fontSize:'13px',flexShrink:0,cursor:'grab'}}),
+    editingEx?.blockName===blockName&&editingEx?.idx===ei
+      ?React.createElement('input',{autoFocus:true,className:'ex-input',value:editingEx.newName,style:{flex:1},
+          onChange:e=>setEditingEx(p=>({...p,newName:e.target.value})),
+          onKeyDown:e=>{if(e.key==='Enter')renameEx(blockName,ei,editingEx.newName);if(e.key==='Escape')setEditingEx(null);}})
+      :React.createElement('span',{style:{flex:1,fontSize:'13px',color:'#ddd'}},ex),
+    editingEx?.blockName===blockName&&editingEx?.idx===ei
+      ?React.createElement('button',{type:'button',className:'b bsm',style:{padding:'2px 6px',minHeight:'20px',fontSize:'11px'},
+          onClick:()=>renameEx(blockName,ei,editingEx.newName)},React.createElement('i',{className:'ti ti-check'}))
+      :React.createElement('button',{type:'button',className:'b bd bsm',style:{padding:'2px 6px',minHeight:'20px',fontSize:'11px',opacity:.6},
+          onClick:()=>setEditingEx({blockName,idx:ei,newName:ex}),title:'Renomear'},React.createElement('i',{className:'ti ti-pencil'})),
+    editingEx?.blockName!==blockName||editingEx?.idx!==ei
+      ?React.createElement('button',{type:'button',className:'b bd bsm',style:{padding:'2px 6px',minHeight:'20px',fontSize:'11px',opacity:.5},
+          onClick:()=>deleteEx(blockName,ei),title:'Remover'},React.createElement('i',{className:'ti ti-trash'}))
+      :null
+  );
+
+  // ── shared: block row for mobile accordion ─────────────────────────────────
+  const renderMobileBlockRow=(name,bi)=>{
+    const isExp=expandedBlock===name;
+    const col=blockColors_[name]||'#555';
+    const blockExs=registry[name]||[];
+    const canDrag=expandedBlock===null;
+    return React.createElement('div',{key:name,
+      draggable:canDrag,
+      onDragStart:canDrag?()=>setDragBlockIdx(bi):undefined,
+      onDragEnd:canDrag?()=>{setDragBlockIdx(null);setDragOverBlockIdx(null);}:undefined,
+      onDragOver:canDrag?e=>{e.preventDefault();setDragOverBlockIdx(bi);}:undefined,
+      onDrop:canDrag?e=>{e.preventDefault();reorderBlocks(dragBlockIdx,bi);setDragOverBlockIdx(null);}:undefined,
+      style:{marginBottom:'4px',borderRadius:'7px',overflow:'hidden',
+        border:`1px solid ${dragOverBlockIdx===bi?'var(--theme-accent)':isExp?col+'55':'#1e1e1e'}`,
+        borderLeft:`3px solid ${col}`}
+    },
+      // Header row
+      React.createElement('div',{
+        style:{display:'flex',alignItems:'center',gap:'8px',padding:'9px 10px',
+          background:isExp?'#161616':'#111',cursor:'pointer'},
+        onClick:()=>{setExpandedBlock(isExp?null:name);setSelBlock(name);setEditingBlock(null);}
+      },
+        React.createElement('i',{className:'ti ti-grip-vertical',
+          style:{color:canDrag?'#333':'#1e1e1e',fontSize:'14px',flexShrink:0,cursor:canDrag?'grab':'default'}}),
+        React.createElement('div',{style:{width:'10px',height:'10px',borderRadius:'50%',background:col,flexShrink:0}}),
+        editingBlock?.name===name
+          ?React.createElement(React.Fragment,null,
+              React.createElement('div',{style:{width:'20px',height:'20px',borderRadius:'3px',background:editingBlock.newColor||'#888',border:'1px solid #444',cursor:'pointer',flexShrink:0},
+                onClick:e=>{e.stopPropagation();document.getElementById('mob-edit-block-color-'+name)?.click();}}),
+              React.createElement('input',{type:'color',id:'mob-edit-block-color-'+name,
+                value:/^#[0-9a-fA-F]{6}$/.test(editingBlock.newColor||'')?editingBlock.newColor:'#888888',
+                style:{opacity:0,position:'absolute',pointerEvents:'none'},
+                onChange:e=>setEditingBlock(p=>({...p,newColor:e.target.value}))}),
+              React.createElement('input',{autoFocus:true,className:'ex-input',value:editingBlock.newName,style:{flex:1},
+                onChange:e=>setEditingBlock(p=>({...p,newName:e.target.value})),
+                onClick:e=>e.stopPropagation(),
+                onKeyDown:e=>{if(e.key==='Enter'){e.stopPropagation();renameBlock(name,editingBlock.newName,editingBlock.newColor);}if(e.key==='Escape')setEditingBlock(null);}})
+            )
+          :React.createElement('span',{style:{flex:1,fontSize:'13px',fontWeight:600,color:isExp?'#fff':'#bbb',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},name),
+        React.createElement('span',{style:{fontSize:'10px',color:'#444',marginRight:'4px'}},blockExs.length),
+        editingBlock?.name===name
+          ?React.createElement('button',{type:'button',className:'b bsm',style:{padding:'2px 6px',minHeight:'20px',fontSize:'11px'},
+              onClick:e=>{e.stopPropagation();renameBlock(name,editingBlock.newName,editingBlock.newColor);}},React.createElement('i',{className:'ti ti-check'}))
+          :React.createElement('button',{type:'button',className:'b bd bsm',style:{padding:'2px 5px',minHeight:'20px',fontSize:'11px',opacity:.6},
+              onClick:e=>{e.stopPropagation();setEditingBlock({name,newName:name,newColor:blockColors_[name]||'#888888'});},title:'Renomear'},React.createElement('i',{className:'ti ti-pencil'})),
+        editingBlock?.name!==name&&React.createElement('button',{type:'button',className:'b bd bsm',style:{padding:'2px 5px',minHeight:'20px',fontSize:'11px',opacity:.5},
+          onClick:e=>{e.stopPropagation();deleteBlock(name);},title:'Remover'},React.createElement('i',{className:'ti ti-trash'})),
+        React.createElement('i',{className:`ti ti-chevron-${isExp?'down':'right'}`,style:{color:'#444',fontSize:'13px',flexShrink:0}})
+      ),
+      // Expanded body
+      isExp&&React.createElement('div',{style:{padding:'8px',background:'#0d0d0d',borderTop:'1px solid #1e1e1e'}},
+        blockExs.length===0
+          ?React.createElement('div',{style:{padding:'12px',textAlign:'center',color:'#333',fontSize:'12px'}},'Nenhum exercício. Adicione abaixo.')
+          :React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'3px',marginBottom:'8px'}},
+              blockExs.map((ex,ei)=>renderExRow(name,ex,ei,blockExs))
+            ),
+        // Sort A→Z + add inline
+        React.createElement('div',{style:{display:'flex',gap:'6px',alignItems:'center',borderTop:'1px solid #1e1e1e',paddingTop:'8px'}},
+          React.createElement('input',{className:'ex-input',placeholder:'Adicionar exercício...',value:selBlock===name?newExName:'',
+            style:{flex:1},
+            onChange:e=>setNewExName(e.target.value),
+            onFocus:()=>setSelBlock(name),
+            onKeyDown:e=>{if(e.key==='Enter'){setSelBlock(name);addEx();}}}),
+          React.createElement('button',{type:'button',className:'b bsec',style:{padding:'5px 8px',flexShrink:0},
+            onClick:()=>{setSelBlock(name);setTimeout(addEx,0);},
+            disabled:!newExName.trim()},React.createElement('i',{className:'ti ti-plus'})),
+          React.createElement('button',{type:'button',className:'b bsm',style:{padding:'5px 7px',flexShrink:0},
+            onClick:()=>{setSelBlock(name);setTimeout(sortExsAZ,0);},title:'A→Z'},
+            React.createElement('i',{className:'ti ti-sort-ascending-letters'}))
+        )
+      )
+    );
+  };
+
+  // ── mobile layout ──────────────────────────────────────────────────────────
+  if(isMobile) return React.createElement('div',{style:{padding:'10px',paddingBottom:'70px'}},
+    // Header
+    React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px'}},
+      React.createElement('div',null,
+        React.createElement('span',{style:{fontSize:'11px',fontWeight:700,color:'#888',textTransform:'uppercase',letterSpacing:'.07em'}},'Tipos de Bloco'),
+        expandedBlock===null&&React.createElement('span',{style:{fontSize:'10px',color:'#333',marginLeft:'8px'}},'⠿ arrastar para reordenar')
+      ),
+      React.createElement('button',{type:'button',className:'b bsm',onClick:sortBlocksAZ,title:'Ordenar A→Z'},
+        React.createElement('i',{className:'ti ti-sort-ascending-letters'}))
+    ),
+    // Accordion list
+    React.createElement('div',{style:{display:'flex',flexDirection:'column'}},
+      blockKeys.map((name,bi)=>renderMobileBlockRow(name,bi))
+    ),
+    // Add new block
+    React.createElement('div',{style:{marginTop:'12px',padding:'10px',background:'#111',border:'1px solid #1e1e1e',borderRadius:'7px',display:'flex',flexDirection:'column',gap:'6px'}},
+      React.createElement('span',{style:{fontSize:'10px',fontWeight:700,color:'#888',textTransform:'uppercase',letterSpacing:'.07em'}},'Novo Tipo de Bloco'),
+      React.createElement('div',{style:{display:'flex',gap:'6px',alignItems:'center'}},
+        React.createElement('div',{style:{width:'28px',height:'28px',borderRadius:'5px',background:newBlockColor,border:'1px solid #333',cursor:'pointer',flexShrink:0},
+          onClick:()=>document.getElementById('mob-new-block-color')?.click()}),
+        React.createElement('input',{type:'color',id:'mob-new-block-color',value:newBlockColor,
+          onChange:e=>setNewBlockColor(e.target.value),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
+        React.createElement('input',{className:'ex-input',placeholder:'Nome do tipo...',value:newBlockName,style:{flex:1},
+          onChange:e=>setNewBlockName(e.target.value),
+          onKeyDown:e=>{if(e.key==='Enter')addBlock();}}),
+        React.createElement('button',{type:'button',className:'b bsec',onClick:addBlock,disabled:!newBlockName.trim(),style:{flexShrink:0}},
+          React.createElement('i',{className:'ti ti-plus'}))
+      )
+    ),
+    // Footer info
+    React.createElement('div',{style:{position:'fixed',bottom:0,left:0,right:0,background:'#0a0a0a',borderTop:'1px solid #1e1e1e',padding:'8px 14px',display:'flex',alignItems:'center',gap:'10px',zIndex:50}},
+      React.createElement('span',{style:{fontSize:'11px',color:'#555',flex:1}},
+        `${Object.keys(registry).length} tipos · ${Object.values(registry).reduce((a,v)=>a+v.length,0)} exercícios`),
+      React.createElement('button',{type:'button',className:'b bsec',onClick:saveConfig},
+        React.createElement('i',{className:'ti ti-download'}),' Salvar config.json')
+    )
+  );
+
+  // ── desktop layout ─────────────────────────────────────────────────────────
   return React.createElement('div',{style:{display:'flex',gap:'12px',padding:'12px',height:'calc(100vh - 120px)',minHeight:'400px'}},
     // ── Left panel: Block types ──────────────────────────────────────────────
     React.createElement('div',{style:{width:'240px',flexShrink:0,display:'flex',flexDirection:'column',gap:'8px',paddingBottom:'60px'}},
@@ -6618,45 +6893,7 @@ function ExerciseTab(){
           React.createElement('div',{style:{flex:1,overflowY:'auto',display:'flex',flexDirection:'column',gap:'4px'}},
             exs.length===0
               ?React.createElement('div',{style:{padding:'20px',textAlign:'center',color:'#333',fontSize:'13px'}},'Nenhum exercício. Adicione abaixo.')
-              :exs.map((ex,ei)=>
-                React.createElement('div',{key:ei,
-                  draggable:true,
-                  onDragStart:()=>setDragExIdx(ei),
-                  onDragEnd:()=>{setDragExIdx(null);setDragOverExIdx(null);},
-                  onDragOver:e=>{e.preventDefault();setDragOverExIdx(ei);},
-                  onDrop:e=>{e.preventDefault();reorderExs(dragExIdx,ei);setDragOverExIdx(null);},
-                  style:{
-                    display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',
-                    background:'#111',
-                    border:`1px solid ${dragOverExIdx===ei?'var(--theme-accent)':'#1e1e1e'}`,
-                    borderRadius:'6px',transition:'all .1s'
-                  }
-                },
-                  React.createElement('i',{className:'ti ti-grip-vertical',style:{color:'#333',fontSize:'14px',flexShrink:0,cursor:'grab'}}),
-                  editingEx?.blockName===selBlock&&editingEx?.idx===ei
-                    ?React.createElement('input',{
-                        autoFocus:true,className:'ex-input',value:editingEx.newName,style:{flex:1},
-                        onChange:e=>setEditingEx(p=>({...p,newName:e.target.value})),
-                        onKeyDown:e=>{
-                          if(e.key==='Enter') renameEx(selBlock,ei,editingEx.newName);
-                          if(e.key==='Escape') setEditingEx(null);
-                        }
-                      })
-                    :React.createElement('span',{style:{flex:1,fontSize:'13px',color:'#ddd'}},ex),
-                  editingEx?.blockName===selBlock&&editingEx?.idx===ei
-                    ?React.createElement('button',{type:'button',className:'b bsm',style:{padding:'2px 6px',minHeight:'20px',fontSize:'11px'},
-                        onClick:()=>renameEx(selBlock,ei,editingEx.newName)},
-                        React.createElement('i',{className:'ti ti-check'}))
-                    :React.createElement('button',{type:'button',className:'b bd bsm',style:{padding:'2px 6px',minHeight:'20px',fontSize:'11px',opacity:.6},
-                        onClick:()=>setEditingEx({blockName:selBlock,idx:ei,newName:ex}),title:'Renomear'},
-                        React.createElement('i',{className:'ti ti-pencil'})),
-                  editingEx?.blockName!==selBlock||editingEx?.idx!==ei
-                    ?React.createElement('button',{type:'button',className:'b bd bsm',style:{padding:'2px 6px',minHeight:'20px',fontSize:'11px',opacity:.5},
-                        onClick:()=>deleteEx(selBlock,ei),title:'Remover'},
-                        React.createElement('i',{className:'ti ti-trash'}))
-                    :null
-                )
-              )
+              :exs.map((ex,ei)=>renderExRow(selBlock,ex,ei,exs))
           ),
           // Add exercise
           React.createElement('div',{style:{borderTop:'1px solid #1e1e1e',paddingTop:'8px',display:'flex',gap:'6px'}},
