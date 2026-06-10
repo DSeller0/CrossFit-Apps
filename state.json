@@ -13612,6 +13612,10 @@
   "coachProfile": {
     "name": "Coach Zé",
     "contact": "ze@cone.app",
-    "phone": "+55 11 99999-9999"
+    "phone": "+55 11 99999-9999",
+    "pixKey": "coach@cone.app",
+    "cidade": "Sao Paulo",
+    "pixTestCap": 50.0,
+    "pixEnabled": true
   }
 }

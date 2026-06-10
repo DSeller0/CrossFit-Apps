@@ -1996,6 +1996,77 @@ function CalendarExportView({sessions,label,year,month,gymName,logoDataUrl,logoS
 
 
 // ── LocaisTab ─────────────────────────────────────────────────────────────────
+
+// ── CurrencyInput — centavos-first masked input ───────────────────────────────
+function CurrencyInput({value,onChange,placeholder,style}){
+  const toCentavos=v=>Math.round((parseFloat(v)||0)*100);
+  const [centavos,setCentavos]=useState(()=>toCentavos(value));
+
+  useEffect(()=>{
+    const incoming=toCentavos(value);
+    if(incoming!==centavos) setCentavos(incoming);
+  },[value]);
+
+  const display=centavos===0?'':
+    'R$ '+(centavos/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  const handleChange=e=>{
+    const digits=e.target.value.replace(/\D/g,'');
+    const next=digits===''?0:parseInt(digits.slice(-8),10);
+    setCentavos(next);
+    onChange(next/100);
+  };
+
+  return React.createElement('input',{
+    type:'text',inputMode:'numeric',
+    value:display,
+    placeholder:placeholder||'R$ 0,00',
+    onChange:handleChange,
+    style:{...style}
+  });
+}
+
+// ── Pix helpers ───────────────────────────────────────────────────────────────
+function crc16Pix(str){
+  let crc=0xFFFF;
+  for(let i=0;i<str.length;i++){
+    crc^=str.charCodeAt(i)<<8;
+    for(let j=0;j<8;j++) crc=(crc&0x8000)?(crc<<1)^0x1021:crc<<1;
+  }
+  return(crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0');
+}
+
+function buildPixPayload({pixKey,merchantName,merchantCity,amount,description,txid}){
+  const clean=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-zA-Z0-9 @._\-+\/]/g,'').trim();
+  const f=(id,val)=>{const l=String(val.length).padStart(2,'0');return`${id}${l}${val}`;};
+  // Normalise phone key: strip non-digits except leading +
+  let key=(pixKey||'').trim();
+  if(/^\+?[\d\s\(\)\-]+$/.test(key)&&!key.includes('@')&&key.replace(/\D/g,'').length>=10){
+    key='+55'+key.replace(/\D/g,'');
+    if(key.startsWith('+5555')) key='+5'+key.slice(3);
+  }
+  const gui=f('00','br.gov.bcb.pix')+f('01',key)+
+    (description?f('02',clean(description).slice(0,72)):'');
+  const amtStr=amount&&Number(amount)>0?Number(amount).toFixed(2):'';
+  const name=clean(merchantName||'COACH').slice(0,25).toUpperCase()||'COACH';
+  const city=clean(merchantCity||'BRASIL').slice(0,15).toUpperCase()||'BRASIL';
+  const additional=f('62',f('05',(txid||'CONE').replace(/[^a-zA-Z0-9]/g,'').slice(0,25)||'CONE'));
+  const payload=
+    f('00','01')+
+    f('26',gui)+
+    f('52','0000')+
+    f('53','986')+
+    (amtStr?f('54',amtStr):'')+
+    f('58','BR')+
+    f('59',name)+
+    f('60',city)+
+    additional+
+    '6304';
+  return payload+crc16Pix(payload);
+}
+
+
 function LocaisTab(){
   const [locs,setLocs]=useState(loadLocations);
   const [coach,setCoach]=useState(loadCoach);
@@ -2083,7 +2154,7 @@ function LocaisTab(){
           ),
           React.createElement('div',{style:{flex:1}},
             React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Taxa'),
-            React.createElement('input',{type:'number',value:form.rate,onChange:e=>setF('rate',e.target.value),placeholder:'0',min:0,style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+            React.createElement(CurrencyInput,{value:form.rate||0,onChange:v=>setF('rate',v),style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
           ),
           React.createElement('div',{style:{flex:1}},
             React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Por'),
@@ -2112,7 +2183,35 @@ function LocaisTab(){
         value:coach[k]||'',onChange:e=>setCoach(p=>({...p,[k]:e.target.value})),
         placeholder:k==='name'?'Nome do coach':k==='contact'?'E-mail':'Telefone',
         style:{width:'100%',background:'#0d0d0d',border:'1px solid #1e1e1e',color:'#ccc',padding:'6px 8px',borderRadius:'4px',fontSize:'12px',marginBottom:'4px'}
-      }))
+      })),
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'4px'}},
+        React.createElement('button',{type:'button',
+          onClick:()=>setCoach(p=>({...p,pixEnabled:!p.pixEnabled})),
+          style:{display:'flex',alignItems:'center',gap:'5px',padding:'4px 10px',borderRadius:'4px',cursor:'pointer',fontSize:'11px',fontWeight:700,border:`1px solid ${coach.pixEnabled?'rgba(74,200,192,.4)':'#2e2e2e'}`,background:coach.pixEnabled?'rgba(74,200,192,.1)':'transparent',color:coach.pixEnabled?'var(--theme-accent)':'#555',flex:1}
+        },
+          React.createElement('i',{className:`ti ti-${coach.pixEnabled?'toggle-right':'toggle-left'}`,style:{fontSize:'14px'}}),
+          coach.pixEnabled?'Pix Ativado':'Pix Desativado'
+        )
+      ),
+      coach.pixEnabled&&React.createElement('input',{
+        value:coach.pixKey||'',onChange:e=>setCoach(p=>({...p,pixKey:e.target.value})),
+        placeholder:'Chave Pix',
+        style:{width:'100%',background:'#0d0d0d',border:'1px solid #1e1e1e',color:'#4ac8c0',padding:'6px 8px',borderRadius:'4px',fontSize:'12px',marginBottom:'4px'}
+      }),
+      React.createElement('input',{
+        value:coach.cidade||'',onChange:e=>setCoach(p=>({...p,cidade:e.target.value})),
+        placeholder:'Cidade (para QR Pix)',
+        style:{width:'100%',background:'#0d0d0d',border:'1px solid #1e1e1e',color:'#ccc',padding:'6px 8px',borderRadius:'4px',fontSize:'12px',marginBottom:'4px'}
+      }),
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px'}},
+        React.createElement('span',{style:{fontSize:'10px',color:'#554a3a',whiteSpace:'nowrap'}},'Cap teste:'),
+        React.createElement(CurrencyInput,{
+          value:coach.pixTestCap||0,
+          onChange:v=>setCoach(p=>({...p,pixTestCap:v||null})),
+          placeholder:'Sem limite',
+          style:{flex:1,background:'#0d0d0d',border:'1px solid #1e1e1e',color:'#d8a840',padding:'6px 8px',borderRadius:'4px',fontSize:'12px'}
+        })
+      )
     ),
 
     // Location accordion
@@ -2204,7 +2303,7 @@ function LocaisTab(){
           ),
           React.createElement('div',{style:{flex:1}},
             React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Taxa'),
-            React.createElement('input',{type:'number',value:form.rate,onChange:e=>setF('rate',e.target.value),placeholder:'0',min:0,style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+            React.createElement(CurrencyInput,{value:form.rate||0,onChange:v=>setF('rate',v),style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
           ),
           React.createElement('div',{style:{flex:1}},
             React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Por'),
@@ -2238,7 +2337,36 @@ function LocaisTab(){
           onChange:e=>setCoach(p=>({...p,[k]:e.target.value})),
           placeholder:k==='name'?'Nome do coach':k==='contact'?'E-mail':'Telefone',
           style:{width:'100%',background:'#111',border:'1px solid #1e1e1e',color:'#ccc',padding:'5px 7px',borderRadius:'4px',fontSize:'12px',marginBottom:'4px'}
-        }))
+        })),
+        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'4px'}},
+          React.createElement('button',{type:'button',
+            onClick:()=>setCoach(p=>({...p,pixEnabled:!p.pixEnabled})),
+            style:{display:'flex',alignItems:'center',gap:'5px',padding:'3px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'11px',fontWeight:700,border:`1px solid ${coach.pixEnabled?'rgba(74,200,192,.4)':'#2e2e2e'}`,background:coach.pixEnabled?'rgba(74,200,192,.1)':'transparent',color:coach.pixEnabled?'var(--theme-accent)':'#555'}
+          },
+            React.createElement('i',{className:`ti ti-${coach.pixEnabled?'toggle-right':'toggle-left'}`,style:{fontSize:'14px'}}),
+            coach.pixEnabled?'Pix Ativado':'Pix Desativado'
+          )
+        ),
+        coach.pixEnabled&&React.createElement('input',{
+          value:coach.pixKey||'',onChange:e=>setCoach(p=>({...p,pixKey:e.target.value})),
+          placeholder:'Chave Pix (e-mail, CPF, telefone…)',
+          style:{width:'100%',background:'#111',border:'1px solid #1e1e1e',color:'#4ac8c0',padding:'5px 7px',borderRadius:'4px',fontSize:'12px',marginBottom:'4px'}
+        }),
+        React.createElement('input',{
+          value:coach.cidade||'',onChange:e=>setCoach(p=>({...p,cidade:e.target.value})),
+          placeholder:'Cidade (para QR Pix)',
+          style:{width:'100%',background:'#111',border:'1px solid #1e1e1e',color:'#ccc',padding:'5px 7px',borderRadius:'4px',fontSize:'12px',marginBottom:'4px'}
+        }),
+        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginTop:'2px'}},
+          React.createElement('span',{style:{fontSize:'10px',color:'#554a3a',whiteSpace:'nowrap'}},'Cap teste Pix:'),
+          React.createElement(CurrencyInput,{
+            value:coach.pixTestCap||0,
+            onChange:v=>setCoach(p=>({...p,pixTestCap:v||null})),
+            placeholder:'Sem limite',
+            style:{flex:1,background:'#111',border:'1px solid #1e1e1e',color:'#d8a840',padding:'5px 7px',borderRadius:'4px',fontSize:'12px'}
+          }),
+          React.createElement('span',{title:'Valor máximo gerado no QR Pix durante testes. 0 = sem limite.',style:{fontSize:'11px',color:'#333',cursor:'help'}},React.createElement('i',{className:'ti ti-info-circle'}))
+        )
       ),
 
       // Locations list header
@@ -2324,6 +2452,7 @@ function ReportModal({events,sessions,onClose}){
   const [showRate,setShowRate]=useState(true);
   const [showHeader,setShowHeader]=useState(true);
   const [generating,setGenerating]=useState(false);
+  const [showPix,setShowPix]=useState(false);
 
   const MONTHS_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
@@ -2372,15 +2501,43 @@ function ReportModal({events,sessions,onClose}){
   }
 
   // ── Generate PDF ───────────────────────────────────────────────────────────
+  // helper: load script only once
+  function loadScript(src){
+    return new Promise((res,rej)=>{
+      if(document.querySelector(`script[src="${src}"]`)){res();return;}
+      const s=document.createElement('script');s.src=src;
+      s.onload=res;s.onerror=rej;document.head.appendChild(s);
+    });
+  }
+
+  // helper: generate QR as base64 PNG (returns null if qrcode not loaded)
+  function qrToBase64(text,size=200){
+    return new Promise(res=>{
+      try{
+        const div=document.createElement('div');div.style.cssText='position:fixed;left:-9999px;top:-9999px;';
+        document.body.appendChild(div);
+        new QRCode(div,{text,width:size,height:size,correctLevel:QRCode.CorrectLevel.M});
+        setTimeout(()=>{
+          const img=div.querySelector('img')||div.querySelector('canvas');
+          let b64=null;
+          if(img instanceof HTMLCanvasElement) b64=img.toDataURL('image/png');
+          else if(img instanceof HTMLImageElement) b64=img.src;
+          document.body.removeChild(div);
+          res(b64);
+        },120);
+      }catch(e){res(null);}
+    });
+  }
+
   async function generatePDF(){
     setGenerating(true);
-    const script=document.createElement('script');
-    script.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    script.onload=async()=>{
-      const autoTableScript=document.createElement('script');
-      autoTableScript.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
-      autoTableScript.onload=()=>{
-        try{
+    try{
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+      if(showPix&&coach.pixKey){
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js');
+      }
+      try{
           const {jsPDF}=window.jspdf;
           const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
           const evs=filteredEvents();
@@ -2438,7 +2595,7 @@ function ReportModal({events,sessions,onClose}){
           y=doc.lastAutoTable.finalY+14;
 
           // ── Per-location sections ──
-          Object.entries(groups).forEach(([locId,levs])=>{
+          for(const [locId,levs] of Object.entries(groups)){
             const loc=locations.find(l=>l.id===locId);
             const name=loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
 
@@ -2474,18 +2631,54 @@ function ReportModal({events,sessions,onClose}){
             doc.setFontSize(9);doc.setFont('helvetica','italic');doc.setTextColor(100,100,100);
             let sub=`${levs.length} ${levs.length!==1?'sessões':'sessão'} · ${fmtDur(totalMin)}`;
             if(t&&showRate)sub+=` · ${t.currency} ${t.total.toLocaleString('pt-BR')}`;
-            doc.text(sub,14,y);y+=10;
-          });
+            doc.text(sub,14,y);y+=8;
+
+            // Pix QR
+            if(showPix&&coach.pixEnabled&&coach.pixKey&&t&&t.total>0){
+              const cap=coach.pixTestCap&&Number(coach.pixTestCap)>0?Number(coach.pixTestCap):null;
+              const payAmount=cap&&t.total>cap?cap:t.total;
+              const isCapped=cap&&t.total>cap;
+              const period=useRange?`${fmtDate(rangeFrom)}-${fmtDate(rangeTo)}`:(MONTHS_PT[mo].substring(0,3)+yr).replace(/\s/g,'');
+              const desc=`${name} ${period}`.slice(0,72);
+              const txid=(name.replace(/\s/g,'').slice(0,10)+String(mo+1).padStart(2,'0')+yr).slice(0,25);
+              const pixPayload=buildPixPayload({
+                pixKey:coach.pixKey,
+                merchantName:coach.name||gymName,
+                merchantCity:coach.cidade||'BRASIL',
+                amount:payAmount,
+                description:desc,
+                txid
+              });
+              // Generate QR off-screen
+              const qrB64=await qrToBase64(pixPayload,200);
+              if(y>240){doc.addPage();y=15;}
+              if(qrB64){
+                doc.addImage(qrB64,'PNG',14,y,28,28);
+                doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(30,30,30);
+                doc.text('Pagar com Pix',46,y+5);
+                doc.setFontSize(10);doc.setFont('helvetica','bold');
+                doc.text(`${t.currency} ${payAmount.toLocaleString('pt-BR',{minimumFractionDigits:2})}`,46,y+11);
+                doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+                doc.text(coach.pixKey,46,y+17);
+                doc.text(clean(coach.name||gymName).slice(0,25).toUpperCase(),46,y+22);
+                if(isCapped){
+                  doc.setFontSize(8);doc.setTextColor(180,80,0);
+                  doc.text(`⚠ Valor limitado a ${t.currency} ${payAmount.toFixed(2)} (modo teste)`,14,y+31);
+                  y+=35;
+                } else {
+                  y+=33;
+                }
+              }
+            }
+            y+=6;
+          }
 
           const gymSlug=(gymCfg.gymName||'relatorio').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
           const filename=`${gymSlug}-relatorio-${period.replace(/\s/g,'-').toLowerCase()}.pdf`;
           doc.save(filename);
-        }catch(err){console.error('PDF error:',err);alert('Erro ao gerar PDF: '+err.message);}
-        setGenerating(false);
-      };
-      document.head.appendChild(autoTableScript);
-    };
-    document.head.appendChild(script);
+      }catch(err){console.error('PDF error:',err);alert('Erro ao gerar PDF: '+err.message);}
+    }catch(loadErr){alert('Erro ao carregar bibliotecas PDF: '+loadErr.message);}
+    setGenerating(false);
   }
 
   const evs=filteredEvents();
@@ -2575,7 +2768,8 @@ function ReportModal({events,sessions,onClose}){
         [
           [showDetails,setShowDetails,'Mostrar detalhes da sessão (blocos/exercícios)'],
           [showRate,setShowRate,'Incluir valor por sessão'],
-          [showHeader,setShowHeader,'Incluir cabeçalho (coach, academia, data)']
+          [showHeader,setShowHeader,'Incluir cabeçalho (coach, academia, data)'],
+          ...(coach.pixEnabled&&coach.pixKey&&showRate?[[showPix,setShowPix,'Incluir QR code Pix (por local)']]:[])
         ].map(([val,setter,lbl],i)=>React.createElement('label',{key:i,style:{display:'flex',alignItems:'center',gap:'7px',fontSize:'12px',color:'#c8b090',cursor:'pointer',marginBottom:i<2?'6px':'0'}},
           React.createElement('input',{type:'checkbox',checked:val,onChange:()=>setter(v=>!v),style:{accentColor:'var(--theme-accent)',width:'13px',height:'13px'}}),
           lbl
@@ -2590,11 +2784,26 @@ function ReportModal({events,sessions,onClose}){
           const name=loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
           const t=calcTotal(levs,loc);
           const totalMin=levs.reduce((s,ev)=>s+(ev.durationMin||60),0);
-          return React.createElement('div',{key:locId,style:{display:'flex',alignItems:'center',gap:'8px',padding:'4px 0',borderBottom:'1px solid #1a1610',fontSize:'12px'}},
+          const previewCap=coach.pixTestCap&&Number(coach.pixTestCap)>0?Number(coach.pixTestCap):null;
+          const previewAmt=t?(previewCap&&t.total>previewCap?previewCap:t.total):0;
+          const previewPayload=showPix&&coach.pixEnabled&&coach.pixKey&&t&&t.total>0?buildPixPayload({
+            pixKey:coach.pixKey,merchantName:coach.name||gymCfg.gymName||'COACH',
+            merchantCity:coach.cidade||'BRASIL',amount:previewAmt,
+            description:name.slice(0,72),
+            txid:name.replace(/[^a-zA-Z0-9]/g,'').slice(0,25)||'CONE'
+          }):null;
+          return React.createElement('div',{key:locId,style:{display:'flex',alignItems:'center',gap:'8px',padding:'4px 0',borderBottom:'1px solid #1a1610',fontSize:'12px',flexWrap:'wrap'}},
             React.createElement('span',{style:{flex:1,color:'#c8b090',fontWeight:600}},name),
             React.createElement('span',{style:{color:'#887060'}},levs.length+(levs.length!==1?' sessões':' sessão')),
             React.createElement('span',{style:{color:'#887060'}},fmtDur(totalMin)),
-            t&&showRate?React.createElement('span',{style:{color:'#d8a840',fontWeight:700}},t.currency+' '+t.total.toLocaleString('pt-BR')):null
+            t&&showRate?React.createElement('span',{style:{color:'#d8a840',fontWeight:700}},t.currency+' '+t.total.toLocaleString('pt-BR')):null,
+            previewPayload&&React.createElement('button',{
+              type:'button',title:'Copiar código Pix',
+              onClick:()=>navigator.clipboard?.writeText(previewPayload)
+                .then(()=>alert('Código Pix copiado!'))
+                .catch(()=>prompt('Copie o código Pix:',previewPayload)),
+              style:{background:'rgba(74,200,192,.1)',border:'1px solid rgba(74,200,192,.25)',color:'var(--theme-accent)',padding:'1px 6px',borderRadius:'3px',cursor:'pointer',fontSize:'10px',fontWeight:700,display:'flex',alignItems:'center',gap:'3px',whiteSpace:'nowrap'}
+            },React.createElement('i',{className:'ti ti-copy',style:{fontSize:'10px'}}),' Pix')
           );
         }),
         // Grand total
