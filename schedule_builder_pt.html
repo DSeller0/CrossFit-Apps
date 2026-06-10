@@ -170,7 +170,38 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .p-re{background:#222;color:#666;border:1px solid #333}
 
 /* ── publisher controls ── */
-.pub-controls{background:#1c1c1c;border:1px solid #272727;border-radius:10px;padding:14px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.agenda-wrap{height:600px}
+.agenda-pane-backdrop{display:none}
+.agenda-filter-btn{white-space:nowrap}
+.sess-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:700px){.sess-summary-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:380px){.sess-summary-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.agenda-filter-btn{padding:2px 5px;font-size:9px}}
+@media(min-width:481px){.agenda-pane-backdrop{display:none !important}}
+.agenda-header{gap:6px}
+.agenda-stats{font-size:11px}
+.agenda-week-row{min-height:80px}
+.agenda-day-hdrs .agenda-day-hdr{padding:5px 4px;font-size:9px;font-weight:700;color:var(--theme-accent);text-transform:uppercase;letter-spacing:.08em;text-align:center;border-right:1px solid #2a2318}
+@media(max-width:480px){.agenda-day-hdrs .agenda-day-hdr{padding:3px 2px;font-size:8px;letter-spacing:.02em}}
+.agenda-cell{min-height:80px}
+@media(max-width:768px){.agenda-week-row{min-height:64px}.agenda-cell{min-height:64px;padding:3px}}
+@media(max-width:480px){.agenda-week-row{min-height:46px}.agenda-cell{min-height:46px;padding:2px}}
+@media(max-width:480px){.agenda-card-badges{display:none}}
+@media(max-width:480px){.agenda-stats{font-size:10px;gap:5px}}
+@media(max-width:480px){
+  .agenda-header{padding:6px 8px}
+  .agenda-header>span{font-size:12px !important;min-width:100px}
+}
+.agenda-pane{flex:0 0 40%}
+@media(max-width:768px){
+  .agenda-wrap{height:auto;min-height:420px}
+  .agenda-pane{flex:0 0 50%}
+}
+@media(max-width:480px){
+  .agenda-wrap{height:auto;min-height:360px}
+  .agenda-pane{position:fixed;top:0;right:0;bottom:0;width:85% !important;flex:none !important;z-index:500;box-shadow:-4px 0 20px rgba(0,0,0,.6);overflow-y:auto}
+  .agenda-grid-col{flex:1 1 100% !important}
+}.pub-controls{background:#1c1c1c;border:1px solid #272727;border-radius:10px;padding:14px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .pub-view-tabs{display:flex;gap:6px;margin-bottom:12px}
 .pvt{font-family:inherit;font-size:12px;padding:7px 14px;border-radius:5px;border:1px solid #2e2e2e;background:transparent;color:#888;cursor:pointer;transition:all .12s}
 .pvt.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
@@ -810,7 +841,13 @@ function IntensityInput({value,onChange,defaultReps,defaultSets}){
 const emptyEx=()=>({id:uid(),name:'',sets:'',reps:'',intensity:null,note:'',progression:null});
 // progression = null (unique) | [{reps,load,unit}] (progression mode)
 const emptyBlock=()=>({id:uid(),label:APP_CONFIG.blockNames[0]||'-',type:APP_CONFIG.blockNames.find(n=>n!=='-')||'Força',zone:'Zona 01',duration:'',rounds:'',notes:'',ladderMode:false,exercises:[emptyEx()]});
-const emptyS=()=>({id:uid(),date:todayISO(),mainTraining:'',blocks:[emptyBlock()]});
+const emptyS=()=>({id:uid(),date:todayISO(),mainTraining:[],blocks:[emptyBlock()]});
+// Backwards compat: always return mainTraining as array
+function getTargets(s){
+  if(!s||!s.mainTraining) return [];
+  return Array.isArray(s.mainTraining)?s.mainTraining:[s.mainTraining];
+}
+function matchesAthlete(s,athName){return getTargets(s).includes(athName);}
 
 // ── BlockEditor ───────────────────────────────────────────
 
@@ -1114,19 +1151,35 @@ function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete,collapsed,onT
 }
 
 // ── TrainingCreator ───────────────────────────────────────
-function TrainingCreator({sessions,setSessions,blockNames}){
+function TrainingCreator({sessions,setSessions,blockNames,preload,onPreloadConsumed}){
   const [form,setForm]=useState(emptyS());
   const [blocks,setBlocks]=useState([emptyBlock()]);
   const [editing,setEditing]=useState(null); // {dateKey, id}
+  const [showAlvoModal,setShowAlvoModal]=useState(false);
+  const [sessionName,setSessionName]=useState('');
   const formRef=useRef();
 
+  useEffect(()=>{
+    if(!preload)return;
+    if(preload._newForDate){
+      setForm(f=>({...emptyS(),date:preload._newForDate}));
+      setBlocks([emptyBlock()]);
+      setEditing(null);
+    } else {
+      startEdit(preload,preload.date||preload._dateKey||'');
+    }
+    onPreloadConsumed&&onPreloadConsumed();
+  },[preload]);
+
   const startEdit=(s,dateKey)=>{
-    setForm({...s,date:dateKey});
+    const targets=getTargets(s);
+    const sName=typeof s.mainTraining==='string'?s.mainTraining:(s.sessionName||'');
+    setForm({...s,date:dateKey,mainTraining:targets,sessionName:sName});
     setBlocks(s.blocks?.length?s.blocks:[emptyBlock()]);
     setEditing({dateKey,id:s.id});
     setTimeout(()=>formRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),60);
   };
-  const cancel=()=>{setForm(emptyS());setBlocks([emptyBlock()]);setEditing(null);};
+  const cancel=()=>{setForm(emptyS());setBlocks([emptyBlock()]);setEditing(null);setShowAlvoModal(false);};
 
   const saveS=()=>{
     const dateKey=form.date||todayISO();
@@ -1206,7 +1259,37 @@ function TrainingCreator({sessions,setSessions,blockNames}){
         )
       )
     ),
-    React.createElement('div',{className:'sc-card',ref:formRef},
+      showAlvoModal&&React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'},onClick:()=>setShowAlvoModal(false)},
+        React.createElement('div',{style:{background:'#0d0d0d',border:'1px solid #2e2e2e',borderRadius:'10px',padding:'18px',width:'320px',maxWidth:'90vw'},onClick:e=>e.stopPropagation()},
+          React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}},
+            React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#ccc'}},'Selecionar Atletas'),
+            React.createElement('button',{onClick:()=>setShowAlvoModal(false),style:{background:'transparent',border:'none',color:'#555',cursor:'pointer',fontSize:'16px'}},'✕')
+          ),
+          React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'6px',maxHeight:'300px',overflowY:'auto',marginBottom:'14px'}},
+            loadAthletes().map(a=>{
+              const targets=Array.isArray(form.mainTraining)?form.mainTraining:[];
+              const checked=targets.includes(a.name);
+              return React.createElement('label',{key:a.id,style:{display:'flex',alignItems:'center',gap:'10px',padding:'6px 8px',borderRadius:'6px',cursor:'pointer',background:checked?'rgba(74,200,192,.06)':'transparent',border:'1px solid '+(checked?'rgba(74,200,192,.25)':'#1e1e1e')}},
+                React.createElement('input',{type:'checkbox',checked,
+                  onChange:()=>{
+                    const cur=Array.isArray(form.mainTraining)?form.mainTraining:[];
+                    setForm(f=>({...f,mainTraining:checked?cur.filter(n=>n!==a.name):[...cur,a.name]}));
+                  },
+                  style:{accentColor:a.color||'var(--theme-accent)',width:'14px',height:'14px'}
+                }),
+                React.createElement('span',{style:{width:'10px',height:'10px',borderRadius:'50%',background:a.color||'#555',flexShrink:0}}),
+                React.createElement('span',{style:{fontSize:'13px',color:'#ccc',flex:1}},a.name),
+                React.createElement('span',{style:{fontSize:'11px',color:'#555'}},a.level||'')
+              );
+            })
+          ),
+          React.createElement('button',{type:'button',
+            style:{width:'100%',background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'8px',borderRadius:'6px',cursor:'pointer',fontSize:'13px',fontWeight:700},
+            onClick:()=>setShowAlvoModal(false)
+          },'Confirmar')
+        )
+      ),
+          React.createElement('div',{className:'sc-card',ref:formRef},
       React.createElement('div',{className:'sc-hdr'},
         React.createElement('span',{className:'sc-title'},editing?'Editar sessão':'Nova sessão'),
         editing&&React.createElement('button',{type:'button',className:'b bsm',onClick:cancel},'Cancelar')
@@ -1231,26 +1314,32 @@ function TrainingCreator({sessions,setSessions,blockNames}){
           })
         ),
         React.createElement('div',{className:'fg'},
-          React.createElement('span',{className:'lbl'},'Alvo'),
+          React.createElement('span',{className:'lbl'},'Nome da Sessão'),
           React.createElement('div',{className:'input-mic-row'},
-            React.createElement('div',{style:{display:'flex',gap:'6px',flex:1}},
-              React.createElement('input',{
-                placeholder:'ex: Turma A / nome do atleta',
-                value:form.mainTraining||'',
-                onChange:e=>setForm(f=>({...f,mainTraining:e.target.value})),
-                style:{flex:1}
-              }),
-              React.createElement('select',{
-                value:'',
-                onChange:e=>{if(e.target.value)setForm(f=>({...f,mainTraining:e.target.value}));},
-                style:{width:'36px',fontFamily:'inherit',fontSize:'13px',background:'#111',border:'1px solid #2e2e2e',borderRadius:'5px',color:'#888',cursor:'pointer',flexShrink:0,padding:'0 4px'},
-                title:'Selecionar atleta'
-              },
-                React.createElement('option',{value:''},'👤'),
-                loadAthletes().map(a=>React.createElement('option',{key:a.id,value:a.name},a.name))
-              )
-            ),
-            React.createElement(MicButton,{onTranscript:txt=>setForm(f=>({...f,mainTraining:(f.mainTraining?f.mainTraining+' ':'')+txt}))})
+            React.createElement('input',{
+              placeholder:'ex: Segunda · Semana 3 D1',
+              value:typeof form.mainTraining==='string'?form.mainTraining:(form.sessionName||''),
+              onChange:e=>setForm(f=>({...f,sessionName:e.target.value})),
+              style:{flex:1}
+            }),
+            React.createElement(MicButton,{onTranscript:txt=>setForm(f=>({...f,sessionName:(f.sessionName||'')+(f.sessionName?' ':'')+txt}))})
+          )
+        ),
+        React.createElement('div',{className:'fg'},
+          React.createElement('span',{className:'lbl'},'Alvo'),
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px'}},
+            React.createElement('button',{
+              type:'button',
+              onClick:()=>setShowAlvoModal(true),
+              style:{display:'flex',alignItems:'center',gap:'6px',flex:1,background:'#111',border:'1px solid #2e2e2e',borderRadius:'5px',padding:'7px 10px',cursor:'pointer',color:'#888',fontSize:'13px',textAlign:'left'}
+            },
+              React.createElement('i',{className:'ti ti-users',style:{fontSize:'14px',color:'var(--theme-accent)'}}),
+              getTargets(form).length===0
+                ?React.createElement('span',{style:{color:'#444'}},'Nenhum atleta selecionado')
+                :React.createElement('div',{style:{display:'flex',gap:'4px',flexWrap:'wrap'}},
+                  getTargets(form).map((name,i)=>React.createElement('span',{key:i,style:{fontSize:'11px',fontWeight:700,padding:'1px 6px',borderRadius:'3px',background:'var(--theme-accent)22',color:'var(--theme-accent)',border:'1px solid var(--theme-accent)44'}},name))
+                )
+            )
           )
         )
       ),
@@ -1896,7 +1985,451 @@ function CalendarExportView({sessions,label,year,month,gymName,logoDataUrl,logoS
 }
 
 // ── SchedulePublisher ─────────────────────────────────────
-function SchedulePublisher({sessions}){
+
+// ── AgendaView ────────────────────────────────────────────────────────────────
+function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResult}){
+  const [year,setYear]=useState(new Date().getFullYear());
+  const [month,setMonth]=useState(new Date().getMonth());
+  const [filter,setFilter]=useState('all'); // 'all'|'scheduled'|'completed'
+  const [selDay,setSelDay]=useState(null);
+  const [showForm,setShowForm]=useState(null); // null | {type:'aula'|'personal',eventId?:string}
+  const [formData,setFormData]=useState({});
+
+  const todayISO=toISO(new Date());
+  const MONTHS_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const DAYS_PT_SHORT=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const BLOCK_C={'Força':'#d8a840','LPO':'#4ac8c0','For Time':'#e87820','Core':'#68d8a0','Acessórios':'#c884f0','AMRAP':'#e87820','Cardio':'#64b5f6','EMOM':'#ff8a65','WOD':'#e87820','HIIT':'#ff6d00'};
+
+  // Derive event status from results
+  const results=loadResults();
+  function evStatus(ev){
+    // ev.status is the single source of truth — toggling writes to it directly
+    return ev.status==='completed'?'completed':'scheduled';
+  }
+
+  // Get events for a date, filtered
+  function dayEvents(iso){
+    const evs=(events[iso]||[]).filter(ev=>{
+      if(filter==='all') return true;
+      return filter===evStatus(ev);
+    });
+    return evs.sort((a,b)=>a.time.localeCompare(b.time));
+  }
+
+  // Sessions for a date that are NOT athlete-specific (gym-wide)
+  function dayGymSessions(iso){
+    return(sessions[iso]||[]).filter(s=>getTargets(s).length===0);
+  }
+
+  // Month stats
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const totalCells=Math.ceil((firstDay+daysInMonth)/7)*7;
+  const cells=[];
+  for(let i=0;i<totalCells;i++){const d=i-firstDay+1;cells.push(d>=1&&d<=daysInMonth?d:null);}
+  const weeks=[];
+  for(let i=0;i<cells.length;i+=7)weeks.push(cells.slice(i,i+7));
+
+  let totalAulas=0,totalPersonal=0,completedAulas=0,completedPersonal=0;
+  cells.filter(Boolean).forEach(d=>{
+    const iso=toISO2(year,month,d);
+    const evs=events[iso]||[];
+    evs.forEach(ev=>{
+      const done=evStatus(ev)==='completed';
+      if(ev.type==='aula'){totalAulas++;if(done)completedAulas++;}
+      if(ev.type==='personal'){totalPersonal++;if(done)completedPersonal++;}
+    });
+  });
+  const totalEvs=totalAulas+totalPersonal;
+  const totalCompleted=completedAulas+completedPersonal;
+
+  function uid2(){return Math.random().toString(36).slice(2)+Date.now().toString(36);}
+  function toISO2(y,m,d){return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+
+  function saveEvent(ev){
+    setEvents(prev=>{
+      const d={...prev};
+      const list=[...(d[ev.date]||[])];
+      const idx=list.findIndex(e=>e.id===ev.id);
+      if(idx>=0)list[idx]=ev;else list.push(ev);
+      list.sort((a,b)=>a.time.localeCompare(b.time));
+      return{...d,[ev.date]:list};
+    });
+  }
+
+  function deleteEvent(date,id){
+    setEvents(prev=>{
+      const d={...prev};
+      d[date]=(d[date]||[]).filter(e=>e.id!==id);
+      if(!d[date].length)delete d[date];
+      return{...d};
+    });
+  }
+
+  function toggleStatus(date,id){
+    setEvents(prev=>{
+      const list=(prev[date]||[]);
+      const ev=list.find(e=>e.id===id);
+      if(!ev)return prev;
+      const updated={...ev,status:ev.status==='completed'?'scheduled':'completed'};
+      const newList=list.map(e=>e.id===id?updated:e);
+      return{...prev,[date]:newList};
+    });
+  }
+
+  function openForm(type,date,existingEv){
+    const defaults=existingEv||{
+      id:uid2(),date,time:'07:00',durationMin:60,type,
+      label:type==='aula'?'Turma Manhã':'',
+      sessionId:null,athleteIds:[],status:'scheduled',notes:''
+    };
+    setFormData(defaults);
+    setShowForm({type,eventId:existingEv?.id||null,date});
+  }
+
+  function submitForm(){
+    saveEvent({...formData});
+    setShowForm(null);
+  }
+
+  // ── Grid cell ──────────────────────────────────────────────────────────────
+  function CellDay({day}){
+    const iso=toISO2(year,month,day);
+    const isToday=iso===todayISO;
+    const isPast=iso<todayISO;
+    const isSelected=selDay===iso;
+    const gymSessions=dayGymSessions(iso);
+    const evs=dayEvents(iso);
+
+    const allCards=[
+      ...gymSessions.map(s=>({kind:'session',data:s})),
+      ...evs.map(ev=>({kind:'event',data:ev}))
+    ];
+
+    return React.createElement('div',{
+      onClick:()=>setSelDay(isSelected?null:iso),
+      className:'agenda-cell',
+      style:{
+        borderRight:'1px solid #2a2318',
+        padding:'5px',cursor:'pointer',
+        background:isSelected?'rgba(74,200,192,.07)':isToday?'rgba(74,200,192,.04)':'transparent',
+        borderBottom:'none',transition:'background .1s'
+      }
+    },
+      React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'3px'}},
+        isToday
+          ?React.createElement('span',{style:{width:'20px',height:'20px',borderRadius:'50%',background:'var(--theme-accent)',color:'var(--theme-accent-text)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:900}},day)
+          :React.createElement('span',{style:{fontSize:'11px',color:isPast?'#554a3a':'#c8b090',fontWeight:isToday?700:400}},day),
+        allCards.length>0&&React.createElement('span',{style:{fontSize:'9px',color:'#554a3a'}},allCards.length)
+      ),
+      allCards.slice(0,3).map((card,ci)=>{
+        if(card.kind==='session'){
+          const s=card.data;
+          return React.createElement('div',{key:'s'+ci,style:{marginBottom:'2px',padding:'2px 4px',borderRadius:'3px',borderLeft:'2px solid var(--theme-accent)',background:'rgba(74,200,192,.06)'}},
+            React.createElement('div',{style:{fontSize:'9px',fontWeight:700,color:'var(--theme-accent)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},
+              React.createElement('i',{className:'ti ti-calendar-event',style:{fontSize:'8px',marginRight:'2px'},'aria-hidden':'true'}),
+              s.mainTraining||'Sessão'
+            )
+          );
+        }
+        const ev=card.data;
+        const isPers=ev.type==='personal';
+        const done=evStatus(ev)==='completed';
+        const borderCol=isPers?'#d8a840':'var(--theme-accent)';
+        const ath=isPers&&ev.athleteIds?.[0]?athletes.find(a=>a.id===ev.athleteIds[0]):null;
+        return React.createElement('div',{key:'e'+ci,style:{marginBottom:'2px',padding:'2px 4px',borderRadius:'3px',borderLeft:`2px solid ${borderCol}`,background:isPers?'rgba(216,168,64,.07)':'rgba(74,200,192,.06)',opacity:done?.75:1}},
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'3px'}},
+            done&&React.createElement('span',{style:{fontSize:'8px',color:'#68d8a0'}},'✓'),
+            React.createElement('span',{style:{fontSize:'9px',color:'#888'}},ev.time),
+            React.createElement('span',{style:{fontSize:'9px',fontWeight:700,color:isPers?'#d8a840':'#c8b090',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:'70px'}},
+              ath?React.createElement('span',null,React.createElement('span',{style:{width:'5px',height:'5px',borderRadius:'50%',background:ath.color,display:'inline-block',marginRight:'2px'}}),ev.label):ev.label
+            )
+          )
+        );
+      }),
+      allCards.length>3&&React.createElement('div',{style:{fontSize:'8px',color:'#554a3a',paddingLeft:'4px'}},`+${allCards.length-3} mais`)
+    );
+  }
+
+  // ── Day pane ───────────────────────────────────────────────────────────────
+  function DayPane(){
+    if(!selDay) return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:'#3a3028',fontSize:'12px',fontStyle:'italic',padding:'40px 0'}},'Clique num dia para ver detalhes');
+
+    const iso=selDay;
+    const d=new Date(iso+'T12:00:00');
+    const dateLabel=d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+    const gymSessions=dayGymSessions(iso);
+    const evs=(events[iso]||[]).sort((a,b)=>a.time.localeCompare(b.time));
+
+    // Collect all unique times for timeline
+    const times=[...new Set(evs.map(ev=>ev.time))].sort();
+
+    return React.createElement('div',{style:{height:'100%',display:'flex',flexDirection:'column'}},
+      // Pane header
+      React.createElement('div',{style:{padding:'10px 14px',borderBottom:'1px solid #2a2318',flexShrink:0}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}},
+          React.createElement('span',{style:{fontSize:'12px',fontWeight:700,color:'var(--theme-accent)',textTransform:'capitalize'}},dateLabel),
+          React.createElement('button',{onClick:()=>setSelDay(null),style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'2px 7px',borderRadius:'4px',cursor:'pointer',fontSize:'11px'}},'✕')
+        ),
+        React.createElement('div',{style:{display:'flex',gap:'5px',flexWrap:'wrap'}},
+          React.createElement('button',{
+            onClick:()=>openForm('aula',iso),
+            style:{background:'rgba(74,200,192,.08)',border:'1px solid rgba(74,200,192,.25)',color:'var(--theme-accent)',padding:'4px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'10px',fontWeight:700}
+          },React.createElement('i',{className:'ti ti-plus','aria-hidden':'true'}),' Aula'),
+          React.createElement('button',{
+            onClick:()=>openForm('personal',iso),
+            style:{background:'rgba(216,168,64,.08)',border:'1px solid rgba(216,168,64,.25)',color:'#d8a840',padding:'4px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'10px',fontWeight:700}
+          },React.createElement('i',{className:'ti ti-plus','aria-hidden':'true'}),' Personal'),
+          onEditSession&&React.createElement('button',{
+            onClick:()=>onEditSession({_newForDate:iso}),
+            style:{background:'rgba(104,216,160,.08)',border:'1px solid rgba(104,216,160,.25)',color:'#68d8a0',padding:'4px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'10px',fontWeight:700}
+          },React.createElement('i',{className:'ti ti-calendar-plus','aria-hidden':'true'}),' Sessão do dia')
+        )
+      ),
+
+      // Pane scroll body
+      React.createElement('div',{style:{flex:1,overflowY:'auto',padding:'10px 14px'}},
+
+        // Session of the day (gym-wide)
+        gymSessions.length>0&&React.createElement('div',{style:{marginBottom:'12px'}},
+          React.createElement('div',{style:{fontSize:'10px',color:'#554a3a',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'6px'}},'Sessão do dia'),
+          gymSessions.map((s,si)=>React.createElement('div',{key:si,style:{background:'#0d0b08',border:'1px solid #2a2318',borderTop:'2px solid var(--theme-accent)',borderRadius:'6px',padding:'8px 10px',marginBottom:'6px'}},
+            React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'5px'}},
+              React.createElement('span',{style:{fontSize:'12px',fontWeight:700,color:'#c8b090'}},s.mainTraining||'Sessão'),
+              React.createElement('div',{style:{display:'flex',gap:'4px'}},
+                onEditSession&&React.createElement('button',{
+                  onClick:(e)=>{e.stopPropagation();onEditSession(s);},
+                  style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'2px 6px',borderRadius:'3px',cursor:'pointer',fontSize:'10px',fontWeight:700}
+                },'Editar')
+              )
+            ),
+            React.createElement('div',{style:{display:'flex',gap:'3px',flexWrap:'wrap'}},
+              (s.blocks||[]).map((bl,bi)=>{
+                const lbl=bl.label&&bl.label!=='-'?bl.label:bl.type;
+                return React.createElement('span',{key:bi,style:{fontSize:'9px',fontWeight:700,padding:'1px 4px',borderRadius:'2px',background:(BLOCK_C[lbl]||BLOCK_C[bl.type]||'#555')+'22',color:BLOCK_C[lbl]||BLOCK_C[bl.type]||'#aaa',border:`1px solid ${(BLOCK_C[lbl]||BLOCK_C[bl.type]||'#555')}44`}},lbl);
+              })
+            )
+          ))
+        ),
+
+        // Timeline events
+        evs.length===0&&gymSessions.length===0&&React.createElement('div',{style:{color:'#3a3028',fontSize:'12px',fontStyle:'italic',padding:'20px 0 0'}},'Sem eventos. Use os botões acima para adicionar.'),
+
+        evs.length>0&&React.createElement('div',{style:{marginBottom:'6px'}},
+          React.createElement('div',{style:{fontSize:'10px',color:'#554a3a',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'8px'}},'Agenda'),
+          evs.map((ev,ei)=>{
+            const isPers=ev.type==='personal';
+            const done=evStatus(ev)==='completed';
+            const borderCol=isPers?'#d8a840':'var(--theme-accent)';
+            const athList=(ev.athleteIds||[]).map(id=>athletes.find(a=>a.id===id)).filter(Boolean);
+            const linkedSession=ev.sessionId?(sessions[iso]||[]).find(s=>s.id===ev.sessionId):null;
+
+            return React.createElement('div',{key:ev.id,style:{display:'flex',gap:'8px',marginBottom:'10px'}},
+              // Time column
+              React.createElement('div',{style:{minWidth:'36px',flexShrink:0,paddingTop:'8px'}},
+                React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'#887060'}},ev.time),
+                React.createElement('div',{style:{width:'1px',background:'#2a2318',margin:'3px auto 0',height:'calc(100% - 16px)',minHeight:'20px'}})
+              ),
+              // Event card
+              React.createElement('div',{style:{flex:1,background:'#0d0b08',border:`1px solid #2a2318`,borderTop:`2px solid ${borderCol}`,borderRadius:'6px',padding:'8px 10px',opacity:done?.8:1}},
+                // Card header
+                React.createElement('div',{style:{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:'5px'}},
+                  React.createElement('div',null,
+                    React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'5px'}},
+                      done&&React.createElement('i',{className:'ti ti-circle-check',style:{fontSize:'11px',color:'#68d8a0'},'aria-hidden':'true'}),
+                      React.createElement('span',{style:{fontSize:'12px',fontWeight:700,color:isPers?'#d8a840':'#c8b090'}},ev.label),
+                      React.createElement('span',{style:{fontSize:'9px',fontWeight:700,padding:'1px 4px',borderRadius:'3px',textTransform:'uppercase',background:isPers?'rgba(216,168,64,.12)':'rgba(74,200,192,.1)',color:isPers?'#d8a840':'var(--theme-accent)'}},isPers?'Personal':'Aula')
+                    ),
+                    React.createElement('div',{style:{fontSize:'10px',color:'#554a3a',marginTop:'1px'}},`${ev.time} · ${ev.durationMin}min`)
+                  ),
+                  React.createElement('div',{style:{display:'flex',gap:'3px',flexShrink:0}},
+                    React.createElement('button',{
+                      onClick:()=>toggleStatus(iso,ev.id),
+                      title:done?'Marcar como agendado':'Marcar como concluído',
+                      style:{background:'transparent',border:`1px solid ${done?'rgba(104,216,160,.3)':'#2a2318'}`,color:done?'#68d8a0':'#554a3a',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px',fontWeight:700}
+                    },done?'✓ Feito':'○ Ag.'),
+                    React.createElement('button',{
+                      onClick:()=>openForm(ev.type,iso,ev),
+                      style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px'}
+                    },React.createElement('i',{className:'ti ti-edit',style:{fontSize:'10px'},'aria-hidden':'true'})),
+                    React.createElement('button',{
+                      onClick:()=>{if(window.confirm('Remover este evento?'))deleteEvent(iso,ev.id);},
+                      style:{background:'transparent',border:'1px solid #2a2318',color:'#5a2020',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px'}
+                    },React.createElement('i',{className:'ti ti-trash',style:{fontSize:'10px'},'aria-hidden':'true'})),
+                    onEditSession&&React.createElement('button',{
+                      onClick:()=>onEditSession(linkedSession||{_newForDate:iso}),
+                      title:linkedSession?'Editar sessão vinculada':'Criar sessão para este dia',
+                      style:{background:'transparent',border:'1px solid #2a2318',color:linkedSession?'#554a3a':'#68d8a0',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px',fontWeight:700}
+                    },React.createElement('i',{className:linkedSession?'ti ti-edit':'ti ti-calendar-plus',style:{fontSize:'10px'},'aria-hidden':'true'})),
+                    onLogResult&&isPers&&React.createElement('button',{
+                      onClick:()=>onLogResult({athleteId:ev.athleteIds[0]||null,date:iso}),
+                      title:'Lançar resultado',
+                      style:{background:'rgba(74,200,192,.1)',border:'1px solid rgba(74,200,192,.3)',color:'var(--theme-accent)',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px',fontWeight:700}
+                    },React.createElement('i',{className:'ti ti-clipboard-list',style:{fontSize:'10px'},'aria-hidden':'true'}))
+                  )
+                ),
+
+                // Athletes
+                athList.length>0&&React.createElement('div',{style:{display:'flex',gap:'4px',flexWrap:'wrap',marginBottom:'5px'}},
+                  athList.map((a,ai)=>React.createElement('span',{key:ai,style:{display:'flex',alignItems:'center',gap:'3px',fontSize:'10px',color:'#a89880'}},
+                    React.createElement('span',{style:{width:'6px',height:'6px',borderRadius:'50%',background:a.color,display:'inline-block'}}),
+                    a.name
+                  ))
+                ),
+
+                // Linked session blocks
+                linkedSession&&React.createElement('div',{style:{display:'flex',gap:'2px',flexWrap:'wrap',marginBottom:'5px'}},
+                  (linkedSession.blocks||[]).map((bl,bi)=>{
+                    const lbl=bl.label&&bl.label!=='-'?bl.label:bl.type;
+                    return React.createElement('span',{key:bi,style:{fontSize:'8px',fontWeight:700,padding:'1px 4px',borderRadius:'2px',background:(BLOCK_C[lbl]||'#555')+'22',color:BLOCK_C[lbl]||'#aaa',border:`1px solid ${(BLOCK_C[lbl]||'#555')}44`}},lbl);
+                  })
+                ),
+
+                // Notes
+                ev.notes&&React.createElement('div',{style:{fontSize:'10px',color:'#554a3a',marginTop:'5px',fontStyle:'italic'}},ev.notes)
+              )
+            );
+          })
+        )
+      )
+    );
+  }
+
+  // ── Event form — top-level to avoid focus loss on re-render ─────────────────
+  function EventForm(){
+    if(!showForm) return null;
+    return React.createElement(EventFormInner,{
+      showForm,sessions,athletes,
+      initialData:formData,
+      onSave:(ev)=>{saveEvent(ev);setShowForm(null);},
+      onCancel:()=>setShowForm(null)
+    });
+  }
+
+
+// ── EventFormInner — standalone component so inputs don't lose focus ──────────
+function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}){
+  const [fd,setFd]=useState(()=>({...initialData}));
+  const isPers=showForm.type==='personal';
+  const daySessions=(sessions[showForm.date]||[]);
+  const set=(k,v)=>setFd(p=>({...p,[k]:v}));
+  const toggleAthlete=id=>setFd(p=>({...p,athleteIds:p.athleteIds?.includes(id)?p.athleteIds.filter(x=>x!==id):[...(p.athleteIds||[]),id]}));
+
+  return React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.7)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center'}},
+    React.createElement('div',{style:{background:'#0d0b08',border:'1px solid #2a2318',borderRadius:'10px',padding:'18px',width:'340px',maxWidth:'90vw',maxHeight:'80vh',overflowY:'auto'}},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}},
+        React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#c8b090'}},(showForm.eventId?'Editar':'Novo')+' '+(isPers?'Personal':'Aula')),
+        React.createElement('button',{onClick:onCancel,style:{background:'transparent',border:'none',color:'#554a3a',cursor:'pointer',fontSize:'16px'}},'✕')
+      ),
+      React.createElement('div',{style:{marginBottom:'10px'}},
+        React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},isPers?'Nome / cliente':'Nome da turma'),
+        React.createElement('input',{type:'text',value:fd.label||'',onChange:e=>set('label',e.target.value),placeholder:isPers?'Ex: Jinx':'Ex: Turma Manhã',style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}})
+      ),
+      React.createElement('div',{style:{display:'flex',gap:'8px',marginBottom:'10px'}},
+        React.createElement('div',{style:{flex:1}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Horário'),
+          React.createElement('input',{type:'time',value:fd.time||'07:00',onChange:e=>set('time',e.target.value),style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}})
+        ),
+        React.createElement('div',{style:{flex:1}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Duração (min)'),
+          React.createElement('input',{type:'number',value:fd.durationMin||60,onChange:e=>set('durationMin',Number(e.target.value)),min:15,max:240,step:15,style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}})
+        )
+      ),
+      daySessions.length>0&&React.createElement('div',{style:{marginBottom:'10px'}},
+        React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Sessão vinculada'),
+        React.createElement('select',{value:fd.sessionId||'',onChange:e=>set('sessionId',e.target.value||null),style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}},
+          React.createElement('option',{value:''},'Nenhuma'),
+          daySessions.map(s=>React.createElement('option',{key:s.id,value:s.id},s.mainTraining||'Sessão'))
+        )
+      ),
+      React.createElement('div',{style:{marginBottom:'10px'}},
+        React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'5px'}},isPers?'Atletas (obrigatório)':'Atletas presentes (opcional)'),
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'4px',maxHeight:'120px',overflowY:'auto'}},
+          athletes.map(a=>React.createElement('label',{key:a.id,style:{display:'flex',alignItems:'center',gap:'6px',cursor:'pointer',fontSize:'12px',color:'#a89880'}},
+            React.createElement('input',{type:'checkbox',checked:(fd.athleteIds||[]).includes(a.id),onChange:()=>toggleAthlete(a.id),style:{accentColor:a.color}}),
+            React.createElement('span',{style:{width:'8px',height:'8px',borderRadius:'50%',background:a.color,flexShrink:0}}),
+            a.name
+          ))
+        )
+      ),
+      React.createElement('div',{style:{marginBottom:'14px'}},
+        React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Notas (opcional)'),
+        React.createElement('textarea',{value:fd.notes||'',onChange:e=>set('notes',e.target.value),rows:2,placeholder:'Observações...',style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px',resize:'vertical'}})
+      ),
+      React.createElement('div',{style:{display:'flex',gap:'6px'}},
+        React.createElement('button',{
+          onClick:()=>onSave({...fd}),
+          style:{flex:1,background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'8px',borderRadius:'5px',cursor:'pointer',fontSize:'12px',fontWeight:700}
+        },'Salvar'),
+        React.createElement('button',{
+          onClick:onCancel,
+          style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'8px 14px',borderRadius:'5px',cursor:'pointer',fontSize:'12px'}
+        },'Cancelar')
+      )
+    )
+  );
+}
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  return React.createElement('div',{style:{display:'flex',flexDirection:'column',height:'100%'}},
+
+    // Header bar
+    React.createElement('div',{className:'agenda-header',style:{display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',borderBottom:'1px solid #2a2318',flexWrap:'wrap',flexShrink:0}},
+      React.createElement('button',{onClick:()=>{if(month===0){setMonth(11);setYear(y=>y-1);}else setMonth(m=>m-1);setSelDay(null);},style:{background:'transparent',border:'1px solid #2a2318',color:'#887060',padding:'4px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'12px'}},'‹'),
+      React.createElement('span',{style:{fontSize:'14px',fontWeight:700,color:'#c8b090',flex:'1 1 100px',minWidth:'80px',textTransform:'uppercase',letterSpacing:'.03em'}},`${MONTHS_PT[month]} ${year}`),
+      React.createElement('button',{onClick:()=>{if(month===11){setMonth(0);setYear(y=>y+1);}else setMonth(m=>m+1);setSelDay(null);},style:{background:'transparent',border:'1px solid #2a2318',color:'#887060',padding:'4px 8px',borderRadius:'4px',cursor:'pointer',fontSize:'12px'}},'›'),
+      // Stats
+      React.createElement('div',{className:'agenda-stats',style:{display:'flex',gap:'8px',fontSize:'11px',flexWrap:'wrap'}},
+        React.createElement('span',{style:{color:'var(--theme-accent)'}},[completedAulas,'/',totalAulas,' aulas'].join('')),
+        React.createElement('span',{style:{color:'#d8a840'}},[completedPersonal,'/',totalPersonal,' personal'].join('')),
+        React.createElement('span',{style:{color:'#68d8a0'}},[totalCompleted,'/',totalEvs,' concluídas'].join(''))
+      ),
+      // Filter
+      React.createElement('div',{style:{display:'flex',gap:'4px'}},
+        ['all','scheduled','completed'].map(f=>React.createElement('button',{key:f,
+          onClick:()=>setFilter(f),
+          className:'agenda-filter-btn',
+          style:{background:filter===f?'var(--theme-accent)':'transparent',color:filter===f?'var(--theme-accent-text)':'#887060',border:`1px solid ${filter===f?'var(--theme-accent)':'#2a2318'}`,padding:'3px 7px',borderRadius:'4px',cursor:'pointer',fontSize:'10px',fontWeight:700,textTransform:'uppercase'}
+        },f==='all'?'Todos':f==='scheduled'?'Agendado':'Completo'))
+      )
+    ),
+
+    // Grid + pane layout
+    React.createElement('div',{style:{display:'flex',flex:1,minHeight:0,overflow:'hidden'}},
+
+      // Calendar grid
+      React.createElement('div',{style:{flex:selDay?'0 0 60%':'1',minWidth:0,overflowY:'auto',borderRight:selDay?'1px solid #2a2318':'none'}},
+        // Day headers
+        React.createElement('div',{className:'agenda-day-hdrs',style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:'1px solid #2a2318',position:'sticky',top:0,background:'#0d0b08',zIndex:2}},
+          DAYS_PT_SHORT.map(d=>React.createElement('div',{key:d,className:'agenda-day-hdr'},d))
+        ),
+        // Weeks
+        weeks.map((week,wi)=>React.createElement('div',{key:wi,className:'agenda-week-row',style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:'1px solid #2a2318'}},
+          week.map((day,di)=>day
+            ?React.createElement(CellDay,{key:di,day})
+            :React.createElement('div',{key:di,style:{borderRight:'1px solid #2a2318',background:'rgba(0,0,0,.3)',minHeight:'80px'}})
+          )
+        ))
+      ),
+
+      // Day pane
+      React.createElement('div',{
+      className:'agenda-pane-backdrop',
+      style:{display:selDay?'block':'none',position:'fixed',inset:0,background:'rgba(0,0,0,.5)',zIndex:499},
+      onClick:()=>setSelDay(null)
+    }),
+    selDay&&React.createElement('div',{className:'agenda-pane',style:{minWidth:0,overflowY:'auto',background:'#0d0b08'}},
+        React.createElement(DayPane)
+      )
+    ),
+
+    // Event form modal
+    React.createElement(EventForm)
+  );
+}
+
+
+function SchedulePublisher({sessions,events,setEvents,athletes,onEditSession,onLogResult}){
   const dailyRef=useRef();
   const weeklyRef=useRef();
   const exportDailyRef=useRef();
@@ -2132,7 +2665,7 @@ function SchedulePublisher({sessions}){
   // all dates that have sessions, sorted
   // Apply athlete filter — only show sessions matching filterAthlete.name
   const filteredSessions=filterAthlete
-    ?Object.fromEntries(Object.entries(sessions).map(([k,v])=>[k,v.filter(s=>s.mainTraining===filterAthlete.name)]))
+    ?Object.fromEntries(Object.entries(sessions).map(([k,v])=>[k,v.filter(s=>matchesAthlete(s,filterAthlete.name))]))
     :sessions;
   const allSessionDates=Object.keys(filteredSessions).filter(k=>filteredSessions[k]?.length>0).sort();
 
@@ -2148,7 +2681,19 @@ function SchedulePublisher({sessions}){
 
   return React.createElement('div',null,
 
-    // ── controls bar ──
+    // ── Agenda — always visible ──
+    React.createElement('div',{className:'agenda-wrap',style:{display:'flex',flexDirection:'column',marginBottom:'12px',border:'1px solid #1e1e1e',borderRadius:'8px',overflow:'hidden'}},
+      React.createElement(AgendaView,{
+        sessions,
+        events:events||{},
+        setEvents:setEvents||(()=>{}),
+        athletes:athletes||[],
+        onEditSession:onEditSession||(()=>{}),
+        onLogResult:onLogResult||(()=>{})
+      })
+    ),
+
+    // ── controls bar (image export) ──
     React.createElement('div',{className:'pub-controls'},
       // hidden file input
       React.createElement('input',{
@@ -2313,7 +2858,7 @@ function SchedulePublisher({sessions}){
       React.createElement('div',{style:{display:'flex',gap:'6px',marginBottom:'8px',flexWrap:'wrap',alignItems:'center'}},
 React.createElement('button',{type:'button',className:`pvt ${previewTarget==='daily'?'on':''}`,onClick:()=>setPreviewTarget('daily')},'Diário'),
         React.createElement('button',{type:'button',className:`pvt ${previewTarget==='semanal'?'on':''}`,onClick:()=>setPreviewTarget('semanal')},'Semanal'),
-        React.createElement('button',{type:'button',className:`pvt ${previewTarget==='calendar'?'on':''}`,onClick:()=>setPreviewTarget('calendar')},'Calendário'),
+        React.createElement('button',{type:'button',className:`pvt ${previewTarget==='calendar'?'on':''}`,onClick:()=>setPreviewTarget('calendar')},'Exportar Mensal'),
         React.createElement('button',{type:'button',
           className:`pvt ${previewTarget==='mobileA'?'on':''}`,
           style:previewTarget==='mobileA'?{background:'var(--theme-accent)',borderColor:'var(--theme-accent)',color:'var(--theme-accent-text)'}:{color:'var(--theme-accent)',borderColor:'var(--theme-accent)'},
@@ -3457,10 +4002,10 @@ function RosterView({athletes,setAthletes}){
 }
 
 // ── LogView ───────────────────────────────────────────────
-function LogView({athletes,sessions}){
+function LogView({athletes,sessions,preload,onPreloadConsumed}){
   const [results,setResults]=useState(loadResults);
-  const [date,setDate]=useState(todayISO());
-  const [athleteId,setAthleteId]=useState('');
+  const [date,setDate]=useState(()=>preload?.date||todayISO());
+  const [athleteId,setAthleteId]=useState(()=>preload?.athleteId||'');
   const [presence,setPresence]=useState('Presente');
   const [blockLogs,setBlockLogs]=useState([]);
   const [coachNote,setCoachNote]=useState('');
@@ -3469,6 +4014,14 @@ function LogView({athletes,sessions}){
   const [energyLevel,setEnergyLevel]=useState(3);
 
   const [selectedSessionIdx,setSelectedSessionIdx]=useState(0);
+
+  useEffect(()=>{
+    if(!preload)return;
+    if(preload.date) setDate(preload.date);
+    if(preload.athleteId) setAthleteId(preload.athleteId);
+    onPreloadConsumed&&onPreloadConsumed();
+  },[preload]);
+
   const daySessions=sessions[date]||[];
   const session=daySessions[selectedSessionIdx]||daySessions[0]||null;
 
@@ -4005,7 +4558,7 @@ function HistoryView({athletes,sessions}){
 }
 
 // ── ResultsTab (root) ─────────────────────────────────────
-function ResultsTab({sessions}){
+function ResultsTab({sessions,preload,onPreloadConsumed}){
   const [subView,setSubView]=useState('log'); // 'log'|'roster'|'history'
   const [athletes,setAthletes]=useState(loadAthletes);
 
@@ -4017,7 +4570,7 @@ function ResultsTab({sessions}){
         )
       )
     ),
-    subView==='log'&&React.createElement(LogView,{athletes,sessions}),
+    subView==='log'&&React.createElement(LogView,{athletes,sessions,preload,onPreloadConsumed}),
     subView==='roster'&&React.createElement(RosterView,{athletes,setAthletes}),
     subView==='history'&&React.createElement(HistoryView,{athletes,sessions}),
     subView==='leaderboard'&&React.createElement(LeaderboardView,{athletes,sessions})
@@ -4588,7 +5141,7 @@ function PrSubView({athId,goalsData,persist,onBack}){
 
 
 // ── Sessions Summary Panel ────────────────────────────────────────────────────
-function SessionsSummaryPanel({athName,sessions,results,expandedSessions,setExpandedSessions}){
+function SessionsSummaryPanel({athName,athId,sessions,results,expandedSessions,setExpandedSessions,onEditSession,onLogResult}){
   const WOD_TYPES_S=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
   const SCALE_RANK_S={RX:4,Inter:3,SC:2,Adaptado:1};
   const SCALE_NAMES_S={4:'RX',3:'Inter',2:'SC',1:'Adaptado'};
@@ -4605,7 +5158,7 @@ function SessionsSummaryPanel({athName,sessions,results,expandedSessions,setExpa
   const athSessions=[];
   allDates.forEach(date=>{
     (sessions[date]||[]).forEach(s=>{
-      if(s.mainTraining&&s.mainTraining===athName) athSessions.push({date,session:s});
+      if(matchesAthlete(s,athName)) athSessions.push({date,session:s});
     });
   });
 
@@ -4617,7 +5170,7 @@ function SessionsSummaryPanel({athName,sessions,results,expandedSessions,setExpa
     'Nenhuma sessão atribuída a este atleta. Use o campo Alvo no Criador de Treinos.'
   );
 
-  return React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'10px'}},
+  return React.createElement('div',{className:'sess-summary-grid'},
     cards.map(({date,session})=>{
       const isPast=date<=todayISO;
       const isToday=date===todayISO;
@@ -4691,20 +5244,29 @@ function SessionsSummaryPanel({athName,sessions,results,expandedSessions,setExpa
               const sc=rowResult?.scale;
               const scCol=sc?SCALE_COLORS_S[sc]:'#555';
               return React.createElement('div',{key:ei,style:{display:'flex',alignItems:'center',gap:'8px',padding:'3px 0',fontSize:'12px'}},
-                React.createElement('span',{style:{flex:1,color:'#ccc'}},`${ex.sets?ex.sets+'×':''}${ex.reps?ex.reps+' ':''}${ex.name}`),
+                React.createElement('span',{style:{flex:1,color:'#ccc'}},ex.name),
                 sc&&React.createElement('span',{style:{fontSize:'10px',fontWeight:700,padding:'1px 5px',borderRadius:'3px',color:scCol,background:scCol+'22',border:`1px solid ${scCol}44`}},sc)
               );
             }),
             athBl?.rpe&&React.createElement('div',{style:{fontSize:'11px',color:'#555',marginTop:'3px'}},`RPE ${athBl.rpe}`),
             athBl?.perfTime&&React.createElement('div',{style:{fontSize:'12px',fontWeight:700,color:'#e0e0e0',marginTop:'3px'}},athBl.perfTime),
-            isWod&&isPast&&React.createElement('a',{
-              href:`leaderboard.html?wod=${bl.id}&session=${session.id}&date=${date}`,
-              target:'_blank',
-              style:{display:'flex',alignItems:'center',gap:'5px',marginTop:'6px',padding:'5px 8px',
-                background:'rgba(74,200,192,.06)',border:'1px solid rgba(74,200,192,.25)',
-                borderRadius:'5px',color:'#4ac8c0',fontSize:'11px',fontWeight:700,
-                textDecoration:'none',textTransform:'uppercase',letterSpacing:'.05em'}
-            },React.createElement('i',{className:'ti ti-trophy'}),' Ver Leaderboard')
+            React.createElement('div',{style:{display:'flex',gap:'5px',marginTop:'6px',flexWrap:'wrap'}},
+              onEditSession&&React.createElement('button',{
+                type:'button',
+                onClick:e=>{e.stopPropagation();onEditSession({...session,date,_dateKey:date});},
+                style:{display:'flex',alignItems:'center',gap:'4px',padding:'4px 8px',background:'transparent',
+                  border:'1px solid #2a2318',color:'#887060',borderRadius:'4px',cursor:'pointer',
+                  fontSize:'10px',fontWeight:700,fontFamily:'inherit'}
+              },React.createElement('i',{className:'ti ti-edit',style:{fontSize:'10px'}}),'Editar Sessão'),
+              onLogResult&&React.createElement('button',{
+                type:'button',
+                onClick:e=>{e.stopPropagation();onLogResult({athleteId:athId,date});},
+                style:{display:'flex',alignItems:'center',gap:'4px',padding:'4px 8px',
+                  background:'rgba(74,200,192,.08)',border:'1px solid rgba(74,200,192,.25)',
+                  color:'var(--theme-accent)',borderRadius:'4px',cursor:'pointer',
+                  fontSize:'10px',fontWeight:700,fontFamily:'inherit'}
+              },React.createElement('i',{className:'ti ti-clipboard-list',style:{fontSize:'10px'}}),'Lançar Resultado')
+            )
           );
         });
 
@@ -4991,8 +5553,12 @@ function RecentWods({results,sessions}){
 }
 
 // ── Main AthleteTab component ─────────────────────────────────────────────────
-function AthleteTab({sessions,results}){
-  const [athletes]=useState(loadAthletes);
+function AthleteTab({sessions,results,onEditSession,onLogResult}){
+  const [athletes,setAthletes]=useState(loadAthletes);
+  const [showAthForm,setShowAthForm]=useState(false);
+  const [athForm,setAthForm]=useState({name:'',level:'Iniciante',goal:'Saúde geral',notes:'',color:'#e87820',since:todayISO()});
+  const [editingAth,setEditingAth]=useState(null);
+  const [confirmDelAth,setConfirmDelAth]=useState(null);
   const [goalsData,setGoalsDataState]=useState(loadGoalsData);
   const [selAthlete,setSelAthleteState]=useState(null);
   const [editMode,setEditMode]=useState(false);
@@ -5001,6 +5567,7 @@ function AthleteTab({sessions,results}){
   const [expandedSessions,setExpandedSessions]=useState(()=>new Set());
 
   const persist=d=>{setGoalsDataState(d);saveGoalsData(d);};
+  const persistAthletes=a=>{setAthletes(a);saveAthletes(a);};
 
   const ath=athletes.find(a=>a.id===selAthlete)||null;
   const athColor=ath?.color||'#00b8d4';
@@ -5041,6 +5608,19 @@ function AthleteTab({sessions,results}){
     updateGoal(goalId,{milestones});
   };
 
+  const saveAthlete=()=>{
+    if(!athForm.name.trim()) return;
+    if(editingAth){
+      persistAthletes(athletes.map(a=>a.id===editingAth?{...a,...athForm}:a));
+    } else {
+      persistAthletes([...athletes,{...athForm,id:uid(),since:athForm.since||todayISO()}]);
+    }
+    setAthForm({name:'',level:'Iniciante',goal:'Saúde geral',notes:'',color:'#e87820',since:todayISO()});
+    setEditingAth(null);setShowAthForm(false);
+  };
+  const deleteAthlete=id=>{persistAthletes(athletes.filter(a=>a.id!==id));setConfirmDelAth(null);};
+  const startEditAth=a=>{setAthForm({name:a.name,level:a.level,goal:a.goal||'',notes:a.notes||'',color:a.color||'#e87820',since:a.since||''});setEditingAth(a.id);setShowAthForm(true);};
+
   // Combined progress for landing
   const combinedPct=ath=>{
     const goals=(goalsData.athleteGoals||{})[ath.id]||[];
@@ -5050,7 +5630,68 @@ function AthleteTab({sessions,results}){
 
   // ── Landing view ──────────────────────────────────────────────────────────
   if(!selAthlete) return React.createElement('div',{style:{padding:'12px'}},
-    React.createElement('div',{style:{fontSize:'11px',fontWeight:700,color:'#888',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'12px'}},'Todos os Atletas'),
+    // Athlete form modal
+    showAthForm&&React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'},onClick:()=>{setShowAthForm(false);setEditingAth(null);}},
+      React.createElement('div',{style:{background:'#0d0d0d',border:'1px solid #2e2e2e',borderRadius:'10px',padding:'18px',width:'340px',maxWidth:'90vw',maxHeight:'80vh',overflowY:'auto'},onClick:e=>e.stopPropagation()},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}},
+          React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#ccc'}},editingAth?'Editar atleta':'Novo atleta'),
+          React.createElement('button',{onClick:()=>{setShowAthForm(false);setEditingAth(null);},style:{background:'transparent',border:'none',color:'#555',cursor:'pointer',fontSize:'16px'}},'✕')
+        ),
+        React.createElement('div',{style:{marginBottom:'10px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Nome'),
+          React.createElement('input',{value:athForm.name,onChange:e=>setAthForm(f=>({...f,name:e.target.value})),placeholder:'Nome do atleta',style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+        ),
+        React.createElement('div',{style:{display:'flex',gap:'8px',marginBottom:'10px'}},
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Nível'),
+            React.createElement('select',{value:athForm.level,onChange:e=>setAthForm(f=>({...f,level:e.target.value})),style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}},
+              getLevels().map(l=>React.createElement('option',{key:l},l))
+            )
+          ),
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Objetivo'),
+            React.createElement('select',{value:athForm.goal,onChange:e=>setAthForm(f=>({...f,goal:e.target.value})),style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}},
+              getGoals().map(g=>React.createElement('option',{key:g},g))
+            )
+          )
+        ),
+        React.createElement('div',{style:{marginBottom:'10px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Observações'),
+          React.createElement('input',{value:athForm.notes,onChange:e=>setAthForm(f=>({...f,notes:e.target.value})),placeholder:'ex: Joelho direito',style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+        ),
+        React.createElement('div',{style:{marginBottom:'14px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'5px'}},'Cor'),
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+            React.createElement('div',{style:{width:'28px',height:'28px',borderRadius:'50%',background:athForm.color,cursor:'pointer',border:'2px solid #2e2e2e',flexShrink:0},onClick:()=>document.getElementById('ath-color-picker')?.click()}),
+            React.createElement('input',{type:'color',id:'ath-color-picker',value:athForm.color,onChange:e=>setAthForm(f=>({...f,color:e.target.value})),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
+            React.createElement('input',{type:'text',value:athForm.color,onChange:e=>{if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))setAthForm(f=>({...f,color:e.target.value}));},style:{flex:1,background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+          )
+        ),
+        React.createElement('button',{onClick:saveAthlete,style:{width:'100%',background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'9px',borderRadius:'6px',cursor:'pointer',fontSize:'13px',fontWeight:700}},
+          editingAth?'Salvar alterações':'Adicionar atleta'
+        )
+      )
+    ),
+    // Delete confirm modal
+    confirmDelAth&&React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}},
+      React.createElement('div',{style:{background:'#0d0d0d',border:'1px solid #3a1010',borderRadius:'10px',padding:'20px',width:'300px',maxWidth:'90vw',textAlign:'center'}},
+        React.createElement('i',{className:'ti ti-alert-triangle',style:{fontSize:'28px',color:'#e05050',marginBottom:'10px',display:'block'}}),
+        React.createElement('div',{style:{fontSize:'14px',color:'#ccc',marginBottom:'6px',fontWeight:700}},`Remover ${athletes.find(a=>a.id===confirmDelAth)?.name||'atleta'}?`),
+        React.createElement('div',{style:{fontSize:'12px',color:'#555',marginBottom:'16px'}},'Esta ação não pode ser desfeita.'),
+        React.createElement('div',{style:{display:'flex',gap:'8px'}},
+          React.createElement('button',{onClick:()=>deleteAthlete(confirmDelAth),style:{flex:1,background:'#3a1010',border:'1px solid #6a2020',color:'#e05050',padding:'8px',borderRadius:'6px',cursor:'pointer',fontSize:'13px',fontWeight:700}},'Remover'),
+          React.createElement('button',{onClick:()=>setConfirmDelAth(null),style:{flex:1,background:'transparent',border:'1px solid #2e2e2e',color:'#888',padding:'8px',borderRadius:'6px',cursor:'pointer',fontSize:'13px'}},'Cancelar')
+        )
+      )
+    ),
+    // Header row
+    React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'12px'}},
+      React.createElement('div',{style:{fontSize:'11px',fontWeight:700,color:'#888',textTransform:'uppercase',letterSpacing:'.07em'}},'Atletas'),
+      React.createElement('button',{type:'button',
+        onClick:()=>{setAthForm({name:'',level:'Iniciante',goal:'Saúde geral',notes:'',color:'#e87820',since:todayISO()});setEditingAth(null);setShowAthForm(true);},
+        style:{display:'flex',alignItems:'center',gap:'5px',background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'6px 12px',borderRadius:'6px',cursor:'pointer',fontSize:'12px',fontWeight:700}
+      },React.createElement('i',{className:'ti ti-plus'}),' Atleta')
+    ),
     athletes.length===0
       ?React.createElement('div',{style:{color:'#333',fontSize:'13px',padding:'20px',textAlign:'center'}},'Nenhum atleta registrado.')
       :React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:'10px'}},
@@ -5060,15 +5701,20 @@ function AthleteTab({sessions,results}){
           const goals=(goalsData.athleteGoals||{})[a.id]||[];
           return React.createElement('div',{key:a.id,
             style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'12px',
-              cursor:'pointer',transition:'border-color .1s',borderLeft:`3px solid ${color}`},
-            onClick:()=>setSelAthleteState(a.id),
+              transition:'border-color .1s',borderLeft:'3px solid '+color},
             onMouseEnter:e=>e.currentTarget.style.borderColor=color,
             onMouseLeave:e=>e.currentTarget.style.borderColor='#1e1e1e'
           },
-            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'8px'}},
+            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'8px'}},
               React.createElement('div',{style:{width:'10px',height:'10px',borderRadius:'50%',background:color,flexShrink:0}}),
-              React.createElement('span',{style:{fontWeight:700,fontSize:'14px',color:'#fff',flex:1}},a.name),
-              pct!==null&&React.createElement('span',{style:{fontSize:'12px',color:'#888'}},`${pct}%`)
+              React.createElement('span',{style:{fontWeight:700,fontSize:'14px',color:'#fff',flex:1,cursor:'pointer'},onClick:()=>setSelAthleteState(a.id)},a.name),
+              pct!==null&&React.createElement('span',{style:{fontSize:'12px',color:'#888'}},pct+'%'),
+              React.createElement('button',{type:'button',onClick:e=>{e.stopPropagation();startEditAth(a);},style:{background:'transparent',border:'1px solid #2e2e2e',color:'#555',padding:'2px 5px',borderRadius:'4px',cursor:'pointer'},title:'Editar'},
+                React.createElement('i',{className:'ti ti-edit',style:{fontSize:'12px'}})
+              ),
+              React.createElement('button',{type:'button',onClick:e=>{e.stopPropagation();setConfirmDelAth(a.id);},style:{background:'transparent',border:'1px solid #2e2e2e',color:'#5a1a1a',padding:'2px 5px',borderRadius:'4px',cursor:'pointer'},title:'Remover'},
+                React.createElement('i',{className:'ti ti-trash',style:{fontSize:'12px'}})
+              )
             ),
             pct!==null
               ?React.createElement('div',{style:{display:'flex',gap:'2px'}},
@@ -5112,10 +5758,13 @@ function AthleteTab({sessions,results}){
       React.createElement('div',{style:{fontSize:'10px',color:'#555',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'10px'}},'Sessões'),
       React.createElement(SessionsSummaryPanel,{
         athName:ath?.name||'',
+        athId:selAthlete,
         sessions,
         results:athResults,
         expandedSessions,
-        setExpandedSessions
+        setExpandedSessions,
+        onEditSession,
+        onLogResult
       })
     ),
 
@@ -5718,6 +6367,9 @@ const saveAthletes=d=>{try{localStorage.setItem(LS_ATHLETES,JSON.stringify(d))}c
 const LS_SETTINGS='eagles_settings_v1';
 const LS_REGISTRY='eagles_block_registry_v1';
 const LS_GOALS='eagles_athlete_goals_v1';
+const LS_EVENTS='eagles_events_v1';
+const loadEvents=()=>{try{const d=localStorage.getItem(LS_EVENTS);return d?JSON.parse(d):{}}catch{return{}}};
+const saveEvents=d=>{try{localStorage.setItem(LS_EVENTS,JSON.stringify(d))}catch{}};
 const loadGoalsData=()=>{try{const d=localStorage.getItem(LS_GOALS);return d?JSON.parse(d):{athleteGoals:{},prs:{}};}catch{return{athleteGoals:{},prs:{}};}};
 const saveGoalsData=d=>{try{localStorage.setItem(LS_GOALS,JSON.stringify(d));}catch{}};
 const loadRegistry=()=>{try{const d=localStorage.getItem(LS_REGISTRY);return d?JSON.parse(d):null;}catch{return null;}};
@@ -6228,6 +6880,9 @@ function ResultadosTab({sessions}){
 function App(){
   const [tab,setTab]=useState('creator');
   const [sessions,setSessions]=useState(loadLS);
+  const [events,setEvents]=useState(loadEvents);
+  const [creatorPreload,setCreatorPreload]=useState(null);
+  const [resultsPreload,setResultsPreload]=useState(null);
   const [saved,setSaved]=useState(false);
   const [energyLevel,setEnergyLevel]=useState(3);
   const [toast,setToast]=useState(null);
@@ -6331,6 +6986,24 @@ function App(){
       });
   },[]);
 
+  useEffect(()=>{saveEvents(events);},[events]);
+
+  // ── URL param deep-links (?tab=results&athlete=ID&date=DATE, ?editSession=ID&editDate=DATE) ──
+  useEffect(()=>{
+    const p=new URLSearchParams(window.location.search);
+    const tabParam=p.get('tab');
+    const editSessId=p.get('editSession');
+    const editDate=p.get('editDate');
+    if(editSessId&&editDate){
+      // find the session and preload into creator
+      const daySessions=loadLS()[editDate]||[];
+      const sess=daySessions.find(s=>s.id===editSessId);
+      if(sess){setCreatorPreload({...sess,date:editDate,_dateKey:editDate});setTab('creator');}
+    } else if(tabParam){
+      setTab(tabParam);
+    }
+  },[]);
+
   useEffect(()=>{
     saveLS(sessions);setSaved(true);
     const t=setTimeout(()=>setSaved(false),1400);
@@ -6345,7 +7018,7 @@ function App(){
   // ── Export state as .json ──
   const handleSaveState=(customName)=>{
     const lbcSaved=(()=>{try{const d=localStorage.getItem('eagles_lb_colors_v1');return d?JSON.parse(d):{}}catch{return{}}})();
-    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings(),lbColors:lbcSaved,results:loadResults(),athletes:loadAthletes(),exerciseRegistry:loadRegistry()||{},athleteGoalsData:loadGoalsData()};
+    const state={version:2,exportedAt:new Date().toISOString(),sessions,settings:loadSettings(),lbColors:lbcSaved,results:loadResults(),athletes:loadAthletes(),exerciseRegistry:loadRegistry()||{},athleteGoalsData:loadGoalsData(),events:loadEvents()};
     const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
     const a=document.createElement('a');
     const date=toISO(new Date());
@@ -6387,6 +7060,7 @@ function App(){
         if(parsed.athleteGoalsData&&typeof parsed.athleteGoalsData==='object'){saveGoalsData(parsed.athleteGoalsData);}
         if(parsed.athletes&&Array.isArray(parsed.athletes)&&parsed.athletes.length){saveAthletes(parsed.athletes);}
         if(parsed.results&&Array.isArray(parsed.results)){saveResults(parsed.results);}
+        if(parsed.events&&typeof parsed.events==='object'){saveEvents(parsed.events);}
         // restore publisher settings if present
         if(parsed.settings&&typeof parsed.settings==='object'){
           saveSettings(parsed.settings);
@@ -6490,16 +7164,16 @@ function App(){
     ),
     React.createElement('div',{className:'pane'},
       tab==='creator'
-        ?React.createElement(TrainingCreator,{sessions,setSessions,blockNames})
+        ?React.createElement(TrainingCreator,{sessions,setSessions,blockNames,preload:creatorPreload,onPreloadConsumed:()=>setCreatorPreload(null)})
         :tab==='parser'
         ?React.createElement(TextParser,{sessions,setSessions,setTab})
         :tab==='athletes'
-        ?React.createElement(AthleteTab,{sessions,results:loadResults()})
+        ?React.createElement(AthleteTab,{sessions,results:loadResults(),onEditSession:(s)=>{setCreatorPreload(s);setTab('creator');},onLogResult:({athleteId,date})=>{setResultsPreload({athleteId,date});setTab('results');}})
         :tab==='exercises'
         ?React.createElement(ExerciseTab,null)
         :tab==='results'
-        ?React.createElement('div',{className:'res-pane'},React.createElement(ResultsTab,{sessions}))
-        :React.createElement('div',{className:'pub-pane'},React.createElement(SchedulePublisher,{sessions}))
+        ?React.createElement('div',{className:'res-pane'},React.createElement(ResultsTab,{sessions,preload:resultsPreload,onPreloadConsumed:()=>setResultsPreload(null)}))
+        :React.createElement('div',{className:'pub-pane'},React.createElement(SchedulePublisher,{sessions,events,setEvents,athletes:loadAthletes(),onEditSession:(s)=>{setCreatorPreload(s);setTab('creator');},onLogResult:({athleteId,date})=>{setResultsPreload({athleteId,date});setTab('results');}}))
     )
   );
 }
