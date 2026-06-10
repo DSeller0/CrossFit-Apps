@@ -2036,9 +2036,11 @@ function crc16Pix(str){
   return(crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0');
 }
 
+const pixClean=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/[^a-zA-Z0-9 @._\-+\/]/g,'').trim();
+
 function buildPixPayload({pixKey,merchantName,merchantCity,amount,description,txid}){
-  const clean=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[^a-zA-Z0-9 @._\-+\/]/g,'').trim();
+  const clean=pixClean;
   const f=(id,val)=>{const l=String(val.length).padStart(2,'0');return`${id}${l}${val}`;};
   // Normalise phone key: strip non-digits except leading +
   let key=(pixKey||'').trim();
@@ -2660,7 +2662,7 @@ function ReportModal({events,sessions,onClose}){
                 doc.text(`${t.currency} ${payAmount.toLocaleString('pt-BR',{minimumFractionDigits:2})}`,46,y+11);
                 doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
                 doc.text(coach.pixKey,46,y+17);
-                doc.text(clean(coach.name||gymName).slice(0,25).toUpperCase(),46,y+22);
+                doc.text(pixClean(coach.name||gymName).slice(0,25).toUpperCase(),46,y+22);
                 if(isCapped){
                   doc.setFontSize(8);doc.setTextColor(180,80,0);
                   doc.text(`⚠ Valor limitado a ${t.currency} ${payAmount.toFixed(2)} (modo teste)`,14,y+31);
