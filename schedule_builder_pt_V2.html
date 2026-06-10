@@ -2042,11 +2042,17 @@ const pixClean=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
 function buildPixPayload({pixKey,merchantName,merchantCity,amount,description,txid}){
   const clean=pixClean;
   const f=(id,val)=>{const l=String(val.length).padStart(2,'0');return`${id}${l}${val}`;};
-  // Normalise phone key: strip non-digits except leading +
+  // Normalise phone key: only pre-process if it looks like a phone (no @ or .)
   let key=(pixKey||'').trim();
-  if(/^\+?[\d\s\(\)\-]+$/.test(key)&&!key.includes('@')&&key.replace(/\D/g,'').length>=10){
-    key='+55'+key.replace(/\D/g,'');
-    if(key.startsWith('+5555')) key='+5'+key.slice(3);
+  if(/^[\+\d\s\(\)\-]+$/.test(key)&&!key.includes('@')&&!key.includes('.')){
+    const digits=key.replace(/\D/g,'');
+    if(key.startsWith('+55')){
+      key=key.replace(/[\s\(\)\-]/g,''); // keep +55, strip spaces/dashes only
+    } else if(digits.startsWith('55')&&digits.length===13){
+      key='+'+digits; // already has country code without +
+    } else if(digits.length>=10){
+      key='+55'+digits; // local DDD+number, add +55
+    }
   }
   const gui=f('00','br.gov.bcb.pix')+f('01',key)+
     (description?f('02',clean(description).slice(0,72)):'');
