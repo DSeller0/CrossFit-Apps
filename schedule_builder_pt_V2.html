@@ -810,7 +810,13 @@ function IntensityInput({value,onChange,defaultReps,defaultSets}){
 const emptyEx=()=>({id:uid(),name:'',sets:'',reps:'',intensity:null,note:'',progression:null});
 // progression = null (unique) | [{reps,load,unit}] (progression mode)
 const emptyBlock=()=>({id:uid(),label:APP_CONFIG.blockNames[0]||'-',type:APP_CONFIG.blockNames.find(n=>n!=='-')||'Força',zone:'Zona 01',duration:'',rounds:'',notes:'',ladderMode:false,exercises:[emptyEx()]});
-const emptyS=()=>({id:uid(),date:todayISO(),mainTraining:'',blocks:[emptyBlock()]});
+const emptyS=()=>({id:uid(),date:todayISO(),mainTraining:[],blocks:[emptyBlock()]});
+// Backwards compat: always return mainTraining as array
+function getTargets(s){
+  if(!s||!s.mainTraining) return [];
+  return Array.isArray(s.mainTraining)?s.mainTraining:[s.mainTraining];
+}
+function matchesAthlete(s,athName){return getTargets(s).includes(athName);}
 
 // ── BlockEditor ───────────────────────────────────────────
 
@@ -1114,19 +1120,35 @@ function BlockEditor({block,idx,total,blockNames,onUpdate,onDelete,collapsed,onT
 }
 
 // ── TrainingCreator ───────────────────────────────────────
-function TrainingCreator({sessions,setSessions,blockNames}){
+function TrainingCreator({sessions,setSessions,blockNames,preload,onPreloadConsumed}){
   const [form,setForm]=useState(emptyS());
   const [blocks,setBlocks]=useState([emptyBlock()]);
   const [editing,setEditing]=useState(null); // {dateKey, id}
+  const [showAlvoModal,setShowAlvoModal]=useState(false);
+  const [sessionName,setSessionName]=useState('');
   const formRef=useRef();
 
+  useEffect(()=>{
+    if(!preload)return;
+    if(preload._newForDate){
+      setForm(f=>({...emptyS(),date:preload._newForDate}));
+      setBlocks([emptyBlock()]);
+      setEditing(null);
+    } else {
+      startEdit(preload,preload.date||preload._dateKey||'');
+    }
+    onPreloadConsumed&&onPreloadConsumed();
+  },[preload]);
+
   const startEdit=(s,dateKey)=>{
-    setForm({...s,date:dateKey});
+    const targets=getTargets(s);
+    const sName=typeof s.mainTraining==='string'?s.mainTraining:(s.sessionName||'');
+    setForm({...s,date:dateKey,mainTraining:targets,sessionName:sName});
     setBlocks(s.blocks?.length?s.blocks:[emptyBlock()]);
     setEditing({dateKey,id:s.id});
     setTimeout(()=>formRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),60);
   };
-  const cancel=()=>{setForm(emptyS());setBlocks([emptyBlock()]);setEditing(null);};
+  const cancel=()=>{setForm(emptyS());setBlocks([emptyBlock()]);setEditing(null);setShowAlvoModal(false);};
 
   const saveS=()=>{
     const dateKey=form.date||todayISO();
@@ -1206,7 +1228,37 @@ function TrainingCreator({sessions,setSessions,blockNames}){
         )
       )
     ),
-    React.createElement('div',{className:'sc-card',ref:formRef},
+      showAlvoModal&&React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'},onClick:()=>setShowAlvoModal(false)},
+        React.createElement('div',{style:{background:'#0d0d0d',border:'1px solid #2e2e2e',borderRadius:'10px',padding:'18px',width:'320px',maxWidth:'90vw'},onClick:e=>e.stopPropagation()},
+          React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}},
+            React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#ccc'}},'Selecionar Atletas'),
+            React.createElement('button',{onClick:()=>setShowAlvoModal(false),style:{background:'transparent',border:'none',color:'#555',cursor:'pointer',fontSize:'16px'}},'✕')
+          ),
+          React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'6px',maxHeight:'300px',overflowY:'auto',marginBottom:'14px'}},
+            loadAthletes().map(a=>{
+              const targets=Array.isArray(form.mainTraining)?form.mainTraining:[];
+              const checked=targets.includes(a.name);
+              return React.createElement('label',{key:a.id,style:{display:'flex',alignItems:'center',gap:'10px',padding:'6px 8px',borderRadius:'6px',cursor:'pointer',background:checked?'rgba(74,200,192,.06)':'transparent',border:'1px solid '+(checked?'rgba(74,200,192,.25)':'#1e1e1e')}},
+                React.createElement('input',{type:'checkbox',checked,
+                  onChange:()=>{
+                    const cur=Array.isArray(form.mainTraining)?form.mainTraining:[];
+                    setForm(f=>({...f,mainTraining:checked?cur.filter(n=>n!==a.name):[...cur,a.name]}));
+                  },
+                  style:{accentColor:a.color||'var(--theme-accent)',width:'14px',height:'14px'}
+                }),
+                React.createElement('span',{style:{width:'10px',height:'10px',borderRadius:'50%',background:a.color||'#555',flexShrink:0}}),
+                React.createElement('span',{style:{fontSize:'13px',color:'#ccc',flex:1}},a.name),
+                React.createElement('span',{style:{fontSize:'11px',color:'#555'}},a.level||'')
+              );
+            })
+          ),
+          React.createElement('button',{type:'button',
+            style:{width:'100%',background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'8px',borderRadius:'6px',cursor:'pointer',fontSize:'13px',fontWeight:700},
+            onClick:()=>setShowAlvoModal(false)
+          },'Confirmar')
+        )
+      ),
+          React.createElement('div',{className:'sc-card',ref:formRef},
       React.createElement('div',{className:'sc-hdr'},
         React.createElement('span',{className:'sc-title'},editing?'Editar sessão':'Nova sessão'),
         editing&&React.createElement('button',{type:'button',className:'b bsm',onClick:cancel},'Cancelar')
@@ -1231,26 +1283,32 @@ function TrainingCreator({sessions,setSessions,blockNames}){
           })
         ),
         React.createElement('div',{className:'fg'},
-          React.createElement('span',{className:'lbl'},'Alvo'),
+          React.createElement('span',{className:'lbl'},'Nome da Sessão'),
           React.createElement('div',{className:'input-mic-row'},
-            React.createElement('div',{style:{display:'flex',gap:'6px',flex:1}},
-              React.createElement('input',{
-                placeholder:'ex: Turma A / nome do atleta',
-                value:form.mainTraining||'',
-                onChange:e=>setForm(f=>({...f,mainTraining:e.target.value})),
-                style:{flex:1}
-              }),
-              React.createElement('select',{
-                value:'',
-                onChange:e=>{if(e.target.value)setForm(f=>({...f,mainTraining:e.target.value}));},
-                style:{width:'36px',fontFamily:'inherit',fontSize:'13px',background:'#111',border:'1px solid #2e2e2e',borderRadius:'5px',color:'#888',cursor:'pointer',flexShrink:0,padding:'0 4px'},
-                title:'Selecionar atleta'
-              },
-                React.createElement('option',{value:''},'👤'),
-                loadAthletes().map(a=>React.createElement('option',{key:a.id,value:a.name},a.name))
-              )
-            ),
-            React.createElement(MicButton,{onTranscript:txt=>setForm(f=>({...f,mainTraining:(f.mainTraining?f.mainTraining+' ':'')+txt}))})
+            React.createElement('input',{
+              placeholder:'ex: Segunda · Semana 3 D1',
+              value:typeof form.mainTraining==='string'?form.mainTraining:(form.sessionName||''),
+              onChange:e=>setForm(f=>({...f,sessionName:e.target.value})),
+              style:{flex:1}
+            }),
+            React.createElement(MicButton,{onTranscript:txt=>setForm(f=>({...f,sessionName:(f.sessionName||'')+(f.sessionName?' ':'')+txt}))})
+          )
+        ),
+        React.createElement('div',{className:'fg'},
+          React.createElement('span',{className:'lbl'},'Alvo'),
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px'}},
+            React.createElement('button',{
+              type:'button',
+              onClick:()=>setShowAlvoModal(true),
+              style:{display:'flex',alignItems:'center',gap:'6px',flex:1,background:'#111',border:'1px solid #2e2e2e',borderRadius:'5px',padding:'7px 10px',cursor:'pointer',color:'#888',fontSize:'13px',textAlign:'left'}
+            },
+              React.createElement('i',{className:'ti ti-users',style:{fontSize:'14px',color:'var(--theme-accent)'}}),
+              getTargets(form).length===0
+                ?React.createElement('span',{style:{color:'#444'}},'Nenhum atleta selecionado')
+                :React.createElement('div',{style:{display:'flex',gap:'4px',flexWrap:'wrap'}},
+                  getTargets(form).map((name,i)=>React.createElement('span',{key:i,style:{fontSize:'11px',fontWeight:700,padding:'1px 6px',borderRadius:'3px',background:'var(--theme-accent)22',color:'var(--theme-accent)',border:'1px solid var(--theme-accent)44'}},name))
+                )
+            )
           )
         )
       ),
@@ -1914,13 +1972,8 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
   // Derive event status from results
   const results=loadResults();
   function evStatus(ev){
-    if(ev.status==='completed') return 'completed';
-    if(ev.date<todayISO) return 'completed'; // past = done
-    if(ev.athleteIds&&ev.athleteIds.length){
-      const hasResult=ev.athleteIds.some(aid=>results.some(r=>r.athleteId===aid&&r.date===ev.date&&(r.sessionId===ev.sessionId||!ev.sessionId)));
-      if(hasResult) return 'completed';
-    }
-    return 'scheduled';
+    // ev.status is the single source of truth — toggling writes to it directly
+    return ev.status==='completed'?'completed':'scheduled';
   }
 
   // Get events for a date, filtered
@@ -1934,7 +1987,7 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
 
   // Sessions for a date that are NOT athlete-specific (gym-wide)
   function dayGymSessions(iso){
-    return(sessions[iso]||[]).filter(s=>!athletes.some(a=>a.name===s.mainTraining));
+    return(sessions[iso]||[]).filter(s=>getTargets(s).length===0);
   }
 
   // Month stats
@@ -1983,9 +2036,14 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
   }
 
   function toggleStatus(date,id){
-    const ev=(events[date]||[]).find(e=>e.id===id);
-    if(!ev)return;
-    saveEvent({...ev,status:ev.status==='completed'?'scheduled':'completed'});
+    setEvents(prev=>{
+      const list=(prev[date]||[]);
+      const ev=list.find(e=>e.id===id);
+      if(!ev)return prev;
+      const updated={...ev,status:ev.status==='completed'?'scheduled':'completed'};
+      const newList=list.map(e=>e.id===id?updated:e);
+      return{...prev,[date]:newList};
+    });
   }
 
   function openForm(type,date,existingEv){
@@ -2166,13 +2224,13 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
                       onClick:()=>{if(window.confirm('Remover este evento?'))deleteEvent(iso,ev.id);},
                       style:{background:'transparent',border:'1px solid #2a2318',color:'#5a2020',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px'}
                     },React.createElement('i',{className:'ti ti-trash',style:{fontSize:'10px'},'aria-hidden':'true'})),
-                    onEditSession&&linkedSession&&React.createElement('button',{
-                      onClick:()=>onEditSession(linkedSession),
-                      title:'Editar sessão vinculada',
-                      style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px',fontWeight:700}
-                    },React.createElement('i',{className:'ti ti-edit',style:{fontSize:'10px'},'aria-hidden':'true'})),
-                    onLogResult&&isPers&&athList.length>0&&React.createElement('button',{
-                      onClick:()=>onLogResult({athleteId:ev.athleteIds[0],date:iso}),
+                    onEditSession&&React.createElement('button',{
+                      onClick:()=>onEditSession(linkedSession||{_newForDate:iso}),
+                      title:linkedSession?'Editar sessão vinculada':'Criar sessão para este dia',
+                      style:{background:'transparent',border:'1px solid #2a2318',color:linkedSession?'#554a3a':'#68d8a0',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px',fontWeight:700}
+                    },React.createElement('i',{className:linkedSession?'ti ti-edit':'ti ti-calendar-plus',style:{fontSize:'10px'},'aria-hidden':'true'})),
+                    onLogResult&&isPers&&React.createElement('button',{
+                      onClick:()=>onLogResult({athleteId:ev.athleteIds[0]||null,date:iso}),
                       title:'Lançar resultado',
                       style:{background:'rgba(74,200,192,.1)',border:'1px solid rgba(74,200,192,.3)',color:'var(--theme-accent)',padding:'2px 5px',borderRadius:'3px',cursor:'pointer',fontSize:'9px',fontWeight:700}
                     },React.createElement('i',{className:'ti ti-clipboard-list',style:{fontSize:'10px'},'aria-hidden':'true'}))
@@ -2333,7 +2391,7 @@ function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}
 }
 
 
-function SchedulePublisher({sessions,events,setEvents,athletes}){
+function SchedulePublisher({sessions,events,setEvents,athletes,onEditSession,onLogResult}){
   const dailyRef=useRef();
   const weeklyRef=useRef();
   const exportDailyRef=useRef();
@@ -2569,7 +2627,7 @@ function SchedulePublisher({sessions,events,setEvents,athletes}){
   // all dates that have sessions, sorted
   // Apply athlete filter — only show sessions matching filterAthlete.name
   const filteredSessions=filterAthlete
-    ?Object.fromEntries(Object.entries(sessions).map(([k,v])=>[k,v.filter(s=>s.mainTraining===filterAthlete.name)]))
+    ?Object.fromEntries(Object.entries(sessions).map(([k,v])=>[k,v.filter(s=>matchesAthlete(s,filterAthlete.name))]))
     :sessions;
   const allSessionDates=Object.keys(filteredSessions).filter(k=>filteredSessions[k]?.length>0).sort();
 
@@ -2591,7 +2649,9 @@ function SchedulePublisher({sessions,events,setEvents,athletes}){
         sessions,
         events:events||{},
         setEvents:setEvents||(()=>{}),
-        athletes:athletes||[]
+        athletes:athletes||[],
+        onEditSession:onEditSession||(()=>{}),
+        onLogResult:onLogResult||(()=>{})
       })
     ),
 
@@ -5052,7 +5112,7 @@ function SessionsSummaryPanel({athName,sessions,results,expandedSessions,setExpa
   const athSessions=[];
   allDates.forEach(date=>{
     (sessions[date]||[]).forEach(s=>{
-      if(s.mainTraining&&s.mainTraining===athName) athSessions.push({date,session:s});
+      if(matchesAthlete(s,athName)) athSessions.push({date,session:s});
     });
   });
 
@@ -5439,7 +5499,11 @@ function RecentWods({results,sessions}){
 
 // ── Main AthleteTab component ─────────────────────────────────────────────────
 function AthleteTab({sessions,results}){
-  const [athletes]=useState(loadAthletes);
+  const [athletes,setAthletes]=useState(loadAthletes);
+  const [showAthForm,setShowAthForm]=useState(false);
+  const [athForm,setAthForm]=useState({name:'',level:'Iniciante',goal:'Saúde geral',notes:'',color:'#e87820',since:todayISO()});
+  const [editingAth,setEditingAth]=useState(null);
+  const [confirmDelAth,setConfirmDelAth]=useState(null);
   const [goalsData,setGoalsDataState]=useState(loadGoalsData);
   const [selAthlete,setSelAthleteState]=useState(null);
   const [editMode,setEditMode]=useState(false);
@@ -5448,6 +5512,7 @@ function AthleteTab({sessions,results}){
   const [expandedSessions,setExpandedSessions]=useState(()=>new Set());
 
   const persist=d=>{setGoalsDataState(d);saveGoalsData(d);};
+  const persistAthletes=a=>{setAthletes(a);saveAthletes(a);};
 
   const ath=athletes.find(a=>a.id===selAthlete)||null;
   const athColor=ath?.color||'#00b8d4';
@@ -5488,6 +5553,19 @@ function AthleteTab({sessions,results}){
     updateGoal(goalId,{milestones});
   };
 
+  const saveAthlete=()=>{
+    if(!athForm.name.trim()) return;
+    if(editingAth){
+      persistAthletes(athletes.map(a=>a.id===editingAth?{...a,...athForm}:a));
+    } else {
+      persistAthletes([...athletes,{...athForm,id:uid(),since:athForm.since||todayISO()}]);
+    }
+    setAthForm({name:'',level:'Iniciante',goal:'Saúde geral',notes:'',color:'#e87820',since:todayISO()});
+    setEditingAth(null);setShowAthForm(false);
+  };
+  const deleteAthlete=id=>{persistAthletes(athletes.filter(a=>a.id!==id));setConfirmDelAth(null);};
+  const startEditAth=a=>{setAthForm({name:a.name,level:a.level,goal:a.goal||'',notes:a.notes||'',color:a.color||'#e87820',since:a.since||''});setEditingAth(a.id);setShowAthForm(true);};
+
   // Combined progress for landing
   const combinedPct=ath=>{
     const goals=(goalsData.athleteGoals||{})[ath.id]||[];
@@ -5497,7 +5575,68 @@ function AthleteTab({sessions,results}){
 
   // ── Landing view ──────────────────────────────────────────────────────────
   if(!selAthlete) return React.createElement('div',{style:{padding:'12px'}},
-    React.createElement('div',{style:{fontSize:'11px',fontWeight:700,color:'#888',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:'12px'}},'Todos os Atletas'),
+    // Athlete form modal
+    showAthForm&&React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'},onClick:()=>{setShowAthForm(false);setEditingAth(null);}},
+      React.createElement('div',{style:{background:'#0d0d0d',border:'1px solid #2e2e2e',borderRadius:'10px',padding:'18px',width:'340px',maxWidth:'90vw',maxHeight:'80vh',overflowY:'auto'},onClick:e=>e.stopPropagation()},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}},
+          React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#ccc'}},editingAth?'Editar atleta':'Novo atleta'),
+          React.createElement('button',{onClick:()=>{setShowAthForm(false);setEditingAth(null);},style:{background:'transparent',border:'none',color:'#555',cursor:'pointer',fontSize:'16px'}},'✕')
+        ),
+        React.createElement('div',{style:{marginBottom:'10px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Nome'),
+          React.createElement('input',{value:athForm.name,onChange:e=>setAthForm(f=>({...f,name:e.target.value})),placeholder:'Nome do atleta',style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+        ),
+        React.createElement('div',{style:{display:'flex',gap:'8px',marginBottom:'10px'}},
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Nível'),
+            React.createElement('select',{value:athForm.level,onChange:e=>setAthForm(f=>({...f,level:e.target.value})),style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}},
+              getLevels().map(l=>React.createElement('option',{key:l},l))
+            )
+          ),
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Objetivo'),
+            React.createElement('select',{value:athForm.goal,onChange:e=>setAthForm(f=>({...f,goal:e.target.value})),style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}},
+              getGoals().map(g=>React.createElement('option',{key:g},g))
+            )
+          )
+        ),
+        React.createElement('div',{style:{marginBottom:'10px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'3px'}},'Observações'),
+          React.createElement('input',{value:athForm.notes,onChange:e=>setAthForm(f=>({...f,notes:e.target.value})),placeholder:'ex: Joelho direito',style:{width:'100%',background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+        ),
+        React.createElement('div',{style:{marginBottom:'14px'}},
+          React.createElement('label',{style:{fontSize:'11px',color:'#555',display:'block',marginBottom:'5px'}},'Cor'),
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+            React.createElement('div',{style:{width:'28px',height:'28px',borderRadius:'50%',background:athForm.color,cursor:'pointer',border:'2px solid #2e2e2e',flexShrink:0},onClick:()=>document.getElementById('ath-color-picker')?.click()}),
+            React.createElement('input',{type:'color',id:'ath-color-picker',value:athForm.color,onChange:e=>setAthForm(f=>({...f,color:e.target.value})),style:{opacity:0,position:'absolute',pointerEvents:'none'}}),
+            React.createElement('input',{type:'text',value:athForm.color,onChange:e=>{if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))setAthForm(f=>({...f,color:e.target.value}));},style:{flex:1,background:'#111',border:'1px solid #2e2e2e',color:'#ccc',padding:'7px 9px',borderRadius:'5px',fontSize:'13px'}})
+          )
+        ),
+        React.createElement('button',{onClick:saveAthlete,style:{width:'100%',background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'9px',borderRadius:'6px',cursor:'pointer',fontSize:'13px',fontWeight:700}},
+          editingAth?'Salvar alterações':'Adicionar atleta'
+        )
+      )
+    ),
+    // Delete confirm modal
+    confirmDelAth&&React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}},
+      React.createElement('div',{style:{background:'#0d0d0d',border:'1px solid #3a1010',borderRadius:'10px',padding:'20px',width:'300px',maxWidth:'90vw',textAlign:'center'}},
+        React.createElement('i',{className:'ti ti-alert-triangle',style:{fontSize:'28px',color:'#e05050',marginBottom:'10px',display:'block'}}),
+        React.createElement('div',{style:{fontSize:'14px',color:'#ccc',marginBottom:'6px',fontWeight:700}},`Remover ${athletes.find(a=>a.id===confirmDelAth)?.name||'atleta'}?`),
+        React.createElement('div',{style:{fontSize:'12px',color:'#555',marginBottom:'16px'}},'Esta ação não pode ser desfeita.'),
+        React.createElement('div',{style:{display:'flex',gap:'8px'}},
+          React.createElement('button',{onClick:()=>deleteAthlete(confirmDelAth),style:{flex:1,background:'#3a1010',border:'1px solid #6a2020',color:'#e05050',padding:'8px',borderRadius:'6px',cursor:'pointer',fontSize:'13px',fontWeight:700}},'Remover'),
+          React.createElement('button',{onClick:()=>setConfirmDelAth(null),style:{flex:1,background:'transparent',border:'1px solid #2e2e2e',color:'#888',padding:'8px',borderRadius:'6px',cursor:'pointer',fontSize:'13px'}},'Cancelar')
+        )
+      )
+    ),
+    // Header row
+    React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'12px'}},
+      React.createElement('div',{style:{fontSize:'11px',fontWeight:700,color:'#888',textTransform:'uppercase',letterSpacing:'.07em'}},'Atletas'),
+      React.createElement('button',{type:'button',
+        onClick:()=>{setAthForm({name:'',level:'Iniciante',goal:'Saúde geral',notes:'',color:'#e87820',since:todayISO()});setEditingAth(null);setShowAthForm(true);},
+        style:{display:'flex',alignItems:'center',gap:'5px',background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'6px 12px',borderRadius:'6px',cursor:'pointer',fontSize:'12px',fontWeight:700}
+      },React.createElement('i',{className:'ti ti-plus'}),' Atleta')
+    ),
     athletes.length===0
       ?React.createElement('div',{style:{color:'#333',fontSize:'13px',padding:'20px',textAlign:'center'}},'Nenhum atleta registrado.')
       :React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:'10px'}},
@@ -5507,15 +5646,20 @@ function AthleteTab({sessions,results}){
           const goals=(goalsData.athleteGoals||{})[a.id]||[];
           return React.createElement('div',{key:a.id,
             style:{background:'#111',border:'1px solid #1e1e1e',borderRadius:'8px',padding:'12px',
-              cursor:'pointer',transition:'border-color .1s',borderLeft:`3px solid ${color}`},
-            onClick:()=>setSelAthleteState(a.id),
+              transition:'border-color .1s',borderLeft:'3px solid '+color},
             onMouseEnter:e=>e.currentTarget.style.borderColor=color,
             onMouseLeave:e=>e.currentTarget.style.borderColor='#1e1e1e'
           },
-            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'8px'}},
+            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'8px'}},
               React.createElement('div',{style:{width:'10px',height:'10px',borderRadius:'50%',background:color,flexShrink:0}}),
-              React.createElement('span',{style:{fontWeight:700,fontSize:'14px',color:'#fff',flex:1}},a.name),
-              pct!==null&&React.createElement('span',{style:{fontSize:'12px',color:'#888'}},`${pct}%`)
+              React.createElement('span',{style:{fontWeight:700,fontSize:'14px',color:'#fff',flex:1,cursor:'pointer'},onClick:()=>setSelAthleteState(a.id)},a.name),
+              pct!==null&&React.createElement('span',{style:{fontSize:'12px',color:'#888'}},pct+'%'),
+              React.createElement('button',{type:'button',onClick:e=>{e.stopPropagation();startEditAth(a);},style:{background:'transparent',border:'1px solid #2e2e2e',color:'#555',padding:'2px 5px',borderRadius:'4px',cursor:'pointer'},title:'Editar'},
+                React.createElement('i',{className:'ti ti-edit',style:{fontSize:'12px'}})
+              ),
+              React.createElement('button',{type:'button',onClick:e=>{e.stopPropagation();setConfirmDelAth(a.id);},style:{background:'transparent',border:'1px solid #2e2e2e',color:'#5a1a1a',padding:'2px 5px',borderRadius:'4px',cursor:'pointer'},title:'Remover'},
+                React.createElement('i',{className:'ti ti-trash',style:{fontSize:'12px'}})
+              )
             ),
             pct!==null
               ?React.createElement('div',{style:{display:'flex',gap:'2px'}},
@@ -6679,6 +6823,7 @@ function App(){
   const [tab,setTab]=useState('creator');
   const [sessions,setSessions]=useState(loadLS);
   const [events,setEvents]=useState(loadEvents);
+  const [creatorPreload,setCreatorPreload]=useState(null);
   const [saved,setSaved]=useState(false);
   const [energyLevel,setEnergyLevel]=useState(3);
   const [toast,setToast]=useState(null);
@@ -6944,7 +7089,7 @@ function App(){
     ),
     React.createElement('div',{className:'pane'},
       tab==='creator'
-        ?React.createElement(TrainingCreator,{sessions,setSessions,blockNames})
+        ?React.createElement(TrainingCreator,{sessions,setSessions,blockNames,preload:creatorPreload,onPreloadConsumed:()=>setCreatorPreload(null)})
         :tab==='parser'
         ?React.createElement(TextParser,{sessions,setSessions,setTab})
         :tab==='athletes'
@@ -6953,7 +7098,7 @@ function App(){
         ?React.createElement(ExerciseTab,null)
         :tab==='results'
         ?React.createElement('div',{className:'res-pane'},React.createElement(ResultsTab,{sessions}))
-        :React.createElement('div',{className:'pub-pane'},React.createElement(SchedulePublisher,{sessions,events,setEvents,athletes:loadAthletes()}))
+        :React.createElement('div',{className:'pub-pane'},React.createElement(SchedulePublisher,{sessions,events,setEvents,athletes:loadAthletes(),onEditSession:(s)=>{setCreatorPreload(s);setTab('creator');},onLogResult:({athleteId,date})=>{setTab('results');}}))
     )
   );
 }
