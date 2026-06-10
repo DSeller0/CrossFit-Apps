@@ -2355,7 +2355,7 @@ function ReportModal({events,sessions,onClose}){
             const t=calcTotal(levs,loc);
             const totalMin=levs.reduce((s,ev)=>s+(ev.durationMin||60),0);
             doc.setFontSize(9);doc.setFont('helvetica','italic');doc.setTextColor(100,100,100);
-            let sub=`${levs.length} sessão${levs.length!==1?'ões':''} · ${fmtDur(totalMin)}`;
+            let sub=`${levs.length} ${levs.length!==1?'sessões':'sessão'} · ${fmtDur(totalMin)}`;
             if(t&&showRate)sub+=` · ${t.currency} ${t.total.toLocaleString('pt-BR')}`;
             doc.text(sub,14,y);y+=10;
           });
@@ -2475,7 +2475,7 @@ function ReportModal({events,sessions,onClose}){
           const totalMin=levs.reduce((s,ev)=>s+(ev.durationMin||60),0);
           return React.createElement('div',{key:locId,style:{display:'flex',alignItems:'center',gap:'8px',padding:'4px 0',borderBottom:'1px solid #1a1610',fontSize:'12px'}},
             React.createElement('span',{style:{flex:1,color:'#c8b090',fontWeight:600}},name),
-            React.createElement('span',{style:{color:'#887060'}},levs.length+' sessões'),
+            React.createElement('span',{style:{color:'#887060'}},levs.length+(levs.length!==1?' sessões':' sessão')),
             React.createElement('span',{style:{color:'#887060'}},fmtDur(totalMin)),
             t&&showRate?React.createElement('span',{style:{color:'#d8a840',fontWeight:700}},t.currency+' '+t.total.toLocaleString('pt-BR')):null
           );
