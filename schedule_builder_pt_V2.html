@@ -2224,7 +2224,7 @@ function LocaisTab(){
 
     // Location accordion
     React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}},
-      React.createElement('span',{style:{fontSize:'11px',fontWeight:700,color:'#888',textTransform:'uppercase',letterSpacing:'.07em'}},'Locais'),
+      React.createElement('span',{style:{fontSize:'11px',fontWeight:700,color:'#888',textTransform:'uppercase',letterSpacing:'.07em'}},'Serviços'),
       React.createElement('button',{type:'button',onClick:()=>{setEditId(null);setForm({name:'',type:'box',color:'#4ac8c0',rate:'',rateUnit:'per_session',currency:'R$'});setShowForm(true);},style:{background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'4px 10px',borderRadius:'4px',cursor:'pointer',fontSize:'11px',fontWeight:700,display:'flex',alignItems:'center',gap:'3px'}},React.createElement('i',{className:'ti ti-plus'}),' Novo')
     ),
 
@@ -2496,15 +2496,26 @@ function ReportModal({events,sessions,onClose}){
     const athletes=loadAthletes();
     evs.forEach(ev=>{
       let key;
-      if(ev.type==='personal'&&!athAll){
-        // When filtering by athlete, group personal events by athlete name
-        const matchedAth=athletes.find(a=>athSelected.has(a.id)&&(ev.athleteIds||[]).includes(a.id));
-        key=matchedAth?'__ath__'+matchedAth.id:(ev.locationId||'__unlabelled__');
+      if(ev.type==='personal'){
+        // Personal always groups by athlete — each athlete is their own billing entity
+        const athIds=(ev.athleteIds||[]).filter(id=>athAll||athSelected.has(id));
+        if(athIds.length===0){
+          // no matched athlete — put in unlabelled
+          if(!groups['__unlabelled__'])groups['__unlabelled__']=[];
+          groups['__unlabelled__'].push(ev);
+          return;
+        }
+        // one event may have multiple athletes — add to each athlete's group
+        athIds.forEach(id=>{
+          const k='__ath__'+id;
+          if(!groups[k])groups[k]=[];
+          groups[k].push(ev);
+        });
       } else {
         key=ev.locationId||'__unlabelled__';
+        if(!groups[key])groups[key]=[];
+        groups[key].push(ev);
       }
-      if(!groups[key])groups[key]=[];
-      groups[key].push(ev);
     });
     return groups;
   }
@@ -2517,8 +2528,10 @@ function ReportModal({events,sessions,onClose}){
   function fmtDur(min){return min>=60?`${Math.floor(min/60)}h${min%60?min%60+'min':''}`:min+'min';}
   function calcTotal(evs,loc){
     if(!loc||!loc.rate)return null;
-    const totalMin=evs.reduce((s,ev)=>s+(ev.durationMin||60),0);
-    const total=loc.rateUnit==='per_hour'?(totalMin/60)*loc.rate:evs.length*loc.rate;
+    const total=evs.reduce((sum,ev)=>{
+      const hrs=loc.rateUnit==='per_hour'?Math.max(1,Math.floor((ev.durationMin||60)/60)):1;
+      return sum+(loc.rateUnit==='per_hour'?hrs*loc.rate:loc.rate);
+    },0);
     return{total,currency:loc.currency||'R$'};
   }
 
@@ -2595,7 +2608,9 @@ function ReportModal({events,sessions,onClose}){
             const name=athGroup2?athGroup2.name:loc?loc.name:(locId==='__unlabelled__'?'Sem local':locId);
             const totalMin=levs.reduce((s,ev)=>s+(ev.durationMin||60),0);
             const _ag=typeof athGroup2!=='undefined'?athGroup2:typeof athGroup!=='undefined'?athGroup:null;
-            const locForCalc=loc||(_ag?locations.find(l=>l.type==='personal'&&(l.athleteIds||[]).includes(_ag.id)):null);
+            const locForCalc=_ag
+              ?locations.find(l=>l.type==='personal'&&(l.athleteIds||[]).includes(_ag.id))
+              :loc;
           const t=calcTotal(levs,locForCalc);
             if(t){grandTotal+=t.total;grandCurrency=t.currency;}
             summaryRows.push([
@@ -2655,7 +2670,9 @@ function ReportModal({events,sessions,onClose}){
 
             // Subtotal row
             const _ag=typeof athGroup2!=='undefined'?athGroup2:typeof athGroup!=='undefined'?athGroup:null;
-            const locForCalc=loc||(_ag?locations.find(l=>l.type==='personal'&&(l.athleteIds||[]).includes(_ag.id)):null);
+            const locForCalc=_ag
+              ?locations.find(l=>l.type==='personal'&&(l.athleteIds||[]).includes(_ag.id))
+              :loc;
           const t=calcTotal(levs,locForCalc);
             const totalMin=levs.reduce((s,ev)=>s+(ev.durationMin||60),0);
             doc.setFontSize(9);doc.setFont('helvetica','italic');doc.setTextColor(100,100,100);
@@ -2764,7 +2781,7 @@ function ReportModal({events,sessions,onClose}){
 
       // Location filter
       locations.length>0&&React.createElement('div',{style:{marginBottom:'12px'}},
-        React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'6px'}},'Locais'),
+        React.createElement('div',{style:{fontSize:'10px',fontWeight:700,color:'var(--theme-accent)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'6px'}},'Serviços'),
         React.createElement('div',{style:{display:'flex',flexWrap:'wrap',gap:'5px'}},
           // Todos pill
           React.createElement('button',{
@@ -2876,7 +2893,9 @@ function ReportModal({events,sessions,onClose}){
           'Total: '+Object.entries(groups).reduce((acc,[locId,levs])=>{
             const loc=locations.find(l=>l.id===locId);
             const _ag=typeof athGroup2!=='undefined'?athGroup2:typeof athGroup!=='undefined'?athGroup:null;
-            const locForCalc=loc||(_ag?locations.find(l=>l.type==='personal'&&(l.athleteIds||[]).includes(_ag.id)):null);
+            const locForCalc=_ag
+              ?locations.find(l=>l.type==='personal'&&(l.athleteIds||[]).includes(_ag.id))
+              :loc;
           const t=calcTotal(levs,locForCalc);
             if(t)acc+= t.total;
             return acc;
@@ -3203,6 +3222,10 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
                     a.name
                   ))
                 ),
+                (ev.local&&ev.local!=='__outro__'?ev.local:ev.localText||'')&&React.createElement('div',{style:{fontSize:'10px',color:'#554a3a',marginBottom:'4px',display:'flex',alignItems:'center',gap:'3px'}},
+                  React.createElement('i',{className:'ti ti-map-pin',style:{fontSize:'9px'}}),
+                  ev.local==='__outro__'?(ev.localText||''):(ev.local||'')
+                ),
 
                 // Linked session blocks
                 linkedSession&&React.createElement('div',{style:{display:'flex',gap:'2px',flexWrap:'wrap',marginBottom:'5px'}},
@@ -3216,7 +3239,44 @@ function AgendaView({sessions,events,setEvents,athletes,onEditSession,onLogResul
                 ev.notes&&React.createElement('div',{style:{fontSize:'10px',color:'#554a3a',marginTop:'5px',fontStyle:'italic'}},ev.notes)
               )
             );
-          })
+          }),
+
+          // ── Bottom add + copy buttons ────────────────────────────────────
+          React.createElement('div',{style:{borderTop:'1px solid #1e1e1e',marginTop:'10px',paddingTop:'10px',display:'flex',gap:'6px',flexWrap:'wrap'}},
+            React.createElement('button',{
+              type:'button',
+              onClick:()=>openForm('aula',iso),
+              style:{display:'flex',alignItems:'center',gap:'4px',padding:'5px 10px',background:'rgba(74,200,192,.06)',border:'1px solid rgba(74,200,192,.2)',color:'var(--theme-accent)',borderRadius:'5px',cursor:'pointer',fontSize:'11px',fontWeight:700}
+            },React.createElement('i',{className:'ti ti-plus'}),' Aula'),
+            React.createElement('button',{
+              type:'button',
+              onClick:()=>openForm('personal',iso),
+              style:{display:'flex',alignItems:'center',gap:'4px',padding:'5px 10px',background:'rgba(216,168,64,.06)',border:'1px solid rgba(216,168,64,.2)',color:'#d8a840',borderRadius:'5px',cursor:'pointer',fontSize:'11px',fontWeight:700}
+            },React.createElement('i',{className:'ti ti-plus'}),' Personal'),
+            React.createElement('button',{
+              type:'button',
+              title:'Copiar último evento',
+              onClick:()=>{
+                // find most recent event overall
+                const allEvs=Object.entries(events).sort((a,b)=>b[0].localeCompare(a[0]));
+                let last=null;
+                for(const [d,evs2] of allEvs){
+                  const sorted=[...evs2].sort((a,b)=>b.time.localeCompare(a.time));
+                  if(sorted.length){last=sorted[0];break;}
+                }
+                if(!last){return;}
+                openForm(last.type,iso,{
+                  ...last,
+                  id:undefined,date:iso,status:'scheduled',
+                  time:last.time,durationMin:last.durationMin,
+                  label:last.label,locationId:last.locationId,
+                  athleteIds:last.athleteIds||[],notes:last.notes||'',
+                  local:last.local||'',localText:last.localText||''
+                });
+              },
+              style:{display:'flex',alignItems:'center',gap:'4px',padding:'5px 10px',background:'rgba(255,255,255,.03)',border:'1px solid #2a2318',color:'#887060',borderRadius:'5px',cursor:'pointer',fontSize:'11px',fontWeight:700}
+            },React.createElement('i',{className:'ti ti-copy'}),' Copiar último')
+          )
         )
       )
     );
@@ -3240,26 +3300,74 @@ function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}
   const isPers=showForm.type==='personal';
   const daySessions=(sessions[showForm.date]||[]);
   const locs=loadLocations();
+  const boxSvcs=locs.filter(l=>l.type==='box');
   const set=(k,v)=>setFd(p=>({...p,[k]:v}));
   const toggleAthlete=id=>setFd(p=>({...p,athleteIds:p.athleteIds?.includes(id)?p.athleteIds.filter(x=>x!==id):[...(p.athleteIds||[]),id]}));
 
+  // selected service for rate hint (aula only)
+  const selSvc=!isPers&&fd.locationId?locs.find(l=>l.id===fd.locationId):null;
+
+  const S=(label,children)=>React.createElement('div',{style:{marginBottom:'10px'}},
+    React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},label),
+    children
+  );
+  const inp=(val,onChange,opts={})=>React.createElement('input',{type:'text',value:val,onChange,style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'},...(opts.style||{}),...opts});
+  const sel=(val,onChange,opts)=>React.createElement('select',{value:val,onChange,style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}},opts);
+
   return React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,.7)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center'}},
-    React.createElement('div',{style:{background:'#0d0b08',border:'1px solid #2a2318',borderRadius:'10px',padding:'18px',width:'340px',maxWidth:'90vw',maxHeight:'80vh',overflowY:'auto'}},
+    React.createElement('div',{style:{background:'#0d0b08',border:'1px solid #2a2318',borderRadius:'10px',padding:'18px',width:'340px',maxWidth:'90vw',maxHeight:'85vh',overflowY:'auto'}},
+      // header
       React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}},
         React.createElement('span',{style:{fontSize:'13px',fontWeight:700,color:'#c8b090'}},(showForm.eventId?'Editar':'Novo')+' '+(isPers?'Personal':'Aula')),
         React.createElement('button',{onClick:onCancel,style:{background:'transparent',border:'none',color:'#554a3a',cursor:'pointer',fontSize:'16px'}},'✕')
       ),
-      React.createElement('div',{style:{marginBottom:'10px'}},
-        React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},isPers?'Nome / cliente':'Nome da turma'),
-        React.createElement('input',{type:'text',value:fd.label||'',onChange:e=>set('label',e.target.value),placeholder:isPers?'Ex: Jinx':'Ex: Turma Manhã',style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}})
+
+      // Label
+      S(isPers?'Nome / cliente':'Nome da turma',
+        inp(fd.label||'',e=>set('label',e.target.value),{placeholder:isPers?'Ex: Jinx':'Ex: Turma Manhã'})
       ),
-      locs.length>0&&React.createElement('div',{style:{marginBottom:'10px'}},
-        React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Local'),
-        React.createElement('select',{value:fd.locationId||'',onChange:e=>set('locationId',e.target.value||null),style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}},
-          React.createElement('option',{value:''},'Sem local'),
-          locs.map(l=>React.createElement('option',{key:l.id,value:l.id},l.name))
+
+      // Aula: Serviço (required for billing) + auto rate hint
+      !isPers&&S('Serviço (cobrança)',
+        React.createElement(React.Fragment,null,
+          sel(fd.locationId||'',e=>set('locationId',e.target.value||null),
+            [React.createElement('option',{key:'',value:''},'Sem serviço'),
+             ...boxSvcs.map(l=>React.createElement('option',{key:l.id,value:l.id},l.name))]
+          ),
+          selSvc&&React.createElement('div',{style:{fontSize:'10px',color:'#887060',marginTop:'3px'}},
+            `${selSvc.currency||'R$'} ${selSvc.rate||0}/${selSvc.rateUnit==='per_hour'?'hora':'sessão'}`
+          )
         )
       ),
+
+      // Personal: Atletas (required for billing)
+      isPers&&S('Atletas',
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'4px',maxHeight:'120px',overflowY:'auto'}},
+          athletes.map(a=>{
+            const svc=locs.find(l=>l.type==='personal'&&(l.athleteIds||[]).includes(a.id));
+            return React.createElement('label',{key:a.id,style:{display:'flex',alignItems:'center',gap:'6px',cursor:'pointer',fontSize:'12px',color:'#a89880'}},
+              React.createElement('input',{type:'checkbox',checked:(fd.athleteIds||[]).includes(a.id),onChange:()=>toggleAthlete(a.id),style:{accentColor:a.color}}),
+              React.createElement('span',{style:{width:'8px',height:'8px',borderRadius:'50%',background:a.color,flexShrink:0}}),
+              React.createElement('span',{style:{flex:1}},a.name),
+              svc&&React.createElement('span',{style:{fontSize:'10px',color:'#554a3a'}},`${svc.currency||'R$'}${svc.rate||0}`)
+            );
+          })
+        )
+      ),
+
+      // Local (both types — optional context, box services as quick-select)
+      S('Local (opcional)',
+        sel(fd.local||'',e=>set('local',e.target.value),
+          [React.createElement('option',{key:'',value:''},'—'),
+           ...boxSvcs.map(l=>React.createElement('option',{key:l.id,value:l.name},l.name)),
+           React.createElement('option',{key:'outro',value:'__outro__'},'Outro...')]
+        )
+      ),
+      fd.local==='__outro__'&&S('Especificar local',
+        inp(fd.localText||'',e=>set('localText',e.target.value),{placeholder:'Ex: Studio Norte'})
+      ),
+
+      // Time + Duration
       React.createElement('div',{style:{display:'flex',gap:'8px',marginBottom:'10px'}},
         React.createElement('div',{style:{flex:1}},
           React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Horário'),
@@ -3267,19 +3375,13 @@ function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}
         ),
         React.createElement('div',{style:{flex:1}},
           React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Duração (min)'),
-          React.createElement('input',{type:'number',value:fd.durationMin||60,onChange:e=>set('durationMin',Number(e.target.value)),min:15,max:240,step:15,style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}})
+          React.createElement('input',{type:'number',value:fd.durationMin||60,onChange:e=>set('durationMin',Number(e.target.value)),min:15,max:480,step:15,style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}})
         )
       ),
-      daySessions.length>0&&React.createElement('div',{style:{marginBottom:'10px'}},
-        React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Sessão vinculada'),
-        React.createElement('select',{value:fd.sessionId||'',onChange:e=>set('sessionId',e.target.value||null),style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px'}},
-          React.createElement('option',{value:''},'Nenhuma'),
-          daySessions.map(s=>React.createElement('option',{key:s.id,value:s.id},s.mainTraining||'Sessão'))
-        )
-      ),
-      React.createElement('div',{style:{marginBottom:'10px'}},
-        React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'5px'}},isPers?'Atletas (obrigatório)':'Atletas presentes (opcional)'),
-        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'4px',maxHeight:'120px',overflowY:'auto'}},
+
+      // Aula: athletes optional
+      !isPers&&S('Atletas presentes (opcional)',
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'4px',maxHeight:'100px',overflowY:'auto'}},
           athletes.map(a=>React.createElement('label',{key:a.id,style:{display:'flex',alignItems:'center',gap:'6px',cursor:'pointer',fontSize:'12px',color:'#a89880'}},
             React.createElement('input',{type:'checkbox',checked:(fd.athleteIds||[]).includes(a.id),onChange:()=>toggleAthlete(a.id),style:{accentColor:a.color}}),
             React.createElement('span',{style:{width:'8px',height:'8px',borderRadius:'50%',background:a.color,flexShrink:0}}),
@@ -3287,19 +3389,23 @@ function EventFormInner({showForm,sessions,athletes,initialData,onSave,onCancel}
           ))
         )
       ),
-      React.createElement('div',{style:{marginBottom:'14px'}},
-        React.createElement('label',{style:{fontSize:'11px',color:'#554a3a',display:'block',marginBottom:'3px'}},'Notas (opcional)'),
+
+      // Linked session
+      daySessions.length>0&&S('Sessão vinculada',
+        sel(fd.sessionId||'',e=>set('sessionId',e.target.value||null),
+          [React.createElement('option',{key:'',value:''},'Nenhuma'),
+           ...daySessions.map(s=>React.createElement('option',{key:s.id,value:s.id},s.mainTraining||'Sessão'))]
+        )
+      ),
+
+      // Notes
+      S('Notas (opcional)',
         React.createElement('textarea',{value:fd.notes||'',onChange:e=>set('notes',e.target.value),rows:2,placeholder:'Observações...',style:{width:'100%',background:'#111',border:'1px solid #2a2318',color:'#c8b090',padding:'6px 8px',borderRadius:'5px',fontSize:'12px',resize:'vertical'}})
       ),
+
       React.createElement('div',{style:{display:'flex',gap:'6px'}},
-        React.createElement('button',{
-          onClick:()=>onSave({...fd}),
-          style:{flex:1,background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'8px',borderRadius:'5px',cursor:'pointer',fontSize:'12px',fontWeight:700}
-        },'Salvar'),
-        React.createElement('button',{
-          onClick:onCancel,
-          style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'8px 14px',borderRadius:'5px',cursor:'pointer',fontSize:'12px'}
-        },'Cancelar')
+        React.createElement('button',{onClick:()=>onSave({...fd}),style:{flex:1,background:'var(--theme-accent)',color:'var(--theme-accent-text)',border:'none',padding:'8px',borderRadius:'5px',cursor:'pointer',fontSize:'12px',fontWeight:700}},'Salvar'),
+        React.createElement('button',{onClick:onCancel,style:{background:'transparent',border:'1px solid #2a2318',color:'#554a3a',padding:'8px 14px',borderRadius:'5px',cursor:'pointer',fontSize:'12px'}},'Cancelar')
       )
     )
   );
@@ -8226,7 +8332,7 @@ function App(){
     ),
     React.createElement('div',{className:'tab-bar'},
       [['creator','ti-edit','Criador de Treinos'],['parser','ti-sparkles','Criar por Texto'],['athletes','ti-chart-radar','Atletas'],
-        ['exercises','ti-tool','Exercícios'],['locations','ti-map-pin','Locais'],['results','ti-chart-bar','Resultados'],['publisher','ti-calendar','Publicador de Grade']].map(([id,icon,lbl])=>
+        ['exercises','ti-tool','Exercícios'],['locations','ti-map-pin','Serviços'],['results','ti-chart-bar','Resultados'],['publisher','ti-calendar','Publicador de Grade']].map(([id,icon,lbl])=>
         React.createElement('button',{key:id,type:'button',className:`tab3 ${tab===id?'on':''}`,onClick:()=>setTab(id)},
           React.createElement('i',{className:`ti ${icon}`,'aria-hidden':'true'}),lbl
         )

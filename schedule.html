@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="description" content="Grade de treinos semanal — Cone"/>
+<link rel="manifest" href="manifest.json"/>
 <title>Cone — Treinos</title><!-- set from config.scheduleTitle at runtime -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -107,18 +109,6 @@ function toISO(d){
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
 
-function getWeekDates(offset){
-  const now=new Date();
-  const day=now.getDay(); // 0=Sun
-  const mon=new Date(now);
-  mon.setDate(now.getDate()-day+1+(offset*7)); // Monday
-  return Array.from({length:7},(_,i)=>{
-    const d=new Date(mon);d.setDate(mon.getDate()+(i===6?-1:i)); // Mon-Sun (Sun wraps)
-    return d;
-  });
-  // Actually: Mon=0,Tue=1,...,Sat=5,Sun=6 order
-}
-
 function getWeek(offset){
   const now=new Date();
   const day=now.getDay(); // 0=Sun
@@ -127,16 +117,13 @@ function getWeek(offset){
   return Array.from({length:7},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return d;});
 }
 
-function blockColor(label,type){
-  // always use wkBlockType — keeps schedule in sync with Publicador de Grade Semanal scheme
-  // blockColors is intentionally ignored here to avoid config colour overrides
-  return cfg.wkBlockType||'#68d8a0';
-}
+function blockColor(){return cfg.wkBlockType||'#68d8a0';}
 
+function getTargets(s){if(!s?.mainTraining)return[];return Array.isArray(s.mainTraining)?s.mainTraining:[s.mainTraining];}
 function sessionsForDay(dateKey){
   const all=(state.sessions||{})[dateKey]||[];
   if(!selectedAthlete) return all.filter(s=>s.blocks&&s.blocks.length);
-  return all.filter(s=>!s.mainTraining||s.mainTraining===selectedAthlete).filter(s=>s.blocks&&s.blocks.length);
+  return all.filter(s=>{const t=getTargets(s);return t.length===0||t.includes(selectedAthlete);}).filter(s=>s.blocks&&s.blocks.length);
 }
 
 function fmtIntensity(ins){
@@ -277,8 +264,8 @@ function render(){
                     ${sess.mainTraining?`<div class="sess-alvo">${sess.mainTraining}</div>`:''}
                     <div class="block-badges">
                       ${blocks.map(bl=>{
-                        const label=bl.label&&bl.label!=='-'?bl.label:bl.type;
-                        const col=blockColor(bl.label,bl.type);
+                        const _l=bl.label&&bl.label!=='-'?bl.label:null;const _t=bl.type&&bl.type!=='-'?bl.type:null;const label=_l&&_t&&_l!==_t?`${_l} · ${_t}`:_l||_t||'';
+                        const col=blockColor();
                         const p=blockProgress(bl);
                         const blDone=p.total>0&&p.done===p.total;
                         return `<span class="block-badge" style="background:${col}20;color:${col};border:1px solid ${col}40">${blDone?'✓ ':''}${label}</span>`;
@@ -309,8 +296,8 @@ function renderDetail(sess,dateKey){
   return `<div class="day-detail">
     ${sess.mainTraining?`<div class="detail-sess-title">${sess.mainTraining}</div>`:''}
     ${(sess.blocks||[]).map(bl=>{
-      const label=bl.label&&bl.label!=='-'?bl.label:bl.type;
-      const col=blockColor(bl.label,bl.type);
+      const _l=bl.label&&bl.label!=='-'?bl.label:null;const _t=bl.type&&bl.type!=='-'?bl.type:null;const label=_l&&_t&&_l!==_t?`${_l} · ${_t}`:_l||_t||'';
+      const col=blockColor();
       const meta=[bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
       const isWod=WOD_TYPES.includes(bl.label)||WOD_TYPES.includes(bl.type);
       const prog=blockProgress(bl);
@@ -382,7 +369,7 @@ function renderDetail(sess,dateKey){
 }
 
 // ── Controls ──────────────────────────────────────────────────────────────────
-function changeWeek(dir){weekOffset+=dir;expandedDays.clear();render();}
+function changeWeek(dir){weekOffset+=dir;expandedDays.clear();checkedExercises.clear();render();}
 function setAthlete(val){selectedAthlete=val;expandedDays.clear();render();}
 
 // ── Load data ─────────────────────────────────────────────────────────────────
@@ -390,7 +377,7 @@ async function init(){
   try{
     const [cfgRes,stateRes]=await Promise.all([
       fetch('./config.json?v='+Date.now()).catch(()=>null),
-      fetch('./state.json')
+      fetch('./state.json?v='+Date.now())
     ]);
     if(cfgRes?.ok){
       cfg=await cfgRes.json();
@@ -408,7 +395,8 @@ async function init(){
       <div class="error">
         <i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>
         Não foi possível carregar os treinos.<br>
-        <small>Verifique se o arquivo state.json está na mesma pasta.<br>${e.message}</small>
+        <small>Verifique se o arquivo state.json está na mesma pasta.<br>${e.message}</small><br>
+        <button onclick="init()" style="margin-top:12px;background:transparent;border:1px solid #2e2e2e;color:#666;font-size:13px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit"><i class="ti ti-refresh"></i> Tentar novamente</button>
       </div>`;
   }
 }

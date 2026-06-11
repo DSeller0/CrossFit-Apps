@@ -1,13 +1,12 @@
 {
   "name": "Cone — Criador de Treinos",
-  "short_name": "Cone Treinos",
-  "description": "Criador e publicador de treinos Cone",
+  "short_name": "Cone",
+  "description": "Gestão de treinos CrossFit para coaches",
   "start_url": "./schedule_builder_pt_V2.html",
-  "scope": "./",
   "display": "standalone",
+  "background_color": "#1a1410",
+  "theme_color": "#4ac8c0",
   "orientation": "any",
-  "background_color": "#0a0a0a",
-  "theme_color": "#00b8d4",
   "icons": [
     {
       "src": "icon-192.png",
@@ -20,6 +19,23 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Atletas",
+      "url": "./athletes.html",
+      "description": "Ver perfis dos atletas"
+    },
+    {
+      "name": "Grade",
+      "url": "./schedule.html",
+      "description": "Grade semanal de treinos"
+    },
+    {
+      "name": "Leaderboard",
+      "url": "./leaderboard.html",
+      "description": "Ranking dos WODs"
     }
   ]
 }

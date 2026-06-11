@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="description" content="Leaderboard de WODs — Cone"/>
+<link rel="manifest" href="manifest.json"/>
 <title>Cone — Leaderboard</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -89,7 +91,7 @@ function buildWodList(){
           const dt=new Date(dateKey+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
           const label=bl.label&&bl.label!=='-'?bl.label:bl.type;
           const meta=[bl.rounds&&`${bl.rounds}rds`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
-          list.push({key:`${dateKey}|${sess.id}|${bl.id}`,dateKey,sessId:sess.id,blId:bl.id,blType:bl.type,label,meta,sessName:sess.mainTraining||'',dt});
+          list.push({key:`${dateKey}|${sess.id}|${bl.id}`,dateKey,sessId:sess.id,blId:bl.id,blType:bl.type,label,meta,sessName:Array.isArray(sess.mainTraining)?sess.mainTraining.join(', '):(sess.mainTraining||''),dt});
         }
       });
     });
@@ -134,7 +136,7 @@ function render(){
   };
   const accent=lbc.lbHdrBorder;
   document.documentElement.style.setProperty('--accent',accent);
-  document.body.style.background='#0a0a0a';
+  document.body.style.background=lbc.lbBg||'#0a0a0a';
 
   const gymName=cfg.gymName||settings.gymName||'Cone';
   const wodList=buildWodList();
@@ -225,7 +227,7 @@ function applyUrlParams(){
 // Fetch config + state
 Promise.all([
   fetch('./config.json?v='+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({})),
-  fetch('./state.json').then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
+  fetch('./state.json?v='+Date.now()).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
 ]).then(([cfgData,stateData])=>{
   cfg=cfgData;
   state=stateData;
@@ -233,7 +235,7 @@ Promise.all([
   applyUrlParams();
   render();
 }).catch(err=>{
-  document.getElementById('app').innerHTML=`<div class="error"><i class="ti ti-alert-circle"></i><br><br>Não foi possível carregar os resultados.<br><small>Verifique se o arquivo state.json está na mesma pasta.<br>${err.message}</small></div>`;
+  document.getElementById('app').innerHTML=`<div class="error"><i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>Não foi possível carregar os resultados.<br><small>Verifique se o arquivo state.json está na mesma pasta.<br>${err.message}</small><br><button onclick="location.reload()" style="margin-top:12px;background:transparent;border:1px solid #1e1e1e;color:#666;font-size:13px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit"><i class="ti ti-refresh"></i> Tentar novamente</button></div>`;
 });
 </script>
 </body>
