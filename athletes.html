@@ -400,5 +400,26 @@ function loadData(){
 }
 loadData();
 </script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg=>{
+        // Check for updates every time the app loads
+        reg.addEventListener('updatefound',()=>{
+          const newSW=reg.installing;
+          newSW.addEventListener('statechange',()=>{
+            if(newSW.state==='installed'&&navigator.serviceWorker.controller){
+              // New version available — could show a "reload to update" banner here
+              console.log('[Cone] Nova versão disponível. Recarregue para atualizar.');
+            }
+          });
+        });
+      })
+      .catch(err=>console.warn('[Cone] Service worker não registrado:',err));
+  });
+}
+</script>
 </body>
 </html>

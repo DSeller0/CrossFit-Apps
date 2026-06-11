@@ -238,5 +238,26 @@ Promise.all([
   document.getElementById('app').innerHTML=`<div class="error"><i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>Não foi possível carregar os resultados.<br><small>Verifique se o arquivo state.json está na mesma pasta.<br>${err.message}</small><br><button onclick="location.reload()" style="margin-top:12px;background:transparent;border:1px solid #1e1e1e;color:#666;font-size:13px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit"><i class="ti ti-refresh"></i> Tentar novamente</button></div>`;
 });
 </script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg=>{
+        // Check for updates every time the app loads
+        reg.addEventListener('updatefound',()=>{
+          const newSW=reg.installing;
+          newSW.addEventListener('statechange',()=>{
+            if(newSW.state==='installed'&&navigator.serviceWorker.controller){
+              // New version available — could show a "reload to update" banner here
+              console.log('[Cone] Nova versão disponível. Recarregue para atualizar.');
+            }
+          });
+        });
+      })
+      .catch(err=>console.warn('[Cone] Service worker não registrado:',err));
+  });
+}
+</script>
 </body>
 </html>
