@@ -7,6 +7,7 @@ import {
 } from '../../utils/storage';
 import { APP_CONFIG, ZONES, ECOL, DSHORT, PLC, GF } from '../../utils/config';
 import { buildPixPayload } from '../../utils/pix';
+import PresenterView from '../PresenterView';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 const pixClean = s => (s || '').normalize('NFD').replace(/[\u0300-\u036F]/g, '').replace(/[^a-zA-Z0-9 @._\-+\/]/g, '').trim();
@@ -1358,6 +1359,7 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
   const [blockTitleScales, setBlockTitleScales] = useState(_savedSettings.blockTitleScales || [1, 1, 1]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [presenterOpen, setPresenterOpen] = useState(false);
   const [eaglesBg, setEaglesBg] = useState(APP_CONFIG.mobileEaglesBg || '#000000');
   const [megaManBg, setMegaManBg] = useState(APP_CONFIG.mobileMegaManBg || '#0a1a5c');
   const [noteColor, setNoteColor] = useState(APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa');
@@ -1564,7 +1566,22 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
 
   const currentWeekDates = selectedWeek || defaultWeek;
 
-  return React.createElement('div', null,
+  const dvColorsObj = { bg: dvBg, gymName: dvGymName, date: dvDate, mainTraining: dvMainTraining, zoneType: dvZoneType, blockLabel: dvBlockLabel, cap: dvCap, rounds: dvRounds, exName: dvExName, intensity: dvIntensity, note: dvNote, blockNotes: dvBlockNotes, divider: dvDivider };
+  return React.createElement(React.Fragment, null,
+    presenterOpen && React.createElement(PresenterView, {
+      sessions: filteredSessions,
+      selectedDate: selectedDate || toISO(currentWeekDates[1]),
+      weekDates: currentWeekDates,
+      gymName,
+      dvColors: dvColorsObj,
+      fontScale,
+      zoneScales,
+      blockTitleScales,
+      logoDataUrl,
+      logoScale,
+      onClose: () => setPresenterOpen(false),
+    }),
+    React.createElement('div', null,
     React.createElement('div', { className: 'agenda-wrap', style: { display: 'flex', flexDirection: 'column', marginBottom: '12px', border: '1px solid #1e1e1e', borderRadius: '8px', overflow: 'hidden' } },
       React.createElement(AgendaView, {
         sessions,
@@ -1649,6 +1666,9 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
         React.createElement('button', { type: 'button', className: 'b', style: { borderColor: 'var(--theme-accent)', color: previewOpen ? 'var(--theme-accent-text)' : 'var(--theme-accent)', background: previewOpen ? 'var(--theme-accent)' : 'transparent' }, onClick: () => setPreviewOpen(p => !p) },
           React.createElement('i', { className: 'ti ti-eye', 'aria-hidden': 'true' }),
           previewOpen ? ' Fechar' : ' Pré-visualizar'
+        ),
+        React.createElement('button', { type: 'button', className: 'b', style: { borderColor: '#9b59b6', color: '#9b59b6', background: 'transparent' }, onClick: () => setPresenterOpen(true), title: 'Modo TV — tela cheia com QR code para atletas' },
+          React.createElement('i', { className: 'ti ti-presentation', 'aria-hidden': 'true' }), ' Apresentar'
         ),
         React.createElement('button', { type: 'button', className: 'b bsm', title: 'Configurações', onClick: () => setSettingsOpen(true) },
           React.createElement('i', { className: 'ti ti-settings', 'aria-hidden': 'true' }), ' Cores'
@@ -1950,7 +1970,7 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
         React.createElement(WeeklyExportView, { sessions: filteredSessions, label, year, month, onDayClick: handleDayClick })
       )
     )
-  );
+  )); // closes inner div + Fragment
 }
 
 export default SchedulePublisher;

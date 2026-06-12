@@ -60,6 +60,10 @@ drop policy if exists "public read" on exercise_registry;
 drop policy if exists "public read" on goals_data;
 drop policy if exists "public read" on lb_colors;
 
+-- ── Public result insert — log.html anonymous athlete submissions ─────────────
+drop policy if exists "public result insert" on results;
+create policy "public result insert" on results for insert with check (true);
+
 -- ── Public read — schedule.html, athletes.html, leaderboard.html ──────────────
 create policy "public read" on sessions        for select using (true);
 create policy "public read" on athletes        for select using (true);
