@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 
 const DV_W = 1920;
@@ -7,6 +7,14 @@ const DV_H = 1080;
 export default function PresenterView({ logUrl, onClose, children }) {
   const [scale, setScale] = useState(1);
   const [qrDataUrl, setQrDataUrl] = useState('');
+  const [showControls, setShowControls] = useState(true);
+  const hideTimer = useRef(null);
+
+  const resetHideTimer = () => {
+    setShowControls(true);
+    clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setShowControls(false), 3000);
+  };
 
   useEffect(() => {
     function updateScale() {
@@ -28,18 +36,25 @@ export default function PresenterView({ logUrl, onClose, children }) {
   }, [logUrl]);
 
   useEffect(() => {
+    resetHideTimer();
+    return () => clearTimeout(hideTimer.current);
+  }, []);
+
+  useEffect(() => {
     const handler = e => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
   return React.createElement('div', {
+    onMouseMove: resetHideTimer,
     style: {
       position: 'fixed', inset: 0, zIndex: 9999, background: '#000',
       overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      cursor: showControls ? 'default' : 'none',
     }
   },
-    // Close button (always on top)
+    // Close button — fades out with cursor after 3s idle
     React.createElement('button', {
       onClick: onClose,
       title: 'Fechar (Esc)',
@@ -49,6 +64,9 @@ export default function PresenterView({ logUrl, onClose, children }) {
         color: '#fff', borderRadius: '6px', cursor: 'pointer',
         width: '36px', height: '36px', fontSize: '18px', lineHeight: 1,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
+        opacity: showControls ? 1 : 0,
+        transition: 'opacity .4s',
+        pointerEvents: showControls ? 'auto' : 'none',
       }
     },
       React.createElement('i', { className: 'ti ti-x', 'aria-hidden': 'true' })
