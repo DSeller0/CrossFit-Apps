@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link id="gfonts-lb" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Raleway:wght@400;600;700;900&display=swap"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--accent:#00b8d4;--accent-text:#000;--bg:#000;--bg2:#050e14;--lb-font:'Courier New',monospace}
@@ -224,10 +225,19 @@ function applyUrlParams(){
   }
 }
 
+// ── Supabase ──────────────────────────────────────────────────────────────────
+const _sb=supabase.createClient('https://crsalcpvsedmiabkeibp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw');
+async function fetchState(){
+  const tbls=['sessions','athletes','results','events','locations','coach_profile','settings','goals_data','lb_colors'];
+  const rows=await Promise.all(tbls.map(t=>_sb.from(t).select('value').eq('id',1).maybeSingle()));
+  const[s,a,r,ev,loc,cp,st,gd,lb]=rows.map(x=>x.data?.value??null);
+  return{sessions:s??{},athletes:a??[],results:r??[],events:ev??{},locations:loc??[],coachProfile:cp??{},settings:st??{},athleteGoalsData:gd??{athleteGoals:{},prs:{}},lbColors:lb??{}};
+}
+
 // Fetch config + state
 Promise.all([
   fetch('./config.json?v='+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({})),
-  fetch('./state.json?v='+Date.now()).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
+  fetchState()
 ]).then(([cfgData,stateData])=>{
   cfg=cfgData;
   state=stateData;
@@ -235,7 +245,7 @@ Promise.all([
   applyUrlParams();
   render();
 }).catch(err=>{
-  document.getElementById('app').innerHTML=`<div class="error"><i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>Não foi possível carregar os resultados.<br><small>Verifique se o arquivo state.json está na mesma pasta.<br>${err.message}</small><br><button onclick="location.reload()" style="margin-top:12px;background:transparent;border:1px solid #1e1e1e;color:#666;font-size:13px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit"><i class="ti ti-refresh"></i> Tentar novamente</button></div>`;
+  document.getElementById('app').innerHTML=`<div class="error"><i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>Não foi possível carregar os resultados.<br><small>${err.message}</small><br><button onclick="location.reload()" style="margin-top:12px;background:transparent;border:1px solid #1e1e1e;color:#666;font-size:13px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit"><i class="ti ti-refresh"></i> Tentar novamente</button></div>`;
 });
 </script>
 

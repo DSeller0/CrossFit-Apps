@@ -10,6 +10,7 @@ import {
   loadLocations, saveLocations,
   loadCoach, saveCoach,
   loadLBColors,
+  syncFromSupabase,
   toISO,
 } from './utils/storage';
 import { APP_CONFIG, normaliseType, normaliseZone, GF } from './utils/config';
@@ -50,6 +51,14 @@ export default function App() {
     document.documentElement.style.setProperty('--theme-accent', APP_CONFIG.themeAccent);
     document.documentElement.style.setProperty('--theme-accent-text', APP_CONFIG.themeAccentText);
     document.title = APP_CONFIG.appTitle;
+  }, []);
+
+  // ── Pull latest data from Supabase on startup ────────────────────────────
+  useEffect(() => {
+    syncFromSupabase().then(fresh => {
+      if (fresh.sessions)  setSessions(fresh.sessions);
+      if (fresh.events)    setEvents(fresh.events);
+    }).catch(() => {});
   }, []);
 
   // ── Fetch config.json on first empty-state visit ──────────────────────────

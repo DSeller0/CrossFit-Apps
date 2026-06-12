@@ -1,4 +1,12 @@
 import { normaliseType, normaliseZone } from './config';
+import {
+  dbSaveSessions, dbSaveAthletes, dbSaveResults, dbSaveEvents,
+  dbSaveLocations, dbSaveCoach, dbSaveSettings, dbSaveRegistry,
+  dbSaveGoalsData, dbSaveLBColors,
+  dbLoadSessions, dbLoadAthletes, dbLoadResults, dbLoadEvents,
+  dbLoadLocations, dbLoadCoach, dbLoadSettings, dbLoadRegistry,
+  dbLoadGoalsData, dbLoadLBColors,
+} from './supabase';
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
 export const LS_KEY       = 'gym_v9';
@@ -57,40 +65,73 @@ export const loadLS = () => {
     return parsed;
   } catch { return {}; }
 };
-export const saveLS = d => { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch {} };
+export const saveLS = d => { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch {} dbSaveSessions(d); };
 
 // ── Athletes ──────────────────────────────────────────────────────────────────
 export const loadAthletes  = () => { try { const d = localStorage.getItem(LS_ATHLETES);  return d ? JSON.parse(d) : []; } catch { return []; } };
-export const saveAthletes  = d => { try { localStorage.setItem(LS_ATHLETES, JSON.stringify(d)); } catch {} };
+export const saveAthletes  = d => { try { localStorage.setItem(LS_ATHLETES, JSON.stringify(d)); } catch {} dbSaveAthletes(d); };
 
 // ── Results ───────────────────────────────────────────────────────────────────
 export const loadResults   = () => { try { const d = localStorage.getItem(LS_RESULTS); const p = d ? JSON.parse(d) : []; return Array.isArray(p) ? p : []; } catch { return []; } };
-export const saveResults   = d => { try { localStorage.setItem(LS_RESULTS, JSON.stringify(d)); } catch {} };
+export const saveResults   = d => { try { localStorage.setItem(LS_RESULTS, JSON.stringify(d)); } catch {} dbSaveResults(d); };
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 export const loadSettings  = () => { try { const d = localStorage.getItem(LS_SETTINGS);  return d ? JSON.parse(d) : {}; } catch { return {}; } };
-export const saveSettings  = d => { try { localStorage.setItem(LS_SETTINGS, JSON.stringify(d)); } catch {} };
+export const saveSettings  = d => { try { localStorage.setItem(LS_SETTINGS, JSON.stringify(d)); } catch {} dbSaveSettings(d); };
 
 // ── Exercise registry ─────────────────────────────────────────────────────────
 export const loadRegistry  = () => { try { const d = localStorage.getItem(LS_REGISTRY);  return d ? JSON.parse(d) : null; } catch { return null; } };
-export const saveRegistry  = d => { try { localStorage.setItem(LS_REGISTRY, JSON.stringify(d)); } catch {} };
+export const saveRegistry  = d => { try { localStorage.setItem(LS_REGISTRY, JSON.stringify(d)); } catch {} dbSaveRegistry(d); };
 
 // ── Goals & PRs ───────────────────────────────────────────────────────────────
 export const loadGoalsData = () => { try { const d = localStorage.getItem(LS_GOALS); return d ? JSON.parse(d) : { athleteGoals: {}, prs: {} }; } catch { return { athleteGoals: {}, prs: {} }; } };
-export const saveGoalsData = d => { try { localStorage.setItem(LS_GOALS, JSON.stringify(d)); } catch {} };
+export const saveGoalsData = d => { try { localStorage.setItem(LS_GOALS, JSON.stringify(d)); } catch {} dbSaveGoalsData(d); };
 
 // ── Events (agenda) ───────────────────────────────────────────────────────────
 export const loadEvents    = () => { try { const d = localStorage.getItem(LS_EVENTS);    return d ? JSON.parse(d) : {}; } catch { return {}; } };
-export const saveEvents    = d => { try { localStorage.setItem(LS_EVENTS, JSON.stringify(d)); } catch {} };
+export const saveEvents    = d => { try { localStorage.setItem(LS_EVENTS, JSON.stringify(d)); } catch {} dbSaveEvents(d); };
 
 // ── Locations / services ──────────────────────────────────────────────────────
 export const loadLocations = () => { try { const d = localStorage.getItem(LS_LOCATIONS); return d ? JSON.parse(d) : []; } catch { return []; } };
-export const saveLocations = d => { try { localStorage.setItem(LS_LOCATIONS, JSON.stringify(d)); } catch {} };
+export const saveLocations = d => { try { localStorage.setItem(LS_LOCATIONS, JSON.stringify(d)); } catch {} dbSaveLocations(d); };
 
 // ── Coach profile ─────────────────────────────────────────────────────────────
 export const loadCoach     = () => { try { const d = localStorage.getItem(LS_COACH); return d ? JSON.parse(d) : { name: '', contact: '', phone: '' }; } catch { return { name: '', contact: '', phone: '' }; } };
-export const saveCoach     = d => { try { localStorage.setItem(LS_COACH, JSON.stringify(d)); } catch {} };
+export const saveCoach     = d => { try { localStorage.setItem(LS_COACH, JSON.stringify(d)); } catch {} dbSaveCoach(d); };
 
 // ── Leaderboard colours ───────────────────────────────────────────────────────
 export const loadLBColors  = () => { try { const d = localStorage.getItem(LS_LB_COLORS); return d ? JSON.parse(d) : {}; } catch { return {}; } };
-export const saveLBColors  = d => { try { localStorage.setItem(LS_LB_COLORS, JSON.stringify(d)); } catch {} };
+export const saveLBColors  = d => { try { localStorage.setItem(LS_LB_COLORS, JSON.stringify(d)); } catch {} dbSaveLBColors(d); };
+
+// ── Pull all data from Supabase into localStorage ─────────────────────────────
+// Called once on app startup. Returns an object with the fresh data so App.jsx
+// can update React state without a reload.
+export async function syncFromSupabase() {
+  const [sessions, athletes, results, events, locations, coach, settings, registry, goalsData, lbColors] =
+    await Promise.all([
+      dbLoadSessions(), dbLoadAthletes(), dbLoadResults(), dbLoadEvents(),
+      dbLoadLocations(), dbLoadCoach(), dbLoadSettings(), dbLoadRegistry(),
+      dbLoadGoalsData(), dbLoadLBColors(),
+    ]);
+
+  const out = {};
+
+  if (sessions && typeof sessions === 'object' && !Array.isArray(sessions)) {
+    const migrated = migrateTypes(sessions);
+    saveLS(migrated);
+    out.sessions = migrated;
+  }
+  if (Array.isArray(athletes))   { saveAthletes(athletes);   out.athletes = athletes; }
+  if (Array.isArray(results))    { saveResults(results);     out.results  = results;  }
+  if (events && typeof events === 'object' && !Array.isArray(events)) {
+    saveEvents(events); out.events = events;
+  }
+  if (Array.isArray(locations))  { saveLocations(locations); out.locations = locations; }
+  if (coach && typeof coach === 'object')      { saveCoach(coach);       out.coach    = coach;    }
+  if (settings && typeof settings === 'object'){ saveSettings(settings); out.settings = settings; }
+  if (registry && typeof registry === 'object'){ saveRegistry(registry); out.registry = registry; }
+  if (goalsData && typeof goalsData === 'object') { saveGoalsData(goalsData); out.goalsData = goalsData; }
+  if (lbColors && typeof lbColors === 'object')   { saveLBColors(lbColors);   out.lbColors  = lbColors;  }
+
+  return out;
+}
