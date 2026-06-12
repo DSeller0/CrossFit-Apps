@@ -144,7 +144,7 @@ export default function LoginScreen() {
                 <i className="ti ti-alert-circle" aria-hidden="true" /> {error}
               </p>
             )}
-            <button className="login-btn" type="submit" disabled={verifying || code.join('').length < 6}>
+            <button className="login-btn" type="submit" disabled={verifying || code.join('').length < 8}>
               {verifying
                 ? <><i className="ti ti-loader-2 spin" aria-hidden="true" /> Verificando...</>
                 : <><i className="ti ti-check" aria-hidden="true" /> Entrar</>}
