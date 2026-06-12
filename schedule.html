@@ -416,7 +416,7 @@ function openLogPane(dateKey,sessId){
   const wodBlocks=(sess.blocks||[]).filter(b=>WOD_LOG_TYPES.includes(b.type)||WOD_LOG_TYPES.includes(b.label));
   logForm={
     dateKey,sessId,sess,athleteId:'',assignedAth,
-    blocks:wodBlocks.map(b=>({blockId:b.id,blockType:b.type,blockLabel:b.label||b.type,rpe:7,scale:'RX',perfTime:'',perfRounds:'',perfReps:''}))
+    blocks:wodBlocks.map(b=>({blockId:b.id,blockType:b.type,blockLabel:b.label&&b.type&&b.label!==b.type?`${b.label} · ${b.type}`:b.label||b.type,rpe:7,scale:'RX',perfTime:'',perfRounds:'',perfReps:''}))
   };
   renderLogPaneContent();
   document.getElementById('log-pane-overlay').style.display='block';
