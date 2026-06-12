@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="description" content="Perfil e progresso dos atletas — Cone"/>
+<link rel="manifest" href="manifest.json"/>
+<title>Cone — Atletas</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link id="gfonts" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;900&display=swap"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#1a1410;--bg2:#211c17;--bg3:#2a231c;
+  --accent:#4ac8c0;--gold:#d8a840;--green:#68d8a0;--cream:#f0e8d0;
+  --sub:#c8b090;--muted:#a89880;--divider:#3a3028;
+  --font:'Raleway',sans-serif
+}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#3a3028;border-radius:3px;border:1px solid var(--accent)}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+*{scrollbar-width:thin;scrollbar-color:#3a3028 var(--bg)}
+.topbar{background:#0d0b09;border-bottom:2px solid var(--accent);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-gym{font-size:18px;font-weight:900;color:var(--cream);text-transform:uppercase;letter-spacing:.08em}
+.back-btn{background:transparent;border:1px solid var(--divider);color:var(--sub);font-size:13px;padding:6px 14px;border-radius:5px;cursor:pointer;font-family:var(--font);transition:all .12s;display:flex;align-items:center;gap:5px}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+.page{padding:18px 20px;max-width:1200px;margin:0 auto}
+.section-label{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+.athlete-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+@media(max-width:400px){.athlete-grid{grid-template-columns:1fr}}
+.ath-card{background:var(--bg2);border:1px solid var(--divider);border-radius:10px;padding:16px;cursor:pointer;transition:all .12s}
+.ath-card:hover{border-color:var(--accent);background:var(--bg3)}
+.ath-card-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ath-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.ath-name{font-size:15px;font-weight:700;color:var(--cream);flex:1}
+.ath-pct{font-size:13px;color:var(--gold);font-weight:700}
+.hp-mini{display:flex;gap:2px}
+.hp-block{flex:1;height:9px;border-radius:2px;background:var(--bg3);border:1px solid var(--divider);position:relative;overflow:hidden}
+.hp-fill{position:absolute;top:0;left:0;bottom:0}
+.no-goals{font-size:12px;color:var(--muted);font-style:italic;padding:4px 0}
+.detail-page{padding:18px 20px;max-width:920px;margin:0 auto}
+.ath-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.ath-title{font-size:22px;font-weight:900;color:var(--cream)}
+.ath-level{font-size:12px;color:var(--gold);font-weight:600;padding:2px 9px;background:rgba(216,168,64,.12);border:1px solid rgba(216,168,64,.35);border-radius:4px}
+.section{background:var(--bg2);border:1px solid var(--divider);border-radius:10px;padding:18px;margin-bottom:14px}
+.section-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.09em;margin-bottom:14px}
+/* stat rows */
+.stat-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--divider)}
+.stat-row:last-child{border-bottom:none}
+.stat-name-col{min-width:140px;flex-shrink:0;font-size:14px;font-weight:700;color:var(--cream)}
+.stat-sub{font-size:12px;color:var(--sub);margin-top:4px}
+.stat-bar-wrap{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+.stat-bar{display:flex;gap:2px}
+.stat-block{flex:1;height:16px;border-radius:2px;background:var(--bg3);border:1px solid var(--divider);position:relative;overflow:hidden}
+.stat-fill{position:absolute;top:0;left:0;bottom:0;border-radius:2px}
+.stat-pct{font-size:15px;font-weight:900;color:var(--cream);min-width:44px;text-align:right;flex-shrink:0}
+@media(max-width:500px){
+  .stat-row{flex-wrap:wrap;gap:6px}
+  .stat-name-col{min-width:100%;margin-bottom:2px}
+  .stat-pct{min-width:auto}
+}
+/* sessions */
+.sess-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:640px){.sess-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:360px){.sess-grid{grid-template-columns:1fr}}
+.sess-card{background:var(--bg3);border:1px solid var(--divider);border-radius:8px;overflow:hidden;cursor:pointer;transition:border-color .12s}
+.sess-card:hover{border-color:var(--accent)}
+.sess-card.past{opacity:.85}
+.sess-card.future{border-style:dashed}
+.sess-card.today{border-color:var(--accent)}
+.sess-hdr{padding:8px 10px 6px;border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:space-between}
+.sess-dow{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em}
+.sess-date{font-size:12px;color:var(--sub)}
+.sess-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;text-transform:uppercase}
+.sess-body{padding:8px 10px}
+.block-badges{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px}
+.block-badge{font-size:10px;font-weight:700;padding:2px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
+.sess-perf{font-size:11px;color:var(--sub);margin-top:4px}
+.sess-expand{background:var(--bg2);border-top:1px solid var(--divider);padding:10px}
+.sess-ex-row{font-size:12px;color:var(--cream);padding:3px 0;display:flex;gap:8px;align-items:center}
+.sess-ex-scale{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px}
+.lb-link{display:flex;align-items:center;gap:5px;margin-top:6px;padding:5px 8px;background:rgba(74,200,192,.08);border:1px solid rgba(74,200,192,.3);border-radius:5px;color:var(--accent);font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:.05em}
+/* PR rows */
+.pr-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--divider);flex-wrap:wrap}
+.pr-row:last-child{border-bottom:none}
+.pr-info{min-width:140px;flex-shrink:0}
+.pr-name{font-size:14px;font-weight:700;color:var(--cream)}
+.pr-cat{font-size:12px;color:var(--gold);margin-top:2px;font-weight:600}
+.pr-bar-wrap{flex:1;display:flex;flex-direction:column;gap:3px;min-width:120px}
+.pr-bar{display:flex;gap:2px}
+.pr-bar-block{flex:1;height:14px;border-radius:2px;background:var(--bg3);border:1px solid var(--divider);position:relative;overflow:hidden}
+.pr-bar-fill{position:absolute;top:0;left:0;bottom:0}
+.pr-meta{font-size:12px;color:var(--sub);margin-top:2px}
+.pr-best{text-align:right;flex-shrink:0;min-width:76px}
+.pr-value{font-size:15px;font-weight:900;color:var(--cream)}
+.pr-date{font-size:12px;color:var(--sub);margin-top:2px}
+.pr-delta{font-size:12px;font-weight:700;flex-shrink:0;min-width:56px;text-align:right}
+/* goals */
+.goal-row{margin-bottom:14px}
+.goal-row:last-child{margin-bottom:0}
+.goal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.goal-name{font-size:14px;font-weight:700;color:var(--cream)}
+.goal-count{font-size:13px;color:var(--gold);font-weight:600}
+.hp-bar{display:flex;gap:2px;cursor:pointer}
+.hp-bar-block{flex:1;height:22px;border-radius:2px;background:var(--bg3);border:1px solid var(--divider);position:relative;overflow:hidden}
+.hp-bar-fill{position:absolute;top:0;left:0;bottom:0}
+.hp-tick{position:absolute;top:0;bottom:0;width:2px;background:var(--gold);z-index:1}
+.milestone-pcts{position:relative;height:16px;margin-top:3px}
+.mp-label{position:absolute;transform:translateX(-50%);font-size:10px;color:var(--gold);white-space:nowrap;font-weight:600}
+.milestones-panel{margin-top:8px;padding:10px 14px;background:var(--bg);border-radius:6px;border:1px solid var(--divider)}
+.ms-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--divider);font-size:13px}
+.ms-row:last-child{border-bottom:none}
+.ms-check{width:16px;height:16px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px}
+.ms-check.hit{background:rgba(104,216,160,.15);color:var(--green);border:1px solid rgba(104,216,160,.4)}
+.ms-check.miss{background:var(--bg3);border:1px solid var(--divider)}
+.ms-label{flex:1;color:var(--cream)}
+.ms-label.done{color:var(--muted);text-decoration:line-through}
+.ms-pct{font-size:12px;color:var(--gold);font-weight:600}
+.loading{text-align:center;padding:60px 20px;color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.1em}
+.error{text-align:center;padding:40px 20px;color:#e05050;font-size:13px;line-height:1.8}
+.retry-btn{margin-top:14px;background:transparent;border:1px solid var(--divider);color:var(--sub);font-size:13px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:var(--font)}
+.retry-btn:hover{border-color:var(--accent);color:var(--accent)}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading"><i class="ti ti-loader"></i> Carregando...</div></div>
+<script>
+let cfg={},state={},selAthlete=null;
+let expandedGoals=new Set(),expandedSessions=new Set();
+
+const SCALE_RANK={RX:4,Inter:3,SC:2,Adaptado:1};
+const SCALE_NAMES={4:'RX',3:'Inter',2:'SC',1:'Adaptado'};
+const SCALE_COLORS={RX:'#4ac8c0',Inter:'#d8a840',SC:'#e87820',Adaptado:'#a89880'};
+const WOD_TYPES=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
+const DAY_PT=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+function snapPct(p){return Math.round(p/10)*10;}
+function toISO(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function toSecs(t){if(!t)return Infinity;const p=String(t).split(':');return p.length===2?parseInt(p[0])*60+parseInt(p[1]):parseInt(t)||Infinity;}
+// Backwards compat: mainTraining may be string or array
+function getTargets(s){if(!s?.mainTraining)return[];return Array.isArray(s.mainTraining)?s.mainTraining:[s.mainTraining];}
+
+function applyConfig(){
+  const r=document.documentElement.style;
+  if(cfg.wkBg)r.setProperty('--bg',cfg.wkBg);
+  if(cfg.wkHeader)r.setProperty('--accent',cfg.wkHeader);
+  else if(cfg.themeAccent)r.setProperty('--accent',cfg.themeAccent);
+  if(cfg.wkExName)r.setProperty('--cream',cfg.wkExName);
+  if(cfg.wkDateNum)r.setProperty('--sub',cfg.wkDateNum);
+  if(cfg.wkDivider)r.setProperty('--divider',cfg.wkDivider);
+  if(cfg.fontFamily){r.setProperty('--font',cfg.fontFamily);document.body.style.fontFamily=cfg.fontFamily;if(cfg.googleFontsUrl){const gf=document.getElementById('gfonts');if(gf)gf.href=cfg.googleFontsUrl;}}
+}
+
+// ── Character stats ───────────────────────────────────────────────────────────
+function calcStats(athId,goalsData,results){
+  const athResults=results.filter(r=>String(r.athleteId)===String(athId));
+  const now=new Date();
+  const days30=new Date(now);days30.setDate(now.getDate()-30);
+  const days60=new Date(now);days60.setDate(now.getDate()-60);
+  const days28=new Date(now);days28.setDate(now.getDate()-28);
+
+  // FORÇA — avg % toward load PR targets
+  const prs=(goalsData.prs||{})[athId]||[];
+  const loadPrs=prs.filter(p=>p.type==='load'&&p.target&&p.results?.length);
+  let forca=null,forcaSub='Sem PRs de carga registrados';
+  if(loadPrs.length){
+    const vals=loadPrs.map(p=>{const best=p.results.reduce((b,r)=>Number(r.value)>Number(b.value)?r:b);return Math.min(100,Math.round(Number(best.value)/Number(p.target)*100));});
+    forca=Math.round(vals.reduce((a,v)=>a+v,0)/vals.length);
+    forcaSub=`${loadPrs.length} lift${loadPrs.length>1?'s':''} — média ${forca}% da meta`;
+  }
+
+  // CONDICIONAMENTO — WOD completion + attendance last 4 weeks
+  const r4w=athResults.filter(r=>new Date(r.date)>=days28);
+  const present4w=r4w.filter(r=>r.presence==='Presente').length;
+  const total4w=r4w.length;
+  const attPct=total4w>0?Math.round(present4w/total4w*100):null;
+  const wodResults=athResults.filter(r=>r.presence==='Presente'&&(r.blocks||[]).some(b=>WOD_TYPES.includes(b.blockType)||WOD_TYPES.includes(b.blockLabel)));
+  const completed=wodResults.filter(r=>{const wb=(r.blocks||[]).find(b=>WOD_TYPES.includes(b.blockType)||WOD_TYPES.includes(b.blockLabel));return wb&&wb.perfTime;}).length;
+  const compPct=wodResults.length>0?Math.round(completed/wodResults.length*100):null;
+  let cond=null,condSub='Sem dados suficientes';
+  if(attPct!==null&&compPct!==null){cond=Math.round((attPct+compPct)/2);condSub=`Presença 4 sem: ${attPct}% · WODs completos: ${compPct}%`;}
+  else if(attPct!==null){cond=attPct;condSub=`Presença últimas 4 semanas: ${attPct}%`;}
+
+  // HABILIDADE — RX rate last 30 days + milestone hit rate
+  const r30=athResults.filter(r=>new Date(r.date)>=days30&&r.presence==='Presente');
+  let rxPct=null;
+  if(r30.length){
+    const rxCount=r30.filter(r=>{const wb=(r.blocks||[]).find(b=>WOD_TYPES.includes(b.blockType)||WOD_TYPES.includes(b.blockLabel));if(!wb)return false;const rows=wb.exerciseRows||[];let min=4;rows.forEach(row=>{const rank=SCALE_RANK[row.scale]??0;if(rank<min)min=rank;});return min===4;}).length;
+    rxPct=Math.round(rxCount/r30.length*100);
+  }
+  const athGoals=(goalsData.athleteGoals||{})[athId]||[];
+  const allMs=athGoals.flatMap(g=>g.milestones||[]);
+  const hitMs=allMs.filter(m=>m.hit).length;
+  const msPct=allMs.length>0?Math.round(hitMs/allMs.length*100):null;
+  let hab=null,habSub='Sem dados suficientes';
+  if(rxPct!==null&&msPct!==null){hab=Math.round((rxPct+msPct)/2);habSub=`RX rate 30 dias: ${rxPct}% · Milestones: ${hitMs}/${allMs.length}`;}
+  else if(rxPct!==null){hab=rxPct;habSub=`RX rate últimos 30 dias: ${rxPct}%`;}
+  else if(msPct!==null){hab=msPct;habSub=`Milestones atingidos: ${hitMs}/${allMs.length}`;}
+
+  // PROGRESSÃO — PRs set last 60 days + RPE trend
+  const recentPRs=prs.filter(p=>{if(!p.results?.length)return false;const best=p.type==='time'?p.results.reduce((b,r)=>toSecs(r.value)<toSecs(b.value)?r:b):p.results.reduce((b,r)=>Number(r.value)>Number(b.value)?r:b);return new Date(best.date)>=days60;}).length;
+  const rpeAll=athResults.filter(r=>r.blocks?.some(b=>b.rpe)).map(r=>r.blocks.find(b=>b.rpe)?.rpe||7);
+  const rpeHalf=rpeAll.length>=6?[rpeAll.slice(0,Math.floor(rpeAll.length/2)),rpeAll.slice(Math.floor(rpeAll.length/2))]:null;
+  let rpeTrend=null;
+  if(rpeHalf){const a1=rpeHalf[0].reduce((a,v)=>a+v,0)/rpeHalf[0].length;const a2=rpeHalf[1].reduce((a,v)=>a+v,0)/rpeHalf[1].length;rpeTrend=a1>a2?'↓':'↑';}
+  let prog=null,progSub='Sem dados suficientes';
+  if(recentPRs>0||rpeAll.length>0){prog=Math.min(100,recentPRs*20);progSub=`${recentPRs} PR${recentPRs!==1?'s':''} nos últimos 60 dias${rpeTrend?` · RPE tendência ${rpeTrend}`:''}`;  }
+
+  // CONSISTÊNCIA — streak + energy average
+  const sortedDates=[...new Set(athResults.map(r=>r.date))].sort().reverse();
+  let streak=0;const today=toISO(new Date());
+  for(const d of sortedDates){const dr=athResults.filter(r=>r.date===d);if(dr.some(r=>r.presence==='Presente'))streak++;else if(d<=today)break;}
+  const streakPct=Math.min(100,Math.round(streak/12*100));
+  const energyResults=athResults.filter(r=>r.energyLevel&&r.presence==='Presente');
+  const avgEnergy=energyResults.length>0?Math.round(energyResults.reduce((a,r)=>a+r.energyLevel,0)/energyResults.length*10)/10:null;
+  let consistSub=`Streak: ${streak} semana${streak!==1?'s':''} consecutiva${streak!==1?'s':''}`;
+  if(avgEnergy!==null)consistSub+=` · Energia média: ${avgEnergy}/5`;
+
+  return [
+    {key:'forca',name:'Força',pct:forca,sub:forcaSub,color:'var(--gold)'},
+    {key:'cond',name:'Condicionamento',pct:cond,sub:condSub,color:'var(--accent)'},
+    {key:'hab',name:'Habilidade',pct:hab,sub:habSub,color:'var(--green)'},
+    {key:'prog',name:'Progressão',pct:prog,sub:progSub,color:'#c884f0'},
+    {key:'consist',name:'Consistência',pct:streakPct,sub:consistSub,color:'var(--gold)'},
+  ];
+}
+
+function statRowHTML(stat){
+  const pct=stat.pct??0;
+  // Use opacity variant for partial fills regardless of color type
+  const fillFull=stat.color;
+  const fillPart=stat.color.startsWith('var(')?stat.color:stat.color+'99';
+  const blocks=Array.from({length:10},(_,bi)=>{
+    const fill=pct>=(bi+1)*10?1:pct>bi*10?(pct-bi*10)/10:0;
+    return `<div class="stat-block"><div class="stat-fill" style="width:${fill*100}%;background:${fill===1?fillFull:fillPart};opacity:${fill===1?1:0.5}"></div></div>`;
+  }).join('');
+  return `<div class="stat-row">
+    <div class="stat-name-col">${stat.name}</div>
+    <div class="stat-bar-wrap"><div class="stat-bar">${blocks}</div><div class="stat-sub">${stat.sub}</div></div>
+    <div class="stat-pct">${stat.pct!==null?stat.pct+'%':'—'}</div>
+  </div>`;
+}
+
+// ── Sessions summary ──────────────────────────────────────────────────────────
+function sessionsSummaryHTML(athName,results,sessions){
+  const today=new Date();const todayISO=toISO(today);
+  const future30=new Date(today);future30.setDate(today.getDate()+30);
+  const allDates=Object.keys(sessions).sort();
+  const athSessions=allDates.reduce((acc,date)=>{
+    (sessions[date]||[]).filter(s=>getTargets(s).includes(athName)).forEach(s=>acc.push({date,session:s}));
+    return acc;
+  },[]);
+  const past=athSessions.filter(s=>s.date<=todayISO).slice(-2);
+  const future=athSessions.filter(s=>s.date>todayISO&&s.date<=toISO(future30)).slice(0,2);
+  const cards=[...past,...future];
+  if(!cards.length)return'<div style="font-size:13px;color:var(--muted);font-style:italic;padding:8px 0">Nenhuma sessão atribuída a este atleta.</div>';
+  return`<div class="sess-grid">${cards.map(({date,session})=>{
+    const isPast=date<=todayISO,isToday=date===todayISO;
+    const d=new Date(date+'T12:00:00');
+    const dow=DAY_PT[d.getDay()];
+    const dateLabel=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+    const athResult=results.find(r=>String(r.athleteId)===String(selAthlete)&&r.date===date&&(r.sessionId===session.id||!r.sessionId));
+    const expanded=expandedSessions.has(date+'|'+session.id);
+    const badges=(session.blocks||[]).map(bl=>{
+      const _l=bl.label&&bl.label!=='-'?bl.label:null;const _t=bl.type&&bl.type!=='-'?bl.type:null;
+      const label=_l&&_t&&_l!==_t?`${_l} · ${_t}`:_l||_t||'';
+      return label?`<span class="block-badge" style="background:rgba(74,200,192,.12);color:var(--accent);border:1px solid rgba(74,200,192,.3)">${label}</span>`:'';
+    }).join('');
+    let bodyHTML='';
+    if(isPast&&athResult){
+      const wb=(athResult.blocks||[]).find(b=>WOD_TYPES.includes(b.blockType)||WOD_TYPES.includes(b.blockLabel));
+      if(athResult.presence==='Ausente'){bodyHTML=`<div class="block-badges">${badges}</div><div class="sess-perf" style="color:#7a2020">Ausente</div>`;}
+      else if(athResult.presence==='Atrasado'){bodyHTML=`<div class="block-badges">${badges}</div><div class="sess-perf" style="color:var(--gold)">Atrasado</div>`;}
+      else if(wb){
+        const exRows=wb.exerciseRows||[];let minRank=4;exRows.forEach(row=>{const rank=SCALE_RANK[row.scale]??0;if(rank<minRank)minRank=rank;});
+        const scale=exRows.length>0?SCALE_NAMES[minRank]:'';const scaleCol=SCALE_COLORS[scale]||'';
+        bodyHTML=`<div class="block-badges">${badges}</div><div class="sess-perf">${scale?`<span style="font-size:11px;font-weight:700;padding:1px 5px;border-radius:3px;color:${scaleCol};background:${scaleCol}22;border:1px solid ${scaleCol}44">${scale}</span> `:''}${wb.perfTime?`<strong style="color:var(--cream)">${wb.perfTime}</strong> `:''}${wb.rpe?`<span style="color:var(--muted)">RPE ${wb.rpe}</span>`:''}</div>`;
+      }else{bodyHTML=`<div class="block-badges">${badges}</div><div class="sess-perf" style="color:var(--muted)">Sem resultado</div>`;}
+    }else if(isPast){bodyHTML=`<div class="block-badges">${badges}</div><div class="sess-perf" style="color:var(--muted)">Sem resultado</div>`;}
+    else{bodyHTML=`<div class="block-badges">${badges}</div><div class="sess-perf" style="color:var(--accent)">Próxima sessão</div>`;}
+    let expandHTML='';
+    if(expanded){
+      const blocksDetail=(session.blocks||[]).map(bl=>{
+        const _l=bl.label&&bl.label!=='-'?bl.label:null;const _t=bl.type&&bl.type!=='-'?bl.type:null;
+        const label=_l&&_t&&_l!==_t?`${_l} · ${_t}`:_l||_t||'';
+        const isWod=WOD_TYPES.includes(bl.label)||WOD_TYPES.includes(bl.type);
+        const exs=(bl.exercises||[]).filter(e=>e.name);
+        const athBl=isPast&&athResult?(athResult.blocks||[]).find(b=>b.blockId===bl.id):null;
+        const exRows=athBl?.exerciseRows||[];
+        return`<div style="margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">${label}</div>
+          ${exs.map(ex=>{const rowResult=exRows.find(r=>r.name===ex.name);const sc=rowResult?.scale||'';const scCol=SCALE_COLORS[sc]||'';return`<div class="sess-ex-row"><span style="flex:1;color:var(--cream)">${ex.name}</span>${sc?`<span class="sess-ex-scale" style="color:${scCol};background:${scCol}22;border:1px solid ${scCol}44">${sc}</span>`:''}</div>`;}).join('')}
+          ${isPast&&athBl?.rpe?`<div style="font-size:11px;color:var(--muted);margin-top:4px">RPE ${athBl.rpe}</div>`:''}
+          ${isPast&&athBl?.perfTime?`<div style="font-size:12px;font-weight:700;color:var(--cream);margin-top:4px">${athBl.perfTime}</div>`:''}
+          ${isWod&&isPast?`<a class="lb-link" href="leaderboard.html?wod=${bl.id}&session=${session.id}&date=${date}" target="_blank"><i class="ti ti-trophy"></i> Ver Leaderboard</a>`:''}
+        </div>`;
+      }).join('');
+      expandHTML=`<div class="sess-expand">${blocksDetail}</div>`;
+    }
+    const badgeHTML=isToday?`<span class="sess-badge" style="background:var(--accent);color:#000">Hoje</span>`:isPast?`<span class="sess-badge" style="background:rgba(104,216,160,.15);color:var(--green);border:1px solid rgba(104,216,160,.3)">Feito</span>`:`<span class="sess-badge" style="background:rgba(74,200,192,.1);color:var(--accent);border:1px solid rgba(74,200,192,.3)">Próxima</span>`;
+    return`<div class="sess-card ${isPast?'past':'future'}${isToday?' today':''}" onclick="toggleSession('${date}','${session.id}')">
+      <div class="sess-hdr"><div><div class="sess-dow">${dow}</div><div class="sess-date">${dateLabel}</div></div>${badgeHTML}</div>
+      <div class="sess-body">${bodyHTML}</div>${expandHTML}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── PR helpers ────────────────────────────────────────────────────────────────
+function prBest(pr){if(!pr.results?.length)return null;if(pr.type==='time')return pr.results.reduce((b,r)=>toSecs(r.value)<toSecs(b.value)?r:b);return pr.results.reduce((b,r)=>Number(r.value)>Number(b.value)?r:b);}
+function prDelta(pr){if(!pr.results||pr.results.length<2)return null;const sorted=[...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date));const last=sorted[sorted.length-1],prev=sorted[sorted.length-2];if(pr.type==='time'){const diff=toSecs(prev.value)-toSecs(last.value);if(diff===0)return{label:'=',good:null};const abs=Math.abs(diff);const m=Math.floor(abs/60),s=abs%60;return{label:(diff>0?'-':'+')+`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`,good:diff>0};}const diff=Number(last.value)-Number(prev.value);if(diff===0)return{label:'=',good:null};const unit=pr.type==='load'?(pr.unit||'kg'):'reps';return{label:(diff>0?'+':'')+diff+' '+unit,good:diff>0};}
+function prPct(pr){const best=prBest(pr);if(!best||!pr.target)return null;if(pr.type==='time'){const ts=toSecs(pr.target);const fs=pr.results.length>0?toSecs([...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date))[0].value):ts*2;if(fs<=ts)return 100;return Math.min(100,Math.round((fs-toSecs(best.value))/(fs-ts)*100));}const tn=Number(pr.target);if(!tn)return null;return Math.min(100,Math.round(Number(best.value)/tn*100));}
+
+function prRowHTML(pr,color){
+  const best=prBest(pr);const delta=prDelta(pr);const pct=prPct(pr);
+  const bestLabel=best?(pr.type==='load'?`${best.value} ${pr.unit||'kg'}`:pr.type==='reps'?`${best.value} reps`:best.value):'—';
+  const targetLabel=pr.target?(pr.type==='load'?`${pr.target} ${pr.unit||'kg'}`:pr.type==='reps'?`${pr.target} reps`:pr.target):null;
+  const bestDate=best?new Date(best.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}):null;
+  const dc=delta?.good===true?'#68d8a0':delta?.good===false?'#e05050':'#a89880';
+  const arrow=delta?.good===true?'↑':delta?.good===false?'↓':'';
+  const barBlocks=pct!==null?`<div class="pr-bar">${Array.from({length:10},(_,bi)=>{const fill=pct>=(bi+1)*10?1:pct>bi*10?(pct-bi*10)/10:0;return`<div class="pr-bar-block">${fill>0?`<div class="pr-bar-fill" style="width:${fill*100}%;background:${fill===1?color:color+'99'}"></div>`:''}</div>`;}).join('')}</div><div class="pr-meta">Meta: ${targetLabel}</div>`:'';
+  return`<div class="pr-row"><div class="pr-info"><div class="pr-name">${pr.name}</div>${pr.category?`<div class="pr-cat">${pr.category}</div>`:''}</div><div class="pr-bar-wrap">${barBlocks}</div><div class="pr-best"><div class="pr-value">${bestLabel}</div>${bestDate?`<div class="pr-date">${bestDate}</div>`:''}</div>${delta?`<div class="pr-delta" style="color:${dc}">${arrow} ${delta.label}</div>`:'<div style="min-width:56px"></div>'}</div>`;
+}
+
+function prSectionHTML(athId,goalsData,color){
+  const prs=(goalsData.prs||{})[athId]||[];
+  if(!prs.length)return'<div style="font-size:13px;color:var(--muted);font-style:italic">Nenhum PR registrado.</div>';
+  return[...prs].sort((a,b)=>{const ad=a.results?.length?a.results[a.results.length-1].date:'';const bd=b.results?.length?b.results[b.results.length-1].date:'';return bd.localeCompare(ad);}).slice(0,5).map(pr=>prRowHTML(pr,color)).join('');
+}
+
+function hpBarHTML(goal,color,goalId){
+  const pct=goal.totalSessions>0?(goal.completedSessions/goal.totalSessions)*100:0;
+  const blocks=Array.from({length:10},(_,bi)=>{const bs=bi*10,be=(bi+1)*10;let fill=0;if(pct>=be)fill=1;else if(pct>bs)fill=(pct-bs)/10;const hasMile=(goal.milestones||[]).some(m=>snapPct(m.pct)===be);return`<div class="hp-bar-block">${fill>0?`<div class="hp-bar-fill" style="width:${fill*100}%;background:${fill===1?color:color+'99'}"></div>`:''}${hasMile?`<div class="hp-tick"></div>`:''}</div>`;}).join('');
+  const milePcts=(goal.milestones||[]).map(m=>`<div class="mp-label" style="left:${snapPct(m.pct)}%">${snapPct(m.pct)}%</div>`).join('');
+  const isExp=expandedGoals.has(goalId);
+  const mPanel=isExp?`<div class="milestones-panel">${(goal.milestones||[]).length===0?'<div style="font-size:13px;color:var(--muted)">Nenhum milestone.</div>':(goal.milestones||[]).map(m=>`<div class="ms-row"><div class="ms-check ${m.hit?'hit':'miss'}">${m.hit?'✓':''}</div><span class="ms-label${m.hit?' done':''}">${m.label}</span><span class="ms-pct">${snapPct(m.pct)}%</span></div>`).join('')}</div>`:'';
+  return`<div class="goal-row"><div class="goal-header"><span class="goal-name">${goal.name}</span><span class="goal-count">${goal.completedSessions}/${goal.totalSessions} sessões</span></div><div class="hp-bar" onclick="toggleGoal('${goalId}')">${blocks}</div><div class="milestone-pcts">${milePcts}</div>${mPanel}</div>`;
+}
+
+function render(){
+  applyConfig();
+  const athletes=state.athletes||[];
+  const goalsData=state.athleteGoalsData||{};
+  const gymName=cfg.gymName||state.settings?.gymName||'Cone';
+  const logoFile=cfg.logo||'icon-192.png';
+  const results=state.results||[];
+  const sessions=state.sessions||{};
+  const topbar=`<div class="topbar"><div style="display:flex;align-items:center;gap:10px"><img src="${logoFile}" style="width:34px;height:34px;object-fit:contain;border-radius:4px" onerror="this.style.display='none'" alt=""/><span class="topbar-gym">${gymName}</span></div>${selAthlete?`<button class="back-btn" onclick="goBack()"><i class="ti ti-arrow-left"></i> Todos</button>`:''}</div>`;
+  if(!selAthlete){
+    const cards=athletes.map(a=>{
+      const goals=(goalsData.athleteGoals||{})[a.id]||[];
+      const pct=goals.length>0?Math.round(goals.reduce((s,g)=>s+(g.totalSessions>0?g.completedSessions/g.totalSessions:0),0)/goals.length*100):null;
+      const color=a.color||'#555';
+      const hp=pct!==null?`<div class="hp-mini">${Array.from({length:10},(_,bi)=>{const fill=pct>=(bi+1)*10?1:pct>bi*10?(pct-bi*10)/10:0;return`<div class="hp-block"><div class="hp-fill" style="width:${fill*100}%;background:${fill===1?color:color+'99'}"></div></div>`;}).join('')}</div>`:`<div class="no-goals">${goals.length===0?'Nenhum objetivo':goals.length+' objetivo'+(goals.length>1?'s':'')}</div>`;
+      return`<div class="ath-card" style="border-left:3px solid ${color}" onclick="selectAthlete('${a.id}')"><div class="ath-card-top"><div class="ath-dot" style="background:${color}"></div><span class="ath-name">${a.name}</span>${pct!==null?`<span class="ath-pct">${pct}%</span>`:''}</div>${hp}</div>`;
+    }).join('');
+    document.getElementById('app').innerHTML=`${topbar}<div class="page"><div class="section-label">Todos os Atletas</div><div class="athlete-grid">${cards||'<div style="color:var(--muted)">Nenhum atleta registrado.</div>'}</div></div>`;
+    return;
+  }
+  const ath=athletes.find(a=>a.id===selAthlete);
+  if(!ath){selAthlete=null;render();return;}
+  const color=ath.color||'#4ac8c0';
+  const athGoals=(goalsData.athleteGoals||{})[ath.id]||[];
+  const goals=athGoals.length===0?'<div style="font-size:13px;color:var(--muted);font-style:italic">Nenhum objetivo definido.</div>':athGoals.map(g=>hpBarHTML(g,color,g.id)).join('');
+  const stats=calcStats(ath.id,goalsData,results);
+  document.getElementById('app').innerHTML=`${topbar}<div class="detail-page">
+    <div class="ath-header">
+      <div style="width:14px;height:14px;border-radius:50%;background:${color};flex-shrink:0"></div>
+      <span class="ath-title">${ath.name}</span>
+      ${ath.level?`<span class="ath-level">${ath.level}</span>`:''}
+    </div>
+    <div class="section"><div class="section-title">Desenvolvimento</div>${stats.map(s=>statRowHTML(s)).join('')}</div>
+    <div class="section"><div class="section-title">Sessões</div>${sessionsSummaryHTML(ath.name,results,sessions)}</div>
+    <div class="section"><div class="section-title">PRs</div>${prSectionHTML(ath.id,goalsData,color)}</div>
+    <div class="section"><div class="section-title">Objetivos</div>${goals}</div>
+  </div>`;
+}
+
+function selectAthlete(id){selAthlete=id;expandedGoals.clear();expandedSessions.clear();render();}
+function goBack(){selAthlete=null;expandedGoals.clear();expandedSessions.clear();render();}
+function toggleGoal(id){if(expandedGoals.has(id))expandedGoals.delete(id);else expandedGoals.add(id);render();}
+function toggleSession(date,sessId){const key=date+'|'+sessId;if(expandedSessions.has(key))expandedSessions.delete(key);else expandedSessions.add(key);render();}
+
+// ── Supabase ──────────────────────────────────────────────────────────────────
+const _sb=supabase.createClient('https://crsalcpvsedmiabkeibp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw');
+async function fetchState(){
+  const tbls=['sessions','athletes','results','events','locations','coach_profile','settings','goals_data','lb_colors'];
+  const rows=await Promise.all(tbls.map(t=>_sb.from(t).select('value').eq('id',1).maybeSingle()));
+  const[s,a,r,ev,loc,cp,st,gd,lb]=rows.map(x=>x.data?.value??null);
+  return{sessions:s??{},athletes:a??[],results:r??[],events:ev??{},locations:loc??[],coachProfile:cp??{},settings:st??{},athleteGoalsData:gd??{athleteGoals:{},prs:{}},lbColors:lb??{}};
+}
+
+function loadData(){
+  return Promise.all([
+    fetch('./config.json?v='+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({})),
+    fetchState()
+  ]).then(([c,s])=>{
+    cfg=c;if(cfg.colors&&typeof cfg.colors==='object')cfg={...cfg,...cfg.colors};
+    state=s;
+    const p=new URLSearchParams(window.location.search);
+    if(p.get('athlete'))selAthlete=p.get('athlete');
+    render();
+  }).catch(err=>{
+    document.getElementById('app').innerHTML=`<div class="error"><i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>Não foi possível carregar os dados.<br><small>${err.message}</small><br><button class="retry-btn" onclick="loadData()"><i class="ti ti-refresh"></i> Tentar novamente</button></div>`;
+  });
+}
+loadData();
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg=>{
+        // Check for updates every time the app loads
+        reg.addEventListener('updatefound',()=>{
+          const newSW=reg.installing;
+          newSW.addEventListener('statechange',()=>{
+            if(newSW.state==='installed'&&navigator.serviceWorker.controller){
+              // New version available — could show a "reload to update" banner here
+              console.log('[Cone] Nova versão disponível. Recarregue para atualizar.');
+            }
+          });
+        });
+      })
+      .catch(err=>console.warn('[Cone] Service worker não registrado:',err));
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="description" content="Grade de treinos semanal — Cone"/>
+<link rel="manifest" href="manifest.json"/>
+<title>Cone — Treinos</title><!-- set from config.scheduleTitle at runtime -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link id="gfonts-sc" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Raleway:wght@400;600;700;900&display=swap"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#e87820;--accent-text:#000;--bg:#0a0a0a;--bg2:#111;
+  --border:#1e1e1e;--text:#e0e0e0;--sub:#666;--cyan:#00b8d4;
+  --sc-font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif
+}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;-webkit-text-size-adjust:100%}
+
+/* ── Topbar ── */
+.topbar{background:#000;border-bottom:2px solid var(--accent);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-logo{width:36px;height:36px;object-fit:contain;border-radius:4px}
+.topbar-gym{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.08em;font-family:var(--sc-font)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.athlete-sel{font-family:inherit;font-size:12px;background:#111;border:1px solid #2e2e2e;color:var(--text);border-radius:5px;padding:6px 10px;outline:none;cursor:pointer}
+
+/* ── Week nav ── */
+.week-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#000;border-bottom:1px solid var(--border);position:sticky;top:66px;z-index:99}
+.week-label{font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
+.nav-btn{background:transparent;border:1px solid #2e2e2e;color:var(--sub);font-size:16px;width:32px;height:32px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── Grid ── */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:12px 12px 20px}
+@media(max-width:700px){.week-grid{grid-template-columns:1fr;gap:8px;padding:10px}}
+
+/* ── Day card ── */
+.day-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .12s}
+.day-card.past{opacity:.55}
+.day-card.today{border-color:var(--accent)}
+.day-card.has-session{cursor:pointer}
+.day-card.has-session:hover{border-color:#444}
+.day-hdr{padding:8px 10px 6px;display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--border)}
+.day-dow{font-size:11px;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-family:var(--sc-font)}
+.day-num{font-size:13px;font-weight:700;color:var(--sub)}
+.day-today-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-left:4px}
+.day-body{padding:8px 10px}
+.rest-label{font-size:11px;color:#333;text-transform:uppercase;letter-spacing:.07em;padding:4px 0}
+.concluido-badge{font-size:9px;font-weight:700;color:#444;background:#1a1a1a;border:1px solid #252525;border-radius:3px;padding:1px 5px;text-transform:uppercase;letter-spacing:.05em}
+
+/* ── Session summary ── */
+.sess-summary{margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #1a1a1a}
+.sess-summary:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.sess-alvo{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.block-badges{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px}
+.block-badge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em}
+.ex-preview{font-size:10px;color:#444;line-height:1.4}
+.progress-bar-wrap{margin-top:5px}
+.progress-bar-track{height:3px;background:#1a1a1a;border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .2s}
+.progress-label{font-size:9px;color:#444;margin-top:2px;text-align:right}
+
+/* ── Expanded detail ── */
+.day-detail{background:#0d0d0d;border-top:1px solid var(--border);padding:12px 10px}
+.detail-sess{margin-bottom:14px}
+.detail-sess:last-child{margin-bottom:0}
+.detail-sess-title{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.detail-block{margin-bottom:10px;padding:8px 10px;background:#111;border-radius:6px;border-left:2px solid var(--accent)}
+.detail-block-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.detail-block-title{font-size:12px;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;font-family:var(--sc-font)}
+.detail-block-meta{font-size:10px;color:#000;background:var(--accent);padding:1px 6px;border-radius:2px;font-weight:700}
+.detail-block-done{font-size:11px;color:#3a7a3a;font-weight:700}
+.detail-ex{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid #1a1a1a}
+.detail-ex:last-of-type{border-bottom:none}
+.detail-ex-check{width:18px;height:18px;border-radius:4px;border:1px solid #2e2e2e;background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s;margin-top:1px}
+.detail-ex-check.done{background:#1a3a1a;border-color:#3a7a3a}
+.detail-ex-check.done::after{content:'✓';font-size:11px;color:#4caf50;font-weight:900}
+.detail-ex-body{flex:1;min-width:0}
+.detail-ex-name{font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em;line-height:1.3;font-family:var(--sc-font)}
+.detail-ex-name.done{color:#444;text-decoration:line-through}
+.detail-ex-vol{display:inline-block;font-size:10px;font-weight:700;color:#ffd700;background:rgba(0,0,0,.4);border:1px solid rgba(255,215,0,.2);border-radius:3px;padding:1px 6px;margin-top:2px}
+.detail-ex-note{font-size:10px;color:#4a9aaa;font-style:italic;margin-top:1px}
+.detail-block-notes{font-size:10px;color:#555;font-style:italic;margin-top:6px;padding-top:6px;border-top:1px solid #1a1a1a}
+.lb-link{display:flex;align-items:center;gap:6px;margin-top:8px;padding:7px 10px;background:#050e14;border:1px solid var(--cyan);border-radius:5px;color:var(--cyan);font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:.06em;transition:background .12s}
+.lb-link:hover{background:#0a1e28}
+
+/* ── Loading / Error ── */
+.loading{text-align:center;padding:60px 20px;color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.1em}
+.error{text-align:center;padding:40px 20px;color:#e05050;font-size:13px;line-height:1.8}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading"><i class="ti ti-loader"></i> Carregando...</div></div>
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+let cfg={}, state={}, selectedAthlete='', weekOffset=0;
+let expandedDays=new Set(); // "dateKey|sessIdx"
+let checkedExercises=new Set(); // "blockId|exId"
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const DAY_PT=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
+const MONTH_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function toISO(d){
+  const pad=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function getWeek(offset){
+  const now=new Date();
+  const day=now.getDay(); // 0=Sun
+  const sun=new Date(now);
+  sun.setDate(now.getDate()-day+(offset*7)); // rewind to Sunday
+  return Array.from({length:7},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return d;});
+}
+
+function blockColor(){return cfg.wkBlockType||'#68d8a0';}
+
+function getTargets(s){if(!s?.mainTraining)return[];return Array.isArray(s.mainTraining)?s.mainTraining:[s.mainTraining];}
+function sessionsForDay(dateKey){
+  const all=(state.sessions||{})[dateKey]||[];
+  if(!selectedAthlete) return all.filter(s=>s.blocks&&s.blocks.length);
+  return all.filter(s=>{const t=getTargets(s);return t.length===0||t.includes(selectedAthlete);}).filter(s=>s.blocks&&s.blocks.length);
+}
+
+function fmtIntensity(ins){
+  if(!ins?.mode) return null;
+  if(ins.mode==='progression'){
+    const steps=ins.steps||[];
+    const loads=steps.map(s=>s.load).filter(Boolean);
+    const unit=(steps[0]?.unit||'% RM').replace('% do RM','% RM');
+    return loads.length?loads.join('/')+' '+unit:null;
+  }
+  if(ins.mode==='pct') return ins.pct?ins.pct+'% RM':null;
+  if(ins.mode==='gender'){
+    const p=[];
+    ['Masculino','Feminino'].forEach(g=>{
+      const unit=ins[`${g}_unit`]||'kg';
+      const vals=['RX','Inter','SC'].map(k=>ins[`${g}_${k}`]).filter(Boolean);
+      if(vals.length) p.push(`${g==='Masculino'?'M':'F'}: ${vals.join('/')} ${unit}`);
+    });
+    return p.join(' | ')||null;
+  }
+  if(ins.mode==='cardio') return ins.cardioVal?(ins.cardioVal+(ins.cardioUnit||'m')):null;
+  return null;
+}
+
+function exVolStr(ex){
+  const isCardio=ex.intensity?.mode==='cardio';
+  const cardioPrefix=isCardio&&ex.intensity?.cardioVal?`${ex.intensity.cardioVal}${ex.intensity.cardioUnit||'m'}`:'';
+  const repsDisplay=ex.reps?(ex.reps.includes(',')?ex.reps.split(',').map(r=>r.trim()).join('-'):ex.reps):'';
+  const volPrefix=ex.sets&&repsDisplay?`${ex.sets}×${repsDisplay}`:repsDisplay;
+  return cardioPrefix||volPrefix;
+}
+
+// ── Progress tracking ─────────────────────────────────────────────────────────
+function blockProgress(bl){
+  const exs=(bl.exercises||[]).filter(e=>e.name);
+  if(!exs.length) return {done:0,total:0};
+  const done=exs.filter(ex=>checkedExercises.has(`${bl.id}|${ex.id}`)).length;
+  return {done,total:exs.length};
+}
+
+function sessionProgress(sess){
+  const blocks=(sess.blocks||[]);
+  const done=blocks.filter(bl=>{const p=blockProgress(bl);return p.total>0&&p.done===p.total;}).length;
+  return {done,total:blocks.filter(bl=>(bl.exercises||[]).some(e=>e.name)).length};
+}
+
+// ── Toggle helpers ────────────────────────────────────────────────────────────
+function toggleExpand(dateKey,sessIdx){
+  const key=`${dateKey}|${sessIdx}`;
+  if(expandedDays.has(key)) expandedDays.delete(key);
+  else expandedDays.add(key);
+  render();
+}
+
+function toggleCheck(blockId,exId){
+  const key=`${blockId}|${exId}`;
+  if(checkedExercises.has(key)) checkedExercises.delete(key);
+  else checkedExercises.add(key);
+  render();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function applyCfgVars(){
+  const r=document.documentElement.style;
+  if(cfg.themeAccent)     r.setProperty('--accent',cfg.themeAccent);
+  if(cfg.themeAccentText) r.setProperty('--accent-text',cfg.themeAccentText);
+  if(cfg.wkBg){r.setProperty('--bg',cfg.wkBg);r.setProperty('--bg2',cfg.wkBg);}
+  if(cfg.wkDivider)       r.setProperty('--border',cfg.wkDivider);
+  if(cfg.wkHeader)        r.setProperty('--accent',cfg.wkHeader);
+  if(cfg.wkDateNum)       r.setProperty('--sub',cfg.wkDateNum);
+  if(cfg.wkExName)        r.setProperty('--text',cfg.wkExName);
+  if(cfg.fontFamily){
+    r.setProperty('--sc-font',cfg.fontFamily);
+    if(cfg.googleFontsUrl){const gf=document.getElementById('gfonts-sc');if(gf)gf.href=cfg.googleFontsUrl;}
+  }
+}
+
+function render(){
+  const week=getWeek(weekOffset);
+  const today=toISO(new Date());
+  const athletes=(state.athletes||[]);
+  const restLabel=cfg.restDayLabel||'Descanso';
+  const gymName=cfg.gymName||state.settings?.gymName||'Cone';
+  const logoFile=cfg.logo||'icon-192.png';
+
+  // Apply CSS vars on every render so they're never lost
+  applyCfgVars();
+
+  // Week label
+  const mon=week[0],sun=week[6];
+  const weekLabel=`${mon.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${sun.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} · ${MONTH_PT[mon.getMonth()]} ${mon.getFullYear()}`;
+
+  document.getElementById('app').innerHTML=`
+    <div class="topbar">
+      <div class="topbar-left">
+        <img class="topbar-logo" src="${logoFile}" onerror="this.style.display='none'" alt="Logo"/>
+        <span class="topbar-gym">${gymName}</span>
+      </div>
+      <div class="topbar-right">
+        <select class="athlete-sel" id="athlete-sel" onchange="setAthlete(this.value)">
+          <option value="">— Todos —</option>
+          ${athletes.map(a=>`<option value="${a.name}"${selectedAthlete===a.name?' selected':''}>${a.name}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="week-nav">
+      <button class="nav-btn" onclick="changeWeek(-1)"><i class="ti ti-chevron-left"></i></button>
+      <span class="week-label">${weekLabel}</span>
+      <button class="nav-btn" onclick="changeWeek(1)"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <div class="week-grid">
+      ${week.map(date=>{
+        const dateKey=toISO(date);
+        const isPast=dateKey<today;
+        const isToday=dateKey===today;
+        const daySessions=sessionsForDay(dateKey);
+        const hasSess=daySessions.length>0;
+
+        const dayHtml=`
+          <div class="day-card${isPast?' past':''}${isToday?' today':''}${hasSess?' has-session':''}">
+            <div class="day-hdr">
+              <span class="day-dow">${DAY_PT[date.getDay()]}</span>
+              <div style="display:flex;align-items:center;gap:4px">
+                ${isPast&&hasSess?`<span class="concluido-badge">Concluído</span>`:''}
+                <span class="day-num">${date.getDate()}</span>
+                ${isToday?`<div class="day-today-dot"></div>`:''}
+              </div>
+            </div>
+            <div class="day-body">
+              ${hasSess?daySessions.map((sess,si)=>{
+                const prog=sessionProgress(sess);
+                const isExpanded=expandedDays.has(`${dateKey}|${si}`);
+                const blocks=(sess.blocks||[]);
+                const exNames=[...new Set(blocks.flatMap(bl=>(bl.exercises||[]).filter(e=>e.name).map(e=>e.name.toUpperCase())))].slice(0,3);
+
+                return `
+                  <div class="sess-summary" onclick="toggleExpand('${dateKey}',${si})">
+                    ${sess.mainTraining?`<div class="sess-alvo">${sess.mainTraining}</div>`:''}
+                    <div class="block-badges">
+                      ${blocks.map(bl=>{
+                        const _l=bl.label&&bl.label!=='-'?bl.label:null;const _t=bl.type&&bl.type!=='-'?bl.type:null;const label=_l&&_t&&_l!==_t?`${_l} · ${_t}`:_l||_t||'';
+                        const col=blockColor();
+                        const p=blockProgress(bl);
+                        const blDone=p.total>0&&p.done===p.total;
+                        return `<span class="block-badge" style="background:${col}20;color:${col};border:1px solid ${col}40">${blDone?'✓ ':''}${label}</span>`;
+                      }).join('')}
+                    </div>
+                    ${exNames.length?`<div class="ex-preview">${exNames.join(' · ')}${blocks.flatMap(b=>(b.exercises||[])).filter(e=>e.name).length>3?'…':''}</div>`:''}
+                    ${prog.total>0?`
+                      <div class="progress-bar-wrap">
+                        <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${prog.total?Math.round(prog.done/prog.total*100):0}%"></div></div>
+                        <div class="progress-label">${prog.done}/${prog.total} blocos</div>
+                      </div>`:''}
+                    <div style="font-size:10px;color:#444;margin-top:4px;text-align:right">${isExpanded?'▲ fechar':'▼ detalhes'}</div>
+                  </div>
+                  ${isExpanded?renderDetail(sess,dateKey):''}
+                `;
+              }).join(''):`<div class="rest-label"><i class="ti ti-moon"></i> ${restLabel}</div>`}
+            </div>
+          </div>
+        `;
+        return dayHtml;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderDetail(sess,dateKey){
+  const WOD_TYPES=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
+  return `<div class="day-detail">
+    ${sess.mainTraining?`<div class="detail-sess-title">${sess.mainTraining}</div>`:''}
+    ${(sess.blocks||[]).map(bl=>{
+      const _l=bl.label&&bl.label!=='-'?bl.label:null;const _t=bl.type&&bl.type!=='-'?bl.type:null;const label=_l&&_t&&_l!==_t?`${_l} · ${_t}`:_l||_t||'';
+      const col=blockColor();
+      const meta=[bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
+      const isWod=WOD_TYPES.includes(bl.label)||WOD_TYPES.includes(bl.type);
+      const prog=blockProgress(bl);
+      const blDone=prog.total>0&&prog.done===prog.total;
+      const exs=(bl.exercises||[]).filter(e=>e.name);
+
+      // Build progression lines for display
+      const exRows=exs.map(ex=>{
+        const isProg=ex.intensity?.mode==='progression';
+        const vol=exVolStr(ex);
+        const ins=fmtIntensity(ex.intensity);
+        const key=`${bl.id}|${ex.id}`;
+        const done=checkedExercises.has(key);
+
+        if(isProg){
+          const steps=ex.intensity?.steps||[];
+          const unit=(steps[0]?.unit||'% RM').replace('% do RM','% RM');
+          const SCALE_RANK={RX:4,Inter:3,SC:2,Adaptado:1};
+          const SCALE_NAMES={4:'RX',3:'Inter',2:'SC',1:'Adaptado'};
+          // group steps by reps
+          const groups=[];
+          steps.forEach(s=>{
+            const reps=s.reps||ex.reps||'';
+            const existing=groups.find(g=>g.reps===reps);
+            if(existing){if(s.load)existing.loads.push(s.load);}
+            else groups.push({reps,loads:s.load?[s.load]:[]});
+          });
+          return groups.map((g,gi)=>{
+            const repsPrefix=ex.sets&&g.reps?`${g.sets||ex.sets}×${g.reps}`:g.reps;
+            const loadStr=g.loads.length?g.loads.join('/')+' '+unit:'';
+            const lineKey=`${bl.id}|${ex.id}-${gi}`;
+            const lineDone=checkedExercises.has(lineKey);
+            return `<div class="detail-ex">
+              <div class="detail-ex-check${lineDone?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}-${gi}')"></div>
+              <div class="detail-ex-body">
+                <div class="detail-ex-name${lineDone?' done':''}">${[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
+                ${loadStr?`<div class="detail-ex-vol">${loadStr}</div>`:''}
+              </div>
+            </div>`;
+          }).join('');
+        }
+
+        return `<div class="detail-ex">
+          <div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>
+          <div class="detail-ex-body">
+            <div class="detail-ex-name${done?' done':''}">${[vol,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
+            ${ins?`<div class="detail-ex-vol">${ins}</div>`:''}
+            ${ex.note?`<div class="detail-ex-note">${ex.note}</div>`:''}
+          </div>
+        </div>`;
+      }).join('');
+
+      return `<div class="detail-block" style="border-left-color:${col}">
+        <div class="detail-block-hdr">
+          <span class="detail-block-title" style="color:${col}">${label}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            ${meta?`<span class="detail-block-meta" style="background:${col};color:#000">${meta}</span>`:''}
+            ${blDone?`<span class="detail-block-done">✓ Completo</span>`:''}
+          </div>
+        </div>
+        ${exRows}
+        ${bl.notes?`<div class="detail-block-notes">${bl.notes}</div>`:''}
+        ${isWod?`<a class="lb-link" href="leaderboard.html?wod=${bl.id}&session=${sess.id}&date=${dateKey}" target="_blank">
+          <i class="ti ti-trophy"></i> Ver Leaderboard
+        </a>`:''}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+function changeWeek(dir){weekOffset+=dir;expandedDays.clear();checkedExercises.clear();render();}
+function setAthlete(val){selectedAthlete=val;expandedDays.clear();render();}
+
+// ── Supabase ──────────────────────────────────────────────────────────────────
+const _sb=supabase.createClient('https://crsalcpvsedmiabkeibp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw');
+async function fetchState(){
+  const tbls=['sessions','athletes','results','events','locations','coach_profile','settings','goals_data','lb_colors'];
+  const rows=await Promise.all(tbls.map(t=>_sb.from(t).select('value').eq('id',1).maybeSingle()));
+  const[s,a,r,ev,loc,cp,st,gd,lb]=rows.map(x=>x.data?.value??null);
+  return{sessions:s??{},athletes:a??[],results:r??[],events:ev??{},locations:loc??[],coachProfile:cp??{},settings:st??{},athleteGoalsData:gd??{athleteGoals:{},prs:{}},lbColors:lb??{}};
+}
+
+// ── Load data ─────────────────────────────────────────────────────────────────
+async function init(){
+  try{
+    const [cfgRes,stateData]=await Promise.all([
+      fetch('./config.json?v='+Date.now()).catch(()=>null),
+      fetchState()
+    ]);
+    if(cfgRes?.ok){
+      cfg=await cfgRes.json();
+      // flatten nested colors if present (backwards compat)
+      if(cfg.colors&&typeof cfg.colors==='object') cfg={...cfg,...cfg.colors};
+      if(cfg.scheduleTitle||cfg.appTitle) document.title=cfg.scheduleTitle||cfg.appTitle;
+    }
+    state=stateData;
+    render();
+  }catch(e){
+    document.getElementById('app').innerHTML=`
+      <div class="error">
+        <i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>
+        Não foi possível carregar os treinos.<br>
+        <small>${e.message}</small><br>
+        <button onclick="init()" style="margin-top:12px;background:transparent;border:1px solid #2e2e2e;color:#666;font-size:13px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit"><i class="ti ti-refresh"></i> Tentar novamente</button>
+      </div>`;
+  }
+}
+
+init();
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg=>{
+        // Check for updates every time the app loads
+        reg.addEventListener('updatefound',()=>{
+          const newSW=reg.installing;
+          newSW.addEventListener('statechange',()=>{
+            if(newSW.state==='installed'&&navigator.serviceWorker.controller){
+              // New version available — could show a "reload to update" banner here
+              console.log('[Cone] Nova versão disponível. Recarregue para atualizar.');
+            }
+          });
+        });
+      })
+      .catch(err=>console.warn('[Cone] Service worker não registrado:',err));
+  });
+}
+</script>
+</body>
+</html>
