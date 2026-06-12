@@ -4,7 +4,7 @@ import { supabase } from '../utils/supabase';
 export default function LoginScreen() {
   const [email, setEmail]     = useState('');
   const [sent, setSent]       = useState(false);
-  const [code, setCode]       = useState(['', '', '', '', '', '']);
+  const [code, setCode]       = useState(['', '', '', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [error, setError]     = useState('');
@@ -28,9 +28,9 @@ export default function LoginScreen() {
     const next = [...code];
     next[i] = v;
     setCode(next);
-    if (v && i < 5) inputs.current[i + 1]?.focus();
-    // Auto-submit when all 6 digits filled
-    if (v && i === 5 && next.every(d => d !== '')) {
+    if (v && i < 7) inputs.current[i + 1]?.focus();
+    // Auto-submit when all 8 digits filled
+    if (v && i === 7 && next.every(d => d !== '')) {
       verifyCode(next.join(''));
     }
   };
@@ -42,11 +42,11 @@ export default function LoginScreen() {
   };
 
   const handleCodePaste = e => {
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    if (pasted.length === 6) {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 8);
+    if (pasted.length === 8) {
       const next = pasted.split('');
       setCode(next);
-      inputs.current[5]?.focus();
+      inputs.current[7]?.focus();
       verifyCode(pasted);
     }
     e.preventDefault();
@@ -72,7 +72,7 @@ export default function LoginScreen() {
   const handleVerifySubmit = async e => {
     e.preventDefault();
     const token = code.join('');
-    if (token.length < 6) return;
+    if (token.length < 8) return;
     verifyCode(token);
   };
 
@@ -110,7 +110,7 @@ export default function LoginScreen() {
                 : <><i className="ti ti-send" aria-hidden="true" /> Enviar código</>}
             </button>
             <p className="login-hint">
-              Sem senha — você receberá um código de 6 dígitos por e-mail.
+              Sem senha — você receberá um código de 8 dígitos por e-mail.
             </p>
           </form>
         ) : (
@@ -120,7 +120,7 @@ export default function LoginScreen() {
               <span>Código enviado para <strong>{email}</strong></span>
             </div>
             <label className="login-label" style={{ textAlign: 'center', marginBottom: '10px' }}>
-              Digite o código de 6 dígitos
+              Digite o código de 8 dígitos
             </label>
             <div className="login-otp-row" onPaste={handleCodePaste}>
               {code.map((digit, i) => (

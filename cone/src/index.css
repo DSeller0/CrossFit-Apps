@@ -444,7 +444,7 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .login-sent-mini{display:flex;align-items:center;gap:8px;font-size:13px;color:#888;margin-bottom:14px;padding:10px;background:#1a1a1a;border-radius:6px;border:1px solid #2a2a2a}
 .login-sent-mini strong{color:#e0e0e0}
 .login-otp-row{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
-.login-otp-input{width:44px;height:54px;text-align:center;font-family:inherit;font-size:22px;font-weight:700;color:#f0e8d0;background:#1a1a1a;border:2px solid #2e2e2e;border-radius:8px;outline:none;caret-color:transparent;-webkit-appearance:none;appearance:none}
+.login-otp-input{width:36px;height:48px;text-align:center;font-family:inherit;font-size:20px;font-weight:700;color:#f0e8d0;background:#1a1a1a;border:2px solid #2e2e2e;border-radius:8px;outline:none;caret-color:transparent;-webkit-appearance:none;appearance:none}
 .login-otp-input:focus{border-color:var(--accent)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{display:inline-block;animation:spin .8s linear infinite}
