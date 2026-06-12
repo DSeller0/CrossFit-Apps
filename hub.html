@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="description" content="Cone — Treinos do dia"/>
+<title>Cone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;900&display=swap"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0b09;
+  --card:#161210;
+  --card2:#1e1a16;
+  --accent:#4ac8c0;
+  --cream:#f0e8d0;
+  --sub:#c8b090;
+  --muted:#a89880;
+  --divider:#2a231c;
+  --font:'Raleway',sans-serif;
+}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh;padding-bottom:80px}
+
+.topbar{
+  padding:16px 20px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--divider);
+  background:var(--bg);
+  position:sticky;top:0;z-index:10;
+}
+.brand{font-size:24px;font-weight:900;color:var(--cream);letter-spacing:-.02em;line-height:1}
+.brand em{color:var(--accent);font-style:normal}
+.gym-name{font-size:11px;color:var(--sub);margin-top:2px;letter-spacing:.08em;text-transform:uppercase}
+.coach-link{
+  font-size:11px;color:var(--muted);text-decoration:none;
+  padding:6px 12px;border:1px solid var(--divider);border-radius:6px;
+  letter-spacing:.04em;transition:color .15s,border-color .15s;
+}
+.coach-link:hover{color:var(--cream);border-color:#444}
+
+.date-section{padding:22px 20px 10px}
+.date-label{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
+.date-full{font-size:20px;font-weight:900;color:var(--cream);text-transform:capitalize}
+
+.sessions{padding:0 16px 8px}
+
+.sess-card{
+  background:var(--card);
+  border:1px solid var(--divider);
+  border-radius:14px;
+  padding:18px;
+  margin-bottom:12px;
+  transition:border-color .15s;
+}
+.sess-card.featured{border-color:var(--accent);border-width:2px}
+
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.sess-badge{
+  font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);background:rgba(74,200,192,.13);
+  padding:3px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0;
+}
+.sess-time{font-size:12px;color:var(--sub);font-weight:700;letter-spacing:.06em;white-space:nowrap;flex-shrink:0}
+.sess-name{font-size:17px;font-weight:900;color:var(--cream);margin-bottom:10px;line-height:1.2}
+
+.blocks{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.block-pill{
+  display:flex;align-items:center;gap:7px;
+  background:var(--card2);border:1px solid var(--divider);
+  padding:6px 11px;border-radius:7px;
+  font-size:12px;color:var(--sub);
+}
+.block-pill .btype{font-weight:900;color:var(--accent);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.block-pill .bdot{color:var(--divider);font-size:14px}
+.block-pill .blabel{color:var(--sub)}
+
+.card-footer{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.result-count{font-size:11px;color:var(--muted);line-height:1.3}
+
+.btn-log{
+  background:var(--accent);color:#000;
+  font-family:var(--font);font-size:13px;font-weight:900;
+  padding:10px 20px;border-radius:9px;border:none;cursor:pointer;
+  text-decoration:none;letter-spacing:.04em;white-space:nowrap;
+  display:inline-block;transition:opacity .15s;
+}
+.btn-log:hover{opacity:.85}
+
+.empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;line-height:1.7}
+.empty-icon{font-size:40px;margin-bottom:14px;opacity:.35;display:block}
+
+.loading{text-align:center;padding:64px 20px;color:var(--accent);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#0a0807;border-top:1px solid var(--divider);
+  display:flex;z-index:20;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:11px 8px;gap:4px;
+  font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.05em;
+  color:var(--muted);text-decoration:none;
+  border:none;background:none;cursor:pointer;
+  transition:color .15s;
+}
+.nav-btn:hover{color:var(--cream)}
+.nav-icon{font-size:19px;line-height:1}
+.nav-sep{width:1px;background:var(--divider);margin:10px 0}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div>
+    <div class="brand">C<em>o</em>ne</div>
+    <div class="gym-name" id="gymName">&nbsp;</div>
+  </div>
+  <a class="coach-link" href="cone/">Coach →</a>
+</header>
+
+<div class="date-section">
+  <div class="date-label">Hoje</div>
+  <div class="date-full" id="dateDisplay">—</div>
+</div>
+
+<div class="sessions" id="sessions">
+  <div class="loading">carregando treinos...</div>
+</div>
+
+<nav class="bottom-nav">
+  <a class="nav-btn" href="leaderboard.html">
+    <span class="nav-icon">🏆</span>
+    <span>Leaderboard</span>
+  </a>
+  <div class="nav-sep"></div>
+  <a class="nav-btn" href="schedule.html">
+    <span class="nav-icon">📅</span>
+    <span>Agenda</span>
+  </a>
+</nav>
+
+<script>
+const _sb = supabase.createClient(
+  'https://crsalcpvsedmiabkeibp.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw'
+);
+
+const WOD_TYPES = new Set(['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']);
+
+function todayKey() {
+  const d = new Date();
+  return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function main() {
+  const dateKey = todayKey();
+
+  document.getElementById('dateDisplay').textContent =
+    new Date().toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
+
+  const [sessRes, resRes, settRes] = await Promise.all([
+    _sb.from('sessions').select('value').eq('id',1).single(),
+    _sb.from('results').select('value').eq('id',1).single(),
+    _sb.from('settings').select('value').eq('id',1).maybeSingle(),
+  ]);
+
+  const gymName = settRes?.data?.value?.gymName;
+  document.getElementById('gymName').textContent = gymName || '';
+
+  const allSessions = sessRes.data?.value || {};
+  const todaySessions = allSessions[dateKey] || [];
+  const allResults    = resRes.data?.value || [];
+
+  const countBySess = {};
+  allResults.forEach(r => {
+    if (r.sessionId) countBySess[r.sessionId] = (countBySess[r.sessionId] || 0) + 1;
+  });
+
+  const container = document.getElementById('sessions');
+
+  if (!todaySessions.length) {
+    container.innerHTML = `
+      <div class="empty">
+        <span class="empty-icon">🏋</span>
+        Nenhum treino programado hoje.<br>
+        <span style="font-size:12px">Confira a agenda para os próximos dias.</span>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = todaySessions.map((sess, idx) => {
+    const featured = idx === 0;
+    const logUrl   = `log.html?date=${dateKey}&session=${encodeURIComponent(sess.id)}`;
+    const count    = countBySess[sess.id] || 0;
+
+    const countLabel = count === 0 ? 'Seja o primeiro a registrar'
+                     : count === 1 ? '1 resultado registrado'
+                     : `${count} resultados registrados`;
+
+    const wodBlocks = (sess.blocks || []).filter(b => WOD_TYPES.has(b.type));
+
+    const blocksHtml = wodBlocks.length ? `
+      <div class="blocks">
+        ${wodBlocks.map(b => {
+          const hasLabel = b.label && b.label !== b.type;
+          return `<div class="block-pill">
+            <span class="btype">${esc(b.type)}</span>
+            ${hasLabel ? `<span class="bdot">·</span><span class="blabel">${esc(b.label)}</span>` : ''}
+          </div>`;
+        }).join('')}
+      </div>` : '';
+
+    const headRight = featured
+      ? `<span class="sess-badge">Sessão do dia</span>`
+      : (sess.time ? `<span class="sess-time">${esc(sess.time)}</span>` : '');
+
+    return `
+<div class="sess-card${featured ? ' featured' : ''}">
+  <div class="card-head">
+    <span class="sess-name">${esc(sess.name || 'Treino')}</span>
+    ${headRight}
+  </div>
+  ${featured && sess.time ? `<div style="font-size:12px;color:var(--sub);font-weight:700;margin-bottom:10px;letter-spacing:.06em">${esc(sess.time)}</div>` : ''}
+  ${blocksHtml}
+  <div class="card-footer">
+    <span class="result-count">${countLabel}</span>
+    <a class="btn-log" href="${logUrl}">Registrar</a>
+  </div>
+</div>`;
+  }).join('');
+}
+
+main().catch(err => {
+  document.getElementById('sessions').innerHTML = `
+    <div class="empty">
+      <span class="empty-icon">⚠️</span>
+      Erro ao carregar treinos.<br>
+      <span style="font-size:12px">${esc(err.message)}</span>
+    </div>`;
+});
+</script>
+</body>
+</html>
