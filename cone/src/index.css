@@ -448,3 +448,97 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .login-otp-input:focus{border-color:var(--accent)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{display:inline-block;animation:spin .8s linear infinite}
+
+/* ── Quick Log tab ── */
+.ql-wrap{max-width:640px;margin:0 auto;padding:0 0 80px}
+.ql-sess-bar{
+  background:#161616;border-bottom:1px solid #252525;
+  padding:12px 14px;display:flex;align-items:center;
+  justify-content:space-between;gap:10px;
+  position:sticky;top:88px;z-index:50;
+}
+.ql-sess-left{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ql-sess-name{font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ql-logged-count{font-size:11px;color:#555}
+.ql-sess-controls{display:flex;gap:6px;flex-shrink:0}
+.ql-sel{
+  font-family:inherit;font-size:12px;padding:6px 24px 6px 9px;
+  border-radius:5px;border:1px solid #2e2e2e;background:#111;color:#ccc;
+  outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 7px center;max-width:140px;
+}
+.ql-flash{
+  margin:10px 14px 0;padding:10px 14px;
+  background:#0e2010;border:1px solid #2a6030;border-radius:7px;
+  font-size:13px;color:#60c850;display:flex;align-items:center;gap:7px;
+}
+.ql-section-label{
+  font-size:10px;font-weight:700;color:#555;text-transform:uppercase;
+  letter-spacing:.08em;padding:14px 14px 6px;
+}
+.ql-athlete-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;padding:0 14px;
+}
+.ql-ath-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 12px;border-radius:8px;
+  border:1px solid #2e2e2e;background:#1c1c1c;
+  font-family:inherit;font-size:13px;font-weight:600;color:#ccc;
+  cursor:pointer;text-align:left;min-height:48px;
+  transition:all .12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.ql-ath-btn:hover{border-color:#444;color:#fff}
+.ql-ath-btn.sel{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:700}
+.ql-ath-btn.logged:not(.sel){color:#444;border-color:#1e1e1e}
+.ql-ath-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ql-ath-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ql-ath-check{margin-left:auto;font-size:12px;color:#60a840;flex-shrink:0}
+.ql-perf{padding:14px}
+.ql-block-card{
+  background:#1c1c1c;border:1px solid #272727;border-radius:10px;
+  padding:14px;margin-bottom:10px;
+}
+.ql-block-label{font-size:12px;font-weight:900;color:var(--theme-accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.ql-scale-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.ql-scale-btn{
+  flex:1;min-width:0;padding:9px 4px;border-radius:6px;
+  border:1px solid #2e2e2e;background:#111;
+  font-family:inherit;font-size:12px;font-weight:700;color:#888;
+  cursor:pointer;transition:all .12s;text-align:center;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.ql-scale-btn:hover{border-color:#444;color:#fff}
+.ql-scale-btn.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
+.ql-perf-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ql-perf-lbl{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.05em;font-weight:600;flex-shrink:0}
+.ql-perf-input{
+  font-family:inherit;font-size:18px;font-weight:700;
+  padding:8px 10px;border-radius:6px;
+  border:1px solid #2e2e2e;background:#111;color:#e0e0e0;
+  outline:none;width:100%;text-align:center;
+  -webkit-appearance:none;appearance:none;
+}
+.ql-perf-input:focus{border-color:#444}
+.ql-perf-input.sm{width:72px;flex-shrink:0}
+.ql-rpe-row{display:flex;align-items:center;gap:8px}
+.ql-rpe-lbl{font-size:12px;font-weight:700;color:#e87820;min-width:44px;flex-shrink:0}
+.ql-rpe-bar{display:flex;gap:3px;flex:1;height:20px}
+.ql-rpe-seg{flex:1;border-radius:3px;background:#1a1a1a;border:1px solid #222;cursor:pointer;transition:background .1s;-webkit-tap-highlight-color:transparent}
+.ql-rpe-seg.on{border-color:transparent}
+.ql-submit{
+  width:100%;padding:14px;margin-top:4px;border-radius:9px;border:none;
+  background:var(--theme-accent);color:var(--theme-accent-text);
+  font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  letter-spacing:.04em;transition:opacity .15s;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.ql-submit:hover{opacity:.88}
+.ql-no-wod{font-size:13px;color:#555;text-align:center;padding:16px 0 12px}
+.ql-empty{text-align:center;padding:40px 20px;color:#555;font-size:13px}
+@media(max-width:400px){
+  .ql-athlete-grid{grid-template-columns:1fr}
+  .ql-scale-btn{font-size:11px}
+}
