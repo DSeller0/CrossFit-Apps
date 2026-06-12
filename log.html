@@ -105,7 +105,7 @@ async function load() {
   state.session  = session;
   state.athletes = assignedAth;
   state.blocks   = (session.blocks || []).filter(b => WOD_TYPES.includes(b.type)).map(b => ({
-    blockId: b.id, blockType: b.type, blockLabel: b.label || b.type,
+    blockId: b.id, blockType: b.type, blockLabel: b.label && b.type && b.label !== b.type ? `${b.label} · ${b.type}` : b.label || b.type,
     rpe: 7, scale: 'RX', perfTime: '', perfRounds: '', perfReps: '',
   }));
 
