@@ -419,3 +419,27 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 ::-webkit-scrollbar-thumb:hover{background:#4ac8c0;border-color:#68d8a0}
 ::-webkit-scrollbar-corner{background:#1a1410}
 *{scrollbar-width:thin;scrollbar-color:#3a3028 #1a1410}
+
+/* ── Login screen ── */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0a0a;padding:20px}
+.login-box{background:#161616;border:1px solid #2a2a2a;border-radius:12px;padding:40px 36px;width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.login-logo{width:64px;height:64px;background:#111;border:1px solid #2a2a2a;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.login-title{font-size:26px;font-weight:900;color:#fff;letter-spacing:.04em}
+.login-sub{font-size:13px;color:#666;margin-bottom:8px}
+.login-form{width:100%;display:flex;flex-direction:column;gap:10px}
+.login-label{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.07em}
+.login-input{width:100%;font-family:inherit;font-size:14px;padding:10px 12px;border-radius:6px;border:1px solid #2e2e2e;background:#111;color:#e0e0e0;outline:none;transition:border-color .15s}
+.login-input:focus{border-color:var(--theme-accent,#00b8d4)}
+.login-error{font-size:12px;color:#e05050;display:flex;align-items:center;gap:5px}
+.login-btn{width:100%;font-family:inherit;font-size:14px;font-weight:700;padding:11px;border-radius:6px;border:none;background:var(--theme-accent,#00b8d4);color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .15s;margin-top:4px}
+.login-btn:hover{opacity:.88}
+.login-btn:disabled{opacity:.5;cursor:not-allowed}
+.login-hint{font-size:11px;color:#555;text-align:center;line-height:1.5}
+.login-sent{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:10px 0}
+.login-sent p{font-size:13px;color:#888}
+.login-sent strong{font-size:15px;color:#e0e0e0}
+.login-sent-hint{font-size:12px;color:#555;line-height:1.5;margin-top:4px}
+.login-resend{font-family:inherit;font-size:12px;color:#666;background:transparent;border:none;cursor:pointer;text-decoration:underline;margin-top:8px}
+.login-resend:hover{color:#aaa}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;animation:spin .8s linear infinite}

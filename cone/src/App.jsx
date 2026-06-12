@@ -13,6 +13,7 @@ import {
   syncFromSupabase,
   toISO,
 } from './utils/storage';
+import { supabase } from './utils/supabase';
 import { APP_CONFIG, normaliseType, normaliseZone, GF } from './utils/config';
 import ServicosTab from './components/tabs/Servicos';
 import ExerciciosTab from './components/tabs/Exercicios';
@@ -20,6 +21,7 @@ import AtletasTab from './components/tabs/Atletas';
 import ResultadosTab from './components/tabs/Resultados';
 import PublicadorTab from './components/tabs/Publicador';
 import CriadorTab from './components/tabs/Criador';
+import LoginScreen from './components/LoginScreen';
 
 
 const TABS = [
@@ -32,6 +34,8 @@ const TABS = [
 ];
 
 export default function App() {
+  const [session, setSession]               = useState(null);
+  const [authLoading, setAuthLoading]       = useState(true);
   const [tab, setTab]                       = useState('creator');
   const [sessions, setSessions]             = useState(loadLS);
   const [events, setEvents]                 = useState(loadEvents);
@@ -44,6 +48,19 @@ export default function App() {
   const [showSaveName, setShowSaveName]     = useState(false);
   const [configLoaded, setConfigLoaded]     = useState(false);
   const fileInputRef = useRef();
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   // ── Apply CSS variables from APP_CONFIG on mount ──────────────────────────
   useEffect(() => {
@@ -234,6 +251,14 @@ export default function App() {
     reader.readAsText(file);
   };
 
+  if (authLoading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--accent)', fontSize: 14, letterSpacing: '.1em' }}>
+      <i className="ti ti-loader-2 spin" aria-hidden="true" style={{ marginRight: 8 }} /> Carregando...
+    </div>
+  );
+
+  if (!session) return <LoginScreen />;
+
   return (
     <div>
       <input
@@ -263,6 +288,18 @@ export default function App() {
       <div className="topbar">
         <span className="topbar-title">Criador de Treinos</span>
         <div className="topbar-right">
+          <span className="saved-badge" style={{ color: 'var(--muted, #888)' }}>
+            <i className="ti ti-user" aria-hidden="true" style={{ fontSize: 12 }} />
+            {' '}{session.user.email}
+          </span>
+          <button
+            type="button"
+            className="tb-btn"
+            onClick={() => supabase.auth.signOut()}
+            title="Sair da conta"
+          >
+            <i className="ti ti-logout" aria-hidden="true" /> Sair
+          </button>
           {saved && (
             <span className="saved-badge">
               <i className="ti ti-device-floppy" aria-hidden="true" style={{ fontSize: 12 }} />
