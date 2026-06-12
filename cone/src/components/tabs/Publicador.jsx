@@ -1567,20 +1567,20 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
   const currentWeekDates = selectedWeek || defaultWeek;
 
   const dvColorsObj = { bg: dvBg, gymName: dvGymName, date: dvDate, mainTraining: dvMainTraining, zoneType: dvZoneType, blockLabel: dvBlockLabel, cap: dvCap, rounds: dvRounds, exName: dvExName, intensity: dvIntensity, note: dvNote, blockNotes: dvBlockNotes, divider: dvDivider };
+  const _presenterDateKey = selectedDate || toISO(currentWeekDates[1]);
+  const _presenterSess = (filteredSessions[_presenterDateKey] || [])[0];
+  const _presenterLogUrl = _presenterSess ? `https://dseller0.github.io/CrossFit-Apps/log.html?date=${_presenterDateKey}&session=${_presenterSess.id}` : '';
   return React.createElement(React.Fragment, null,
     presenterOpen && React.createElement(PresenterView, {
-      sessions: filteredSessions,
-      selectedDate: selectedDate || toISO(currentWeekDates[1]),
-      weekDates: currentWeekDates,
-      gymName,
-      dvColors: dvColorsObj,
-      fontScale,
-      zoneScales,
-      blockTitleScales,
-      logoDataUrl,
-      logoScale,
+      logUrl: _presenterLogUrl,
       onClose: () => setPresenterOpen(false),
-    }),
+    },
+      React.createElement(DailyExportView, {
+        sessions: filteredSessions, label, gymName, fontScale, zoneScales, blockTitleScales,
+        selectedDate: _presenterDateKey, logoDataUrl, logoScale,
+        weekDates: currentWeekDates, dvColors: dvColorsObj,
+      })
+    ),
     React.createElement('div', null,
     React.createElement('div', { className: 'agenda-wrap', style: { display: 'flex', flexDirection: 'column', marginBottom: '12px', border: '1px solid #1e1e1e', borderRadius: '8px', overflow: 'hidden' } },
       React.createElement(AgendaView, {
