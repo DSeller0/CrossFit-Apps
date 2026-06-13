@@ -32,7 +32,7 @@ jobs:
         run: |
           mkdir -p deploy/cone
           # Public pages and assets at root
-          cp athletes.html leaderboard.html schedule.html log.html recover.html index.html deploy/
+          cp athletes.html leaderboard.html schedule.html log.html recover.html index.html me.html deploy/
           cp config.json manifest.json sw.js deploy/
           cp icon-192.png icon-512.png deploy/
           cp -f icon-192.jpeg icon-512.jpeg deploy/ 2>/dev/null || true

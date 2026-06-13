@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="description" content="Cone — Meu Perfil"/>
+<title>Meu Perfil · Cone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;900&display=swap"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0b09;
+  --card:#161210;
+  --card2:#1e1a16;
+  --accent:#4ac8c0;
+  --cream:#f0e8d0;
+  --sub:#c8b090;
+  --muted:#a89880;
+  --divider:#2a231c;
+  --font:'Raleway',sans-serif;
+}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh;padding-bottom:32px}
+
+/* ── Topbar ── */
+.topbar{padding:14px 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--divider);background:var(--bg);position:sticky;top:0;z-index:10}
+.back-btn{font-size:22px;color:var(--muted);text-decoration:none;line-height:1;transition:color .15s;padding:2px 4px}
+.back-btn:hover{color:var(--cream)}
+.brand{font-size:20px;font-weight:900;color:var(--cream);letter-spacing:-.02em}
+.brand em{color:var(--accent);font-style:normal}
+
+/* ── Generic states ── */
+.center-msg{text-align:center;padding:64px 20px;color:var(--muted);font-size:13px;line-height:1.8}
+.center-msg .icon{font-size:36px;display:block;margin-bottom:14px;opacity:.4}
+
+/* ── Name picker ── */
+.picker-wrap{max-width:420px;margin:36px auto;padding:0 20px}
+.picker-title{font-size:22px;font-weight:900;color:var(--cream);margin-bottom:4px}
+.picker-sub{font-size:13px;color:var(--sub);margin-bottom:20px}
+.picker-input{
+  width:100%;background:var(--card);border:1px solid var(--divider);border-radius:10px;
+  color:var(--cream);font-family:var(--font);font-size:15px;padding:12px 16px;
+  outline:none;transition:border-color .15s
+}
+.picker-input:focus{border-color:var(--accent)}
+.picker-input::placeholder{color:var(--muted)}
+.picker-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.picker-item{
+  background:var(--card);border:1px solid var(--divider);border-radius:10px;
+  padding:13px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;
+  transition:border-color .15s;text-decoration:none
+}
+.picker-item:hover{border-color:var(--accent)}
+.ath-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.picker-name{font-size:15px;font-weight:700;color:var(--cream)}
+.picker-empty{text-align:center;padding:24px 0;font-size:13px;color:var(--muted)}
+
+/* ── Hero ── */
+.hero{padding:24px 20px;border-bottom:1px solid var(--divider);display:flex;align-items:center;gap:16px}
+.ath-avatar{
+  width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;color:#000;flex-shrink:0
+}
+.hero-name{font-size:26px;font-weight:900;color:var(--cream);line-height:1.1}
+.hero-sub{font-size:12px;color:var(--sub);margin-top:5px}
+.hero-since{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── Stats row ── */
+.stats-row{display:flex;border-bottom:1px solid var(--divider)}
+.stat-cell{flex:1;padding:16px 12px;text-align:center;border-right:1px solid var(--divider)}
+.stat-cell:last-child{border-right:none}
+.stat-num{font-size:28px;font-weight:900;color:var(--accent);line-height:1}
+.stat-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+
+/* ── Section wrapper ── */
+.section{padding:18px 20px;border-bottom:1px solid var(--divider)}
+.section-title{font-size:10px;font-weight:900;color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px}
+
+/* ── Week strip ── */
+.week-strip{display:flex;gap:4px}
+.week-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.week-dot{
+  width:34px;height:34px;border-radius:50%;border:2px solid var(--divider);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);
+  transition:all .15s
+}
+.week-dot.done{background:var(--accent);border-color:var(--accent);color:#000}
+.week-dot.today-empty{border-color:var(--accent);color:var(--accent)}
+.week-dot.future{opacity:.25}
+.week-lbl{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+
+/* ── Scale bar ── */
+.scale-bar-wrap{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px}
+.scale-seg{height:100%;border-radius:3px;min-width:4px}
+.seg-rx{background:#4ac8c0}
+.seg-inter{background:#4a90d8}
+.seg-sc{background:#d8904a}
+.seg-adaptado{background:#9070d8}
+.scale-legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px}
+.scale-lbl{font-size:11px;color:var(--sub);display:flex;align-items:center;gap:6px}
+.sl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── Result cards ── */
+.result-card{background:var(--card);border:1px solid var(--divider);border-radius:12px;padding:14px;margin-bottom:10px}
+.rc-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.rc-date{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.06em;white-space:nowrap}
+.rc-sess{font-size:14px;font-weight:900;color:var(--cream);line-height:1.2}
+.rc-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.energy-badge{font-size:9px;font-weight:700;color:var(--muted);background:var(--card2);border:1px solid var(--divider);border-radius:4px;padding:2px 6px;letter-spacing:.04em}
+.absent-badge{font-size:9px;font-weight:700;color:#c0704a;background:rgba(192,112,74,.1);border:1px solid rgba(192,112,74,.2);border-radius:4px;padding:2px 6px}
+.rc-blocks{display:flex;flex-direction:column;gap:5px;margin-bottom:6px}
+.rc-block{
+  background:var(--card2);border:1px solid var(--divider);border-radius:7px;
+  padding:7px 11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap
+}
+.rc-btype{font-size:10px;font-weight:900;color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+.rc-bdot{color:var(--divider);font-size:12px}
+.rc-blabel{font-size:11px;color:var(--sub)}
+.scale-chip{font-size:9px;font-weight:900;padding:2px 7px;border-radius:4px;letter-spacing:.06em;white-space:nowrap}
+.chip-rx{background:rgba(74,200,192,.15);color:#4ac8c0;border:1px solid rgba(74,200,192,.25)}
+.chip-inter{background:rgba(74,144,216,.15);color:#4a90d8;border:1px solid rgba(74,144,216,.25)}
+.chip-sc{background:rgba(216,144,74,.15);color:#d8904a;border:1px solid rgba(216,144,74,.25)}
+.chip-adaptado{background:rgba(144,112,216,.15);color:#9070d8;border:1px solid rgba(144,112,216,.25)}
+.rc-perf{font-size:12px;font-weight:700;color:var(--cream)}
+.rc-rpe{font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.rc-note{font-size:11px;color:var(--muted);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--divider)}
+.no-blocks{font-size:12px;color:var(--muted);font-style:italic}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="back-btn" href="index.html" title="Voltar">&#8592;</a>
+  <div class="brand">C<em>o</em>ne</div>
+</header>
+
+<div id="root"><div class="center-msg"><span class="icon">⏳</span>carregando...</div></div>
+
+<script>
+const _sb = supabase.createClient(
+  'https://crsalcpvsedmiabkeibp.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw'
+);
+
+const WOD_TYPES = new Set(['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']);
+const SCALE_ORDER = ['RX','Inter','SC','Adaptado'];
+const SCALE_CLASS = { RX:'chip-rx', Inter:'chip-inter', SC:'chip-sc', Adaptado:'chip-adaptado' };
+const SCALE_COLOR = { RX:'seg-rx', Inter:'seg-inter', SC:'seg-sc', Adaptado:'seg-adaptado' };
+const WEEK_LABELS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const ENERGY_LABEL = ['','😴','😕','😐','💪','🔥'];
+
+function toISO(d) {
+  return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
+}
+function todayISO() { return toISO(new Date()); }
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDateShort(iso) {
+  return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { day:'numeric', month:'short' });
+}
+
+function fmtDateLong(iso) {
+  return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { month:'long', year:'numeric' });
+}
+
+function isoWeekDates() {
+  const today = new Date();
+  const dow = today.getDay();
+  const daysFromMon = dow === 0 ? 6 : dow - 1;
+  const mon = new Date(today);
+  mon.setDate(today.getDate() - daysFromMon);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + i);
+    return toISO(d);
+  });
+}
+
+function fmtPerf(block) {
+  if (block.blockType === 'For Time' && block.perfTime) return block.perfTime;
+  const parts = [];
+  if (block.perfRounds != null && block.perfRounds !== '') parts.push(`${block.perfRounds} rounds`);
+  if (block.perfReps != null && block.perfReps !== '') parts.push(`+${block.perfReps} reps`);
+  return parts.join(' ') || null;
+}
+
+function initials(name) {
+  return name.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+}
+
+// ── Name picker ──────────────────────────────────────────────────────────────
+function renderPicker(athletes) {
+  const root = document.getElementById('root');
+  root.innerHTML = `
+    <div class="picker-wrap">
+      <div class="picker-title">Quem é você?</div>
+      <div class="picker-sub">Selecione seu nome para ver seu perfil.</div>
+      <input class="picker-input" id="pickerQ" type="search" placeholder="Buscar seu nome..." autocomplete="off" autocorrect="off"/>
+      <div class="picker-list" id="pickerList"></div>
+    </div>`;
+
+  const sorted = [...athletes].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+  function renderList(q) {
+    const q2 = q.trim().toLowerCase();
+    const matches = q2 ? sorted.filter(a => a.name.toLowerCase().includes(q2)) : sorted;
+    const list = document.getElementById('pickerList');
+    if (!list) return;
+    if (!matches.length) {
+      list.innerHTML = '<div class="picker-empty">Nenhum atleta encontrado.</div>';
+      return;
+    }
+    list.innerHTML = matches.map(a => `
+      <a class="picker-item" href="me.html?id=${esc(a.id)}">
+        <span class="ath-dot" style="background:${esc(a.color||'#4ac8c0')}"></span>
+        <span class="picker-name">${esc(a.name)}</span>
+      </a>`).join('');
+  }
+
+  renderList('');
+  document.getElementById('pickerQ').addEventListener('input', e => renderList(e.target.value));
+}
+
+// ── Profile ──────────────────────────────────────────────────────────────────
+function renderProfile(athlete, myResults, allSessions) {
+  const root = document.getElementById('root');
+  const today = todayISO();
+  const color = athlete.color || '#4ac8c0';
+
+  // Sort newest first
+  const sorted = [...myResults].sort((a, b) => b.date.localeCompare(a.date));
+
+  // Stats
+  const total = sorted.length;
+  const nowY = new Date().getFullYear();
+  const nowM = new Date().getMonth() + 1;
+  const thisMonth = sorted.filter(r => {
+    const [y, m] = r.date.split('-').map(Number);
+    return y === nowY && m === nowM;
+  }).length;
+  const weekDates = new Set(isoWeekDates());
+  const thisWeek = sorted.filter(r => weekDates.has(r.date)).length;
+  const earliest = sorted.length ? sorted[sorted.length - 1].date : null;
+
+  // Scale totals across all blocks
+  const scaleCounts = { RX: 0, Inter: 0, SC: 0, Adaptado: 0 };
+  sorted.forEach(r => {
+    (r.blocks || []).forEach(b => {
+      if (b.scale && scaleCounts[b.scale] !== undefined) scaleCounts[b.scale]++;
+    });
+  });
+  const scaleTotal = Object.values(scaleCounts).reduce((a, b) => a + b, 0);
+
+  // Week strip
+  const weekISOs = isoWeekDates();
+  const datesWithResult = new Set(sorted.map(r => r.date));
+
+  // Session name lookup
+  function sessName(r) {
+    const daySessions = allSessions[r.date] || [];
+    const s = daySessions.find(s => s.id === r.sessionId);
+    return s?.sessionName || s?.name || 'Treino';
+  }
+
+  // Recent results (last 15)
+  const recent = sorted.slice(0, 15);
+
+  root.innerHTML = `
+    <!-- Hero -->
+    <div class="hero">
+      <div class="ath-avatar" style="background:${esc(color)}">${esc(initials(athlete.name))}</div>
+      <div>
+        <div class="hero-name">${esc(athlete.name)}</div>
+        <div class="hero-sub">${total} sessão${total !== 1 ? 'ões' : ''} registrada${total !== 1 ? 's' : ''}</div>
+        ${earliest ? `<div class="hero-since">desde ${fmtDateLong(earliest)}</div>` : ''}
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-cell">
+        <div class="stat-num">${total}</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">${thisMonth}</div>
+        <div class="stat-label">Este mês</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">${thisWeek}</div>
+        <div class="stat-label">Esta semana</div>
+      </div>
+    </div>
+
+    <!-- Week strip -->
+    <div class="section">
+      <div class="section-title">Esta semana</div>
+      <div class="week-strip">
+        ${weekISOs.map((iso, i) => {
+          const done = datesWithResult.has(iso);
+          const isToday = iso === today;
+          const isFuture = iso > today;
+          let cls = 'week-dot';
+          if (done) cls += ' done';
+          else if (isToday) cls += ' today-empty';
+          else if (isFuture) cls += ' future';
+          const check = done ? '✓' : (isToday ? '·' : '');
+          return `
+            <div class="week-col">
+              <div class="${cls}">${check}</div>
+              <div class="week-lbl">${WEEK_LABELS[i]}</div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- Scale bar -->
+    ${scaleTotal > 0 ? `
+    <div class="section">
+      <div class="section-title">Escalas usadas</div>
+      <div class="scale-bar-wrap">
+        ${SCALE_ORDER.filter(s => scaleCounts[s] > 0).map(s => {
+          const pct = ((scaleCounts[s] / scaleTotal) * 100).toFixed(1);
+          return `<div class="scale-seg ${SCALE_COLOR[s]}" style="flex:${scaleCounts[s]}"></div>`;
+        }).join('')}
+      </div>
+      <div class="scale-legend">
+        ${SCALE_ORDER.filter(s => scaleCounts[s] > 0).map(s => {
+          const pct = Math.round((scaleCounts[s] / scaleTotal) * 100);
+          const colorMap = { RX:'#4ac8c0', Inter:'#4a90d8', SC:'#d8904a', Adaptado:'#9070d8' };
+          return `<span class="scale-lbl"><span class="sl-dot" style="background:${colorMap[s]}"></span>${s} ${pct}%</span>`;
+        }).join('')}
+      </div>
+    </div>` : ''}
+
+    <!-- Recent results -->
+    <div class="section" style="border-bottom:none">
+      <div class="section-title">Histórico recente</div>
+      ${recent.length === 0
+        ? `<div class="center-msg" style="padding:30px 0"><span class="icon">📋</span>Nenhum resultado registrado ainda.</div>`
+        : recent.map(r => {
+            const wodBlocks = (r.blocks || []).filter(b => WOD_TYPES.has(b.blockType));
+            const absent = r.presence && r.presence !== 'Presente';
+            const energy = r.energyLevel;
+            const perf = wodBlocks.map(b => {
+              const p = fmtPerf(b);
+              const scCls = SCALE_CLASS[b.scale] || '';
+              const hasLabel = b.blockLabel && b.blockLabel !== b.blockType;
+              return `
+                <div class="rc-block">
+                  <span class="rc-btype">${esc(b.blockType||'')}</span>
+                  ${hasLabel ? `<span class="rc-bdot">·</span><span class="rc-blabel">${esc(b.blockLabel)}</span>` : ''}
+                  ${b.scale ? `<span class="scale-chip ${scCls}">${esc(b.scale)}</span>` : ''}
+                  ${p ? `<span class="rc-perf">${esc(p)}</span>` : ''}
+                  ${b.rpe ? `<span class="rc-rpe">RPE ${b.rpe}</span>` : ''}
+                </div>`;
+            }).join('');
+            return `
+              <div class="result-card">
+                <div class="rc-head">
+                  <div class="rc-date">${fmtDateShort(r.date)}</div>
+                  <div class="rc-sess">${esc(sessName(r))}</div>
+                </div>
+                ${(absent || energy) ? `
+                  <div class="rc-meta">
+                    ${absent ? `<span class="absent-badge">${esc(r.presence)}</span>` : ''}
+                    ${energy ? `<span class="energy-badge">${ENERGY_LABEL[energy] || ''} Energia ${energy}/5</span>` : ''}
+                  </div>` : ''}
+                ${perf ? `<div class="rc-blocks">${perf}</div>` : (!absent ? `<div class="no-blocks">Sem blocos WOD registrados</div>` : '')}
+                ${r.coachNote ? `<div class="rc-note">${esc(r.coachNote)}</div>` : ''}
+              </div>`;
+          }).join('')
+      }
+    </div>
+  `;
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
+async function main() {
+  const params = new URLSearchParams(location.search);
+  const athleteId = params.get('id');
+
+  const [athRes, resRes, sessRes] = await Promise.all([
+    _sb.from('athletes').select('value').eq('id',1).single(),
+    _sb.from('results').select('value').eq('id',1).single(),
+    athleteId ? _sb.from('sessions').select('value').eq('id',1).single() : Promise.resolve({ data: null }),
+  ]);
+
+  const athletes = athRes.data?.value || [];
+  const allResults = resRes.data?.value || [];
+  const allSessions = sessRes.data?.value || {};
+
+  if (!athleteId) {
+    renderPicker(athletes);
+    return;
+  }
+
+  const athlete = athletes.find(a => a.id === athleteId);
+  if (!athlete) {
+    document.getElementById('root').innerHTML = `
+      <div class="center-msg">
+        <span class="icon">🔍</span>
+        Atleta não encontrado.<br>
+        <a href="me.html" style="color:var(--accent);font-size:13px">Buscar pelo nome</a>
+      </div>`;
+    return;
+  }
+
+  document.title = `${athlete.name} · Cone`;
+
+  const myResults = allResults.filter(r => r.athleteId === athleteId);
+  renderProfile(athlete, myResults, allSessions);
+}
+
+main().catch(err => {
+  document.getElementById('root').innerHTML = `
+    <div class="center-msg">
+      <span class="icon">⚠️</span>
+      Erro ao carregar.<br>
+      <span style="font-size:12px;color:var(--muted)">${esc(err.message)}</span>
+    </div>`;
+});
+</script>
+</body>
+</html>
