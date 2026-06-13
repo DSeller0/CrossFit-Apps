@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   uid, toISO, todayISO,
   loadAthletes, loadRegistry,
@@ -432,6 +432,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const [templates, setTemplates] = useState(loadTemplates);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templateFlash, setTemplateFlash] = useState(null);
+  const [recurringTpl, setRecurringTpl] = useState(null);
+  const [recurDays, setRecurDays] = useState(new Set([1, 3, 5]));
+  const [recurStart, setRecurStart] = useState(todayISO);
+  const [recurEnd, setRecurEnd] = useState(() => { const d = new Date(); d.setDate(d.getDate() + 28); return toISO(d); });
+  const [recurDone, setRecurDone] = useState(null);
   const formRef = useRef();
 
   useEffect(() => {
@@ -481,6 +486,38 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     const updated = templates.filter(t => t.id !== id);
     setTemplates(updated);
     saveTemplates(updated);
+  };
+
+  const recurPreviewDates = useMemo(() => {
+    if (!recurStart || !recurEnd) return [];
+    const out = [];
+    const cur = new Date(recurStart + 'T12:00:00');
+    const end = new Date(recurEnd + 'T12:00:00');
+    while (cur <= end) {
+      if (recurDays.has(cur.getDay())) out.push(toISO(cur));
+      cur.setDate(cur.getDate() + 1);
+    }
+    return out;
+  }, [recurStart, recurEnd, recurDays]);
+
+  const applyRecurring = () => {
+    if (!recurringTpl || recurPreviewDates.length === 0) return;
+    setSessions(prev => {
+      const next = { ...prev };
+      recurPreviewDates.forEach(dateKey => {
+        const session = {
+          id: uid(),
+          date: dateKey,
+          sessionName: recurringTpl.name,
+          mainTraining: [],
+          blocks: cloneBlocks(recurringTpl.blocks),
+        };
+        next[dateKey] = [...(next[dateKey] || []), session];
+      });
+      return next;
+    });
+    setRecurDone(recurPreviewDates.length);
+    setTimeout(() => { setRecurDone(null); setRecurringTpl(null); }, 2500);
   };
 
   const saveS = () => {
@@ -556,7 +593,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
         )
       )
     ),
-    showTemplateModal && React.createElement('div', {
+    showTemplateModal && !recurringTpl && React.createElement('div', {
       style: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,.8)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' },
       onClick: () => setShowTemplateModal(false)
     },
@@ -593,6 +630,14 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                     )
                   ),
                   React.createElement('button', {
+                    type: 'button', className: 'b bsm',
+                    style: { flexShrink: 0, borderColor: '#1a4a3a', color: '#4ac8a0' },
+                    onClick: e => { e.stopPropagation(); setShowTemplateModal(false); setRecurringTpl(tpl); },
+                    title: 'Sessões recorrentes'
+                  },
+                    React.createElement('i', { className: 'ti ti-repeat' })
+                  ),
+                  React.createElement('button', {
                     type: 'button', className: 'b bd bsm',
                     style: { flexShrink: 0 },
                     onClick: e => { e.stopPropagation(); deleteTemplate(tpl.id); },
@@ -602,6 +647,93 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                   )
                 )
               )
+            )
+      )
+    ),
+    recurringTpl && React.createElement('div', {
+      style: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', zIndex: 2100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' },
+      onClick: () => setRecurringTpl(null)
+    },
+      React.createElement('div', {
+        style: { background: '#0d0d0d', border: '1px solid #1a4a3a', borderRadius: '12px', padding: '20px', width: '360px', maxWidth: '100%', maxHeight: '85vh', display: 'flex', flexDirection: 'column', gap: '14px' },
+        onClick: e => e.stopPropagation()
+      },
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+          React.createElement('div', null,
+            React.createElement('div', { style: { fontSize: '14px', fontWeight: 700, color: '#4ac8a0' } },
+              React.createElement('i', { className: 'ti ti-repeat', style: { marginRight: '6px' } }), 'Sessões Recorrentes'
+            ),
+            React.createElement('div', { style: { fontSize: '11px', color: '#555', marginTop: '2px' } }, recurringTpl.name)
+          ),
+          React.createElement('button', { type: 'button', className: 'b bsm', onClick: () => setRecurringTpl(null) },
+            React.createElement('i', { className: 'ti ti-x' })
+          )
+        ),
+        React.createElement('div', null,
+          React.createElement('div', { style: { fontSize: '11px', color: '#666', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '.05em' } }, 'Dias da semana'),
+          React.createElement('div', { style: { display: 'flex', gap: '6px' } },
+            [['Dom',0],['Seg',1],['Ter',2],['Qua',3],['Qui',4],['Sex',5],['Sáb',6]].map(([label, day]) =>
+              React.createElement('button', {
+                key: day, type: 'button',
+                style: {
+                  flex: 1, padding: '6px 0', fontSize: '11px', fontWeight: 700, borderRadius: '6px', border: '1px solid',
+                  borderColor: recurDays.has(day) ? '#4ac8a0' : '#2a2a2a',
+                  background: recurDays.has(day) ? 'rgba(74,200,160,.15)' : 'transparent',
+                  color: recurDays.has(day) ? '#4ac8a0' : '#555', cursor: 'pointer', transition: 'all .12s'
+                },
+                onClick: () => setRecurDays(prev => { const s = new Set(prev); s.has(day) ? s.delete(day) : s.add(day); return s; })
+              }, label)
+            )
+          )
+        ),
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' } },
+          React.createElement('label', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
+            React.createElement('span', { style: { fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '.05em' } }, 'Início'),
+            React.createElement('input', {
+              type: 'date', value: recurStart,
+              onChange: e => setRecurStart(e.target.value),
+              style: { background: '#111', border: '1px solid #2a2a2a', borderRadius: '6px', color: '#ddd', padding: '6px 8px', fontSize: '13px' }
+            })
+          ),
+          React.createElement('label', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
+            React.createElement('span', { style: { fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '.05em' } }, 'Fim'),
+            React.createElement('input', {
+              type: 'date', value: recurEnd,
+              onChange: e => setRecurEnd(e.target.value),
+              style: { background: '#111', border: '1px solid #2a2a2a', borderRadius: '6px', color: '#ddd', padding: '6px 8px', fontSize: '13px' }
+            })
+          )
+        ),
+        recurPreviewDates.length > 0 && React.createElement('div', {
+          style: { background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px', padding: '10px', maxHeight: '140px', overflowY: 'auto' }
+        },
+          React.createElement('div', { style: { fontSize: '11px', color: '#666', marginBottom: '6px' } },
+            `${recurPreviewDates.length} sessão${recurPreviewDates.length !== 1 ? 'ões' : ''} a criar:`
+          ),
+          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px' } },
+            recurPreviewDates.map(d =>
+              React.createElement('span', {
+                key: d,
+                style: { fontSize: '11px', background: 'rgba(74,200,160,.1)', border: '1px solid rgba(74,200,160,.2)', borderRadius: '4px', padding: '2px 6px', color: '#4ac8a0' }
+              }, d)
+            )
+          )
+        ),
+        recurDays.size === 0 && React.createElement('div', { style: { fontSize: '12px', color: '#664', textAlign: 'center' } }, 'Selecione ao menos um dia.'),
+        recurPreviewDates.length === 0 && recurDays.size > 0 && React.createElement('div', { style: { fontSize: '12px', color: '#664', textAlign: 'center' } }, 'Nenhuma data no período selecionado.'),
+        recurDone != null
+          ? React.createElement('div', { style: { textAlign: 'center', fontSize: '14px', color: '#4ac8a0', fontWeight: 700 } },
+              React.createElement('i', { className: 'ti ti-check', style: { marginRight: '6px' } }),
+              `${recurDone} sessão${recurDone !== 1 ? 'ões' : ''} criada${recurDone !== 1 ? 's' : ''}!`
+            )
+          : React.createElement('button', {
+              type: 'button', className: 'b bp',
+              disabled: recurPreviewDates.length === 0,
+              style: { width: '100%', opacity: recurPreviewDates.length === 0 ? 0.4 : 1 },
+              onClick: applyRecurring
+            },
+              React.createElement('i', { className: 'ti ti-calendar-plus', style: { marginRight: '6px' } }),
+              `Criar ${recurPreviewDates.length} sessão${recurPreviewDates.length !== 1 ? 'ões' : ''}`
             )
       )
     ),
