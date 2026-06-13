@@ -258,6 +258,7 @@ function render(){
           <option value="">— Todos —</option>
           ${athletes.map(a=>`<option value="${a.name}"${selectedAthlete===a.name?' selected':''}>${a.name}</option>`).join('')}
         </select>
+        <a href="index.html" style="color:#4ac8c0;font-size:22px;text-decoration:none;line-height:1;padding:4px;opacity:.7;transition:opacity .15s" title="Início" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7"><i class="ti ti-home"></i></a>
       </div>
     </div>
     <div class="week-nav">
