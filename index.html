@@ -41,6 +41,18 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 }
 .coach-link:hover{color:var(--cream);border-color:#444}
 
+.live-dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--accent);margin-left:8px;vertical-align:middle;
+  opacity:.7;
+  animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:.7;transform:scale(1)}
+  50%{opacity:.3;transform:scale(.75)}
+}
+.live-dot.flash{animation:none;opacity:1;background:#fff}
+
 .date-section{padding:22px 20px 10px}
 .date-label{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
 .date-full{font-size:20px;font-weight:900;color:var(--cream);text-transform:capitalize}
@@ -117,7 +129,7 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 
 <header class="topbar">
   <div>
-    <div class="brand">C<em>o</em>ne</div>
+    <div class="brand">C<em>o</em>ne<span class="live-dot" id="liveDot" title="Atualizando ao vivo"></span></div>
     <div class="gym-name" id="gymName">&nbsp;</div>
   </div>
   <a class="coach-link" href="cone/">Coach →</a>
@@ -232,21 +244,41 @@ async function main() {
   ${featured && sess.time ? `<div style="font-size:12px;color:var(--sub);font-weight:700;margin-bottom:10px;letter-spacing:.06em">${esc(sess.time)}</div>` : ''}
   ${blocksHtml}
   <div class="card-footer">
-    <span class="result-count">${countLabel}</span>
+    <span class="result-count" id="rc-${sess.id}">${countLabel}</span>
     <a class="btn-log" href="${logUrl}">Registrar</a>
   </div>
 </div>`;
   }).join('');
 }
 
-main().catch(err => {
-  document.getElementById('sessions').innerHTML = `
-    <div class="empty">
-      <span class="empty-icon">⚠️</span>
-      Erro ao carregar treinos.<br>
-      <span style="font-size:12px">${esc(err.message)}</span>
-    </div>`;
-});
+async function refreshCounts() {
+  const dot = document.getElementById('liveDot');
+  if (dot) { dot.classList.add('flash'); setTimeout(() => dot.classList.remove('flash'), 400); }
+
+  const { data } = await _sb.from('results').select('value').eq('id', 1).single();
+  const results = data?.value || [];
+  const countBySess = {};
+  results.forEach(r => { if (r.sessionId) countBySess[r.sessionId] = (countBySess[r.sessionId] || 0) + 1; });
+
+  document.querySelectorAll('[id^="rc-"]').forEach(el => {
+    const sessId = el.id.replace('rc-', '');
+    const count = countBySess[sessId] || 0;
+    el.textContent = count === 0 ? 'Seja o primeiro a registrar'
+                   : count === 1 ? '1 resultado registrado'
+                   : `${count} resultados registrados`;
+  });
+}
+
+main()
+  .then(() => setInterval(refreshCounts, 30000))
+  .catch(err => {
+    document.getElementById('sessions').innerHTML = `
+      <div class="empty">
+        <span class="empty-icon">⚠️</span>
+        Erro ao carregar treinos.<br>
+        <span style="font-size:12px">${esc(err.message)}</span>
+      </div>`;
+  });
 </script>
 </body>
 </html>
