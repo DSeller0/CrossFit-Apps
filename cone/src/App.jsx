@@ -23,6 +23,7 @@ import PublicadorTab from './components/tabs/Publicador';
 import CriadorTab from './components/tabs/Criador';
 import LoginScreen from './components/LoginScreen';
 import QuickLogTab from './components/tabs/QuickLog';
+import ConfigTab from './components/tabs/Config';
 
 
 const TABS = [
@@ -33,6 +34,7 @@ const TABS = [
   ['results',   'ti-chart-bar',  'Resultados'],
   ['quicklog',  'ti-bolt',       'Log Rápido'],
   ['publisher', 'ti-calendar',   'Publicador de Grade'],
+  ['config',    'ti-settings',   'Configurações'],
 ];
 
 export default function App() {
@@ -384,6 +386,7 @@ export default function App() {
         {tab === 'results'   && <div className="res-pane"><ResultadosTab sessions={sessions} preload={resultsPreload} onPreloadConsumed={() => setResultsPreload(null)} /></div>}
         {tab === 'quicklog'  && <div className="ql-pane"><QuickLogTab sessions={sessions} /></div>}
         {tab === 'publisher' && <div className="pub-pane"><PublicadorTab sessions={sessions} events={events} setEvents={setEvents} athletes={loadAthletes()} onEditSession={s => { setCreatorPreload(s); setTab('creator'); }} onLogResult={({athleteId, date}) => { setResultsPreload({athleteId, date}); setTab('results'); }} /></div>}
+        {tab === 'config'    && <ConfigTab />}
       </div>
     </div>
   );

@@ -542,3 +542,33 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
   .ql-athlete-grid{grid-template-columns:1fr}
   .ql-scale-btn{font-size:11px}
 }
+
+/* ── Config tab ── */
+.cfg-wrap{max-width:520px;margin:0 auto;padding:24px 20px 60px}
+.cfg-section{
+  background:#161210;border:1px solid #2a231c;border-radius:12px;
+  padding:20px;margin-bottom:20px;display:flex;flex-direction:column;gap:16px
+}
+.cfg-section-title{
+  font-size:11px;font-weight:900;color:var(--accent,#4ac8c0);
+  letter-spacing:.12em;text-transform:uppercase;
+  display:flex;align-items:center;gap:7px
+}
+.cfg-field{display:flex;flex-direction:column;gap:5px;cursor:default}
+.cfg-label{font-size:12px;font-weight:700;color:#c8b090}
+.cfg-hint{font-size:11px;color:#665e55}
+.cfg-input{
+  background:#0d0b09;border:1px solid #2a231c;border-radius:8px;
+  color:#f0e8d0;font-family:inherit;font-size:14px;
+  padding:10px 13px;outline:none;transition:border-color .15s
+}
+.cfg-input:focus{border-color:#4ac8c0}
+.cfg-input::placeholder{color:#3a3028}
+.cfg-logo-preview{
+  display:flex;align-items:center;justify-content:center;
+  background:#0d0b09;border:1px solid #2a231c;border-radius:8px;
+  padding:14px;min-height:72px
+}
+.cfg-logo-preview img{max-height:56px;max-width:200px;object-fit:contain}
+.cfg-save-row{display:flex;align-items:center;gap:14px}
+.cfg-flash{font-size:12px;color:#4ac8c0}
