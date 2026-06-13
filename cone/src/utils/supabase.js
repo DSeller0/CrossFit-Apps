@@ -125,3 +125,13 @@ export async function dbLoadLBColors() {
 export async function dbSaveLBColors(colors) {
   return dbSave('lb_colors', colors);
 }
+
+// ── Session templates ─────────────────────────────────────────────────────────
+
+export async function dbLoadTemplates() {
+  return dbLoad('templates');
+}
+
+export async function dbSaveTemplates(templates) {
+  return dbSave('templates', templates);
+}

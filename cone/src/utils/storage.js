@@ -2,10 +2,10 @@ import { normaliseType, normaliseZone } from './config';
 import {
   dbSaveSessions, dbSaveAthletes, dbSaveResults, dbSaveEvents,
   dbSaveLocations, dbSaveCoach, dbSaveSettings, dbSaveRegistry,
-  dbSaveGoalsData, dbSaveLBColors,
+  dbSaveGoalsData, dbSaveLBColors, dbSaveTemplates,
   dbLoadSessions, dbLoadAthletes, dbLoadResults, dbLoadEvents,
   dbLoadLocations, dbLoadCoach, dbLoadSettings, dbLoadRegistry,
-  dbLoadGoalsData, dbLoadLBColors,
+  dbLoadGoalsData, dbLoadLBColors, dbLoadTemplates,
 } from './supabase';
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
@@ -18,7 +18,8 @@ export const LS_GOALS     = 'eagles_athlete_goals_v1';
 export const LS_EVENTS    = 'eagles_events_v1';
 export const LS_LOCATIONS = 'eagles_locations_v1';
 export const LS_COACH     = 'eagles_coach_v1';
-export const LS_LB_COLORS = 'eagles_lb_colors_v1';
+export const LS_LB_COLORS  = 'eagles_lb_colors_v1';
+export const LS_TEMPLATES  = 'cone_templates_v1';
 
 // ── Utility helpers ───────────────────────────────────────────────────────────
 export const uid = () => (Date.now().toString(36) + Math.random().toString(36).slice(2));
@@ -103,15 +104,19 @@ export const saveCoach     = d => { try { localStorage.setItem(LS_COACH, JSON.st
 export const loadLBColors  = () => { try { const d = localStorage.getItem(LS_LB_COLORS); return d ? JSON.parse(d) : {}; } catch { return {}; } };
 export const saveLBColors  = d => { try { localStorage.setItem(LS_LB_COLORS, JSON.stringify(d)); } catch {} dbSaveLBColors(d); };
 
+// ── Session templates ─────────────────────────────────────────────────────────
+export const loadTemplates = () => { try { const d = localStorage.getItem(LS_TEMPLATES); return d ? JSON.parse(d) : []; } catch { return []; } };
+export const saveTemplates = d => { try { localStorage.setItem(LS_TEMPLATES, JSON.stringify(d)); } catch {} dbSaveTemplates(d); };
+
 // ── Pull all data from Supabase into localStorage ─────────────────────────────
 // Called once on app startup. Returns an object with the fresh data so App.jsx
 // can update React state without a reload.
 export async function syncFromSupabase() {
-  const [sessions, athletes, results, events, locations, coach, settings, registry, goalsData, lbColors] =
+  const [sessions, athletes, results, events, locations, coach, settings, registry, goalsData, lbColors, templates] =
     await Promise.all([
       dbLoadSessions(), dbLoadAthletes(), dbLoadResults(), dbLoadEvents(),
       dbLoadLocations(), dbLoadCoach(), dbLoadSettings(), dbLoadRegistry(),
-      dbLoadGoalsData(), dbLoadLBColors(),
+      dbLoadGoalsData(), dbLoadLBColors(), dbLoadTemplates(),
     ]);
 
   const out = {};
@@ -132,6 +137,7 @@ export async function syncFromSupabase() {
   if (registry && typeof registry === 'object'){ saveRegistry(registry); out.registry = registry; }
   if (goalsData && typeof goalsData === 'object') { saveGoalsData(goalsData); out.goalsData = goalsData; }
   if (lbColors && typeof lbColors === 'object')   { saveLBColors(lbColors);   out.lbColors  = lbColors;  }
+  if (Array.isArray(templates))                   { saveTemplates(templates); out.templates = templates; }
 
   return out;
 }

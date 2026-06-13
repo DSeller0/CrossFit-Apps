@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   uid, toISO, todayISO,
   loadAthletes, loadRegistry,
+  loadTemplates, saveTemplates,
   getTargets,
 } from '../../utils/storage';
 import { APP_CONFIG, ZONES, BTC, PLC } from '../../utils/config';
@@ -428,6 +429,9 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const [showAlvoModal, setShowAlvoModal] = useState(false);
   const [pendingDate, setPendingDate] = useState(null);
   const [collapsedBlocks, setCollapsedBlocks] = useState({});
+  const [templates, setTemplates] = useState(loadTemplates);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [templateFlash, setTemplateFlash] = useState(null);
   const formRef = useRef();
 
   useEffect(() => {
@@ -451,6 +455,33 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   };
   const cancel = () => { setForm(emptyS()); setBlocks([emptyBlock()]); setEditing(null); setShowAlvoModal(false); };
+
+  const cloneBlocks = bls => bls.map(bl => ({
+    ...bl, id: uid(),
+    exercises: (bl.exercises || []).map(ex => ({ ...ex, id: uid() })),
+  }));
+
+  const saveAsTemplate = () => {
+    const name = (form.sessionName || '').trim() || `Template ${templates.length + 1}`;
+    const tpl = { id: uid(), name, blocks: cloneBlocks(blocks) };
+    const updated = [...templates, tpl];
+    setTemplates(updated);
+    saveTemplates(updated);
+    setTemplateFlash(name);
+    setTimeout(() => setTemplateFlash(null), 2000);
+  };
+
+  const applyTemplate = tpl => {
+    setBlocks(cloneBlocks(tpl.blocks));
+    setForm(f => ({ ...f, sessionName: f.sessionName || tpl.name }));
+    setShowTemplateModal(false);
+  };
+
+  const deleteTemplate = id => {
+    const updated = templates.filter(t => t.id !== id);
+    setTemplates(updated);
+    saveTemplates(updated);
+  };
 
   const saveS = () => {
     const dateKey = form.date || todayISO();
@@ -525,6 +556,55 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
         )
       )
     ),
+    showTemplateModal && React.createElement('div', {
+      style: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,.8)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' },
+      onClick: () => setShowTemplateModal(false)
+    },
+      React.createElement('div', {
+        style: { background: '#0d0d0d', border: '1px solid #2e2e2e', borderRadius: '12px', padding: '18px', width: '380px', maxWidth: '100%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' },
+        onClick: e => e.stopPropagation()
+      },
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' } },
+          React.createElement('span', { style: { fontSize: '14px', fontWeight: 700, color: '#fff' } }, 'Templates'),
+          React.createElement('button', { type: 'button', className: 'b bsm', onClick: () => setShowTemplateModal(false) },
+            React.createElement('i', { className: 'ti ti-x' })
+          )
+        ),
+        templates.length === 0
+          ? React.createElement('div', { style: { textAlign: 'center', padding: '30px 0', color: '#444', fontSize: '13px' } },
+              React.createElement('i', { className: 'ti ti-bookmark-off', style: { fontSize: '28px', display: 'block', marginBottom: '8px' } }),
+              'Nenhum template salvo.',
+              React.createElement('br'),
+              React.createElement('span', { style: { fontSize: '11px' } }, 'Monte uma sessão e clique em  para salvar.')
+            )
+          : React.createElement('div', { style: { overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' } },
+              templates.map(tpl =>
+                React.createElement('div', {
+                  key: tpl.id,
+                  style: { background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px', padding: '12px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', transition: 'border-color .12s' },
+                  onClick: () => applyTemplate(tpl),
+                  onMouseEnter: e => e.currentTarget.style.borderColor = '#9070d8',
+                  onMouseLeave: e => e.currentTarget.style.borderColor = '#2a2a2a',
+                },
+                  React.createElement('div', { style: { flex: 1, minWidth: 0 } },
+                    React.createElement('div', { style: { fontSize: '13px', fontWeight: 700, color: '#e0e0e0', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, tpl.name),
+                    React.createElement('div', { style: { fontSize: '11px', color: '#555' } },
+                      `${tpl.blocks.length} bloco${tpl.blocks.length !== 1 ? 's' : ''}`
+                    )
+                  ),
+                  React.createElement('button', {
+                    type: 'button', className: 'b bd bsm',
+                    style: { flexShrink: 0 },
+                    onClick: e => { e.stopPropagation(); deleteTemplate(tpl.id); },
+                    title: 'Excluir template'
+                  },
+                    React.createElement('i', { className: 'ti ti-trash' })
+                  )
+                )
+              )
+            )
+      )
+    ),
     showAlvoModal && React.createElement('div', {
       style: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,.75)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' },
       onClick: () => setShowAlvoModal(false)
@@ -565,8 +645,23 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     ),
     React.createElement('div', { className: 'sc-card', ref: formRef },
       React.createElement('div', { className: 'sc-hdr' },
-        React.createElement('span', { className: 'sc-title' }, editing ? 'Editar sessão' : 'Nova sessão'),
-        editing && React.createElement('button', { type: 'button', className: 'b bsm', onClick: cancel }, 'Cancelar')
+        React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '2px' } },
+          React.createElement('span', { className: 'sc-title' }, editing ? 'Editar sessão' : 'Nova sessão'),
+          templateFlash && React.createElement('span', { style: { fontSize: '11px', color: '#9070d8' } },
+            React.createElement('i', { className: 'ti ti-bookmark-filled' }), ' "', templateFlash, '" salvo'
+          )
+        ),
+        React.createElement('div', { style: { display: 'flex', gap: '6px', alignItems: 'center' } },
+          React.createElement('button', {
+            type: 'button', className: 'b bsm',
+            style: { borderColor: '#4a2880', color: '#9070d8' },
+            onClick: () => setShowTemplateModal(true)
+          },
+            React.createElement('i', { className: 'ti ti-template', 'aria-hidden': 'true' }),
+            ' Templates'
+          ),
+          editing && React.createElement('button', { type: 'button', className: 'b bsm', onClick: cancel }, 'Cancelar')
+        )
       ),
       React.createElement('div', { className: 'g2' },
         React.createElement('div', { className: 'fg' },
@@ -662,9 +757,19 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           )
         )
       ),
-      React.createElement('button', { type: 'button', className: 'b bp bfull', onClick: saveS },
-        React.createElement('i', { className: 'ti ti-check', 'aria-hidden': 'true' }),
-        editing ? ' Save changes' : ' Save session'
+      React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+        React.createElement('button', { type: 'button', className: 'b bp bfull', onClick: saveS },
+          React.createElement('i', { className: 'ti ti-check', 'aria-hidden': 'true' }),
+          editing ? ' Salvar alterações' : ' Salvar sessão'
+        ),
+        blocks.length > 0 && React.createElement('button', {
+          type: 'button', className: 'b bsm',
+          style: { borderColor: '#4a2880', color: '#9070d8', flexShrink: 0, minWidth: '38px' },
+          title: 'Salvar como template',
+          onClick: saveAsTemplate
+        },
+          React.createElement('i', { className: 'ti ti-bookmark', 'aria-hidden': 'true' })
+        )
       )
     ),
     totalSessions > 0 && React.createElement('div', null,
