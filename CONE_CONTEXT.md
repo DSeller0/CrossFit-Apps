@@ -2,286 +2,282 @@
 
 ## What this project is
 
-Cone is a CrossFit coaching management app built by a solo developer (non-technical background) 
-working entirely with Claude AI assistance over several weeks. It is currently a collection of 
-single-file HTML applications hosted on GitHub Pages. No build system, no backend, no framework — 
-everything runs in the browser with localStorage for persistence.
-
-The app is functional and in active use for testing by a coach.
+Cone is a CrossFit coaching management app built by a solo developer (no prior coding background),
+working entirely with Claude AI assistance. Started as a single-file HTML app, now migrated to
+Vite + React + Supabase. In active use by coaches (Rod / Team Medrado).
 
 ---
 
 ## Current file structure
 
-All files live flat in the GitHub Pages repo root:
-
 ```
-schedule_builder_pt_V2.html   ← Main builder app (~503KB, 8400+ lines)
-athletes.html                 ← Public athlete profile page
-schedule.html                 ← Public weekly training schedule
-leaderboard.html              ← Public WOD results leaderboard
-sw.js                         ← Service worker (just added, PWA step)
-manifest.json                 ← PWA manifest
-config.json                   ← Runtime colour/font/gym config (read by public pages)
-state.json                    ← Full app state export (read by public pages)
-icon-192.png                  ← App icon
-icon-512.png                  ← App icon
+/                           ← GitHub Pages root
+  index.html                ← PUBLIC: athlete landing page (today's sessions, live refresh)
+  me.html                   ← PUBLIC: athlete self-profile (name picker → personal history)
+  log.html                  ← PUBLIC: athlete self-log (QR code target)
+  leaderboard.html          ← PUBLIC: WOD results leaderboard
+  schedule.html             ← PUBLIC/COACH: weekly training schedule
+  athletes.html             ← COACH: athlete profiles (legacy HTML, still in use)
+  recover.html              ← UTILITY: mobile localStorage data export
+  manifest.json             ← PWA manifest
+  sw.js                     ← Service worker
+  config.json               ← Runtime config (legacy)
+  icon-192.png / icon-512.png
+
+cone/                       ← Vite + React 19 app (main coach builder)
+  src/
+    App.jsx                 ← Auth gating, Supabase sync on startup, tab router
+    index.css               ← Global styles (TotK dark theme + all tab namespaces)
+    utils/
+      supabase.js           ← createClient, dbLoad/dbSave generics, per-table helpers
+      storage.js            ← localStorage read/write + syncFromSupabase()
+      config.js             ← APP_CONFIG, ZONES, BTC, PLC constants
+    components/
+      LoginScreen.jsx       ← 8-digit OTP auth (email → code boxes)
+      PresenterView.jsx     ← Full-screen TV mode (scales DailyExportView)
+      tabs/
+        Criador.jsx         ← Session builder + block editor + templates + recurring sessions
+        Atletas.jsx         ← Athlete management
+        Exercicios.jsx      ← Exercise registry
+        Servicos.jsx        ← Services / billing locations
+        Resultados.jsx      ← Coach result logging
+        QuickLog.jsx        ← Log Rápido — fast mobile result entry
+        Publicador.jsx      ← Session publisher + Apresentar button
+
+  dist/                     ← Vite build output (deployed to /cone/)
+
+.github/workflows/deploy.yml ← CI: builds cone/, copies public pages, deploys to gh-pages
+CONE_CONTEXT.md             ← This file
 ```
 
-GitHub Pages URL: `https://dseller0.github.io/CrossFit-Apps/`
+GitHub Pages URLs:
+- Hub (athlete home): `https://dseller0.github.io/CrossFit-Apps/`  ← index.html at root
+- Athlete profile:    `https://dseller0.github.io/CrossFit-Apps/me.html?id=<athleteId>`
+- Cone (coach app):  `https://dseller0.github.io/CrossFit-Apps/cone/`
+- Log:               `https://dseller0.github.io/CrossFit-Apps/log.html`
+- Leaderboard:       `https://dseller0.github.io/CrossFit-Apps/leaderboard.html`
+- Schedule:          `https://dseller0.github.io/CrossFit-Apps/schedule.html`
+- Recover:           `https://dseller0.github.io/CrossFit-Apps/recover.html`
 
 ---
 
-## Architecture — how it works today
+## Architecture
 
-### The builder (`schedule_builder_pt_V2.html`)
+### Backend — Supabase
+Project: `https://crsalcpvsedmiabkeibp.supabase.co`
 
-A single-file React app (CDN React 18, no build step). All components are defined inline.
-State is stored in `localStorage` under these keys:
+Single-row JSONB tables (all `id=1`, `value=JSONB`):
 
-| Key | Contents |
-|-----|----------|
-| `gym_v9` | Sessions (workouts by date) |
-| `eagles_athletes_v1` | Athletes array |
-| `eagles_results_v1` | Training results |
-| `eagles_settings_v1` | Publisher settings |
-| `eagles_lb_colors_v1` | Leaderboard colour config |
-| `eagles_block_registry_v1` | Exercise registry |
-| `eagles_athlete_goals_v1` | Goals + PRs |
-| `eagles_events_v1` | Agenda coaching events |
-| `eagles_locations_v1` | Services/locations (billing) |
-| `eagles_coach_v1` | Coach profile (name, Pix key, etc.) |
+| Table             | Contents                                        |
+|-------------------|-------------------------------------------------|
+| `sessions`        | `{ "YYYY-MM-DD": [session, ...] }`              |
+| `athletes`        | `[athlete, ...]`                                |
+| `results`         | `[result, ...]`                                 |
+| `settings`        | `{ gymName, ... }`                              |
+| `templates`       | `[template, ...]`  ← session block templates    |
+| `athletes_goals`  | goals + PRs per athlete                         |
+| `exercise_registry` | exercise registry                             |
+| `lb_colors`       | leaderboard colour config                       |
+| `events`          | coach agenda events                             |
+| `locations`       | services/billing locations                      |
+| `coach_profile`   | coach profile (Pix key, etc.)                   |
 
-The coach exports state manually via "Salvar estado" → uploads `state.json` to GitHub → 
-public pages fetch it. This is the main UX pain point to fix.
+RLS:
+- Public read: anon key on all tables
+- Public insert: `results` table only (athletes self-log without auth)
+- Write (all tables): restricted to `allowed_emails` via `is_allowed_user()` security-definer fn
+- New sign-ups: DISABLED in Supabase dashboard
 
-### Public pages
+### Authentication
+- Email OTP, 8-digit code (NOT magic links — Outlook Safe Links broke those)
+- Phase 1: enter email → `signInWithOtp({ email, options: { shouldCreateUser: false } })`
+- Phase 2: 8 input boxes → `verifyOtp({ email, token, type: 'email' })`
+- Email delivery: configured via Gmail SMTP (smtp.gmail.com:587, App Password) — no domain required
+- Supabase email template must include `{{ .Token }}` (not just the magic link)
 
-`athletes.html`, `schedule.html`, `leaderboard.html` all:
-- Fetch `./config.json?v=timestamp` and `./state.json?v=timestamp` on load
-- Are read-only — no editing, no auth
-- Use the TotK (Zelda: Tears of the Kingdom) colour theme
+### Cone app (Vite + React 19)
+- `App.jsx`: detects Supabase session → shows LoginScreen or main tabs
+- On startup: `syncFromSupabase()` pulls all tables into localStorage + updates React state
+- On every save: fire-and-forget Supabase upsert
+- localStorage key prefix: `gym_v9` (sessions), `eagles_*` (athletes, results, etc.), `cone_templates_v1` (templates)
+- Tab order: Criador · Atletas · Exercícios · Serviços · Resultados · Log Rápido · Publicador
 
-### Data model
+### Data sync helpers (`storage.js`)
+```js
+loadLS() / saveLS(d)               // sessions
+loadAthletes() / saveAthletes(d)
+loadResults() / saveResults(d)
+loadTemplates() / saveTemplates(d) // ← cone_templates_v1
+syncFromSupabase()                 // pulls all 11 tables in parallel, returns fresh data
+```
 
+---
+
+## Data model
+
+### Session
 ```javascript
-// Core state structure (state.json)
 {
-  version: 2,
-  sessions: {
-    "2026-06-11": [
-      {
-        id: string,
-        date: string,           // "YYYY-MM-DD"
-        mainTraining: string[], // array of athlete names (was string, now array)
-        sessionName: string,    // display name for the session
-        blocks: [
-          {
-            id: string,
-            label: string,      // e.g. "WOD", "Força"
-            type: string,       // e.g. "For Time", "AMRAP"
-            zone: string,
-            duration: string,   // cap in minutes
-            rounds: string,
-            exercises: [
-              { id, name, sets, reps, intensity, note, progression }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  athletes: [
-    { id, name, level, goal, notes, color, since }
-  ],
-  results: [
-    {
-      id, date, athleteId, presence,  // "Presente"|"Ausente"|"Atrasado"
-      energyLevel,                     // 1-5
-      sessionId,
-      blocks: [
-        {
-          blockId, blockType, blockLabel,
-          rpe,                          // 1-10
-          perfTime, perfRounds, perfReps,
-          exerciseRows: [{ name, scale, load }]
-        }
-      ],
-      coachNote, flagForReview
-    }
-  ],
-  athleteGoalsData: {
-    athleteGoals: { [athleteId]: [{ id, name, totalSessions, completedSessions, milestones }] },
-    prs: { [athleteId]: [{ id, name, category, type, unit, target, results: [{value, date}] }] }
-  },
-  events: {
-    "2026-06-11": [
-      {
-        id, date, time,          // "HH:MM"
-        durationMin,
-        type,                    // "aula" | "personal"
-        label,
-        locationId,              // references a service/location
-        local,                   // display location name (optional)
-        localText,               // free text if local === "__outro__"
-        athleteIds: [],
-        status,                  // "scheduled" | "completed"
-        sessionId,               // optional link to a session
-        notes
-      }
-    ]
-  },
-  locations: [
-    {
-      id, name,
-      type,                      // "box" | "personal"
-      color,
-      rate,                      // number
-      rateUnit,                  // "per_session" | "per_hour"
-      currency,                  // "R$"
-      athleteIds: []             // for personal services
-    }
-  ],
-  coachProfile: {
-    name, contact, phone,
-    pixKey,                      // Pix key for QR generation
-    cidade,                      // city for Pix EMV payload
-    pixTestCap,                  // max amount for test QR codes
-    pixEnabled                   // boolean
-  },
-  settings: {},
-  lbColors: { ...leaderboard colour overrides }
+  id: string,
+  date: "YYYY-MM-DD",
+  sessionName: string,       // display name (field is sessionName, not name)
+  time: string,              // "HH:MM" (optional)
+  mainTraining: string[],    // athlete names assigned (shim: getTargets(s) handles old string)
+  blocks: [{
+    id, label, type,         // e.g. label:"Chipper", type:"For Time"
+    zone, duration, rounds, notes, ladderMode,
+    exercises: [{ id, name, sets, reps, intensity, note }]
+  }]
+}
+```
+
+Block label display pattern:
+```javascript
+b.label && b.type && b.label !== b.type ? `${b.label} · ${b.type}` : b.label || b.type
+```
+
+### Result
+```javascript
+{
+  id, date, athleteId, sessionId,
+  presence,              // "Presente" | "Ausente" | "Atrasado"
+  energyLevel,           // 1–5
+  blocks: [{
+    blockId, blockType, blockLabel,
+    scale,               // "RX" | "Inter" | "SC" | "Adaptado"
+    perfTime,            // "MM:SS" (For Time blocks)
+    perfRounds, perfReps,
+    rpe,                 // 1–10
+    exerciseRows: [{ name, scale, load }]
+  }],
+  coachNote, flagForReview,
+  loggedByAthlete: true  // set when athlete self-logs via log.html
+}
+```
+
+### Template (`cone_templates_v1`)
+```javascript
+{
+  id: string,
+  name: string,
+  blocks: [block, ...]   // same structure as session blocks, IDs cloned on apply
+}
+```
+
+### Athlete
+```javascript
+{
+  id, name, color,       // color is CSS hex, used as avatar accent
+  ...                    // contact, goals, PRs etc. (managed in athletes.html / Atletas tab)
 }
 ```
 
 ---
 
-## Builder tabs (in order)
+## Feature inventory
 
-1. **Criador de Treinos** — session builder with blocks, exercises, DnD, progression
-2. **Criar por Texto** — text parser (to be REMOVED in next refactor)
-3. **Atletas** — athlete profiles, character stats, session summary, PRs, goals
-4. **Exercícios** — exercise registry, two-pane desktop / accordion mobile
-5. **Serviços** — billing services (boxes + personal rate tiers), coach Pix profile
-6. **Resultados** — log training results per athlete
-7. **Publicador de Grade** — agenda calendar + image export for social media
+### Coach app (cone/)
+
+| Tab | Description |
+|-----|-------------|
+| **Criador** | Session builder. Blocks with exercises, zone, duration, ladder mode. Save as template (🔖). Apply template. Recurring sessions (repeat icon → day picker + date range → bulk create). |
+| **Atletas** | Athlete list, profiles, goals, PRs. |
+| **Exercícios** | Exercise registry (autocomplete source). |
+| **Serviços** | Billing services / locations. |
+| **Resultados** | Coach result logging with full block detail, RPE, energy level, coach note. |
+| **Log Rápido** | Fast mobile entry. Sticky session bar, 2-col athlete grid, scale chips, perf fields, RPE bar. Quick-submit per athlete. |
+| **Publicador** | Publish daily session. Apresentar → PresenterView (TV mode with QR). |
+
+### Public pages
+
+| Page | Description |
+|------|-------------|
+| **index.html** | Today's sessions. First card = "Sessão do dia". Result count per session. Live refresh every 30s (updates count spans in-place, pulsing live dot in header). Bottom nav: Leaderboard · Meu Perfil · Agenda. |
+| **me.html** | Athlete self-profile. `?id=<athleteId>` → full profile. No `?id` → searchable name picker. Sections: hero + stats, week strip, scale bar, last 15 results with blocks/scale/perf/RPE/coach note. |
+| **log.html** | Athlete self-log. Reads `?date=` + `?session=` params. Saves result with `loggedByAthlete: true`. |
+| **leaderboard.html** | WOD leaderboard. Filter by block + scale. Custom colours via `lb_colors` table. |
+| **schedule.html** | Weekly schedule view. Slide-in result log pane. Athlete filter. |
+
+All public pages: home button (ti-home icon) in topbar linking back to index.html.
 
 ---
 
-## Visual design system — TotK theme
+## Design system — TotK dark theme
 
 ```css
---bg: #1a1410          /* dark warm brown */
---bg2: #211c17
---bg3: #2a231c
---accent: #4ac8c0      /* Sheikah teal */
---gold: #d8a840        /* Sheikah gold */
---green: #68d8a0       /* Zonai green */
---cream: #f0e8d0       /* warm off-white text */
---sub: #c8b090         /* secondary text */
---muted: #a89880       /* muted/disabled text */
---divider: #3a3028     /* borders */
+--bg: #0d0b09            /* public pages */
+--bg: #1a1410            /* coach app */
+--card: #161210
+--card2: #1e1a16
+--accent: #4ac8c0        /* Sheikah teal */
+--gold: #d8a840
+--cream: #f0e8d0         /* primary text */
+--sub: #c8b090
+--muted: #a89880
+--divider: #2a231c
+--font: 'Raleway', sans-serif
 ```
 
-All new components should use these variables. No hardcoded dark colours.
+Icon library: **Tabler Icons** (`ti-*` classes via CDN in public pages, imported in cone app).
+No Zelda-specific icon library exists — sticking with Tabler.
+
+WOD block types: `['WOD', 'For Time', 'AMRAP', 'EMOM', 'MetCon', 'HIIT']`
+Scales: `['RX', 'Inter', 'SC', 'Adaptado']`
 
 ---
 
-## Key features already built
+## Branding rules
 
-- Block-based session creator with DnD, ladder mode, progression intensity
-- Exercise registry with per-block-type autocomplete
-- Multi-athlete session assignment (Alvo field → array of athlete names)
-- Character development screen (5 calculated stats: Força, Condicionamento, Habilidade, Progressão, Consistência)
-- Session summary cards (2 past + 2 upcoming per athlete)
-- PR tracking with progress bars
-- Coach agenda (monthly calendar, 60/40 pane split, event creation)
-- Billing: per-session or floor-hourly rates, Pix QR in PDF reports
-- PDF report generation (jsPDF + autoTable) with Pix QR (EMV payload, CRC16)
-- Mobile responsive: accordion layout for Exercícios and Serviços tabs at ≤600px
-- PWA: service worker + manifest (just added)
-- Image export for WhatsApp (multiple mobile formats)
-- Leaderboard with deep-link from schedule page
+- App name: **Cone** only — never "Eagles" (old brand), never "CrossFit" (copyright)
+- "CrossFit" is acceptable in internal/coach-only UI and code comments
+- Public pages: no "CrossFit" anywhere
 
 ---
 
-## Known issues / technical debt
+## PresenterView (Publicador tab)
 
-1. **503KB single file** — the builder is too large to open via `file://` on mobile
-2. **No backend** — everything in localStorage, one device only, no sync
-3. **Manual state export** — coach must manually export + upload to GitHub after changes
-4. **Criar por Texto tab** — agreed to remove in next refactor
-5. **mainTraining string→array migration** — done in builder and public pages, 
-   but old state.json exports will have string values (backwards compat shim exists in all pages)
-6. **No offline fallback page** — SW serves cached files but no custom offline.html
-7. **No recurring sessions** — each week is manual
-8. **No session templates** — common workflows not saved
-
----
-
-## Immediately next steps (implementation order)
-
-These are agreed and ready to build, in dependency order:
-
-### 1. ✅ PWA + Service Worker — DONE
-`sw.js` written, registration added to all pages, manifest updated.
-To verify: DevTools → Application → Service Workers → should show "activated and running"
-
-### 2. ✅ Vite + React migration — DONE
-`cone/` directory — Vite + React 19, all tabs migrated, build pipeline set up,
-GitHub Actions deploys to GitHub Pages on every push to main.
-Live at: `https://dseller0.github.io/CrossFit-Apps/cone/`
-
-### 3. ✅ Supabase integration — DONE
-- 10 single-row JSONB tables mirror localStorage keys exactly
-- All saves in Cone auto-sync to Supabase (fire-and-forget, non-blocking)
-- App pulls from Supabase on startup via `syncFromSupabase()` in App.jsx
-- Public pages (schedule.html, athletes.html, leaderboard.html) read live from Supabase
-- Supabase project: `https://crsalcpvsedmiabkeibp.supabase.co`
-
-### 4. ✅ Authentication — DONE
-- Supabase magic link (email OTP, no password)
-- Login screen gates the full builder UI
-- RLS: public read (anon key) + write restricted to emails in `allowed_emails` table
-- `is_allowed_user()` security-definer function enforces the email allowlist
-- To add a coach: insert their email into `allowed_emails`, re-enable sign-ups briefly, disable again after first login
-- Sign-ups disabled after coach's first login
-
-### 5. Quick log mode — NEXT
-Simplified result logging for mobile mid-WOD use.
-
-### 6. Session templates + recurring sessions
-
-### 7. Athlete self-logging
+- Full-screen overlay, scales 1920×1080 `DailyExportView` to fit viewport
+- `scale = Math.min(window.innerWidth/1920, window.innerHeight/1080)`
+- Auto-hide controls: mouse idle 3s → cursor + close button fade out
+- QR code positioned in screen coords (outside scaled div) → always 130px
+- QR links to `log.html?date=YYYY-MM-DD&session=<id>`
+- ESC key closes
 
 ---
 
 ## Decisions already made (do not re-litigate)
 
 - Language: Portuguese (Brazilian) — all UI strings in pt-BR
-- Rate billing: `Math.max(1, Math.floor(durationMin / 60))` — floor hourly, minimum 1h
-- "Locais" tab renamed to "Serviços" — a service is a billing arrangement, not just a place
-- Aulas bill to the box (service), Personal bills to the athlete (via their assigned service)
-- No emoji in UI — numbers only (e.g. energy level 1-5, not emoji)
-- mainTraining is array — backwards compat shim `getTargets(s)` exists in all pages
-- Pix QR: static QR with fixed amount, EMV payload, CRC16/CCITT
-- `pixTestCap` safety limit on QR amount (stored in coachProfile)
+- Auth: OTP code, not magic links (Outlook Safe Links consumed magic link tokens)
+- Email delivery: Gmail SMTP with App Password (no domain required, works for any recipient)
+- Rate billing: `Math.max(1, Math.floor(durationMin / 60))` — floor hourly, min 1h
+- "Locais" tab = "Serviços" — billing arrangement, not just a place
+- Energy level: numbers 1–5 (no emoji in UI)
+- `mainTraining` is an array — `getTargets(s)` shims old string values
+- Pix QR: static, fixed amount, EMV payload, CRC16/CCITT, `pixTestCap` safety limit
+- Session field is `sessionName` (not `name`) — check both when reading old data
+- Criador.jsx uses `React.createElement()` throughout — no JSX syntax in that file
+- Rod's June 16–18 session data: accepted as permanently lost, moved on
+
+---
+
+## Pending / next steps
+
+### Ideas in consideration
+- **Gym settings UI** — coach sets gymName, logo, accent color from inside the app
+- **QR per athlete** — coach generates shareable `me.html?id=<id>` QR for each athlete
+- **me.html evolution** — currently shows results history + stats; direction TBD (personal client vs box client distinction to be thought through)
+- **Leaderboard all-time PRs** — aggregate best performances per exercise across all sessions
+- **PWA install prompt** — nudge athletes to add hub to home screen
+
+### Operational
+- Gmail SMTP: awaiting Rod's confirmation that auth email reached him
+- Templates Supabase table: SQL has been run, verify sync is working after coach login
 
 ---
 
 ## Repo
 
 GitHub: `https://github.com/DSeller0/CrossFit-Apps`
-Pages root: `https://dseller0.github.io/CrossFit-Apps/`
-Builder (Cone app): `https://dseller0.github.io/CrossFit-Apps/cone/`
-Public pages: `/schedule.html`, `/athletes.html`, `/leaderboard.html`
-Deploy: GitHub Actions → `gh-pages` branch (auto on push to main)
-
----
-
-## How this was built
-
-Started as a single-file HTML app built entirely through Claude.ai chat with no local dev environment.
-Migrated to Vite + React + Supabase with Claude Code (first local dev environment).
-The developer has no prior coding background.
-
+Deploy: GitHub Actions → `gh-pages` branch (auto on push to `main`)
+Build: `npm run build` in `cone/` → `cone/dist/` → assembled into `deploy/` folder
