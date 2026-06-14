@@ -11,9 +11,10 @@ import {
   loadCoach, saveCoach,
   loadLBColors,
   syncFromSupabase,
+  getSessionsTs,
   toISO,
 } from './utils/storage';
-import { supabase } from './utils/supabase';
+import { supabase, dbGetUpdatedAt } from './utils/supabase';
 import { APP_CONFIG, normaliseType, normaliseZone, GF } from './utils/config';
 import ServicosTab from './components/tabs/Servicos';
 import ExerciciosTab from './components/tabs/Exercicios';
@@ -47,6 +48,7 @@ export default function App() {
   const [resultsPreload, setResultsPreload] = useState(null);
   const [saved, setSaved]                   = useState(false);
   const [toast, setToast]                   = useState(null);
+  const [syncState, setSyncState]           = useState('idle'); // 'idle'|'syncing'|'synced'|'conflict'
   const [blockNames, setBlockNames]         = useState(APP_CONFIG.blockNames);
   const [saveFileName, setSaveFileName]     = useState('');
   const [showSaveName, setShowSaveName]     = useState(false);
@@ -81,6 +83,36 @@ export default function App() {
       if (fresh.events)    setEvents(fresh.events);
     }).catch(() => {});
   }, []);
+
+  // ── Manual sync handler ───────────────────────────────────────────────────
+  const handleSync = async () => {
+    setSyncState('syncing');
+    try {
+      const fresh = await syncFromSupabase();
+      if (fresh.sessions) setSessions(fresh.sessions);
+      if (fresh.events)   setEvents(fresh.events);
+      setSyncState('synced');
+      setTimeout(() => setSyncState('idle'), 2200);
+    } catch {
+      setSyncState('idle');
+    }
+  };
+
+  // ── Conflict detection — poll every 30s ──────────────────────────────────
+  useEffect(() => {
+    if (!session) return;
+    const check = async () => {
+      try {
+        const remoteTs = await dbGetUpdatedAt('sessions');
+        const localTs  = getSessionsTs();
+        if (remoteTs && localTs && remoteTs > localTs) {
+          setSyncState(s => s === 'syncing' || s === 'synced' ? s : 'conflict');
+        }
+      } catch {}
+    };
+    const id = setInterval(check, 30000);
+    return () => clearInterval(id);
+  }, [session]);
 
   // ── Fetch config.json on first empty-state visit ──────────────────────────
   useEffect(() => {
@@ -304,6 +336,16 @@ export default function App() {
           >
             <i className="ti ti-logout" aria-hidden="true" /> Sair
           </button>
+          <button
+            type="button"
+            className={`tb-btn${syncState === 'conflict' ? ' tb-sync-warn' : ''}`}
+            onClick={handleSync}
+            disabled={syncState === 'syncing'}
+            title="Sincronizar dados com o servidor"
+          >
+            <i className={`ti ${syncState === 'syncing' ? 'ti-loader-2 spin' : syncState === 'synced' ? 'ti-check' : syncState === 'conflict' ? 'ti-alert-triangle' : 'ti-refresh'}`} aria-hidden="true" />
+            {syncState === 'syncing' ? ' Sincronizando...' : syncState === 'synced' ? ' Sincronizado' : syncState === 'conflict' ? ' Conflito!' : ' Sincronizar'}
+          </button>
           {saved && (
             <span className="saved-badge">
               <i className="ti ti-device-floppy" aria-hidden="true" style={{ fontSize: 12 }} />
@@ -364,6 +406,17 @@ export default function App() {
           )}
         </div>
       </div>
+
+      {syncState === 'conflict' && (
+        <div className="sync-conflict-banner">
+          <i className="ti ti-alert-triangle" aria-hidden="true" />
+          Sessões foram alteradas em outro dispositivo desde que você abriu o app.
+          Sincronize antes de salvar para não perder dados.
+          <button type="button" className="sync-conflict-btn" onClick={handleSync}>
+            Sincronizar agora
+          </button>
+        </div>
+      )}
 
       <div className="tab-bar">
         {TABS.map(([id, icon, lbl]) => (

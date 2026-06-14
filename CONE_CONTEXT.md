@@ -126,7 +126,19 @@ syncFromSupabase()                 // pulls all 11 tables in parallel, returns f
   blocks: [{
     id, label, type,         // e.g. label:"Chipper", type:"For Time"
     zone, duration, rounds, notes, ladderMode,
-    exercises: [{ id, name, sets, reps, intensity, note }]
+    exercises: [{
+      id, name, sets, reps, intensity, note,
+      isComplex: bool,              // true = complex set
+      complexMovements: [{ id, name, reps }]  // sub-movements of a complex
+    }],
+    // Estações blocks only (type === 'Estações'):
+    stationRepeat: number,          // how many times the station sequence repeats
+    restBetweenCycles: string,      // "MM:SS" rest after each full cycle (optional)
+    stations: [{
+      id, name, duration,           // name e.g. "Grupo A", duration e.g. "10:00"
+      isRest: bool,                 // true = rest/transition, no exercises
+      exercises: [...]              // same exercise structure as block exercises
+    }]
   }]
 }
 ```
@@ -135,6 +147,8 @@ Block label display pattern:
 ```javascript
 b.label && b.type && b.label !== b.type ? `${b.label} · ${b.type}` : b.label || b.type
 ```
+
+Estações blocks: `exercises` key is absent; `stations` replaces it. Old blocks with `exercises` are unaffected.
 
 ### Result
 ```javascript
@@ -180,9 +194,9 @@ b.label && b.type && b.label !== b.type ? `${b.label} · ${b.type}` : b.label ||
 
 | Tab | Description |
 |-----|-------------|
-| **Criador** | Session builder. Blocks with exercises, zone, duration, ladder mode. Save as template (🔖). Apply template. Recurring sessions (repeat icon → day picker + date range → bulk create). |
+| **Criador** | Session builder. Block type picker (15 types across 4 color families). Adaptive meta fields per type. Compact exercise rows with ⚙ expand-to-reveal (intensity + note). Complex sets: Complexo toggle → sub-movements + notation. Escada mode toggle in exercise detail. Estações block type → station groups with per-station exercises and cycle repeat. Mobile: bottom sheet for exercise detail. Week grid, templates, recurring sessions, sync/conflict detection. |
 | **Atletas** | Athlete list, profiles, goals, PRs. |
-| **Exercícios** | Exercise registry (autocomplete source). |
+| **Exercícios** | Exercise registry. Two-pane desktop (block list left, exercises right). Todos view shows all exercises with colored block tags. ExerciseCombobox ranks current-block exercises first when typing. |
 | **Serviços** | Billing services / locations. |
 | **Resultados** | Coach result logging with full block detail, RPE, energy level, coach note. |
 | **Log Rápido** | Fast mobile entry. Sticky session bar, 2-col athlete grid, scale chips, perf fields, RPE bar. Quick-submit per athlete. |
@@ -221,7 +235,16 @@ All public pages: home button (ti-home icon) in topbar linking back to index.htm
 Icon library: **Tabler Icons** (`ti-*` classes via CDN in public pages, imported in cone app).
 No Zelda-specific icon library exists — sticking with Tabler.
 
-WOD block types: `['WOD', 'For Time', 'AMRAP', 'EMOM', 'MetCon', 'HIIT']`
+Block type color families (CSS class prefix → types):
+- **RED** (`bt-wd/hi/mc`): WOD · HIIT · MetCon — intensity-based
+- **AMBER** (`bt-em/ft/am/es`): EMOM · For Time · AMRAP · Estações — time-structured
+- **BLUE** (`bt-st/lp/co/ac`): Força · LPO · Core · Acessórios — barbell/lifting
+- **GREEN** (`bt-wu/sk/ca/mo`): Aquecimento · Skill · Cardio · Mobilidade — movement quality
+- **NEUTRAL** (`bt-re`): Descanso
+
+Accent colors: purple `#9070d8` = exercise-layer state (Complexo/Escada toggles, ⚙ active). Teal `#4ac8c0` = navigation/action (drag-over, Feito button in bottom sheet).
+
+WOD block types (leaderboard-linked): `['WOD', 'For Time', 'AMRAP', 'EMOM', 'MetCon', 'HIIT']`
 Scales: `['RX', 'Inter', 'SC', 'Adaptado']`
 
 ---
@@ -256,19 +279,87 @@ Scales: `['RX', 'Inter', 'SC', 'Adaptado']`
 - `mainTraining` is an array — `getTargets(s)` shims old string values
 - Pix QR: static, fixed amount, EMV payload, CRC16/CCITT, `pixTestCap` safety limit
 - Session field is `sessionName` (not `name`) — check both when reading old data
-- Criador.jsx uses `React.createElement()` throughout — no JSX syntax in that file
+- Criador.jsx redesigned to use JSX (feature/criador-redesign branch); all other tabs also use JSX
 - Rod's June 16–18 session data: accepted as permanently lost, moved on
+- Complex sets use toggle buttons (not checkboxes) for "Complexo" and "Escada" modes in ExerciseRow detail
+- schedule.html renders complex exercises: headline = sets×(notation) NAME, then sub-movement list, then load
+- Mobile ExerciseRow: main row shows only name + ⚙ + delete; ⚙ opens bottom sheet (sets×reps, mode toggles, intensity, note). Desktop keeps inline expand. Body scroll locked while sheet is open.
+- Estações block type: station-based (groups + rest stations), cycle repeat, renders in schedule.html with station headers + duration chips
+- Block color families: 4 groups (RED/AMBER/BLUE/GREEN) — related block types share hue family for visual grouping
+- EMOM got its own CSS class `bt-em` (separated from MetCon's `bt-mc`) when families were defined
+- Exercícios tab: "Todos" view aggregates all exercises with colored block tags; ExerciseCombobox ranks current-block matches first when querying
+
+### Exercícios tab — current state
+
+**Data model** (unchanged): `{ [blockName]: string[] }` — exercises stored per block as plain strings.
+
+**Implemented:**
+- Two-pane desktop layout (block list left, exercise list right)
+- "Todos" view: all exercises alphabetically with block tag pills; clicking a tag navigates to that block; delete removes from all blocks (with confirmation)
+- ExerciseCombobox: when typing, current block's matches appear first, then all other blocks' matches alphabetically
+
+**Future migration** (deferred): global flat list `{ exercises: [{id, name, tags:[]}] }` — not needed until the coach explicitly manages cross-block exercise relationships.
+
+**What was dropped:** Default equipment loads, muscle maps, exercise demo links — deferred indefinitely.
+
+**Block colors in Exercícios:** Each block type has its own accent color, editable via color picker in the left panel. Colors carry through to the block tag pills in the Todos view.
+
+**New block types:** Added by code only (not via Exercícios UI).
+
+**Design A prototype files** (in repo root, not deployed):
+- `design-a.html` — approved reference design (two-pane, block tags, mobile responsive)
+- `design-b.html`, `design-c.html` — rejected alternatives
 
 ---
 
 ## Pending / next steps
 
-### Ideas in consideration
-- **Gym settings UI** — coach sets gymName, logo, accent color from inside the app
-- **QR per athlete** — coach generates shareable `me.html?id=<id>` QR for each athlete
-- **me.html evolution** — currently shows results history + stats; direction TBD (personal client vs box client distinction to be thought through)
-- **Leaderboard all-time PRs** — aggregate best performances per exercise across all sessions
-- **PWA install prompt** — nudge athletes to add hub to home screen
+### Merged to main ✅ — `feature/criador-redesign`
+
+All of the following is now live:
+- Block type picker modal (grid of type cards across 4 color families)
+- Adaptive meta fields per block type
+- Compact exercise rows with ⚙ expand-to-reveal
+- Complex sets: Complexo + Escada toggle buttons, sub-movements, notation
+- Escada removed from Avançado section (now only in exercise detail)
+- Mobile bottom sheet for exercise detail (name on main row; sets×reps + everything else in sheet)
+- Progressive disclosure: zone + notes behind "Avançado ▼"
+- Collapsed block summary bar
+- Week grid with `sessionName`
+- Sync + conflict detection
+- OTP login fix
+- schedule.html: complex exercises render correctly; Estações blocks render with station headers
+- **Estações block type**: station groups + rest stations + cycle repeat
+- **Block color families**: RED / AMBER / BLUE / GREEN (related types share hue)
+- **Exercícios tab**: Todos view + block tag pills + ExerciseCombobox cross-block ranking
+- Voice command (MicButton) removed — proved to have no purpose
+
+### Criador QoL — agreed improvements (not yet built)
+
+These were reviewed and approved. Build when prioritized:
+
+1. **Insert block between blocks** — `+` button between existing blocks, not just at the bottom
+2. **Block notes quick access** — surfaced directly in block body (collapsed one-liner, expands on click) without opening Avançado panel
+3. **Copy block** — duplicate button on collapsed block bar, clones within session
+4. **Always-accessible drag handle** — block reorder should not require collapsing first; a side rail or persistent handle when expanded
+5. **Exercise load badge** — subtle dot/icon on collapsed ExerciseRow when intensity/load is programmed
+6. **One-step undo for delete** — toast with "Desfazer" after removing a block or exercise (5-second window)
+7. **Estações: total time display** — computed cap in block header (`Cap 42'`), excluding trailing rest, live-updating as durations change. Formula: `(sum of station durations × stationRepeat) - last rest duration if last station is rest`.
+8. **Estações: MM:SS masked input** — digit-by-digit formatting: type `1500` → displays `15:00`. Colon auto-inserts after 2 digits; backspace removes last digit.
+9. **Session-level notes field** — free-text for daily coaching brief / warmup direction
+10. **Quick "Publicar hoje"** — shortcut button in Criador topbar to publish the current day's session without switching to Publicador tab
+11. **Week grid collapse** — toggle to shrink to a single-row date strip, freeing vertical space for the block editor
+
+### Queue after QoL
+1. **Leaderboard all-time PRs** — best performance per movement across all sessions
+2. **QR per athlete** — `me.html?id=<id>` QR in Atletas tab for coach to share
+3. **PWA install prompt** — nudge athletes on index.html
+4. **me.html evolution** — direction TBD
+
+### Gym settings UI ✅
+- Configurações tab in coach app (App.jsx + Config.jsx)
+- Fields: gymName, label (PDF subtitle), logo URL with live preview
+- Saves via `saveSettings()` → Supabase `settings` table on next sync
 
 ### Operational
 - Gmail SMTP: awaiting Rod's confirmation that auth email reached him

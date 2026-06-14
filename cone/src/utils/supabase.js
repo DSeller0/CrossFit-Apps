@@ -135,3 +135,15 @@ export async function dbLoadTemplates() {
 export async function dbSaveTemplates(templates) {
   return dbSave('templates', templates);
 }
+
+// ── Conflict detection ────────────────────────────────────────────────────────
+// Fetches only the updated_at column — lightweight, used for polling.
+
+export async function dbGetUpdatedAt(table) {
+  const { data } = await supabase
+    .from(table)
+    .select('updated_at')
+    .eq('id', 1)
+    .maybeSingle();
+  return data?.updated_at ?? null;
+}

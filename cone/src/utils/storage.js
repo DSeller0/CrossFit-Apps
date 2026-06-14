@@ -6,7 +6,18 @@ import {
   dbLoadSessions, dbLoadAthletes, dbLoadResults, dbLoadEvents,
   dbLoadLocations, dbLoadCoach, dbLoadSettings, dbLoadRegistry,
   dbLoadGoalsData, dbLoadLBColors, dbLoadTemplates,
+  dbGetUpdatedAt,
 } from './supabase';
+
+// Tracks the updated_at timestamp of the sessions row at last sync/save.
+// Used to detect when another device has written to Supabase since we loaded.
+let _sessionsTs = null;
+export const getSessionsTs  = () => _sessionsTs;
+export const markSessionsSaved = () => {
+  // Set slightly into the future so the async Supabase write has time to land
+  // before the next 30s poll compares against it.
+  _sessionsTs = new Date(Date.now() + 6000).toISOString();
+};
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
 export const LS_KEY       = 'gym_v9';
@@ -66,7 +77,7 @@ export const loadLS = () => {
     return parsed;
   } catch { return {}; }
 };
-export const saveLS = d => { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch {} dbSaveSessions(d); };
+export const saveLS = d => { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch {} markSessionsSaved(); dbSaveSessions(d); };
 
 // ── Athletes ──────────────────────────────────────────────────────────────────
 export const loadAthletes  = () => { try { const d = localStorage.getItem(LS_ATHLETES);  return d ? JSON.parse(d) : []; } catch { return []; } };
@@ -112,11 +123,12 @@ export const saveTemplates = d => { try { localStorage.setItem(LS_TEMPLATES, JSO
 // Called once on app startup. Returns an object with the fresh data so App.jsx
 // can update React state without a reload.
 export async function syncFromSupabase() {
-  const [sessions, athletes, results, events, locations, coach, settings, registry, goalsData, lbColors, templates] =
+  const [sessions, athletes, results, events, locations, coach, settings, registry, goalsData, lbColors, templates, sessionsTs] =
     await Promise.all([
       dbLoadSessions(), dbLoadAthletes(), dbLoadResults(), dbLoadEvents(),
       dbLoadLocations(), dbLoadCoach(), dbLoadSettings(), dbLoadRegistry(),
       dbLoadGoalsData(), dbLoadLBColors(), dbLoadTemplates(),
+      dbGetUpdatedAt('sessions'),
     ]);
 
   const out = {};
@@ -138,6 +150,10 @@ export async function syncFromSupabase() {
   if (goalsData && typeof goalsData === 'object') { saveGoalsData(goalsData); out.goalsData = goalsData; }
   if (lbColors && typeof lbColors === 'object')   { saveLBColors(lbColors);   out.lbColors  = lbColors;  }
   if (Array.isArray(templates))                   { saveTemplates(templates); out.templates = templates; }
+
+  // Record the Supabase timestamp AFTER saveLS (which sets a provisional value).
+  // This becomes the baseline for conflict detection going forward.
+  if (sessionsTs) _sessionsTs = sessionsTs;
 
   return out;
 }
