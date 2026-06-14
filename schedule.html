@@ -84,7 +84,13 @@ html,body{background:var(--bg);color:var(--text);font-family:-apple-system,Blink
 .detail-ex-name.done{color:#444;text-decoration:line-through}
 .detail-ex-vol{display:inline-block;font-size:10px;font-weight:700;color:#ffd700;background:rgba(0,0,0,.4);border:1px solid rgba(255,215,0,.2);border-radius:3px;padding:1px 6px;margin-top:2px}
 .detail-ex-note{font-size:10px;color:#4a9aaa;font-style:italic;margin-top:1px}
+.detail-ex-movement{font-size:11px;color:#999;margin-top:2px;padding-left:2px}
 .detail-block-notes{font-size:10px;color:#555;font-style:italic;margin-top:6px;padding-top:6px;border-top:1px solid #1a1a1a}
+.detail-station{margin:4px 0;padding:6px 8px;background:#0a0a0a;border-radius:4px;border-left:2px solid #c8a030}
+.detail-station-hdr{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.detail-station-name{font-size:11px;font-weight:700;color:#c8a030;text-transform:uppercase;letter-spacing:.06em}
+.detail-station-dur{font-size:10px;color:#000;background:#c8a030;padding:1px 5px;border-radius:2px;font-weight:700}
+.detail-station-rest{margin:4px 0;padding:5px 8px;font-size:11px;color:#444;font-style:italic;border-left:2px solid #252525;background:#080808;border-radius:4px}
 .lb-link{display:flex;align-items:center;gap:6px;margin-top:8px;padding:7px 10px;background:#050e14;border:1px solid var(--cyan);border-radius:5px;color:var(--cyan);font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:.06em;transition:background .12s}
 .lb-link:hover{background:#0a1e28}
 .log-btn{display:flex;align-items:center;gap:6px;width:100%;margin-top:10px;padding:8px 10px;background:transparent;border:1px solid #3a2a1a;border-radius:5px;color:#e87820;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;font-family:inherit;transition:background .12s}
@@ -334,7 +340,43 @@ function renderDetail(sess,dateKey){
       const isWod=WOD_TYPES.includes(bl.label)||WOD_TYPES.includes(bl.type);
       const prog=blockProgress(bl);
       const blDone=prog.total>0&&prog.done===prog.total;
-      const exs=(bl.exercises||[]).filter(e=>e.name);
+      // ── Estações block ──────────────────────────────────────────────────────
+      if(bl.type==='Estações'){
+        const stations=bl.stations||[];
+        const repeat=(bl.stationRepeat||1)>1?`×${bl.stationRepeat}`:'';
+        const stRows=stations.map(st=>{
+          if(st.isRest){
+            return `<div class="detail-station-rest">${st.name||'Descanso'}${st.duration?` — ${st.duration}`:''}</div>`;
+          }
+          const stExs=(st.exercises||[]).filter(e=>e.name||e.isComplex);
+          const stExRows=stExs.map(ex=>{
+            const vol=exVolStr(ex);const ins=fmtIntensity(ex.intensity);
+            return `<div class="detail-ex"><div class="detail-ex-body">
+              <div class="detail-ex-name">${[vol,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
+              ${ins?`<div class="detail-ex-vol">${ins}</div>`:''}
+              ${ex.note?`<div class="detail-ex-note">${ex.note}</div>`:''}
+            </div></div>`;
+          }).join('');
+          return `<div class="detail-station">
+            <div class="detail-station-hdr">
+              <span class="detail-station-name">${st.name||'Grupo'}</span>
+              ${st.duration?`<span class="detail-station-dur">${st.duration}</span>`:''}
+            </div>
+            ${stExRows}
+          </div>`;
+        }).join('');
+        return `<div class="detail-block" style="border-left-color:${col}">
+          <div class="detail-block-hdr">
+            <span class="detail-block-title" style="color:${col}">${label}</span>
+            ${repeat?`<span class="detail-block-meta" style="background:${col};color:#000">${repeat}</span>`:''}
+          </div>
+          ${stRows}
+          ${bl.restBetweenCycles?`<div class="detail-block-notes">Descanso entre ciclos: ${bl.restBetweenCycles}</div>`:''}
+          ${bl.notes?`<div class="detail-block-notes">${bl.notes}</div>`:''}
+        </div>`;
+      }
+
+      const exs=(bl.exercises||[]).filter(e=>e.name||e.isComplex);
 
       // Build progression lines for display
       const exRows=exs.map(ex=>{
@@ -343,6 +385,30 @@ function renderDetail(sess,dateKey){
         const ins=fmtIntensity(ex.intensity);
         const key=`${bl.id}|${ex.id}`;
         const done=checkedExercises.has(key);
+
+        if(ex.isComplex){
+          const mvs=(ex.complexMovements||[]).filter(m=>m.name);
+          const notation=(ex.complexMovements||[]).map(m=>m.reps||'?').join('+');
+          const displayName=ex.name||mvs.map(m=>m.name).join(' + ')||'Complexo';
+          const sets=ex.sets||'';
+          const volStr=[sets,notation?`(${notation})`:''].filter(Boolean).join('×');
+          let loadStr='';
+          if(isProg){
+            const steps=ex.intensity?.steps||[];
+            const unit=(steps[0]?.unit||'% RM').replace('% do RM','% RM');
+            const loads=steps.map(s=>s.load).filter(Boolean);
+            if(loads.length)loadStr=loads.join(' / ')+' '+unit;
+          }else if(ins){loadStr=ins;}
+          return `<div class="detail-ex">
+            <div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>
+            <div class="detail-ex-body">
+              <div class="detail-ex-name${done?' done':''}">${[volStr,displayName.toUpperCase()].filter(Boolean).join(' ')}</div>
+              ${mvs.map(m=>`<div class="detail-ex-movement">· ${[m.reps?m.reps+'×':'',m.name.toUpperCase()].filter(Boolean).join(' ')}</div>`).join('')}
+              ${loadStr?`<div class="detail-ex-vol">${loadStr}</div>`:''}
+              ${ex.note?`<div class="detail-ex-note">${ex.note}</div>`:''}
+            </div>
+          </div>`;
+        }
 
         if(isProg){
           const steps=ex.intensity?.steps||[];

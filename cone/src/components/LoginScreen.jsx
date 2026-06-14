@@ -20,7 +20,7 @@ export default function LoginScreen() {
     });
     setLoading(false);
     if (err) setError(err.message);
-    else { setSent(true); setCode(['', '', '', '', '', '']); }
+    else { setSent(true); setCode(['', '', '', '', '', '', '', '']); }
   };
 
   const handleCodeInput = (i, val) => {
@@ -63,7 +63,7 @@ export default function LoginScreen() {
     setVerifying(false);
     if (err) {
       setError('Código inválido ou expirado. Tente solicitar um novo.');
-      setCode(['', '', '', '', '', '']);
+      setCode(['', '', '', '', '', '', '', '']);
       inputs.current[0]?.focus();
     }
     // On success, App.jsx auth listener will detect the session and unmount LoginScreen

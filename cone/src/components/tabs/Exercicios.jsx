@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { loadRegistry, saveRegistry, loadSettings } from '../../utils/storage';
 import { APP_CONFIG } from '../../utils/config';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -116,6 +116,28 @@ export default function ExerciciosTab() {
     const exs = [...registry[selBlock]];
     const moved = exs.splice(from, 1)[0]; exs.splice(to, 0, moved);
     const reg = { ...registry, [selBlock]: exs };
+    setRegistryState(reg); persist(reg, null);
+  };
+
+  // ── Todos view — aggregated exercise list with block tags ─────────────────
+  const allTaggedExs = useMemo(() => {
+    const exToBlocks = {};
+    Object.entries(registry).forEach(([blockName, exs]) => {
+      exs.forEach(ex => {
+        if (!exToBlocks[ex]) exToBlocks[ex] = [];
+        exToBlocks[ex].push(blockName);
+      });
+    });
+    return Object.entries(exToBlocks)
+      .map(([name, tags]) => ({ name, tags }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt'));
+  }, [registry]);
+
+  const deleteFromAll = name => {
+    const blocks = Object.keys(registry).filter(k => registry[k].includes(name));
+    if (!window.confirm(`Remover "${name}" de ${blocks.length} tipo${blocks.length > 1 ? 's' : ''} de bloco?`)) return;
+    const reg = {};
+    Object.entries(registry).forEach(([k, v]) => { reg[k] = v.filter(e => e !== name); });
     setRegistryState(reg); persist(reg, null);
   };
 
@@ -343,6 +365,16 @@ export default function ExerciciosTab() {
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {/* Todos row */}
+          <div
+            onClick={() => { setSelBlock(null); setEditingBlock(null); }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: selBlock === null ? '#1a1a1a' : '#111', border: `1px solid ${selBlock === null ? '#333' : '#1e1e1e'}`, borderLeft: '3px solid #444', borderRadius: 6, cursor: 'pointer', transition: 'all .1s', marginBottom: 2 }}
+          >
+            <i className="ti ti-list" style={{ color: '#444', fontSize: 14, flexShrink: 0 }} />
+            <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: selBlock === null ? '#fff' : '#888' }}>Todos</span>
+            <span style={{ fontSize: 10, color: '#444' }}>{totalExs}</span>
+          </div>
+
           {blockKeys.map((name, bi) => (
             <div key={name}
               draggable
@@ -413,7 +445,45 @@ export default function ExerciciosTab() {
 
       {/* Right panel — exercises */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, paddingBottom: 60 }}>
-        {selBlock ? (
+        {selBlock === null ? (
+          /* Todos view */
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <i className="ti ti-list" style={{ color: '#555', fontSize: 14 }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.07em' }}>Todos os exercícios</span>
+                <span style={{ fontSize: 11, color: '#555' }}>· {allTaggedExs.length}</span>
+              </div>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {allTaggedExs.length === 0
+                ? <div style={{ padding: 20, textAlign: 'center', color: '#333', fontSize: 13 }}>Nenhum exercício cadastrado.</div>
+                : allTaggedExs.map(({ name, tags }) => (
+                  <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 5, padding: '8px 10px', background: '#0d0d0d', border: '1px solid #1e1e1e', borderRadius: 5 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ flex: 1, fontSize: 13, color: '#ddd' }}>{name}</span>
+                      <button type="button" className="b bd bsm" style={{ padding: '2px 6px', minHeight: 20, fontSize: 11, opacity: .5 }}
+                        onClick={() => deleteFromAll(name)} title="Remover de todos">
+                        <i className="ti ti-trash" />
+                      </button>
+                    </div>
+                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                      {tags.map(tag => {
+                        const c = blockColors_[tag] || '#555';
+                        return (
+                          <span key={tag} style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 3, letterSpacing: '.04em', textTransform: 'uppercase', background: c + '22', color: c, border: `1px solid ${c}44`, cursor: 'pointer' }}
+                            onClick={() => setSelBlock(tag)} title={`Ir para ${tag}`}>
+                            {tag}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </>
+        ) : (
           <>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -442,10 +512,6 @@ export default function ExerciciosTab() {
               </button>
             </div>
           </>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#333', fontSize: 14 }}>
-            ← Selecione um tipo de bloco para ver os exercícios
-          </div>
         )}
       </div>
 
