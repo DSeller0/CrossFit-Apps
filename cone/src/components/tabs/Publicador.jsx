@@ -498,16 +498,16 @@ function MobileEaglesExportView({ sessions, selectedDate, currentWeekDates, gymN
   const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' }).toUpperCase();
   const dateNum = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const ls = logoScale || 1;
-  const bgA = bgOverride || APP_CONFIG.mobileEaglesBg || '#000000';
+  const bgA = bgOverride || APP_CONFIG.mobileEaglesBg || '#0d0b09';
   return React.createElement('div', { style: { background: bgA, width: '1080px', fontFamily: GF() } },
-    React.createElement('div', { style: { background: bgA, padding: `${Math.round(22 * f)}px ${pad}px ${Math.round(18 * f)}px`, borderBottom: '2px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+    React.createElement('div', { style: { background: bgA, padding: `${Math.round(22 * f)}px ${pad}px ${Math.round(18 * f)}px`, borderBottom: `2px solid ${col.date || '#4ac8c0'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
       React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: mfs(16, f) } },
         logoDataUrl && React.createElement('img', { src: logoDataUrl, style: { width: `${Math.round(56 * ls)}px`, height: `${Math.round(56 * ls)}px`, objectFit: 'contain', borderRadius: '4px' } }),
         React.createElement('span', { style: { fontSize: mfs(30, f), fontWeight: 900, color: col.gymName || '#fff', textTransform: 'uppercase', letterSpacing: '.08em' } }, gymName || 'Cone')
       ),
       React.createElement('div', { style: { textAlign: 'right' } },
-        React.createElement('div', { style: { fontSize: mfs(18, f), color: col.date || '#e87820', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em' } }, `${weekday} · ${dateNum}`),
-        s.mainTraining && React.createElement('div', { style: { fontSize: mfs(13, f), color: col.subtitle || '#666', textTransform: 'uppercase', letterSpacing: '.06em', marginTop: mfs(2, f) } }, s.mainTraining)
+        React.createElement('div', { style: { fontSize: mfs(18, f), color: col.date || '#4ac8c0', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em' } }, `${weekday} · ${dateNum}`),
+        s.mainTraining && React.createElement('div', { style: { fontSize: mfs(13, f), color: col.subtitle || '#3a8a80', textTransform: 'uppercase', letterSpacing: '.06em', marginTop: mfs(2, f) } }, s.mainTraining)
       )
     ),
     (s.blocks || []).map(bl => React.createElement(MobileBlockA, { key: bl.id, bl, fs: f, bg: bgA, colors: col }))
@@ -620,10 +620,12 @@ function MobileWeeklySingleDay({ date, sessions, f, col, variant }) {
             const title = _lbl && _typ && _lbl !== _typ ? `${_lbl} · ${_typ}` : _lbl || _typ || '';
             const meta = [bl.rounds && `${bl.rounds} RDS`, bl.duration && `CAP ${bl.duration}'`].filter(Boolean).join(' · ');
             const exNames = (bl.exercises || []).filter(e => e.name || e.isComplex);
+            const blkBg = isA ? 'rgba(74,200,192,0.12)' : 'rgba(0,184,212,0.12)';
+            const blkDiv = isA ? 'rgba(74,200,192,0.08) 1px solid' : 'rgba(0,184,212,0.08) 1px solid';
             return React.createElement('div', { key: bl.id },
-              React.createElement('div', { style: { background: 'rgba(0,184,212,0.12)', padding: `${Math.round(6 * f)}px ${pad}px`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
-                React.createElement('span', { style: { fontSize: mfs(13, f), fontWeight: 900, color: cyan, textTransform: 'uppercase', letterSpacing: '.08em', fontFamily } }, title),
-                meta && React.createElement('span', { style: { fontSize: mfs(11, f), fontWeight: 900, color: '#000', background: cyan, padding: `${Math.round(2 * f)}px ${Math.round(7 * f)}px`, borderRadius: '2px', fontFamily } }, meta)
+              React.createElement('div', { style: { background: blkBg, padding: `${Math.round(6 * f)}px ${pad}px`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+                React.createElement('span', { style: { fontSize: mfs(13, f), fontWeight: 900, color: hdrAccent, textTransform: 'uppercase', letterSpacing: '.08em', fontFamily } }, title),
+                meta && React.createElement('span', { style: { fontSize: mfs(11, f), fontWeight: 900, color: '#000', background: hdrAccent, padding: `${Math.round(2 * f)}px ${Math.round(7 * f)}px`, borderRadius: '2px', fontFamily } }, meta)
               ),
               exNames.map(ex => {
                 const line = ex.isComplex ? complexLine(ex) : (() => {
@@ -631,7 +633,7 @@ function MobileWeeklySingleDay({ date, sessions, f, col, variant }) {
                   const prefix = ex.sets && repsDisplay ? `${ex.sets}×${repsDisplay}` : repsDisplay;
                   return [prefix, ex.name.toUpperCase()].filter(Boolean).join(' ');
                 })();
-                return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(5 * f)}px ${pad}px`, borderBottom: 'rgba(0,184,212,0.08) 1px solid', fontSize: mfs(14, f), fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '.04em', fontFamily, lineHeight: 1.2 } }, line);
+                return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(5 * f)}px ${pad}px`, borderBottom: blkDiv, fontSize: mfs(14, f), fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '.04em', fontFamily, lineHeight: 1.2 } }, line);
               })
             );
           })
@@ -1394,7 +1396,8 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
   const [previewOpen, setPreviewOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [presenterOpen, setPresenterOpen] = useState(false);
-  const [eaglesBg, setEaglesBg] = useState(APP_CONFIG.mobileEaglesBg || '#000000');
+  const migEa = (v, old, nw) => (!v || v === old) ? nw : v;
+  const [eaglesBg, setEaglesBg] = useState(migEa(APP_CONFIG.mobileEaglesBg, '#000000', '#0d0b09'));
   const [megaManBg, setMegaManBg] = useState(APP_CONFIG.mobileMegaManBg || '#0a1a5c');
   const [noteColor, setNoteColor] = useState(APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa');
   const _sc = { ...(_savedSettings.colors || {}), ..._savedSettings };
@@ -1420,13 +1423,13 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
   const [wkExName, setWkExName] = useState(_sc.wkExName || '#666666');
   const [wkDivider, setWkDivider] = useState(_sc.wkDivider || '#1a1a1a');
   const [eaGymName, setEaGymName] = useState(_sc.eaGymName || '#ffffff');
-  const [eaDate, setEaDate] = useState(_sc.eaDate || '#e87820');
-  const [eaSubtitle, setEaSubtitle] = useState(_sc.eaSubtitle || '#666666');
-  const [eaBlockType, setEaBlockType] = useState(_sc.eaBlockType || '#00b8d4');
-  const [eaBlockMeta, setEaBlockMeta] = useState(_sc.eaBlockMeta || '#00b8d4');
+  const [eaDate, setEaDate] = useState(migEa(_sc.eaDate, '#e87820', '#4ac8c0'));
+  const [eaSubtitle, setEaSubtitle] = useState(migEa(_sc.eaSubtitle, '#666666', '#3a8a80'));
+  const [eaBlockType, setEaBlockType] = useState(migEa(_sc.eaBlockType, '#00b8d4', '#4ac8c0'));
+  const [eaBlockMeta, setEaBlockMeta] = useState(migEa(_sc.eaBlockMeta, '#00b8d4', '#4ac8c0'));
   const [eaExName, setEaExName] = useState(_sc.eaExName || '#ffffff');
   const [eaIntensity, setEaIntensity] = useState(_sc.eaIntensity || '#ffd700');
-  const [eaBlockHdr, setEaBlockHdr] = useState(_sc.eaBlockHdr || 'rgba(0,184,212,0.12)');
+  const [eaBlockHdr, setEaBlockHdr] = useState(migEa(_sc.eaBlockHdr, 'rgba(0,184,212,0.12)', 'rgba(74,200,192,0.12)'));
   const [eaDivider, setEaDivider] = useState(_sc.eaDivider || 'rgba(0,184,212,0.1)');
   const [mmGymName, setMmGymName] = useState(_sc.mmGymName || '#ffffff');
   const [mmDate, setMmDate] = useState(_sc.mmDate || '#00b8d4');
