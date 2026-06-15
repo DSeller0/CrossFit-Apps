@@ -1840,8 +1840,18 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
           const move = e => { if (!dragging) return; el.style.left = (e.clientX - ox) + 'px'; el.style.top = (e.clientY - oy) + 'px'; };
           const up = () => { dragging = false; document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
           hdr.addEventListener('mousedown', down);
+          if (!el._touch) {
+            el._touch = true;
+            let ty = 0, swipeFromTop = false;
+            const pill = el.querySelector('.settings-sheet-pill');
+            el.addEventListener('touchstart', e => { ty = e.touches[0].clientY; swipeFromTop = hdr.contains(e.target) || !!(pill && pill.contains(e.target)); }, { passive: true });
+            el.addEventListener('touchend', e => { if (swipeFromTop && e.changedTouches[0].clientY - ty > 60) setSettingsOpen(false); }, { passive: true });
+          }
         }
       },
+        React.createElement('div', { className: 'settings-sheet-pill' },
+          React.createElement('div', { className: 'settings-sheet-pill-bar' })
+        ),
         React.createElement('div', { className: 'settings-drag-hdr' },
           React.createElement('i', { className: 'ti ti-grip-horizontal', style: { color: '#555', fontSize: '16px' } }),
           React.createElement('span', { style: { fontSize: '13px', color: '#888', marginRight: '8px', flexShrink: 0 } }, 'Configurações:'),
@@ -1985,7 +1995,7 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
             }
           }, React.createElement('i', { className: 'ti ti-download' }), ' Salvar config.json')
         ),
-        React.createElement('div', { style: { padding: '4px 16px 10px', fontSize: '11px', color: '#444' } }, 'Arraste pelo topo para mover. Cores também configuráveis em config.json no GitHub.')
+        React.createElement('div', { style: { padding: '4px 16px 10px', fontSize: '11px', color: '#444' } }, 'Cores também configuráveis em config.json no GitHub.')
       )
     ),
     React.createElement('div', { style: { position: 'fixed', left: '-9999px', top: '-9999px', pointerEvents: 'none', zIndex: -1, overflow: 'hidden' } },

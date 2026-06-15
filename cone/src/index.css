@@ -319,10 +319,19 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .blk-wrap.drag-over{border-color:#e87820;box-shadow:0 0 0 2px rgba(232,120,32,.3)}
 .ex-card.drag-over{border-color:#e87820}
 .sc-card.drag-over-session{border-color:#e87820;box-shadow:0 0 0 2px rgba(232,120,32,.2)}
-.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;pointer-events:none}
+.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;pointer-events:all}
 .settings-modal{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #2e2e2e;border-radius:12px;width:820px;max-width:96vw;max-height:88vh;overflow-y:auto;z-index:501;pointer-events:all;box-shadow:0 8px 40px rgba(0,0,0,.8)}
 .settings-drag-hdr{padding:12px 16px;background:#141414;border-bottom:1px solid #252525;border-radius:12px 12px 0 0;display:flex;align-items:center;gap:8px;cursor:grab;user-select:none}
 .settings-drag-hdr:active{cursor:grabbing}
+.settings-sheet-pill{display:none;justify-content:center;padding:10px 0 2px;background:#141414;border-radius:16px 16px 0 0}
+.settings-sheet-pill-bar{width:36px;height:4px;background:#3a3a3a;border-radius:2px}
+@keyframes sht-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@media(max-width:768px){
+  .settings-overlay{background:rgba(0,0,0,.72)}
+  .settings-modal{top:auto!important;bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;max-height:90vh!important;transform:none!important;border-radius:16px 16px 0 0!important;animation:sht-up .25s ease}
+  .settings-drag-hdr{cursor:default;border-radius:0}
+  .settings-sheet-pill{display:flex}
+}
 .settings-body{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .settings-col-title{font-size:11px;font-weight:700;color:#e87820;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #252525}
 .settings-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
