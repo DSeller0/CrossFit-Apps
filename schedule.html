@@ -187,10 +187,16 @@ function fmtIntensity(ins){
 
 function exVolStr(ex){
   const isCardio=ex.intensity?.mode==='cardio';
-  const cardioPrefix=isCardio&&ex.intensity?.cardioVal?`${ex.intensity.cardioVal}${ex.intensity.cardioUnit||'m'}`:'';
+  if(isCardio){
+    const val=ex.intensity?.cardioVal;
+    const unit=ex.intensity?.cardioUnit||'m';
+    if(!val) return '';
+    const nameHasVal=(ex.name||'').toLowerCase().includes(String(val).toLowerCase());
+    return nameHasVal?'':`${val}${unit}`;
+  }
   const repsDisplay=ex.reps?(ex.reps.includes(',')?ex.reps.split(',').map(r=>r.trim()).join('-'):ex.reps):'';
   const volPrefix=ex.sets&&repsDisplay?`${ex.sets}×${repsDisplay}`:repsDisplay;
-  return cardioPrefix||volPrefix;
+  return volPrefix;
 }
 
 // ── Duration helpers ──────────────────────────────────────────────────────────
