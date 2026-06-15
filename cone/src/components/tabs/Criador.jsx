@@ -738,11 +738,11 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
       {/* ── Collapsed bar ── */}
       <div className="blk-bar">
         <span
-          className={`drag-handle${collapsed ? '' : ' dnd-disabled'}`}
-          title={collapsed ? 'Arrastar' : 'Recolha para arrastar'}
-          draggable={collapsed}
-          onDragStart={collapsed ? e => { if (dragBlkIdx) dragBlkIdx.current = blockIdx; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(blockIdx)); } : undefined}
-          onDragEnd={collapsed ? () => { if (dragBlkIdx) dragBlkIdx.current = null; setDragOverBlkIdx?.(null); } : undefined}
+          className="drag-handle"
+          title="Arrastar bloco"
+          draggable
+          onDragStart={e => { if (dragBlkIdx) dragBlkIdx.current = blockIdx; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(blockIdx)); }}
+          onDragEnd={() => { if (dragBlkIdx) dragBlkIdx.current = null; setDragOverBlkIdx?.(null); }}
         >
           <i className="ti ti-grip-vertical" />
         </span>
@@ -906,6 +906,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const [recurEnd, setRecurEnd]             = useState(() => { const d = new Date(); d.setDate(d.getDate() + 28); return toISO(d); });
   const [recurDone, setRecurDone]           = useState(null);
   const [weekOffset, setWeekOffset]         = useState(0);
+  const [weekGridCollapsed, setWeekGridCollapsed] = useState(false);
   const [isDirty, setIsDirty]               = useState(false);
   const [showSessNotes, setShowSessNotes]   = useState(false);
   const [undoToast, setUndoToast]           = useState(null);
@@ -1424,8 +1425,31 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
             {weekOffset !== 0 && (
               <button type="button" className="b bsm" style={{ fontSize: 11, color: '#e87820', borderColor: '#e87820' }} onClick={() => setWeekOffset(0)}>Hoje</button>
             )}
-            <span style={{ fontSize: 11, color: '#444', marginLeft: 4 }}>Toque para editar · deslize para rolar</span>
+            <span style={{ flex: 1 }} />
+            <button type="button" className="b bsm" title={weekGridCollapsed ? 'Expandir grade' : 'Minimizar grade'}
+              onClick={() => setWeekGridCollapsed(v => !v)}>
+              <i className={`ti ti-layout-${weekGridCollapsed ? 'rows' : 'navbar'}`} />
+            </button>
           </div>
+          {weekGridCollapsed ? (
+            <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 4 }}>
+              {weekDates.map((date, di) => {
+                const dateKey = toISO(date);
+                const list = sessions[dateKey] || [];
+                const isToday = dateKey === todayISO();
+                const isEditing = (sessions[dateKey] || []).some(s => s.id === editing?.id);
+                return (
+                  <button key={dateKey} type="button"
+                    style={{ flexShrink: 0, minWidth: 52, padding: '6px 8px', background: isEditing ? 'rgba(74,200,192,.08)' : isToday ? '#1a1a12' : '#161616', border: '1px solid ' + (isEditing ? '#4ac8c060' : isToday ? '#3a3a20' : '#252525'), borderRadius: 7, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, cursor: 'pointer' }}
+                    onClick={() => { setForm(f => ({ ...f, date: dateKey })); setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: isToday ? '#d8a840' : '#666', textTransform: 'uppercase', letterSpacing: '.04em' }}>{WEEK_DAYS[di]}</span>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: isEditing ? '#4ac8c0' : isToday ? '#d8a840' : '#bbb' }}>{date.getDate()}</span>
+                    {list.length > 0 && <span style={{ fontSize: 10, color: '#4ac8c0', fontWeight: 700 }}>{list.length}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
           <div className="week-scroll">
             <div className="week-grid">
               {weekDates.map((date, di) => {
@@ -1509,6 +1533,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
               })}
             </div>
           </div>
+          )}
         </div>
       )}
     </div>
