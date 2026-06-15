@@ -1790,9 +1790,35 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
       )
     ),
     previewOpen && React.createElement('div', null,
+      React.createElement('div', { style: { display: 'flex', gap: '6px', marginBottom: '6px', flexWrap: 'wrap', alignItems: 'center' } },
+        React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'semanal' ? 'on' : ''}`, onClick: () => { setPreviewTarget('semanal'); setSelectedDate(null); } }, 'Semanal'),
+        getWeeksOfMonth(year, month).map((week, wi) => {
+          const mon = week[1]; const fri = week[5];
+          const fmt = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+          const active = selectedWeekIdx === wi;
+          return React.createElement('button', { key: wi, type: 'button', className: 'b bsm',
+            style: { background: active ? 'var(--theme-accent)' : 'transparent', color: active ? 'var(--theme-accent-text)' : 'var(--theme-accent)', borderColor: 'var(--theme-accent)', fontSize: '11px', padding: '5px 10px' },
+            onClick: () => { setSelectedWeekIdx(wi); setSelectedWeek(week); setSelectedDate(null); setPreviewTarget('semanal'); }
+          }, `${fmt(mon)}–${fmt(fri)}`);
+        })
+      ),
       React.createElement('div', { style: { display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap', alignItems: 'center' } },
         React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'daily' ? 'on' : ''}`, onClick: () => setPreviewTarget('daily') }, 'Diário'),
-        React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'semanal' ? 'on' : ''}`, onClick: () => setPreviewTarget('semanal') }, 'Semanal'),
+        (() => {
+          const selWk = getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates;
+          return selWk.slice(1).map(d => {
+            const iso = toISO(d);
+            const hasSession = !!(filteredSessions[iso]?.length);
+            const active = selectedDate === iso;
+            return React.createElement('button', {
+              key: iso, type: 'button', className: 'b bsm',
+              style: { background: active ? 'var(--theme-accent)' : 'transparent', color: active ? 'var(--theme-accent-text)' : hasSession ? 'var(--theme-accent)' : '#444', borderColor: hasSession ? 'var(--theme-accent)' : '#333', fontSize: '11px', padding: '5px 10px' },
+              onClick: () => { setSelectedDate(iso); setSelectedWeek(selWk); setPreviewTarget('daily'); }
+            }, d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }));
+          });
+        })()
+      ),
+      React.createElement('div', { style: { display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap', alignItems: 'center' } },
         React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'calendar' ? 'on' : ''}`, onClick: () => setPreviewTarget('calendar') }, 'Exportar Mensal'),
         React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'mobileA' ? 'on' : ''}`, style: previewTarget === 'mobileA' ? { background: 'var(--theme-accent)', borderColor: 'var(--theme-accent)', color: 'var(--theme-accent-text)' } : { color: 'var(--theme-accent)', borderColor: 'var(--theme-accent)' }, onClick: () => setPreviewTarget('mobileA') }, 'Mobile 01'),
         React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'mobileB' ? 'on' : ''}`, style: previewTarget === 'mobileB' ? { background: '#00b8d4', borderColor: '#00b8d4', color: '#000' } : { color: '#00b8d4', borderColor: '#00b8d4' }, onClick: () => setPreviewTarget('mobileB') }, 'Mobile 02'),
@@ -1802,15 +1828,6 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
           React.createElement('i', { className: 'ti ti-download', 'aria-hidden': 'true' }),
           ` Baixar ${previewTarget === 'daily' ? 'Diário' : previewTarget === 'semanal' ? 'Semanal' : previewTarget === 'calendar' ? 'Calendário' : previewTarget === 'mobileA' ? 'Mobile 01' : previewTarget === 'mobileB' ? 'Mobile 02' : previewTarget === 'mobileWeeklyA' ? (APP_CONFIG.mobileWeeklyLabels?.[0] || 'Semanal 01').slice(0, 15) : (APP_CONFIG.mobileWeeklyLabels?.[1] || 'Semanal 02').slice(0, 15)}`
         )
-      ),
-      (previewTarget === 'semanal' || previewTarget === 'mobileWeeklyA' || previewTarget === 'mobileWeeklyB') && React.createElement('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px', alignItems: 'center' } },
-        React.createElement('span', { style: { fontSize: '11px', color: '#555', marginRight: '4px', textTransform: 'uppercase', letterSpacing: '.06em' } }, 'Semana:'),
-        getWeeksOfMonth(year, month).map((week, wi) => {
-          const mon = week[1]; const fri = week[5];
-          const fmt = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-          const active = selectedWeekIdx === wi;
-          return React.createElement('button', { key: wi, type: 'button', className: 'b bsm', style: { background: active ? 'var(--theme-accent)' : 'transparent', color: active ? 'var(--theme-accent-text)' : 'var(--theme-accent)', borderColor: 'var(--theme-accent)', fontSize: '11px', padding: '5px 10px' }, onClick: () => setSelectedWeekIdx(wi) }, `${fmt(mon)}–${fmt(fri)}`);
-        })
       ),
       previewTarget === 'daily' && React.createElement('div', { style: { display: 'flex', gap: '10px', marginBottom: '8px', flexWrap: 'wrap', background: '#161616', border: '1px solid #252525', borderRadius: '6px', padding: '10px 12px' } },
         React.createElement('span', { style: { fontSize: '10px', color: '#555', textTransform: 'uppercase', letterSpacing: '.07em', width: '100%', marginBottom: '2px' } }, 'Tamanho da fonte — por zona'),
@@ -1837,24 +1854,6 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
             )
           )
         )
-      ),
-      (previewTarget === 'daily' || previewTarget === 'mobileA' || previewTarget === 'mobileB') && allSessionDates.length > 0 && React.createElement('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px', alignItems: 'center' } },
-        React.createElement('span', { style: { fontSize: '11px', color: '#555', marginRight: '4px', textTransform: 'uppercase', letterSpacing: '.06em' } }, 'Dia:'),
-        allSessionDates.map(dateKey => {
-          const d = new Date(dateKey + 'T12:00:00');
-          const lbl = d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
-          const active = selectedDate === dateKey;
-          return React.createElement('button', {
-            key: dateKey, type: 'button', className: 'b bsm',
-            style: { background: active ? 'var(--theme-accent)' : 'transparent', color: active ? 'var(--theme-accent-text)' : 'var(--theme-accent)', borderColor: 'var(--theme-accent)', fontSize: '11px', padding: '5px 10px' },
-            onClick: () => {
-              setSelectedDate(dateKey);
-              const weeks = getWeeksOfMonth(new Date(dateKey + 'T12:00:00').getFullYear(), new Date(dateKey + 'T12:00:00').getMonth());
-              const wk = weeks.find(w => w.some(d2 => toISO(d2) === dateKey));
-              if (wk) setSelectedWeek(wk);
-            }
-          }, lbl);
-        })
       ),
       React.createElement('div', { ref: previewWrapRef, style: { width: '100%', marginBottom: '12px', borderRadius: '8px', overflow: 'hidden', background: '#000', position: 'relative' } },
         React.createElement('div', { style: { transform: `scale(${(previewTarget === 'mobileA' || previewTarget === 'mobileB') ? (previewWrapRef.current?.offsetWidth || 800) / 1080 : previewScale})`, transformOrigin: 'top left', width: (previewTarget === 'mobileA' || previewTarget === 'mobileB') ? '1080px' : '1920px', pointerEvents: 'none' } },
