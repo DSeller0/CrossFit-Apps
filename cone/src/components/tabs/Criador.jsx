@@ -32,7 +32,6 @@ const emptyS = () => ({ id: uid(), date: todayISO(), mainTraining: [], sessionNa
 // ── Type metadata ─────────────────────────────────────────────────────────────
 const TYPE_CONFIG = {
   // RED family — intensity blocks
-  'WOD':        { icon: 'ti-star',        color: '#d04848', desc: 'Workout of the Day',          showDuration: true,  showRounds: false, durationLabel: 'Duração (min)' },
   'HIIT':       { icon: 'ti-bolt',        color: '#e05848', desc: 'Alta intensidade intervalado', showDuration: true,  showRounds: true,  durationLabel: 'Intervalo (s)'  },
   'MetCon':     { icon: 'ti-flame',       color: '#c84040', desc: 'Condicionamento misto',        showDuration: true,  showRounds: false, durationLabel: 'Duração (min)' },
   // AMBER family — time-structured blocks
@@ -46,7 +45,7 @@ const TYPE_CONFIG = {
   'Core':       { icon: 'ti-hexagon',     color: '#6090d8', desc: 'Core e estabilização',         showDuration: false, showRounds: true,  durationLabel: '' },
   'Acessórios': { icon: 'ti-dumbbell',    color: '#4878b8', desc: 'Trabalho acessório',            showDuration: false, showRounds: true,  durationLabel: '' },
   // GREEN family — movement quality blocks
-  'Aquecimento':{ icon: 'ti-sun',         color: '#80c040', desc: 'Aquecimento e preparação',     showDuration: true,  showRounds: false, durationLabel: 'Duração (min)' },
+  'Aquecimento':{ icon: 'ti-sun',         color: '#80c040', desc: 'Aquecimento e preparação',     showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Skill':      { icon: 'ti-target',      color: '#4ac8c0', desc: 'Técnica e habilidade',         showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Cardio':     { icon: 'ti-run',         color: '#40b878', desc: 'Cardio / Aeróbico',             showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Mobilidade': { icon: 'ti-leaf',        color: '#30a868', desc: 'Mobilidade e flexibilidade',   showDuration: true,  showRounds: false, durationLabel: 'Duração (min)' },

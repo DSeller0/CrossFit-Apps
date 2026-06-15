@@ -13,7 +13,7 @@ export const APP_CONFIG = {
   athleteLevels: ['Iniciante','Intermediário','Avançado','Competidor'],
   athleteGoals: ['Saúde geral','Força','Condicionamento','Competição'],
   blockColors: {},
-  blockNames: ['-','WOD','Skill','Core','Acessórios','LPO','Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Estações','Descanso'],
+  blockNames: ['-','Skill','Core','Acessórios','LPO','Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Estações','Descanso'],
   appTitle: 'Cone — Treinos',
   appDescription: 'Criador e publicador de treinos Cone',
   scheduleTitle: 'Cone — Treinos',

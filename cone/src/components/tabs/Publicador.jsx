@@ -56,6 +56,13 @@ function buildProgressionLines(ex) {
   });
 }
 
+function exLine(ex) {
+  const reps = ex.reps ? (ex.reps.includes(',') ? ex.reps.split(',').map(r => r.trim()).join('-') : ex.reps) : '';
+  const vol = ex.sets && reps ? `${ex.sets}×${reps}` : reps;
+  const cardio = ex.intensity?.mode === 'cardio' ? (fmtIntensity(ex.intensity) || '') : '';
+  return [vol, cardio, ex.name.toUpperCase()].filter(Boolean).join(' ');
+}
+
 function complexLine(ex) {
   const movs = ex.complexMovements || [];
   const displayName = ex.name || movs.map(m => m.name).join(' + ') || 'Complexo';
@@ -216,9 +223,7 @@ function DailyExportView({ sessions, label, weekDates, gymName, fontScale, zoneS
                         );
                       }
                       const isProg = ex.intensity?.mode === 'progression';
-                      const repsDisplay = ex.reps ? (ex.reps.includes(',') ? ex.reps.split(',').map(r => r.trim()).join('-') : ex.reps) : '';
-                      const volPrefix = ex.sets && repsDisplay ? `${ex.sets}×${repsDisplay}` : repsDisplay;
-                      const line = [volPrefix, ex.name.toUpperCase()].filter(Boolean).join(' ');
+                      const line = exLine(ex);
                       if (isProg) {
                         const progLines = buildProgressionLines(ex);
                         if (!progLines || !progLines.length) {
@@ -361,7 +366,7 @@ function WeeklyCalendarExportView({ sessions, label, year, month, gymName, logoD
                       React.createElement('div', { style: { fontSize: `calc(12px * var(--fs,1))`, fontWeight: 900, color: blCol, textTransform: 'uppercase', letterSpacing: '.07em', lineHeight: 1.2 } }, bl.type + (meta ? ` · ${meta}` : '')),
                       exs.slice(0, 4).map(ex =>
                         React.createElement('div', { key: ex.id, style: { marginTop: '3px' } },
-                          React.createElement('div', { style: { fontSize: `calc(13px * var(--fs,1))`, fontWeight: 900, color: wk.exName || '#fff', textTransform: 'uppercase', letterSpacing: '.04em', lineHeight: 1.15 } }, ex.isComplex ? complexLine(ex) : ex.name)
+                          React.createElement('div', { style: { fontSize: `calc(13px * var(--fs,1))`, fontWeight: 900, color: wk.exName || '#fff', textTransform: 'uppercase', letterSpacing: '.04em', lineHeight: 1.15 } }, ex.isComplex ? complexLine(ex) : exLine(ex))
                         )
                       ),
                       bl.notes && React.createElement('div', { style: { fontSize: `calc(10px * var(--fs,1))`, color: '#555', marginTop: '3px', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.4 } }, bl.notes)
@@ -459,9 +464,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
           );
         }
         const isProg = ex.intensity?.mode === 'progression';
-        const repsDisplay = ex.reps ? (ex.reps.includes(',') ? ex.reps.split(',').map(r => r.trim()).join('-') : ex.reps) : '';
-        const volPrefix = ex.sets && repsDisplay ? `${ex.sets}×${repsDisplay}` : repsDisplay;
-        const line = [volPrefix, ex.name.toUpperCase()].filter(Boolean).join(' ');
+        const line = exLine(ex);
         if (isProg) {
           const progLines = buildProgressionLines(ex);
           if (!progLines || !progLines.length) return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(6 * f)}px 0`, borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}` } },
@@ -475,7 +478,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
             ex.note && React.createElement('div', { style: { fontSize: mfs(12, f), color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa', fontStyle: 'italic', marginTop: mfs(2, f) } }, ex.note)
           );
         }
-        const ins = fmtIntensity(ex.intensity);
+        const ins = ex.intensity?.mode !== 'cardio' ? fmtIntensity(ex.intensity) : null;
         return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(6 * f)}px 0`, borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}` } },
           React.createElement('div', { style: { fontSize: mfs(17, f), fontWeight: 900, color: col.exName || '#fff', textTransform: 'uppercase', letterSpacing: '.04em', fontFamily: GF(), lineHeight: 1.2 } }, line),
           ins && React.createElement('div', { style: { display: 'inline-block', fontSize: mfs(13, f), fontWeight: 700, color: '#ffd700', background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,215,0,0.25)', borderRadius: '3px', padding: `${Math.round(2 * f)}px ${Math.round(8 * f)}px`, marginTop: mfs(3, f), fontFamily: GF() } }, ins),
@@ -539,9 +542,7 @@ function MobileBlockB({ bl, fs, colors }) {
           );
         }
         const isProg = ex.intensity?.mode === 'progression';
-        const repsDisplay = ex.reps ? (ex.reps.includes(',') ? ex.reps.split(',').map(r => r.trim()).join('-') : ex.reps) : '';
-        const volPrefix = ex.sets && repsDisplay ? `${ex.sets}×${repsDisplay}` : repsDisplay;
-        const line = [volPrefix, ex.name.toUpperCase()].filter(Boolean).join(' ');
+        const line = exLine(ex);
         if (isProg) {
           const progLines = buildProgressionLines(ex);
           if (!progLines || !progLines.length) return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(6 * f)}px 0`, borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}` } },
@@ -555,7 +556,7 @@ function MobileBlockB({ bl, fs, colors }) {
             ex.note && React.createElement('div', { style: { fontSize: mfs(11, f), color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa', fontStyle: 'italic', marginTop: mfs(2, f) } }, ex.note)
           );
         }
-        const ins = fmtIntensity(ex.intensity);
+        const ins = ex.intensity?.mode !== 'cardio' ? fmtIntensity(ex.intensity) : null;
         return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(6 * f)}px 0`, borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}` } },
           React.createElement('div', { style: { fontSize: mfs(17, f), fontWeight: 900, color: col.exName || '#fff', textTransform: 'uppercase', letterSpacing: '.05em', fontFamily: GF(), lineHeight: 1.2 } }, line),
           ins && React.createElement('div', { style: { display: 'inline-block', fontSize: mfs(13, f), fontWeight: 700, color: '#ffd700', background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,215,0,0.25)', borderRadius: '3px', padding: `${Math.round(2 * f)}px ${Math.round(8 * f)}px`, marginTop: mfs(3, f), fontFamily: GF() } }, ins),
@@ -628,11 +629,7 @@ function MobileWeeklySingleDay({ date, sessions, f, col, variant }) {
                 meta && React.createElement('span', { style: { fontSize: mfs(11, f), fontWeight: 900, color: '#000', background: hdrAccent, padding: `${Math.round(2 * f)}px ${Math.round(7 * f)}px`, borderRadius: '2px', fontFamily } }, meta)
               ),
               exNames.map(ex => {
-                const line = ex.isComplex ? complexLine(ex) : (() => {
-                  const repsDisplay = ex.reps ? (ex.reps.includes(',') ? ex.reps.split(',').map(r => r.trim()).join('-') : ex.reps) : '';
-                  const prefix = ex.sets && repsDisplay ? `${ex.sets}×${repsDisplay}` : repsDisplay;
-                  return [prefix, ex.name.toUpperCase()].filter(Boolean).join(' ');
-                })();
+                const line = ex.isComplex ? complexLine(ex) : exLine(ex);
                 return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(5 * f)}px ${pad}px`, borderBottom: blkDiv, fontSize: mfs(14, f), fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '.04em', fontFamily, lineHeight: 1.2 } }, line);
               })
             );
