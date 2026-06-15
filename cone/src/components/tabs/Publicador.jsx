@@ -213,7 +213,7 @@ function DailyExportView({ sessions, label, weekDates, gymName, fontScale, zoneS
                         [bl.rounds && `${bl.rounds} RDS`, bl.duration && `CAP ${bl.duration}'`].filter(Boolean).join(' · ')
                       )
                     ),
-                    bl.exercises.filter(e => e.name || e.isComplex).map(ex => {
+                    (bl.exercises || []).filter(e => e.name || e.isComplex).map(ex => {
                       if (ex.isComplex) {
                         const movs = ex.complexMovements || [];
                         return React.createElement('div', { key: ex.id, className: 'dv-ex-item', style: { borderBottom: `1px solid ${dv.divider || 'transparent'}` } },
@@ -246,7 +246,7 @@ function DailyExportView({ sessions, label, weekDates, gymName, fontScale, zoneS
                       );
                     }),
                     (() => {
-                      const loads = [...new Set(bl.exercises.filter(e => e.name && fmtIntensity(e.intensity) && e.intensity?.mode !== 'cardio' && e.intensity?.mode !== 'progression').map(e => fmtIntensity(e.intensity)))];
+                      const loads = [...new Set((bl.exercises || []).filter(e => e.name && fmtIntensity(e.intensity) && e.intensity?.mode !== 'cardio' && e.intensity?.mode !== 'progression').map(e => fmtIntensity(e.intensity)))];
                       return loads.length > 0 && React.createElement('div', { className: 'dv-block-notes', style: { borderTop: `1px solid ${dv.divider || '#1a1a1a'}`, marginTop: '6px', paddingTop: '6px', color: dv.intensity || '#f5c842', fontStyle: 'normal', fontWeight: 700 } },
                         loads.join(' · ')
                       );
