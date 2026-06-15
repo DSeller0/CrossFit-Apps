@@ -193,18 +193,52 @@ function exVolStr(ex){
   return cardioPrefix||volPrefix;
 }
 
+// ── Duration helpers ──────────────────────────────────────────────────────────
+function parseDurMins(d){
+  if(!d) return 0;
+  const p=String(d).trim();
+  if(p.includes(':')){const[m,s]=p.split(':').map(n=>parseInt(n)||0);return m+s/60;}
+  return parseInt(p)||0;
+}
+
+function stationsCapMins(bl){
+  const stations=bl.stations||[];
+  const cycleMins=stations.reduce((t,st)=>t+parseDurMins(st.duration),0);
+  const last=stations[stations.length-1];
+  const lastRestMins=last?.isRest?parseDurMins(last.duration):0;
+  const repeat=bl.stationRepeat||1;
+  const betweenMins=parseDurMins(bl.restBetweenCycles);
+  const total=cycleMins*repeat+Math.max(0,repeat-1)*betweenMins-lastRestMins;
+  return total>0?Math.round(total):0;
+}
+
 // ── Progress tracking ─────────────────────────────────────────────────────────
 function blockProgress(bl){
-  const exs=(bl.exercises||[]).filter(e=>e.name);
+  const exs=(bl.exercises||[]).filter(e=>e.name||e.isComplex);
   if(!exs.length) return {done:0,total:0};
-  const done=exs.filter(ex=>checkedExercises.has(`${bl.id}|${ex.id}`)).length;
+  let done=0;
+  exs.forEach(ex=>{
+    const isProg=!ex.isComplex&&ex.intensity?.mode==='progression';
+    if(isProg){
+      // progression exercises render one checkbox per reps-group; all must be checked
+      const steps=ex.intensity?.steps||[];
+      const groups=[];
+      steps.forEach(s=>{
+        const reps=s.reps||ex.reps||'';
+        if(!groups.find(g=>g.reps===reps)) groups.push({reps});
+      });
+      if(groups.length===0||groups.every((_,gi)=>checkedExercises.has(`${bl.id}|${ex.id}-${gi}`))) done++;
+    } else {
+      if(checkedExercises.has(`${bl.id}|${ex.id}`)) done++;
+    }
+  });
   return {done,total:exs.length};
 }
 
 function sessionProgress(sess){
   const blocks=(sess.blocks||[]);
   const done=blocks.filter(bl=>{const p=blockProgress(bl);return p.total>0&&p.done===p.total;}).length;
-  return {done,total:blocks.filter(bl=>(bl.exercises||[]).some(e=>e.name)).length};
+  return {done,total:blocks.filter(bl=>(bl.exercises||[]).some(e=>e.name||e.isComplex)).length};
 }
 
 // ── Toggle helpers ────────────────────────────────────────────────────────────
@@ -365,10 +399,14 @@ function renderDetail(sess,dateKey){
             ${stExRows}
           </div>`;
         }).join('');
+        const capMins=stationsCapMins(bl);
         return `<div class="detail-block" style="border-left-color:${col}">
           <div class="detail-block-hdr">
             <span class="detail-block-title" style="color:${col}">${label}</span>
-            ${repeat?`<span class="detail-block-meta" style="background:${col};color:#000">${repeat}</span>`:''}
+            <div style="display:flex;align-items:center;gap:6px">
+              ${repeat?`<span class="detail-block-meta" style="background:${col};color:#000">${repeat}</span>`:''}
+              ${capMins>0?`<span class="detail-block-meta" style="background:#1e1e1e;color:#aaa;border:1px solid #333">Cap ${capMins}'</span>`:''}
+            </div>
           </div>
           ${stRows}
           ${bl.restBetweenCycles?`<div class="detail-block-notes">Descanso entre ciclos: ${bl.restBetweenCycles}</div>`:''}
@@ -595,7 +633,7 @@ async function fetchState(){
 }
 
 // ── Load data ─────────────────────────────────────────────────────────────────
-async function init(){
+async function init(attempt=0){
   try{
     const [cfgRes,stateData]=await Promise.all([
       fetch('./config.json?v='+Date.now()).catch(()=>null),
@@ -610,6 +648,7 @@ async function init(){
     state=stateData;
     render();
   }catch(e){
+    if(attempt<2){setTimeout(()=>init(attempt+1),2000*(attempt+1));return;}
     document.getElementById('app').innerHTML=`
       <div class="error">
         <i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>
