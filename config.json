@@ -4,7 +4,6 @@
   "themeAccentText": "#000000",
   "gymName": "Cone",
   "blockColors": {
-    "WOD": "#e87820",
     "Skill": "#e87820",
     "Core": "#e87820",
     "Acessórios": "#e87820",
@@ -22,7 +21,6 @@
   },
   "blockNames": [
     "-",
-    "WOD",
     "Skill",
     "Core",
     "Acessórios",
@@ -52,8 +50,8 @@
   ],
   "restDayLabel": "Descanso",
   "mobileWeeklyLabels": [
-    "Mobile Semanal Cone",
-    "Mobile Semanal Medrado"
+    "Mobile Semanal 01",
+    "Mobile Semanal 02"
   ],
   "lbColors": {
     "lbBg": "#000000",
