@@ -682,7 +682,7 @@ function StationEditor({ block, onUpdate }) {
 }
 
 // ── BlockEditor ───────────────────────────────────────────────────────────────
-function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, collapsed, onToggleCollapse, dragBlkIdx, dragOverBlkIdx, setDragOverBlkIdx, reorderBlocks, blockIdx }) {
+function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy, collapsed, onToggleCollapse, dragBlkIdx, dragOverBlkIdx, setDragOverBlkIdx, reorderBlocks, blockIdx }) {
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [showAdv, setShowAdv] = useState(false);
   const dragExIdx = useRef(null);
@@ -759,6 +759,9 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, collap
 
         <div className="blk-spacer" />
 
+        <button type="button" className="b bsm" style={{ padding: '3px 8px', minHeight: 26, fontSize: 11 }} onClick={onCopy} title="Duplicar bloco">
+          <i className="ti ti-copy" />
+        </button>
         {total > 1 && (
           <button type="button" className="b bd bsm" style={{ padding: '3px 8px', minHeight: 26, fontSize: 11 }} onClick={onDelete}>
             <i className="ti ti-trash" />
@@ -1006,7 +1009,25 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   });
 
   // Block management
-  const addBlock = type => { setBlocks(b => [...b, emptyBlock(type)]); setShowBlockPicker(false); };
+  const [insertAtIdx, setInsertAtIdx] = useState(null);
+  const addBlock = type => {
+    const newBlk = emptyBlock(type);
+    setBlocks(b => {
+      if (insertAtIdx === null) return [...b, newBlk];
+      const next = [...b]; next.splice(insertAtIdx + 1, 0, newBlk); return next;
+    });
+    setInsertAtIdx(null);
+    setShowBlockPicker(false);
+  };
+  const copyBlock = id => {
+    setBlocks(b => {
+      const idx = b.findIndex(x => x.id === id);
+      if (idx < 0) return b;
+      const orig = b[idx];
+      const copy = { ...orig, id: uid(), exercises: (orig.exercises || []).map(ex => ({ ...ex, id: uid() })) };
+      const next = [...b]; next.splice(idx + 1, 0, copy); return next;
+    });
+  };
   const updBlock = (id, upd) => setBlocks(b => b.map(x => x.id === id ? upd : x));
   const delBlock = id => setBlocks(b => b.length > 1 ? b.filter(x => x.id !== id) : b);
 
@@ -1082,8 +1103,8 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                         <div style={{ fontSize: 11, color: '#555', marginBottom: 5 }}>{tpl.blocks.length} bloco{tpl.blocks.length !== 1 ? 's' : ''}</div>
                         {tpl.blocks.length > 0 && (() => {
                           const types = tpl.blocks.map(b => b.type || b.label || '?');
-                          const shown = types.slice(0, 5);
-                          const rest = types.length - 5;
+                          const shown = types.slice(0, 10);
+                          const rest = types.length - 10;
                           return (
                             <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                               {shown.map((t, i) => <span key={i} className={`wg-pill ${PLC[t] || 'p-st'}`}>{t}</span>)}
@@ -1285,22 +1306,35 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
             )}
           </div>
 
-          {blocks.map((bl, i) => (
-            <BlockEditor
-              key={bl.id}
-              block={bl} idx={i} total={blocks.length}
-              blockNames={blockNames || APP_CONFIG.blockNames}
-              onUpdate={upd => updBlock(bl.id, upd)}
-              onDelete={() => delBlock(bl.id)}
-              collapsed={!!collapsedBlocks[bl.id]}
-              onToggleCollapse={() => setCollapsedBlocks(p => ({ ...p, [bl.id]: !p[bl.id] }))}
-              dragBlkIdx={dragBlkIdx} dragOverBlkIdx={dragOverBlkIdx}
-              setDragOverBlkIdx={setDragOverBlkIdx} reorderBlocks={reorderBlocks} blockIdx={i}
-            />
-          ))}
+          {blocks.flatMap((bl, i) => {
+            const editor = (
+              <BlockEditor
+                key={bl.id}
+                block={bl} idx={i} total={blocks.length}
+                blockNames={blockNames || APP_CONFIG.blockNames}
+                onUpdate={upd => updBlock(bl.id, upd)}
+                onDelete={() => delBlock(bl.id)}
+                onCopy={() => copyBlock(bl.id)}
+                collapsed={!!collapsedBlocks[bl.id]}
+                onToggleCollapse={() => setCollapsedBlocks(p => ({ ...p, [bl.id]: !p[bl.id] }))}
+                dragBlkIdx={dragBlkIdx} dragOverBlkIdx={dragOverBlkIdx}
+                setDragOverBlkIdx={setDragOverBlkIdx} reorderBlocks={reorderBlocks} blockIdx={i}
+              />
+            );
+            if (i < blocks.length - 1) {
+              return [editor, (
+                <button key={`ins-${i}`} type="button" className="insert-blk-btn"
+                  title="Inserir bloco aqui"
+                  onClick={() => { setInsertAtIdx(i); setShowBlockPicker(true); }}>
+                  <i className="ti ti-plus" />
+                </button>
+              )];
+            }
+            return [editor];
+          })}
 
           {/* Add block */}
-          <button type="button" className="add-blk-btn" style={{ width: '100%', marginBottom: 0 }} onClick={() => setShowBlockPicker(true)}>
+          <button type="button" className="add-blk-btn" style={{ width: '100%', marginBottom: 0 }} onClick={() => { setInsertAtIdx(null); setShowBlockPicker(true); }}>
             <i className="ti ti-layout-grid-add" style={{ fontSize: 16 }} /> Adicionar bloco
           </button>
         </div>
