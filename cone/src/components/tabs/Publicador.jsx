@@ -1158,7 +1158,9 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
     });
   }
   function openForm(type, date, existingEv) {
-    const defaults = existingEv || { id: uid2(), date, time: '07:00', durationMin: 60, type, label: type === 'aula' ? 'Turma Manhã' : '', sessionId: null, athleteIds: [], status: 'scheduled', notes: '' };
+    const defaults = existingEv
+      ? { ...existingEv, id: existingEv.id || uid2() }
+      : { id: uid2(), date, time: '07:00', durationMin: 60, type, label: type === 'aula' ? 'Turma Manhã' : '', sessionId: null, athleteIds: [], status: 'scheduled', notes: '' };
     setFormData(defaults);
     setShowForm({ type, eventId: existingEv?.id || null, date });
   }
