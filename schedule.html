@@ -181,7 +181,7 @@ function fmtIntensity(ins){
     });
     return p.join(' | ')||null;
   }
-  if(ins.mode==='cardio') return ins.cardioVal?(ins.cardioVal+(ins.cardioUnit||'m')):null;
+  if(ins.mode==='cardio') return null; // distance already shown in name line via exVolStr
   return null;
 }
 

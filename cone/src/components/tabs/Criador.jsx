@@ -48,7 +48,7 @@ const TYPE_CONFIG = {
   // GREEN family — movement quality blocks
   'Aquecimento':{ icon: 'ti-sun',         color: '#80c040', desc: 'Aquecimento e preparação',     showDuration: true,  showRounds: false, durationLabel: 'Duração (min)' },
   'Skill':      { icon: 'ti-target',      color: '#4ac8c0', desc: 'Técnica e habilidade',         showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
-  'Cardio':     { icon: 'ti-run',         color: '#40b878', desc: 'Cardio / Aeróbico',             showDuration: true,  showRounds: false, durationLabel: 'Duração (min)' },
+  'Cardio':     { icon: 'ti-run',         color: '#40b878', desc: 'Cardio / Aeróbico',             showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Mobilidade': { icon: 'ti-leaf',        color: '#30a868', desc: 'Mobilidade e flexibilidade',   showDuration: true,  showRounds: false, durationLabel: 'Duração (min)' },
   // NEUTRAL
   'Descanso':   { icon: 'ti-moon',        color: '#555',    desc: 'Descanso / Recovery',           showDuration: false, showRounds: false, durationLabel: '' },
