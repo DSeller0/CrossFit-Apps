@@ -682,6 +682,22 @@ function EventFormInner({ showForm, sessions, athletes, initialData, onSave, onC
   const set = (k, v) => setFd(p => ({ ...p, [k]: v }));
   const toggleAthlete = id => setFd(p => ({ ...p, athleteIds: p.athleteIds?.includes(id) ? p.athleteIds.filter(x => x !== id) : [...(p.athleteIds || []), id] }));
   const selSvc = !isPers && fd.locationId ? locs.find(l => l.id === fd.locationId) : null;
+  const [rec, setRec] = useState({ enabled: false, freq: 'weekly', days: [new Date(showForm.date + 'T12:00:00').getDay()], until: '' });
+  const _uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const toggleRecDay = i => setRec(r => ({ ...r, days: r.days.includes(i) ? r.days.filter(x => x !== i) : [...r.days, i] }));
+  const handleSave = () => {
+    const base = { ...fd };
+    if (!rec.enabled || !rec.until || (rec.freq === 'weekly' && rec.days.length === 0)) { onSave([base]); return; }
+    const results = [];
+    const until = new Date(rec.until + 'T12:00:00');
+    let cur = new Date(showForm.date + 'T12:00:00');
+    while (cur <= until) {
+      if (rec.freq === 'daily' || rec.days.includes(cur.getDay()))
+        results.push({ ...base, id: _uid(), date: cur.toISOString().slice(0, 10), recurrenceGroup: base.id });
+      cur.setDate(cur.getDate() + 1);
+    }
+    onSave(results.length > 0 ? results : [base]);
+  };
   const S = (label, children) => React.createElement('div', { style: { marginBottom: '10px' } },
     React.createElement('label', { style: { fontSize: '11px', color: '#554a3a', display: 'block', marginBottom: '3px' } }, label),
     children
@@ -691,7 +707,10 @@ function EventFormInner({ showForm, sessions, athletes, initialData, onSave, onC
   return React.createElement('div', { style: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' } },
     React.createElement('div', { style: { background: '#0d0b08', border: '1px solid #2a2318', borderRadius: '10px', padding: '18px', width: '340px', maxWidth: '90vw', maxHeight: '85vh', overflowY: 'auto' } },
       React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' } },
-        React.createElement('span', { style: { fontSize: '13px', fontWeight: 700, color: '#c8b090' } }, (showForm.eventId ? 'Editar' : 'Novo') + ' ' + (isPers ? 'Personal' : 'Aula')),
+        React.createElement('div', null,
+          React.createElement('div', { style: { fontSize: '13px', fontWeight: 700, color: '#c8b090' } }, (showForm.eventId ? 'Editar' : 'Novo') + ' ' + (isPers ? 'Personal' : 'Aula')),
+          React.createElement('div', { style: { fontSize: '10px', color: '#554a3a', marginTop: '1px' } }, new Date(showForm.date + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' }))
+        ),
         React.createElement('button', { onClick: onCancel, style: { background: 'transparent', border: 'none', color: '#554a3a', cursor: 'pointer', fontSize: '16px' } }, '✕')
       ),
       S(isPers ? 'Nome / cliente' : 'Nome da turma',
@@ -721,14 +740,14 @@ function EventFormInner({ showForm, sessions, athletes, initialData, onSave, onC
           })
         )
       ),
-      S('Local (opcional)',
+      isPers && S('Local (opcional)',
         sel(fd.local || '', e => set('local', e.target.value),
           [React.createElement('option', { key: '', value: '' }, '—'),
            ...boxSvcs.map(l => React.createElement('option', { key: l.id, value: l.name }, l.name)),
            React.createElement('option', { key: 'outro', value: '__outro__' }, 'Outro...')]
         )
       ),
-      fd.local === '__outro__' && S('Especificar local',
+      isPers && fd.local === '__outro__' && S('Especificar local',
         inp(fd.localText || '', e => set('localText', e.target.value), { placeholder: 'Ex: Studio Norte' })
       ),
       React.createElement('div', { style: { display: 'flex', gap: '8px', marginBottom: '10px' } },
@@ -759,8 +778,36 @@ function EventFormInner({ showForm, sessions, athletes, initialData, onSave, onC
       S('Notas (opcional)',
         React.createElement('textarea', { value: fd.notes || '', onChange: e => set('notes', e.target.value), rows: 2, placeholder: 'Observações...', style: { width: '100%', background: '#111', border: '1px solid #2a2318', color: '#c8b090', padding: '6px 8px', borderRadius: '5px', fontSize: '12px', resize: 'vertical' } })
       ),
+      !showForm.eventId && React.createElement('div', { style: { borderTop: '1px solid #2a2318', paddingTop: '10px', marginBottom: '10px' } },
+        React.createElement('label', { style: { display: 'flex', alignItems: 'center', gap: '7px', cursor: 'pointer', fontSize: '12px', color: '#887060', userSelect: 'none' } },
+          React.createElement('input', { type: 'checkbox', checked: rec.enabled, onChange: e => setRec(r => ({ ...r, enabled: e.target.checked })), style: { accentColor: 'var(--theme-accent)' } }),
+          React.createElement('i', { className: 'ti ti-refresh', style: { fontSize: '13px' } }),
+          'Repetir evento'
+        ),
+        rec.enabled && React.createElement('div', { style: { marginTop: '8px', paddingLeft: '2px' } },
+          React.createElement('div', { style: { display: 'flex', gap: '6px', marginBottom: '8px' } },
+            ['weekly', 'daily'].map(f => React.createElement('button', { key: f, type: 'button',
+              onClick: () => setRec(r => ({ ...r, freq: f })),
+              style: { flex: 1, padding: '5px 0', fontSize: '11px', fontWeight: 700, borderRadius: '5px', cursor: 'pointer', border: '1px solid', background: rec.freq === f ? 'var(--theme-accent)' : 'transparent', color: rec.freq === f ? 'var(--theme-accent-text)' : '#887060', borderColor: rec.freq === f ? 'var(--theme-accent)' : '#2a2318' } },
+              f === 'weekly' ? 'Semanal' : 'Diário'
+            ))
+          ),
+          rec.freq === 'weekly' && React.createElement('div', { style: { display: 'flex', gap: '3px', marginBottom: '8px' } },
+            ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map((d, i) => {
+              const on = rec.days.includes(i);
+              return React.createElement('button', { key: i, type: 'button', onClick: () => toggleRecDay(i),
+                style: { flex: 1, padding: '5px 2px', fontSize: '10px', fontWeight: 700, borderRadius: '4px', cursor: 'pointer', border: '1px solid', background: on ? 'var(--theme-accent)' : 'transparent', color: on ? 'var(--theme-accent-text)' : '#887060', borderColor: on ? 'var(--theme-accent)' : '#2a2318', minWidth: 0 } },
+              d);
+            })
+          ),
+          React.createElement('div', null,
+            React.createElement('label', { style: { fontSize: '11px', color: '#554a3a', display: 'block', marginBottom: '3px' } }, 'Repetir até'),
+            React.createElement('input', { type: 'date', value: rec.until, onChange: e => setRec(r => ({ ...r, until: e.target.value })), min: showForm.date, style: { width: '100%', background: '#111', border: '1px solid #2a2318', color: '#c8b090', padding: '6px 8px', borderRadius: '5px', fontSize: '12px', boxSizing: 'border-box' } })
+          )
+        )
+      ),
       React.createElement('div', { style: { display: 'flex', gap: '6px' } },
-        React.createElement('button', { onClick: () => onSave({ ...fd }), style: { flex: 1, background: 'var(--theme-accent)', color: 'var(--theme-accent-text)', border: 'none', padding: '8px', borderRadius: '5px', cursor: 'pointer', fontSize: '12px', fontWeight: 700 } }, 'Salvar'),
+        React.createElement('button', { onClick: handleSave, style: { flex: 1, background: 'var(--theme-accent)', color: 'var(--theme-accent-text)', border: 'none', padding: '8px', borderRadius: '5px', cursor: 'pointer', fontSize: '12px', fontWeight: 700 } }, rec.enabled && rec.until ? 'Criar eventos' : 'Salvar'),
         React.createElement('button', { onClick: onCancel, style: { background: 'transparent', border: '1px solid #2a2318', color: '#554a3a', padding: '8px 14px', borderRadius: '5px', cursor: 'pointer', fontSize: '12px' } }, 'Cancelar')
       )
     )
@@ -1277,6 +1324,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
                     done && React.createElement('i', { className: 'ti ti-circle-check', style: { fontSize: '12px', color: '#68d8a0' }, 'aria-hidden': 'true' }),
                     React.createElement('span', { style: { fontSize: '13px', fontWeight: 700, color: isPers ? '#d8a840' : '#c8b090' } }, ev.label),
                     React.createElement('span', { style: { fontSize: '10px', fontWeight: 700, padding: '1px 5px', borderRadius: '3px', textTransform: 'uppercase', background: isPers ? 'rgba(216,168,64,.12)' : 'rgba(74,200,192,.1)', color: isPers ? '#d8a840' : 'var(--theme-accent)' } }, isPers ? 'Personal' : 'Aula'),
+                    ev.recurrenceGroup && React.createElement('i', { className: 'ti ti-refresh', style: { fontSize: '10px', color: '#554a3a' }, title: 'Evento recorrente' }),
                     svcLoc && React.createElement('span', { style: { fontSize: '10px', fontWeight: 700, padding: '1px 5px', borderRadius: '3px', background: (svcLoc.color || '#555') + '22', color: svcLoc.color || '#aaa', border: `1px solid ${(svcLoc.color || '#555')}44` } }, svcLoc.name)
                   ),
                   React.createElement('div', { style: { fontSize: '11px', color: '#554a3a' } }, `${ev.time} · ${ev.durationMin}min`),
@@ -1339,6 +1387,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
       React.createElement('button', { onClick: () => setShowReport(true), style: { background: 'rgba(216,168,64,.1)', border: '1px solid rgba(216,168,64,.3)', color: '#d8a840', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' } }, React.createElement('i', { className: 'ti ti-file-analytics' }), ' Relatório'),
       React.createElement('span', { style: { fontSize: '14px', fontWeight: 700, color: '#c8b090', flex: '1 1 100px', minWidth: '80px', textTransform: 'uppercase', letterSpacing: '.03em' } }, `${MONTHS_PT[month]} ${year}`),
       React.createElement('button', { onClick: () => { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); setSelDay(null); }, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '16px', lineHeight: 1 } }, '›'),
+      React.createElement('button', { onClick: () => { const now = new Date(); setMonth(now.getMonth()); setYear(now.getFullYear()); setSelDay(now.toISOString().slice(0, 10)); }, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer', fontSize: '11px', fontWeight: 700 } }, 'Hoje'),
       React.createElement('div', { className: 'agenda-stats', style: { display: 'flex', gap: '8px', fontSize: '11px', flexWrap: 'wrap' } },
         React.createElement('span', { style: { color: 'var(--theme-accent)' } }, [completedAulas, '/', totalAulas, ' aulas'].join('')),
         React.createElement('span', { style: { color: '#d8a840' } }, [completedPersonal, '/', totalPersonal, ' personal'].join('')),
@@ -1366,7 +1415,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
       )
     ),
     showReport && React.createElement(ReportModal, { events, sessions, onClose: () => setShowReport(false) }),
-    showForm && React.createElement(EventFormInner, { showForm, sessions, athletes, initialData: formData, onSave: ev => { saveEvent(ev); setShowForm(null); }, onCancel: () => setShowForm(null) })
+    showForm && React.createElement(EventFormInner, { showForm, sessions, athletes, initialData: formData, onSave: evs => { const arr = Array.isArray(evs) ? evs : [evs]; arr.forEach(saveEvent); setShowForm(null); }, onCancel: () => setShowForm(null) })
   );
 }
 
