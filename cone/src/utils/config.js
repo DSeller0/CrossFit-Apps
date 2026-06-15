@@ -35,7 +35,7 @@ export const APP_CONFIG = {
     perfNormal:'#ffffff', filterActiveBg:'#00b8d4', filterActiveText:'#000000'
   },
   restDayLabel: 'Descanso',
-  mobileWeeklyLabels: ['Mobile Semanal Cone','Mobile Semanal Medrado']
+  mobileWeeklyLabels: ['Mobile Semanal 01','Mobile Semanal 02']
 };
 
 export const DEFAULT_TYPES = ['Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Estações','Descanso'];

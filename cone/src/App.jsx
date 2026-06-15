@@ -235,7 +235,8 @@ export default function App() {
     const a = document.createElement('a');
     const name = (customName || saveFileName || '').trim()
       .replace(/[^a-zA-Z0-9\u00C0-\u024F\-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-    a.download = `${name || 'grade-treino-' + toISO(new Date())}.json`;
+    const gymSlug = (APP_CONFIG.gymName || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036F]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    a.download = `${name || (gymSlug ? `grade-${gymSlug}` : 'grade-treino') + '-' + toISO(new Date())}.json`;
     a.href = URL.createObjectURL(blob);
     a.click();
     URL.revokeObjectURL(a.href);

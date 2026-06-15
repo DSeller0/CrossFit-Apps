@@ -56,6 +56,14 @@ function buildProgressionLines(ex) {
   });
 }
 
+function complexLine(ex) {
+  const movs = ex.complexMovements || [];
+  const displayName = ex.name || movs.map(m => m.name).join(' + ') || 'Complexo';
+  const notation = movs.map(m => m.reps || '?').join('+');
+  const volPrefix = ex.sets && notation ? `${ex.sets}×(${notation})` : notation ? `(${notation})` : ex.sets ? `${ex.sets}×` : '';
+  return [volPrefix, displayName.toUpperCase()].filter(Boolean).join(' ');
+}
+
 function getWeeksOfMonth(year, month) {
   const weeks = [];
   let cursor = new Date(year, month, 1);
@@ -198,7 +206,15 @@ function DailyExportView({ sessions, label, weekDates, gymName, fontScale, zoneS
                         [bl.rounds && `${bl.rounds} RDS`, bl.duration && `CAP ${bl.duration}'`].filter(Boolean).join(' · ')
                       )
                     ),
-                    bl.exercises.filter(e => e.name).map(ex => {
+                    bl.exercises.filter(e => e.name || e.isComplex).map(ex => {
+                      if (ex.isComplex) {
+                        const movs = ex.complexMovements || [];
+                        return React.createElement('div', { key: ex.id, className: 'dv-ex-item', style: { borderBottom: `1px solid ${dv.divider || 'transparent'}` } },
+                          React.createElement('div', { className: 'dv-ex-name', style: { color: dv.exName || '#fff' } }, complexLine(ex)),
+                          ...movs.map((m, mi) => React.createElement('div', { key: mi, className: 'dv-ex-note', style: { color: dv.note || '#888' } }, `· ${[m.reps, m.name].filter(Boolean).join(' ')}`)),
+                          ex.note ? React.createElement('div', { key: 'n', className: 'dv-ex-note', style: { color: dv.note || '#888' } }, ex.note) : null
+                        );
+                      }
                       const isProg = ex.intensity?.mode === 'progression';
                       const repsDisplay = ex.reps ? (ex.reps.includes(',') ? ex.reps.split(',').map(r => r.trim()).join('-') : ex.reps) : '';
                       const volPrefix = ex.sets && repsDisplay ? `${ex.sets}×${repsDisplay}` : repsDisplay;
@@ -340,12 +356,12 @@ function WeeklyCalendarExportView({ sessions, label, year, month, gymName, logoD
                     const ec = ECOL[bl.type] || ECOL['Força'];
                     const blCol = wk.blockType || ec.text;
                     const meta = [bl.rounds && `${bl.rounds} RDS`, bl.duration && `CAP ${bl.duration}'`].filter(Boolean).join(' · ');
-                    const exs = bl.exercises?.filter(e => e.name) || [];
+                    const exs = bl.exercises?.filter(e => e.name || e.isComplex) || [];
                     return React.createElement('div', { key: bl.id, style: { borderLeft: `2px solid ${blCol}`, paddingLeft: '8px', flexShrink: 0 } },
                       React.createElement('div', { style: { fontSize: `calc(12px * var(--fs,1))`, fontWeight: 900, color: blCol, textTransform: 'uppercase', letterSpacing: '.07em', lineHeight: 1.2 } }, bl.type + (meta ? ` · ${meta}` : '')),
                       exs.slice(0, 4).map(ex =>
                         React.createElement('div', { key: ex.id, style: { marginTop: '3px' } },
-                          React.createElement('div', { style: { fontSize: `calc(13px * var(--fs,1))`, fontWeight: 900, color: wk.exName || '#fff', textTransform: 'uppercase', letterSpacing: '.04em', lineHeight: 1.15 } }, ex.name)
+                          React.createElement('div', { style: { fontSize: `calc(13px * var(--fs,1))`, fontWeight: 900, color: wk.exName || '#fff', textTransform: 'uppercase', letterSpacing: '.04em', lineHeight: 1.15 } }, ex.isComplex ? complexLine(ex) : ex.name)
                         )
                       ),
                       bl.notes && React.createElement('div', { style: { fontSize: `calc(10px * var(--fs,1))`, color: '#555', marginTop: '3px', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.4 } }, bl.notes)
@@ -433,7 +449,15 @@ function MobileBlockA({ bl, fs, bg, colors }) {
       meta && React.createElement('div', { style: { fontSize: mfs(12, f), color: col.blockMeta || '#00b8d4', fontWeight: 700, textTransform: 'uppercase', marginTop: mfs(2, f), fontFamily: GF() } }, meta)
     ),
     React.createElement('div', { style: { background: blockBg, padding: `${Math.round(4 * f)}px ${pad}px ${Math.round(14 * f)}px` } },
-      (bl.exercises || []).filter(e => e.name).map((ex, ei) => {
+      (bl.exercises || []).filter(e => e.name || e.isComplex).map((ex, ei) => {
+        if (ex.isComplex) {
+          const movs = ex.complexMovements || [];
+          return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(6 * f)}px 0`, borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}` } },
+            React.createElement('div', { style: { fontSize: mfs(17, f), fontWeight: 900, color: col.exName || '#fff', textTransform: 'uppercase', letterSpacing: '.04em', fontFamily: GF(), lineHeight: 1.2 } }, complexLine(ex)),
+            ...movs.map((m, mi) => React.createElement('div', { key: mi, style: { fontSize: mfs(13, f), color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa', fontFamily: GF() } }, `· ${[m.reps, m.name].filter(Boolean).join(' ')}`)),
+            ex.note ? React.createElement('div', { key: 'n', style: { fontSize: mfs(12, f), color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa', fontStyle: 'italic', marginTop: mfs(2, f) } }, ex.note) : null
+          );
+        }
         const isProg = ex.intensity?.mode === 'progression';
         const repsDisplay = ex.reps ? (ex.reps.includes(',') ? ex.reps.split(',').map(r => r.trim()).join('-') : ex.reps) : '';
         const volPrefix = ex.sets && repsDisplay ? `${ex.sets}×${repsDisplay}` : repsDisplay;
@@ -505,7 +529,15 @@ function MobileBlockB({ bl, fs, colors }) {
       meta && React.createElement('span', { style: { fontSize: mfs(12, f), fontWeight: 900, color: col.blockMetaText || '#000', background: col.blockMetaBg || '#00b8d4', padding: `${Math.round(3 * f)}px ${Math.round(10 * f)}px`, borderRadius: '2px', fontFamily: GF(), whiteSpace: 'nowrap' } }, meta)
     ),
     React.createElement('div', { style: { background: APP_CONFIG.mobileMegaManBg || '#000', padding: `${Math.round(8 * f)}px ${pad}px ${Math.round(14 * f)}px` } },
-      (bl.exercises || []).filter(e => e.name).map((ex, ei) => {
+      (bl.exercises || []).filter(e => e.name || e.isComplex).map((ex, ei) => {
+        if (ex.isComplex) {
+          const movs = ex.complexMovements || [];
+          return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(6 * f)}px 0`, borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}` } },
+            React.createElement('div', { style: { fontSize: mfs(17, f), fontWeight: 900, color: col.exName || '#fff', textTransform: 'uppercase', letterSpacing: '.05em', fontFamily: GF(), lineHeight: 1.2 } }, complexLine(ex)),
+            ...movs.map((m, mi) => React.createElement('div', { key: mi, style: { fontSize: mfs(13, f), color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa', fontFamily: GF() } }, `· ${[m.reps, m.name].filter(Boolean).join(' ')}`)),
+            ex.note ? React.createElement('div', { key: 'n', style: { fontSize: mfs(11, f), color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa', fontStyle: 'italic', marginTop: mfs(2, f) } }, ex.note) : null
+          );
+        }
         const isProg = ex.intensity?.mode === 'progression';
         const repsDisplay = ex.reps ? (ex.reps.includes(',') ? ex.reps.split(',').map(r => r.trim()).join('-') : ex.reps) : '';
         const volPrefix = ex.sets && repsDisplay ? `${ex.sets}×${repsDisplay}` : repsDisplay;
@@ -572,14 +604,13 @@ function MobileWeeklySingleDay({ date, sessions, f, col, variant }) {
   const pad = Math.round(18 * f);
   const isA = variant === 'A';
   const cyan = '#00b8d4';
-  const orange = '#e87820';
-  const hdrAccent = isA ? orange : cyan;
+  const hdrAccent = isA ? '#4ac8c0' : cyan;
   const fontFamily = GF();
   const bg = isA ? (APP_CONFIG.mobileEaglesBg || '#000') : (APP_CONFIG.mobileMegaManBg || '#000');
   return React.createElement('div', null,
-    React.createElement('div', { style: { background: isA ? '#111' : '#050e14', padding: `${Math.round(8 * f)}px ${pad}px`, borderTop: `${Math.max(2, Math.round(3 * f))}px solid ${hdrAccent}`, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' } },
+    React.createElement('div', { style: { background: isA ? '#161412' : '#050e14', padding: `${Math.round(8 * f)}px ${pad}px`, borderTop: `${Math.max(2, Math.round(3 * f))}px solid ${hdrAccent}`, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' } },
       React.createElement('span', { style: { fontSize: mfs(15, f), fontWeight: 900, color: hdrAccent, textTransform: 'uppercase', letterSpacing: '.1em', fontFamily } }, dow),
-      React.createElement('span', { style: { fontSize: mfs(12, f), fontWeight: 700, color: isA ? '#555' : '#3a6a80', fontFamily } }, dateNum)
+      React.createElement('span', { style: { fontSize: mfs(12, f), fontWeight: 700, color: isA ? '#3a8a80' : '#3a6a80', fontFamily } }, dateNum)
     ),
     s
       ? React.createElement('div', { style: { background: bg } },
@@ -588,16 +619,18 @@ function MobileWeeklySingleDay({ date, sessions, f, col, variant }) {
             const _typ = bl.type && bl.type !== '-' ? bl.type : null;
             const title = _lbl && _typ && _lbl !== _typ ? `${_lbl} · ${_typ}` : _lbl || _typ || '';
             const meta = [bl.rounds && `${bl.rounds} RDS`, bl.duration && `CAP ${bl.duration}'`].filter(Boolean).join(' · ');
-            const exNames = (bl.exercises || []).filter(e => e.name);
+            const exNames = (bl.exercises || []).filter(e => e.name || e.isComplex);
             return React.createElement('div', { key: bl.id },
               React.createElement('div', { style: { background: 'rgba(0,184,212,0.12)', padding: `${Math.round(6 * f)}px ${pad}px`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
                 React.createElement('span', { style: { fontSize: mfs(13, f), fontWeight: 900, color: cyan, textTransform: 'uppercase', letterSpacing: '.08em', fontFamily } }, title),
                 meta && React.createElement('span', { style: { fontSize: mfs(11, f), fontWeight: 900, color: '#000', background: cyan, padding: `${Math.round(2 * f)}px ${Math.round(7 * f)}px`, borderRadius: '2px', fontFamily } }, meta)
               ),
               exNames.map(ex => {
-                const repsDisplay = ex.reps ? (ex.reps.includes(',') ? ex.reps.split(',').map(r => r.trim()).join('-') : ex.reps) : '';
-                const prefix = ex.sets && repsDisplay ? `${ex.sets}×${repsDisplay}` : repsDisplay;
-                const line = [prefix, ex.name.toUpperCase()].filter(Boolean).join(' ');
+                const line = ex.isComplex ? complexLine(ex) : (() => {
+                  const repsDisplay = ex.reps ? (ex.reps.includes(',') ? ex.reps.split(',').map(r => r.trim()).join('-') : ex.reps) : '';
+                  const prefix = ex.sets && repsDisplay ? `${ex.sets}×${repsDisplay}` : repsDisplay;
+                  return [prefix, ex.name.toUpperCase()].filter(Boolean).join(' ');
+                })();
                 return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(5 * f)}px ${pad}px`, borderBottom: 'rgba(0,184,212,0.08) 1px solid', fontSize: mfs(14, f), fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '.04em', fontFamily, lineHeight: 1.2 } }, line);
               })
             );
@@ -615,7 +648,8 @@ function MobileWeeklyExportView({ sessions, gymName, logoDataUrl, logoScale, fon
   const pad = Math.round(22 * f);
   const isA = variant === 'A';
   const cyan = '#00b8d4';
-  const bg = isA ? (APP_CONFIG.mobileEaglesBg || '#000') : (APP_CONFIG.mobileMegaManBg || '#000');
+  const accent = isA ? '#4ac8c0' : cyan;
+  const bg = isA ? (APP_CONFIG.mobileEaglesBg || '#0d0b09') : (APP_CONFIG.mobileMegaManBg || '#000');
   const fontFamily = GF();
   const orderedDays = [1, 2, 3, 4, 5, 6, 0].map(i => weekDates[i]);
   const mon = weekDates[1];
@@ -623,14 +657,14 @@ function MobileWeeklyExportView({ sessions, gymName, logoDataUrl, logoScale, fon
   const weekLabel = `${mon.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} – ${sun.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}`;
   const midDate = weekDates[3];
   return React.createElement('div', { style: { background: bg, width: '1080px', fontFamily } },
-    React.createElement('div', { style: { background: bg, padding: `${Math.round(22 * f)}px ${pad}px ${Math.round(16 * f)}px`, borderBottom: `${Math.max(2, Math.round(3 * f))}px solid ${cyan}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+    React.createElement('div', { style: { background: bg, padding: `${Math.round(22 * f)}px ${pad}px ${Math.round(16 * f)}px`, borderBottom: `${Math.max(2, Math.round(3 * f))}px solid ${accent}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
       React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: mfs(14, f) } },
         logoDataUrl && React.createElement('img', { src: logoDataUrl, style: { width: `${Math.round(48 * ls)}px`, height: `${Math.round(48 * ls)}px`, objectFit: 'contain', borderRadius: '4px' } }),
         React.createElement('span', { style: { fontSize: mfs(28, f), fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '.08em', fontFamily } }, gymName || 'Cone')
       ),
       React.createElement('div', { style: { textAlign: 'right' } },
-        React.createElement('div', { style: { fontSize: mfs(16, f), fontWeight: 900, color: cyan, textTransform: 'uppercase', letterSpacing: '.1em', fontFamily } }, weekLabel),
-        React.createElement('div', { style: { fontSize: mfs(12, f), color: isA ? '#555' : '#3a6a80', marginTop: mfs(2, f), textTransform: 'uppercase', letterSpacing: '.06em', fontFamily } }, monthNames[midDate.getMonth()] + ' ' + midDate.getFullYear())
+        React.createElement('div', { style: { fontSize: mfs(16, f), fontWeight: 900, color: accent, textTransform: 'uppercase', letterSpacing: '.1em', fontFamily } }, weekLabel),
+        React.createElement('div', { style: { fontSize: mfs(12, f), color: isA ? '#3a8a80' : '#3a6a80', marginTop: mfs(2, f), textTransform: 'uppercase', letterSpacing: '.06em', fontFamily } }, monthNames[midDate.getMonth()] + ' ' + midDate.getFullYear())
       )
     ),
     orderedDays.map((date, i) =>
@@ -1468,19 +1502,20 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
       const DAY_EN = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
       const padD = n => String(n).padStart(2, '0');
       const fmtDate = d => `${padD(d.getDate())}${padD(d.getMonth() + 1)}${d.getFullYear()}`;
+      const gymSlug = (gymName || APP_CONFIG.gymName || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'grade';
       let filename;
       if (tgt === 'daily') {
         const dateStr = selectedDate || toISO(currentWeekDates[1]);
         const d = new Date(dateStr + 'T12:00:00');
-        filename = `eagles-daily-training-${DAY_EN[d.getDay()]}-${fmtDate(d)}`;
+        filename = `${gymSlug}-treino-${DAY_EN[d.getDay()]}-${fmtDate(d)}`;
       } else if (tgt === 'semanal') {
         const wks = getWeeksOfMonth(year, month);
         const wk = wks[selectedWeekIdx] || currentWeekDates;
         const mon = wk[1]; const fri = wk[5];
-        filename = `eagles-weekly-program-${padD(mon.getDate())}${padD(mon.getMonth() + 1)}to${padD(fri.getDate())}${padD(fri.getMonth() + 1)}`;
+        filename = `${gymSlug}-semanal-${padD(mon.getDate())}${padD(mon.getMonth() + 1)}to${padD(fri.getDate())}${padD(fri.getMonth() + 1)}`;
       } else {
-        const mnames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-        filename = `eagles-calendar-${mnames[month]}-${year}`;
+        const mnames = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+        filename = `${gymSlug}-calendario-${mnames[month]}-${year}`;
       }
       a.download = `${filename}.png`;
       a.href = out.toDataURL('image/png');
@@ -1507,7 +1542,8 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
       const padD = n => String(n).padStart(2, '0');
       const dateStr = selectedDate || toISO(currentWeekDates[1]);
       const d = new Date(dateStr + 'T12:00:00');
-      const fname = `eagles-mobile-${variant === 'A' ? 'eagles' : 'megaman'}-${DAY_EN[d.getDay()]}-${padD(d.getDate())}${padD(d.getMonth() + 1)}${d.getFullYear()}`;
+      const gymSlug = (gymName || APP_CONFIG.gymName || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'grade';
+      const fname = `${gymSlug}-mobile-${variant === 'A' ? '01' : '02'}-${DAY_EN[d.getDay()]}-${padD(d.getDate())}${padD(d.getMonth() + 1)}${d.getFullYear()}`;
       const a = document.createElement('a');
       a.download = `${fname}.png`;
       a.href = out.toDataURL('image/png');
@@ -1523,19 +1559,20 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
     await new Promise(r => setTimeout(r, 250));
     try {
       const W = 1080; const H = el.scrollHeight || 3000;
-      const cv = await html2canvas(el, { scale: APP_CONFIG.exportScale || 2, backgroundColor: variant === 'A' ? (APP_CONFIG.mobileEaglesBg || '#000') : (APP_CONFIG.mobileMegaManBg || '#000'), useCORS: true, logging: false, width: W, height: H, windowWidth: W });
+      const cv = await html2canvas(el, { scale: APP_CONFIG.exportScale || 2, backgroundColor: variant === 'A' ? (APP_CONFIG.mobileEaglesBg || '#0d0b09') : (APP_CONFIG.mobileMegaManBg || '#000'), useCORS: true, logging: false, width: W, height: H, windowWidth: W });
       const out = document.createElement('canvas');
       out.width = W * 2; out.height = H * 2;
       const ctx = out.getContext('2d');
-      ctx.fillStyle = variant === 'A' ? (APP_CONFIG.mobileEaglesBg || '#000') : (APP_CONFIG.mobileMegaManBg || '#000');
+      ctx.fillStyle = variant === 'A' ? (APP_CONFIG.mobileEaglesBg || '#0d0b09') : (APP_CONFIG.mobileMegaManBg || '#000');
       ctx.fillRect(0, 0, out.width, out.height);
       ctx.drawImage(cv, 0, 0);
       const wk = getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates;
       const mon = wk[1]; const fri = wk[5];
       const padD = n => String(n).padStart(2, '0');
-      const labels = APP_CONFIG.mobileWeeklyLabels || ['Mobile Semanal Cone', 'Mobile Semanal Medrado'];
+      const labels = APP_CONFIG.mobileWeeklyLabels || ['Mobile Semanal 01', 'Mobile Semanal 02'];
       const lbl = (labels[variant === 'A' ? 0 : 1] || '').replace(/[^a-zA-Z0-9\u00C0-\u024F\-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 40).toLowerCase();
-      const fname = `eagles-${lbl}-${padD(mon.getDate())}${padD(mon.getMonth() + 1)}to${padD(fri.getDate())}${padD(fri.getMonth() + 1)}`;
+      const gymSlugW = (gymName || APP_CONFIG.gymName || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036F]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'grade';
+      const fname = `${gymSlugW}-${lbl}-${padD(mon.getDate())}${padD(mon.getMonth() + 1)}to${padD(fri.getDate())}${padD(fri.getMonth() + 1)}`;
       const a = document.createElement('a'); a.download = `${fname}.png`; a.href = out.toDataURL('image/png'); a.click();
     } catch (e) { console.error(e); alert('Falha na exportação — tente novamente.'); }
     setExporting(false);
@@ -1683,16 +1720,16 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
           React.createElement('i', { className: 'ti ti-calendar-down', 'aria-hidden': 'true' }), ' Calendário'
         ),
         React.createElement('button', { type: 'button', className: 'b bsm', style: { fontSize: '12px', background: 'var(--theme-accent)', color: 'var(--theme-accent-text)', borderColor: 'var(--theme-accent)', fontWeight: 700 }, onClick: () => doMobileExport('A'), disabled: exporting },
-          React.createElement('i', { className: 'ti ti-device-mobile', 'aria-hidden': 'true' }), ' Mobile Eagles'
+          React.createElement('i', { className: 'ti ti-device-mobile', 'aria-hidden': 'true' }), ' Mobile 01'
         ),
         React.createElement('button', { type: 'button', className: 'b bsm', style: { fontSize: '12px', background: '#00b8d4', color: '#000', borderColor: '#00b8d4', fontWeight: 700 }, onClick: () => doMobileExport('B'), disabled: exporting },
-          React.createElement('i', { className: 'ti ti-device-mobile', 'aria-hidden': 'true' }), ' Mobile Mega Man'
+          React.createElement('i', { className: 'ti ti-device-mobile', 'aria-hidden': 'true' }), ' Mobile 02'
         ),
         React.createElement('button', { type: 'button', className: 'b bsm', style: { fontSize: '11px', background: 'var(--theme-accent)', color: 'var(--theme-accent-text)', borderColor: 'var(--theme-accent)', fontWeight: 700 }, onClick: () => doMobileWeeklyExport('A'), disabled: exporting },
-          React.createElement('i', { className: 'ti ti-layout-list', 'aria-hidden': 'true' }), ' ', (APP_CONFIG.mobileWeeklyLabels?.[0] || 'Mobile Semanal Cone').slice(0, 15)
+          React.createElement('i', { className: 'ti ti-layout-list', 'aria-hidden': 'true' }), ' ', (APP_CONFIG.mobileWeeklyLabels?.[0] || 'Mobile Semanal 01').slice(0, 15)
         ),
         React.createElement('button', { type: 'button', className: 'b bsm', style: { fontSize: '11px', background: '#00b8d4', color: '#000', borderColor: '#00b8d4', fontWeight: 700 }, onClick: () => doMobileWeeklyExport('B'), disabled: exporting },
-          React.createElement('i', { className: 'ti ti-layout-list', 'aria-hidden': 'true' }), ' ', (APP_CONFIG.mobileWeeklyLabels?.[1] || 'Mobile Semanal Medrado').slice(0, 15)
+          React.createElement('i', { className: 'ti ti-layout-list', 'aria-hidden': 'true' }), ' ', (APP_CONFIG.mobileWeeklyLabels?.[1] || 'Mobile Semanal 02').slice(0, 15)
         ),
         exporting && React.createElement('span', { style: { fontSize: '11px', color: '#e87820' } }, 'Exportando...')
       )
@@ -1702,13 +1739,13 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
         React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'daily' ? 'on' : ''}`, onClick: () => setPreviewTarget('daily') }, 'Diário'),
         React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'semanal' ? 'on' : ''}`, onClick: () => setPreviewTarget('semanal') }, 'Semanal'),
         React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'calendar' ? 'on' : ''}`, onClick: () => setPreviewTarget('calendar') }, 'Exportar Mensal'),
-        React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'mobileA' ? 'on' : ''}`, style: previewTarget === 'mobileA' ? { background: 'var(--theme-accent)', borderColor: 'var(--theme-accent)', color: 'var(--theme-accent-text)' } : { color: 'var(--theme-accent)', borderColor: 'var(--theme-accent)' }, onClick: () => setPreviewTarget('mobileA') }, 'Mobile Cone'),
-        React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'mobileB' ? 'on' : ''}`, style: previewTarget === 'mobileB' ? { background: '#00b8d4', borderColor: '#00b8d4', color: '#000' } : { color: '#00b8d4', borderColor: '#00b8d4' }, onClick: () => setPreviewTarget('mobileB') }, 'Mobile Mega Man'),
-        React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'mobileWeeklyA' ? 'on' : ''}`, style: previewTarget === 'mobileWeeklyA' ? { background: 'var(--theme-accent)', borderColor: 'var(--theme-accent)', color: 'var(--theme-accent-text)' } : { color: 'var(--theme-accent)', borderColor: 'var(--theme-accent)' }, onClick: () => setPreviewTarget('mobileWeeklyA') }, (APP_CONFIG.mobileWeeklyLabels?.[0] || 'Mobile Semanal Cone').slice(0, 15)),
-        React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'mobileWeeklyB' ? 'on' : ''}`, style: previewTarget === 'mobileWeeklyB' ? { background: '#00b8d4', borderColor: '#00b8d4', color: '#000' } : { color: '#00b8d4', borderColor: '#00b8d4' }, onClick: () => setPreviewTarget('mobileWeeklyB') }, (APP_CONFIG.mobileWeeklyLabels?.[1] || 'Mobile Semanal Medrado').slice(0, 15)),
+        React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'mobileA' ? 'on' : ''}`, style: previewTarget === 'mobileA' ? { background: 'var(--theme-accent)', borderColor: 'var(--theme-accent)', color: 'var(--theme-accent-text)' } : { color: 'var(--theme-accent)', borderColor: 'var(--theme-accent)' }, onClick: () => setPreviewTarget('mobileA') }, 'Mobile 01'),
+        React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'mobileB' ? 'on' : ''}`, style: previewTarget === 'mobileB' ? { background: '#00b8d4', borderColor: '#00b8d4', color: '#000' } : { color: '#00b8d4', borderColor: '#00b8d4' }, onClick: () => setPreviewTarget('mobileB') }, 'Mobile 02'),
+        React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'mobileWeeklyA' ? 'on' : ''}`, style: previewTarget === 'mobileWeeklyA' ? { background: 'var(--theme-accent)', borderColor: 'var(--theme-accent)', color: 'var(--theme-accent-text)' } : { color: 'var(--theme-accent)', borderColor: 'var(--theme-accent)' }, onClick: () => setPreviewTarget('mobileWeeklyA') }, (APP_CONFIG.mobileWeeklyLabels?.[0] || 'Mobile Semanal 01').slice(0, 15)),
+        React.createElement('button', { type: 'button', className: `pvt ${previewTarget === 'mobileWeeklyB' ? 'on' : ''}`, style: previewTarget === 'mobileWeeklyB' ? { background: '#00b8d4', borderColor: '#00b8d4', color: '#000' } : { color: '#00b8d4', borderColor: '#00b8d4' }, onClick: () => setPreviewTarget('mobileWeeklyB') }, (APP_CONFIG.mobileWeeklyLabels?.[1] || 'Mobile Semanal 02').slice(0, 15)),
         React.createElement('button', { type: 'button', className: 'b bsec bsm', style: { marginLeft: 'auto', fontSize: '12px' }, onClick: () => previewTarget === 'mobileA' ? doMobileExport('A') : previewTarget === 'mobileB' ? doMobileExport('B') : previewTarget === 'mobileWeeklyA' ? doMobileWeeklyExport('A') : previewTarget === 'mobileWeeklyB' ? doMobileWeeklyExport('B') : doExport(previewTarget), disabled: exporting },
           React.createElement('i', { className: 'ti ti-download', 'aria-hidden': 'true' }),
-          ` Baixar ${previewTarget === 'daily' ? 'Diário' : previewTarget === 'semanal' ? 'Semanal' : previewTarget === 'calendar' ? 'Calendário' : previewTarget === 'mobileA' ? 'Mobile Eagles' : previewTarget === 'mobileB' ? 'Mobile Mega Man' : previewTarget === 'mobileWeeklyA' ? (APP_CONFIG.mobileWeeklyLabels?.[0] || 'Semanal Eagles').slice(0, 15) : (APP_CONFIG.mobileWeeklyLabels?.[1] || 'Semanal Medrado').slice(0, 15)}`
+          ` Baixar ${previewTarget === 'daily' ? 'Diário' : previewTarget === 'semanal' ? 'Semanal' : previewTarget === 'calendar' ? 'Calendário' : previewTarget === 'mobileA' ? 'Mobile 01' : previewTarget === 'mobileB' ? 'Mobile 02' : previewTarget === 'mobileWeeklyA' ? (APP_CONFIG.mobileWeeklyLabels?.[0] || 'Semanal 01').slice(0, 15) : (APP_CONFIG.mobileWeeklyLabels?.[1] || 'Semanal 02').slice(0, 15)}`
         )
       ),
       (previewTarget === 'semanal' || previewTarget === 'mobileWeeklyA' || previewTarget === 'mobileWeeklyB') && React.createElement('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px', alignItems: 'center' } },
@@ -1806,8 +1843,8 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
             React.createElement('option', { value: 'daily' }, 'Diário'),
             React.createElement('option', { value: 'semanal' }, 'Semanal'),
             React.createElement('option', { value: 'calendar' }, 'Calendário'),
-            React.createElement('option', { value: 'mobileEagles' }, 'Mobile Cone'),
-            React.createElement('option', { value: 'megaMan' }, 'Mobile Mega Man')
+            React.createElement('option', { value: 'mobileEagles' }, 'Mobile 01'),
+            React.createElement('option', { value: 'megaMan' }, 'Mobile 02')
           ),
           React.createElement('button', { type: 'button', className: 'b bd bsm', style: { marginLeft: '8px', padding: '3px 8px', minHeight: '24px', flexShrink: 0 }, onClick: () => setSettingsOpen(false) }, React.createElement('i', { className: 'ti ti-x' }))
         ),
