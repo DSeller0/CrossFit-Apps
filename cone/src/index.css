@@ -208,9 +208,10 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 }
 @media(max-width:480px){
   .agenda-wrap{height:auto;min-height:360px}
-  .agenda-pane{position:fixed;top:0;right:0;bottom:0;width:85% !important;flex:none !important;z-index:500;box-shadow:-4px 0 20px rgba(0,0,0,.6);overflow-y:auto}
+  .agenda-pane{position:fixed;top:0;right:0;bottom:0;width:96% !important;flex:none !important;z-index:500;box-shadow:-4px 0 24px rgba(0,0,0,.7);overflow-y:auto}
   .agenda-grid-col{flex:1 1 100% !important}
 }
+.agenda-filter-btn{min-height:32px}
 .pub-controls{background:#1c1c1c;border:1px solid #272727;border-radius:10px;padding:14px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .pub-view-tabs{display:flex;gap:6px;margin-bottom:12px}
 .pvt{font-family:inherit;font-size:12px;padding:7px 14px;border-radius:5px;border:1px solid #2e2e2e;background:transparent;color:#888;cursor:pointer;transition:all .12s}
