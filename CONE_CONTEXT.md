@@ -323,7 +323,7 @@ All of the following is now live:
 - Complex sets: Complexo + Escada toggle buttons, sub-movements, notation
 - Escada removed from Avançado section (now only in exercise detail)
 - Mobile bottom sheet for exercise detail (name on main row; sets×reps + everything else in sheet)
-- Progressive disclosure: zone + notes behind "Avançado ▼"
+- Progressive disclosure: zone behind "Avançado ▼" (notes moved to always-visible quick-access field)
 - Collapsed block summary bar
 - Week grid with `sessionName`
 - Sync + conflict detection
@@ -334,21 +334,24 @@ All of the following is now live:
 - **Exercícios tab**: Todos view + block tag pills + ExerciseCombobox cross-block ranking
 - Voice command (MicButton) removed — proved to have no purpose
 
-### Criador QoL — agreed improvements (not yet built)
+### Criador QoL — agreed improvements
 
-These were reviewed and approved. Build when prioritized:
+✅ = shipped
 
 1. **Insert block between blocks** — `+` button between existing blocks, not just at the bottom
-2. **Block notes quick access** — surfaced directly in block body (collapsed one-liner, expands on click) without opening Avançado panel
+2. ✅ **Block notes quick access** — textarea always visible at bottom of expanded block; Avançado now only holds Zona
 3. **Copy block** — duplicate button on collapsed block bar, clones within session
 4. **Always-accessible drag handle** — block reorder should not require collapsing first; a side rail or persistent handle when expanded
-5. **Exercise load badge** — subtle dot/icon on collapsed ExerciseRow when intensity/load is programmed
+5. ✅ **Exercise load badge** — amber chip on collapsed ExerciseRow showing intensity value (e.g. `70%`, `400m`, `M/F`, `60%↗`); hidden when detail is open
 6. **One-step undo for delete** — toast with "Desfazer" after removing a block or exercise (5-second window)
-7. **Estações: total time display** — computed cap in block header (`Cap 42'`), excluding trailing rest, live-updating as durations change. Formula: `(sum of station durations × stationRepeat) - last rest duration if last station is rest`.
+7. ✅ **Estações: total time display** — `Cap X'` chip in block header in schedule.html; formula: `(cycle duration × repeat) + (repeat−1) × restBetweenCycles − last rest station`
 8. **Estações: MM:SS masked input** — digit-by-digit formatting: type `1500` → displays `15:00`. Colon auto-inserts after 2 digits; backspace removes last digit.
 9. **Session-level notes field** — free-text for daily coaching brief / warmup direction
-10. **Quick "Publicar hoje"** — shortcut button in Criador topbar to publish the current day's session without switching to Publicador tab
+10. ✅ **"Publicar hoje" shortcut** — green button in session form header navigates directly to Publicador tab
 11. **Week grid collapse** — toggle to shrink to a single-row date strip, freeing vertical space for the block editor
+12. **Change indicator** — when a value is modified: if block is expanded, flash the specific input field; if block is collapsed, flash the block bar. Trigger on blur/Enter for text inputs, immediately on modal confirm / toggle changes.
+13. **Session highlight in calendar** — while editing a session, the matching card in the week grid gets a teal ring so the coach knows which session is being modified. Clears when editor closes.
+14. **Template block type display** — colored pill chips in sequential block order inside each template card (e.g. Core · Core · WOD · WOD · Força · Força); truncated at 5 with `+N mais`.
 
 ### Queue after QoL
 1. **Leaderboard all-time PRs** — best performance per movement across all sessions
