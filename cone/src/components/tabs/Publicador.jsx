@@ -1677,10 +1677,7 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
       ),
       React.createElement('div', { className: 'fg', style: { flex: '1', minWidth: '140px' } },
         React.createElement('span', { className: 'lbl' }, 'Rótulo do período'),
-        React.createElement('div', { className: 'input-mic-row' },
-          React.createElement('input', { placeholder: 'ex: Semana 4', value: label, onChange: e => setLabel(e.target.value) }),
-          React.createElement(MicButton, { onTranscript: txt => setLabel(l => (l ? l + ' ' : '') + txt) })
-        )
+        React.createElement('input', { placeholder: 'ex: Semana 4', value: label, onChange: e => setLabel(e.target.value) })
       ),
       React.createElement('div', { className: 'fg', style: { minWidth: '180px' } },
         React.createElement('span', { className: 'lbl' }, `Escala da fonte — ${fontScale.toFixed(2)}×`),

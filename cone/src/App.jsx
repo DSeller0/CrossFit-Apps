@@ -118,8 +118,7 @@ export default function App() {
   useEffect(() => {
     if (configLoaded) return;
     setConfigLoaded(true);
-    const isEmpty = Object.keys(loadLS()).length === 0;
-    if (!isEmpty || window.location.protocol === 'file:') return;
+    if (window.location.protocol === 'file:') return;
     fetch('./config.json?v=' + Date.now())
       .then(r => r.ok ? r.json() : null)
       .catch(() => null)
@@ -171,8 +170,9 @@ export default function App() {
           if (cfg.mobileMegaManBg)         merged.megaManBg = cfg.mobileMegaManBg;
           if (cfg.mobileExerciseNoteColor) merged.noteColor = cfg.mobileExerciseNoteColor;
           if (cfg.gymName)                 merged.gymName   = cfg.gymName;
+          const colourChanged = COLOUR_KEYS.some(k => cfg[k] !== undefined && existing[k] !== cfg[k]);
           saveSettings(merged);
-          if (!hasStoredColours) { window.location.reload(); return; }
+          if (!hasStoredColours || colourChanged) { window.location.reload(); return; }
         }
         if (cfg.lbColors && typeof cfg.lbColors === 'object') {
           try {
