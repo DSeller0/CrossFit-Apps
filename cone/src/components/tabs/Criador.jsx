@@ -272,6 +272,26 @@ function BlockTypePicker({ blockNames, onSelect, onClose }) {
 }
 
 // ── ExerciseRow ───────────────────────────────────────────────────────────────
+function loadBadgeStr(ex) {
+  const ins = ex.intensity;
+  if (!ins || !ins.mode || ins.mode === 'none') return null;
+  if (ins.mode === 'pct') return ins.pct ? `${ins.pct}%` : null;
+  if (ins.mode === 'cardio') return ins.cardioVal ? `${ins.cardioVal}${ins.cardioUnit || 'm'}` : null;
+  if (ins.mode === 'gender') {
+    const scales = ['RX','Inter','SC'];
+    const hasAny = scales.some(k => ins[`Masculino_${k}`] || ins[`Feminino_${k}`]);
+    return hasAny ? 'M/F' : null;
+  }
+  if (ins.mode === 'progression') {
+    const steps = ins.steps || [];
+    const loads = steps.map(s => s.load).filter(Boolean);
+    if (!loads.length) return '↗';
+    const unit = (steps[0]?.unit || '%').replace('% do RM', '%');
+    return `${loads[0]}${unit}`;
+  }
+  return null;
+}
+
 function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, onUpdate, onDelete, canDelete, dragIdx, setDragIdx, dragOverIdx, setDragOverIdx, myIdx }) {
   const [showDetail, setShowDetail] = useState(false);
   const isMobile = useIsMobile();
@@ -439,6 +459,8 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
             />
           </div>
         ))}
+
+        {(() => { const b = loadBadgeStr(ex); return b && !showDetail ? <span className="ex-load-badge">{b}</span> : null; })()}
 
         <button
           type="button"
@@ -820,10 +842,20 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, collap
             </>
           )}
 
-          {/* Advanced toggle */}
+          {/* Notes — always visible */}
+          <div className="fg" style={{ marginTop: 8 }}>
+            <textarea
+              className="blk-notes-quick"
+              placeholder="Notas do bloco — descrição, time cap, regras, buy-in..."
+              value={block.notes}
+              onChange={e => onUpdate({ ...block, notes: e.target.value })}
+            />
+          </div>
+
+          {/* Advanced toggle — zona only */}
           <button type="button" className="blk-adv-toggle" onClick={() => setShowAdv(v => !v)}>
             <i className={`ti ti-chevron-${showAdv ? 'up' : 'down'}`} />
-            Avançado {showAdv ? '' : '(zona, notas)'}
+            Avançado {showAdv ? '' : '(zona)'}
           </button>
 
           {showAdv && (
@@ -836,14 +868,6 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, collap
                     {ZONES.map(z => <option key={z}>{z}</option>)}
                   </select>
                 </label>
-              </div>
-              <div className="fg" style={{ marginTop: 10 }}>
-                <span className="lbl">Notas do bloco</span>
-                <textarea
-                  placeholder="Descrição, time cap, regras, movimentos buy-in..."
-                  value={block.notes}
-                  onChange={e => onUpdate({ ...block, notes: e.target.value })}
-                />
               </div>
             </div>
           )}
@@ -858,7 +882,7 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, collap
 }
 
 // ── TrainingCreator ───────────────────────────────────────────────────────────
-function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreloadConsumed }) {
+function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreloadConsumed, onGoToPublish }) {
   const [form, setForm]                     = useState(emptyS());
   const [blocks, setBlocks]                 = useState([]);
   const [editing, setEditing]               = useState(null);
@@ -1182,6 +1206,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
             )}
           </div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            {onGoToPublish && (
+              <button type="button" className="b bsm" style={{ borderColor: '#1a4a2a', color: '#40b878' }} onClick={onGoToPublish} title="Ir para Publicador">
+                <i className="ti ti-calendar-event" /> Publicar
+              </button>
+            )}
             <button type="button" className="b bsm" style={{ borderColor: '#4a2880', color: '#9070d8' }} onClick={() => setShowTemplateModal(true)}>
               <i className="ti ti-template" /> Templates
             </button>
@@ -1379,4 +1408,6 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   );
 }
 
-export default TrainingCreator;
+export default function CriadorTab({ sessions, setSessions, blockNames, preload, onPreloadConsumed, onGoToPublish }) {
+  return <TrainingCreator sessions={sessions} setSessions={setSessions} blockNames={blockNames} preload={preload} onPreloadConsumed={onPreloadConsumed} onGoToPublish={onGoToPublish} />;
+}

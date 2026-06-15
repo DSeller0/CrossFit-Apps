@@ -432,7 +432,7 @@ export default function App() {
       </div>
 
       <div className="pane">
-        {tab === 'creator'   && <CriadorTab sessions={sessions} setSessions={setSessions} blockNames={blockNames} preload={creatorPreload} onPreloadConsumed={() => setCreatorPreload(null)} />}
+        {tab === 'creator'   && <CriadorTab sessions={sessions} setSessions={setSessions} blockNames={blockNames} preload={creatorPreload} onPreloadConsumed={() => setCreatorPreload(null)} onGoToPublish={() => setTab('publisher')} />}
         {tab === 'athletes'  && <AtletasTab sessions={sessions} results={loadResults()} onEditSession={s => { setCreatorPreload(s); setTab('creator'); }} onLogResult={({athleteId, date}) => { setResultsPreload({athleteId, date}); setTab('results'); }} />}
         {tab === 'exercises' && <ExerciciosTab />}
         {tab === 'locations' && <ServicosTab />}
