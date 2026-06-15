@@ -33,11 +33,11 @@ const emptyS = () => ({ id: uid(), date: todayISO(), mainTraining: [], sessionNa
 const TYPE_CONFIG = {
   // RED family — intensity blocks
   'HIIT':       { icon: 'ti-bolt',        color: '#e05848', desc: 'Alta intensidade intervalado', showDuration: true,  showRounds: true,  durationLabel: 'Intervalo (s)'  },
-  'MetCon':     { icon: 'ti-flame',       color: '#c84040', desc: 'Condicionamento misto',        showDuration: true,  showRounds: false, durationLabel: 'Duração (min)' },
+  'MetCon':     { icon: 'ti-flame',       color: '#c84040', desc: 'Condicionamento misto',        showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   // AMBER family — time-structured blocks
   'EMOM':       { icon: 'ti-alarm',       color: '#d07828', desc: 'Every Minute on the Minute',  showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'For Time':   { icon: 'ti-clock',       color: '#c86828', desc: 'Contra o relógio',             showDuration: true,  showRounds: true,  durationLabel: 'Time cap (min)' },
-  'AMRAP':      { icon: 'ti-refresh',     color: '#e09830', desc: 'Máx rounds em tempo fixo',    showDuration: true,  showRounds: false, durationLabel: 'Duração (min)' },
+  'AMRAP':      { icon: 'ti-refresh',     color: '#e09830', desc: 'Máx rounds em tempo fixo',    showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Estações':   { icon: 'ti-map-pin',     color: '#c8a030', desc: 'Treino por grupos / estações', showDuration: false, showRounds: false, durationLabel: '', isStations: true },
   // BLUE family — barbell / lifting blocks
   'Força':      { icon: 'ti-trending-up', color: '#5090e0', desc: 'Força e hipertrofia',          showDuration: false, showRounds: true,  durationLabel: '' },
@@ -48,9 +48,9 @@ const TYPE_CONFIG = {
   'Aquecimento':{ icon: 'ti-sun',         color: '#80c040', desc: 'Aquecimento e preparação',     showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Skill':      { icon: 'ti-target',      color: '#4ac8c0', desc: 'Técnica e habilidade',         showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Cardio':     { icon: 'ti-run',         color: '#40b878', desc: 'Cardio / Aeróbico',             showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
-  'Mobilidade': { icon: 'ti-leaf',        color: '#30a868', desc: 'Mobilidade e flexibilidade',   showDuration: true,  showRounds: false, durationLabel: 'Duração (min)' },
+  'Mobilidade': { icon: 'ti-leaf',        color: '#30a868', desc: 'Mobilidade e flexibilidade',   showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   // NEUTRAL
-  'Descanso':   { icon: 'ti-moon',        color: '#555',    desc: 'Descanso / Recovery',           showDuration: false, showRounds: false, durationLabel: '' },
+  'Descanso':   { icon: 'ti-moon',        color: '#555',    desc: 'Descanso / Recovery',           showDuration: false, showRounds: true,  durationLabel: '' },
 };
 const DEFAULT_TYPE_CFG = { icon: 'ti-edit', color: '#888', desc: 'Bloco livre', showDuration: true, showRounds: true, durationLabel: 'Duração (min)' };
 const getTypeCfg = t => TYPE_CONFIG[t] || DEFAULT_TYPE_CFG;
