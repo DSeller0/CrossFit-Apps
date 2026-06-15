@@ -71,6 +71,11 @@ function blockSummary(block) {
   return parts.join(' · ');
 }
 
+const maskMMSS = raw => {
+  const d = raw.replace(/\D/g, '').slice(0, 4);
+  return d.length <= 2 ? d : d.slice(0, 2) + ':' + d.slice(2);
+};
+
 // ── IntensityInput ────────────────────────────────────────────────────────────
 function IntensityInput({ value, onChange, defaultReps, defaultSets }) {
   const [mode, setMode] = useState(value?.mode || 'none');
@@ -626,8 +631,8 @@ function StationEditor({ block, onUpdate }) {
               : null}
             <input className="st-name-input" placeholder={st.isRest ? 'Descanso' : 'Nome do grupo'}
               value={st.name} onChange={e => updStation(si, { name: e.target.value })} />
-            <input className="st-dur-input" placeholder="0:00" title="Duração (ex: 10:00)"
-              value={st.duration} onChange={e => updStation(si, { duration: e.target.value })} />
+            <input className="st-dur-input" placeholder="00:00" title="Duração (MM:SS)"
+              value={st.duration} onChange={e => updStation(si, { duration: maskMMSS(e.target.value) })} />
             <button type="button" className={`ex-mode-btn${st.isRest ? ' on' : ''}`}
               style={{ padding: '3px 8px', fontSize: 11 }}
               onClick={() => updStation(si, { isRest: !st.isRest, exercises: st.isRest ? [emptyEx()] : [] })}
@@ -901,7 +906,17 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const [recurEnd, setRecurEnd]             = useState(() => { const d = new Date(); d.setDate(d.getDate() + 28); return toISO(d); });
   const [recurDone, setRecurDone]           = useState(null);
   const [weekOffset, setWeekOffset]         = useState(0);
+  const [isDirty, setIsDirty]               = useState(false);
+  const [showSessNotes, setShowSessNotes]   = useState(false);
+  const [undoToast, setUndoToast]           = useState(null);
+  const undoTimerRef = useRef(null);
   const formRef = useRef();
+
+  const fireUndo = (msg, undoFn) => {
+    clearTimeout(undoTimerRef.current);
+    setUndoToast({ msg, undoFn });
+    undoTimerRef.current = setTimeout(() => setUndoToast(null), 5000);
+  };
 
   // Preload
   useEffect(() => {
@@ -922,10 +937,15 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setForm({ ...s, date: dateKey, mainTraining: targets, sessionName: sName });
     setBlocks(s.blocks?.length ? s.blocks : []);
     setEditing({ dateKey, id: s.id });
+    setIsDirty(false);
+    setShowSessNotes(!!(s.notes));
     setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   };
 
-  const cancel = () => { setForm(emptyS()); setBlocks([]); setEditing(null); setShowAlvoModal(false); };
+  const cancel = () => {
+    setForm(emptyS()); setBlocks([]); setEditing(null); setShowAlvoModal(false);
+    setIsDirty(false); setShowSessNotes(false);
+  };
 
   const cloneBlocks = bls => bls.map(bl => ({
     ...bl, id: uid(),
@@ -1017,6 +1037,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     });
     setInsertAtIdx(null);
     setShowBlockPicker(false);
+    setIsDirty(true);
   };
   const copyBlock = id => {
     setBlocks(b => {
@@ -1026,9 +1047,19 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
       const copy = { ...orig, id: uid(), exercises: (orig.exercises || []).map(ex => ({ ...ex, id: uid() })) };
       const next = [...b]; next.splice(idx + 1, 0, copy); return next;
     });
+    setIsDirty(true);
   };
-  const updBlock = (id, upd) => setBlocks(b => b.map(x => x.id === id ? upd : x));
-  const delBlock = id => setBlocks(b => b.length > 1 ? b.filter(x => x.id !== id) : b);
+  const updBlock = (id, upd) => { setBlocks(b => b.map(x => x.id === id ? upd : x)); setIsDirty(true); };
+  const delBlock = id => {
+    const idx = blocks.findIndex(x => x.id === id);
+    if (blocks.length <= 1 || idx < 0) return;
+    const deleted = blocks[idx];
+    setBlocks(b => b.filter(x => x.id !== id));
+    setIsDirty(true);
+    fireUndo('Bloco removido', () => {
+      setBlocks(b => { const n = [...b]; n.splice(idx, 0, deleted); return n; });
+    });
+  };
 
   const dragBlkIdx = useRef(null);
   const [dragOverBlkIdx, setDragOverBlkIdx] = useState(null);
@@ -1071,6 +1102,17 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
               <button type="button" className="b bp bsm" onClick={() => { setForm(f => ({ ...f, date: pendingDate.newDate })); setPendingDate(null); }}>Confirmar</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Undo toast ── */}
+      {undoToast && (
+        <div style={{ position: 'fixed', bottom: 84, left: '50%', transform: 'translateX(-50%)', background: '#1a1a1a', border: '1px solid #333', borderRadius: 8, padding: '10px 16px', display: 'flex', gap: 12, alignItems: 'center', zIndex: 3500, boxShadow: '0 4px 20px rgba(0,0,0,.7)', fontSize: 13, color: '#ccc', whiteSpace: 'nowrap' }}>
+          {undoToast.msg}
+          <button type="button" className="b bsm" style={{ padding: '4px 12px', color: '#4ac8c0', borderColor: '#4ac8c0' }}
+            onClick={() => { undoToast.undoFn(); setUndoToast(null); clearTimeout(undoTimerRef.current); }}>
+            Desfazer
+          </button>
         </div>
       )}
 
@@ -1204,7 +1246,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                 return (
                   <label key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 7, cursor: 'pointer', background: checked ? 'rgba(74,200,192,.06)' : 'transparent', border: '1px solid ' + (checked ? 'rgba(74,200,192,.25)' : '#1e1e1e') }}>
                     <input type="checkbox" checked={checked}
-                      onChange={() => setForm(f => ({ ...f, mainTraining: checked ? targets.filter(n => n !== a.name) : [...targets, a.name] }))}
+                      onChange={() => { setForm(f => ({ ...f, mainTraining: checked ? targets.filter(n => n !== a.name) : [...targets, a.name] })); setIsDirty(true); }}
                       style={{ accentColor: a.color || 'var(--theme-accent)', width: 14, height: 14 }} />
                     <span style={{ width: 10, height: 10, borderRadius: '50%', background: a.color || '#555', flexShrink: 0 }} />
                     <span style={{ fontSize: 13, color: '#ccc', flex: 1 }}>{a.name}</span>
@@ -1258,7 +1300,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                 const newDate = e.target.value;
                 const oldDate = form.date || todayISO();
                 if (editing && newDate !== oldDate) { setPendingDate({ newDate, oldDate }); e.target.value = oldDate; }
-                else setForm(f => ({ ...f, date: newDate }));
+                else { setForm(f => ({ ...f, date: newDate })); setIsDirty(true); }
               }} />
           </div>
           <div className="fg">
@@ -1266,7 +1308,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
             <input
               placeholder="ex: Semana 3 · D1 · Força Lower"
               value={form.sessionName || ''}
-              onChange={e => setForm(f => ({ ...f, sessionName: e.target.value }))}
+              onChange={e => { setForm(f => ({ ...f, sessionName: e.target.value })); setIsDirty(true); }}
             />
           </div>
         </div>
@@ -1285,6 +1327,23 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                 </div>
             }
           </button>
+        </div>
+
+        {/* Session notes */}
+        <div style={{ marginTop: 6 }}>
+          <button type="button" className="blk-adv-toggle" onClick={() => setShowSessNotes(v => !v)}>
+            <i className={`ti ti-chevron-${showSessNotes ? 'up' : 'down'}`} />
+            Briefing da sessão{form.notes ? <span style={{ color: '#4ac8c0', fontSize: 10, marginLeft: 4 }}>●</span> : null}
+          </button>
+          {showSessNotes && (
+            <textarea
+              className="blk-notes-quick"
+              style={{ marginTop: 6 }}
+              placeholder="Contexto, objetivos, link de vídeo, regras..."
+              value={form.notes || ''}
+              onChange={e => { setForm(f => ({ ...f, notes: e.target.value })); setIsDirty(true); }}
+            />
+          )}
         </div>
 
         {/* Blocks */}
@@ -1340,8 +1399,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
 
         {/* Save row */}
         <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-          <button type="button" className="b bp bfull" onClick={saveS}>
-            <i className="ti ti-check" /> {editing ? 'Salvar alterações' : 'Salvar sessão'}
+          <button type="button" className="b bp bfull" onClick={saveS}
+            style={isDirty ? { boxShadow: '0 0 0 2px #4ac8c040' } : undefined}>
+            <i className="ti ti-check" />
+            {isDirty && <span style={{ color: '#4ac8c0', fontSize: 11, marginLeft: 4 }}>●</span>}
+            {' '}{editing ? 'Salvar alterações' : 'Salvar sessão'}
           </button>
           {blocks.length > 0 && (
             <button type="button" className="b bsm" style={{ borderColor: '#4a2880', color: '#9070d8', flexShrink: 0, minWidth: 38 }}
