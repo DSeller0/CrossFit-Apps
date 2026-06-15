@@ -1079,7 +1079,18 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                       onMouseLeave={e => e.currentTarget.style.borderColor = '#2a2a2a'}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 13, fontWeight: 700, color: '#e0e0e0', marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tpl.name}</div>
-                        <div style={{ fontSize: 11, color: '#555' }}>{tpl.blocks.length} bloco{tpl.blocks.length !== 1 ? 's' : ''}</div>
+                        <div style={{ fontSize: 11, color: '#555', marginBottom: 5 }}>{tpl.blocks.length} bloco{tpl.blocks.length !== 1 ? 's' : ''}</div>
+                        {tpl.blocks.length > 0 && (() => {
+                          const types = tpl.blocks.map(b => b.type || b.label || '?');
+                          const shown = types.slice(0, 5);
+                          const rest = types.length - 5;
+                          return (
+                            <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                              {shown.map((t, i) => <span key={i} className={`wg-pill ${PLC[t] || 'p-st'}`}>{t}</span>)}
+                              {rest > 0 && <span style={{ fontSize: 10, color: '#555', alignSelf: 'center' }}>+{rest}</span>}
+                            </div>
+                          );
+                        })()}
                       </div>
                       <button type="button" className="b bsm" style={{ flexShrink: 0, borderColor: '#1a4a3a', color: '#4ac8a0' }}
                         onClick={e => { e.stopPropagation(); setShowTemplateModal(false); setRecurringTpl(tpl); }} title="Sessões recorrentes">
@@ -1333,6 +1344,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                     </div>
                     {list.map(s => (
                       <div key={s.id} className="wg-sc" draggable
+                        style={{ outline: editing?.id === s.id ? '2px solid #4ac8c0' : 'none', outlineOffset: 1 }}
                         onClick={() => startEdit(s, dateKey)}
                         onDragStart={e => { e.dataTransfer.setData('sess-id', s.id); e.dataTransfer.setData('sess-date', dateKey); e.dataTransfer.effectAllowed = 'move'; e.stopPropagation(); }}
                         onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('drag-over'); e.stopPropagation(); }}
