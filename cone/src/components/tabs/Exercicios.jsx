@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { loadRegistry, saveRegistry, loadSettings } from '../../utils/storage';
-import { APP_CONFIG } from '../../utils/config';
+import { APP_CONFIG, ECOL } from '../../utils/config';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
 function initRegistry() {
@@ -26,7 +26,10 @@ export default function ExerciciosTab() {
   const [dragOverExIdx, setDragOverExIdx]     = useState(null);
   const [blockColors_, setBlockColors_]       = useState(() => ({ ...APP_CONFIG.blockColors }));
   const [expandedBlock, setExpandedBlock]     = useState(null);
+  const [showTodos, setShowTodos]             = useState(false);
   const isMobile = useIsMobile();
+
+  const tagColor = tag => blockColors_[tag] || ECOL[tag]?.text || '#555';
 
   const persist = (reg, cols) => {
     saveRegistry(reg);
@@ -317,7 +320,51 @@ export default function ExerciciosTab() {
   // ── Mobile layout ─────────────────────────────────────────────────────────
   if (isMobile) return (
     <div style={{ padding: 10, paddingBottom: 70 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+      {/* Tab toggle */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+        <button type="button" onClick={() => setShowTodos(false)}
+          style={{ flex: 1, padding: '7px 0', fontSize: 12, fontWeight: 700, borderRadius: 6, border: '1px solid #2a2a2a', background: !showTodos ? '#1e1e1e' : '#0d0d0d', color: !showTodos ? '#fff' : '#555', cursor: 'pointer' }}>
+          Tipos
+        </button>
+        <button type="button" onClick={() => setShowTodos(true)}
+          style={{ flex: 1, padding: '7px 0', fontSize: 12, fontWeight: 700, borderRadius: 6, border: '1px solid #2a2a2a', background: showTodos ? '#1e1e1e' : '#0d0d0d', color: showTodos ? '#fff' : '#555', cursor: 'pointer' }}>
+          Todos · {allTaggedExs.length}
+        </button>
+      </div>
+
+      {showTodos ? (
+        /* Todos view — all exercises with block tags */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {allTaggedExs.length === 0
+            ? <div style={{ padding: 20, textAlign: 'center', color: '#333', fontSize: 13 }}>Nenhum exercício cadastrado.</div>
+            : allTaggedExs.map(({ name, tags }) => (
+              <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 5, padding: '8px 10px', background: '#0d0d0d', border: '1px solid #1e1e1e', borderRadius: 5 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ flex: 1, fontSize: 13, color: '#ddd' }}>{name}</span>
+                  <button type="button" className="b bd bsm" style={{ padding: '2px 6px', minHeight: 20, fontSize: 11, opacity: .5 }}
+                    onClick={() => deleteFromAll(name)} title="Remover de todos">
+                    <i className="ti ti-trash" />
+                  </button>
+                </div>
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                  {tags.map(tag => {
+                    const c = tagColor(tag);
+                    return (
+                      <span key={tag} style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 3, letterSpacing: '.04em', textTransform: 'uppercase', background: c + '22', color: c, border: `1px solid ${c}44`, cursor: 'pointer' }}
+                        onClick={() => { setShowTodos(false); setExpandedBlock(tag); setSelBlock(tag); }} title={`Ir para ${tag}`}>
+                        {tag}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      ) : (
+        /* Block accordion */
+        <>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <div>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.07em' }}>Tipos de Bloco</span>
           {expandedBlock === null && <span style={{ fontSize: 10, color: '#333', marginLeft: 8 }}>⠿ arrastar para reordenar</span>}
@@ -346,6 +393,8 @@ export default function ExerciciosTab() {
           </button>
         </div>
       </div>
+        </>
+      )}
 
       <Footer />
     </div>
@@ -469,7 +518,7 @@ export default function ExerciciosTab() {
                     </div>
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                       {tags.map(tag => {
-                        const c = blockColors_[tag] || '#555';
+                        const c = tagColor(tag);
                         return (
                           <span key={tag} style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 3, letterSpacing: '.04em', textTransform: 'uppercase', background: c + '22', color: c, border: `1px solid ${c}44`, cursor: 'pointer' }}
                             onClick={() => setSelBlock(tag)} title={`Ir para ${tag}`}>

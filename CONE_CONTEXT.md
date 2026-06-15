@@ -328,7 +328,7 @@ All of the following is now live:
 - Week grid with `sessionName`
 - Sync + conflict detection
 - OTP login fix
-- schedule.html: complex exercises render correctly; Estações blocks render with station headers
+- schedule.html: complex exercises render correctly; Estações blocks render with station headers; progress bar bug fixed (progression exercise key mismatch + complex-exercise filter alignment)
 - **Estações block type**: station groups + rest stations + cycle repeat
 - **Block color families**: RED / AMBER / BLUE / GREEN (related types share hue)
 - **Exercícios tab**: Todos view + block tag pills + ExerciseCombobox cross-block ranking
@@ -364,6 +364,7 @@ These were reviewed and approved. Build when prioritized:
 ### Operational
 - Gmail SMTP: awaiting Rod's confirmation that auth email reached him
 - Templates Supabase table: SQL has been run, verify sync is working after coach login
+- **Athlete data in Supabase:** First names are safe to store. Supabase uses TLS + AES-256 at rest, SOC 2 compliant. First names alone are low-sensitivity PII. LGPD (Brazil) applies — coach should inform athletes that data is stored in the app, no formal consent form needed at this scale.
 
 ---
 
