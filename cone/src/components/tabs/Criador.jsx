@@ -686,7 +686,7 @@ function StationEditor({ block, onUpdate }) {
 }
 
 // ── BlockEditor ───────────────────────────────────────────────────────────────
-function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy, collapsed, onToggleCollapse, dragBlkIdx, dragOverBlkIdx, setDragOverBlkIdx, reorderBlocks, blockIdx, isChanged }) {
+function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy, collapsed, onToggleCollapse, dragBlkIdx, dragOverBlkIdx, setDragOverBlkIdx, reorderBlocks, blockIdx, changedFields }) {
   const [showTypePicker, setShowTypePicker] = useState(false);
   const dragExIdx = useRef(null);
   const [dragOverExIdx, setDragOverExIdx] = useState(null);
@@ -723,7 +723,7 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
   return (
     <div
       className={`blk-wrap ${BTC[block.type] || 'bt-st'}`}
-      style={{ outline: dragOverBlkIdx === blockIdx ? '2px solid var(--theme-accent)' : 'none', outlineOffset: 2, borderRadius: 8, transition: 'outline .1s, border-color .15s', borderColor: isChanged ? 'rgba(74,200,192,0.65)' : undefined }}
+      style={{ outline: dragOverBlkIdx === blockIdx ? '2px solid var(--theme-accent)' : 'none', outlineOffset: 2, borderRadius: 8, transition: 'outline .1s, border-color .15s', borderColor: (collapsed && changedFields?.size) ? 'rgba(74,200,192,0.65)' : undefined }}
       onDragOver={e => { e.preventDefault(); if (dragBlkIdx?.current !== null && dragBlkIdx?.current !== blockIdx) setDragOverBlkIdx?.(blockIdx); }}
       onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOverBlkIdx?.(null); }}
       onDrop={e => {
@@ -775,6 +775,9 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
       {/* ── Expanded body ── */}
       {!collapsed && (
         <div className="blk-body">
+          {(() => {
+            const fch = (...fields) => fields.some(f => changedFields?.has(f)) ? { borderColor: 'rgba(74,200,192,0.65)' } : {};
+            return (<>
           {/* Type + name row */}
           <div className="blk-type-row">
             <button type="button" className="blk-type-btn" onClick={() => setShowTypePicker(true)}
@@ -787,6 +790,7 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
               placeholder={`Nome personalizado (padrão: ${block.type})`}
               value={customName}
               onChange={e => onUpdate({ ...block, label: e.target.value.trim() || block.type })}
+              style={fch('label')}
             />
           </div>
 
@@ -797,14 +801,16 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
                 <label className="blk-meta-field">
                   <span>{cfg.durationLabel || 'Duração (min)'}</span>
                   <input type="number" min={1} placeholder="—" value={block.duration}
-                    onChange={e => onUpdate({ ...block, duration: e.target.value })} />
+                    onChange={e => onUpdate({ ...block, duration: e.target.value })}
+                    style={fch('duration')} />
                 </label>
               )}
               {cfg.showRounds && (
                 <label className="blk-meta-field">
                   <span>Rounds</span>
                   <input type="number" min={1} placeholder="—" value={block.rounds}
-                    onChange={e => onUpdate({ ...block, rounds: e.target.value })} />
+                    onChange={e => onUpdate({ ...block, rounds: e.target.value })}
+                    style={fch('rounds')} />
                 </label>
               )}
             </div>
@@ -817,8 +823,8 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
             <>
               <div className="blk-ex-list">
                 {(block.exercises || []).map((ex, ei) => (
+                  <div key={ex.id} style={changedFields?.has(`ex:${ex.id}`) ? { borderRadius: 6, outline: '1.5px solid rgba(74,200,192,0.5)', outlineOffset: 2, marginBottom: 4 } : undefined}>
                   <ExerciseRow
-                    key={ex.id}
                     ex={ex}
                     myIdx={ei}
                     blockLabel={block.label !== block.type ? block.label : null}
@@ -833,6 +839,7 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
                     dragOverIdx={dragOverExIdx}
                     setDragOverIdx={setDragOverExIdx}
                   />
+                  </div>
                 ))}
               </div>
               <div className="blk-ex-actions">
@@ -855,6 +862,7 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
               placeholder="Notas do bloco — descrição, time cap, regras, buy-in..."
               value={block.notes}
               onChange={e => onUpdate({ ...block, notes: e.target.value })}
+              style={fch('notes')}
             />
           </div>
 
@@ -862,11 +870,13 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
             <label className="blk-meta-field">
               <span>Zona</span>
               <select value={block.zone || 'Zona 01'} onChange={e => onUpdate({ ...block, zone: e.target.value })}
-                style={{ background: '#111', border: '1px solid #2e2e2e', borderRadius: 5, color: '#ccc', padding: '8px 10px', fontFamily: 'inherit', fontSize: 13, outline: 'none' }}>
+                style={{ background: '#111', border: '1px solid #2e2e2e', borderRadius: 5, color: '#ccc', padding: '8px 10px', fontFamily: 'inherit', fontSize: 13, outline: 'none', ...fch('zone') }}>
                 {ZONES.map(z => <option key={z}>{z}</option>)}
               </select>
             </label>
           </div>
+            </>);
+          })()}
         </div>
       )}
 
@@ -902,11 +912,15 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const undoTimerRef = useRef(null);
   const formRef = useRef();
   const weekGridRef = useRef();
-  const [changedBlockIds, setChangedBlockIds]       = useState(() => new Set());
+  const [changedBlockFields, setChangedBlockFields] = useState({});
+  const [changedSessionFields, setChangedSessionFields] = useState(() => new Set());
   const [activeTemplateId, setActiveTemplateId]     = useState(null);
   const [showUpdateTemplateModal, setShowUpdateTemplateModal] = useState(false);
   const [highlightedSessionId, setHighlightedSessionId] = useState(null);
   const [pendingDelete, setPendingDelete]           = useState(null);
+
+  const trackSessionField = field =>
+    setChangedSessionFields(prev => { const n = new Set(prev); n.add(field); return n; });
 
   const fireUndo = (msg, undoFn) => {
     clearTimeout(undoTimerRef.current);
@@ -933,7 +947,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setForm({ ...s, date: dateKey, mainTraining: targets, sessionName: sName });
     setBlocks(s.blocks?.length ? s.blocks : []);
     setEditing({ dateKey, id: s.id });
-    setIsDirty(false); setChangedBlockIds(new Set()); setActiveTemplateId(null);
+    setIsDirty(false); setChangedBlockFields({}); setChangedSessionFields(new Set()); setActiveTemplateId(null);
     setShowSessNotes(!!(s.notes));
     setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   };
@@ -941,7 +955,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const cancel = () => {
     setForm(emptyS()); setBlocks([]); setEditing(null); setShowAlvoModal(false);
     setIsDirty(false); setShowSessNotes(false);
-    setChangedBlockIds(new Set()); setActiveTemplateId(null);
+    setChangedBlockFields({}); setChangedSessionFields(new Set()); setActiveTemplateId(null);
   };
 
   const cloneBlocks = bls => bls.map(bl => ({
@@ -966,7 +980,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setForm(f => ({ ...f, sessionName: f.sessionName || tpl.name }));
     setShowTemplateModal(false);
     setActiveTemplateId(tpl.id);
-    setChangedBlockIds(new Set());
+    setChangedBlockFields({}); setChangedSessionFields(new Set());
   };
   const deleteTemplate = id => {
     const updated = templates.filter(t => t.id !== id);
@@ -1087,9 +1101,25 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setIsDirty(true);
   };
   const updBlock = (id, upd) => {
+    const old = blocks.find(x => x.id === id);
     setBlocks(b => b.map(x => x.id === id ? upd : x));
     setIsDirty(true);
-    setChangedBlockIds(prev => { const n = new Set(prev); n.add(id); return n; });
+    if (!old) return;
+    const newFields = new Set();
+    ['label', 'type', 'duration', 'rounds', 'notes', 'zone', 'ladderMode'].forEach(f => {
+      if (upd[f] !== old[f]) newFields.add(f);
+    });
+    const oldExs = old.exercises || [];
+    (upd.exercises || []).forEach(ex => {
+      const oldEx = oldExs.find(x => x.id === ex.id);
+      if (!oldEx || JSON.stringify(ex) !== JSON.stringify(oldEx)) newFields.add(`ex:${ex.id}`);
+    });
+    if (!newFields.size) return;
+    setChangedBlockFields(prev => {
+      const cur = new Set(prev[id] || []);
+      newFields.forEach(f => cur.add(f));
+      return { ...prev, [id]: cur };
+    });
   };
   const delBlock = id => {
     const idx = blocks.findIndex(x => x.id === id);
@@ -1317,7 +1347,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                 return (
                   <label key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 7, cursor: 'pointer', background: checked ? 'rgba(74,200,192,.06)' : 'transparent', border: '1px solid ' + (checked ? 'rgba(74,200,192,.25)' : '#1e1e1e') }}>
                     <input type="checkbox" checked={checked}
-                      onChange={() => { setForm(f => ({ ...f, mainTraining: checked ? targets.filter(n => n !== a.name) : [...targets, a.name] })); setIsDirty(true); }}
+                      onChange={() => { setForm(f => ({ ...f, mainTraining: checked ? targets.filter(n => n !== a.name) : [...targets, a.name] })); setIsDirty(true); trackSessionField('mainTraining'); }}
                       style={{ accentColor: a.color || 'var(--theme-accent)', width: 14, height: 14 }} />
                     <span style={{ width: 10, height: 10, borderRadius: '50%', background: a.color || '#555', flexShrink: 0 }} />
                     <span style={{ fontSize: 13, color: '#ccc', flex: 1 }}>{a.name}</span>
@@ -1367,11 +1397,12 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           <div className="fg">
             <span className="lbl">Data</span>
             <input type="date" value={form.date || todayISO()}
+              style={changedSessionFields.has('date') ? { borderColor: 'rgba(74,200,192,0.65)' } : undefined}
               onChange={e => {
                 const newDate = e.target.value;
                 const oldDate = form.date || todayISO();
                 if (editing && newDate !== oldDate) { setPendingDate({ newDate, oldDate }); e.target.value = oldDate; }
-                else { setForm(f => ({ ...f, date: newDate })); setIsDirty(true); }
+                else { setForm(f => ({ ...f, date: newDate })); setIsDirty(true); trackSessionField('date'); }
               }} />
           </div>
           <div className="fg">
@@ -1379,7 +1410,8 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
             <input
               placeholder="ex: Semana 3 · D1 · Força Lower"
               value={form.sessionName || ''}
-              onChange={e => { setForm(f => ({ ...f, sessionName: e.target.value })); setIsDirty(true); }}
+              style={changedSessionFields.has('sessionName') ? { borderColor: 'rgba(74,200,192,0.65)' } : undefined}
+              onChange={e => { setForm(f => ({ ...f, sessionName: e.target.value })); setIsDirty(true); trackSessionField('sessionName'); }}
             />
           </div>
         </div>
@@ -1387,7 +1419,9 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
         {/* Athletes */}
         <div className="fg" style={{ marginTop: 4 }}>
           <span className="lbl">Para quem</span>
-          <button type="button" className="cr-athletes-btn" onClick={() => setShowAlvoModal(true)}>
+          <button type="button" className="cr-athletes-btn"
+            style={changedSessionFields.has('mainTraining') ? { borderColor: 'rgba(74,200,192,0.65)' } : undefined}
+            onClick={() => setShowAlvoModal(true)}>
             <i className="ti ti-users" style={{ color: 'var(--theme-accent)', fontSize: 15 }} />
             {targets.length === 0
               ? <span style={{ color: '#444' }}>Nenhum atleta — clique para selecionar</span>
@@ -1409,10 +1443,10 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           {showSessNotes && (
             <textarea
               className="blk-notes-quick"
-              style={{ marginTop: 6 }}
+              style={{ marginTop: 6, ...(changedSessionFields.has('notes') ? { borderColor: 'rgba(74,200,192,0.65)' } : {}) }}
               placeholder="Contexto, objetivos, link de vídeo, regras..."
               value={form.notes || ''}
-              onChange={e => { setForm(f => ({ ...f, notes: e.target.value })); setIsDirty(true); }}
+              onChange={e => { setForm(f => ({ ...f, notes: e.target.value })); setIsDirty(true); trackSessionField('notes'); }}
             />
           )}
         </div>
@@ -1448,7 +1482,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                 onToggleCollapse={() => setCollapsedBlocks(p => ({ ...p, [bl.id]: !p[bl.id] }))}
                 dragBlkIdx={dragBlkIdx} dragOverBlkIdx={dragOverBlkIdx}
                 setDragOverBlkIdx={setDragOverBlkIdx} reorderBlocks={reorderBlocks} blockIdx={i}
-                isChanged={changedBlockIds.has(bl.id)}
+                changedFields={changedBlockFields[bl.id] || null}
               />
             );
             if (i < blocks.length - 1) {
