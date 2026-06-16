@@ -38,19 +38,19 @@ const TYPE_CONFIG = {
   'EMOM':       { icon: 'ti-alarm',       color: '#d07828', desc: 'Every Minute on the Minute',  showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'For Time':   { icon: 'ti-clock',       color: '#c86828', desc: 'Contra o relógio',             showDuration: true,  showRounds: true,  durationLabel: 'Time cap (min)' },
   'AMRAP':      { icon: 'ti-refresh',     color: '#e09830', desc: 'Máx rounds em tempo fixo',    showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
-  'Estações':   { icon: 'ti-map-pin',     color: '#c8a030', desc: 'Treino por grupos / estações', showDuration: false, showRounds: false, durationLabel: '', isStations: true },
+  'Estações':   { icon: 'ti-map-pin',     color: '#c8a030', desc: 'Treino por grupos / estações', showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)', isStations: true },
   // BLUE family — barbell / lifting blocks
-  'Força':      { icon: 'ti-trending-up', color: '#5090e0', desc: 'Força e hipertrofia',          showDuration: false, showRounds: true,  durationLabel: '' },
-  'LPO':        { icon: 'ti-weight',      color: '#4070c0', desc: 'Levantamento Olímpico',        showDuration: false, showRounds: true,  durationLabel: '' },
-  'Core':       { icon: 'ti-hexagon',     color: '#6090d8', desc: 'Core e estabilização',         showDuration: false, showRounds: true,  durationLabel: '' },
-  'Acessórios': { icon: 'ti-dumbbell',    color: '#4878b8', desc: 'Trabalho acessório',            showDuration: false, showRounds: true,  durationLabel: '' },
+  'Força':      { icon: 'ti-trending-up', color: '#5090e0', desc: 'Força e hipertrofia',          showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
+  'LPO':        { icon: 'ti-weight',      color: '#4070c0', desc: 'Levantamento Olímpico',        showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
+  'Core':       { icon: 'ti-hexagon',     color: '#6090d8', desc: 'Core e estabilização',         showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
+  'Acessórios': { icon: 'ti-dumbbell',    color: '#4878b8', desc: 'Trabalho acessório',            showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   // GREEN family — movement quality blocks
   'Aquecimento':{ icon: 'ti-sun',         color: '#80c040', desc: 'Aquecimento e preparação',     showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Skill':      { icon: 'ti-target',      color: '#4ac8c0', desc: 'Técnica e habilidade',         showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Cardio':     { icon: 'ti-run',         color: '#40b878', desc: 'Cardio / Aeróbico',             showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Mobilidade': { icon: 'ti-leaf',        color: '#30a868', desc: 'Mobilidade e flexibilidade',   showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   // NEUTRAL
-  'Descanso':   { icon: 'ti-moon',        color: '#555',    desc: 'Descanso / Recovery',           showDuration: false, showRounds: true,  durationLabel: '' },
+  'Descanso':   { icon: 'ti-moon',        color: '#555',    desc: 'Descanso / Recovery',           showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
 };
 const DEFAULT_TYPE_CFG = { icon: 'ti-edit', color: '#888', desc: 'Bloco livre', showDuration: true, showRounds: true, durationLabel: 'Duração (min)' };
 const getTypeCfg = t => TYPE_CONFIG[t] || DEFAULT_TYPE_CFG;
@@ -688,7 +688,6 @@ function StationEditor({ block, onUpdate }) {
 // ── BlockEditor ───────────────────────────────────────────────────────────────
 function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy, collapsed, onToggleCollapse, dragBlkIdx, dragOverBlkIdx, setDragOverBlkIdx, reorderBlocks, blockIdx }) {
   const [showTypePicker, setShowTypePicker] = useState(false);
-  const [showAdv, setShowAdv] = useState(false);
   const dragExIdx = useRef(null);
   const [dragOverExIdx, setDragOverExIdx] = useState(null);
 
@@ -859,25 +858,15 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
             />
           </div>
 
-          {/* Advanced toggle — zona only */}
-          <button type="button" className="blk-adv-toggle" onClick={() => setShowAdv(v => !v)}>
-            <i className={`ti ti-chevron-${showAdv ? 'up' : 'down'}`} />
-            Avançado {showAdv ? '' : '(zona)'}
-          </button>
-
-          {showAdv && (
-            <div className="blk-adv-body">
-              <div className="blk-adv-row">
-                <label className="blk-meta-field">
-                  <span>Zona</span>
-                  <select value={block.zone || 'Zona 01'} onChange={e => onUpdate({ ...block, zone: e.target.value })}
-                    style={{ background: '#111', border: '1px solid #2e2e2e', borderRadius: 5, color: '#ccc', padding: '8px 10px', fontFamily: 'inherit', fontSize: 13, outline: 'none' }}>
-                    {ZONES.map(z => <option key={z}>{z}</option>)}
-                  </select>
-                </label>
-              </div>
-            </div>
-          )}
+          <div className="blk-meta-row" style={{ marginTop: 6 }}>
+            <label className="blk-meta-field">
+              <span>Zona</span>
+              <select value={block.zone || 'Zona 01'} onChange={e => onUpdate({ ...block, zone: e.target.value })}
+                style={{ background: '#111', border: '1px solid #2e2e2e', borderRadius: 5, color: '#ccc', padding: '8px 10px', fontFamily: 'inherit', fontSize: 13, outline: 'none' }}>
+                {ZONES.map(z => <option key={z}>{z}</option>)}
+              </select>
+            </label>
+          </div>
         </div>
       )}
 
