@@ -55,12 +55,26 @@ const TYPE_CONFIG = {
 const DEFAULT_TYPE_CFG = { icon: 'ti-edit', color: '#888', desc: 'Bloco livre', showDuration: true, showRounds: true, durationLabel: 'Duração (min)' };
 const getTypeCfg = t => TYPE_CONFIG[t] || DEFAULT_TYPE_CFG;
 
+function stationsCapStr(block) {
+  if (block.type !== 'Estações') return null;
+  const parse = v => { if (!v) return 0; const p = String(v).split(':'); return p.length >= 2 ? (+p[0]||0)*60+(+p[1]||0) : (+p[0]||0)*60; };
+  const sts = block.stations || [];
+  const singleCycle = sts.reduce((s, st) => s + parse(st.duration), 0);
+  if (!singleCycle) return null;
+  const repeat = block.stationRepeat || 1;
+  const restBetween = parse(block.restBetweenCycles) * (repeat - 1);
+  const totalSec = singleCycle * repeat + restBetween;
+  const m = Math.floor(totalSec / 60), s = totalSec % 60;
+  return s > 0 ? `Cap ${m}:${String(s).padStart(2, '0')}` : `Cap ${m}'`;
+}
+
 function blockSummary(block) {
   if (block.type === 'Estações') {
     const groups = (block.stations || []).filter(s => !s.isRest).length;
     const rests  = (block.stations || []).filter(s => s.isRest).length;
-    const rep    = (block.stationRepeat || 1) > 1 ? ` ×${block.stationRepeat}` : '';
-    return [groups && `${groups} grupos`, rests && `${rests} descanso`, rep].filter(Boolean).join(' · ');
+    const rep    = (block.stationRepeat || 1) > 1 ? `×${block.stationRepeat}` : '';
+    const cap    = stationsCapStr(block);
+    return [cap, groups && `${groups} grupos`, rests && `${rests} descanso`, rep].filter(Boolean).join(' · ');
   }
   const cfg = getTypeCfg(block.type);
   const parts = [];
@@ -693,6 +707,7 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
 
   const cfg = getTypeCfg(block.type);
   const summary = blockSummary(block);
+  const capStr = stationsCapStr(block);
   const customName = block.label && block.label !== block.type ? block.label : '';
 
   const addEx = () => onUpdate({ ...block, exercises: [...block.exercises, emptyEx()] });
@@ -757,8 +772,20 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
         {/* Custom name if set */}
         {customName && <span className="blk-custom-name">{customName}</span>}
 
-        {/* Summary when collapsed */}
+        {/* Summary (collapsed all types; expanded Estações: cap time only) */}
         {collapsed && summary && <span className="blk-summary">{summary}</span>}
+        {!collapsed && capStr && <span className="blk-summary">{capStr}</span>}
+
+        {/* Exercise name+load chips — collapsed non-Estações blocks only */}
+        {collapsed && block.type !== 'Estações' && (block.exercises || []).filter(e => e.name?.trim()).slice(0, 3).map((ex, i) => {
+          const badge = loadBadgeStr(ex);
+          return (
+            <span key={i} className="blk-ex-chip">
+              <span className="blk-ex-chip-name">{ex.name}</span>
+              {badge && <span className="ex-load-badge">{badge}</span>}
+            </span>
+          );
+        })}
 
         <div className="blk-spacer" />
 
@@ -778,6 +805,15 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
           {(() => {
             const fch = (...fields) => fields.some(f => changedFields?.has(f)) ? { borderColor: 'rgba(74,200,192,0.65)' } : {};
             return (<>
+          {/* Drag strip — second grab point when block is expanded */}
+          <div className="blk-body-drag"
+            draggable
+            onDragStart={e => { if (dragBlkIdx) dragBlkIdx.current = blockIdx; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(blockIdx)); }}
+            onDragEnd={() => { if (dragBlkIdx) dragBlkIdx.current = null; setDragOverBlkIdx?.(null); }}
+          >
+            <i className="ti ti-grip-horizontal" />
+          </div>
+
           {/* Type + name row */}
           <div className="blk-type-row">
             <button type="button" className="blk-type-btn" onClick={() => setShowTypePicker(true)}

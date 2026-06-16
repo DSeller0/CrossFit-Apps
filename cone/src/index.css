@@ -305,7 +305,8 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .tag-adap{background:#3a1414;color:#e06848;border:1px solid #601e1e}
 
 @keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,120,32,.5)}50%{box-shadow:0 0 0 6px rgba(232,120,32,0)}}
-.drag-handle{cursor:grab;color:#444;padding:0 6px;display:flex;align-items:center;font-size:16px;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.drag-handle{cursor:grab;color:#3a3a3a;padding:0 6px;display:flex;align-items:center;font-size:16px;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:color .12s}
+.drag-handle:hover{color:#666}
 .ex-suggestion:focus{background:#252525;outline:none;}
 .ex-suggestion:hover{background:#252525;}
 .ex-input{font-family:inherit;font-size:13px;border:1px solid #2e2e2e;border-radius:6px;padding:8px 11px;background:#111;color:#e0e0e0;outline:none;width:100%;-webkit-appearance:none;appearance:none;transition:border-color .15s}
@@ -317,7 +318,12 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .collapse-all-row{display:flex;gap:6px;margin-bottom:8px}
 .collapse-all-btn{font-family:inherit;font-size:11px;color:#555;background:transparent;border:1px solid #252525;border-radius:4px;padding:4px 10px;cursor:pointer;transition:all .12s}
 .collapse-all-btn:hover{color:#aaa;border-color:#444}
-.drag-handle:active{cursor:grabbing;color:#e87820}
+.drag-handle:active{cursor:grabbing;color:#4ac8c0}
+.blk-body-drag{display:flex;justify-content:center;padding:0 0 10px;cursor:grab;color:#282828;transition:color .12s;user-select:none;font-size:14px}
+.blk-body-drag:hover{color:#4ac8c0}
+.blk-body-drag:active{cursor:grabbing;color:#4ac8c0}
+.blk-ex-chip{font-size:10px;color:#484848;background:#141414;border:1px solid #1e1e1e;border-radius:4px;padding:2px 7px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0}
+.blk-ex-chip-name{max-width:90px;overflow:hidden;text-overflow:ellipsis}
 .blk-wrap.drag-over{border-color:#e87820;box-shadow:0 0 0 2px rgba(232,120,32,.3)}
 .ex-card.drag-over{border-color:#e87820}
 .sc-card.drag-over-session{border-color:#e87820;box-shadow:0 0 0 2px rgba(232,120,32,.2)}
