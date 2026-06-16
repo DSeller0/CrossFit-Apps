@@ -4,6 +4,12 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="description" content="Cone — Treinos do dia"/>
+<meta name="theme-color" content="#4ac8c0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Cone"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link rel="manifest" href="manifest.json"/>
 <title>Cone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -123,6 +129,31 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 .nav-btn:hover{color:var(--cream)}
 .nav-icon{font-size:19px;line-height:1}
 .nav-sep{width:1px;background:var(--divider);margin:10px 0}
+
+#pwa-banner{
+  position:fixed;bottom:calc(60px + env(safe-area-inset-bottom,0px));left:0;right:0;
+  display:flex;align-items:center;gap:10px;
+  background:#161210;border-top:1px solid #2a231c;
+  padding:10px 16px;z-index:30;
+  transform:translateY(100%);opacity:0;
+  transition:transform .3s ease,opacity .3s ease;
+  pointer-events:none;
+}
+#pwa-banner.show{transform:translateY(0);opacity:1;pointer-events:auto}
+#pwa-banner .pwa-icon{width:36px;height:36px;border-radius:8px;flex-shrink:0}
+#pwa-banner .pwa-text{flex:1;min-width:0}
+#pwa-banner .pwa-title{font-size:13px;font-weight:700;color:var(--cream);line-height:1.2}
+#pwa-banner .pwa-sub{font-size:11px;color:var(--sub);margin-top:1px}
+#pwa-banner .pwa-install{
+  background:var(--accent);color:#000;
+  font-family:var(--font);font-size:12px;font-weight:900;
+  padding:7px 14px;border-radius:7px;border:none;cursor:pointer;
+  white-space:nowrap;flex-shrink:0;
+}
+#pwa-banner .pwa-dismiss{
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:18px;line-height:1;padding:4px;flex-shrink:0;
+}
 </style>
 </head>
 <body>
@@ -142,6 +173,16 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 
 <div class="sessions" id="sessions">
   <div class="loading">carregando treinos...</div>
+</div>
+
+<div id="pwa-banner" role="banner" aria-label="Instalar aplicativo">
+  <img class="pwa-icon" src="icon-192.png" alt="Cone"/>
+  <div class="pwa-text">
+    <div class="pwa-title">Adicionar à tela inicial</div>
+    <div class="pwa-sub">Acesso rápido sem abrir o navegador</div>
+  </div>
+  <button class="pwa-install" id="pwa-install-btn">Instalar</button>
+  <button class="pwa-dismiss" id="pwa-dismiss-btn" aria-label="Fechar">✕</button>
 </div>
 
 <nav class="bottom-nav">
@@ -284,6 +325,45 @@ main()
         <span style="font-size:12px">${esc(err.message)}</span>
       </div>`;
   });
+
+// ── PWA install prompt ────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+(function() {
+  const DISMISSED_KEY = 'cone_pwa_dismissed';
+  if (localStorage.getItem(DISMISSED_KEY)) return;
+
+  let deferredPrompt = null;
+  const banner = document.getElementById('pwa-banner');
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(() => banner.classList.add('show'), 2500);
+  });
+
+  document.getElementById('pwa-install-btn').addEventListener('click', () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      banner.classList.remove('show');
+      localStorage.setItem(DISMISSED_KEY, '1');
+    });
+  });
+
+  document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+    banner.classList.remove('show');
+    localStorage.setItem(DISMISSED_KEY, '1');
+  });
+
+  window.addEventListener('appinstalled', () => {
+    banner.classList.remove('show');
+    deferredPrompt = null;
+  });
+})();
 </script>
 </body>
 </html>
