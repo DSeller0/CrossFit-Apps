@@ -907,14 +907,13 @@ export default function ResultadosTab({ sessions, preload, onPreloadConsumed }) 
   return (
     <div>
       <div className="res-tabs">
-        {[['log', 'ti-pencil', 'Registrar'], ['history', 'ti-chart-bar', 'Histórico / KPIs'], ['leaderboard', 'ti-trophy', 'Leaderboard'], ['roster', 'ti-users', 'Atletas']].map(([id, icon, lbl]) => (
+        {[['log', 'ti-pencil', 'Registrar'], ['history', 'ti-chart-bar', 'Histórico / KPIs'], ['leaderboard', 'ti-trophy', 'Leaderboard']].map(([id, icon, lbl]) => (
           <button key={id} type="button" className={`res-tab ${subView === id ? 'on' : ''}`} onClick={() => setSubView(id)}>
             <i className={`ti ${icon}`} /> {lbl}
           </button>
         ))}
       </div>
       {subView === 'log'         && <LogView athletes={athletes} sessions={sessions} preload={preload} onPreloadConsumed={onPreloadConsumed} />}
-      {subView === 'roster'      && <RosterView athletes={athletes} setAthletes={setAthletes} />}
       {subView === 'history'     && <HistoryView athletes={athletes} sessions={sessions} />}
       {subView === 'leaderboard' && <LeaderboardView athletes={athletes} sessions={sessions} />}
     </div>

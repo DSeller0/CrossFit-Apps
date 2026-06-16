@@ -723,7 +723,7 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
   return (
     <div
       className={`blk-wrap ${BTC[block.type] || 'bt-st'}`}
-      style={{ outline: dragOverBlkIdx === blockIdx ? '2px solid var(--theme-accent)' : 'none', outlineOffset: 2, borderRadius: 8, transition: 'outline .1s', boxShadow: isChanged ? 'inset 0 0 0 2px rgba(74,200,192,0.35)' : undefined }}
+      style={{ outline: dragOverBlkIdx === blockIdx ? '2px solid var(--theme-accent)' : 'none', outlineOffset: 2, borderRadius: 8, transition: 'outline .1s, border-color .15s', borderColor: isChanged ? 'rgba(74,200,192,0.65)' : undefined }}
       onDragOver={e => { e.preventDefault(); if (dragBlkIdx?.current !== null && dragBlkIdx?.current !== blockIdx) setDragOverBlkIdx?.(blockIdx); }}
       onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOverBlkIdx?.(null); }}
       onDrop={e => {
@@ -958,6 +958,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     const tpl = { id: uid(), name, blocks: cloneBlocks(blocks) };
     const updated = [...templates, tpl];
     setTemplates(updated); saveTemplates(updated);
+    setActiveTemplateId(tpl.id);
     setTemplateFlash(name); setTimeout(() => setTemplateFlash(null), 2000);
   };
   const applyTemplate = tpl => {
