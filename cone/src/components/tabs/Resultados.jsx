@@ -833,7 +833,7 @@ function LeaderboardView({ athletes, sessions }) {
       <div className="sc-card" style={{ padding: 12, marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <span className="lbl" style={{ margin: 0 }}>Leaderboard</span>
-          <button type="button" className="b bsm" onClick={() => setLbSettingsOpen(true)}><i className="ti ti-settings" /> Cores</button>
+          <button type="button" className="b bsm" onClick={() => setLbSettingsOpen(true)}><i className="ti ti-settings" /></button>
         </div>
         <div className="g2">
           <div className="fg">

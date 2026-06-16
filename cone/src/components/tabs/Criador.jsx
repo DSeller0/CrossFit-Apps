@@ -38,7 +38,7 @@ const TYPE_CONFIG = {
   'EMOM':       { icon: 'ti-alarm',       color: '#d07828', desc: 'Every Minute on the Minute',  showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'For Time':   { icon: 'ti-clock',       color: '#c86828', desc: 'Contra o relógio',             showDuration: true,  showRounds: true,  durationLabel: 'Time cap (min)' },
   'AMRAP':      { icon: 'ti-refresh',     color: '#e09830', desc: 'Máx rounds em tempo fixo',    showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
-  'Estações':   { icon: 'ti-map-pin',     color: '#c8a030', desc: 'Treino por grupos / estações', showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)', isStations: true },
+  'Estações':   { icon: 'ti-map-pin',     color: '#c8a030', desc: 'Treino por grupos / estações', showDuration: false, showRounds: false, durationLabel: 'Duração (min)', isStations: true },
   // BLUE family — barbell / lifting blocks
   'Força':      { icon: 'ti-trending-up', color: '#5090e0', desc: 'Força e hipertrofia',          showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'LPO':        { icon: 'ti-weight',      color: '#4070c0', desc: 'Levantamento Olímpico',        showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
