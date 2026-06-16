@@ -686,7 +686,7 @@ function StationEditor({ block, onUpdate }) {
 }
 
 // ── BlockEditor ───────────────────────────────────────────────────────────────
-function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy, collapsed, onToggleCollapse, dragBlkIdx, dragOverBlkIdx, setDragOverBlkIdx, reorderBlocks, blockIdx }) {
+function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy, collapsed, onToggleCollapse, dragBlkIdx, dragOverBlkIdx, setDragOverBlkIdx, reorderBlocks, blockIdx, isChanged }) {
   const [showTypePicker, setShowTypePicker] = useState(false);
   const dragExIdx = useRef(null);
   const [dragOverExIdx, setDragOverExIdx] = useState(null);
@@ -723,7 +723,7 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
   return (
     <div
       className={`blk-wrap ${BTC[block.type] || 'bt-st'}`}
-      style={{ outline: dragOverBlkIdx === blockIdx ? '2px solid var(--theme-accent)' : 'none', outlineOffset: 2, borderRadius: 8, transition: 'outline .1s' }}
+      style={{ outline: dragOverBlkIdx === blockIdx ? '2px solid var(--theme-accent)' : 'none', outlineOffset: 2, borderRadius: 8, transition: 'outline .1s', boxShadow: isChanged ? 'inset 0 0 0 2px rgba(74,200,192,0.35)' : undefined }}
       onDragOver={e => { e.preventDefault(); if (dragBlkIdx?.current !== null && dragBlkIdx?.current !== blockIdx) setDragOverBlkIdx?.(blockIdx); }}
       onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOverBlkIdx?.(null); }}
       onDrop={e => {
@@ -901,6 +901,12 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const [undoToast, setUndoToast]           = useState(null);
   const undoTimerRef = useRef(null);
   const formRef = useRef();
+  const weekGridRef = useRef();
+  const [changedBlockIds, setChangedBlockIds]       = useState(() => new Set());
+  const [activeTemplateId, setActiveTemplateId]     = useState(null);
+  const [showUpdateTemplateModal, setShowUpdateTemplateModal] = useState(false);
+  const [highlightedSessionId, setHighlightedSessionId] = useState(null);
+  const [pendingDelete, setPendingDelete]           = useState(null);
 
   const fireUndo = (msg, undoFn) => {
     clearTimeout(undoTimerRef.current);
@@ -927,7 +933,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setForm({ ...s, date: dateKey, mainTraining: targets, sessionName: sName });
     setBlocks(s.blocks?.length ? s.blocks : []);
     setEditing({ dateKey, id: s.id });
-    setIsDirty(false);
+    setIsDirty(false); setChangedBlockIds(new Set()); setActiveTemplateId(null);
     setShowSessNotes(!!(s.notes));
     setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   };
@@ -935,6 +941,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const cancel = () => {
     setForm(emptyS()); setBlocks([]); setEditing(null); setShowAlvoModal(false);
     setIsDirty(false); setShowSessNotes(false);
+    setChangedBlockIds(new Set()); setActiveTemplateId(null);
   };
 
   const cloneBlocks = bls => bls.map(bl => ({
@@ -957,6 +964,8 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setBlocks(cloneBlocks(tpl.blocks));
     setForm(f => ({ ...f, sessionName: f.sessionName || tpl.name }));
     setShowTemplateModal(false);
+    setActiveTemplateId(tpl.id);
+    setChangedBlockIds(new Set());
   };
   const deleteTemplate = id => {
     const updated = templates.filter(t => t.id !== id);
@@ -993,7 +1002,15 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   // Save / delete
   const saveS = () => {
     const dateKey = form.date || todayISO();
-    const session = { ...form, date: dateKey, blocks, id: editing?.id || form.id };
+    const savedId = editing?.id || form.id || uid();
+    const session = { ...form, date: dateKey, blocks, id: savedId };
+
+    const targetDate = new Date(dateKey + 'T12:00:00');
+    const today = new Date();
+    const targetSunday = new Date(targetDate); targetSunday.setDate(targetDate.getDate() - targetDate.getDay());
+    const thisSunday = new Date(today); thisSunday.setDate(today.getDate() - today.getDay());
+    const targetWeekOffset = Math.round((targetSunday - thisSunday) / (7 * 24 * 60 * 60 * 1000));
+
     setSessions(prev => {
       const next = { ...prev };
       if (editing) {
@@ -1008,14 +1025,43 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
       }
       return next;
     });
+
+    setWeekOffset(targetWeekOffset);
+    setWeekGridCollapsed(false);
+    setHighlightedSessionId(savedId);
+    setTimeout(() => weekGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    setTimeout(() => setHighlightedSessionId(null), 2000);
     cancel();
   };
 
-  const del = (dateKey, id) => setSessions(prev => {
-    const n = { ...prev };
-    n[dateKey] = (n[dateKey] || []).filter(s => s.id !== id);
-    return n;
-  });
+  const del = (dateKey, id) => {
+    const sess = (sessions[dateKey] || []).find(s => s.id === id);
+    setPendingDelete({ dateKey, id, sessionName: sess?.sessionName || '—' });
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    const { dateKey, id, sessionName } = pendingDelete;
+    const snap = (sessions[dateKey] || []).find(s => s.id === id);
+    setSessions(prev => { const n = { ...prev }; n[dateKey] = (n[dateKey] || []).filter(s => s.id !== id); return n; });
+    setPendingDelete(null);
+    if (snap) {
+      fireUndo(`Sessão "${sessionName}" removida`, () => {
+        setSessions(prev => { const n = { ...prev }; n[dateKey] = [...(n[dateKey] || []), snap]; return n; });
+      });
+    }
+  };
+
+  const updateTemplate = () => {
+    if (!activeTemplateId) return;
+    setTemplates(prev => {
+      const updated = prev.map(t => t.id === activeTemplateId ? { ...t, blocks: cloneBlocks(blocks) } : t);
+      saveTemplates(updated);
+      return updated;
+    });
+    setActiveTemplateId(null);
+    setShowUpdateTemplateModal(false);
+  };
 
   // Block management
   const [insertAtIdx, setInsertAtIdx] = useState(null);
@@ -1039,7 +1085,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     });
     setIsDirty(true);
   };
-  const updBlock = (id, upd) => { setBlocks(b => b.map(x => x.id === id ? upd : x)); setIsDirty(true); };
+  const updBlock = (id, upd) => {
+    setBlocks(b => b.map(x => x.id === id ? upd : x));
+    setIsDirty(true);
+    setChangedBlockIds(prev => { const n = new Set(prev); n.add(id); return n; });
+  };
   const delBlock = id => {
     const idx = blocks.findIndex(x => x.id === id);
     if (blocks.length <= 1 || idx < 0) return;
@@ -1090,6 +1140,36 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
             <div className="confirm-btns">
               <button type="button" className="b bsm" onClick={() => setPendingDate(null)}>Cancelar</button>
               <button type="button" className="b bp bsm" onClick={() => { setForm(f => ({ ...f, date: pendingDate.newDate })); setPendingDate(null); }}>Confirmar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete confirm ── */}
+      {pendingDelete && (
+        <div className="confirm-overlay">
+          <div className="confirm-box">
+            <div className="confirm-msg">
+              Remover sessão <strong>{pendingDelete.sessionName}</strong>?
+            </div>
+            <div className="confirm-btns">
+              <button type="button" className="b bsm" onClick={() => setPendingDelete(null)}>Cancelar</button>
+              <button type="button" className="b bd bsm" onClick={confirmDelete}>Remover</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Update template confirm ── */}
+      {showUpdateTemplateModal && (
+        <div className="confirm-overlay">
+          <div className="confirm-box">
+            <div className="confirm-msg">
+              Atualizar o template <strong>{templates.find(t => t.id === activeTemplateId)?.name || ''}</strong> com os blocos atuais?
+            </div>
+            <div className="confirm-btns">
+              <button type="button" className="b bsm" onClick={() => setShowUpdateTemplateModal(false)}>Cancelar</button>
+              <button type="button" className="b bp bsm" onClick={updateTemplate}>Atualizar</button>
             </div>
           </div>
         </div>
@@ -1367,6 +1447,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                 onToggleCollapse={() => setCollapsedBlocks(p => ({ ...p, [bl.id]: !p[bl.id] }))}
                 dragBlkIdx={dragBlkIdx} dragOverBlkIdx={dragOverBlkIdx}
                 setDragOverBlkIdx={setDragOverBlkIdx} reorderBlocks={reorderBlocks} blockIdx={i}
+                isChanged={changedBlockIds.has(bl.id)}
               />
             );
             if (i < blocks.length - 1) {
@@ -1396,9 +1477,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
             {' '}{editing ? 'Salvar alterações' : 'Salvar sessão'}
           </button>
           {blocks.length > 0 && (
-            <button type="button" className="b bsm" style={{ borderColor: '#4a2880', color: '#9070d8', flexShrink: 0, minWidth: 38 }}
-              title="Salvar como template" onClick={saveAsTemplate}>
-              <i className="ti ti-bookmark" />
+            <button type="button" className="b bsm"
+              style={{ borderColor: '#4a2880', color: '#9070d8', flexShrink: 0, minWidth: 38, background: activeTemplateId ? 'rgba(144,112,216,0.12)' : undefined }}
+              title={activeTemplateId ? 'Template ativo — clique para atualizar' : 'Salvar como template'}
+              onClick={activeTemplateId ? () => setShowUpdateTemplateModal(true) : saveAsTemplate}>
+              <i className={`ti ${activeTemplateId ? 'ti-bookmark-filled' : 'ti-bookmark'}`} />
             </button>
           )}
         </div>
@@ -1406,7 +1489,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
 
       {/* ── Week grid ── */}
       {totalSessions > 0 && (
-        <div>
+        <div ref={weekGridRef}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
             <button type="button" className="b bsm" onClick={() => setWeekOffset(o => o-1)}><i className="ti ti-chevron-left" /></button>
             <span style={{ fontSize: 12, color: '#aaa', fontWeight: 600 }}>{weekLabel}</span>
@@ -1451,7 +1534,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                       {list.length > 0 && <span className="wg-sub">{list.length}s</span>}
                     </div>
                     {list.map(s => (
-                      <div key={s.id} className="wg-sc" draggable
+                      <div key={s.id} className={`wg-sc${s.id === highlightedSessionId ? ' wg-saved' : ''}`} draggable
                         style={{ outline: editing?.id === s.id ? '2px solid #4ac8c0' : 'none', outlineOffset: 1 }}
                         onClick={() => startEdit(s, dateKey)}
                         onDragStart={e => { e.dataTransfer.setData('sess-id', s.id); e.dataTransfer.setData('sess-date', dateKey); e.dataTransfer.effectAllowed = 'move'; e.stopPropagation(); }}
