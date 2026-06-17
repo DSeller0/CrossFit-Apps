@@ -468,6 +468,9 @@ function renderDetail(sess,dateKey){
       }
 
       const exs=(bl.exercises||[]).filter(e=>e.name||e.isComplex);
+      const hasProgEx=exs.some(e=>!e.isComplex&&e.intensity?.mode==='progression');
+      const blRmData=rmValues[bl.id];
+      const blIsEdit=rmEditKey===bl.id;
 
       // Build progression lines for display
       const exRows=exs.map(ex=>{
@@ -503,9 +506,6 @@ function renderDetail(sess,dateKey){
 
         if(isProg){
           const steps=ex.intensity?.steps||[];
-          const exKey=`${bl.id}|${ex.id}`;
-          const rmData=rmValues[exKey];
-          const isEdit=rmEditKey===exKey;
           const groups=[];
           steps.forEach(s=>{
             const reps=s.reps||ex.reps||'';
@@ -517,25 +517,14 @@ function renderDetail(sess,dateKey){
             const repsPrefix=ex.sets&&g.reps?`${g.sets||ex.sets}×${g.reps}`:g.reps;
             const pctNums=g.loads.map(l=>parseFloat(l)).filter(n=>!isNaN(n));
             const pctStr=pctNums.length?pctNums.join('/')+'% RM':'';
-            const calcStr=rmData?.rm&&pctNums.length?
-              pctNums.map(p=>Math.round(rmData.rm*p/100*2)/2).join('/')+' '+(rmData.unit||'kg'):'';
+            const calcStr=blRmData?.rm&&pctNums.length?
+              pctNums.map(p=>Math.ceil(blRmData.rm*p/100)).join('/')+' '+(blRmData.unit||'kg'):'';
             const lineKey=`${bl.id}|${ex.id}-${gi}`;
             const lineDone=checkedExercises.has(lineKey);
             return `<div class="detail-ex">
               <div class="detail-ex-check${lineDone?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}-${gi}')"></div>
               <div class="detail-ex-body">
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                  <div class="detail-ex-name${lineDone?' done':''}">${[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
-                  ${gi===0?`<button class="rm-chip${rmData?' has-rm':''}" onclick="event.stopPropagation();toggleRmEdit('${exKey}')">${rmData?rmData.rm+' '+(rmData.unit||'kg'):'RM'}</button>`:''}
-                </div>
-                ${gi===0&&isEdit?`<div class="rm-input-wrap" onclick="event.stopPropagation()">
-                  <input id="rm-inp" type="number" class="rm-input" placeholder="100" min="1" step="0.5" inputmode="decimal" value="${rmData?.rm||''}" onkeydown="if(event.key==='Enter'){event.preventDefault();event.stopPropagation();confirmRm()}"/>
-                  <select id="rm-unit-sel" class="rm-unit-sel" onclick="event.stopPropagation()">
-                    <option value="kg"${(rmData?.unit||'kg')==='kg'?' selected':''}>kg</option>
-                    <option value="lbs"${rmData?.unit==='lbs'?' selected':''}>lbs</option>
-                  </select>
-                  <button class="rm-confirm-btn" onclick="event.preventDefault();event.stopPropagation();confirmRm()">✓</button>
-                </div>`:''}
+                <div class="detail-ex-name${lineDone?' done':''}">${[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
                 ${pctStr?`<div class="detail-ex-vol">${pctStr}</div>`:''}
                 ${calcStr?`<div class="rm-calc-badge">${calcStr}</div>`:''}
               </div>
@@ -557,10 +546,19 @@ function renderDetail(sess,dateKey){
         <div class="detail-block-hdr">
           <span class="detail-block-title" style="color:${col}">${label}</span>
           <div style="display:flex;align-items:center;gap:6px">
+            ${hasProgEx?`<button class="rm-chip${blRmData?' has-rm':''}" onclick="event.stopPropagation();toggleRmEdit('${bl.id}')">${blRmData?blRmData.rm+' '+(blRmData.unit||'kg'):'RM'}</button>`:''}
             ${meta?`<span class="detail-block-meta" style="background:${col};color:#000">${meta}</span>`:''}
             ${blDone?`<span class="detail-block-done">✓ Completo</span>`:''}
           </div>
         </div>
+        ${blIsEdit?`<div class="rm-input-wrap" style="padding:0 12px 10px" onclick="event.stopPropagation()">
+          <input id="rm-inp" type="number" class="rm-input" placeholder="100" min="1" step="1" inputmode="numeric" value="${blRmData?.rm||''}" onkeydown="if(event.key==='Enter'){event.preventDefault();event.stopPropagation();confirmRm()}"/>
+          <select id="rm-unit-sel" class="rm-unit-sel" onclick="event.stopPropagation()">
+            <option value="kg"${(blRmData?.unit||'kg')==='kg'?' selected':''}>kg</option>
+            <option value="lbs"${blRmData?.unit==='lbs'?' selected':''}>lbs</option>
+          </select>
+          <button class="rm-confirm-btn" onclick="event.preventDefault();event.stopPropagation();confirmRm()">✓</button>
+        </div>`:''}
         ${exRows}
         ${bl.notes?`<div class="detail-block-notes">${bl.notes}</div>`:''}
         ${isWod?`<a class="lb-link" href="leaderboard.html?wod=${bl.id}&session=${sess.id}&date=${dateKey}" target="_blank">
