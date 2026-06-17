@@ -170,17 +170,17 @@ function render() {
       <div class="sess-date">${dateStr}</div>
       ${session.sessionName ? `<div class="sess-name">${session.sessionName}</div>` : ''}
       <div class="block-list">
-        ${allBlocks.map(b => {
-          const exs = (b.exercises||[]).filter(e=>e.name).map(e=>{
+        ${allBlocks.filter(b=>WOD_TYPES.includes(b.type)).map(b => {
+          const exLines = (b.exercises||[]).filter(e=>e.name).map(e=>{
             const vol = e.sets && e.reps ? `${e.sets}×${e.reps}` : (e.reps||'');
-            return [vol, e.name].filter(Boolean).join(' ');
-          }).join(' · ');
+            return `<div>${[vol, e.name].filter(Boolean).join(' ')}</div>`;
+          }).join('');
           const meta = [b.rounds && `${b.rounds} rounds`, b.duration && `CAP ${b.duration}'`].filter(Boolean).join(' · ');
           return `<div class="block-pill">
             <div>
               <div class="block-type">${b.label||b.type}</div>
               ${meta ? `<div class="block-meta">${meta}</div>` : ''}
-              ${exs ? `<div class="block-exs">${exs}</div>` : ''}
+              ${exLines ? `<div class="block-exs">${exLines}</div>` : ''}
             </div>
           </div>`;
         }).join('')}
@@ -222,7 +222,7 @@ function render() {
           ${bl.blockType === 'For Time' ? `
           <div class="fg">
             <div class="lbl">Tempo (MM:SS)</div>
-            <input type="text" placeholder="ex: 12:34" value="${bl.perfTime}" oninput="state.blocks[${i}].perfTime=this.value" inputmode="numeric"/>
+            <input type="text" placeholder="MM:SS" value="${bl.perfTime}" oninput="maskPerfTime(this,${i})" inputmode="numeric" maxlength="5"/>
           </div>` : `
           <div class="row2">
             <div class="fg">
@@ -253,6 +253,13 @@ function setRpe(i, n) {
 function setScale(i, s) {
   state.blocks[i].scale = s;
   document.querySelectorAll(`#block-form-${i} .scale-btn`).forEach(b => b.classList.toggle('on', b.textContent===s));
+}
+
+function maskPerfTime(el, idx) {
+  let v = el.value.replace(/\D/g,'').slice(0,4);
+  if (v.length > 2) v = v.slice(0,2) + ':' + v.slice(2);
+  el.value = v;
+  state.blocks[idx].perfTime = v;
 }
 
 async function submit() {
