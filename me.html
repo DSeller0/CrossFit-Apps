@@ -12,47 +12,51 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0d0b09;
-  --card:#161210;
-  --card2:#1e1a16;
-  --accent:#4ac8c0;
-  --cream:#f0e8d0;
-  --sub:#c8b090;
-  --muted:#a89880;
-  --divider:#2a231c;
-  --font:'Raleway',sans-serif;
+  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;
+  --card:#161210;--card2:#1e1a16;
+  --divider:#2a231c;--gold:#d8a840;--gold2:#b88820;
+  --teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;
+  --muted:#806850;--dim:#554a3a;
+  --accent:#4ac8c0;--font:'Raleway',sans-serif;
 }
-html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh;padding-bottom:32px}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh;padding-bottom:80px}
 
-/* ── Topbar ── */
-.topbar{padding:14px 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--divider);background:var(--bg);position:sticky;top:0;z-index:10}
-.back-btn{font-size:22px;color:var(--muted);text-decoration:none;line-height:1;transition:color .15s;padding:2px 4px}
-.back-btn:hover{color:var(--cream)}
-.brand{font-size:20px;font-weight:900;color:var(--cream);letter-spacing:-.02em}
-.brand em{color:var(--accent);font-style:normal}
+/* ── Header ── */
+.hdr{padding:18px 20px 14px;border-bottom:1px solid var(--divider);background:var(--bg);position:sticky;top:0;z-index:20;position:relative}
+.hdr-rule{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.hdr-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold2))}
+.hdr-line.r{background:linear-gradient(270deg,transparent,var(--gold2))}
+.hdr-diamond{width:5px;height:5px;border:1px solid var(--gold);transform:rotate(45deg);flex-shrink:0}
+.brand{font-size:22px;font-weight:900;letter-spacing:8px;color:var(--cream);text-align:center}
+.gym{text-align:center;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;margin-top:1px}
+.hdr-back{position:absolute;top:50%;left:20px;transform:translateY(-50%);color:var(--muted);font-size:20px;text-decoration:none;transition:color .15s;line-height:1;padding:4px}
+.hdr-back:hover{color:var(--cream)}
 
 /* ── Generic states ── */
 .center-msg{text-align:center;padding:64px 20px;color:var(--muted);font-size:13px;line-height:1.8}
 .center-msg .icon{font-size:36px;display:block;margin-bottom:14px;opacity:.4}
 
 /* ── Name picker ── */
-.picker-wrap{max-width:420px;margin:36px auto;padding:0 20px}
+.picker-wrap{max-width:420px;margin:28px auto;padding:0 20px}
 .picker-title{font-size:22px;font-weight:900;color:var(--cream);margin-bottom:4px}
 .picker-sub{font-size:13px;color:var(--sub);margin-bottom:20px}
 .picker-input{
-  width:100%;background:var(--card);border:1px solid var(--divider);border-radius:10px;
+  width:100%;background:var(--stone);border:1px solid var(--divider);
   color:var(--cream);font-family:var(--font);font-size:15px;padding:12px 16px;
   outline:none;transition:border-color .15s
 }
-.picker-input:focus{border-color:var(--accent)}
+.picker-input:focus{border-color:var(--teal)}
 .picker-input::placeholder{color:var(--muted)}
 .picker-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
 .picker-item{
-  background:var(--card);border:1px solid var(--divider);border-radius:10px;
+  background:var(--stone);border:1px solid var(--divider);
   padding:13px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;
-  transition:border-color .15s;text-decoration:none
+  transition:border-color .15s;text-decoration:none;position:relative;
 }
-.picker-item:hover{border-color:var(--accent)}
+.picker-item::before,.picker-item::after{content:'';position:absolute;width:7px;height:7px}
+.picker-item::before{top:-1px;left:-1px;border-top:1px solid var(--gold2);border-left:1px solid var(--gold2)}
+.picker-item::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--gold2);border-right:1px solid var(--gold2)}
+.picker-item:hover{border-color:rgba(74,200,192,.35)}
 .ath-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .picker-name{font-size:15px;font-weight:700;color:var(--cream)}
 .picker-empty{text-align:center;padding:24px 0;font-size:13px;color:var(--muted)}
@@ -77,7 +81,7 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 
 /* ── Section wrapper ── */
 .section{padding:18px 20px;border-bottom:1px solid var(--divider)}
-.section-title{font-size:10px;font-weight:900;color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px}
+.section-title{font-size:9px;font-weight:900;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px}
 
 /* ── Week strip ── */
 .week-strip{display:flex;gap:4px}
@@ -93,8 +97,8 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 .week-lbl{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 
 /* ── Scale bar ── */
-.scale-bar-wrap{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px}
-.scale-seg{height:100%;border-radius:3px;min-width:4px}
+.scale-bar-wrap{display:flex;height:10px;gap:2px;overflow:hidden}
+.scale-seg{height:100%;min-width:4px}
 .seg-rx{background:#4ac8c0}
 .seg-inter{background:#4a90d8}
 .seg-sc{background:#d8904a}
@@ -104,22 +108,33 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 .sl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
 /* ── Result cards ── */
-.result-card{background:var(--card);border:1px solid var(--divider);border-radius:12px;padding:14px;margin-bottom:10px}
+.result-card{background:var(--stone);border:1px solid var(--divider);padding:14px;margin-bottom:8px;position:relative}
+.result-card::before,.result-card::after{content:'';position:absolute;width:7px;height:7px}
+.result-card::before{top:-1px;left:-1px;border-top:1px solid var(--gold2);border-left:1px solid var(--gold2)}
+.result-card::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--gold2);border-right:1px solid var(--gold2)}
 .rc-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
-.rc-date{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.06em;white-space:nowrap}
+.rc-date{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.06em;white-space:nowrap}
 .rc-sess{font-size:14px;font-weight:900;color:var(--cream);line-height:1.2}
 .rc-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.energy-badge{font-size:9px;font-weight:700;color:var(--muted);background:var(--card2);border:1px solid var(--divider);border-radius:4px;padding:2px 6px;letter-spacing:.04em}
-.absent-badge{font-size:9px;font-weight:700;color:#c0704a;background:rgba(192,112,74,.1);border:1px solid rgba(192,112,74,.2);border-radius:4px;padding:2px 6px}
+.energy-badge{font-size:9px;font-weight:700;color:var(--muted);background:var(--stone2);border:1px solid var(--divider);padding:2px 6px;letter-spacing:.04em}
+.absent-badge{font-size:9px;font-weight:700;color:#c0704a;background:rgba(192,112,74,.1);border:1px solid rgba(192,112,74,.2);padding:2px 6px}
 .rc-blocks{display:flex;flex-direction:column;gap:5px;margin-bottom:6px}
 .rc-block{
-  background:var(--card2);border:1px solid var(--divider);border-radius:7px;
+  background:var(--stone2);border:1px solid var(--divider);
   padding:7px 11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap
 }
-.rc-btype{font-size:10px;font-weight:900;color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+.rc-btype{font-size:10px;font-weight:900;color:var(--teal);letter-spacing:.06em;text-transform:uppercase}
 .rc-bdot{color:var(--divider);font-size:12px}
 .rc-blabel{font-size:11px;color:var(--sub)}
-.scale-chip{font-size:9px;font-weight:900;padding:2px 7px;border-radius:4px;letter-spacing:.06em;white-space:nowrap}
+.scale-chip{font-size:9px;font-weight:900;padding:2px 7px;letter-spacing:.06em;white-space:nowrap}
+
+/* ── Bottom nav ── */
+.p-nav{position:fixed;bottom:0;left:0;right:0;background:#0a0807;border-top:1px solid var(--divider);display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:30}
+.p-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px;gap:3px;color:var(--muted);text-decoration:none;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.06em;border:none;background:none;cursor:pointer;transition:color .15s}
+.p-nav-btn:hover{color:var(--sub)}
+.p-nav-btn.active{color:var(--teal)}
+.p-nav-ic{font-size:18px;line-height:1}
+.p-nav-sep{width:1px;background:var(--divider);margin:10px 0}
 .chip-rx{background:rgba(74,200,192,.15);color:#4ac8c0;border:1px solid rgba(74,200,192,.25)}
 .chip-inter{background:rgba(74,144,216,.15);color:#4a90d8;border:1px solid rgba(74,144,216,.25)}
 .chip-sc{background:rgba(216,144,74,.15);color:#d8904a;border:1px solid rgba(216,144,74,.25)}
@@ -132,9 +147,15 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 </head>
 <body>
 
-<header class="topbar">
-  <a class="back-btn" href="index.html" title="Voltar">&#8592;</a>
-  <div class="brand">C<em>o</em>ne</div>
+<header class="hdr" style="position:relative">
+  <a class="hdr-back" href="index.html" title="Início">←</a>
+  <div class="hdr-rule">
+    <div class="hdr-line"></div>
+    <div class="hdr-diamond"></div>
+    <div class="hdr-line r"></div>
+  </div>
+  <div class="brand">CONE</div>
+  <div class="gym">Meu Perfil</div>
 </header>
 
 <div id="root"><div class="center-msg"><span class="icon">⏳</span>carregando...</div></div>
@@ -427,5 +448,16 @@ main().catch(err => {
     </div>`;
 });
 </script>
+
+<nav class="p-nav">
+  <a class="p-nav-btn" href="index.html"><span class="p-nav-ic">🏠</span><span>Início</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn" href="leaderboard.html"><span class="p-nav-ic">🏆</span><span>Ranking</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn active" href="me.html"><span class="p-nav-ic">👤</span><span>Perfil</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn" href="schedule.html"><span class="p-nav-ic">📅</span><span>Agenda</span></a>
+</nav>
+
 </body>
 </html>

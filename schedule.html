@@ -14,25 +14,39 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --accent:#e87820;--accent-text:#000;--bg:#0a0a0a;--bg2:#111;
-  --border:#1e1e1e;--text:#e0e0e0;--sub:#666;--cyan:#00b8d4;
-  --sc-font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif
+  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--bg2:#161210;
+  --divider:#2a231c;--gold:#d8a840;--gold2:#b88820;
+  --teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;
+  --accent:#4ac8c0;--accent-text:#000;
+  --border:#2a231c;--text:#f0e8d0;--cyan:#4ac8c0;
+  --sc-font:'Raleway',sans-serif;
 }
-html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;-webkit-text-size-adjust:100%}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-height:100vh;-webkit-text-size-adjust:100%;padding-bottom:72px}
 
-/* ── Topbar ── */
-.topbar{background:#000;border-bottom:2px solid var(--accent);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100}
-.topbar-left{display:flex;align-items:center;gap:12px}
-.topbar-logo{width:36px;height:36px;object-fit:contain;border-radius:4px}
-.topbar-gym{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.08em;font-family:var(--sc-font)}
-.topbar-right{display:flex;align-items:center;gap:8px}
-.athlete-sel{font-family:inherit;font-size:12px;background:#111;border:1px solid #2e2e2e;color:var(--text);border-radius:5px;padding:6px 10px;outline:none;cursor:pointer}
+/* ── Header ── */
+.hdr{padding:18px 20px 14px;border-bottom:1px solid var(--divider);background:var(--bg);position:sticky;top:0;z-index:20}
+.hdr-rule{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.hdr-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold2))}
+.hdr-line.r{background:linear-gradient(270deg,transparent,var(--gold2))}
+.hdr-diamond{width:5px;height:5px;border:1px solid var(--gold);transform:rotate(45deg);flex-shrink:0}
+.brand{font-size:22px;font-weight:900;letter-spacing:8px;color:var(--cream);text-align:center}
+.gym{text-align:center;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;margin-top:1px}
+/* ── Athlete selector bar ── */
+.sel-bar{background:var(--bg);border-bottom:1px solid var(--divider);padding:10px 20px}
+.athlete-sel{font-family:var(--sc-font);font-size:12px;background:var(--stone);border:1px solid var(--divider);color:var(--text);padding:6px 10px;outline:none;cursor:pointer;width:100%;max-width:320px}
+/* ── Bottom nav ── */
+.p-nav{position:fixed;bottom:0;left:0;right:0;background:#0a0807;border-top:1px solid var(--divider);display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:30}
+.p-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px;gap:3px;color:var(--muted);text-decoration:none;font-family:var(--sc-font);font-size:9px;font-weight:700;letter-spacing:.06em;border:none;background:none;cursor:pointer;transition:color .15s}
+.p-nav-btn:hover{color:var(--sub)}
+.p-nav-btn.active{color:var(--teal)}
+.p-nav-ic{font-size:18px;line-height:1}
+.p-nav-sep{width:1px;background:var(--divider);margin:10px 0}
 
 /* ── Week nav ── */
-.week-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#000;border-bottom:1px solid var(--border);position:sticky;top:66px;z-index:99}
-.week-label{font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
-.nav-btn{background:transparent;border:1px solid #2e2e2e;color:var(--sub);font-size:16px;width:32px;height:32px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
-.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.week-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:90px;z-index:19}
+.week-label{font-size:13px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
+.nav-btn{background:transparent;border:1px solid var(--divider);color:var(--muted);font-size:16px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.nav-btn:hover{border-color:var(--teal);color:var(--teal)}
 
 /* ── Grid ── */
 .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:12px 12px 20px}
@@ -294,18 +308,16 @@ function render(){
   const weekLabel=`${mon.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${sun.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} · ${MONTH_PT[mon.getMonth()]} ${mon.getFullYear()}`;
 
   document.getElementById('app').innerHTML=`
-    <div class="topbar">
-      <div class="topbar-left">
-        <img class="topbar-logo" src="${logoFile}" onerror="this.style.display='none'" alt="Logo"/>
-        <span class="topbar-gym">${gymName}</span>
-      </div>
-      <div class="topbar-right">
-        <select class="athlete-sel" id="athlete-sel" onchange="setAthlete(this.value)">
-          <option value="">— Todos —</option>
-          ${athletes.map(a=>`<option value="${a.name}"${selectedAthlete===a.name?' selected':''}>${a.name}</option>`).join('')}
-        </select>
-        <a href="index.html" style="color:#4ac8c0;font-size:22px;text-decoration:none;line-height:1;padding:4px;opacity:.7;transition:opacity .15s" title="Início" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7"><i class="ti ti-home"></i></a>
-      </div>
+    <div class="hdr">
+      <div class="hdr-rule"><div class="hdr-line"></div><div class="hdr-diamond"></div><div class="hdr-line r"></div></div>
+      <div class="brand">CONE</div>
+      <div class="gym">${gymName||'Agenda'}</div>
+    </div>
+    <div class="sel-bar">
+      <select class="athlete-sel" id="athlete-sel" onchange="setAthlete(this.value)">
+        <option value="">— Todos —</option>
+        ${athletes.map(a=>`<option value="${a.name}"${selectedAthlete===a.name?' selected':''}>${a.name}</option>`).join('')}
+      </select>
     </div>
     <div class="week-nav">
       <button class="nav-btn" onclick="changeWeek(-1)"><i class="ti ti-chevron-left"></i></button>
@@ -670,6 +682,16 @@ init();
 
 <div id="log-pane-overlay" onclick="closeLogPane()"></div>
 <div id="log-pane"><div id="log-pane-content"></div></div>
+
+<nav class="p-nav">
+  <a class="p-nav-btn" href="index.html"><span class="p-nav-ic">🏠</span><span>Início</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn" href="leaderboard.html"><span class="p-nav-ic">🏆</span><span>Ranking</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn" href="me.html"><span class="p-nav-ic">👤</span><span>Perfil</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn active" href="schedule.html"><span class="p-nav-ic">📅</span><span>Agenda</span></a>
+</nav>
 
 <script>
 if('serviceWorker' in navigator){
