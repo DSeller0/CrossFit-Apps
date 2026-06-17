@@ -84,10 +84,10 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 .hm-hdrs{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px}
 .hm-hdr{font-size:8px;color:var(--muted);text-align:center;font-weight:700;letter-spacing:.04em}
 .hm-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.hm-cell{aspect-ratio:1;background:var(--stone);border:1px solid var(--divider);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--dim)}
-.hm-cell.has{background:rgba(74,200,192,.18);border-color:rgba(74,200,192,.5);color:var(--teal)}
-.hm-cell.today{border-color:var(--gold);box-shadow:0 0 6px rgba(216,168,64,.2)}
-.hm-cell.today.has{border-color:var(--teal);color:var(--teal);box-shadow:0 0 8px rgba(74,200,192,.3)}
+.hm-cell{height:10px;background:var(--stone);border:1px solid var(--divider)}
+.hm-cell.has{background:rgba(74,200,192,.65);border-color:rgba(74,200,192,.85)}
+.hm-cell.today{border-color:var(--gold)}
+.hm-cell.today.has{background:rgba(74,200,192,.65);border-color:var(--teal)}
 .hm-cell.future{opacity:.2}
 
 /* ── Scale section ── */
@@ -97,8 +97,9 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 .scale-rows{display:flex;flex-direction:column;gap:6px}
 .sc-row{display:flex;align-items:center;gap:8px}
 .sc-lbl{font-size:10px;font-weight:700;color:var(--sub);width:58px}
-.sc-track{flex:1;height:6px;background:var(--stone);border:1px solid var(--divider)}
-.sc-fill{height:100%}
+.hp-bar{flex:1;display:flex;gap:2px}
+.hp-block{flex:1;height:14px;background:var(--stone2);border:1px solid var(--divider);position:relative;overflow:hidden}
+.hp-fill{position:absolute;top:0;left:0;height:100%}
 .sc-pct{font-size:10px;font-weight:700;color:var(--gold);width:28px;text-align:right}
 .stat-pair{display:flex;gap:12px;padding:0 20px;margin-bottom:14px}
 .stat-half{flex:1;background:var(--stone);border:1px solid var(--divider);padding:12px;text-align:center;position:relative}
@@ -133,7 +134,7 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 .rc-scale{font-size:8px;font-weight:900;padding:1px 5px;letter-spacing:.04em}
 
 /* ── Picker ── */
-.picker-wrap{max-width:420px;margin:28px auto;padding:0 20px}
+.picker-wrap{margin:28px auto;padding:0 20px}
 .picker-title{font-size:22px;font-weight:900;color:var(--cream);margin-bottom:4px}
 .picker-sub{font-size:13px;color:var(--sub);margin-bottom:20px}
 .picker-input{width:100%;background:var(--stone);border:1px solid var(--divider);color:var(--cream);font-family:var(--font);font-size:15px;padding:12px 16px;outline:none;transition:border-color .15s}
@@ -313,7 +314,7 @@ function renderProfile(athlete,myResults,allSessions){
       <div class="sec-title">Últimas 4 semanas</div>
       <div class="heatmap">
         <div class="hm-hdrs">${CAL_HDRS.map(h=>`<div class="hm-hdr">${h}</div>`).join('')}</div>
-        <div class="hm-grid">${calDays.map(iso=>`<div class="hm-cell${datesWithResult.has(iso)?' has':''}${iso===today?' today':''}${iso>today?' future':''}">${datesWithResult.has(iso)?'✓':iso===today?'·':''}</div>`).join('')}</div>
+        <div class="hm-grid">${calDays.map(iso=>`<div class="hm-cell${datesWithResult.has(iso)?' has':''}${iso===today?' today':''}${iso>today?' future':''}"></div>`).join('')}</div>
       </div>
     </div>
 
@@ -323,7 +324,7 @@ function renderProfile(athlete,myResults,allSessions){
       <div class="sec-title">Distribuição</div>
       <div class="scale-wrap">
         <div class="scale-bar-bg">${SCALE_ORDER.filter(s=>scaleCounts[s]>0).map(s=>`<div class="scale-seg" style="flex:${scaleCounts[s]};background:${SCALE_COLOR[s]}"></div>`).join('')}</div>
-        <div class="scale-rows">${SCALE_ORDER.filter(s=>scaleCounts[s]>0).map(s=>{const pct=Math.round(scaleCounts[s]/scaleTotal*100);return`<div class="sc-row"><div class="sc-lbl">${s}</div><div class="sc-track"><div class="sc-fill" style="width:${pct}%;background:${SCALE_COLOR[s]}"></div></div><div class="sc-pct">${pct}%</div></div>`;}).join('')}</div>
+        <div class="scale-rows">${SCALE_ORDER.filter(s=>scaleCounts[s]>0).map(s=>{const pct=Math.round(scaleCounts[s]/scaleTotal*100);const blocks=Array.from({length:10},(_,i)=>{const fill=Math.min(100,Math.max(0,(pct-i*10)/10*100));return`<div class="hp-block"><div class="hp-fill" style="width:${fill}%;background:${SCALE_COLOR[s]}"></div></div>`;}).join('');return`<div class="sc-row"><div class="sc-lbl">${s}</div><div class="hp-bar">${blocks}</div><div class="sc-pct">${pct}%</div></div>`;}).join('')}</div>
       </div>`:''}
       ${avgEnergy||avgRpe?`<div class="sec-title">Performance</div>
       <div class="stat-pair">
