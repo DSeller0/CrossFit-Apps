@@ -129,7 +129,7 @@ const _sb=supabase.createClient('https://crsalcpvsedmiabkeibp.supabase.co','eyJh
 const WOD_TYPES=new Set(['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']);
 const SCALE_ORDER=['RX','Inter','SC','Adaptado'];
 const SCALE_COLOR={RX:'#38b0a8',Inter:'#4a80d0',SC:'#c07838',Adaptado:'#8060c0'};
-const WEEK_LABELS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const WEEK_LABELS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
 function toISO(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
 function todayISO(){return toISO(new Date())}
@@ -138,9 +138,9 @@ function fmtDateLong(iso){return new Date(iso+'T12:00:00').toLocaleDateString('p
 function initials(name){return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()}
 
 function isoWeekDates(){
-  const today=new Date(),dow=today.getDay(),daysFromMon=dow===0?6:dow-1;
-  const mon=new Date(today);mon.setDate(today.getDate()-daysFromMon);
-  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return toISO(d)});
+  const today=new Date(),dow=today.getDay();
+  const sun=new Date(today);sun.setDate(today.getDate()-dow);
+  return Array.from({length:7},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return toISO(d)});
 }
 
 function calcStreak(sorted){
@@ -213,8 +213,9 @@ function renderProfile(athlete,myResults,allSessions){
   const weekISOs=isoWeekDates();
 
   // 4-week calendar (28 days)
-  const calDays=Array.from({length:28},(_,i)=>{const d=new Date();d.setDate(d.getDate()-27+i);return toISO(d);});
-  const CAL_HDRS=['S','T','Q','Q','S','S','D'];
+  const _now=new Date();const _startSun=new Date(_now);_startSun.setDate(_now.getDate()-_now.getDay()-21);
+  const calDays=Array.from({length:28},(_,i)=>{const d=new Date(_startSun);d.setDate(_startSun.getDate()+i);return toISO(d);});
+  const CAL_HDRS=['D','S','T','Q','Q','S','S'];
 
   const milestones=[
     {label:'Primeira sessão',test:total>=1,reward:'◆'},

@@ -102,7 +102,7 @@ const WOD_TYPES=new Set(['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']);
 const SCALE_ORDER=['RX','Inter','SC','Adaptado'];
 const SCALE_COLOR={RX:'#38a898',Inter:'#4880c0',SC:'#b87030',Adaptado:'#7850b0'};
 const SCALE_BORDER={RX:'rgba(56,168,152,.4)',Inter:'rgba(72,128,192,.4)',SC:'rgba(184,112,48,.4)',Adaptado:'rgba(120,80,176,.4)'};
-const WEEK_LABELS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const WEEK_LABELS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
 function toISO(d){return[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
 function todayISO(){return toISO(new Date())}
@@ -111,9 +111,9 @@ function fmtDateLong(iso){return new Date(iso+'T12:00:00').toLocaleDateString('p
 function fmtDateShort(iso){return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'})}
 function initials(name){return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()}
 function isoWeekDates(){
-  const today=new Date(),dow=today.getDay(),dfm=dow===0?6:dow-1;
-  const mon=new Date(today);mon.setDate(today.getDate()-dfm);
-  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return toISO(d)});
+  const today=new Date(),dow=today.getDay();
+  const sun=new Date(today);sun.setDate(today.getDate()-dow);
+  return Array.from({length:7},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return toISO(d)});
 }
 function calcStreak(sorted){
   if(!sorted.length)return 0;

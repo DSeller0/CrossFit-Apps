@@ -166,8 +166,8 @@ const WOD_TYPES=new Set(['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']);
 const SCALE_ORDER=['RX','Inter','SC','Adaptado'];
 const SCALE_COLOR={RX:'#4ac8c0',Inter:'#4a90d8',SC:'#d8904a',Adaptado:'#9070d8'};
 const SCALE_BORDER={RX:'rgba(74,200,192,.3)',Inter:'rgba(74,144,216,.3)',SC:'rgba(216,144,74,.3)',Adaptado:'rgba(144,112,216,.3)'};
-const WEEK_LABELS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-const CAL_HDRS=['S','T','Q','Q','S','S','D'];
+const WEEK_LABELS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const CAL_HDRS=['D','S','T','Q','Q','S','S'];
 
 function toISO(d){return[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
 function todayISO(){return toISO(new Date())}
@@ -176,9 +176,9 @@ function fmtDateLong(iso){return new Date(iso+'T12:00:00').toLocaleDateString('p
 function fmtDateShort(iso){return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'})}
 function initials(name){return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()}
 function isoWeekDates(){
-  const today=new Date(),dow=today.getDay(),dfm=dow===0?6:dow-1;
-  const mon=new Date(today);mon.setDate(today.getDate()-dfm);
-  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return toISO(d)});
+  const today=new Date(),dow=today.getDay();
+  const sun=new Date(today);sun.setDate(today.getDate()-dow);
+  return Array.from({length:7},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return toISO(d)});
 }
 function calcStreak(sorted){
   if(!sorted.length)return 0;
@@ -243,7 +243,8 @@ function renderProfile(athlete,myResults,allSessions){
   const rpes=sorted.flatMap(r=>(r.blocks||[]).map(b=>b.rpe).filter(Boolean));
   const avgRpe=rpes.length?(rpes.reduce((a,b)=>a+b,0)/rpes.length).toFixed(1):null;
   const datesWithResult=new Set(sorted.map(r=>r.date));
-  const calDays=Array.from({length:28},(_,i)=>{const d=new Date();d.setDate(d.getDate()-27+i);return toISO(d);});
+  const _now=new Date();const _startSun=new Date(_now);_startSun.setDate(_now.getDate()-_now.getDay()-21);
+  const calDays=Array.from({length:28},(_,i)=>{const d=new Date(_startSun);d.setDate(_startSun.getDate()+i);return toISO(d);});
   const rxRate=scaleTotal>0?Math.round(scaleCounts.RX/scaleTotal*100):null;
 
   const milestones=[
@@ -364,24 +365,37 @@ function renderProfile(athlete,myResults,allSessions){
     </div>`;
 }
 
-async function main(){
-  const params=new URLSearchParams(location.search);
-  const athleteId=params.get('id');
-  const [athRes,resRes,sessRes]=await Promise.all([
-    _sb.from('athletes').select('value').eq('id',1).single(),
-    _sb.from('results').select('value').eq('id',1).single(),
-    athleteId?_sb.from('sessions').select('value').eq('id',1).single():Promise.resolve({data:null}),
-  ]);
-  const athletes=athRes.data?.value||[];
-  const allResults=resRes.data?.value||[];
-  const allSessions=sessRes.data?.value||{};
-  if(!athleteId){renderPicker(athletes);return;}
-  const athlete=athletes.find(a=>a.id===athleteId);
-  if(!athlete){document.getElementById('root').innerHTML=`<div class="center-msg">Atleta não encontrado.<br><a href="me.html" style="color:var(--teal)">← voltar</a></div>`;return;}
-  document.title=`${athlete.name} · Cone`;
-  renderProfile(athlete,allResults.filter(r=>r.athleteId===athleteId),allSessions);
+// ── Mock data (Arthur demo) ───────────────────────────────────────────────────
+const MOCK_ATHLETE={id:'arthur',name:'Arthur',color:'#4ac8c0'};
+const _RAW=[
+  ['2026-06-17','RX',5,8],['2026-06-16','RX',4,8],['2026-06-15','Inter',4,7],
+  ['2026-06-14','RX',5,9],['2026-06-13','SC',3,6],['2026-06-12','Inter',4,7],
+  ['2026-06-11','RX',5,8],['2026-06-10','Inter',4,7],['2026-06-07','RX',4,8],
+  ['2026-06-04','SC',3,7],['2026-06-02','Inter',3,6],
+  ['2026-05-28','RX',5,9],['2026-05-26','Inter',4,7],['2026-05-23','RX',4,8],
+  ['2026-05-21','SC',3,6],['2026-05-19','Inter',4,7],['2026-05-15','RX',5,8],
+  ['2026-05-13','Adaptado',3,5],['2026-05-12','Inter',4,7],['2026-05-09','RX',4,8],
+  ['2026-05-08','SC',3,6],['2026-05-07','Inter',4,7],['2026-05-06','RX',5,9],
+  ['2026-05-05','SC',4,7],
+  ['2026-04-28','RX',4,8],['2026-04-26','Inter',3,6],['2026-04-23','RX',5,9],
+  ['2026-04-21','SC',3,6],['2026-04-16','Inter',4,7],['2026-04-14','RX',4,8],
+  ['2026-04-10','SC',3,6],['2026-04-08','Inter',4,7],['2026-04-06','RX',5,8],
+  ['2026-04-03','Adaptado',3,5],['2026-04-02','Inter',4,7],
+  ['2026-03-30','RX',4,8],['2026-03-28','SC',3,6],['2026-03-25','Inter',4,7],
+  ['2026-03-23','RX',4,8],['2026-03-19','Inter',3,6],['2026-03-16','SC',4,7],
+  ['2026-03-12','RX',5,9],['2026-03-09','Inter',4,7],['2026-03-05','SC',3,6],
+  ['2026-03-03','RX',4,8],
+];
+const MOCK_RESULTS=_RAW.map(([date,scale,energy,rpe],i)=>({
+  date,athleteId:'arthur',sessionId:`s${i}`,energyLevel:energy,
+  blocks:[{blockType:['WOD','For Time','AMRAP','EMOM'][i%4],blockLabel:'',scale,rpe}]
+}));
+
+function main(){
+  document.title='Arthur · Cone';
+  renderProfile(MOCK_ATHLETE,MOCK_RESULTS,{});
 }
-main().catch(e=>{document.getElementById('root').innerHTML=`<div class="center-msg">⚠️ Erro ao carregar.<br><small>${esc(e.message)}</small></div>`;});
+main();
 </script>
 <nav class="p-nav">
   <a class="p-nav-btn" href="index.html"><span class="p-nav-ic">🏠</span><span>Início</span></a>
