@@ -359,8 +359,6 @@ async function main() {
     _sb.from('settings').select('value').eq('id',1).maybeSingle(),
   ]);
 
-  const gymName = settRes?.data?.value?.gymName;
-  if (gymName) document.getElementById('gymName').textContent = gymName;
 
   const allSessions = sessRes.data?.value || {};
   const allResults  = resRes.data?.value || [];
