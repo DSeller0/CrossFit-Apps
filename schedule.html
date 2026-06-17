@@ -141,6 +141,18 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-
 /* ── Loading / Error ── */
 .loading{text-align:center;padding:60px 20px;color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.1em}
 .error{text-align:center;padding:40px 20px;color:#e05050;font-size:13px;line-height:1.8}
+
+/* ── RM Input ── */
+.rm-chip{font-family:var(--sc-font);font-size:9px;font-weight:900;padding:2px 8px;border:1px solid var(--gold2);background:transparent;color:var(--gold2);cursor:pointer;letter-spacing:.06em;text-transform:uppercase;-webkit-tap-highlight-color:transparent;transition:all .12s;flex-shrink:0;line-height:1.4}
+.rm-chip:hover{background:rgba(216,168,64,.15)}
+.rm-chip.has-rm{border-color:var(--gold);color:var(--gold);background:rgba(216,168,64,.1)}
+.rm-input-wrap{display:flex;align-items:center;gap:6px;margin:6px 0 4px;flex-wrap:wrap}
+.rm-input{font-family:var(--sc-font);font-size:13px;padding:5px 8px;border:1px solid var(--gold2);background:var(--stone2);color:var(--cream);width:76px;outline:none}
+.rm-input:focus{border-color:var(--gold)}
+.rm-unit-sel{font-family:var(--sc-font);font-size:11px;padding:5px 6px;border:1px solid var(--divider);background:var(--stone2);color:var(--sub);outline:none;cursor:pointer}
+.rm-confirm-btn{font-family:var(--sc-font);font-size:12px;font-weight:900;padding:5px 10px;border:1px solid var(--teal);background:transparent;color:var(--teal);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.rm-confirm-btn:hover,.rm-confirm-btn:active{background:var(--teal);color:#000}
+.rm-calc-badge{display:inline-block;font-size:10px;font-weight:700;color:var(--gold);background:rgba(216,168,64,.1);border:1px solid rgba(216,168,64,.28);padding:1px 6px;margin-top:3px}
 </style>
 </head>
 <body>
@@ -150,6 +162,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-
 let cfg={}, state={}, selectedAthlete='', weekOffset=0;
 let expandedDays=new Set(); // "dateKey|sessIdx"
 let checkedExercises=new Set(); // "blockId|exId"
+let rmValues={}; // exKey → {rm:number, unit:'kg'|'lbs'}
+let rmEditKey=null; // currently-open RM input key
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const DAY_PT=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
@@ -259,6 +273,27 @@ function sessionProgress(sess){
   const blocks=(sess.blocks||[]);
   const done=blocks.filter(bl=>{const p=blockProgress(bl);return p.total>0&&p.done===p.total;}).length;
   return {done,total:blocks.filter(bl=>(bl.exercises||[]).some(e=>e.name||e.isComplex)).length};
+}
+
+// ── RM helpers ────────────────────────────────────────────────────────────────
+function toggleRmEdit(key){
+  rmEditKey=rmEditKey===key?null:key;
+  render();
+  if(rmEditKey){
+    requestAnimationFrame(()=>{
+      const inp=document.getElementById('rm-inp');
+      if(inp){inp.focus();if(inp.value)inp.select();}
+    });
+  }
+}
+function confirmRm(){
+  if(!rmEditKey)return;
+  const inp=document.getElementById('rm-inp');
+  const sel=document.getElementById('rm-unit-sel');
+  const num=parseFloat(inp?.value);
+  if(num>0)rmValues[rmEditKey]={rm:num,unit:sel?.value||'kg'};
+  rmEditKey=null;
+  render();
 }
 
 // ── Toggle helpers ────────────────────────────────────────────────────────────
@@ -468,10 +503,9 @@ function renderDetail(sess,dateKey){
 
         if(isProg){
           const steps=ex.intensity?.steps||[];
-          const unit=(steps[0]?.unit||'% RM').replace('% do RM','% RM');
-          const SCALE_RANK={RX:4,Inter:3,SC:2,Adaptado:1};
-          const SCALE_NAMES={4:'RX',3:'Inter',2:'SC',1:'Adaptado'};
-          // group steps by reps
+          const exKey=`${bl.id}|${ex.id}`;
+          const rmData=rmValues[exKey];
+          const isEdit=rmEditKey===exKey;
           const groups=[];
           steps.forEach(s=>{
             const reps=s.reps||ex.reps||'';
@@ -481,14 +515,29 @@ function renderDetail(sess,dateKey){
           });
           return groups.map((g,gi)=>{
             const repsPrefix=ex.sets&&g.reps?`${g.sets||ex.sets}×${g.reps}`:g.reps;
-            const loadStr=g.loads.length?g.loads.join('/')+' '+unit:'';
+            const pctNums=g.loads.map(l=>parseFloat(l)).filter(n=>!isNaN(n));
+            const pctStr=pctNums.length?pctNums.join('/')+'% RM':'';
+            const calcStr=rmData?.rm&&pctNums.length?
+              pctNums.map(p=>Math.round(rmData.rm*p/100*2)/2).join('/')+' '+(rmData.unit||'kg'):'';
             const lineKey=`${bl.id}|${ex.id}-${gi}`;
             const lineDone=checkedExercises.has(lineKey);
             return `<div class="detail-ex">
               <div class="detail-ex-check${lineDone?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}-${gi}')"></div>
               <div class="detail-ex-body">
-                <div class="detail-ex-name${lineDone?' done':''}">${[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
-                ${loadStr?`<div class="detail-ex-vol">${loadStr}</div>`:''}
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                  <div class="detail-ex-name${lineDone?' done':''}">${[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
+                  ${gi===0?`<button class="rm-chip${rmData?' has-rm':''}" onclick="event.stopPropagation();toggleRmEdit('${exKey}')">${rmData?rmData.rm+' '+(rmData.unit||'kg'):'RM'}</button>`:''}
+                </div>
+                ${gi===0&&isEdit?`<div class="rm-input-wrap" onclick="event.stopPropagation()">
+                  <input id="rm-inp" type="number" class="rm-input" placeholder="100" min="1" step="0.5" inputmode="decimal" value="${rmData?.rm||''}" onkeydown="if(event.key==='Enter'){event.preventDefault();event.stopPropagation();confirmRm()}"/>
+                  <select id="rm-unit-sel" class="rm-unit-sel" onclick="event.stopPropagation()">
+                    <option value="kg"${(rmData?.unit||'kg')==='kg'?' selected':''}>kg</option>
+                    <option value="lbs"${rmData?.unit==='lbs'?' selected':''}>lbs</option>
+                  </select>
+                  <button class="rm-confirm-btn" onclick="event.preventDefault();event.stopPropagation();confirmRm()">✓</button>
+                </div>`:''}
+                ${pctStr?`<div class="detail-ex-vol">${pctStr}</div>`:''}
+                ${calcStr?`<div class="rm-calc-badge">${calcStr}</div>`:''}
               </div>
             </div>`;
           }).join('');
@@ -638,8 +687,8 @@ async function submitLogPane(){
 }
 
 // ── Controls ──────────────────────────────────────────────────────────────────
-function changeWeek(dir){weekOffset+=dir;expandedDays.clear();checkedExercises.clear();render();}
-function setAthlete(val){selectedAthlete=val;expandedDays.clear();render();}
+function changeWeek(dir){weekOffset+=dir;expandedDays.clear();checkedExercises.clear();rmEditKey=null;render();}
+function setAthlete(val){selectedAthlete=val;expandedDays.clear();rmEditKey=null;render();}
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const _sb=supabase.createClient('https://crsalcpvsedmiabkeibp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw');
