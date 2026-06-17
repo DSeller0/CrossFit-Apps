@@ -468,7 +468,7 @@ function renderDetail(sess,dateKey){
       }
 
       const exs=(bl.exercises||[]).filter(e=>e.name||e.isComplex);
-      const hasProgEx=exs.some(e=>!e.isComplex&&e.intensity?.mode==='progression');
+      const hasProgEx=exs.some(e=>e.intensity?.mode==='progression');
       const blRmData=rmValues[bl.id];
       const blIsEdit=rmEditKey===bl.id;
 
@@ -486,12 +486,14 @@ function renderDetail(sess,dateKey){
           const displayName=ex.name||mvs.map(m=>m.name).join(' + ')||'Complexo';
           const sets=ex.sets||'';
           const volStr=[sets,notation?`(${notation})`:''].filter(Boolean).join('×');
-          let loadStr='';
+          let loadStr='';let calcStr='';
           if(isProg){
             const steps=ex.intensity?.steps||[];
             const unit=(steps[0]?.unit||'% RM').replace('% do RM','% RM');
             const loads=steps.map(s=>s.load).filter(Boolean);
             if(loads.length)loadStr=loads.join(' / ')+' '+unit;
+            const pctNums=loads.map(l=>parseFloat(l)).filter(n=>!isNaN(n));
+            if(blRmData?.rm&&pctNums.length)calcStr=pctNums.map(p=>Math.ceil(blRmData.rm*p/100)).join('/')+' '+(blRmData.unit||'kg');
           }else if(ins){loadStr=ins;}
           return `<div class="detail-ex">
             <div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>
@@ -499,6 +501,7 @@ function renderDetail(sess,dateKey){
               <div class="detail-ex-name${done?' done':''}">${[volStr,displayName.toUpperCase()].filter(Boolean).join(' ')}</div>
               ${mvs.map(m=>`<div class="detail-ex-movement">· ${[m.reps?m.reps+'×':'',m.name.toUpperCase()].filter(Boolean).join(' ')}</div>`).join('')}
               ${loadStr?`<div class="detail-ex-vol">${loadStr}</div>`:''}
+              ${calcStr?`<div class="rm-calc-badge">${calcStr}</div>`:''}
               ${ex.note?`<div class="detail-ex-note">${ex.note}</div>`:''}
             </div>
           </div>`;
