@@ -292,24 +292,38 @@ function renderProfile(athlete,myResults,allSessions){
   </div>`;
 }
 
-async function main(){
-  const params=new URLSearchParams(location.search);
-  const athleteId=params.get('id');
-  const [athRes,resRes,sessRes]=await Promise.all([
-    _sb.from('athletes').select('value').eq('id',1).single(),
-    _sb.from('results').select('value').eq('id',1).single(),
-    athleteId?_sb.from('sessions').select('value').eq('id',1).single():Promise.resolve({data:null}),
-  ]);
-  const athletes=athRes.data?.value||[];
-  const allResults=resRes.data?.value||[];
-  const allSessions=sessRes.data?.value||{};
-  if(!athleteId){renderPicker(athletes);return;}
-  const athlete=athletes.find(a=>a.id===athleteId);
-  if(!athlete){document.getElementById('root').innerHTML=`<div class="center-msg">Atleta não encontrado.<br><a href="me-a.html" style="color:var(--gold)">← voltar</a></div>`;return;}
-  document.title=`${athlete.name} · Cone`;
-  renderProfile(athlete,allResults.filter(r=>r.athleteId===athleteId),allSessions);
+// ── Mock data (Arthur demo) ───────────────────────────────────────────────────
+const MOCK_ATHLETE={id:'arthur',name:'Arthur',color:'#4ac8c0'};
+// [date, scale, energyLevel, rpe]
+const _RAW=[
+  ['2026-06-17','RX',5,8],['2026-06-16','RX',4,8],['2026-06-15','Inter',4,7],
+  ['2026-06-14','RX',5,9],['2026-06-13','SC',3,6],['2026-06-12','Inter',4,7],
+  ['2026-06-11','RX',5,8],['2026-06-10','Inter',4,7],['2026-06-07','RX',4,8],
+  ['2026-06-04','SC',3,7],['2026-06-02','Inter',3,6],
+  ['2026-05-28','RX',5,9],['2026-05-26','Inter',4,7],['2026-05-23','RX',4,8],
+  ['2026-05-21','SC',3,6],['2026-05-19','Inter',4,7],['2026-05-15','RX',5,8],
+  ['2026-05-13','Adaptado',3,5],['2026-05-12','Inter',4,7],['2026-05-09','RX',4,8],
+  ['2026-05-08','SC',3,6],['2026-05-07','Inter',4,7],['2026-05-06','RX',5,9],
+  ['2026-05-05','SC',4,7],
+  ['2026-04-28','RX',4,8],['2026-04-26','Inter',3,6],['2026-04-23','RX',5,9],
+  ['2026-04-21','SC',3,6],['2026-04-16','Inter',4,7],['2026-04-14','RX',4,8],
+  ['2026-04-10','SC',3,6],['2026-04-08','Inter',4,7],['2026-04-06','RX',5,8],
+  ['2026-04-03','Adaptado',3,5],['2026-04-02','Inter',4,7],
+  ['2026-03-30','RX',4,8],['2026-03-28','SC',3,6],['2026-03-25','Inter',4,7],
+  ['2026-03-23','RX',4,8],['2026-03-19','Inter',3,6],['2026-03-16','SC',4,7],
+  ['2026-03-12','RX',5,9],['2026-03-09','Inter',4,7],['2026-03-05','SC',3,6],
+  ['2026-03-03','RX',4,8],
+];
+const MOCK_RESULTS=_RAW.map(([date,scale,energy,rpe],i)=>({
+  date,athleteId:'arthur',sessionId:`s${i}`,energyLevel:energy,
+  blocks:[{blockType:['WOD','For Time','AMRAP','EMOM'][i%4],blockLabel:'',scale,rpe}]
+}));
+
+function main(){
+  document.title='Arthur · Cone';
+  renderProfile(MOCK_ATHLETE,MOCK_RESULTS,{});
 }
-main().catch(e=>{document.getElementById('root').innerHTML=`<div class="center-msg">⚠️ Erro ao carregar.<br><small>${esc(e.message)}</small></div>`;});
+main();
 </script>
 <nav class="p-nav">
   <a class="p-nav-btn" href="index.html"><span class="p-nav-ic">🏠</span><span>Início</span></a>
