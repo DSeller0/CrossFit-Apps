@@ -18,161 +18,198 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0d0b09;
-  --card:#161210;
-  --card2:#1e1a16;
-  --accent:#4ac8c0;
-  --cream:#f0e8d0;
-  --sub:#c8b090;
-  --muted:#a89880;
-  --divider:#2a231c;
+  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;
+  --divider:#2a231c;--gold:#d8a840;--gold2:#b88820;
+  --teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;
+  --muted:#806850;--dim:#554a3a;
   --font:'Raleway',sans-serif;
 }
-html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh;padding-bottom:80px}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh}
+@media(max-width:699px){body{padding-bottom:64px}}
 
-.topbar{
-  padding:16px 20px 12px;
-  display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid var(--divider);
-  background:var(--bg);
-  position:sticky;top:0;z-index:10;
+/* ── Header ── */
+.hdr{padding:18px 20px 14px;border-bottom:1px solid var(--divider);background:var(--bg);position:sticky;top:0;z-index:20}
+.hdr-rule{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.hdr-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold2))}
+.hdr-line.r{background:linear-gradient(270deg,transparent,var(--gold2))}
+.hdr-diamond{width:5px;height:5px;border:1px solid var(--gold);transform:rotate(45deg);flex-shrink:0}
+.brand{font-size:22px;font-weight:900;letter-spacing:8px;color:var(--cream);text-align:center;text-shadow:0 0 30px rgba(216,168,64,.12)}
+.hdr-foot{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:2px}
+.gym{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.25em;text-transform:uppercase}
+.coach-lnk{font-size:9px;color:var(--dim);text-decoration:none;letter-spacing:.06em;transition:color .15s}
+.coach-lnk:hover{color:var(--cream)}
+
+/* ── Two-pane layout ── */
+.layout{display:flex;flex-direction:column;max-width:1100px;margin:0 auto}
+@media(min-width:700px){
+  .layout{flex-direction:row;align-items:flex-start}
+  .pane-left{width:400px;flex-shrink:0;position:sticky;top:90px;max-height:calc(100vh - 90px);overflow-y:auto;border-right:1px solid var(--divider)}
+  .pane-right{flex:1;padding:28px 24px}
 }
-.brand{font-size:24px;font-weight:900;color:var(--cream);letter-spacing:-.02em;line-height:1}
-.brand em{color:var(--accent);font-style:normal}
-.gym-name{font-size:11px;color:var(--sub);margin-top:2px;letter-spacing:.08em;text-transform:uppercase}
-.coach-link{
-  font-size:11px;color:var(--muted);text-decoration:none;
-  padding:6px 12px;border:1px solid var(--divider);border-radius:6px;
-  letter-spacing:.04em;transition:color .15s,border-color .15s;
-}
-.coach-link:hover{color:var(--cream);border-color:#444}
 
-.live-dot{
-  display:inline-block;width:7px;height:7px;border-radius:50%;
-  background:var(--accent);margin-left:8px;vertical-align:middle;
-  opacity:.7;
-  animation:pulse 2.4s ease-in-out infinite;
-}
-@keyframes pulse{
-  0%,100%{opacity:.7;transform:scale(1)}
-  50%{opacity:.3;transform:scale(.75)}
-}
-.live-dot.flash{animation:none;opacity:1;background:#fff}
+/* ── Sessions pane ── */
+.pane-left{padding:16px 16px 20px}
 
-.date-section{padding:22px 20px 10px}
-.date-label{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
-.date-full{font-size:20px;font-weight:900;color:var(--cream);text-transform:capitalize}
+/* ── Day label ── */
+.day-lbl-row{display:flex;align-items:center;gap:10px;margin:16px 0 8px}
+.day-lbl-row:first-child{margin-top:0}
+.dlr-line{flex:1;height:1px;background:var(--divider)}
+.dlr-text{font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;padding:0 4px}
+.dlr-text.today{color:var(--teal)}
+.dlr-text.past{color:var(--muted)}
+.dlr-text.future{color:var(--sub)}
 
-.sessions{padding:0 16px 8px}
+/* ── Session card ── */
+.sess-card{background:var(--stone);border:1px solid var(--divider);margin-bottom:8px;position:relative;cursor:pointer}
+.sess-card::before,.sess-card::after{content:'';position:absolute;width:8px;height:8px}
+.sess-card::before{top:-1px;left:-1px;border-top:1px solid var(--gold2);border-left:1px solid var(--gold2)}
+.sess-card::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--gold2);border-right:1px solid var(--gold2)}
+.sess-card.today{border-color:rgba(74,200,192,.3);box-shadow:0 0 18px rgba(74,200,192,.06)}
+.sess-card.today::before,.sess-card.today::after{border-color:var(--teal)}
+.sess-card.past{opacity:.72}
 
-.sess-card{
-  background:var(--card);
-  border:1px solid var(--divider);
-  border-radius:14px;
-  padding:18px;
-  margin-bottom:12px;
-  transition:border-color .15s;
-}
-.sess-card.featured{border-color:var(--accent);border-width:2px}
+/* Card header row */
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;gap:10px;user-select:none}
+.card-tag{font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.sess-card.today .card-tag{color:var(--teal)}
+.card-chevron{width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(45deg);transition:transform .2s;flex-shrink:0}
+.sess-card.collapsed .card-chevron{transform:rotate(-45deg)}
 
-.card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
-.sess-badge{
-  font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--accent);background:rgba(74,200,192,.13);
-  padding:3px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0;
-}
-.sess-time{font-size:12px;color:var(--sub);font-weight:700;letter-spacing:.06em;white-space:nowrap;flex-shrink:0}
-.sess-name{font-size:17px;font-weight:900;color:var(--cream);margin-bottom:10px;line-height:1.2}
+/* Compact (collapsed) */
+.sess-compact{padding:0 14px 10px;display:flex;align-items:center;justify-content:space-between}
+.sess-card:not(.collapsed) .sess-compact{display:none}
+.sess-card.collapsed .sess-compact{display:flex}
+.compact-name{font-size:13px;font-weight:700;color:var(--sub)}
+.compact-badge{font-size:10px;color:var(--dim);background:var(--stone2);border:1px solid var(--divider);padding:2px 7px}
 
-.blocks{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
-.block-pill{
-  display:flex;align-items:center;gap:7px;
-  background:var(--card2);border:1px solid var(--divider);
-  padding:6px 11px;border-radius:7px;
-  font-size:12px;color:var(--sub);
-}
-.block-pill .btype{font-weight:900;color:var(--accent);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
-.block-pill .bdot{color:var(--divider);font-size:14px}
-.block-pill .blabel{color:var(--sub)}
+/* Full body (expanded) */
+.card-body{padding:0 14px 14px}
+.sess-card.collapsed .card-body{display:none}
+.card-name{font-size:16px;font-weight:900;color:var(--cream);margin-bottom:10px;line-height:1.2}
 
-.card-footer{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.result-count{font-size:11px;color:var(--muted);line-height:1.3}
+/* ── Block pills ── */
+.blocks{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.blk-pill{display:flex;align-items:center;gap:8px;background:var(--stone2);border:1px solid var(--divider);padding:7px 11px}
+.blk-dot{width:8px;height:8px;transform:rotate(45deg);flex-shrink:0}
+.blk-dot.wod{background:var(--teal)}
+.blk-dot.warm{background:var(--gold)}
+.blk-dot.str{background:#c87850}
+.blk-dot.skill{background:#9070d8}
+.blk-dot.core{background:#70a870}
+.blk-dot.mob{background:#5090d8}
+.blk-type{font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.blk-type.wod{color:var(--teal)}
+.blk-type.warm{color:var(--gold)}
+.blk-type.str{color:#c87850}
+.blk-type.skill{color:#9070d8}
+.blk-type.core{color:#70a870}
+.blk-type.mob{color:#5090d8}
+.blk-sep{color:var(--dim);font-size:11px}
+.blk-label{font-size:11px;color:var(--sub);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.blk-meta{font-size:10px;color:var(--muted);margin-left:auto;white-space:nowrap;flex-shrink:0}
 
-.btn-log{
-  background:var(--accent);color:#000;
-  font-family:var(--font);font-size:13px;font-weight:900;
-  padding:10px 20px;border-radius:9px;border:none;cursor:pointer;
-  text-decoration:none;letter-spacing:.04em;white-space:nowrap;
-  display:inline-block;transition:opacity .15s;
-}
-.btn-log:hover{opacity:.85}
+/* Footer */
+.card-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px}
+.reg-count{font-size:11px;color:var(--muted);line-height:1.3}
+.btn-reg{background:var(--teal);color:#000;font-family:var(--font);font-size:12px;font-weight:900;padding:8px 16px;border:none;cursor:pointer;text-decoration:none;letter-spacing:.04em;white-space:nowrap;transition:opacity .15s;display:inline-block}
+.btn-reg:hover{opacity:.85}
+.day-empty{font-size:12px;color:var(--dim);padding:6px 0;font-style:italic}
 
-.empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;line-height:1.7}
-.empty-icon{font-size:40px;margin-bottom:14px;opacity:.35;display:block}
+/* ── Right pane nav grid ── */
+.pane-right{display:none}
+@media(min-width:700px){.pane-right{display:block}}
+.right-title{font-size:9px;font-weight:900;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-bottom:16px}
+.nav-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.nav-tile{background:var(--stone);border:1px solid var(--divider);padding:20px 12px;text-align:center;text-decoration:none;display:block;position:relative;transition:border-color .15s,background .15s}
+.nav-tile::before,.nav-tile::after{content:'';position:absolute;width:6px;height:6px}
+.nav-tile::before{top:-1px;left:-1px;border-top:1px solid var(--gold2);border-left:1px solid var(--gold2)}
+.nav-tile::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--gold2);border-right:1px solid var(--gold2)}
+.nav-tile:hover{border-color:rgba(74,200,192,.5);background:rgba(74,200,192,.04)}
+.nav-tile:hover .tile-ic,.nav-tile:hover .tile-lbl{color:var(--teal)}
+.tile-ic{font-size:22px;display:block;margin-bottom:6px}
+.tile-lbl{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
 
-.loading{text-align:center;padding:64px 20px;color:var(--accent);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+/* ── Loading / error ── */
+.loading{text-align:center;padding:48px 20px;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.error-msg{text-align:center;padding:48px 20px;color:var(--muted);font-size:13px;line-height:1.8}
 
-.bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;
-  background:#0a0807;border-top:1px solid var(--divider);
-  display:flex;z-index:20;
-  padding-bottom:env(safe-area-inset-bottom,0px);
-}
-.nav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:11px 8px;gap:4px;
-  font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.05em;
-  color:var(--muted);text-decoration:none;
-  border:none;background:none;cursor:pointer;
-  transition:color .15s;
-}
-.nav-btn:hover{color:var(--cream)}
-.nav-icon{font-size:19px;line-height:1}
-.nav-sep{width:1px;background:var(--divider);margin:10px 0}
+/* ── Mobile nav ── */
+.mobile-nav{position:fixed;bottom:0;left:0;right:0;background:#0a0807;border-top:1px solid var(--divider);display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:40}
+@media(min-width:700px){.mobile-nav{display:none}}
+.mn-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px;gap:3px;color:var(--muted);text-decoration:none;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.06em;border:none;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .15s}
+.mn-btn:active{color:var(--teal)}
+.mn-ic{font-size:18px;line-height:1}
+.mn-sep{width:1px;background:var(--divider);margin:10px 0}
 
-#pwa-banner{
-  position:fixed;bottom:calc(60px + env(safe-area-inset-bottom,0px));left:0;right:0;
-  display:flex;align-items:center;gap:10px;
-  background:#161210;border-top:1px solid #2a231c;
-  padding:10px 16px;z-index:30;
-  transform:translateY(100%);opacity:0;
-  transition:transform .3s ease,opacity .3s ease;
-  pointer-events:none;
-}
+/* ── Slide-up sheet ── */
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50}
+#overlay.open{display:block}
+#sheet{position:fixed;left:0;right:0;bottom:0;background:var(--stone);border-top:1px solid var(--divider);transform:translateY(100%);transition:transform .3s ease;z-index:51;padding-bottom:env(safe-area-inset-bottom,0)}
+#sheet.open{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;background:var(--divider);border-radius:2px;margin:12px auto 16px}
+.sheet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--divider);border-top:1px solid var(--divider);margin-bottom:1px}
+.sheet-tile{background:var(--stone);padding:18px 8px;text-align:center;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent}
+.sheet-tile:active{background:var(--stone2)}
+.sheet-ic{font-size:22px;line-height:1}
+.sheet-lbl{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.sheet-close{display:block;width:100%;padding:14px;font-family:var(--font);font-size:12px;font-weight:700;color:var(--muted);background:none;border:none;border-top:1px solid var(--divider);cursor:pointer;letter-spacing:.08em;text-transform:uppercase}
+
+/* ── PWA banner ── */
+#pwa-banner{position:fixed;bottom:calc(58px + env(safe-area-inset-bottom,0));left:0;right:0;display:flex;align-items:center;gap:10px;background:var(--stone);border-top:1px solid var(--divider);padding:10px 16px;z-index:45;transform:translateY(100%);opacity:0;transition:transform .3s ease,opacity .3s ease;pointer-events:none}
 #pwa-banner.show{transform:translateY(0);opacity:1;pointer-events:auto}
-#pwa-banner .pwa-icon{width:36px;height:36px;border-radius:8px;flex-shrink:0}
+#pwa-banner .pwa-icon{width:36px;height:36px;flex-shrink:0}
 #pwa-banner .pwa-text{flex:1;min-width:0}
-#pwa-banner .pwa-title{font-size:13px;font-weight:700;color:var(--cream);line-height:1.2}
+#pwa-banner .pwa-title{font-size:13px;font-weight:700;color:var(--cream)}
 #pwa-banner .pwa-sub{font-size:11px;color:var(--sub);margin-top:1px}
-#pwa-banner .pwa-install{
-  background:var(--accent);color:#000;
-  font-family:var(--font);font-size:12px;font-weight:900;
-  padding:7px 14px;border-radius:7px;border:none;cursor:pointer;
-  white-space:nowrap;flex-shrink:0;
-}
-#pwa-banner .pwa-dismiss{
-  background:none;border:none;color:var(--muted);cursor:pointer;
-  font-size:18px;line-height:1;padding:4px;flex-shrink:0;
-}
+#pwa-banner .pwa-install{background:var(--teal);color:#000;font-family:var(--font);font-size:12px;font-weight:900;padding:7px 14px;border:none;cursor:pointer;white-space:nowrap;flex-shrink:0}
+#pwa-banner .pwa-dismiss{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:4px;flex-shrink:0}
 </style>
 </head>
 <body>
 
-<header class="topbar">
-  <div>
-    <div class="brand">C<em>o</em>ne<span class="live-dot" id="liveDot" title="Atualizando ao vivo"></span></div>
-    <div class="gym-name" id="gymName">&nbsp;</div>
+<header class="hdr">
+  <div class="hdr-rule">
+    <div class="hdr-line"></div>
+    <div class="hdr-diamond"></div>
+    <div class="hdr-line r"></div>
   </div>
-  <a class="coach-link" href="cone/">Coach →</a>
+  <div class="brand">CONE</div>
+  <div class="hdr-foot">
+    <div class="gym" id="gymName"></div>
+    <a class="coach-lnk" href="cone/">Coach →</a>
+  </div>
 </header>
 
-<div class="date-section">
-  <div class="date-label">Hoje</div>
-  <div class="date-full" id="dateDisplay">—</div>
-</div>
+<div class="layout">
+  <div class="pane-left" id="sessionsPane">
+    <div class="loading">carregando treinos...</div>
+  </div>
 
-<div class="sessions" id="sessions">
-  <div class="loading">carregando treinos...</div>
+  <div class="pane-right">
+    <div class="right-title">Navegar</div>
+    <div class="nav-grid">
+      <a class="nav-tile" href="leaderboard.html">
+        <span class="tile-ic">🏆</span>
+        <span class="tile-lbl">Leaderboard</span>
+      </a>
+      <a class="nav-tile" id="reg-tile" href="log.html">
+        <span class="tile-ic">✏️</span>
+        <span class="tile-lbl">Registrar</span>
+      </a>
+      <a class="nav-tile" href="me.html">
+        <span class="tile-ic">👤</span>
+        <span class="tile-lbl">Meu Perfil</span>
+      </a>
+      <a class="nav-tile" href="schedule.html">
+        <span class="tile-ic">📅</span>
+        <span class="tile-lbl">Agenda</span>
+      </a>
+      <a class="nav-tile" href="cone/">
+        <span class="tile-ic">⚙️</span>
+        <span class="tile-lbl">Coach</span>
+      </a>
+    </div>
+  </div>
 </div>
 
 <div id="pwa-banner" role="banner" aria-label="Instalar aplicativo">
@@ -185,22 +222,29 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
   <button class="pwa-dismiss" id="pwa-dismiss-btn" aria-label="Fechar">✕</button>
 </div>
 
-<nav class="bottom-nav">
-  <a class="nav-btn" href="leaderboard.html">
-    <span class="nav-icon">🏆</span>
-    <span>Leaderboard</span>
-  </a>
-  <div class="nav-sep"></div>
-  <a class="nav-btn" href="me.html">
-    <span class="nav-icon">👤</span>
-    <span>Meu perfil</span>
-  </a>
-  <div class="nav-sep"></div>
-  <a class="nav-btn" href="schedule.html">
-    <span class="nav-icon">📅</span>
-    <span>Agenda</span>
-  </a>
+<nav class="mobile-nav">
+  <a class="mn-btn" href="leaderboard.html"><span class="mn-ic">🏆</span><span>Ranking</span></a>
+  <div class="mn-sep"></div>
+  <a class="mn-btn" href="me.html"><span class="mn-ic">👤</span><span>Perfil</span></a>
+  <div class="mn-sep"></div>
+  <a class="mn-btn" href="schedule.html"><span class="mn-ic">📅</span><span>Agenda</span></a>
+  <div class="mn-sep"></div>
+  <button class="mn-btn" onclick="openSheet()"><span class="mn-ic">⊞</span><span>Mais</span></button>
 </nav>
+
+<div id="overlay" onclick="closeSheet()"></div>
+<div id="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-grid">
+    <a class="sheet-tile" href="leaderboard.html"><span class="sheet-ic">🏆</span><span class="sheet-lbl">Leaderboard</span></a>
+    <a class="sheet-tile" href="me.html"><span class="sheet-ic">👤</span><span class="sheet-lbl">Meu Perfil</span></a>
+    <a class="sheet-tile" href="schedule.html"><span class="sheet-ic">📅</span><span class="sheet-lbl">Agenda</span></a>
+    <a class="sheet-tile" id="sheet-reg" href="log.html"><span class="sheet-ic">✏️</span><span class="sheet-lbl">Registrar</span></a>
+    <a class="sheet-tile" href="cone/"><span class="sheet-ic">⚙️</span><span class="sheet-lbl">Coach</span></a>
+    <a class="sheet-tile" href="cone/#resultados"><span class="sheet-ic">📊</span><span class="sheet-lbl">Resultados</span></a>
+  </div>
+  <button class="sheet-close" onclick="closeSheet()">Fechar</button>
+</div>
 
 <script>
 const _sb = supabase.createClient(
@@ -208,10 +252,15 @@ const _sb = supabase.createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw'
 );
 
-const WOD_TYPES = new Set(['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']);
+const WOD_TYPES    = new Set(['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']);
+const STRENGTH_T   = new Set(['Força','Weightlifting','Gymnastics']);
+const WARM_T       = new Set(['Aquecimento','Warm-up']);
+const CORE_T       = new Set(['Core','Abdômen']);
+const MOB_T        = new Set(['Mobilidade','Flexibilidade','Cool-down']);
 
-function todayKey() {
+function dateKey(offset) {
   const d = new Date();
+  d.setDate(d.getDate() + offset);
   return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
 }
 
@@ -219,11 +268,85 @@ function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-async function main() {
-  const dateKey = todayKey();
+function blockCls(type) {
+  if (WOD_TYPES.has(type))  return 'wod';
+  if (STRENGTH_T.has(type)) return 'str';
+  if (WARM_T.has(type))     return 'warm';
+  if (CORE_T.has(type))     return 'core';
+  if (MOB_T.has(type))      return 'mob';
+  return 'skill';
+}
 
-  document.getElementById('dateDisplay').textContent =
-    new Date().toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
+function renderBlock(b) {
+  const cls = blockCls(b.type);
+  const hasLabel = b.label && b.label !== b.type;
+  const isWod = WOD_TYPES.has(b.type);
+  let meta = '';
+  if (b.duration) meta = isWod ? `Cap ${b.duration}'` : `${b.duration}'`;
+  else if (b.stationRepeat) meta = `${b.stationRepeat}×`;
+  return `<div class="blk-pill">
+    <div class="blk-dot ${cls}"></div>
+    <span class="blk-type ${cls}">${esc(b.type)}</span>
+    ${hasLabel ? `<span class="blk-sep">·</span><span class="blk-label">${esc(b.label)}</span>` : ''}
+    ${meta ? `<span class="blk-meta">${meta}</span>` : ''}
+  </div>`;
+}
+
+function renderCard(sess, dk, count, isToday, isFuture, firstOfDay) {
+  const logUrl = `log.html?date=${dk}&session=${encodeURIComponent(sess.id)}`;
+  const blocks  = sess.blocks || [];
+  const expanded = isToday && firstOfDay;
+  const cardCls = `sess-card${isToday ? ' today' : (!isFuture ? ' past' : '')}${expanded ? '' : ' collapsed'}`;
+  const tag = isToday ? '◈ Sessão do dia' : (isFuture ? 'Próxima' : 'Anterior');
+  const name = sess.sessionName || sess.name || 'Treino';
+  const countLabel = count === 0 ? 'Seja o primeiro' : count === 1 ? '1 resultado' : `${count} resultados`;
+
+  return `<div class="${cardCls}" id="sc-${esc(sess.id)}">
+    <div class="card-hdr" onclick="toggleCard(this)">
+      <span class="card-tag">${tag}</span>
+      <div class="card-chevron"></div>
+    </div>
+    <div class="sess-compact">
+      <span class="compact-name">${esc(name)}</span>
+      <span class="compact-badge">${blocks.length} bloco${blocks.length !== 1 ? 's' : ''}</span>
+    </div>
+    <div class="card-body">
+      <div class="card-name">${esc(name)}</div>
+      ${blocks.length ? `<div class="blocks">${blocks.map(renderBlock).join('')}</div>` : ''}
+      <div class="card-footer">
+        <span class="reg-count" id="rc-${esc(sess.id)}">${countLabel}</span>
+        ${!isFuture ? `<a class="btn-reg" href="${logUrl}">Registrar →</a>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderDay(dk, sessions, countBySess, offset) {
+  const isToday  = offset === 0;
+  const isFuture = offset > 0;
+  const labels   = { '-1': 'Ontem', '0': '◈ Hoje', '1': 'Amanhã' };
+  const labelCls = isToday ? 'today' : (isFuture ? 'future' : 'past');
+  const label    = labels[String(offset)] || dk;
+
+  const labelRow = `<div class="day-lbl-row">
+    <div class="dlr-line"></div>
+    <span class="dlr-text ${labelCls}">${label}</span>
+    <div class="dlr-line"></div>
+  </div>`;
+
+  if (!sessions.length) {
+    return labelRow + `<div class="day-empty">Nenhum treino programado.</div>`;
+  }
+
+  return labelRow + sessions.map((sess, i) =>
+    renderCard(sess, dk, countBySess[sess.id] || 0, isToday, isFuture, i === 0)
+  ).join('');
+}
+
+async function main() {
+  const todayDK = dateKey(0);
+  const yesterDK = dateKey(-1);
+  const tomorDK  = dateKey(1);
 
   const [sessRes, resRes, settRes] = await Promise.all([
     _sb.from('sessions').select('value').eq('id',1).single(),
@@ -232,133 +355,98 @@ async function main() {
   ]);
 
   const gymName = settRes?.data?.value?.gymName;
-  document.getElementById('gymName').textContent = gymName || '';
+  if (gymName) document.getElementById('gymName').textContent = gymName;
 
   const allSessions = sessRes.data?.value || {};
-  const todaySessions = allSessions[dateKey] || [];
-  const allResults    = resRes.data?.value || [];
+  const allResults  = resRes.data?.value || [];
 
   const countBySess = {};
   allResults.forEach(r => {
     if (r.sessionId) countBySess[r.sessionId] = (countBySess[r.sessionId] || 0) + 1;
   });
 
-  const container = document.getElementById('sessions');
-
-  if (!todaySessions.length) {
-    container.innerHTML = `
-      <div class="empty">
-        <span class="empty-icon">🏋</span>
-        Nenhum treino programado hoje.<br>
-        <span style="font-size:12px">Confira a agenda para os próximos dias.</span>
-      </div>`;
-    return;
+  // Point registrar tiles to today's first session
+  const todaySessions = allSessions[todayDK] || [];
+  if (todaySessions.length) {
+    const regUrl = `log.html?date=${todayDK}&session=${encodeURIComponent(todaySessions[0].id)}`;
+    document.getElementById('reg-tile')?.setAttribute('href', regUrl);
+    document.getElementById('sheet-reg')?.setAttribute('href', regUrl);
   }
 
-  container.innerHTML = todaySessions.map((sess, idx) => {
-    const featured = idx === 0;
-    const logUrl   = `log.html?date=${dateKey}&session=${encodeURIComponent(sess.id)}`;
-    const count    = countBySess[sess.id] || 0;
-
-    const countLabel = count === 0 ? 'Seja o primeiro a registrar'
-                     : count === 1 ? '1 resultado registrado'
-                     : `${count} resultados registrados`;
-
-    const wodBlocks = (sess.blocks || []).filter(b => WOD_TYPES.has(b.type));
-
-    const blocksHtml = wodBlocks.length ? `
-      <div class="blocks">
-        ${wodBlocks.map(b => {
-          const hasLabel = b.label && b.label !== b.type;
-          return `<div class="block-pill">
-            <span class="btype">${esc(b.type)}</span>
-            ${hasLabel ? `<span class="bdot">·</span><span class="blabel">${esc(b.label)}</span>` : ''}
-          </div>`;
-        }).join('')}
-      </div>` : '';
-
-    const headRight = featured
-      ? `<span class="sess-badge">Sessão do dia</span>`
-      : (sess.time ? `<span class="sess-time">${esc(sess.time)}</span>` : '');
-
-    return `
-<div class="sess-card${featured ? ' featured' : ''}">
-  <div class="card-head">
-    <span class="sess-name">${esc(sess.name || 'Treino')}</span>
-    ${headRight}
-  </div>
-  ${featured && sess.time ? `<div style="font-size:12px;color:var(--sub);font-weight:700;margin-bottom:10px;letter-spacing:.06em">${esc(sess.time)}</div>` : ''}
-  ${blocksHtml}
-  <div class="card-footer">
-    <span class="result-count" id="rc-${sess.id}">${countLabel}</span>
-    <a class="btn-log" href="${logUrl}">Registrar</a>
-  </div>
-</div>`;
-  }).join('');
+  document.getElementById('sessionsPane').innerHTML = [
+    renderDay(yesterDK, allSessions[yesterDK] || [], countBySess, -1),
+    renderDay(todayDK,  todaySessions,               countBySess,  0),
+    renderDay(tomorDK,  allSessions[tomorDK]  || [], countBySess,  1),
+  ].join('');
 }
 
 async function refreshCounts() {
-  const dot = document.getElementById('liveDot');
-  if (dot) { dot.classList.add('flash'); setTimeout(() => dot.classList.remove('flash'), 400); }
-
   const { data } = await _sb.from('results').select('value').eq('id', 1).single();
   const results = data?.value || [];
   const countBySess = {};
   results.forEach(r => { if (r.sessionId) countBySess[r.sessionId] = (countBySess[r.sessionId] || 0) + 1; });
-
   document.querySelectorAll('[id^="rc-"]').forEach(el => {
     const sessId = el.id.replace('rc-', '');
-    const count = countBySess[sessId] || 0;
-    el.textContent = count === 0 ? 'Seja o primeiro a registrar'
-                   : count === 1 ? '1 resultado registrado'
-                   : `${count} resultados registrados`;
+    const count  = countBySess[sessId] || 0;
+    el.textContent = count === 0 ? 'Seja o primeiro' : count === 1 ? '1 resultado' : `${count} resultados`;
   });
 }
+
+function toggleCard(hdr) {
+  hdr.closest('.sess-card').classList.toggle('collapsed');
+}
+
+function openSheet()  {
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('sheet').classList.add('open');
+}
+function closeSheet() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('sheet').classList.remove('open');
+}
+(function() {
+  let sy = 0;
+  const sh = document.getElementById('sheet');
+  sh.addEventListener('touchstart', e => { sy = e.touches[0].clientY; }, { passive:true });
+  sh.addEventListener('touchend',   e => { if (e.changedTouches[0].clientY - sy > 60) closeSheet(); }, { passive:true });
+})();
 
 main()
   .then(() => setInterval(refreshCounts, 30000))
   .catch(err => {
-    document.getElementById('sessions').innerHTML = `
-      <div class="empty">
-        <span class="empty-icon">⚠️</span>
-        Erro ao carregar treinos.<br>
-        <span style="font-size:12px">${esc(err.message)}</span>
+    document.getElementById('sessionsPane').innerHTML =
+      `<div class="error-msg">⚠️ Erro ao carregar.<br>
+        <span style="font-size:12px;color:var(--muted)">${esc(err.message)}</span>
       </div>`;
   });
 
-// ── PWA install prompt ────────────────────────────────────────────────────────
+// ── PWA ───────────────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
-
 (function() {
-  const DISMISSED_KEY = 'cone_pwa_dismissed';
-  if (localStorage.getItem(DISMISSED_KEY)) return;
-
+  const KEY = 'cone_pwa_dismissed';
+  if (localStorage.getItem(KEY)) return;
   let deferredPrompt = null;
   const banner = document.getElementById('pwa-banner');
-
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
     setTimeout(() => banner.classList.add('show'), 2500);
   });
-
   document.getElementById('pwa-install-btn').addEventListener('click', () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(() => {
       deferredPrompt = null;
       banner.classList.remove('show');
-      localStorage.setItem(DISMISSED_KEY, '1');
+      localStorage.setItem(KEY, '1');
     });
   });
-
   document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
     banner.classList.remove('show');
-    localStorage.setItem(DISMISSED_KEY, '1');
+    localStorage.setItem(KEY, '1');
   });
-
   window.addEventListener('appinstalled', () => {
     banner.classList.remove('show');
     deferredPrompt = null;

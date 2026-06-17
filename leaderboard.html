@@ -13,42 +13,73 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--accent:#00b8d4;--accent-text:#000;--bg:#000;--bg2:#050e14;--lb-font:'Courier New',monospace}
-html,body{background:#0a0a0a;min-height:100vh;font-family:var(--lb-font);color:#e0e0e0}
-.wrap{max-width:680px;margin:0 auto;padding:16px}
-.topbar{background:#000;border-bottom:3px solid var(--accent);padding:18px 20px;margin-bottom:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.topbar-gym{font-size:22px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.1em}
-.topbar-sub{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
-.controls{background:#0a0a0a;border-bottom:1px solid #111;padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:10}
-.sel{font-family:var(--lb-font);font-size:13px;background:#111;border:1px solid #1e1e1e;color:#ccc;border-radius:5px;padding:6px 10px;outline:none;flex:1;min-width:160px}
+:root{
+  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;
+  --divider:#2a231c;--gold:#d8a840;--gold2:#b88820;
+  --teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;
+  --accent:#4ac8c0;--accent-text:#000;
+  --lb-font:'Raleway',sans-serif;
+}
+html,body{background:var(--bg);min-height:100vh;font-family:var(--lb-font);color:var(--cream);padding-bottom:72px}
+/* ── Header ── */
+.hdr{padding:18px 20px 14px;border-bottom:1px solid var(--divider);background:var(--bg);position:sticky;top:0;z-index:20}
+.hdr-rule{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.hdr-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold2))}
+.hdr-line.r{background:linear-gradient(270deg,transparent,var(--gold2))}
+.hdr-diamond{width:5px;height:5px;border:1px solid var(--gold);transform:rotate(45deg);flex-shrink:0}
+.brand{font-size:22px;font-weight:900;letter-spacing:8px;color:var(--cream);text-align:center}
+.gym{text-align:center;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;margin-top:1px}
+.hdr-back{position:absolute;top:50%;left:20px;transform:translateY(-50%);color:var(--muted);font-size:20px;text-decoration:none;transition:color .15s;line-height:1;padding:4px}
+.hdr-back:hover{color:var(--cream)}
+/* ── Controls ── */
+.controls{background:var(--bg);border-bottom:1px solid var(--divider);padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;top:90px;z-index:10}
+.sel{font-family:var(--lb-font);font-size:13px;background:var(--stone);border:1px solid var(--divider);color:var(--cream);padding:6px 10px;outline:none;flex:1;min-width:160px}
 .filter-row{display:flex;gap:4px;flex-wrap:wrap}
-.fb{font-family:var(--lb-font);font-size:11px;padding:5px 10px;border-radius:4px;border:1px solid #1e1e1e;background:transparent;color:#666;cursor:pointer;transition:all .12s}
+.fb{font-family:var(--lb-font);font-size:11px;padding:5px 10px;border:1px solid var(--divider);background:transparent;color:var(--muted);cursor:pointer;transition:all .12s}
 .fb.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:700}
-.lb-header{background:#000;padding:16px 20px 12px;border-bottom:1px solid #0d1e1e}
-.lb-title{font-size:16px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.06em}
-.lb-meta{font-size:12px;color:var(--accent);margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
-.row{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid #0d1e1e;transition:background .1s}
-.row:hover{background:#050e14}
+/* ── Leaderboard ── */
+.lb-header{background:var(--stone);padding:16px 20px 12px;border-bottom:1px solid var(--divider)}
+.lb-title{font-size:16px;font-weight:900;color:var(--cream);text-transform:uppercase;letter-spacing:.06em}
+.lb-meta{font-size:12px;color:var(--sub);margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
+.row{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--divider);transition:background .1s}
+.row:hover{background:var(--stone)}
 .row.podium-0{background:rgba(255,215,0,0.06)}
 .row.podium-1{background:rgba(192,192,192,0.05)}
 .row.podium-2{background:rgba(205,127,50,0.05)}
-.rank{font-size:16px;font-weight:900;width:30px;text-align:center;flex-shrink:0;color:#333}
+.rank{font-size:16px;font-weight:900;width:30px;text-align:center;flex-shrink:0;color:var(--muted)}
 .rank.p0{color:#ffd700}
 .rank.p1{color:#c0c0c0}
 .rank.p2{color:#cd7f32}
 .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.name{flex:1;font-size:15px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.scale-badge{font-size:10px;font-weight:700;color:var(--accent);background:rgba(0,184,212,0.1);border:1px solid var(--accent);border-radius:3px;padding:2px 7px;flex-shrink:0}
-.perf{font-size:15px;font-weight:900;color:#fff;flex-shrink:0}
+.name{flex:1;font-size:15px;font-weight:700;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scale-badge{font-size:10px;font-weight:700;color:var(--accent);background:rgba(74,200,192,.1);border:1px solid rgba(74,200,192,.25);padding:2px 7px;flex-shrink:0}
+.perf{font-size:15px;font-weight:900;color:var(--cream);flex-shrink:0}
 .perf.p0{color:#ffd700}
 .perf.p1{color:#c0c0c0}
 .perf.p2{color:#cd7f32}
-.empty{text-align:center;padding:40px 20px;color:#333;font-size:13px}
-.loading{text-align:center;padding:60px 20px;color:var(--accent);font-size:14px;letter-spacing:.1em;text-transform:uppercase}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
+.loading{text-align:center;padding:60px 20px;color:var(--teal);font-size:14px;letter-spacing:.1em;text-transform:uppercase}
 .error{text-align:center;padding:40px 20px;color:#e05050;font-size:13px}
+/* ── Bottom nav ── */
+.p-nav{position:fixed;bottom:0;left:0;right:0;background:#0a0807;border-top:1px solid var(--divider);display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:30}
+.p-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px;gap:3px;color:var(--muted);text-decoration:none;font-family:var(--lb-font);font-size:9px;font-weight:700;letter-spacing:.06em;border:none;background:none;cursor:pointer;transition:color .15s}
+.p-nav-btn:hover{color:var(--sub)}
+.p-nav-btn.active{color:var(--teal)}
+.p-nav-ic{font-size:18px;line-height:1}
+.p-nav-sep{width:1px;background:var(--divider);margin:10px 0}
 </style>
 </head>
 <body>
+<header class="hdr" style="position:relative">
+  <a class="hdr-back" href="index.html" title="Início">←</a>
+  <div class="hdr-rule">
+    <div class="hdr-line"></div>
+    <div class="hdr-diamond"></div>
+    <div class="hdr-line r"></div>
+  </div>
+  <div class="brand">CONE</div>
+  <div class="gym" id="lb-gym">Leaderboard</div>
+</header>
 <div id="app"><div class="loading">Carregando resultados...</div></div>
 <script>
 const PODIUM_COLORS=['#ffd700','#c0c0c0','#cd7f32'];
@@ -164,14 +195,8 @@ function render(){
 
   const scales=['Todos','RX','Inter','SC','Adaptado'];
 
+  {const e=document.getElementById('lb-gym');if(e)e.textContent=gymName;}
   document.getElementById('app').innerHTML=`
-    <div class="topbar" style="background:${lbc.lbHdrBg};border-bottom-color:${lbc.lbHdrBorder}">
-      <div>
-        <div class="topbar-gym" style="color:${lbc.lbHdrTitle}">${gymName}</div>
-        <div class="topbar-sub" style="color:${lbc.lbHdrSub}"><i class="ti ti-trophy"></i> Leaderboard</div>
-      </div>
-      <a href="index.html" style="color:#4ac8c0;font-size:22px;text-decoration:none;line-height:1;padding:4px;opacity:.7;transition:opacity .15s" title="Início" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7"><i class="ti ti-home"></i></a>
-    </div>
     <div class="controls">
       <select id="wod-sel" class="sel">
         <option value="">— Selecionar WOD —</option>
@@ -255,12 +280,10 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js')
       .then(reg=>{
-        // Check for updates every time the app loads
         reg.addEventListener('updatefound',()=>{
           const newSW=reg.installing;
           newSW.addEventListener('statechange',()=>{
             if(newSW.state==='installed'&&navigator.serviceWorker.controller){
-              // New version available — could show a "reload to update" banner here
               console.log('[Cone] Nova versão disponível. Recarregue para atualizar.');
             }
           });
@@ -270,5 +293,16 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+
+<nav class="p-nav">
+  <a class="p-nav-btn" href="index.html"><span class="p-nav-ic">🏠</span><span>Início</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn active" href="leaderboard.html"><span class="p-nav-ic">🏆</span><span>Ranking</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn" href="me.html"><span class="p-nav-ic">👤</span><span>Perfil</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn" href="schedule.html"><span class="p-nav-ic">📅</span><span>Agenda</span></a>
+</nav>
+
 </body>
 </html>
