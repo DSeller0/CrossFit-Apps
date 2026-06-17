@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Meu Perfil · Cone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700;900&display=swap"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#101408;--panel:#161c0c;--panel2:#1c2414;
+  --border:#b8a020;--border2:#485830;
+  --text:#e8e098;--dim:#788048;--gold:#c8b020;--green:#48a828;
+  --heart:#c82020;--teal:#38a898;
+  --rx:#38a898;--inter:#4880c0;--sc:#b87030;--adp:#7850b0;
+  --font:'Raleway',sans-serif;
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;padding-bottom:70px}
+
+/* ── Outer frame ── */
+.lttp-wrap{max-width:480px;margin:0 auto;min-height:100vh;background:var(--panel);border-left:3px double var(--border);border-right:3px double var(--border)}
+
+/* ── Header ── */
+.lttp-hdr{padding:16px 20px 14px;border-bottom:3px double var(--border);text-align:center;position:relative;background:linear-gradient(180deg,#0c1008 0%,var(--panel) 100%)}
+.lttp-brand{font-size:9px;letter-spacing:.4em;color:var(--dim);font-weight:900;text-transform:uppercase}
+.lttp-avatar{width:54px;height:54px;border:3px double var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#000;margin:10px auto 8px}
+.lttp-name{font-size:19px;font-weight:900;color:var(--text);letter-spacing:.06em;text-transform:uppercase}
+.lttp-since{font-size:10px;color:var(--dim);margin-top:2px;letter-spacing:.06em}
+.hdr-back{position:absolute;top:16px;left:16px;color:var(--dim);font-size:16px;text-decoration:none}
+.hdr-back:hover{color:var(--gold)}
+
+/* ── Hearts ── */
+.hearts-section{padding:14px 16px 10px;border-bottom:2px solid var(--border2);background:rgba(0,0,0,.2)}
+.hearts-label{font-size:8px;font-weight:900;color:var(--dim);letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px}
+.hearts-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.heart{font-size:22px;line-height:1;filter:drop-shadow(0 0 4px rgba(200,32,32,.4));transition:filter .15s}
+.heart.empty{filter:none;opacity:.25}
+.heart.today-empty{filter:drop-shadow(0 0 4px rgba(200,184,32,.5));opacity:.6}
+.heart-lbl{font-size:8px;color:var(--dim);font-weight:700;letter-spacing:.04em;margin-top:3px;text-align:center}
+.heart-col{display:flex;flex-direction:column;align-items:center}
+
+/* ── KPI Grid ── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:2px solid var(--border2)}
+.kpi-box{padding:15px 14px;border-right:2px solid var(--border2);border-bottom:2px solid var(--border2);position:relative}
+.kpi-box:nth-child(even){border-right:none}
+.kpi-box:nth-last-child(-n+2){border-bottom:none}
+.kpi-icon{font-size:18px;line-height:1;margin-bottom:6px}
+.kpi-val{font-size:26px;font-weight:900;color:var(--gold);line-height:1}
+.kpi-val.sm{font-size:16px;margin-top:2px}
+.kpi-lbl{font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;margin-top:4px;font-weight:700}
+.kpi-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(184,160,32,.15),transparent)}
+
+/* ── Scale bar ── */
+.scale-section{padding:14px 16px;border-bottom:2px solid var(--border2)}
+.section-lbl{font-size:8px;font-weight:900;color:var(--dim);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}
+.lttp-scale-bar{display:flex;height:12px;border:2px solid var(--border2);overflow:hidden;margin-bottom:8px}
+.lttp-seg{height:100%}
+.scale-chips{display:flex;gap:8px;flex-wrap:wrap}
+.sc-chip{font-size:10px;font-weight:700;padding:2px 8px;border:1px solid;display:flex;align-items:center;gap:5px}
+.sc-dot{width:7px;height:7px;border-radius:50%}
+
+/* ── Recent ── */
+.recent-section{padding:14px 16px;border-bottom:none}
+.recent-row{padding:10px 0;border-bottom:1px solid var(--border2);display:flex;align-items:flex-start;gap:10px}
+.recent-row:last-child{border-bottom:none}
+.recent-date{font-size:10px;font-weight:900;color:var(--teal);letter-spacing:.06em;white-space:nowrap;min-width:48px}
+.recent-body{flex:1}
+.recent-sess{font-size:12px;font-weight:700;color:var(--text)}
+.recent-perf{font-size:11px;color:var(--dim);margin-top:2px}
+.recent-scale{font-size:9px;font-weight:900;padding:1px 5px;border:1px solid;margin-top:3px;display:inline-block}
+
+/* ── Picker ── */
+.picker-wrap{max-width:420px;margin:0 auto;padding:28px 20px}
+.picker-title{font-size:11px;font-weight:900;letter-spacing:.25em;color:var(--gold);text-transform:uppercase;margin-bottom:4px;text-align:center}
+.picker-sub{font-size:12px;color:var(--dim);margin-bottom:18px;text-align:center}
+.picker-input{width:100%;background:rgba(0,0,0,.4);border:2px solid var(--border2);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 13px;outline:none}
+.picker-input:focus{border-color:var(--gold)}
+.picker-list{margin-top:6px;display:flex;flex-direction:column;gap:3px}
+.picker-item{background:rgba(0,0,0,.3);border:2px solid var(--border2);padding:11px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;text-decoration:none;transition:border-color .1s;position:relative}
+.picker-item::after{content:'▶';position:absolute;right:12px;font-size:9px;color:var(--dim)}
+.picker-item:hover{border-color:var(--gold)}
+.ath-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.picker-name{font-size:14px;font-weight:700;color:var(--text)}
+.picker-empty{text-align:center;padding:20px 0;font-size:12px;color:var(--dim)}
+
+/* ── Bottom nav ── */
+.p-nav{position:fixed;bottom:0;left:0;right:0;background:#0a0e06;border-top:3px double var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:30}
+.p-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;gap:3px;color:var(--dim);text-decoration:none;font-family:var(--font);font-size:8px;font-weight:900;letter-spacing:.08em;border:none;background:none;cursor:pointer;transition:color .15s;text-transform:uppercase}
+.p-nav-btn.active{color:var(--gold)}
+.p-nav-ic{font-size:17px;line-height:1}
+.p-nav-sep{width:1px;background:var(--border2);margin:8px 0}
+.center-msg{text-align:center;padding:60px 20px;color:var(--dim);font-size:13px;line-height:1.8}
+</style>
+</head>
+<body>
+<div id="root"><div class="center-msg">⏳ carregando...</div></div>
+<script>
+const _sb=supabase.createClient('https://crsalcpvsedmiabkeibp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw');
+const WOD_TYPES=new Set(['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']);
+const SCALE_ORDER=['RX','Inter','SC','Adaptado'];
+const SCALE_COLOR={RX:'#38a898',Inter:'#4880c0',SC:'#b87030',Adaptado:'#7850b0'};
+const SCALE_BORDER={RX:'rgba(56,168,152,.4)',Inter:'rgba(72,128,192,.4)',SC:'rgba(184,112,48,.4)',Adaptado:'rgba(120,80,176,.4)'};
+const WEEK_LABELS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+
+function toISO(d){return[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function todayISO(){return toISO(new Date())}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmtDateLong(iso){return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}
+function fmtDateShort(iso){return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'})}
+function initials(name){return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()}
+function isoWeekDates(){
+  const today=new Date(),dow=today.getDay(),dfm=dow===0?6:dow-1;
+  const mon=new Date(today);mon.setDate(today.getDate()-dfm);
+  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return toISO(d)});
+}
+function calcStreak(sorted){
+  if(!sorted.length)return 0;
+  const dates=[...new Set(sorted.map(r=>r.date))].sort().reverse();
+  const today=todayISO(),yesterday=toISO(new Date(Date.now()-86400000));
+  if(dates[0]!==today&&dates[0]!==yesterday)return 0;
+  let streak=0,expected=dates[0];
+  for(const d of dates){if(d===expected){streak++;const p=new Date(expected+'T12:00:00');p.setDate(p.getDate()-1);expected=toISO(p);}else break;}
+  return streak;
+}
+
+function renderPicker(athletes){
+  document.getElementById('root').innerHTML=`<div class="lttp-wrap">
+    <div class="lttp-hdr" style="padding:26px 20px 20px">
+      <a class="hdr-back" href="index.html">←</a>
+      <div class="lttp-brand">— Cone —</div>
+      <div style="font-size:22px;font-weight:900;color:var(--gold);letter-spacing:.08em;margin:12px 0 4px;text-align:center">SELECIONAR ATLETA</div>
+    </div>
+    <div class="picker-wrap" style="padding-top:20px">
+      <input class="picker-input" id="pickerQ" type="search" placeholder="Buscar nome..." autocomplete="off"/>
+      <div class="picker-list" id="pickerList"></div>
+    </div>
+  </div>`;
+  const sorted=[...athletes].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+  function renderList(q){
+    const q2=q.trim().toLowerCase();
+    const matches=q2?sorted.filter(a=>a.name.toLowerCase().includes(q2)):sorted;
+    const list=document.getElementById('pickerList');if(!list)return;
+    if(!matches.length){list.innerHTML='<div class="picker-empty">Nenhum atleta.</div>';return;}
+    list.innerHTML=matches.map(a=>`<a class="picker-item" href="me-b.html?id=${esc(a.id)}"><span class="ath-dot" style="background:${esc(a.color||'#38a898')}"></span><span class="picker-name">${esc(a.name)}</span></a>`).join('');
+  }
+  renderList('');
+  document.getElementById('pickerQ').addEventListener('input',e=>renderList(e.target.value));
+}
+
+function renderProfile(athlete,myResults,allSessions){
+  const today=todayISO();
+  const color=athlete.color||'#38a898';
+  const sorted=[...myResults].sort((a,b)=>b.date.localeCompare(a.date));
+  const total=sorted.length;
+  const nowY=new Date().getFullYear(),nowM=new Date().getMonth()+1;
+  const thisMonth=sorted.filter(r=>{const[y,m]=r.date.split('-').map(Number);return y===nowY&&m===nowM}).length;
+  const weekISOs=isoWeekDates();
+  const weekDates=new Set(weekISOs);
+  const thisWeek=sorted.filter(r=>weekDates.has(r.date)).length;
+  const earliest=sorted.length?sorted[sorted.length-1].date:null;
+  const streak=calcStreak(sorted);
+  const scaleCounts={RX:0,Inter:0,SC:0,Adaptado:0};
+  sorted.forEach(r=>(r.blocks||[]).forEach(b=>{if(b.scale&&scaleCounts[b.scale]!==undefined)scaleCounts[b.scale]++;}));
+  const scaleTotal=Object.values(scaleCounts).reduce((a,b)=>a+b,0);
+  const favScale=scaleTotal>0?SCALE_ORDER.find(s=>scaleCounts[s]===Math.max(...Object.values(scaleCounts))):null;
+  const energies=sorted.filter(r=>r.energyLevel).map(r=>r.energyLevel);
+  const avgEnergy=energies.length?(energies.reduce((a,b)=>a+b,0)/energies.length).toFixed(1):null;
+  const wodResults=sorted.filter(r=>(r.blocks||[]).some(b=>WOD_TYPES.has(b.blockType)));
+  const rxRate=scaleTotal>0?Math.round(scaleCounts.RX/scaleTotal*100):null;
+  const datesWithResult=new Set(sorted.map(r=>r.date));
+
+  // Hearts: 7 for the week, filled = trained
+  const heartsHtml=weekISOs.map((iso,i)=>{
+    const done=datesWithResult.has(iso);
+    const isToday=iso===today;
+    const future=iso>today;
+    return`<div class="heart-col"><div class="heart${done?'':isToday?' today-empty':' empty'}">${done?'❤️':isToday?'🤍':'🖤'}</div><div class="heart-lbl">${WEEK_LABELS[i]}</div></div>`;
+  }).join('');
+
+  // KPI boxes
+  const kpis=[
+    {icon:'🏋️',val:total,lbl:'Total'},
+    {icon:'📅',val:thisMonth,lbl:'Este mês'},
+    {icon:'🔥',val:streak,lbl:'Sequência'},
+    {icon:'⚡',val:avgEnergy?`${avgEnergy}/5`:'—',lbl:'Energia média',sm:true},
+    {icon:'⚔️',val:favScale||'—',lbl:'Escala fav.',sm:!!favScale},
+    {icon:'🏆',val:wodResults.length,lbl:'WODs'},
+    {icon:'💪',val:thisWeek,lbl:'Esta semana'},
+    {icon:'⭐',val:rxRate!=null?`${rxRate}%`:'—',lbl:'% RX',sm:true},
+  ];
+
+  // Recent 5 results
+  const recent=sorted.slice(0,5);
+  function sessName(r){
+    const daySessions=allSessions[r.date]||[];
+    const s=daySessions.find(s=>s.id===r.sessionId);
+    return s?.sessionName||s?.name||'Treino';
+  }
+
+  document.getElementById('root').innerHTML=`<div class="lttp-wrap">
+    <div class="lttp-hdr">
+      <a class="hdr-back" href="me-b.html">←</a>
+      <div class="lttp-brand">— Cone —</div>
+      <div class="lttp-avatar" style="background:${esc(color)}">${esc(initials(athlete.name))}</div>
+      <div class="lttp-name">${esc(athlete.name)}</div>
+      ${earliest?`<div class="lttp-since">desde ${fmtDateLong(earliest)}</div>`:''}
+    </div>
+
+    <!-- Heart containers: weekly attendance -->
+    <div class="hearts-section">
+      <div class="hearts-label">Esta semana</div>
+      <div class="hearts-row">${heartsHtml}</div>
+    </div>
+
+    <!-- KPI grid -->
+    <div class="kpi-grid">${kpis.map(k=>`<div class="kpi-box">
+      <div class="kpi-icon">${k.icon}</div>
+      <div class="kpi-val${k.sm?' sm':''}">${k.val}</div>
+      <div class="kpi-lbl">${k.lbl}</div>
+    </div>`).join('')}</div>
+
+    <!-- Scale bar -->
+    ${scaleTotal>0?`<div class="scale-section">
+      <div class="section-lbl">Escalas</div>
+      <div class="lttp-scale-bar">${SCALE_ORDER.filter(s=>scaleCounts[s]>0).map(s=>`<div class="lttp-seg" style="flex:${scaleCounts[s]};background:${SCALE_COLOR[s]}"></div>`).join('')}</div>
+      <div class="scale-chips">${SCALE_ORDER.filter(s=>scaleCounts[s]>0).map(s=>{const pct=Math.round(scaleCounts[s]/scaleTotal*100);return`<div class="sc-chip" style="color:${SCALE_COLOR[s]};border-color:${SCALE_BORDER[s]}"><div class="sc-dot" style="background:${SCALE_COLOR[s]}"></div>${s} ${pct}%</div>`;}).join('')}</div>
+    </div>`:''}
+
+    <!-- Recent results -->
+    ${recent.length>0?`<div class="recent-section">
+      <div class="section-lbl">Histórico recente</div>
+      ${recent.map(r=>{
+        const wodBlocks=(r.blocks||[]).filter(b=>WOD_TYPES.has(b.blockType));
+        const topBlock=wodBlocks[0];
+        const topScale=topBlock?.scale;
+        return`<div class="recent-row">
+          <div class="recent-date">${fmtDateShort(r.date)}</div>
+          <div class="recent-body">
+            <div class="recent-sess">${esc(sessName(r))}</div>
+            ${topBlock?`<div class="recent-perf">${esc(topBlock.blockType||'')}${topBlock.blockLabel&&topBlock.blockLabel!==topBlock.blockType?' · '+esc(topBlock.blockLabel):''}</div>`:''}
+            ${topScale?`<div class="recent-scale" style="color:${SCALE_COLOR[topScale]};border-color:${SCALE_BORDER[topScale]}">${esc(topScale)}</div>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`:''}
+  </div>`;
+}
+
+async function main(){
+  const params=new URLSearchParams(location.search);
+  const athleteId=params.get('id');
+  const [athRes,resRes,sessRes]=await Promise.all([
+    _sb.from('athletes').select('value').eq('id',1).single(),
+    _sb.from('results').select('value').eq('id',1).single(),
+    athleteId?_sb.from('sessions').select('value').eq('id',1).single():Promise.resolve({data:null}),
+  ]);
+  const athletes=athRes.data?.value||[];
+  const allResults=resRes.data?.value||[];
+  const allSessions=sessRes.data?.value||{};
+  if(!athleteId){renderPicker(athletes);return;}
+  const athlete=athletes.find(a=>a.id===athleteId);
+  if(!athlete){document.getElementById('root').innerHTML=`<div class="center-msg">Atleta não encontrado.<br><a href="me-b.html" style="color:var(--gold)">← voltar</a></div>`;return;}
+  document.title=`${athlete.name} · Cone`;
+  renderProfile(athlete,allResults.filter(r=>r.athleteId===athleteId),allSessions);
+}
+main().catch(e=>{document.getElementById('root').innerHTML=`<div class="center-msg">⚠️ Erro.<br><small>${esc(e.message)}</small></div>`;});
+</script>
+<nav class="p-nav">
+  <a class="p-nav-btn" href="index.html"><span class="p-nav-ic">🏠</span><span>Início</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn" href="leaderboard.html"><span class="p-nav-ic">🏆</span><span>Ranking</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn active" href="me-b.html"><span class="p-nav-ic">👤</span><span>Perfil</span></a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn" href="schedule.html"><span class="p-nav-ic">📅</span><span>Agenda</span></a>
+</nav>
+</body>
+</html>
