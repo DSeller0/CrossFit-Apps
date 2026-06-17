@@ -7,52 +7,140 @@
 <title>Meu Perfil · Cone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;900&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700;900&display=swap"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;
-  --card:#161210;--card2:#1e1a16;
   --divider:#2a231c;--gold:#d8a840;--gold2:#b88820;
   --teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;
   --muted:#806850;--dim:#554a3a;
-  --accent:#4ac8c0;--font:'Raleway',sans-serif;
+  --rx:#4ac8c0;--inter:#4a90d8;--sc:#d8904a;--adp:#9070d8;
+  --font:'Raleway',sans-serif;
 }
-html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh;padding-bottom:80px}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh;padding-bottom:70px}
 
 /* ── Header ── */
-.hdr{padding:18px 20px 14px;border-bottom:1px solid var(--divider);background:var(--bg);position:sticky;top:0;z-index:20;position:relative}
+.hdr{padding:18px 20px 14px;border-bottom:1px solid var(--divider);background:var(--bg);position:relative}
 .hdr-rule{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .hdr-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold2))}
 .hdr-line.r{background:linear-gradient(270deg,transparent,var(--gold2))}
 .hdr-diamond{width:5px;height:5px;border:1px solid var(--gold);transform:rotate(45deg);flex-shrink:0}
 .brand{font-size:22px;font-weight:900;letter-spacing:8px;color:var(--cream);text-align:center}
 .gym{text-align:center;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;margin-top:1px}
-.hdr-back{position:absolute;top:50%;left:20px;transform:translateY(-50%);color:var(--muted);font-size:20px;text-decoration:none;transition:color .15s;line-height:1;padding:4px}
+.hdr-back{position:absolute;top:50%;left:20px;transform:translateY(-50%);color:var(--muted);font-size:20px;text-decoration:none;transition:color .15s;padding:4px}
 .hdr-back:hover{color:var(--cream)}
 
-/* ── Generic states ── */
-.center-msg{text-align:center;padding:64px 20px;color:var(--muted);font-size:13px;line-height:1.8}
-.center-msg .icon{font-size:36px;display:block;margin-bottom:14px;opacity:.4}
+/* ── Hero ── */
+.hero{padding:20px 20px 14px;border-bottom:1px solid var(--divider);display:flex;align-items:center;gap:14px;position:relative}
+.ath-avatar{width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#000;flex-shrink:0;position:relative}
+.ath-avatar::before,.ath-avatar::after{content:'';position:absolute;width:8px;height:8px}
+.ath-avatar::before{top:-2px;left:-2px;border-top:2px solid var(--gold);border-left:2px solid var(--gold)}
+.ath-avatar::after{bottom:-2px;right:-2px;border-bottom:2px solid var(--gold);border-right:2px solid var(--gold)}
+.hero-name{font-size:22px;font-weight:900;color:var(--cream);line-height:1.1}
+.hero-sub{font-size:11px;color:var(--sub);margin-top:4px}
+.hero-since{font-size:10px;color:var(--muted);margin-top:2px}
+.streak-badge{position:absolute;top:20px;right:20px;text-align:center}
+.streak-num{font-size:28px;font-weight:900;color:var(--gold);line-height:1}
+.streak-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.streak-flame{font-size:12px}
 
-/* ── Name picker ── */
+/* ── Stats row ── */
+.stats-row{display:flex;border-bottom:1px solid var(--divider)}
+.stat-cell{flex:1;padding:14px 8px;text-align:center;border-right:1px solid var(--divider)}
+.stat-cell:last-child{border-right:none}
+.stat-num{font-size:30px;font-weight:900;color:var(--teal);line-height:1}
+.stat-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+
+/* ── Tabs ── */
+.tabs{display:flex;border-bottom:1px solid var(--divider)}
+.tab{flex:1;padding:9px 4px;background:none;border:none;border-right:1px solid var(--divider);color:var(--muted);cursor:pointer;font-family:var(--font);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:8px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.tab:last-child{border-right:none}
+.tab.active{color:var(--gold);background:rgba(216,168,64,.06);border-bottom:2px solid var(--gold);margin-bottom:-1px}
+.tab-rune{font-size:16px;line-height:1;letter-spacing:0}
+
+/* ── Panels ── */
+.panel{display:none;animation:panelIn .15s ease}
+.panel.active{display:block}
+@keyframes panelIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── Section title ── */
+.sec-title{font-size:8px;font-weight:900;color:var(--gold);letter-spacing:.22em;text-transform:uppercase;padding:16px 20px 10px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(216,168,64,.3),transparent)}
+
+/* ── Week dots ── */
+.week-wrap{padding:0 20px 16px}
+.week-strip{display:flex;gap:4px}
+.week-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.week-dot{width:32px;height:32px;border:1px solid var(--divider);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted)}
+.week-dot.done{background:var(--teal);border-color:var(--teal);color:#000}
+.week-dot.today-empty{border-color:var(--teal);color:var(--teal)}
+.week-dot.future{opacity:.25}
+.week-lbl{font-size:8px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+
+/* ── 28-day heatmap ── */
+.heatmap{padding:0 20px 16px}
+.hm-hdrs{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px}
+.hm-hdr{font-size:8px;color:var(--muted);text-align:center;font-weight:700;letter-spacing:.04em}
+.hm-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.hm-cell{aspect-ratio:1;background:var(--stone);border:1px solid var(--divider);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--dim)}
+.hm-cell.has{background:rgba(74,200,192,.18);border-color:rgba(74,200,192,.5);color:var(--teal)}
+.hm-cell.today{border-color:var(--gold);box-shadow:0 0 6px rgba(216,168,64,.2)}
+.hm-cell.today.has{border-color:var(--teal);color:var(--teal);box-shadow:0 0 8px rgba(74,200,192,.3)}
+.hm-cell.future{opacity:.2}
+
+/* ── Scale section ── */
+.scale-wrap{padding:0 20px 16px}
+.scale-bar-bg{display:flex;height:8px;margin-bottom:12px;gap:2px}
+.scale-seg{height:100%;min-width:4px}
+.scale-rows{display:flex;flex-direction:column;gap:6px}
+.sc-row{display:flex;align-items:center;gap:8px}
+.sc-lbl{font-size:10px;font-weight:700;color:var(--sub);width:58px}
+.sc-track{flex:1;height:6px;background:var(--stone);border:1px solid var(--divider)}
+.sc-fill{height:100%}
+.sc-pct{font-size:10px;font-weight:700;color:var(--gold);width:28px;text-align:right}
+.stat-pair{display:flex;gap:12px;padding:0 20px;margin-bottom:14px}
+.stat-half{flex:1;background:var(--stone);border:1px solid var(--divider);padding:12px;text-align:center;position:relative}
+.stat-half::before{content:'';position:absolute;top:-1px;left:-1px;width:6px;height:6px;border-top:1px solid var(--gold2);border-left:1px solid var(--gold2)}
+.stat-half::after{content:'';position:absolute;bottom:-1px;right:-1px;width:6px;height:6px;border-bottom:1px solid var(--gold2);border-right:1px solid var(--gold2)}
+.sh-val{font-size:22px;font-weight:900;color:var(--gold);line-height:1}
+.sh-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+
+/* ── Milestones ── */
+.milestone-list{padding:0 20px 16px;display:flex;flex-direction:column;gap:5px}
+.ms{background:var(--stone);border:1px solid var(--divider);padding:10px 14px;display:flex;align-items:center;gap:10px;position:relative}
+.ms.done{border-color:rgba(216,168,64,.4)}
+.ms.done::before{content:'';position:absolute;top:-1px;left:-1px;width:5px;height:5px;border-top:1px solid var(--gold);border-left:1px solid var(--gold)}
+.ms-icon{font-size:14px;flex-shrink:0}
+.ms-name{font-size:11px;font-weight:700;color:var(--muted);flex:1}
+.ms.done .ms-name{color:var(--cream)}
+.ms-tag{font-size:8px;font-weight:900;color:var(--dim);padding:1px 6px;border:1px solid var(--dim)}
+.ms.done .ms-tag{color:var(--gold);border-color:rgba(216,168,64,.4)}
+
+/* ── Recent results ── */
+.recent-wrap{padding:0 20px 16px;display:flex;flex-direction:column;gap:6px}
+.rc{background:var(--stone);border:1px solid var(--divider);padding:12px 14px;position:relative}
+.rc::before,.rc::after{content:'';position:absolute;width:6px;height:6px}
+.rc::before{top:-1px;left:-1px;border-top:1px solid var(--gold2);border-left:1px solid var(--gold2)}
+.rc::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--gold2);border-right:1px solid var(--gold2)}
+.rc-top{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.rc-date{font-size:10px;font-weight:700;color:var(--teal);letter-spacing:.06em}
+.rc-sess{font-size:13px;font-weight:900;color:var(--cream);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-blocks{display:flex;flex-direction:column;gap:4px}
+.rc-blk{background:var(--stone2);border:1px solid var(--divider);padding:5px 10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rc-type{font-size:9px;font-weight:900;color:var(--teal);letter-spacing:.06em;text-transform:uppercase}
+.rc-scale{font-size:8px;font-weight:900;padding:1px 5px;letter-spacing:.04em}
+
+/* ── Picker ── */
 .picker-wrap{max-width:420px;margin:28px auto;padding:0 20px}
 .picker-title{font-size:22px;font-weight:900;color:var(--cream);margin-bottom:4px}
 .picker-sub{font-size:13px;color:var(--sub);margin-bottom:20px}
-.picker-input{
-  width:100%;background:var(--stone);border:1px solid var(--divider);
-  color:var(--cream);font-family:var(--font);font-size:15px;padding:12px 16px;
-  outline:none;transition:border-color .15s
-}
+.picker-input{width:100%;background:var(--stone);border:1px solid var(--divider);color:var(--cream);font-family:var(--font);font-size:15px;padding:12px 16px;outline:none;transition:border-color .15s}
 .picker-input:focus{border-color:var(--teal)}
 .picker-input::placeholder{color:var(--muted)}
 .picker-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-.picker-item{
-  background:var(--stone);border:1px solid var(--divider);
-  padding:13px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;
-  transition:border-color .15s;text-decoration:none;position:relative;
-}
+.picker-item{background:var(--stone);border:1px solid var(--divider);padding:13px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .15s;text-decoration:none;position:relative}
 .picker-item::before,.picker-item::after{content:'';position:absolute;width:7px;height:7px}
 .picker-item::before{top:-1px;left:-1px;border-top:1px solid var(--gold2);border-left:1px solid var(--gold2)}
 .picker-item::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--gold2);border-right:1px solid var(--gold2)}
@@ -61,394 +149,240 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 .picker-name{font-size:15px;font-weight:700;color:var(--cream)}
 .picker-empty{text-align:center;padding:24px 0;font-size:13px;color:var(--muted)}
 
-/* ── Hero ── */
-.hero{padding:24px 20px;border-bottom:1px solid var(--divider);display:flex;align-items:center;gap:16px}
-.ath-avatar{
-  width:56px;height:56px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;font-weight:900;color:#000;flex-shrink:0
-}
-.hero-name{font-size:26px;font-weight:900;color:var(--cream);line-height:1.1}
-.hero-sub{font-size:12px;color:var(--sub);margin-top:5px}
-.hero-since{font-size:11px;color:var(--muted);margin-top:2px}
-
-/* ── Stats row ── */
-.stats-row{display:flex;border-bottom:1px solid var(--divider)}
-.stat-cell{flex:1;padding:16px 12px;text-align:center;border-right:1px solid var(--divider)}
-.stat-cell:last-child{border-right:none}
-.stat-num{font-size:28px;font-weight:900;color:var(--accent);line-height:1}
-.stat-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
-
-/* ── Section wrapper ── */
-.section{padding:18px 20px;border-bottom:1px solid var(--divider)}
-.section-title{font-size:9px;font-weight:900;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px}
-
-/* ── Week strip ── */
-.week-strip{display:flex;gap:4px}
-.week-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
-.week-dot{
-  width:34px;height:34px;border-radius:50%;border:2px solid var(--divider);
-  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);
-  transition:all .15s
-}
-.week-dot.done{background:var(--accent);border-color:var(--accent);color:#000}
-.week-dot.today-empty{border-color:var(--accent);color:var(--accent)}
-.week-dot.future{opacity:.25}
-.week-lbl{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
-
-/* ── Scale bar ── */
-.scale-bar-wrap{display:flex;height:10px;gap:2px;overflow:hidden}
-.scale-seg{height:100%;min-width:4px}
-.seg-rx{background:#4ac8c0}
-.seg-inter{background:#4a90d8}
-.seg-sc{background:#d8904a}
-.seg-adaptado{background:#9070d8}
-.scale-legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px}
-.scale-lbl{font-size:11px;color:var(--sub);display:flex;align-items:center;gap:6px}
-.sl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-
-/* ── Result cards ── */
-.result-card{background:var(--stone);border:1px solid var(--divider);padding:14px;margin-bottom:8px;position:relative}
-.result-card::before,.result-card::after{content:'';position:absolute;width:7px;height:7px}
-.result-card::before{top:-1px;left:-1px;border-top:1px solid var(--gold2);border-left:1px solid var(--gold2)}
-.result-card::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--gold2);border-right:1px solid var(--gold2)}
-.rc-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
-.rc-date{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.06em;white-space:nowrap}
-.rc-sess{font-size:14px;font-weight:900;color:var(--cream);line-height:1.2}
-.rc-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.energy-badge{font-size:9px;font-weight:700;color:var(--muted);background:var(--stone2);border:1px solid var(--divider);padding:2px 6px;letter-spacing:.04em}
-.absent-badge{font-size:9px;font-weight:700;color:#c0704a;background:rgba(192,112,74,.1);border:1px solid rgba(192,112,74,.2);padding:2px 6px}
-.rc-blocks{display:flex;flex-direction:column;gap:5px;margin-bottom:6px}
-.rc-block{
-  background:var(--stone2);border:1px solid var(--divider);
-  padding:7px 11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap
-}
-.rc-btype{font-size:10px;font-weight:900;color:var(--teal);letter-spacing:.06em;text-transform:uppercase}
-.rc-bdot{color:var(--divider);font-size:12px}
-.rc-blabel{font-size:11px;color:var(--sub)}
-.scale-chip{font-size:9px;font-weight:900;padding:2px 7px;letter-spacing:.06em;white-space:nowrap}
-
 /* ── Bottom nav ── */
 .p-nav{position:fixed;bottom:0;left:0;right:0;background:#0a0807;border-top:1px solid var(--divider);display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:30}
 .p-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px;gap:3px;color:var(--muted);text-decoration:none;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.06em;border:none;background:none;cursor:pointer;transition:color .15s}
-.p-nav-btn:hover{color:var(--sub)}
 .p-nav-btn.active{color:var(--teal)}
 .p-nav-ic{font-size:18px;line-height:1}
 .p-nav-sep{width:1px;background:var(--divider);margin:10px 0}
-.chip-rx{background:rgba(74,200,192,.15);color:#4ac8c0;border:1px solid rgba(74,200,192,.25)}
-.chip-inter{background:rgba(74,144,216,.15);color:#4a90d8;border:1px solid rgba(74,144,216,.25)}
-.chip-sc{background:rgba(216,144,74,.15);color:#d8904a;border:1px solid rgba(216,144,74,.25)}
-.chip-adaptado{background:rgba(144,112,216,.15);color:#9070d8;border:1px solid rgba(144,112,216,.25)}
-.rc-perf{font-size:12px;font-weight:700;color:var(--cream)}
-.rc-rpe{font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
-.rc-note{font-size:11px;color:var(--muted);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--divider)}
-.no-blocks{font-size:12px;color:var(--muted);font-style:italic}
+.center-msg{text-align:center;padding:64px 20px;color:var(--muted);font-size:13px;line-height:1.8}
 </style>
 </head>
 <body>
-
-<header class="hdr" style="position:relative">
-  <a class="hdr-back" href="index.html" title="Início">←</a>
-  <div class="hdr-rule">
-    <div class="hdr-line"></div>
-    <div class="hdr-diamond"></div>
-    <div class="hdr-line r"></div>
-  </div>
-  <div class="brand">CONE</div>
-  <div class="gym">Meu Perfil</div>
-</header>
-
-<div id="root"><div class="center-msg"><span class="icon">⏳</span>carregando...</div></div>
-
+<div id="root"><div class="center-msg">⏳ carregando...</div></div>
 <script>
-const _sb = supabase.createClient(
-  'https://crsalcpvsedmiabkeibp.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw'
-);
+const _sb=supabase.createClient('https://crsalcpvsedmiabkeibp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw');
+const WOD_TYPES=new Set(['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']);
+const SCALE_ORDER=['RX','Inter','SC','Adaptado'];
+const SCALE_COLOR={RX:'#4ac8c0',Inter:'#4a90d8',SC:'#d8904a',Adaptado:'#9070d8'};
+const SCALE_BORDER={RX:'rgba(74,200,192,.3)',Inter:'rgba(74,144,216,.3)',SC:'rgba(216,144,74,.3)',Adaptado:'rgba(144,112,216,.3)'};
+const WEEK_LABELS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const CAL_HDRS=['S','T','Q','Q','S','S','D'];
 
-const WOD_TYPES = new Set(['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']);
-const SCALE_ORDER = ['RX','Inter','SC','Adaptado'];
-const SCALE_CLASS = { RX:'chip-rx', Inter:'chip-inter', SC:'chip-sc', Adaptado:'chip-adaptado' };
-const SCALE_COLOR = { RX:'seg-rx', Inter:'seg-inter', SC:'seg-sc', Adaptado:'seg-adaptado' };
-const WEEK_LABELS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-const ENERGY_LABEL = ['','😴','😕','😐','💪','🔥'];
-
-function toISO(d) {
-  return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
+function toISO(d){return[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function todayISO(){return toISO(new Date())}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmtDateLong(iso){return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}
+function fmtDateShort(iso){return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'})}
+function initials(name){return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()}
+function isoWeekDates(){
+  const today=new Date(),dow=today.getDay(),dfm=dow===0?6:dow-1;
+  const mon=new Date(today);mon.setDate(today.getDate()-dfm);
+  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return toISO(d)});
 }
-function todayISO() { return toISO(new Date()); }
-
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function fmtDateShort(iso) {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { day:'numeric', month:'short' });
-}
-
-function fmtDateLong(iso) {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { month:'long', year:'numeric' });
-}
-
-function isoWeekDates() {
-  const today = new Date();
-  const dow = today.getDay();
-  const daysFromMon = dow === 0 ? 6 : dow - 1;
-  const mon = new Date(today);
-  mon.setDate(today.getDate() - daysFromMon);
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(mon);
-    d.setDate(mon.getDate() + i);
-    return toISO(d);
-  });
+function calcStreak(sorted){
+  if(!sorted.length)return 0;
+  const dates=[...new Set(sorted.map(r=>r.date))].sort().reverse();
+  const today=todayISO(),yesterday=toISO(new Date(Date.now()-86400000));
+  if(dates[0]!==today&&dates[0]!==yesterday)return 0;
+  let streak=0,expected=dates[0];
+  for(const d of dates){if(d===expected){streak++;const p=new Date(expected+'T12:00:00');p.setDate(p.getDate()-1);expected=toISO(p);}else break;}
+  return streak;
 }
 
-function fmtPerf(block) {
-  if (block.blockType === 'For Time' && block.perfTime) return block.perfTime;
-  const parts = [];
-  if (block.perfRounds != null && block.perfRounds !== '') parts.push(`${block.perfRounds} rounds`);
-  if (block.perfReps != null && block.perfReps !== '') parts.push(`+${block.perfReps} reps`);
-  return parts.join(' ') || null;
+let currentTab=0;
+function setTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+  currentTab=i;
 }
 
-function initials(name) {
-  return name.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
-}
-
-// ── Name picker ──────────────────────────────────────────────────────────────
-function renderPicker(athletes) {
-  const root = document.getElementById('root');
-  root.innerHTML = `
+function renderPicker(athletes){
+  document.getElementById('root').innerHTML=`
+    <header class="hdr" style="position:relative">
+      <a class="hdr-back" href="index.html">←</a>
+      <div class="hdr-rule"><div class="hdr-line"></div><div class="hdr-diamond"></div><div class="hdr-line r"></div></div>
+      <div class="brand">CONE</div><div class="gym">Meu Perfil</div>
+    </header>
     <div class="picker-wrap">
       <div class="picker-title">Quem é você?</div>
       <div class="picker-sub">Selecione seu nome para ver seu perfil.</div>
-      <input class="picker-input" id="pickerQ" type="search" placeholder="Buscar seu nome..." autocomplete="off" autocorrect="off"/>
+      <input class="picker-input" id="pickerQ" type="search" placeholder="Buscar seu nome..." autocomplete="off"/>
       <div class="picker-list" id="pickerList"></div>
     </div>`;
-
-  const sorted = [...athletes].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-
-  function renderList(q) {
-    const q2 = q.trim().toLowerCase();
-    const matches = q2 ? sorted.filter(a => a.name.toLowerCase().includes(q2)) : sorted;
-    const list = document.getElementById('pickerList');
-    if (!list) return;
-    if (!matches.length) {
-      list.innerHTML = '<div class="picker-empty">Nenhum atleta encontrado.</div>';
-      return;
-    }
-    list.innerHTML = matches.map(a => `
-      <a class="picker-item" href="me.html?id=${esc(a.id)}">
-        <span class="ath-dot" style="background:${esc(a.color||'#4ac8c0')}"></span>
-        <span class="picker-name">${esc(a.name)}</span>
-      </a>`).join('');
+  const sorted=[...athletes].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+  function renderList(q){
+    const q2=q.trim().toLowerCase();
+    const matches=q2?sorted.filter(a=>a.name.toLowerCase().includes(q2)):sorted;
+    const list=document.getElementById('pickerList');if(!list)return;
+    if(!matches.length){list.innerHTML='<div class="picker-empty">Nenhum atleta encontrado.</div>';return;}
+    list.innerHTML=matches.map(a=>`<a class="picker-item" href="me.html?id=${esc(a.id)}"><span class="ath-dot" style="background:${esc(a.color||'#4ac8c0')}"></span><span class="picker-name">${esc(a.name)}</span></a>`).join('');
   }
-
   renderList('');
-  document.getElementById('pickerQ').addEventListener('input', e => renderList(e.target.value));
+  document.getElementById('pickerQ').addEventListener('input',e=>renderList(e.target.value));
 }
 
-// ── Profile ──────────────────────────────────────────────────────────────────
-function renderProfile(athlete, myResults, allSessions) {
-  const root = document.getElementById('root');
-  const today = todayISO();
-  const color = athlete.color || '#4ac8c0';
+function renderProfile(athlete,myResults,allSessions){
+  const today=todayISO();
+  const color=athlete.color||'#4ac8c0';
+  const sorted=[...myResults].sort((a,b)=>b.date.localeCompare(a.date));
+  const total=sorted.length;
+  const nowY=new Date().getFullYear(),nowM=new Date().getMonth()+1;
+  const thisMonth=sorted.filter(r=>{const[y,m]=r.date.split('-').map(Number);return y===nowY&&m===nowM}).length;
+  const weekISOs=isoWeekDates();
+  const weekDates=new Set(weekISOs);
+  const thisWeek=sorted.filter(r=>weekDates.has(r.date)).length;
+  const earliest=sorted.length?sorted[sorted.length-1].date:null;
+  const streak=calcStreak(sorted);
+  const scaleCounts={RX:0,Inter:0,SC:0,Adaptado:0};
+  sorted.forEach(r=>(r.blocks||[]).forEach(b=>{if(b.scale&&scaleCounts[b.scale]!==undefined)scaleCounts[b.scale]++;}));
+  const scaleTotal=Object.values(scaleCounts).reduce((a,b)=>a+b,0);
+  const favScale=scaleTotal>0?SCALE_ORDER.find(s=>scaleCounts[s]===Math.max(...Object.values(scaleCounts))):null;
+  const energies=sorted.filter(r=>r.energyLevel).map(r=>r.energyLevel);
+  const avgEnergy=energies.length?(energies.reduce((a,b)=>a+b,0)/energies.length).toFixed(1):null;
+  const rpes=sorted.flatMap(r=>(r.blocks||[]).map(b=>b.rpe).filter(Boolean));
+  const avgRpe=rpes.length?(rpes.reduce((a,b)=>a+b,0)/rpes.length).toFixed(1):null;
+  const datesWithResult=new Set(sorted.map(r=>r.date));
+  const calDays=Array.from({length:28},(_,i)=>{const d=new Date();d.setDate(d.getDate()-27+i);return toISO(d);});
+  const rxRate=scaleTotal>0?Math.round(scaleCounts.RX/scaleTotal*100):null;
 
-  // Sort newest first
-  const sorted = [...myResults].sort((a, b) => b.date.localeCompare(a.date));
+  const milestones=[
+    {icon:'🏋️',label:'Primeira sessão',done:total>=1,tag:'10pts'},
+    {icon:'📅',label:'10 sessões',done:total>=10,tag:'25pts'},
+    {icon:'💪',label:'30 sessões',done:total>=30,tag:'50pts'},
+    {icon:'🔥',label:'50 sessões',done:total>=50,tag:'75pts'},
+    {icon:'⭐',label:'100 sessões',done:total>=100,tag:'100pts'},
+    {icon:'🔥',label:'5 dias seguidos',done:streak>=5,tag:'30pts'},
+    {icon:'🔥',label:'10 dias seguidos',done:streak>=10,tag:'60pts'},
+    {icon:'⚔️',label:'RX pela primeira vez',done:scaleCounts.RX>0,tag:'20pts'},
+  ];
 
-  // Stats
-  const total = sorted.length;
-  const nowY = new Date().getFullYear();
-  const nowM = new Date().getMonth() + 1;
-  const thisMonth = sorted.filter(r => {
-    const [y, m] = r.date.split('-').map(Number);
-    return y === nowY && m === nowM;
-  }).length;
-  const weekDates = new Set(isoWeekDates());
-  const thisWeek = sorted.filter(r => weekDates.has(r.date)).length;
-  const earliest = sorted.length ? sorted[sorted.length - 1].date : null;
-
-  // Scale totals across all blocks
-  const scaleCounts = { RX: 0, Inter: 0, SC: 0, Adaptado: 0 };
-  sorted.forEach(r => {
-    (r.blocks || []).forEach(b => {
-      if (b.scale && scaleCounts[b.scale] !== undefined) scaleCounts[b.scale]++;
-    });
-  });
-  const scaleTotal = Object.values(scaleCounts).reduce((a, b) => a + b, 0);
-
-  // Week strip
-  const weekISOs = isoWeekDates();
-  const datesWithResult = new Set(sorted.map(r => r.date));
-
-  // Session name lookup
-  function sessName(r) {
-    const daySessions = allSessions[r.date] || [];
-    const s = daySessions.find(s => s.id === r.sessionId);
-    return s?.sessionName || s?.name || 'Treino';
+  const recent=sorted.slice(0,8);
+  function sessName(r){
+    const daySessions=allSessions[r.date]||[];
+    const s=daySessions.find(s=>s.id===r.sessionId);
+    return s?.sessionName||s?.name||'Treino';
   }
 
-  // Recent results (last 15)
-  const recent = sorted.slice(0, 15);
+  document.getElementById('root').innerHTML=`
+    <header class="hdr" style="position:relative">
+      <a class="hdr-back" href="index.html">←</a>
+      <div class="hdr-rule"><div class="hdr-line"></div><div class="hdr-diamond"></div><div class="hdr-line r"></div></div>
+      <div class="brand">CONE</div><div class="gym">Meu Perfil</div>
+    </header>
 
-  root.innerHTML = `
-    <!-- Hero -->
     <div class="hero">
       <div class="ath-avatar" style="background:${esc(color)}">${esc(initials(athlete.name))}</div>
       <div>
         <div class="hero-name">${esc(athlete.name)}</div>
-        <div class="hero-sub">${total} sessão${total !== 1 ? 'ões' : ''} registrada${total !== 1 ? 's' : ''}</div>
-        ${earliest ? `<div class="hero-since">desde ${fmtDateLong(earliest)}</div>` : ''}
+        <div class="hero-sub">${total} sessõe${total!==1?'s':''} registrada${total!==1?'s':''}</div>
+        ${earliest?`<div class="hero-since">desde ${fmtDateLong(earliest)}</div>`:''}
       </div>
+      ${streak>0?`<div class="streak-badge">
+        <div class="streak-flame">🔥</div>
+        <div class="streak-num">${streak}</div>
+        <div class="streak-lbl">dias</div>
+      </div>`:''}
     </div>
 
-    <!-- Stats -->
     <div class="stats-row">
-      <div class="stat-cell">
-        <div class="stat-num">${total}</div>
-        <div class="stat-label">Total</div>
+      <div class="stat-cell"><div class="stat-num">${total}</div><div class="stat-lbl">Total</div></div>
+      <div class="stat-cell"><div class="stat-num">${thisMonth}</div><div class="stat-lbl">Este mês</div></div>
+      <div class="stat-cell"><div class="stat-num">${thisWeek}</div><div class="stat-lbl">Esta semana</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="setTab(0)"><span class="tab-rune">◈</span>Semana</button>
+      <button class="tab" onclick="setTab(1)"><span class="tab-rune">◉</span>Escalas</button>
+      <button class="tab" onclick="setTab(2)"><span class="tab-rune">◇</span>Missões</button>
+      <button class="tab" onclick="setTab(3)"><span class="tab-rune">◎</span>Histórico</button>
+    </div>
+
+    <!-- Panel 0: Semana -->
+    <div class="panel active">
+      <div class="sec-title">Esta semana</div>
+      <div class="week-wrap" style="padding-bottom:10px">
+        <div class="week-strip">${weekISOs.map((iso,i)=>{
+          const done=datesWithResult.has(iso);const isToday=iso===today;const future=iso>today;
+          let cls='week-dot';
+          if(done)cls+=' done';else if(isToday)cls+=' today-empty';else if(future)cls+=' future';
+          return`<div class="week-col"><div class="${cls}">${done?'✓':isToday?'·':''}</div><div class="week-lbl">${WEEK_LABELS[i]}</div></div>`;
+        }).join('')}</div>
       </div>
-      <div class="stat-cell">
-        <div class="stat-num">${thisMonth}</div>
-        <div class="stat-label">Este mês</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-num">${thisWeek}</div>
-        <div class="stat-label">Esta semana</div>
+      <div class="sec-title">Últimas 4 semanas</div>
+      <div class="heatmap">
+        <div class="hm-hdrs">${CAL_HDRS.map(h=>`<div class="hm-hdr">${h}</div>`).join('')}</div>
+        <div class="hm-grid">${calDays.map(iso=>`<div class="hm-cell${datesWithResult.has(iso)?' has':''}${iso===today?' today':''}${iso>today?' future':''}">${datesWithResult.has(iso)?'✓':iso===today?'·':''}</div>`).join('')}</div>
       </div>
     </div>
 
-    <!-- Week strip -->
-    <div class="section">
-      <div class="section-title">Esta semana</div>
-      <div class="week-strip">
-        ${weekISOs.map((iso, i) => {
-          const done = datesWithResult.has(iso);
-          const isToday = iso === today;
-          const isFuture = iso > today;
-          let cls = 'week-dot';
-          if (done) cls += ' done';
-          else if (isToday) cls += ' today-empty';
-          else if (isFuture) cls += ' future';
-          const check = done ? '✓' : (isToday ? '·' : '');
-          return `
-            <div class="week-col">
-              <div class="${cls}">${check}</div>
-              <div class="week-lbl">${WEEK_LABELS[i]}</div>
-            </div>`;
-        }).join('')}
-      </div>
+    <!-- Panel 1: Escalas -->
+    <div class="panel">
+      ${scaleTotal>0?`
+      <div class="sec-title">Distribuição</div>
+      <div class="scale-wrap">
+        <div class="scale-bar-bg">${SCALE_ORDER.filter(s=>scaleCounts[s]>0).map(s=>`<div class="scale-seg" style="flex:${scaleCounts[s]};background:${SCALE_COLOR[s]}"></div>`).join('')}</div>
+        <div class="scale-rows">${SCALE_ORDER.filter(s=>scaleCounts[s]>0).map(s=>{const pct=Math.round(scaleCounts[s]/scaleTotal*100);return`<div class="sc-row"><div class="sc-lbl">${s}</div><div class="sc-track"><div class="sc-fill" style="width:${pct}%;background:${SCALE_COLOR[s]}"></div></div><div class="sc-pct">${pct}%</div></div>`;}).join('')}</div>
+      </div>`:''}
+      ${avgEnergy||avgRpe?`<div class="sec-title">Performance</div>
+      <div class="stat-pair">
+        ${avgEnergy?`<div class="stat-half"><div class="sh-val">${avgEnergy}/5</div><div class="sh-lbl">Energia média</div></div>`:''}
+        ${avgRpe?`<div class="stat-half"><div class="sh-val">${avgRpe}/10</div><div class="sh-lbl">RPE médio</div></div>`:''}
+      </div>`:''}
+      ${rxRate!=null?`<div class="sec-title">% RX</div>
+      <div class="stat-pair"><div class="stat-half" style="flex:none;min-width:120px"><div class="sh-val">${rxRate}%</div><div class="sh-lbl">das escalas</div></div></div>`:''}
+      ${!scaleTotal&&!avgEnergy&&!avgRpe?`<div class="center-msg" style="padding:40px 0;font-size:12px">Nenhum dado ainda.</div>`:''}
     </div>
 
-    <!-- Scale bar -->
-    ${scaleTotal > 0 ? `
-    <div class="section">
-      <div class="section-title">Escalas usadas</div>
-      <div class="scale-bar-wrap">
-        ${SCALE_ORDER.filter(s => scaleCounts[s] > 0).map(s => {
-          const pct = ((scaleCounts[s] / scaleTotal) * 100).toFixed(1);
-          return `<div class="scale-seg ${SCALE_COLOR[s]}" style="flex:${scaleCounts[s]}"></div>`;
-        }).join('')}
-      </div>
-      <div class="scale-legend">
-        ${SCALE_ORDER.filter(s => scaleCounts[s] > 0).map(s => {
-          const pct = Math.round((scaleCounts[s] / scaleTotal) * 100);
-          const colorMap = { RX:'#4ac8c0', Inter:'#4a90d8', SC:'#d8904a', Adaptado:'#9070d8' };
-          return `<span class="scale-lbl"><span class="sl-dot" style="background:${colorMap[s]}"></span>${s} ${pct}%</span>`;
-        }).join('')}
-      </div>
-    </div>` : ''}
-
-    <!-- Recent results -->
-    <div class="section" style="border-bottom:none">
-      <div class="section-title">Histórico recente</div>
-      ${recent.length === 0
-        ? `<div class="center-msg" style="padding:30px 0"><span class="icon">📋</span>Nenhum resultado registrado ainda.</div>`
-        : recent.map(r => {
-            const wodBlocks = (r.blocks || []).filter(b => WOD_TYPES.has(b.blockType));
-            const absent = r.presence && r.presence !== 'Presente';
-            const energy = r.energyLevel;
-            const perf = wodBlocks.map(b => {
-              const p = fmtPerf(b);
-              const scCls = SCALE_CLASS[b.scale] || '';
-              const hasLabel = b.blockLabel && b.blockLabel !== b.blockType;
-              return `
-                <div class="rc-block">
-                  <span class="rc-btype">${esc(b.blockType||'')}</span>
-                  ${hasLabel ? `<span class="rc-bdot">·</span><span class="rc-blabel">${esc(b.blockLabel)}</span>` : ''}
-                  ${b.scale ? `<span class="scale-chip ${scCls}">${esc(b.scale)}</span>` : ''}
-                  ${p ? `<span class="rc-perf">${esc(p)}</span>` : ''}
-                  ${b.rpe ? `<span class="rc-rpe">RPE ${b.rpe}</span>` : ''}
-                </div>`;
-            }).join('');
-            return `
-              <div class="result-card">
-                <div class="rc-head">
-                  <div class="rc-date">${fmtDateShort(r.date)}</div>
-                  <div class="rc-sess">${esc(sessName(r))}</div>
-                </div>
-                ${(absent || energy) ? `
-                  <div class="rc-meta">
-                    ${absent ? `<span class="absent-badge">${esc(r.presence)}</span>` : ''}
-                    ${energy ? `<span class="energy-badge">${ENERGY_LABEL[energy] || ''} Energia ${energy}/5</span>` : ''}
-                  </div>` : ''}
-                ${perf ? `<div class="rc-blocks">${perf}</div>` : (!absent ? `<div class="no-blocks">Sem blocos WOD registrados</div>` : '')}
-                ${r.coachNote ? `<div class="rc-note">${esc(r.coachNote)}</div>` : ''}
-              </div>`;
-          }).join('')
-      }
+    <!-- Panel 2: Missões -->
+    <div class="panel">
+      <div class="sec-title">Conquistas</div>
+      <div class="milestone-list">${milestones.map(m=>`<div class="ms${m.done?' done':''}">
+        <div class="ms-icon">${m.icon}</div>
+        <div class="ms-name">${m.label}</div>
+        <div class="ms-tag">${m.done?'✓ ':''}${m.tag}</div>
+      </div>`).join('')}</div>
     </div>
-  `;
+
+    <!-- Panel 3: Histórico -->
+    <div class="panel">
+      <div class="sec-title">Recente</div>
+      <div class="recent-wrap">${recent.length?recent.map(r=>{
+        const wodBlocks=(r.blocks||[]).filter(b=>WOD_TYPES.has(b.blockType));
+        return`<div class="rc">
+          <div class="rc-top">
+            <div class="rc-date">${fmtDateShort(r.date)}</div>
+            <div class="rc-sess">${esc(sessName(r))}</div>
+          </div>
+          ${wodBlocks.length?`<div class="rc-blocks">${wodBlocks.slice(0,2).map(b=>`<div class="rc-blk">
+            <div class="rc-type">${esc(b.blockType||'')}</div>
+            ${b.blockLabel&&b.blockLabel!==b.blockType?`<span style="font-size:10px;color:var(--sub)">· ${esc(b.blockLabel)}</span>`:''}
+            ${b.scale?`<div class="rc-scale" style="color:${SCALE_COLOR[b.scale]||'var(--sub)'};border-color:${SCALE_BORDER[b.scale]||'var(--divider)'}">${esc(b.scale)}</div>`:''}
+          </div>`).join('')}</div>`:''}
+        </div>`;
+      }).join(''):`<div class="center-msg" style="padding:30px 0;font-size:12px">Nenhum resultado ainda.</div>`}</div>
+    </div>`;
 }
 
-// ── Main ─────────────────────────────────────────────────────────────────────
-async function main() {
-  const params = new URLSearchParams(location.search);
-  const athleteId = params.get('id');
-
-  const [athRes, resRes, sessRes] = await Promise.all([
+async function main(){
+  const params=new URLSearchParams(location.search);
+  const athleteId=params.get('id');
+  const [athRes,resRes,sessRes]=await Promise.all([
     _sb.from('athletes').select('value').eq('id',1).single(),
     _sb.from('results').select('value').eq('id',1).single(),
-    athleteId ? _sb.from('sessions').select('value').eq('id',1).single() : Promise.resolve({ data: null }),
+    athleteId?_sb.from('sessions').select('value').eq('id',1).single():Promise.resolve({data:null}),
   ]);
-
-  const athletes = athRes.data?.value || [];
-  const allResults = resRes.data?.value || [];
-  const allSessions = sessRes.data?.value || {};
-
-  if (!athleteId) {
-    renderPicker(athletes);
-    return;
-  }
-
-  const athlete = athletes.find(a => a.id === athleteId);
-  if (!athlete) {
-    document.getElementById('root').innerHTML = `
-      <div class="center-msg">
-        <span class="icon">🔍</span>
-        Atleta não encontrado.<br>
-        <a href="me.html" style="color:var(--accent);font-size:13px">Buscar pelo nome</a>
-      </div>`;
-    return;
-  }
-
-  document.title = `${athlete.name} · Cone`;
-
-  const myResults = allResults.filter(r => r.athleteId === athleteId);
-  renderProfile(athlete, myResults, allSessions);
+  const athletes=athRes.data?.value||[];
+  const allResults=resRes.data?.value||[];
+  const allSessions=sessRes.data?.value||{};
+  if(!athleteId){renderPicker(athletes);return;}
+  const athlete=athletes.find(a=>a.id===athleteId);
+  if(!athlete){document.getElementById('root').innerHTML=`<div class="center-msg">Atleta não encontrado.<br><a href="me.html" style="color:var(--teal)">← voltar</a></div>`;return;}
+  document.title=`${athlete.name} · Cone`;
+  renderProfile(athlete,allResults.filter(r=>r.athleteId===athleteId),allSessions);
 }
-
-main().catch(err => {
-  document.getElementById('root').innerHTML = `
-    <div class="center-msg">
-      <span class="icon">⚠️</span>
-      Erro ao carregar.<br>
-      <span style="font-size:12px;color:var(--muted)">${esc(err.message)}</span>
-    </div>`;
-});
+main().catch(e=>{document.getElementById('root').innerHTML=`<div class="center-msg">⚠️ Erro ao carregar.<br><small>${esc(e.message)}</small></div>`;});
 </script>
-
 <nav class="p-nav">
   <a class="p-nav-btn" href="index.html"><span class="p-nav-ic">🏠</span><span>Início</span></a>
   <div class="p-nav-sep"></div>
@@ -458,6 +392,5 @@ main().catch(err => {
   <div class="p-nav-sep"></div>
   <a class="p-nav-btn" href="schedule.html"><span class="p-nav-ic">📅</span><span>Agenda</span></a>
 </nav>
-
 </body>
 </html>
