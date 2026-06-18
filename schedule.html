@@ -153,6 +153,25 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-
 .rm-confirm-btn{font-family:var(--sc-font);font-size:12px;font-weight:900;padding:5px 10px;border:1px solid var(--teal);background:transparent;color:var(--teal);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .rm-confirm-btn:hover,.rm-confirm-btn:active{background:var(--teal);color:#000}
 .rm-calc-badge{display:inline-block;font-size:10px;font-weight:700;color:var(--gold);background:rgba(216,168,64,.1);border:1px solid rgba(216,168,64,.28);padding:1px 6px;margin-top:3px}
+
+/* ── Demo button + panel ── */
+.demo-btn{font-family:var(--sc-font);font-size:9px;font-weight:900;padding:2px 7px;border:1px solid #3a3a3a;background:transparent;color:#666;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;-webkit-tap-highlight-color:transparent;transition:all .12s;flex-shrink:0;line-height:1.4}
+.demo-btn:hover{border-color:var(--teal);color:var(--teal)}
+.demo-btn.no-demo{opacity:.3;cursor:not-allowed;pointer-events:none}
+#demo-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:300}
+#demo-panel{display:none;position:fixed;left:0;right:0;bottom:0;background:#111;border-top:1px solid #2a2a2a;z-index:301;max-height:82vh;overflow-y:auto;transform:translateY(100%);transition:transform .25s ease}
+#demo-panel.open{transform:translateY(0)}
+.demo-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid #1e1e1e;position:sticky;top:0;background:#111;z-index:1}
+.demo-title{font-size:13px;font-weight:900;color:var(--cream);letter-spacing:.05em;text-transform:uppercase;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.demo-close{background:transparent;border:none;color:#666;font-size:20px;cursor:pointer;padding:4px 4px 4px 12px;line-height:1;flex-shrink:0}
+.demo-close:hover{color:#fff}
+.demo-body{padding:14px 16px 28px;display:flex;flex-direction:column;gap:22px}
+.demo-section-name{font-size:10px;font-weight:900;color:var(--teal);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px}
+.demo-video-wrap{position:relative;width:100%;padding-top:56.25%;background:#0a0a0a;border:1px solid #1e1e1e;margin-bottom:10px}
+.demo-video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.demo-video-err{font-size:11px;color:#555;padding:14px;text-align:center;font-style:italic}
+.demo-desc{font-size:13px;color:var(--sub);line-height:1.75;white-space:pre-wrap}
+.demo-no-content{font-size:12px;color:#3a3a3a;text-align:center;padding:10px;font-style:italic}
 </style>
 </head>
 <body>
@@ -164,6 +183,7 @@ let expandedDays=new Set(); // "dateKey|sessIdx"
 let checkedExercises=new Set(); // "blockId|exId"
 let rmValues={}; // exKey → {rm:number, unit:'kg'|'lbs'}
 let rmEditKey=null; // currently-open RM input key
+let demoMap={}; // exerciseName.toLowerCase() → {name, videoUrl?, description?}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const DAY_PT=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
@@ -309,6 +329,71 @@ function toggleCheck(blockId,exId){
   if(checkedExercises.has(key)) checkedExercises.delete(key);
   else checkedExercises.add(key);
   render();
+}
+
+// ── Demo ─────────────────────────────────────────────────────────────────────
+function buildDemoMap(registry){
+  demoMap={};
+  if(!registry||typeof registry!=='object')return;
+  Object.values(registry).forEach(arr=>{
+    (Array.isArray(arr)?arr:[]).forEach(ex=>{
+      if(typeof ex==='object'&&ex.name){
+        const k=ex.name.toLowerCase();
+        if(!demoMap[k])demoMap[k]=ex;
+      }
+    });
+  });
+}
+
+function extractYouTubeId(url){
+  if(!url)return null;
+  const m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  return m?m[1]:null;
+}
+
+function safeAttr(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,'\\x27');}
+
+function openDemoByName(name){openDemo([{name}]);}
+function openDemoByNames(names){openDemo(names.map(n=>({name:n})));}
+
+function openDemo(movements){
+  const multi=movements.length>1;
+  const title=multi?'Demo':movements[0].name;
+  const sections=movements.map(mv=>{
+    const data=demoMap[(mv.name||'').toLowerCase()]||{};
+    const videoId=extractYouTubeId(data.videoUrl||'');
+    const desc=data.description||'';
+    const hasVideo=!!videoId;
+    const hasDesc=!!desc;
+    const hasAny=hasVideo||hasDesc;
+    return `<div>
+      ${multi?`<div class="demo-section-name">${mv.name}</div>`:''}
+      ${hasVideo?`<div class="demo-video-wrap"><iframe src="https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1" allowfullscreen loading="lazy"></iframe></div>`:''}
+      ${hasDesc?`<div class="demo-desc">${desc}</div>`:''}
+      ${!hasAny?`<div class="demo-no-content">Sem conteúdo de demo disponível.</div>`:''}
+    </div>`;
+  }).join('');
+  document.getElementById('demo-panel').innerHTML=`
+    <div class="demo-hdr">
+      <span class="demo-title">${title}</span>
+      <button class="demo-close" onclick="closeDemo()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="demo-body">${sections}</div>`;
+  document.getElementById('demo-overlay').style.display='block';
+  const panel=document.getElementById('demo-panel');
+  panel.style.display='block';
+  requestAnimationFrame(()=>panel.classList.add('open'));
+}
+
+function closeDemo(){
+  const panel=document.getElementById('demo-panel');
+  panel.classList.remove('open');
+  panel.querySelectorAll('iframe').forEach(f=>{f.src='';});
+  setTimeout(()=>{
+    panel.style.display='none';
+    document.getElementById('demo-overlay').style.display='none';
+    panel.innerHTML='';
+  },250);
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
@@ -495,10 +580,15 @@ function renderDetail(sess,dateKey){
             const pctNums=loads.map(l=>parseFloat(l)).filter(n=>!isNaN(n));
             if(blRmData?.rm&&pctNums.length)calcStr=pctNums.map(p=>Math.ceil(blRmData.rm*p/100)).join('/')+' '+(blRmData.unit||'kg');
           }else if(ins){loadStr=ins;}
+          const hasDemoCx=mvs.some(m=>!!(demoMap[(m.name||'').toLowerCase()]?.videoUrl||demoMap[(m.name||'').toLowerCase()]?.description));
+          const cxNames=mvs.map(m=>safeAttr(m.name));
           return `<div class="detail-ex">
             <div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>
             <div class="detail-ex-body">
-              <div class="detail-ex-name${done?' done':''}">${[volStr,displayName.toUpperCase()].filter(Boolean).join(' ')}</div>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+                <div class="detail-ex-name${done?' done':''}">${[volStr,displayName.toUpperCase()].filter(Boolean).join(' ')}</div>
+                <button class="demo-btn${hasDemoCx?'':' no-demo'}" onclick="event.stopPropagation();openDemoByNames(['${cxNames.join("','")}'])">Demo</button>
+              </div>
               ${mvs.map(m=>`<div class="detail-ex-movement">· ${[m.reps?m.reps+'×':'',m.name.toUpperCase()].filter(Boolean).join(' ')}</div>`).join('')}
               ${loadStr?`<div class="detail-ex-vol">${loadStr}</div>`:''}
               ${calcStr?`<div class="rm-calc-badge">${calcStr}</div>`:''}
@@ -524,10 +614,15 @@ function renderDetail(sess,dateKey){
               pctNums.map(p=>Math.ceil(blRmData.rm*p/100)).join('/')+' '+(blRmData.unit||'kg'):'';
             const lineKey=`${bl.id}|${ex.id}-${gi}`;
             const lineDone=checkedExercises.has(lineKey);
+            const exDataPg=gi===0?demoMap[(ex.name||'').toLowerCase()]||{}:{};
+            const hasDemoPg=gi===0&&!!(exDataPg.videoUrl||exDataPg.description);
             return `<div class="detail-ex">
               <div class="detail-ex-check${lineDone?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}-${gi}')"></div>
               <div class="detail-ex-body">
-                <div class="detail-ex-name${lineDone?' done':''}">${[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+                  <div class="detail-ex-name${lineDone?' done':''}">${[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
+                  ${gi===0?`<button class="demo-btn${hasDemoPg?'':' no-demo'}" onclick="event.stopPropagation();openDemoByName('${safeAttr(ex.name)}')">Demo</button>`:''}
+                </div>
                 ${pctStr?`<div class="detail-ex-vol">${pctStr}</div>`:''}
                 ${calcStr?`<div class="rm-calc-badge">${calcStr}</div>`:''}
               </div>
@@ -535,10 +630,15 @@ function renderDetail(sess,dateKey){
           }).join('');
         }
 
+        const exDataR=demoMap[(ex.name||'').toLowerCase()]||{};
+        const hasDemoR=!!(exDataR.videoUrl||exDataR.description);
         return `<div class="detail-ex">
           <div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>
           <div class="detail-ex-body">
-            <div class="detail-ex-name${done?' done':''}">${[vol,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+              <div class="detail-ex-name${done?' done':''}">${[vol,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
+              <button class="demo-btn${hasDemoR?'':' no-demo'}" onclick="event.stopPropagation();openDemoByName('${safeAttr(ex.name)}')">Demo</button>
+            </div>
             ${ins?`<div class="detail-ex-vol">${ins}</div>`:''}
             ${ex.note?`<div class="detail-ex-note">${ex.note}</div>`:''}
           </div>
@@ -694,10 +794,10 @@ function setAthlete(val){selectedAthlete=val;expandedDays.clear();rmEditKey=null
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const _sb=supabase.createClient('https://crsalcpvsedmiabkeibp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw');
 async function fetchState(){
-  const tbls=['sessions','athletes','results','events','locations','coach_profile','settings','goals_data','lb_colors'];
+  const tbls=['sessions','athletes','results','events','locations','coach_profile','settings','goals_data','lb_colors','exercise_registry'];
   const rows=await Promise.all(tbls.map(t=>_sb.from(t).select('value').eq('id',1).maybeSingle()));
-  const[s,a,r,ev,loc,cp,st,gd,lb]=rows.map(x=>x.data?.value??null);
-  return{sessions:s??{},athletes:a??[],results:r??[],events:ev??{},locations:loc??[],coachProfile:cp??{},settings:st??{},athleteGoalsData:gd??{athleteGoals:{},prs:{}},lbColors:lb??{}};
+  const[s,a,r,ev,loc,cp,st,gd,lb,er]=rows.map(x=>x.data?.value??null);
+  return{sessions:s??{},athletes:a??[],results:r??[],events:ev??{},locations:loc??[],coachProfile:cp??{},settings:st??{},athleteGoalsData:gd??{athleteGoals:{},prs:{}},lbColors:lb??{},exerciseRegistry:er??{}};
 }
 
 // ── Load data ─────────────────────────────────────────────────────────────────
@@ -714,6 +814,7 @@ async function init(attempt=0){
       if(cfg.scheduleTitle||cfg.appTitle) document.title=cfg.scheduleTitle||cfg.appTitle;
     }
     state=stateData;
+    buildDemoMap(state.exerciseRegistry);
     render();
   }catch(e){
     if(attempt<2){setTimeout(()=>init(attempt+1),2000*(attempt+1));return;}
@@ -732,6 +833,9 @@ init();
 
 <div id="log-pane-overlay" onclick="closeLogPane()"></div>
 <div id="log-pane"><div id="log-pane-content"></div></div>
+
+<div id="demo-overlay" onclick="closeDemo()"></div>
+<div id="demo-panel"></div>
 
 <nav class="p-nav">
   <a class="p-nav-btn" href="index.html"><span class="p-nav-ic">🏠</span><span>Início</span></a>
