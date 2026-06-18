@@ -11,6 +11,29 @@ const BLOCK_ORDER = [
 
 const getExName = ex => typeof ex === 'string' ? ex : (ex?.name || '');
 
+function DemoFields({ editingEx, setEditingEx }) {
+  return (
+    <div style={{ paddingLeft: 21, marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
+      <div style={{ fontSize: 9, fontWeight: 700, color: '#4a4a4a', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 1 }}>Demo</div>
+      <input
+        className="ex-input"
+        placeholder="URL do vídeo (YouTube)"
+        value={editingEx?.videoUrl || ''}
+        style={{ fontSize: 11 }}
+        onChange={e => setEditingEx(p => ({ ...p, videoUrl: e.target.value }))}
+      />
+      <textarea
+        className="ex-input"
+        placeholder="Descrição do movimento..."
+        value={editingEx?.description || ''}
+        rows={2}
+        style={{ fontSize: 11, resize: 'vertical', fontFamily: 'inherit' }}
+        onChange={e => setEditingEx(p => ({ ...p, description: e.target.value }))}
+      />
+    </div>
+  );
+}
+
 function initRegistry() {
   const migrateEx = ex => typeof ex === 'string' ? { name: ex } : ex;
   const existing = loadRegistry();
@@ -203,28 +226,6 @@ export default function ExerciciosTab() {
     </div>
   );
 
-  // ── Demo fields (shown in edit mode) ─────────────────────────────────────
-  const DemoFields = () => (
-    <div style={{ paddingLeft: 21, marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
-      <div style={{ fontSize: 9, fontWeight: 700, color: '#4a4a4a', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 1 }}>Demo</div>
-      <input
-        className="ex-input"
-        placeholder="URL do vídeo (YouTube)"
-        value={editingEx?.videoUrl || ''}
-        style={{ fontSize: 11 }}
-        onChange={e => setEditingEx(p => ({ ...p, videoUrl: e.target.value }))}
-      />
-      <textarea
-        className="ex-input"
-        placeholder="Descrição do movimento..."
-        value={editingEx?.description || ''}
-        rows={2}
-        style={{ fontSize: 11, resize: 'vertical', fontFamily: 'inherit' }}
-        onChange={e => setEditingEx(p => ({ ...p, description: e.target.value }))}
-      />
-    </div>
-  );
-
   // ── Exercise row (block view) ─────────────────────────────────────────────
   const renderExRow = (blockName, ex, ei) => {
     const name = getExName(ex);
@@ -268,7 +269,7 @@ export default function ExerciciosTab() {
         </div>
         {isEditing && (
           <>
-            <DemoFields />
+            <DemoFields editingEx={editingEx} setEditingEx={setEditingEx} />
             <BlockPills selectedBlocks={editingEx.selectedBlocks} />
             {editingEx.error && <div style={{ fontSize: 10, color: '#e05848', marginTop: 3, paddingLeft: 21 }}>{editingEx.error}</div>}
           </>
@@ -320,7 +321,7 @@ export default function ExerciciosTab() {
         </div>
         {isEditing && (
           <>
-            <DemoFields />
+            <DemoFields editingEx={editingEx} setEditingEx={setEditingEx} />
             <BlockPills selectedBlocks={editingEx.selectedBlocks} />
             {editingEx.error && <div style={{ fontSize: 10, color: '#e05848', marginTop: 3 }}>{editingEx.error}</div>}
           </>
