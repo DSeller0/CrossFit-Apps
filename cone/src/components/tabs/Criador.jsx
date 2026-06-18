@@ -202,11 +202,13 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
 
   const suggestions = useMemo(() => {
     const reg = loadRegistry() || {};
-    const primary = reg[blockLabel] || [];
+    const getName = e => typeof e === 'string' ? e : (e?.name || '');
+    const primary = (reg[blockLabel] || []).map(getName);
     if (!query.trim()) return primary;
     const q = query.toLowerCase();
     const primaryMatches = primary.filter(e => e.toLowerCase().includes(q));
-    const allOthers = [...new Set(Object.values(reg).flat())]
+    const allNames = [...new Set(Object.values(reg).flat().map(getName))];
+    const allOthers = allNames
       .filter(e => !primary.includes(e) && e.toLowerCase().includes(q))
       .sort((a, b) => a.localeCompare(b, 'pt'));
     return [...primaryMatches, ...allOthers];

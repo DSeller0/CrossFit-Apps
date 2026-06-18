@@ -3,23 +3,27 @@ import { loadRegistry, saveRegistry, loadSettings } from '../../utils/storage';
 import { APP_CONFIG, ECOL } from '../../utils/config';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
-// Canonical block order matches BlockTypePicker grid (row-major: 3 rows × 5 cols)
 const BLOCK_ORDER = [
   'HIIT',       'MetCon',    'EMOM',      'For Time',  'AMRAP',
   'Estações',   'Força',     'LPO',       'Core',      'Acessórios',
   'Aquecimento','Skill',     'Cardio',    'Mobilidade','Descanso',
 ];
 
+const getExName = ex => typeof ex === 'string' ? ex : (ex?.name || '');
+
 function initRegistry() {
+  const migrateEx = ex => typeof ex === 'string' ? { name: ex } : ex;
   const existing = loadRegistry();
   if (existing && typeof existing === 'object') {
-    let changed = false;
     const reg = {};
+    let needsSave = false;
     BLOCK_ORDER.forEach(n => {
-      reg[n] = Array.isArray(existing[n]) ? existing[n] : [];
-      if (!existing[n]) changed = true;
+      if (!existing[n]) { reg[n] = []; needsSave = true; return; }
+      const raw = Array.isArray(existing[n]) ? existing[n] : [];
+      if (raw.some(e => typeof e === 'string')) needsSave = true;
+      reg[n] = raw.map(migrateEx);
     });
-    if (changed) saveRegistry(reg);
+    if (needsSave) saveRegistry(reg);
     return reg;
   }
   const reg = {};
@@ -31,11 +35,11 @@ function initRegistry() {
 export default function ExerciciosTab() {
   const [registry, setRegistryState]     = useState(() => initRegistry());
   const [selBlock, setSelBlock]           = useState(null);
-  const [expandedBlock, setExpandedBlock] = useState(null); // mobile accordion
+  const [expandedBlock, setExpandedBlock] = useState(null);
   const [newExName, setNewExName]         = useState('');
   const [addExError, setAddExError]       = useState('');
   const [editingEx, setEditingEx]         = useState(null);
-  // editingEx: { origName, newName, origBlocks[], selectedBlocks[], fromBlock?, idx?, fromTodos?, error? }
+  // editingEx: { origName, newName, videoUrl, description, origBlocks[], selectedBlocks[], fromBlock?, idx?, fromTodos?, error? }
   const [dragExIdx, setDragExIdx]         = useState(null);
   const [dragOverExIdx, setDragOverExIdx] = useState(null);
   const [showTodos, setShowTodos]         = useState(false);
@@ -44,50 +48,84 @@ export default function ExerciciosTab() {
   const blockColor = name => ECOL[name]?.text || '#888';
   const totalExs   = useMemo(() => Object.values(registry).reduce((a, v) => a + v.length, 0), [registry]);
 
+  // Lookup map for video/description by exercise name
+  const exDemoData = useMemo(() => {
+    const map = {};
+    BLOCK_ORDER.forEach(block => {
+      (registry[block] || []).forEach(ex => {
+        if (typeof ex === 'object' && ex.name && !map[ex.name]) map[ex.name] = ex;
+      });
+    });
+    return map;
+  }, [registry]);
+
   const persist = reg => {
     saveRegistry(reg);
     APP_CONFIG.blockNames = ['-', ...BLOCK_ORDER];
   };
 
-  // Returns all blocks an exercise belongs to
-  const blocksOf = name => BLOCK_ORDER.filter(b => (registry[b] || []).includes(name));
+  const blocksOf = name => BLOCK_ORDER.filter(b => (registry[b] || []).some(e => getExName(e) === name));
 
   // ── Exercise operations ───────────────────────────────────────────────────
   const addEx = targetBlock => {
     const block = targetBlock || selBlock;
     const name  = newExName.trim();
     if (!name || !block) return;
-    if ((registry[block] || []).includes(name)) {
+    if ((registry[block] || []).some(e => getExName(e) === name)) {
       setAddExError(`"${name}" já existe em ${block}`); return;
     }
     setAddExError('');
-    const reg = { ...registry, [block]: [...(registry[block] || []), name] };
+    const reg = { ...registry, [block]: [...(registry[block] || []), { name }] };
     setRegistryState(reg); persist(reg); setNewExName('');
   };
 
   const saveEditEx = () => {
     if (!editingEx) return;
-    const { origName, newName: raw, origBlocks, selectedBlocks } = editingEx;
+    const { origName, newName: raw, videoUrl, description, origBlocks, selectedBlocks } = editingEx;
     const name = raw.trim();
     if (!name) return;
     if (selectedBlocks.length === 0) {
       setEditingEx(p => ({ ...p, error: 'Selecione pelo menos um tipo de bloco' })); return;
     }
-    // Rename + membership sync atomically
+    const newEx = { name };
+    if (videoUrl?.trim()) newEx.videoUrl = videoUrl.trim();
+    if (description?.trim()) newEx.description = description.trim();
     const reg = { ...registry };
-    origBlocks.forEach(b => { reg[b] = (reg[b] || []).filter(e => e !== origName); });
-    selectedBlocks.forEach(b => { if (!(reg[b] || []).includes(name)) reg[b] = [...(reg[b] || []), name]; });
+    origBlocks.forEach(b => { reg[b] = (reg[b] || []).filter(e => getExName(e) !== origName); });
+    selectedBlocks.forEach(b => {
+      if (!(reg[b] || []).some(e => getExName(e) === name)) {
+        reg[b] = [...(reg[b] || []), newEx];
+      } else {
+        reg[b] = (reg[b] || []).map(e => getExName(e) === name ? newEx : e);
+      }
+    });
     setRegistryState(reg); persist(reg); setEditingEx(null);
   };
 
   const startEdit = (ex, fromBlock, idx) => {
-    const current = blocksOf(ex);
-    setEditingEx({ origName: ex, newName: ex, origBlocks: current, selectedBlocks: [...current], fromBlock, idx });
+    const name = getExName(ex);
+    const current = blocksOf(name);
+    setEditingEx({
+      origName: name, newName: name,
+      videoUrl: (typeof ex === 'object' ? ex?.videoUrl : '') || '',
+      description: (typeof ex === 'object' ? ex?.description : '') || '',
+      origBlocks: current, selectedBlocks: [...current], fromBlock, idx,
+    });
   };
 
-  const startEditFromTodos = exName => {
-    const current = blocksOf(exName);
-    setEditingEx({ origName: exName, newName: exName, origBlocks: current, selectedBlocks: [...current], fromTodos: true });
+  const startEditFromTodos = name => {
+    const current = blocksOf(name);
+    let exObj = null;
+    for (const b of current) {
+      exObj = (registry[b] || []).find(e => getExName(e) === name);
+      if (exObj) break;
+    }
+    setEditingEx({
+      origName: name, newName: name,
+      videoUrl: (typeof exObj === 'object' ? exObj?.videoUrl : '') || '',
+      description: (typeof exObj === 'object' ? exObj?.description : '') || '',
+      origBlocks: current, selectedBlocks: [...current], fromTodos: true,
+    });
   };
 
   const togglePill = block => {
@@ -103,11 +141,11 @@ export default function ExerciciosTab() {
     if (editingEx) setEditingEx(null);
   };
 
-  const deleteFromAll = exName => {
-    const inBlocks = blocksOf(exName);
-    if (!window.confirm(`Remover "${exName}" de ${inBlocks.length} tipo${inBlocks.length > 1 ? 's' : ''}?`)) return;
+  const deleteFromAll = name => {
+    const inBlocks = blocksOf(name);
+    if (!window.confirm(`Remover "${name}" de ${inBlocks.length} tipo${inBlocks.length > 1 ? 's' : ''}?`)) return;
     const reg = { ...registry };
-    inBlocks.forEach(b => { reg[b] = (reg[b] || []).filter(e => e !== exName); });
+    inBlocks.forEach(b => { reg[b] = (reg[b] || []).filter(e => getExName(e) !== name); });
     setRegistryState(reg); persist(reg);
     if (editingEx) setEditingEx(null);
   };
@@ -122,7 +160,7 @@ export default function ExerciciosTab() {
 
   const sortExsAZ = blockName => {
     if (!blockName) return;
-    const exs = [...registry[blockName]].sort((a, b) => a.localeCompare(b, 'pt'));
+    const exs = [...registry[blockName]].sort((a, b) => getExName(a).localeCompare(getExName(b), 'pt'));
     const reg = { ...registry, [blockName]: exs };
     setRegistryState(reg); persist(reg);
   };
@@ -132,8 +170,9 @@ export default function ExerciciosTab() {
     const map = {};
     BLOCK_ORDER.forEach(block => {
       (registry[block] || []).forEach(ex => {
-        if (!map[ex]) map[ex] = [];
-        map[ex].push(block);
+        const name = getExName(ex);
+        if (!map[name]) map[name] = [];
+        map[name].push(block);
       });
     });
     return Object.entries(map)
@@ -164,8 +203,32 @@ export default function ExerciciosTab() {
     </div>
   );
 
+  // ── Demo fields (shown in edit mode) ─────────────────────────────────────
+  const DemoFields = () => (
+    <div style={{ paddingLeft: 21, marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
+      <div style={{ fontSize: 9, fontWeight: 700, color: '#4a4a4a', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 1 }}>Demo</div>
+      <input
+        className="ex-input"
+        placeholder="URL do vídeo (YouTube)"
+        value={editingEx?.videoUrl || ''}
+        style={{ fontSize: 11 }}
+        onChange={e => setEditingEx(p => ({ ...p, videoUrl: e.target.value }))}
+      />
+      <textarea
+        className="ex-input"
+        placeholder="Descrição do movimento..."
+        value={editingEx?.description || ''}
+        rows={2}
+        style={{ fontSize: 11, resize: 'vertical', fontFamily: 'inherit' }}
+        onChange={e => setEditingEx(p => ({ ...p, description: e.target.value }))}
+      />
+    </div>
+  );
+
   // ── Exercise row (block view) ─────────────────────────────────────────────
   const renderExRow = (blockName, ex, ei) => {
+    const name = getExName(ex);
+    const hasVideo = typeof ex === 'object' && !!ex.videoUrl;
     const isEditing = !editingEx?.fromTodos && editingEx?.fromBlock === blockName && editingEx?.idx === ei;
     return (
       <div key={ei}
@@ -184,8 +247,11 @@ export default function ExerciciosTab() {
             ? <input autoFocus className="ex-input" value={editingEx.newName} style={{ flex: 1 }}
                 onChange={e => setEditingEx(p => ({ ...p, newName: e.target.value, error: undefined }))}
                 onKeyDown={e => { if (e.key === 'Enter') saveEditEx(); if (e.key === 'Escape') setEditingEx(null); }} />
-            : <span style={{ flex: 1, fontSize: 13, color: '#ddd' }}>{ex}</span>
+            : <span style={{ flex: 1, fontSize: 13, color: '#ddd' }}>{name}</span>
           }
+          {!isEditing && hasVideo && (
+            <i className="ti ti-video" style={{ color: '#4a6a5a', fontSize: 11, flexShrink: 0 }} title="Tem vídeo demo" />
+          )}
           {isEditing ? (
             <>
               <button type="button" className="b bsm" style={{ padding: '2px 6px', minHeight: 20, fontSize: 11 }} onClick={saveEditEx}><i className="ti ti-check" /></button>
@@ -202,6 +268,7 @@ export default function ExerciciosTab() {
         </div>
         {isEditing && (
           <>
+            <DemoFields />
             <BlockPills selectedBlocks={editingEx.selectedBlocks} />
             {editingEx.error && <div style={{ fontSize: 10, color: '#e05848', marginTop: 3, paddingLeft: 21 }}>{editingEx.error}</div>}
           </>
@@ -213,6 +280,8 @@ export default function ExerciciosTab() {
   // ── Todos exercise row ────────────────────────────────────────────────────
   const renderTodosRow = ({ name, tags }) => {
     const isEditing = editingEx?.fromTodos && editingEx?.origName === name;
+    const demo = exDemoData[name];
+    const hasVideo = !!(demo?.videoUrl);
     return (
       <div key={name} style={{ padding: '8px 10px', background: '#0d0d0d', borderRadius: 5, border: `1px solid ${isEditing ? '#2a2a2a' : '#1e1e1e'}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -223,7 +292,8 @@ export default function ExerciciosTab() {
             : <span style={{ flex: 1, fontSize: 13, color: '#ddd' }}>{name}</span>
           }
           {!isEditing && (
-            <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+              {hasVideo && <i className="ti ti-video" style={{ color: '#4a6a5a', fontSize: 11, flexShrink: 0 }} title="Tem vídeo demo" />}
               {tags.map(tag => {
                 const c = blockColor(tag);
                 return (
@@ -250,6 +320,7 @@ export default function ExerciciosTab() {
         </div>
         {isEditing && (
           <>
+            <DemoFields />
             <BlockPills selectedBlocks={editingEx.selectedBlocks} />
             {editingEx.error && <div style={{ fontSize: 10, color: '#e05848', marginTop: 3 }}>{editingEx.error}</div>}
           </>
