@@ -66,12 +66,13 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
     const reg = loadRegistry() || {};
     const getName = e => typeof e === 'string' ? e : (e?.name || '');
     const primary = (reg[blockLabel] || []).map(getName);
-    if (!query.trim()) return primary;
+    const allNames = [...new Set(Object.values(reg).flat().map(getName))];
+    const others = allNames.filter(e => !primary.includes(e));
+    if (!query.trim()) return [...primary, ...others.sort((a, b) => a.localeCompare(b, 'pt'))];
     const q = query.toLowerCase();
     const primaryMatches = primary.filter(e => e.toLowerCase().includes(q));
-    const allNames = [...new Set(Object.values(reg).flat().map(getName))];
-    const allOthers = allNames
-      .filter(e => !primary.includes(e) && e.toLowerCase().includes(q))
+    const allOthers = others
+      .filter(e => e.toLowerCase().includes(q))
       .sort((a, b) => a.localeCompare(b, 'pt'));
     return [...primaryMatches, ...allOthers];
   }, [blockLabel, query]);
