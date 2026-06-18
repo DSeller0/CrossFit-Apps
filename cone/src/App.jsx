@@ -323,6 +323,9 @@ export default function App() {
       )}
 
       <div className="topbar">
+        <a href="../index.html" className="tb-btn" title="Ir para o início" style={{ textDecoration: 'none' }}>
+          <i className="ti ti-home" aria-hidden="true" /> Início
+        </a>
         <span className="topbar-title">Criador de Treinos</span>
         <div className="topbar-right">
           <span className="saved-badge" style={{ color: 'var(--muted, #888)' }}>
