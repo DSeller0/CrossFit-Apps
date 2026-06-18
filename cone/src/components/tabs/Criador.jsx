@@ -370,7 +370,7 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
               <ExerciseCombobox
                 value={mv.name}
                 onChange={v => updMovement(mi, 'name', v)}
-                blockLabel={blockLabel || blockType}
+                blockLabel={blockType}
                 placeholder={`Movimento ${mi + 1}`}
               />
               <span className="ex-qty-sep" style={{ flexShrink: 0 }}>×</span>
@@ -447,7 +447,7 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
           <ExerciseCombobox
             value={ex.name}
             onChange={v => upd('name', v)}
-            blockLabel={blockLabel || blockType}
+            blockLabel={blockType}
             placeholder="Nome do exercício"
           />
         )}

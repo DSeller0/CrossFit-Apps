@@ -64,10 +64,16 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
 
   const suggestions = useMemo(() => {
     const reg = loadRegistry() || {};
-    const exs = reg[blockLabel] || [];
-    if (!query.trim()) return exs;
+    const getName = e => typeof e === 'string' ? e : (e?.name || '');
+    const primary = (reg[blockLabel] || []).map(getName);
+    if (!query.trim()) return primary;
     const q = query.toLowerCase();
-    return exs.filter(e => e.toLowerCase().includes(q));
+    const primaryMatches = primary.filter(e => e.toLowerCase().includes(q));
+    const allNames = [...new Set(Object.values(reg).flat().map(getName))];
+    const allOthers = allNames
+      .filter(e => !primary.includes(e) && e.toLowerCase().includes(q))
+      .sort((a, b) => a.localeCompare(b, 'pt'));
+    return [...primaryMatches, ...allOthers];
   }, [blockLabel, query]);
 
   useEffect(() => { setQuery(value || ''); }, [value]);
