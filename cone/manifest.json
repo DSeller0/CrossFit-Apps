@@ -2,13 +2,13 @@
   "name": "Cone Treinos",
   "short_name": "Cone",
   "description": "Criador e publicador de treinos CrossFit",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#1a1410",
   "theme_color": "#e87820",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
