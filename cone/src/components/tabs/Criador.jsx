@@ -107,7 +107,7 @@ function IntensityInput({ value, onChange, defaultReps, defaultSets }) {
         steps = Array.from({ length: numSets }, () => ({ reps: defaultReps || '', load: '', unit: '% do RM' }));
       }
       onChange({ mode: 'progression', steps });
-    } else onChange({ mode: m });
+    } else onChange({ ...v, mode: m });
   };
   const inlineSelStyle = { fontFamily: 'inherit', fontSize: '11px', border: '1px solid #2e2e2e', borderRadius: '4px', padding: '4px 6px', background: '#111', color: '#ccc', outline: 'none', WebkitAppearance: 'none', appearance: 'none', width: '66px' };
   const steps = value?.steps || [];
@@ -750,7 +750,10 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
     }
   };
 
-  const delEx = id => onUpdate({ ...block, exercises: block.exercises.filter(x => x.id !== id) });
+  const delEx = id => {
+    if (!window.confirm('Remover este exercício?')) return;
+    onUpdate({ ...block, exercises: block.exercises.filter(x => x.id !== id) });
+  };
 
   const changeType = newType => {
     onUpdate({ ...block, type: newType, label: customName || newType });
@@ -1074,6 +1077,14 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
 
   // Save / delete
   const saveS = () => {
+    const emptyBlocks = blocks.filter(bl =>
+      bl.type !== 'Estações' &&
+      !(bl.exercises || []).some(e => (e.name || '').trim() || e.isComplex)
+    );
+    if (emptyBlocks.length > 0) {
+      alert('Há blocos sem exercícios preenchidos. Adicione ao menos um exercício antes de salvar.');
+      return;
+    }
     const dateKey = form.date || todayISO();
     const savedId = editing?.id || form.id || uid();
     const session = { ...form, date: dateKey, blocks, id: savedId };

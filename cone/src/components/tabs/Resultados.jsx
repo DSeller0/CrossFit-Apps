@@ -130,7 +130,7 @@ function RosterView({ athletes, setAthletes }) {
     }
     setForm({ name: '', level: 'Iniciante', goal: 'Saúde geral', notes: '' });
   };
-  const del       = id => { const u = athletes.filter(a => a.id !== id); setAthletes(u); saveAthletes(u); };
+  const del       = id => { if (!window.confirm('Remover atleta?')) return; const u = athletes.filter(a => a.id !== id); setAthletes(u); saveAthletes(u); };
   const startEdit = a  => { setForm({ name: a.name, level: a.level, goal: a.goal, notes: a.notes || '' }); setEditing(a.id); };
   const cancel    = () => { setForm({ name: '', level: 'Iniciante', goal: 'Saúde geral', notes: '' }); setEditing(null); };
 
