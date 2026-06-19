@@ -757,3 +757,65 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 
 /* wg-sc-name flex tweak for new delete-in-header layout */
 .wg-sc-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Registro 3-panel ── */
+.rp-layout{display:grid;grid-template-columns:260px 220px 1fr;margin:0 -14px -14px;border-top:1px solid #1e1e1e;align-items:start}
+.rp-p1{border-right:1px solid #1e1e1e}
+.rp-p2{border-right:1px solid #1e1e1e}
+.rp-p3{}
+@media(max-width:800px){.rp-layout{grid-template-columns:1fr;margin:0;border:none}}
+.rp-sticktop{position:sticky;top:88px;z-index:10;background:#0a0a0a;border-bottom:1px solid #1e1e1e}
+.rp-month-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 12px}
+.rp-month-label{font-size:12px;font-weight:700;color:#ccc;letter-spacing:.04em}
+.rp-nav-btn{background:none;border:1px solid #252525;color:#777;cursor:pointer;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:16px;font-family:inherit;line-height:1;padding:0;transition:all .12s}
+.rp-nav-btn:hover{color:#ddd;border-color:#444}
+.rp-weeks{display:flex;gap:3px;padding:5px 10px;overflow-x:auto;scrollbar-width:none}
+.rp-weeks::-webkit-scrollbar{display:none}
+.rp-week-btn{flex-shrink:0;background:transparent;border:1px solid #222;color:#555;font-size:10px;cursor:pointer;padding:3px 7px;font-family:inherit;letter-spacing:.04em;transition:all .12s}
+.rp-week-btn.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
+.rp-day-hdr{padding:4px 12px 3px;font-size:9px;color:#3a3a3a;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #0f0f0f}
+.rp-sess-card{padding:8px 12px;cursor:pointer;border-left:3px solid transparent;border-bottom:1px solid #111;transition:all .12s}
+.rp-sess-card:hover{background:#0f0f0f}
+.rp-sess-card.on{border-left-color:var(--theme-accent);background:#0a1418}
+.rp-sess-name{font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-sess-sub{font-size:10px;color:#444;margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rp-rest-day{padding:5px 12px;color:#252525;font-size:10px;border-bottom:1px solid #0d0d0d;font-style:italic}
+.rp-p2-empty,.rp-p3-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:40px 16px;color:#2a2a2a;font-size:12px;text-align:center}
+.rp-p2-hdr{padding:9px 12px}
+.rp-p2-title{font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.05em}
+.rp-p2-meta{font-size:10px;color:#3a3a3a;margin-top:2px}
+.rp-ath-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #111;cursor:pointer;transition:background .12s}
+.rp-ath-row:hover{background:#0e0e0e}
+.rp-ath-row.on{background:#0a1418}
+.rp-ath-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.rp-ath-info{flex:1;min-width:0}
+.rp-ath-name{font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-ath-logged{font-size:9px;color:#4a8a30;margin-top:1px}
+.rp-del-inline{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.rp-add-btn{background:transparent;border:1px dashed #252525;color:#444;font-family:inherit;font-size:11px;cursor:pointer;padding:8px 0;display:flex;align-items:center;justify-content:center;gap:6px;margin:10px 12px 0;width:calc(100% - 24px);transition:all .12s}
+.rp-add-btn:hover{border-color:#555;color:#888}
+.rp-add-dropdown{margin:4px 12px 12px;border:1px solid #252525;background:#0d0d0d}
+.rp-add-item{padding:7px 10px;cursor:pointer;font-size:11px;color:#777;border-bottom:1px solid #141414;display:flex;align-items:center;gap:7px;transition:all .12s}
+.rp-add-item:hover{background:#141414;color:#ccc}
+.rp-add-item:last-child{border-bottom:none}
+.rp-p3-hdr{display:flex;align-items:center;gap:8px;padding:8px 14px}
+.rp-p3-name{font-size:13px;font-weight:700;color:#ccc;text-transform:uppercase;letter-spacing:.05em}
+.rp-p3-body{padding:12px 14px}
+.rp-block-card{border:1px solid #1e1e1e;margin-bottom:10px}
+.rp-block-label{padding:6px 10px;background:#0d0d0d;font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #161616}
+.rp-block-body{padding:10px}
+.rp-scale-row{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap}
+.rp-scale-btn{flex:1;min-width:44px;padding:5px 4px;background:transparent;border:1px solid #2a2a2a;color:#555;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.rp-scale-btn:hover{border-color:#444;color:#aaa}
+.rp-scale-btn.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
+.rp-perf-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.rp-perf-lbl{font-size:10px;color:#444;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.rp-perf-input{background:transparent;border:none;border-bottom:1px solid #2a2a2a;color:#e0e0e0;font-family:inherit;font-size:14px;outline:none;padding:2px 4px;width:72px;text-align:center}
+.rp-rpe-row{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+.rp-rpe-bar{display:flex;gap:2px;flex:1;height:16px}
+.rp-rpe-seg{flex:1;border-radius:2px;background:#1a1a1a;border:1px solid #1e1e1e;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .1s}
+.rp-wod-summary{margin-bottom:8px;padding:6px 8px;background:#080808;border:1px solid #111}
+.rp-wod-ex{font-size:10px;color:#444;display:flex;gap:6px;margin-bottom:2px;line-height:1.4}
+.rp-wod-ex:last-child{margin-bottom:0}
+.rp-mobile-back{display:none;align-items:center;gap:6px;padding:8px 12px;font-size:11px;color:#555;cursor:pointer;background:#080808;border-bottom:1px solid #111;font-family:inherit;border:none;width:100%;text-align:left;text-transform:uppercase;letter-spacing:.05em}
+@media(max-width:800px){.rp-mobile-back{display:flex}}
