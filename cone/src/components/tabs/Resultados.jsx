@@ -318,9 +318,9 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
                   onClick={()=>{setSelKey(k);setSelAthlete(null);setAddOpen(false);if(isMobile)setMobilePanel(2);}}>
                   <div className="rp-sess-name">{sessTitle(sess)}</div>
                   <div className="rp-sess-sub">
-                    <span style={{color:logged>0?'#4a8a30':'#333'}}>{logged}/{athletes.length} reg.</span>
+                    <span style={{color:logged>0?'#4ac8c0':'#554a3a'}}>{logged}/{athletes.length} reg.</span>
                     {(sess.blocks||[]).filter(b=>WOD_SET.has(b.type)).slice(0,2).map((b,i)=>(
-                      <span key={i} style={{fontSize:9,background:'#161616',padding:'1px 5px',color:'#505050',border:'1px solid #202020'}}>
+                      <span key={i} style={{fontSize:9,background:'#161210',padding:'1px 5px',color:'#554a3a',border:'1px solid #2a231c'}}>
                         {b.label||b.type}
                       </span>
                     ))}
@@ -387,7 +387,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
           );
         })}
         {loggedList.length===0 && (
-          <div style={{padding:'14px 12px',fontSize:11,color:'#2a2a2a',textAlign:'center'}}>
+          <div style={{padding:'14px 12px',fontSize:11,color:'#806850',textAlign:'center'}}>
             Nenhum resultado registrado ainda.
           </div>
         )}
@@ -438,7 +438,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
             <div className="rp-ath-dot" style={{background:selAthlete.color||'#e87820',width:10,height:10}} />
             <div className="rp-p3-name">{selAthlete.name}</div>
             {selAthlete.level && <span className={`level-badge ${LEVEL_CLS[selAthlete.level]||'lv-ini'}`}>{selAthlete.level}</span>}
-            {saveFlash && <span style={{marginLeft:'auto',fontSize:11,color:'#60a840',display:'flex',alignItems:'center',gap:4}}><i className="ti ti-check"/> Salvo</span>}
+            {saveFlash && <span style={{marginLeft:'auto',fontSize:11,color:'#4ac8c0',display:'flex',alignItems:'center',gap:4}}><i className="ti ti-check"/> Salvo</span>}
           </div>
         </div>
         <div className="rp-p3-body">
@@ -448,7 +448,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
             <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
               {PRESENCE.map(p=>(
                 <button key={p} type="button" className="b bsm"
-                  style={{background:presence===p?'var(--theme-accent)':'transparent',color:presence===p?'var(--theme-accent-text)':'#777',borderColor:presence===p?'var(--theme-accent)':'#2e2e2e'}}
+                  style={{background:presence===p?'var(--theme-accent)':'transparent',color:presence===p?'var(--theme-accent-text)':'#806850',borderColor:presence===p?'var(--theme-accent)':'#2a231c'}}
                   onClick={()=>setPresence(p)}>{p}</button>
               ))}
             </div>
@@ -460,7 +460,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
               <div style={{display:'flex',gap:4}}>
                 {[1,2,3,4,5].map(n=>(
                   <button key={n} type="button" className="b bsm"
-                    style={{flex:1,fontWeight:700,fontSize:13,background:energyLevel===n?'var(--theme-accent)':'transparent',color:energyLevel===n?'var(--theme-accent-text)':'#555',borderColor:energyLevel===n?'var(--theme-accent)':'#2e2e2e'}}
+                    style={{flex:1,fontWeight:700,fontSize:13,background:energyLevel===n?'var(--theme-accent)':'transparent',color:energyLevel===n?'var(--theme-accent-text)':'#806850',borderColor:energyLevel===n?'var(--theme-accent)':'#2a231c'}}
                     onClick={()=>setEnergyLevel(n)}>{n}</button>
                 ))}
               </div>
@@ -486,7 +486,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
                         const vol=exVolStr(ex);
                         return (
                           <div key={ei} className="rp-wod-ex">
-                            {vol&&<span style={{color:'#5a4020',fontWeight:700,flexShrink:0}}>{vol}</span>}
+                            {vol&&<span style={{color:'#d8a840',fontWeight:700,flexShrink:0}}>{vol}</span>}
                             <span>{ex.name}</span>
                           </div>
                         );
@@ -531,25 +531,25 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
             );
           })}
           {presence==='Presente'&&wodBlocks.length===0&&(
-            <div style={{fontSize:12,color:'#444',marginBottom:10,padding:'10px 0'}}>Nenhum bloco WOD nesta sessão.</div>
+            <div style={{fontSize:12,color:'#806850',marginBottom:10,padding:'10px 0'}}>Nenhum bloco WOD nesta sessão.</div>
           )}
           {/* Coach note */}
           <div style={{marginBottom:10}}>
             <button type="button" className="b bsm"
-              style={{width:'100%',justifyContent:'space-between',color:showNote?'var(--theme-accent)':'#444',borderColor:showNote?'var(--theme-accent)':'#1e1e1e'}}
+              style={{width:'100%',justifyContent:'space-between',color:showNote?'var(--theme-accent)':'#806850',borderColor:showNote?'var(--theme-accent)':'#2a231c'}}
               onClick={()=>setShowNote(n=>!n)}>
               <span><i className="ti ti-notes" style={{marginRight:5}}/>Nota do coach</span>
               <i className={`ti ti-chevron-${showNote?'up':'down'}`}/>
             </button>
             {showNote&&(
               <textarea placeholder="Observações gerais..." value={coachNote} onChange={e=>setCoachNote(e.target.value)}
-                style={{width:'100%',marginTop:6,minHeight:56,background:'#0d0d0d',border:'1px solid #1e1e1e',color:'#ccc',fontFamily:'inherit',fontSize:12,padding:'7px 8px',outline:'none',resize:'vertical',boxSizing:'border-box'}} />
+                style={{width:'100%',marginTop:6,minHeight:56,background:'#161210',border:'1px solid #2a231c',color:'#c8b090',fontFamily:'inherit',fontSize:12,padding:'7px 8px',outline:'none',resize:'vertical',boxSizing:'border-box'}} />
             )}
           </div>
           {/* Flag */}
           <div style={{marginBottom:12}}>
             <button type="button" className="b bsm"
-              style={{background:flag?'#3a1010':'transparent',color:flag?'#e05050':'#444',borderColor:flag?'#601818':'#1e1e1e'}}
+              style={{background:flag?'#3a1010':'transparent',color:flag?'#e05050':'#806850',borderColor:flag?'#601818':'#2a231c'}}
               onClick={()=>setFlag(f=>!f)}>
               <i className="ti ti-flag"/> {flag?'Marcado para revisão':'Marcar para revisão'}
             </button>
