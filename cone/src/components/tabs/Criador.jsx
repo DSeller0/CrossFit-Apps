@@ -200,6 +200,7 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
   const [query, setQuery] = useState(value || '');
   const [dropRect, setDropRect] = useState(null);
   const ref = useRef();
+  const dropdownRef = useRef();
 
   const suggestions = useMemo(() => {
     const reg = loadRegistry() || {};
@@ -233,6 +234,13 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const handler = e => { if (!dropdownRef.current?.contains(e.target)) setOpen(false); };
+    window.addEventListener('scroll', handler, { capture: true, passive: true });
+    return () => window.removeEventListener('scroll', handler, { capture: true });
+  }, [open]);
+
   const openDrop = () => {
     const r = ref.current?.getBoundingClientRect();
     if (r) setDropRect(r);
@@ -255,7 +263,7 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
         }}
       />
       {open && suggestions.length > 0 && dropRect && (
-        <div style={{ position: 'fixed', top: dropRect.bottom + 2, left: dropRect.left, width: dropRect.width, zIndex: 9999, background: '#1a1a1a', border: '1px solid #333', borderRadius: 5, maxHeight: 180, overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,.5)' }}>
+        <div ref={dropdownRef} style={{ position: 'fixed', top: dropRect.bottom + 2, left: dropRect.left, width: dropRect.width, zIndex: 9999, background: '#1a1a1a', border: '1px solid #333', borderRadius: 5, maxHeight: 180, overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,.5)' }}>
           {suggestions.map((s, i) => (
             <div
               key={i} className="ex-suggestion" tabIndex={0}
