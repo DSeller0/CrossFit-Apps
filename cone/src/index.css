@@ -309,9 +309,9 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .drag-handle:hover{color:#666}
 .ex-suggestion:focus{background:#252525;outline:none;}
 .ex-suggestion:hover{background:#252525;}
-.ex-input{font-family:inherit;font-size:13px;border:1px solid #2e2e2e;border-radius:6px;padding:8px 11px;background:#111;color:#e0e0e0;outline:none;width:100%;-webkit-appearance:none;appearance:none;transition:border-color .15s}
-.ex-input:focus{border-color:#444}
-.ex-input::placeholder{color:#444}
+.ex-input{font-family:inherit;font-size:13px;border:1px solid #2a231c;border-radius:6px;padding:8px 11px;background:#0d0b09;color:#c8b090;outline:none;width:100%;-webkit-appearance:none;appearance:none;transition:border-color .15s}
+.ex-input:focus{border-color:#554a3a}
+.ex-input::placeholder{color:#3a3020}
 .collapse-btn{font-family:inherit;font-size:13px;background:transparent;border:none;color:#555;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .12s;flex-shrink:0;line-height:1;display:flex;align-items:center}
 .collapse-btn:hover{color:#bbb}
 .blk-collapsed .blk-body{display:none}

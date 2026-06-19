@@ -3,6 +3,14 @@ import { loadRegistry, saveRegistry, loadSettings } from '../../utils/storage';
 import { APP_CONFIG, ECOL } from '../../utils/config';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
+const BG    = '#0d0b09';
+const STONE = '#161210';
+const DIV   = '#2a231c';
+const CREAM = '#f0e8d0';
+const SUB   = '#c8b090';
+const MUTED = '#806850';
+const DIM   = '#554a3a';
+
 const BLOCK_ORDER = [
   'HIIT',       'MetCon',    'EMOM',      'For Time',  'AMRAP',
   'Estações',   'Força',     'LPO',       'Core',      'Acessórios',
@@ -14,7 +22,7 @@ const getExName = ex => typeof ex === 'string' ? ex : (ex?.name || '');
 function DemoFields({ editingEx, setEditingEx }) {
   return (
     <div style={{ paddingLeft: 21, marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
-      <div style={{ fontSize: 9, fontWeight: 700, color: '#4a4a4a', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 1 }}>Demo</div>
+      <div style={{ fontSize: 9, fontWeight: 700, color: DIM, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 1 }}>Demo</div>
       <input
         className="ex-input"
         placeholder="URL do vídeo (YouTube)"
@@ -62,16 +70,14 @@ export default function ExerciciosTab() {
   const [newExName, setNewExName]         = useState('');
   const [addExError, setAddExError]       = useState('');
   const [editingEx, setEditingEx]         = useState(null);
-  // editingEx: { origName, newName, videoUrl, description, origBlocks[], selectedBlocks[], fromBlock?, idx?, fromTodos?, error? }
   const [dragExIdx, setDragExIdx]         = useState(null);
   const [dragOverExIdx, setDragOverExIdx] = useState(null);
   const [showTodos, setShowTodos]         = useState(false);
   const isMobile = useIsMobile();
 
-  const blockColor = name => ECOL[name]?.text || '#888';
+  const blockColor = name => ECOL[name]?.text || MUTED;
   const totalExs   = useMemo(() => Object.values(registry).reduce((a, v) => a + v.length, 0), [registry]);
 
-  // Lookup map for video/description by exercise name
   const exDemoData = useMemo(() => {
     const map = {};
     BLOCK_ORDER.forEach(block => {
@@ -203,7 +209,7 @@ export default function ExerciciosTab() {
       .sort((a, b) => a.name.localeCompare(b.name, 'pt'));
   }, [registry]);
 
-  // ── Block pills (multi-select toggle) ─────────────────────────────────────
+  // ── Block pills ───────────────────────────────────────────────────────────
   const BlockPills = ({ selectedBlocks }) => (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 6, paddingLeft: 21 }}>
       {BLOCK_ORDER.map(block => {
@@ -212,10 +218,10 @@ export default function ExerciciosTab() {
         return (
           <span key={block} onClick={() => togglePill(block)}
             style={{
-              fontSize: 9, padding: '2px 6px', borderRadius: 3, cursor: 'pointer',
-              fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase',
+              fontSize: 9, padding: '2px 6px',
+              cursor: 'pointer', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase',
               background: isSelected ? col : 'transparent',
-              color: isSelected ? '#0d0b09' : col,
+              color: isSelected ? BG : col,
               border: `1px solid ${isSelected ? col : col + '55'}`,
               transition: 'all .1s', userSelect: 'none',
             }}>
@@ -231,6 +237,7 @@ export default function ExerciciosTab() {
     const name = getExName(ex);
     const hasVideo = typeof ex === 'object' && !!ex.videoUrl;
     const isEditing = !editingEx?.fromTodos && editingEx?.fromBlock === blockName && editingEx?.idx === ei;
+    const dragOver  = !isEditing && dragOverExIdx === ei;
     return (
       <div key={ei}
         draggable={!isEditing}
@@ -239,19 +246,21 @@ export default function ExerciciosTab() {
         onDragOver={!isEditing ? e => { e.preventDefault(); setDragOverExIdx(ei); } : undefined}
         onDrop={!isEditing ? e => { e.preventDefault(); reorderExs(blockName, dragExIdx, ei); setDragOverExIdx(null); } : undefined}
         style={{
-          padding: '7px 10px', background: '#0d0d0d', borderRadius: 5, transition: 'all .1s',
-          border: `1px solid ${!isEditing && dragOverExIdx === ei ? 'var(--theme-accent)' : isEditing ? '#2a2a2a' : '#1e1e1e'}`,
+          padding: '7px 10px', background: BG,
+          border: `1px solid ${dragOver ? 'var(--theme-accent)' : isEditing ? DIV : DIV}`,
+          borderLeft: `2px solid ${dragOver ? 'var(--theme-accent)' : DIM}`,
+          transition: 'all .1s',
         }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <i className="ti ti-grip-vertical" style={{ color: isEditing ? '#1a1a1a' : '#2a2a2a', fontSize: 13, flexShrink: 0, cursor: isEditing ? 'default' : 'grab' }} />
+          <i className="ti ti-grip-vertical" style={{ color: isEditing ? DIV : DIM, fontSize: 13, flexShrink: 0, cursor: isEditing ? 'default' : 'grab' }} />
           {isEditing
             ? <input autoFocus className="ex-input" value={editingEx.newName} style={{ flex: 1 }}
                 onChange={e => setEditingEx(p => ({ ...p, newName: e.target.value, error: undefined }))}
                 onKeyDown={e => { if (e.key === 'Enter') saveEditEx(); if (e.key === 'Escape') setEditingEx(null); }} />
-            : <span style={{ flex: 1, fontSize: 13, color: '#ddd' }}>{name}</span>
+            : <span style={{ flex: 1, fontSize: 13, color: SUB }}>{name}</span>
           }
           {!isEditing && hasVideo && (
-            <i className="ti ti-video" style={{ color: '#4a6a5a', fontSize: 11, flexShrink: 0 }} title="Tem vídeo demo" />
+            <i className="ti ti-video" style={{ color: '#4ac8c0', fontSize: 11, flexShrink: 0 }} title="Tem vídeo demo" />
           )}
           {isEditing ? (
             <>
@@ -284,21 +293,25 @@ export default function ExerciciosTab() {
     const demo = exDemoData[name];
     const hasVideo = !!(demo?.videoUrl);
     return (
-      <div key={name} style={{ padding: '8px 10px', background: '#0d0d0d', borderRadius: 5, border: `1px solid ${isEditing ? '#2a2a2a' : '#1e1e1e'}` }}>
+      <div key={name} style={{
+        padding: '8px 10px', background: BG,
+        border: `1px solid ${DIV}`,
+        borderLeft: `2px solid ${isEditing ? 'var(--theme-accent)' : DIM}`,
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {isEditing
             ? <input autoFocus className="ex-input" value={editingEx.newName} style={{ flex: 1 }}
                 onChange={e => setEditingEx(p => ({ ...p, newName: e.target.value, error: undefined }))}
                 onKeyDown={e => { if (e.key === 'Enter') saveEditEx(); if (e.key === 'Escape') setEditingEx(null); }} />
-            : <span style={{ flex: 1, fontSize: 13, color: '#ddd' }}>{name}</span>
+            : <span style={{ flex: 1, fontSize: 13, color: SUB }}>{name}</span>
           }
           {!isEditing && (
             <div style={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-              {hasVideo && <i className="ti ti-video" style={{ color: '#4a6a5a', fontSize: 11, flexShrink: 0 }} title="Tem vídeo demo" />}
+              {hasVideo && <i className="ti ti-video" style={{ color: '#4ac8c0', fontSize: 11, flexShrink: 0 }} title="Tem vídeo demo" />}
               {tags.map(tag => {
                 const c = blockColor(tag);
                 return (
-                  <span key={tag} style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 3, letterSpacing: '.04em', textTransform: 'uppercase', background: c + '22', color: c, border: `1px solid ${c}44`, flexShrink: 0 }}>
+                  <span key={tag} style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', letterSpacing: '.04em', textTransform: 'uppercase', background: c + '22', color: c, border: `1px solid ${c}44`, flexShrink: 0 }}>
                     {tag}
                   </span>
                 );
@@ -364,8 +377,8 @@ export default function ExerciciosTab() {
 
   // ── Footer ────────────────────────────────────────────────────────────────
   const Footer = () => (
-    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#0a0a0a', borderTop: '1px solid #1e1e1e', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 10, zIndex: 50 }}>
-      <span style={{ fontSize: 11, color: '#555', flex: 1 }}>{BLOCK_ORDER.length} tipos · {allTaggedExs.length} exercícios registrados</span>
+    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: BG, borderTop: `1px solid ${DIV}`, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 10, zIndex: 50 }}>
+      <span style={{ fontSize: 11, color: DIM, flex: 1 }}>{BLOCK_ORDER.length} tipos · {allTaggedExs.length} exercícios registrados</span>
       <button type="button" className="b bsec" onClick={saveConfig}>
         <i className="ti ti-download" /> Salvar config.json
       </button>
@@ -378,26 +391,26 @@ export default function ExerciciosTab() {
     const col      = blockColor(name);
     const blockExs = registry[name] || [];
     return (
-      <div key={name} style={{ marginBottom: 4, borderRadius: 7, overflow: 'hidden', border: `1px solid ${isExp ? col + '55' : '#1e1e1e'}`, borderLeft: `3px solid ${col}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px', background: isExp ? '#161616' : '#111', cursor: 'pointer' }}
+      <div key={name} style={{ marginBottom: 2, borderLeft: `3px solid ${col}`, border: `1px solid ${isExp ? col + '44' : DIV}`, borderLeftWidth: 3, borderLeftColor: col }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px', background: isExp ? STONE : BG, cursor: 'pointer' }}
           onClick={() => { const next = isExp ? null : name; setExpandedBlock(next); setSelBlock(next); setEditingEx(null); setAddExError(''); }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: col, flexShrink: 0 }} />
-          <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: isExp ? '#fff' : '#bbb', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
-          <span style={{ fontSize: 11, color: '#555', marginRight: 2 }}>{blockExs.length}</span>
-          <i className={`ti ti-chevron-${isExp ? 'down' : 'right'}`} style={{ color: '#444', fontSize: 13, flexShrink: 0 }} />
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
+          <span style={{ flex: 1, fontSize: 12, fontWeight: 700, color: isExp ? CREAM : SUB, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '.04em' }}>{name}</span>
+          <span style={{ fontSize: 11, color: DIM, marginRight: 2 }}>{blockExs.length}</span>
+          <i className={`ti ti-chevron-${isExp ? 'down' : 'right'}`} style={{ color: MUTED, fontSize: 13, flexShrink: 0 }} />
         </div>
         {isExp && (
-          <div style={{ padding: 8, background: '#0d0d0d', borderTop: '1px solid #1e1e1e' }}>
+          <div style={{ padding: 8, background: BG, borderTop: `1px solid ${DIV}` }}>
             {blockExs.length === 0
-              ? <div style={{ padding: 12, textAlign: 'center', color: '#333', fontSize: 12 }}>Nenhum exercício. Adicione abaixo.</div>
-              : <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginBottom: 8 }}>
+              ? <div style={{ padding: 12, textAlign: 'center', color: DIM, fontSize: 12, fontStyle: 'italic' }}>Nenhum exercício. Adicione abaixo.</div>
+              : <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 8 }}>
                   {blockExs.map((ex, ei) => renderExRow(name, ex, ei))}
                 </div>
             }
             {addExError && selBlock === name && (
               <div style={{ fontSize: 11, color: '#e05848', padding: '2px 0 4px' }}>{addExError}</div>
             )}
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center', borderTop: blockExs.length > 0 ? '1px solid #1e1e1e' : 'none', paddingTop: blockExs.length > 0 ? 8 : 0 }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', borderTop: blockExs.length > 0 ? `1px solid ${DIV}` : 'none', paddingTop: blockExs.length > 0 ? 8 : 0 }}>
               <input className="ex-input" placeholder="Adicionar exercício..." value={selBlock === name ? newExName : ''} style={{ flex: 1 }}
                 onChange={e => { setNewExName(e.target.value); setAddExError(''); }}
                 onFocus={() => setSelBlock(name)}
@@ -419,22 +432,22 @@ export default function ExerciciosTab() {
 
   // ── Mobile layout ─────────────────────────────────────────────────────────
   if (isMobile) return (
-    <div style={{ padding: 10, paddingBottom: 70 }}>
-      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+    <div style={{ padding: 10, paddingBottom: 70, background: BG, minHeight: '100%' }}>
+      <div style={{ display: 'flex', gap: 2, marginBottom: 10, borderBottom: `1px solid ${DIV}`, paddingBottom: 10 }}>
         <button type="button" onClick={() => { setShowTodos(false); setEditingEx(null); }}
-          style={{ flex: 1, padding: '7px 0', fontSize: 12, fontWeight: 700, borderRadius: 6, border: '1px solid #2a2a2a', background: !showTodos ? '#1e1e1e' : '#0d0d0d', color: !showTodos ? '#fff' : '#555', cursor: 'pointer' }}>
-          Tipos
+          style={{ flex: 1, padding: '7px 0', fontSize: 11, fontWeight: 700, border: `1px solid ${!showTodos ? 'var(--theme-accent)' : DIV}`, background: !showTodos ? 'rgba(74,200,192,.08)' : 'transparent', color: !showTodos ? 'var(--theme-accent)' : MUTED, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '.05em', fontFamily: 'inherit' }}>
+          Por tipo
         </button>
         <button type="button" onClick={() => { setShowTodos(true); setEditingEx(null); }}
-          style={{ flex: 1, padding: '7px 0', fontSize: 12, fontWeight: 700, borderRadius: 6, border: '1px solid #2a2a2a', background: showTodos ? '#1e1e1e' : '#0d0d0d', color: showTodos ? '#fff' : '#555', cursor: 'pointer' }}>
+          style={{ flex: 1, padding: '7px 0', fontSize: 11, fontWeight: 700, border: `1px solid ${showTodos ? 'var(--theme-accent)' : DIV}`, background: showTodos ? 'rgba(74,200,192,.08)' : 'transparent', color: showTodos ? 'var(--theme-accent)' : MUTED, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '.05em', fontFamily: 'inherit' }}>
           Todos · {allTaggedExs.length}
         </button>
       </div>
 
       {showTodos
-        ? <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        ? <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {allTaggedExs.length === 0
-              ? <div style={{ padding: 20, textAlign: 'center', color: '#333', fontSize: 13 }}>Nenhum exercício cadastrado.</div>
+              ? <div style={{ padding: 20, textAlign: 'center', color: DIM, fontSize: 13, fontStyle: 'italic' }}>Nenhum exercício cadastrado.</div>
               : allTaggedExs.map(renderTodosRow)
             }
           </div>
@@ -448,69 +461,77 @@ export default function ExerciciosTab() {
 
   // ── Desktop layout ─────────────────────────────────────────────────────────
   const exs      = selBlock ? (registry[selBlock] || []) : [];
-  const blockCol = selBlock ? blockColor(selBlock) : '#888';
+  const blockCol = selBlock ? blockColor(selBlock) : MUTED;
 
   return (
-    <div style={{ display: 'flex', gap: 12, padding: 12, height: 'calc(100vh - 120px)', minHeight: 400 }}>
+    <div style={{ display: 'flex', gap: 0, height: 'calc(100vh - 120px)', minHeight: 400, background: BG }}>
 
-      {/* Left — block list (read-only) */}
-      <div style={{ width: 200, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 4, overflowY: 'auto', paddingBottom: 60 }}>
+      {/* Left — block list */}
+      <div style={{ width: 200, flexShrink: 0, display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingBottom: 60, borderRight: `1px solid ${DIV}` }}>
         <div onClick={() => { setSelBlock(null); setEditingEx(null); }}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: selBlock === null ? '#1a1a1a' : '#111', border: `1px solid ${selBlock === null ? '#333' : '#1e1e1e'}`, borderLeft: '3px solid #444', borderRadius: 6, cursor: 'pointer', marginBottom: 4 }}>
-          <i className="ti ti-list" style={{ color: '#444', fontSize: 14 }} />
-          <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: selBlock === null ? '#fff' : '#888' }}>Todos</span>
-          <span style={{ fontSize: 11, color: '#555' }}>{allTaggedExs.length}</span>
+          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', background: selBlock === null ? STONE : 'transparent', borderLeft: `3px solid ${selBlock === null ? 'var(--theme-accent)' : 'transparent'}`, borderBottom: `1px solid ${DIV}`, cursor: 'pointer' }}>
+          <i className="ti ti-list" style={{ color: selBlock === null ? 'var(--theme-accent)' : MUTED, fontSize: 13 }} />
+          <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: selBlock === null ? CREAM : SUB, textTransform: 'uppercase', letterSpacing: '.04em' }}>Todos</span>
+          <span style={{ fontSize: 11, color: DIM }}>{allTaggedExs.length}</span>
         </div>
 
         {BLOCK_ORDER.map(name => {
-          const col = blockColor(name);
-          const cnt = (registry[name] || []).length;
+          const col     = blockColor(name);
+          const cnt     = (registry[name] || []).length;
+          const isSel   = selBlock === name;
           return (
             <div key={name} onClick={() => { setSelBlock(name); setEditingEx(null); setAddExError(''); }}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: selBlock === name ? '#1a1a1a' : '#111', border: `1px solid ${selBlock === name ? '#333' : '#1e1e1e'}`, borderLeft: `3px solid ${col}`, borderRadius: 6, cursor: 'pointer', transition: 'all .1s' }}>
-              <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: selBlock === name ? '#fff' : '#bbb', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
-              <span style={{ fontSize: 11, color: selBlock === name ? '#666' : '#333' }}>{cnt}</span>
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', background: isSel ? STONE : 'transparent', borderLeft: `3px solid ${isSel ? col : 'transparent'}`, borderBottom: `1px solid ${DIV}`, cursor: 'pointer', transition: 'all .1s' }}>
+              <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: isSel ? CREAM : SUB, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '.04em' }}>{name}</span>
+              <span style={{ fontSize: 11, color: isSel ? MUTED : DIM }}>{cnt}</span>
             </div>
           );
         })}
       </div>
 
       {/* Right — exercises or Todos */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, paddingBottom: 60 }}>
-        {selBlock === null ? (
-          <>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, paddingBottom: 60 }}>
+
+        {/* Panel header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px', borderBottom: `1px solid ${DIV}`, flexShrink: 0 }}>
+          {selBlock === null ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <i className="ti ti-list" style={{ color: '#555', fontSize: 14 }} />
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '.07em' }}>Todos os exercícios</span>
-              <span style={{ fontSize: 11, color: '#555' }}>· {allTaggedExs.length}</span>
+              <i className="ti ti-list" style={{ color: MUTED, fontSize: 13 }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: MUTED, textTransform: 'uppercase', letterSpacing: '.07em' }}>Todos os exercícios</span>
+              <span style={{ fontSize: 11, color: DIM }}>· {allTaggedExs.length}</span>
             </div>
-            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {allTaggedExs.length === 0
-                ? <div style={{ padding: 20, textAlign: 'center', color: '#333', fontSize: 13 }}>Nenhum exercício cadastrado.</div>
-                : allTaggedExs.map(renderTodosRow)
-              }
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: blockCol }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: blockCol, textTransform: 'uppercase', letterSpacing: '.07em' }}>{selBlock}</span>
+              <span style={{ fontSize: 11, color: DIM }}>· {exs.length} exercício{exs.length !== 1 ? 's' : ''}</span>
             </div>
-          </>
-        ) : (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 10, height: 10, borderRadius: '50%', background: blockCol }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: blockCol, textTransform: 'uppercase', letterSpacing: '.07em' }}>{selBlock}</span>
-                <span style={{ fontSize: 11, color: '#555' }}>· {exs.length} exercício{exs.length !== 1 ? 's' : ''}</span>
-              </div>
-              <button type="button" className="b bsm" onClick={() => sortExsAZ(selBlock)} title="A→Z">
-                <i className="ti ti-sort-ascending-letters" />
-              </button>
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {exs.length === 0
-                ? <div style={{ padding: 20, textAlign: 'center', color: '#333', fontSize: 13 }}>Nenhum exercício. Adicione abaixo.</div>
-                : exs.map((ex, ei) => renderExRow(selBlock, ex, ei))
-              }
-            </div>
-            {addExError && <div style={{ fontSize: 11, color: '#e05848', padding: '2px 0' }}>{addExError}</div>}
-            <div style={{ borderTop: '1px solid #1e1e1e', paddingTop: 8, display: 'flex', gap: 6 }}>
+          )}
+          {selBlock && (
+            <button type="button" className="b bsm" onClick={() => sortExsAZ(selBlock)} title="A→Z">
+              <i className="ti ti-sort-ascending-letters" />
+            </button>
+          )}
+        </div>
+
+        {/* Exercise list */}
+        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 1, padding: '8px 0' }}>
+          {selBlock === null ? (
+            allTaggedExs.length === 0
+              ? <div style={{ padding: 20, textAlign: 'center', color: DIM, fontSize: 13, fontStyle: 'italic' }}>Nenhum exercício cadastrado.</div>
+              : allTaggedExs.map(renderTodosRow)
+          ) : (
+            exs.length === 0
+              ? <div style={{ padding: 20, textAlign: 'center', color: DIM, fontSize: 13, fontStyle: 'italic' }}>Nenhum exercício. Adicione abaixo.</div>
+              : exs.map((ex, ei) => renderExRow(selBlock, ex, ei))
+          )}
+        </div>
+
+        {/* Add input (block view only) */}
+        {selBlock !== null && (
+          <div style={{ borderTop: `1px solid ${DIV}`, padding: '10px 14px', flexShrink: 0 }}>
+            {addExError && <div style={{ fontSize: 11, color: '#e05848', marginBottom: 6 }}>{addExError}</div>}
+            <div style={{ display: 'flex', gap: 6 }}>
               <input className="ex-input" placeholder={`Adicionar exercício em ${selBlock}...`} value={newExName} style={{ flex: 1 }}
                 onChange={e => { setNewExName(e.target.value); setAddExError(''); }}
                 onKeyDown={e => { if (e.key === 'Enter') addEx(); }} />
@@ -518,7 +539,7 @@ export default function ExerciciosTab() {
                 <i className="ti ti-plus" /> Adicionar
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
 
