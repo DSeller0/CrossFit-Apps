@@ -62,7 +62,7 @@ function prPct(pr) {
 }
 
 // ── ExerciseCombobox ──────────────────────────────────────────────────────────
-function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
+function ExerciseCombobox({ value, onChange, blockLabel, placeholder, excludeNames }) {
   const [open, setOpen]         = useState(false);
   const [query, setQuery]       = useState(value || '');
   const [dropRect, setDropRect] = useState(null);
@@ -90,8 +90,11 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
         ...others.filter(n => n.toLowerCase().includes(q)).sort((a,b) => a.localeCompare(b,'pt')),
       ];
     }
-    return names.map(name => ({ name, blockType: typeMap[name] || blockLabel || '' }));
-  }, [blockLabel, query]);
+    const excluded = new Set((excludeNames || []).map(n => n.toLowerCase()));
+    return names
+      .filter(name => !excluded.has(name.toLowerCase()))
+      .map(name => ({ name, blockType: typeMap[name] || blockLabel || '' }));
+  }, [blockLabel, query, excludeNames]);
 
   useState(() => { setQuery(value || ''); }, [value]);
 
@@ -230,7 +233,7 @@ function AddResultModal({ pr, onSave, onClose }) {
 }
 
 // ── PrModal ───────────────────────────────────────────────────────────────────
-function PrModal({ onSave, onClose, editPr }) {
+function PrModal({ onSave, onClose, editPr, existingNames }) {
   const [name, setName]     = useState(editPr?.name || '');
   const [type, setType]     = useState(editPr?.type || 'load');
   const [unit, setUnit]     = useState(editPr?.unit || 'kg');
@@ -267,7 +270,7 @@ function PrModal({ onSave, onClose, editPr }) {
         <div style={{ padding:'14px 16px', display:'flex', flexDirection:'column', gap:10 }}>
           <div className="fg">
             <span className="lbl">Exercício / WOD</span>
-            <ExerciseCombobox value={name} onChange={setName} blockLabel="" placeholder="Ex: Fran, Back Squat..." />
+            <ExerciseCombobox value={name} onChange={setName} blockLabel="" placeholder="Ex: Fran, Back Squat..." excludeNames={isEdit ? (existingNames||[]).filter(n=>n.toLowerCase()!==editPr.name.toLowerCase()) : existingNames} />
           </div>
           {exBlocks.length > 0 && (
             <div style={{ display:'flex', flexWrap:'wrap', gap:5, marginTop:-4 }}>
@@ -783,7 +786,7 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
       )}
 
       {/* PR modals */}
-      {(showPrModal||editingPr) && <PrModal editPr={editingPr||null} onSave={savePr} onClose={()=>{setShowPrModal(false);setEditingPr(null);}} />}
+      {(showPrModal||editingPr) && <PrModal editPr={editingPr||null} existingNames={athPrs.map(p=>p.name)} onSave={savePr} onClose={()=>{setShowPrModal(false);setEditingPr(null);}} />}
       {addResultFor && <AddResultModal pr={addResultFor} onSave={result=>addResult(addResultFor.id,result)} onClose={()=>setAddResultFor(null)} />}
     </>
   );
