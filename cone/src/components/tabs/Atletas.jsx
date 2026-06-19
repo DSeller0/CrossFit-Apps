@@ -101,15 +101,6 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
   };
   const select = name => { setQuery(name); onChange(name); setOpen(false); };
 
-  // close on outside click
-  const outsideRef = useRef();
-  outsideRef.current = () => { if (open) setOpen(false); };
-  useState(() => {
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
-  }, []);
-
   return (
     <div ref={ref} style={{ position:'relative', flex:1 }}>
       <input value={query} placeholder={placeholder}
@@ -200,7 +191,7 @@ function PrRow({ pr, onAddResult, onEdit, onDelete, showActions }) {
 function AddResultModal({ pr, onSave, onClose }) {
   const [value, setValue] = useState('');
   const [date, setDate]   = useState(todayISO);
-  const best     = prBest(pr);
+  const best      = prBest(pr);
   const bestLabel = pr.type==='time' ? best?.value : (best?.value?(best.value+(pr.unit?' '+pr.unit:'')):'—');
   const isPR = value && (pr.type==='time' ? toSecs(value)<toSecs(best?.value) : Number(value)>Number(best?.value));
 
@@ -326,26 +317,27 @@ function PrModal({ onSave, onClose, editPr }) {
 }
 
 // ── HpBar ─────────────────────────────────────────────────────────────────────
-function HpBar({ goal, color, editMode, onAddSession, onMilestoneHit, onConfigure, onDelete }) {
+function HpBar({ goal, color, onAddSession, onMilestoneHit, onConfigure, onDelete }) {
   const [expanded, setExpanded] = useState(false);
-  const pct    = goal.totalSessions > 0 ? (goal.completedSessions/goal.totalSessions)*100 : 0;
+  const pct     = goal.totalSessions > 0 ? (goal.completedSessions/goal.totalSessions)*100 : 0;
   const snapPct = p => Math.round(p/10)*10;
 
   return (
-    <div style={{ marginBottom:12 }}>
+    <div style={{ marginBottom:14 }}>
       <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
         <span style={{ fontSize:12, fontWeight:700, color:SUB, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{goal.name}</span>
         <span style={{ fontSize:11, color:DIM, flexShrink:0 }}>{goal.completedSessions}/{goal.totalSessions}</span>
-        {!editMode && (
-          <button type="button" className="b bsm" style={{ padding:'3px 8px', minHeight:22, fontSize:11 }}
-            onClick={()=>{ if(window.confirm(`Confirmar sessão para "${goal.name}"?`)) onAddSession(); }}>
-            +1
-          </button>
-        )}
-        {editMode && <>
-          <button type="button" className="b bsm" style={{ padding:'3px 6px', minHeight:22, fontSize:11 }} onClick={onConfigure}><i className="ti ti-settings" /></button>
-          <button type="button" className="b bd bsm" style={{ padding:'3px 6px', minHeight:22, fontSize:11, opacity:.6 }} onClick={()=>{ if(window.confirm(`Remover "${goal.name}"?`)) onDelete(); }}><i className="ti ti-trash" /></button>
-        </>}
+        <button type="button" className="b bsm" style={{ padding:'3px 7px', minHeight:22, fontSize:11 }}
+          onClick={()=>{ if(window.confirm(`Confirmar sessão para "${goal.name}"?`)) onAddSession(); }}>
+          +1
+        </button>
+        <button type="button" className="b bd bsm" style={{ padding:'3px 6px', minHeight:22, fontSize:11 }} onClick={onConfigure}>
+          <i className="ti ti-settings" />
+        </button>
+        <button type="button" className="b bd bsm" style={{ padding:'3px 6px', minHeight:22, fontSize:11, opacity:.6 }}
+          onClick={()=>{ if(window.confirm(`Remover "${goal.name}"?`)) onDelete(); }}>
+          <i className="ti ti-trash" />
+        </button>
       </div>
       <div style={{ display:'flex', gap:2, cursor:'pointer' }} onClick={()=>setExpanded(e=>!e)}>
         {Array.from({length:10},(_,bi) => {
@@ -386,25 +378,24 @@ function HpBar({ goal, color, editMode, onAddSession, onMilestoneHit, onConfigur
 
 // ── GoalConfigPanel ───────────────────────────────────────────────────────────
 function GoalConfigPanel({ goal, onSave, onCancel }) {
-  const [name, setName]         = useState(goal.name||'');
-  const [total, setTotal]       = useState(goal.totalSessions||10);
-  const [done, setDone]         = useState(goal.completedSessions||0);
-  const [milestones, setMs]     = useState(goal.milestones||[]);
+  const [name, setName]   = useState(goal.name||'');
+  const [total, setTotal] = useState(goal.totalSessions||10);
+  const [done, setDone]   = useState(goal.completedSessions||0);
+  const [milestones, setMs] = useState(goal.milestones||[]);
   const snapPct = p => Math.round(p/10)*10;
   const updM = (i,f,v) => setMs(ms=>ms.map((m,mi)=>mi===i?{...m,[f]:v}:m));
 
   return (
-    <div style={{ background:STONE, border:`1px solid ${DIV}`, padding:12, marginBottom:8 }}>
-      <div style={{ fontSize:9, fontWeight:700, color:DIM, textTransform:'uppercase', letterSpacing:'.07em', marginBottom:10 }}>Configurar objetivo</div>
-      <div className="g2" style={{ marginBottom:8 }}>
+    <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+      <div className="g2">
         <div className="fg"><span className="lbl">Nome</span><input className="ex-input" value={name} onChange={e=>setName(e.target.value)} /></div>
         <div className="fg"><span className="lbl">Total de sessões</span><input type="number" min={1} max={200} className="ex-input" value={total} onChange={e=>setTotal(parseInt(e.target.value)||1)} /></div>
       </div>
-      <div className="fg" style={{ marginBottom:10 }}>
+      <div className="fg">
         <span className="lbl">Sessões completadas</span>
         <input type="number" min={0} max={total} className="ex-input" value={done} onChange={e=>setDone(Math.min(total,Math.max(0,parseInt(e.target.value)||0)))} />
       </div>
-      <div style={{ marginBottom:8 }}>
+      <div>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
           <span style={{ fontSize:9, color:DIM, textTransform:'uppercase', letterSpacing:'.06em' }}>Milestones (máx. 5)</span>
           {milestones.length < 5 && <button type="button" className="b bsm" style={{ padding:'2px 8px', minHeight:22, fontSize:11 }} onClick={()=>setMs(ms=>[...ms,{label:'',pct:50,hit:false}])}><i className="ti ti-plus" /></button>}
@@ -418,8 +409,10 @@ function GoalConfigPanel({ goal, onSave, onCancel }) {
           </div>
         ))}
       </div>
-      <div style={{ display:'flex', gap:8 }}>
-        <button type="button" className="b bsec" onClick={()=>onSave({...goal,name,totalSessions:total,completedSessions:done,milestones})}><i className="ti ti-check" /> Salvar</button>
+      <div style={{ display:'flex', gap:8, marginTop:4 }}>
+        <button type="button" className="b bsec" style={{ flex:1 }} onClick={()=>onSave({...goal,name,totalSessions:total,completedSessions:done,milestones})}>
+          <i className="ti ti-check" /> Salvar
+        </button>
         <button type="button" className="b bd bsm" onClick={onCancel}>Cancelar</button>
       </div>
     </div>
@@ -428,19 +421,18 @@ function GoalConfigPanel({ goal, onSave, onCancel }) {
 
 // ── AtletasTab ────────────────────────────────────────────────────────────────
 export default function AtletasTab({ sessions, results, onEditSession, onLogResult }) {
-  const [athletes, setAthletes]       = useState(loadAthletes);
-  const [goalsData, setGoalsData]     = useState(loadGoalsData);
-  const [selAthlete, setSelAthlete]   = useState(null);
-  const [pane, setPane]               = useState(0);
-  const [pane3Mode, setPane3Mode]     = useState(null); // null | 'profile' | 'prs'
-  const [profileForm, setProfileForm] = useState(null);
+  const [athletes, setAthletes]         = useState(loadAthletes);
+  const [goalsData, setGoalsData]       = useState(loadGoalsData);
+  const [selAthlete, setSelAthlete]     = useState(null);
+  const [pane, setPane]                 = useState(0);      // mobile: 0=list, 1=detail
+  const [profileForm, setProfileForm]   = useState(null);
   const [profileSaved, setProfileSaved] = useState(false);
-  const [adding, setAdding]           = useState(false);
-  const [newName, setNewName]         = useState('');
-  const [editMode, setEditMode]       = useState(false);
-  const [configuringGoal, setConfiguringGoal] = useState(null);
-  const [showPrModal, setShowPrModal] = useState(false);
-  const [editingPr, setEditingPr]     = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [adding, setAdding]             = useState(false);
+  const [newName, setNewName]           = useState('');
+  const [configuringGoal, setConfiguringGoal]   = useState(null);
+  const [showPrModal, setShowPrModal]   = useState(false);
+  const [editingPr, setEditingPr]       = useState(null);
   const [addResultFor, setAddResultFor] = useState(null);
   const isMobile = useIsMobile();
 
@@ -464,7 +456,7 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
     if (!a) return;
     setSelAthlete(athId);
     setProfileForm({ name:a.name, level:a.level||getLevels()[0], goal:a.goal||getGoals()[0], notes:a.notes||'', color:a.color||'#e87820', since:a.since||todayISO() });
-    setPane3Mode(null); setEditMode(false); setConfiguringGoal(null);
+    setConfiguringGoal(null);
     if (isMobile) setPane(1);
   };
 
@@ -476,8 +468,8 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
     setNewName(''); setAdding(false);
     setSelAthlete(a.id);
     setProfileForm({ name:a.name, level:a.level, goal:a.goal, notes:'', color:a.color, since:a.since });
-    setPane3Mode('profile');
-    if (isMobile) setPane(2);
+    setShowProfileModal(true);
+    if (isMobile) setPane(1);
   };
 
   const saveProfile = () => {
@@ -489,13 +481,8 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
   const deleteAthlete = () => {
     if (!window.confirm(`Remover ${ath?.name}? Esta ação não pode ser desfeita.`)) return;
     persistAthletes(athletes.filter(a => a.id !== selAthlete));
-    setSelAthlete(null); setPane3Mode(null);
+    setSelAthlete(null); setShowProfileModal(false);
     if (isMobile) setPane(0);
-  };
-
-  const goBack = () => {
-    if (pane === 2) { setPane(1); setPane3Mode(null); }
-    else if (pane === 1) { setPane(0); setSelAthlete(null); setPane3Mode(null); }
   };
 
   // Goal operations
@@ -539,26 +526,25 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
     persist({ ...goalsData, prs:{...(goalsData.prs||{}),[selAthlete]:athPrs.filter(p=>p.id!==prId)} });
   };
 
-  // ── Session summary (compact) ───────────────────────────────────────────────
+  // Session strip
   const sessionStrip = useMemo(() => {
     if (!selAthlete || !ath) return [];
-    const todayKey  = new Date().toISOString().slice(0,10);
-    const future30  = new Date(); future30.setDate(future30.getDate()+30);
-    const f30       = future30.toISOString().slice(0,10);
+    const todayKey = new Date().toISOString().slice(0,10);
+    const future30 = new Date(); future30.setDate(future30.getDate()+30);
+    const f30      = future30.toISOString().slice(0,10);
     const all = [];
     Object.keys(sessions||{}).sort().forEach(date => {
       (sessions[date]||[]).forEach(s => { if (matchesAthlete(s,ath.name)) all.push({date,session:s}); });
     });
-    const past   = all.filter(x=>x.date<=todayKey).slice(-2);
-    const future = all.filter(x=>x.date>todayKey&&x.date<=f30).slice(0,1);
-    return [...past,...future];
+    return [...all.filter(x=>x.date<=todayKey).slice(-2), ...all.filter(x=>x.date>todayKey&&x.date<=f30).slice(0,1)];
   }, [selAthlete, ath, sessions]);
 
   const DAY_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-
-  // ── Section label ───────────────────────────────────────────────────────────
-  const SectionLabel = ({ children }) => (
-    <div style={{ fontSize:9, fontWeight:700, color:DIM, textTransform:'uppercase', letterSpacing:'.07em', marginBottom:10, marginTop:4 }}>{children}</div>
+  const SecLabel = ({ children, actions }) => (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
+      <div style={{ fontSize:9, fontWeight:700, color:DIM, textTransform:'uppercase', letterSpacing:'.07em' }}>{children}</div>
+      {actions}
+    </div>
   );
 
   // ── Pane 1: Athlete list ────────────────────────────────────────────────────
@@ -601,24 +587,21 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
     </div>
   );
 
-  // ── Pane 2: Athlete overview ────────────────────────────────────────────────
-  const renderPane2 = () => {
+  // ── Pane 2: Full athlete detail ─────────────────────────────────────────────
+  const renderDetail = () => {
     if (!ath) return (
       <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', color:DIM, fontSize:12, fontStyle:'italic', padding:20, textAlign:'center' }}>
         Selecione um atleta
       </div>
     );
 
-    const recentPrs = [...athPrs].sort((a,b) => {
-      const aD = a.results?.length?a.results[a.results.length-1].date:'';
-      const bD = b.results?.length?b.results[b.results.length-1].date:'';
-      return bD.localeCompare(aD);
-    }).slice(0,3);
+    const groupedPrs = {};
+    athPrs.forEach(pr => { const cat=pr.category||'Sem categoria'; if(!groupedPrs[cat]) groupedPrs[cat]=[]; groupedPrs[cat].push(pr); });
 
     return (
-      <div style={{ display:'flex', flexDirection:'column', height:'100%', overflowY:'auto' }}>
-        {/* Athlete header */}
-        <div style={{ padding:'14px 14px 12px', borderBottom:`1px solid ${DIV}`, borderLeft:`3px solid ${athColor}`, flexShrink:0 }}>
+      <div style={{ overflowY:'auto', height:'100%' }}>
+        {/* Profile header */}
+        <div style={{ padding:'14px 16px 12px', borderBottom:`1px solid ${DIV}`, borderLeft:`3px solid ${athColor}` }}>
           <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8 }}>
             <div>
               <div style={{ fontSize:18, fontWeight:900, color:CREAM, letterSpacing:'.03em', lineHeight:1.2 }}>{ath.name}</div>
@@ -629,20 +612,20 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
               </div>
               {ath.notes && <div style={{ fontSize:11, color:DIM, marginTop:6, fontStyle:'italic' }}>{ath.notes}</div>}
             </div>
-            <button type="button" className="b bd bsm" style={{ flexShrink:0, padding:'4px 8px', fontSize:11 }}
-              onClick={()=>{ setPane3Mode('profile'); if(isMobile) setPane(2); }}>
+            <button type="button" className="b bd bsm" style={{ flexShrink:0, padding:'4px 8px', fontSize:11 }} onClick={()=>setShowProfileModal(true)}>
               <i className="ti ti-pencil" />
             </button>
           </div>
         </div>
 
-        <div style={{ padding:'12px 14px', display:'flex', flexDirection:'column', gap:16 }}>
+        <div style={{ padding:'14px 16px', display:'flex', flexDirection:'column', gap:20 }}>
+
           {/* Sessions */}
           <div>
-            <SectionLabel>Sessões</SectionLabel>
+            <SecLabel>Sessões</SecLabel>
             {sessionStrip.length === 0
               ? <div style={{ fontSize:12, color:DIM, fontStyle:'italic' }}>Nenhuma sessão atribuída.</div>
-              : sessionStrip.map(({date, session}) => {
+              : sessionStrip.map(({date,session}) => {
                   const todayKey = new Date().toISOString().slice(0,10);
                   const isToday  = date === todayKey;
                   const isPast   = date <= todayKey;
@@ -650,21 +633,18 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
                   const myResult = athResults.find(r=>r.date===date&&r.sessionId===session.id);
                   const WOD_T    = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
                   const wb       = myResult ? (myResult.blocks||[]).find(b=>WOD_T.includes(b.blockType)||WOD_T.includes(b.blockLabel)) : null;
-                  const perfStr  = wb ? (wb.perfTime||(wb.perfRounds?wb.perfRounds+'rds':null)) : null;
-
+                  const perf     = wb ? (wb.perfTime||(wb.perfRounds?wb.perfRounds+'rds':null)) : null;
                   return (
                     <div key={date+'|'+session.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 0', borderBottom:`1px solid ${DIV}` }}>
-                      <div style={{ width:3, alignSelf:'stretch', background:isToday?'var(--theme-accent)':isPast?DIM:DIV+'88', flexShrink:0 }} />
+                      <div style={{ width:3, alignSelf:'stretch', background:isToday?'var(--theme-accent)':isPast?DIM:DIV+'66', flexShrink:0 }} />
                       <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontSize:12, fontWeight:700, color:isToday?CREAM:SUB, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                          {session.sessionName || DAY_PT[d.getDay()]}
-                        </div>
+                        <div style={{ fontSize:12, fontWeight:700, color:isToday?CREAM:SUB, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{session.sessionName||DAY_PT[d.getDay()]}</div>
                         <div style={{ fontSize:10, color:MUTED }}>{DAY_PT[d.getDay()]} · {d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</div>
                       </div>
                       {isToday && <span style={{ fontSize:9, fontWeight:700, color:'var(--theme-accent)', background:'rgba(74,200,192,.1)', padding:'2px 5px', textTransform:'uppercase', flexShrink:0 }}>Hoje</span>}
-                      {isPast && !isToday && perfStr && <span style={{ fontSize:11, fontWeight:700, color:CREAM, flexShrink:0 }}>{perfStr}</span>}
+                      {isPast && !isToday && perf && <span style={{ fontSize:11, fontWeight:700, color:CREAM, flexShrink:0 }}>{perf}</span>}
                       {isPast && !isToday && !myResult && <span style={{ fontSize:10, color:DIM, flexShrink:0 }}>—</span>}
-                      {!isPast && <span style={{ fontSize:9, color:MUTED, flexShrink:0 }}>Próxima</span>}
+                      {!isPast && <span style={{ fontSize:10, color:MUTED, flexShrink:0 }}>Próxima</span>}
                     </div>
                   );
                 })
@@ -673,142 +653,16 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
 
           {/* PRs */}
           <div>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
-              <SectionLabel>PRs</SectionLabel>
-              <div style={{ display:'flex', gap:6 }}>
-                <button type="button" className="b bsm" style={{ padding:'2px 7px', fontSize:11 }} onClick={()=>setShowPrModal(true)}><i className="ti ti-plus" /></button>
-                {athPrs.length > 0 && (
-                  <button type="button" className="b bd bsm" style={{ padding:'2px 7px', fontSize:11 }}
-                    onClick={()=>{ setPane3Mode('prs'); if(isMobile) setPane(2); }}>
-                    Ver todos ({athPrs.length}) <i className="ti ti-chevron-right" />
-                  </button>
-                )}
-              </div>
-            </div>
-            {recentPrs.length === 0
-              ? <div style={{ fontSize:12, color:DIM, fontStyle:'italic' }}>Nenhum PR. Clique + para registrar.</div>
-              : recentPrs.map(pr => (
-                  <PrRow key={pr.id} pr={pr} showActions
-                    onAddResult={()=>setAddResultFor(pr)}
-                    onEdit={()=>setEditingPr(pr)}
-                    onDelete={()=>deletePr(pr.id)} />
-                ))
-            }
-          </div>
-
-          {/* Goals */}
-          <div>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
-              <SectionLabel>Objetivos</SectionLabel>
-              <div style={{ display:'flex', gap:6 }}>
-                {athGoals.length < 3 && (
-                  <button type="button" className="b bsm" style={{ padding:'2px 7px', fontSize:11 }} onClick={addGoal}><i className="ti ti-plus" /></button>
-                )}
-                <button type="button" className={`b ${editMode?'bsec':'bd'} bsm`} style={{ padding:'2px 7px', fontSize:11 }} onClick={()=>{ setEditMode(e=>!e); setConfiguringGoal(null); }}>
-                  <i className={`ti ${editMode?'ti-check':'ti-edit'}`} />
-                </button>
-              </div>
-            </div>
-            {athGoals.length === 0
-              ? <div style={{ fontSize:12, color:DIM, fontStyle:'italic' }}>Nenhum objetivo. Clique + para adicionar.</div>
-              : athGoals.map(g => (
-                  <div key={g.id}>
-                    {configuringGoal===g.id && editMode
-                      ? <GoalConfigPanel goal={g} onSave={u=>updateGoal(g.id,u)} onCancel={()=>setConfiguringGoal(null)} />
-                      : <HpBar goal={g} color={athColor} editMode={editMode}
-                          onAddSession={()=>addGoalSession(g.id)}
-                          onMilestoneHit={(mi,hit)=>hitMilestone(g.id,mi,hit)}
-                          onConfigure={()=>setConfiguringGoal(g.id)}
-                          onDelete={()=>deleteGoal(g.id)} />
-                    }
-                  </div>
-                ))
-            }
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // ── Pane 3: Context panel ───────────────────────────────────────────────────
-  const renderPane3 = () => {
-    if (!ath || !pane3Mode) return (
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', color:DIM, fontSize:12, fontStyle:'italic', padding:20, textAlign:'center' }}>
-        Selecione uma seção para ver detalhes
-      </div>
-    );
-
-    // Profile editor
-    if (pane3Mode === 'profile') return (
-      <div style={{ display:'flex', flexDirection:'column', height:'100%' }}>
-        <div style={{ padding:'9px 14px', borderBottom:`1px solid ${DIV}`, flexShrink:0 }}>
-          <span style={{ fontSize:10, fontWeight:700, color:DIM, textTransform:'uppercase', letterSpacing:'.07em' }}>Perfil do Atleta</span>
-        </div>
-        <div style={{ flex:1, overflowY:'auto', padding:'16px 14px', display:'flex', flexDirection:'column', gap:18 }}>
-          <div>
-            <div style={{ fontSize:9, fontWeight:700, color:DIM, textTransform:'uppercase', letterSpacing:'.07em', marginBottom:6 }}>Nome</div>
-            <input className="ex-input" value={profileForm?.name||''} onChange={e=>setProfileForm(f=>({...f,name:e.target.value}))} />
-          </div>
-          <div className="g2">
-            <div className="fg">
-              <span className="lbl">Nível</span>
-              <select className="ex-input" value={profileForm?.level||''} onChange={e=>setProfileForm(f=>({...f,level:e.target.value}))}>
-                {getLevels().map(l=><option key={l}>{l}</option>)}
-              </select>
-            </div>
-            <div className="fg">
-              <span className="lbl">Objetivo</span>
-              <select className="ex-input" value={profileForm?.goal||''} onChange={e=>setProfileForm(f=>({...f,goal:e.target.value}))}>
-                {getGoals().map(g=><option key={g}>{g}</option>)}
-              </select>
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize:9, fontWeight:700, color:DIM, textTransform:'uppercase', letterSpacing:'.07em', marginBottom:6 }}>Observações</div>
-            <input className="ex-input" placeholder="ex: Joelho direito" value={profileForm?.notes||''} onChange={e=>setProfileForm(f=>({...f,notes:e.target.value}))} />
-          </div>
-          <div className="g2">
-            <div className="fg">
-              <span className="lbl">Cor</span>
-              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                <div style={{ width:30, height:30, background:profileForm?.color||'#e87820', border:`2px solid ${DIV}`, cursor:'pointer', flexShrink:0 }} onClick={()=>document.getElementById('ath-clr')?.click()} />
-                <input type="color" id="ath-clr" value={profileForm?.color||'#e87820'} onChange={e=>setProfileForm(f=>({...f,color:e.target.value}))} style={{ opacity:0, position:'absolute', pointerEvents:'none' }} />
-                <input className="ex-input" value={profileForm?.color||''} onChange={e=>{ if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) setProfileForm(f=>({...f,color:e.target.value})); }} style={{ fontFamily:'monospace', fontSize:12 }} />
-              </div>
-            </div>
-            <div className="fg">
-              <span className="lbl">Membro desde</span>
-              <input type="date" className="ex-input" value={profileForm?.since||''} onChange={e=>setProfileForm(f=>({...f,since:e.target.value}))} />
-            </div>
-          </div>
-        </div>
-        <div style={{ borderTop:`1px solid ${DIV}`, padding:'10px 14px', display:'flex', gap:8, flexShrink:0 }}>
-          <button type="button" className="b bsec" style={{ flex:1 }} onClick={saveProfile}>
-            {profileSaved ? <><i className="ti ti-check" /> Salvo</> : 'Salvar'}
-          </button>
-          <button type="button" className="b bd" style={{ padding:'0 12px' }} onClick={deleteAthlete}>
-            <i className="ti ti-trash" />
-          </button>
-        </div>
-      </div>
-    );
-
-    // Full PR view
-    if (pane3Mode === 'prs') {
-      const grouped = {};
-      athPrs.forEach(pr => { const cat = pr.category||'Sem categoria'; if (!grouped[cat]) grouped[cat]=[]; grouped[cat].push(pr); });
-      return (
-        <div style={{ display:'flex', flexDirection:'column', height:'100%' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 14px', borderBottom:`1px solid ${DIV}`, flexShrink:0 }}>
-            <span style={{ fontSize:10, fontWeight:700, color:DIM, textTransform:'uppercase', letterSpacing:'.07em', flex:1 }}>Todos os PRs</span>
-            <button type="button" className="b bsm" style={{ padding:'3px 8px', fontSize:11 }} onClick={()=>setShowPrModal(true)}><i className="ti ti-plus" /> Novo PR</button>
-          </div>
-          <div style={{ flex:1, overflowY:'auto', padding:'8px 14px' }}>
+            <SecLabel actions={
+              <button type="button" className="b bsm" style={{ padding:'2px 7px', fontSize:11 }} onClick={()=>setShowPrModal(true)}>
+                <i className="ti ti-plus" /> PR
+              </button>
+            }>PRs</SecLabel>
             {athPrs.length === 0
-              ? <div style={{ padding:20, textAlign:'center', color:DIM, fontSize:12, fontStyle:'italic' }}>Nenhum PR registrado.</div>
-              : Object.entries(grouped).map(([cat, catPrs]) => (
-                  <div key={cat} style={{ marginBottom:16 }}>
-                    <div style={{ fontSize:9, fontWeight:700, color:'var(--theme-accent)', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:6, paddingBottom:4, borderBottom:`1px solid ${DIV}` }}>{cat}</div>
+              ? <div style={{ fontSize:12, color:DIM, fontStyle:'italic' }}>Nenhum PR registrado.</div>
+              : Object.entries(groupedPrs).map(([cat,catPrs]) => (
+                  <div key={cat} style={{ marginBottom:12 }}>
+                    <div style={{ fontSize:9, fontWeight:700, color:'var(--theme-accent)', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:4, paddingBottom:4, borderBottom:`1px solid ${DIV}` }}>{cat}</div>
                     {catPrs.map(pr => (
                       <PrRow key={pr.id} pr={pr} showActions
                         onAddResult={()=>setAddResultFor(pr)}
@@ -819,46 +673,118 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
                 ))
             }
           </div>
+
+          {/* Goals */}
+          <div>
+            <SecLabel actions={
+              athGoals.length < 3 && (
+                <button type="button" className="b bsm" style={{ padding:'2px 7px', fontSize:11 }} onClick={addGoal}>
+                  <i className="ti ti-plus" /> Objetivo
+                </button>
+              )
+            }>Objetivos</SecLabel>
+            {athGoals.length === 0
+              ? <div style={{ fontSize:12, color:DIM, fontStyle:'italic' }}>Nenhum objetivo definido.</div>
+              : athGoals.map(g => (
+                  <HpBar key={g.id} goal={g} color={athColor}
+                    onAddSession={()=>addGoalSession(g.id)}
+                    onMilestoneHit={(mi,hit)=>hitMilestone(g.id,mi,hit)}
+                    onConfigure={()=>setConfiguringGoal(g.id)}
+                    onDelete={()=>deleteGoal(g.id)} />
+                ))
+            }
+          </div>
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   };
 
   // ── Modals ──────────────────────────────────────────────────────────────────
+  const goalBeingConfigured = athGoals.find(g=>g.id===configuringGoal);
+
   const modals = (
     <>
+      {/* Profile modal */}
+      {showProfileModal && (
+        <div className="settings-overlay" onClick={()=>setShowProfileModal(false)}>
+          <div className="settings-modal" style={{ maxWidth:400 }} onClick={e=>e.stopPropagation()}>
+            <div className="settings-drag-hdr">
+              <span style={{ fontSize:13, fontWeight:700, color:CREAM }}>Perfil do Atleta</span>
+              <button type="button" className="b bd bsm" style={{ marginLeft:'auto', padding:'3px 8px', minHeight:24 }} onClick={()=>setShowProfileModal(false)}><i className="ti ti-x" /></button>
+            </div>
+            <div style={{ padding:'14px 16px', display:'flex', flexDirection:'column', gap:12 }}>
+              <div className="fg"><span className="lbl">Nome</span><input className="ex-input" value={profileForm?.name||''} onChange={e=>setProfileForm(f=>({...f,name:e.target.value}))} /></div>
+              <div className="g2">
+                <div className="fg"><span className="lbl">Nível</span>
+                  <select className="ex-input" value={profileForm?.level||''} onChange={e=>setProfileForm(f=>({...f,level:e.target.value}))}>
+                    {getLevels().map(l=><option key={l}>{l}</option>)}
+                  </select>
+                </div>
+                <div className="fg"><span className="lbl">Objetivo</span>
+                  <select className="ex-input" value={profileForm?.goal||''} onChange={e=>setProfileForm(f=>({...f,goal:e.target.value}))}>
+                    {getGoals().map(g=><option key={g}>{g}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="fg"><span className="lbl">Observações</span><input className="ex-input" placeholder="ex: Joelho direito" value={profileForm?.notes||''} onChange={e=>setProfileForm(f=>({...f,notes:e.target.value}))} /></div>
+              <div className="g2">
+                <div className="fg">
+                  <span className="lbl">Cor</span>
+                  <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                    <div style={{ width:28, height:28, background:profileForm?.color||'#e87820', border:`2px solid ${DIV}`, cursor:'pointer', flexShrink:0 }} onClick={()=>document.getElementById('ath-clr')?.click()} />
+                    <input type="color" id="ath-clr" value={profileForm?.color||'#e87820'} onChange={e=>setProfileForm(f=>({...f,color:e.target.value}))} style={{ opacity:0, position:'absolute', pointerEvents:'none' }} />
+                    <input className="ex-input" value={profileForm?.color||''} onChange={e=>{ if(/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) setProfileForm(f=>({...f,color:e.target.value})); }} style={{ fontFamily:'monospace', fontSize:12 }} />
+                  </div>
+                </div>
+                <div className="fg"><span className="lbl">Membro desde</span><input type="date" className="ex-input" value={profileForm?.since||''} onChange={e=>setProfileForm(f=>({...f,since:e.target.value}))} /></div>
+              </div>
+              <div style={{ display:'flex', gap:8, marginTop:4 }}>
+                <button type="button" className="b bsec" style={{ flex:1 }} onClick={()=>{saveProfile();setShowProfileModal(false);}}>
+                  {profileSaved ? <><i className="ti ti-check" /> Salvo</> : <><i className="ti ti-check" /> Salvar</>}
+                </button>
+                <button type="button" className="b bd" style={{ padding:'0 12px' }} onClick={deleteAthlete}><i className="ti ti-trash" /></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Goal config modal */}
+      {goalBeingConfigured && (
+        <div className="settings-overlay" onClick={()=>setConfiguringGoal(null)}>
+          <div className="settings-modal" style={{ maxWidth:400 }} onClick={e=>e.stopPropagation()}>
+            <div className="settings-drag-hdr">
+              <span style={{ fontSize:13, fontWeight:700, color:CREAM }}>Configurar objetivo</span>
+              <button type="button" className="b bd bsm" style={{ marginLeft:'auto', padding:'3px 8px', minHeight:24 }} onClick={()=>setConfiguringGoal(null)}><i className="ti ti-x" /></button>
+            </div>
+            <div style={{ padding:'14px 16px' }}>
+              <GoalConfigPanel goal={goalBeingConfigured} onSave={u=>updateGoal(configuringGoal,u)} onCancel={()=>setConfiguringGoal(null)} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PR modals */}
       {(showPrModal||editingPr) && <PrModal editPr={editingPr||null} onSave={savePr} onClose={()=>{setShowPrModal(false);setEditingPr(null);}} />}
       {addResultFor && <AddResultModal pr={addResultFor} onSave={result=>addResult(addResultFor.id,result)} onClose={()=>setAddResultFor(null)} />}
     </>
   );
 
   // ── Mobile layout ───────────────────────────────────────────────────────────
-  if (isMobile) {
-    const BackBtn = ({ label }) => (
-      <button type="button" className="rp-mobile-back" onClick={goBack}>
-        <i className="ti ti-chevron-left" /> {label}
-      </button>
-    );
-    return (
-      <div style={{ background:BG, minHeight:'100%', paddingBottom:70 }}>
-        {pane === 0 && <div style={{ height:'calc(100vh - 120px)' }}>{renderPane1()}</div>}
-        {pane === 1 && (
-          <div style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 120px)' }}>
-            <BackBtn label="Atletas" />
-            <div style={{ flex:1, overflowY:'auto' }}>{renderPane2()}</div>
-          </div>
-        )}
-        {pane === 2 && (
-          <div style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 120px)' }}>
-            <BackBtn label={ath?.name||'Atleta'} />
-            <div style={{ flex:1, overflowY:'auto' }}>{renderPane3()}</div>
-          </div>
-        )}
-        {modals}
-      </div>
-    );
-  }
+  if (isMobile) return (
+    <div style={{ background:BG, minHeight:'100%', paddingBottom:70 }}>
+      {pane === 0 && <div style={{ height:'calc(100vh - 120px)' }}>{renderPane1()}</div>}
+      {pane === 1 && (
+        <div style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 120px)' }}>
+          <button type="button" className="rp-mobile-back" onClick={()=>{ setPane(0); setSelAthlete(null); }}>
+            <i className="ti ti-chevron-left" /> Atletas
+          </button>
+          <div style={{ flex:1, overflow:'hidden' }}>{renderDetail()}</div>
+        </div>
+      )}
+      {modals}
+    </div>
+  );
 
   // ── Desktop layout ──────────────────────────────────────────────────────────
   return (
@@ -866,11 +792,8 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
       <div style={{ width:200, flexShrink:0, borderRight:`1px solid ${DIV}`, display:'flex', flexDirection:'column' }}>
         {renderPane1()}
       </div>
-      <div style={{ width:300, flexShrink:0, borderRight:`1px solid ${DIV}`, overflowY:'auto' }}>
-        {renderPane2()}
-      </div>
-      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', overflowY:'auto' }}>
-        {renderPane3()}
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        {renderDetail()}
       </div>
       {modals}
     </div>
