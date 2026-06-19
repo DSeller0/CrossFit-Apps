@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   loadAthletes, saveAthletes, loadGoalsData, saveGoalsData,
   loadRegistry, uid, todayISO, matchesAthlete,
@@ -112,7 +113,7 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
           if (e.key==='ArrowDown'&&open&&suggestions.length) ref.current?.querySelector('.ex-suggestion')?.focus();
         }}
       />
-      {open && suggestions.length > 0 && dropRect && (
+      {open && suggestions.length > 0 && dropRect && createPortal(
         <div ref={dropdownRef} style={{ position:'fixed', top:dropRect.bottom+2, left:dropRect.left, width:dropRect.width, zIndex:9999, background:STONE, border:`1px solid ${DIV}`, maxHeight:180, overflowY:'auto', boxShadow:'0 4px 16px rgba(0,0,0,.6)' }}>
           {suggestions.map((s,i) => (
             <div key={i} className="ex-suggestion" tabIndex={0}
@@ -131,7 +132,7 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
             </div>
           ))}
         </div>
-      )}
+      , document.body)}
     </div>
   );
 }
