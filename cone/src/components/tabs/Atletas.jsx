@@ -231,21 +231,30 @@ function AddResultModal({ pr, onSave, onClose }) {
 
 // ── PrModal ───────────────────────────────────────────────────────────────────
 function PrModal({ onSave, onClose, editPr }) {
-  const [category, setCategory] = useState(editPr?.category || '');
-  const [name, setName]         = useState(editPr?.name || '');
-  const [type, setType]         = useState(editPr?.type || 'load');
-  const [unit, setUnit]         = useState(editPr?.unit || 'kg');
-  const [target, setTarget]     = useState(editPr?.target || '');
-  const [date, setDate]         = useState(todayISO);
-  const [value, setValue]       = useState('');
+  const [name, setName]     = useState(editPr?.name || '');
+  const [type, setType]     = useState(editPr?.type || 'load');
+  const [unit, setUnit]     = useState(editPr?.unit || 'kg');
+  const [target, setTarget] = useState(editPr?.target || '');
+  const [date, setDate]     = useState(todayISO);
+  const [value, setValue]   = useState('');
   const registry   = loadRegistry() || {};
-  const blockTypes = Object.keys(registry);
+  const blockOrder = Object.keys(registry);
   const isEdit     = !!editPr;
+
+  const exBlocks = useMemo(() => {
+    const n = name.trim().toLowerCase();
+    if (!n) return [];
+    return blockOrder.filter(bt =>
+      (registry[bt] || []).some(e => (typeof e === 'string' ? e : e?.name || '').toLowerCase() === n)
+    );
+  }, [name, registry]);
+
+  const primaryCategory = exBlocks[0] || editPr?.category || '';
 
   const save = () => {
     if (!name.trim() || (!isEdit && !value)) return;
     const result = isEdit ? null : { value:type==='time'?value:Number(value), date };
-    onSave({ id:editPr?.id||uid(), name:name.trim(), category, type, unit:type==='load'?unit:null, target:target?(type==='time'?target:Number(target)):null, results:isEdit?editPr.results:(result?[result]:[]) });
+    onSave({ id:editPr?.id||uid(), name:name.trim(), category:primaryCategory, categories:exBlocks, type, unit:type==='load'?unit:null, target:target?(type==='time'?target:Number(target)):null, results:isEdit?editPr.results:(result?[result]:[]) });
   };
 
   return (
@@ -256,19 +265,17 @@ function PrModal({ onSave, onClose, editPr }) {
           <button type="button" className="b bd bsm" style={{ marginLeft:'auto', padding:'3px 8px', minHeight:24 }} onClick={onClose}><i className="ti ti-x" /></button>
         </div>
         <div style={{ padding:'14px 16px', display:'flex', flexDirection:'column', gap:10 }}>
-          <div className="g2">
-            <div className="fg">
-              <span className="lbl">Categoria</span>
-              <select className="ex-input" value={category} onChange={e=>{ setCategory(e.target.value); setName(''); }}>
-                <option value="">— Sem categoria —</option>
-                {blockTypes.map(bt => <option key={bt} value={bt}>{bt}</option>)}
-              </select>
-            </div>
-            <div className="fg">
-              <span className="lbl">Exercício / WOD</span>
-              <ExerciseCombobox value={name} onChange={setName} blockLabel={category} placeholder="Ex: Fran, Back Squat..." />
-            </div>
+          <div className="fg">
+            <span className="lbl">Exercício / WOD</span>
+            <ExerciseCombobox value={name} onChange={setName} blockLabel="" placeholder="Ex: Fran, Back Squat..." />
           </div>
+          {exBlocks.length > 0 && (
+            <div style={{ display:'flex', flexWrap:'wrap', gap:5, marginTop:-4 }}>
+              {exBlocks.map(bt => (
+                <span key={bt} style={{ fontSize:10, fontWeight:700, padding:'2px 7px', background:ECOL[bt]?.bg||STONE, color:ECOL[bt]?.text||MUTED, border:`1px solid ${ECOL[bt]?.text||DIV}44` }}>{bt}</span>
+              ))}
+            </div>
+          )}
           <div className="fg">
             <span className="lbl">Tipo</span>
             <div style={{ display:'flex', gap:6 }}>
@@ -596,8 +603,18 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
       </div>
     );
 
+    const blockOrder = Object.keys(loadRegistry() || {});
     const groupedPrs = {};
-    athPrs.forEach(pr => { const cat=pr.category||'Sem categoria'; if(!groupedPrs[cat]) groupedPrs[cat]=[]; groupedPrs[cat].push(pr); });
+    athPrs.forEach(pr => {
+      const cats = pr.categories?.length ? pr.categories : (pr.category ? [pr.category] : []);
+      const cat  = blockOrder.find(b => cats.includes(b)) || cats[0] || 'Sem categoria';
+      if (!groupedPrs[cat]) groupedPrs[cat] = [];
+      groupedPrs[cat].push(pr);
+    });
+    const sortedGroupEntries = [
+      ...blockOrder.filter(bt => groupedPrs[bt]).map(bt => [bt, groupedPrs[bt]]),
+      ...Object.keys(groupedPrs).filter(k => !blockOrder.includes(k)).map(k => [k, groupedPrs[k]]),
+    ];
 
     return (
       <div style={{ overflowY:'auto', height:'100%' }}>
@@ -661,7 +678,7 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
             }>PRs</SecLabel>
             {athPrs.length === 0
               ? <div style={{ fontSize:12, color:DIM, fontStyle:'italic' }}>Nenhum PR registrado.</div>
-              : Object.entries(groupedPrs).map(([cat,catPrs]) => (
+              : sortedGroupEntries.map(([cat,catPrs]) => (
                   <div key={cat} style={{ marginBottom:12 }}>
                     <div style={{ fontSize:9, fontWeight:700, color:'var(--theme-accent)', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:4, paddingBottom:4, borderBottom:`1px solid ${DIV}` }}>{cat}</div>
                     {catPrs.map(pr => (
