@@ -20,7 +20,7 @@ import ServicosTab from './components/tabs/Servicos';
 import ExerciciosTab from './components/tabs/Exercicios';
 import AtletasTab from './components/tabs/Atletas';
 import ResultadosTab from './components/tabs/Resultados';
-import PublicadorTab from './components/tabs/Publicador';
+import PublicadorTab, { AgendaView } from './components/tabs/Publicador';
 import CriadorTab from './components/tabs/Criador';
 import LoginScreen from './components/LoginScreen';
 import ConfigTab from './components/tabs/Config';
@@ -32,7 +32,8 @@ const TABS = [
   ['exercises', 'ti-tool',       'Exercícios'],
   ['locations', 'ti-map-pin',    'Serviços'],
   ['results',   'ti-chart-bar',  'Resultados'],
-  ['publisher', 'ti-calendar',   'Publicador de Grade'],
+  ['agenda',    'ti-calendar',   'Agenda'],
+  ['publisher', 'ti-layout-grid','Publicador de Grade'],
   ['config',    'ti-settings',   'Configurações'],
 ];
 
@@ -439,7 +440,8 @@ export default function App() {
         {tab === 'exercises' && <ExerciciosTab />}
         {tab === 'locations' && <ServicosTab />}
         {tab === 'results'   && <div className="res-pane"><ResultadosTab sessions={sessions} preload={resultsPreload} onPreloadConsumed={() => setResultsPreload(null)} /></div>}
-        {tab === 'publisher' && <div className="pub-pane"><PublicadorTab sessions={sessions} events={events} setEvents={setEvents} athletes={loadAthletes()} onEditSession={s => { setCreatorPreload(s); setTab('creator'); }} onLogResult={({athleteId, date}) => { setResultsPreload({athleteId, date}); setTab('results'); }} /></div>}
+        {tab === 'agenda'    && <div className="pub-pane"><AgendaView sessions={sessions} events={events} setEvents={setEvents} athletes={loadAthletes()} onEditSession={s => { setCreatorPreload(s); setTab('creator'); }} onLogResult={({athleteId, date}) => { setResultsPreload({athleteId, date}); setTab('results'); }} /></div>}
+        {tab === 'publisher' && <div className="pub-pane"><PublicadorTab sessions={sessions} /></div>}
         {tab === 'config'    && <ConfigTab />}
       </div>
     </div>

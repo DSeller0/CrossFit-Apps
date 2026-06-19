@@ -1159,6 +1159,12 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
   const BLOCK_C = { 'Força': '#d8a840', 'LPO': '#4ac8c0', 'For Time': '#e87820', 'Core': '#68d8a0', 'Acessórios': '#c884f0', 'AMRAP': '#e87820', 'Cardio': '#64b5f6', 'EMOM': '#ff8a65', 'WOD': '#e87820', 'HIIT': '#ff6d00' };
   const mobileWeeks = getWeeksOfMonth(year, month);
 
+  const locs = loadLocations();
+  function svcName(ev) {
+    if (ev.type === 'personal') return 'Personal';
+    const svc = ev.locationId ? locs.find(l => l.id === ev.locationId) : null;
+    return svc?.name || 'Aula';
+  }
   function evStatus(ev) { return ev.status === 'completed' ? 'completed' : 'scheduled'; }
   function dayEvents(iso) {
     const evs = (events[iso] || []).filter(ev => { if (filter === 'all') return true; return filter === evStatus(ev); });
@@ -1469,7 +1475,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
                     const isPers = ev.type === 'personal';
                     const done = evStatus(ev) === 'completed';
                     return React.createElement('span', { key: ci, className: `pub-chip ${isPers ? 'pub-chip-pers' : 'pub-chip-aula'}`, style: { opacity: done ? .65 : 1 } },
-                      done ? '✓ ' : '', ev.time, ' ', ev.label
+                      done ? '✓ ' : '', ev.time, ' ', svcName(ev)
                     );
                   }),
                   allCards.length > 3 && React.createElement('span', { className: 'pub-chip-more' }, `+${allCards.length - 3} mais`)
@@ -1531,7 +1537,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
   }
 
   return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', height: '100%' } },
-    isMobile ? renderMobileHeader() : renderDesktopHeader(),
+    isMobile ? (selDay ? null : renderMobileHeader()) : renderDesktopHeader(),
     isMobile
       ? (selDay ? renderMobileDayDetail() : renderMobileDayList())
       : renderDesktopBody(),
@@ -1798,16 +1804,6 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
       })
     ),
     React.createElement('div', null,
-    React.createElement('div', { className: 'agenda-wrap', style: { display: 'flex', flexDirection: 'column', marginBottom: '12px', border: '1px solid #1e1e1e', borderRadius: '8px', overflow: 'hidden' } },
-      React.createElement(AgendaView, {
-        sessions,
-        events: events || {},
-        setEvents: setEvents || (() => {}),
-        athletes: athletes || [],
-        onEditSession: onEditSession || (() => {}),
-        onLogResult: onLogResult || (() => {})
-      })
-    ),
     React.createElement('div', { className: 'pub-controls' },
       React.createElement('input', { type: 'file', ref: logoInputRef, accept: 'image/*', style: { display: 'none' }, onChange: handleLogoUpload }),
       React.createElement('div', { className: 'fg', style: { minWidth: '80px', alignItems: 'center' } },
@@ -2195,4 +2191,5 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
   )); // closes inner div + Fragment
 }
 
+export { AgendaView };
 export default SchedulePublisher;
