@@ -1256,40 +1256,24 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
           : React.createElement('span', { style: { fontSize: '11px', color: isPast ? '#554a3a' : '#c8b090', fontWeight: isToday ? 700 : 400 } }, day),
         allCards.length > 0 && React.createElement('span', { style: { fontSize: '9px', color: '#554a3a' } }, allCards.length)
       ),
-      allCards.slice(0, 3).map((card, ci) => {
-        if (card.kind === 'session') {
-          const s = card.data;
-          return React.createElement('div', { key: 's' + ci, className: 'cell-card', style: { marginBottom: '2px', padding: '2px 4px', borderRadius: '3px', borderLeft: '2px solid var(--theme-accent)', background: 'rgba(74,200,192,.06)' } },
-            React.createElement('div', { className: 'cell-card-full', style: { fontSize: '9px', fontWeight: 700, color: 'var(--theme-accent)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', alignItems: 'center' } },
-              React.createElement('i', { className: 'ti ti-calendar-event', style: { fontSize: '8px', marginRight: '2px' }, 'aria-hidden': 'true' }),
-              s.mainTraining || 'Sessão'
-            ),
-            React.createElement('div', { className: 'cell-card-mini' },
-              React.createElement('span', { style: { width: '5px', height: '5px', borderRadius: '50%', background: 'var(--theme-accent)', display: 'inline-block' } })
-            )
+      React.createElement('div', { className: 'cell-card-grid' },
+        allCards.slice(0, 9).map((card, ci) => {
+          if (card.kind === 'session') {
+            return React.createElement('div', { key: 's' + ci, className: 'cell-card3', style: { borderLeft: '2px solid var(--theme-accent)', background: 'rgba(74,200,192,.06)' } },
+              React.createElement('i', { className: 'ti ti-calendar-event', style: { fontSize: '8px', color: 'var(--theme-accent)', flexShrink: 0 }, 'aria-hidden': 'true' })
+            );
+          }
+          const ev = card.data;
+          const isPers = ev.type === 'personal';
+          const done = evStatus(ev) === 'completed';
+          const borderCol = isPers ? '#d8a840' : 'var(--theme-accent)';
+          return React.createElement('div', { key: 'e' + ci, className: 'cell-card3', style: { borderLeft: `2px solid ${borderCol}`, background: isPers ? 'rgba(216,168,64,.07)' : 'rgba(74,200,192,.06)', opacity: done ? .7 : 1 } },
+            done && React.createElement('span', { style: { fontSize: '7px', color: '#68d8a0', flexShrink: 0, lineHeight: 1 } }, '✓'),
+            React.createElement('span', { style: { fontSize: '8px', color: isPers ? '#d8a840' : '#887060', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, ev.time)
           );
-        }
-        const ev = card.data;
-        const isPers = ev.type === 'personal';
-        const done = evStatus(ev) === 'completed';
-        const borderCol = isPers ? '#d8a840' : 'var(--theme-accent)';
-        const ath = isPers && ev.athleteIds?.[0] ? athletes.find(a => a.id === ev.athleteIds[0]) : null;
-        return React.createElement('div', { key: 'e' + ci, className: 'cell-card', style: { marginBottom: '2px', padding: '2px 4px', borderRadius: '3px', borderLeft: `2px solid ${borderCol}`, background: isPers ? 'rgba(216,168,64,.07)' : 'rgba(74,200,192,.06)', opacity: done ? .75 : 1 } },
-          React.createElement('div', { className: 'cell-card-full', style: { alignItems: 'center', gap: '3px' } },
-            done && React.createElement('span', { style: { fontSize: '8px', color: '#68d8a0' } }, '✓'),
-            React.createElement('span', { style: { fontSize: '9px', color: '#888' } }, ev.time),
-            React.createElement('span', { style: { fontSize: '9px', fontWeight: 700, color: isPers ? '#d8a840' : '#c8b090', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '70px' } },
-              ath ? React.createElement('span', null, React.createElement('span', { style: { width: '5px', height: '5px', borderRadius: '50%', background: ath.color, display: 'inline-block', marginRight: '2px' } }), ev.label) : ev.label
-            )
-          ),
-          React.createElement('div', { className: 'cell-card-mini', style: { alignItems: 'center', gap: '2px' } },
-            done && React.createElement('span', { style: { fontSize: '8px', color: '#68d8a0' } }, '✓'),
-            React.createElement('span', { style: { fontSize: '9px', color: '#666' } }, ev.time),
-            React.createElement('span', { style: { width: '5px', height: '5px', borderRadius: '50%', background: ath ? ath.color : borderCol, display: 'inline-block', flexShrink: 0 } })
-          )
-        );
-      }),
-      allCards.length > 3 && React.createElement('div', { style: { fontSize: '8px', color: '#554a3a', paddingLeft: '4px' } }, `+${allCards.length - 3} mais`)
+        })
+      ),
+      allCards.length > 9 && React.createElement('div', { style: { fontSize: '8px', color: '#554a3a', paddingLeft: '2px', marginTop: '1px' } }, `+${allCards.length - 9} mais`)
     );
   }
 
