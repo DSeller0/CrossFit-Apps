@@ -142,51 +142,56 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder, excludeNam
 
 // ── PrRow ─────────────────────────────────────────────────────────────────────
 function PrRow({ pr, onAddResult, onEdit, onDelete, showActions }) {
-  const best  = prBest(pr);
-  const delta = prDelta(pr);
-  const pct   = prPct(pr);
+  const isMobile    = useIsMobile();
+  const best        = prBest(pr);
+  const delta       = prDelta(pr);
+  const pct         = prPct(pr);
   const bestLabel   = best ? (pr.type==='load'?`${best.value} ${pr.unit||'kg'}`:pr.type==='reps'?`${best.value} reps`:best.value) : '—';
   const targetLabel = pr.target ? (pr.type==='load'?`${pr.target} ${pr.unit||'kg'}`:pr.type==='reps'?`${pr.target} reps`:pr.target) : null;
   const bestDate    = best ? new Date(best.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : null;
 
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 0', borderBottom:`1px solid ${DIV}` }}>
-      <div style={{ minWidth:120, flexShrink:0 }}>
-        <div style={{ fontSize:13, fontWeight:700, color:SUB, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:120 }}>{pr.name}</div>
-        {pr.category && <div style={{ fontSize:10, color:DIM }}>{pr.category}</div>}
-      </div>
-      {pct !== null
-        ? <div style={{ flex:1, display:'flex', flexDirection:'column', gap:2 }}>
-            <div style={{ display:'flex', gap:2 }}>
-              {Array.from({length:10},(_,bi) => {
-                const fill = pct>=(bi+1)*10?1:pct>bi*10?(pct-bi*10)/10:0;
-                return (
-                  <div key={bi} style={{ flex:1, height:12, background:STONE, border:`1px solid ${DIV}`, position:'relative', overflow:'hidden' }}>
-                    {fill>0 && <div style={{ position:'absolute', top:0, left:0, bottom:0, width:`${fill*100}%`, background:fill===1?'var(--theme-accent)':'var(--theme-accent)88' }} />}
-                  </div>
-                );
-              })}
+  const bar = pct !== null ? (
+    <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+      <div style={{ display:'flex', gap:2 }}>
+        {Array.from({length:10},(_,bi) => {
+          const fill = pct>=(bi+1)*10?1:pct>bi*10?(pct-bi*10)/10:0;
+          return (
+            <div key={bi} style={{ flex:1, height:12, background:STONE, border:`1px solid ${DIV}`, position:'relative', overflow:'hidden' }}>
+              {fill>0 && <div style={{ position:'absolute', top:0, left:0, bottom:0, width:`${fill*100}%`, background:fill===1?'var(--theme-accent)':'var(--theme-accent)88' }} />}
             </div>
-            {targetLabel && <div style={{ fontSize:9, color:DIM, textAlign:'right' }}>Meta: {targetLabel}</div>}
-          </div>
-        : <div style={{ flex:1 }} />
-      }
-      <div style={{ textAlign:'right', flexShrink:0, minWidth:60 }}>
-        <div style={{ fontSize:13, fontWeight:900, color:CREAM }}>{bestLabel}</div>
-        {bestDate && <div style={{ fontSize:10, color:DIM }}>{bestDate}</div>}
+          );
+        })}
       </div>
-      {delta && (
-        <div style={{ fontSize:11, fontWeight:700, flexShrink:0, minWidth:46, textAlign:'right', color:delta.good===true?'#68d8a0':delta.good===false?'#e05848':MUTED }}>
-          {delta.good===true?'↑':delta.good===false?'↓':''} {delta.label}
+      {targetLabel && <div style={{ fontSize:9, color:DIM, textAlign:'right' }}>Meta: {targetLabel}</div>}
+    </div>
+  ) : null;
+
+  return (
+    <div style={{ padding:'10px 0', borderBottom:`1px solid ${DIV}` }}>
+      <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontSize:13, fontWeight:700, color:SUB, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{pr.name}</div>
+          {pr.category && <div style={{ fontSize:10, color:DIM }}>{pr.category}</div>}
         </div>
-      )}
-      {showActions && (
-        <div style={{ display:'flex', gap:4, flexShrink:0 }}>
-          <button type="button" className="b bsm" style={{ padding:'3px 6px', minHeight:22, fontSize:11 }} onClick={onAddResult}><i className="ti ti-plus" /></button>
-          <button type="button" className="b bd bsm" style={{ padding:'3px 6px', minHeight:22, fontSize:11, opacity:.6 }} onClick={onEdit}><i className="ti ti-pencil" /></button>
-          <button type="button" className="b bd bsm" style={{ padding:'3px 6px', minHeight:22, fontSize:11, opacity:.5 }} onClick={onDelete}><i className="ti ti-trash" /></button>
+        {!isMobile && bar && <div style={{ flex:1 }}>{bar}</div>}
+        <div style={{ textAlign:'right', flexShrink:0, minWidth:60 }}>
+          <div style={{ fontSize:13, fontWeight:900, color:CREAM }}>{bestLabel}</div>
+          {bestDate && <div style={{ fontSize:10, color:DIM }}>{bestDate}</div>}
         </div>
-      )}
+        {delta && (
+          <div style={{ fontSize:11, fontWeight:700, flexShrink:0, minWidth:46, textAlign:'right', color:delta.good===true?'#68d8a0':delta.good===false?'#e05848':MUTED }}>
+            {delta.good===true?'↑':delta.good===false?'↓':''} {delta.label}
+          </div>
+        )}
+        {showActions && (
+          <div style={{ display:'flex', gap:4, flexShrink:0 }}>
+            <button type="button" className="b bsm" style={{ padding:'3px 6px', minHeight:22, fontSize:11 }} onClick={onAddResult}><i className="ti ti-plus" /></button>
+            <button type="button" className="b bd bsm" style={{ padding:'3px 6px', minHeight:22, fontSize:11, opacity:.6 }} onClick={onEdit}><i className="ti ti-pencil" /></button>
+            <button type="button" className="b bd bsm" style={{ padding:'3px 6px', minHeight:22, fontSize:11, opacity:.5 }} onClick={onDelete}><i className="ti ti-trash" /></button>
+          </div>
+        )}
+      </div>
+      {isMobile && bar && <div style={{ marginTop:8 }}>{bar}</div>}
     </div>
   );
 }
@@ -621,8 +626,8 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
 
     return (
       <div style={{ overflowY:'auto', height:'100%' }}>
-        {/* Profile header */}
-        <div style={{ padding:'14px 16px 12px', borderBottom:`1px solid ${DIV}`, borderLeft:`3px solid ${athColor}` }}>
+        {/* Profile header — sticky */}
+        <div style={{ position:'sticky', top:0, zIndex:10, background:BG, padding:'14px 16px 12px', borderBottom:`1px solid ${DIV}`, borderLeft:`3px solid ${athColor}` }}>
           <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8 }}>
             <div>
               <div style={{ fontSize:18, fontWeight:900, color:CREAM, letterSpacing:'.03em', lineHeight:1.2 }}>{ath.name}</div>
