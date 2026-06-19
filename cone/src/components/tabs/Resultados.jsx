@@ -4,13 +4,11 @@ import {
   loadResults, saveResults,
   loadAthletes,
   loadSettings, saveSettings,
-  uid, todayISO,
+  uid,
 } from '../../utils/storage';
 import { APP_CONFIG, GF } from '../../utils/config';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const getLevels = () => APP_CONFIG.athleteLevels || ['Iniciante', 'Intermediário', 'Avançado', 'Competidor'];
-const getGoals  = () => APP_CONFIG.athleteGoals  || ['Saúde geral', 'Força', 'Condicionamento', 'Competição'];
 const SCALES          = ['RX', 'Inter', 'SC', 'Adaptado'];
 const PRESENCE        = ['Presente', 'Ausente', 'Justificado'];
 const LEVEL_CLS       = { Iniciante:'lv-ini', Intermediário:'lv-int', Avançado:'lv-adv', Competidor:'lv-comp' };
@@ -972,7 +970,7 @@ function LeaderboardView({ athletes, sessions, results }) {
 // ── ResultadosTab (root) ──────────────────────────────────────────────────────
 export default function ResultadosTab({ sessions, preload, onPreloadConsumed }) {
   const [subView,  setSubView]  = useState('registro');
-  const [athletes, setAthletes] = useState(loadAthletes);
+  const [athletes] = useState(loadAthletes);
   const [results,  setResults]  = useState(loadResults);
 
   return (
