@@ -311,11 +311,26 @@ function sessionLoggedCount(sid){
   return (state.results||[]).filter(r=>r.sessionId===sid&&r.presence==='Presente').length;
 }
 
+// ── Exercise volume string (mirrors schedule.html exVolStr) ──────────────────
+function exVolStr(ex){
+  const isCardio=ex.intensity?.mode==='cardio';
+  if(isCardio){
+    const val=ex.intensity?.cardioVal;
+    const unit=ex.intensity?.cardioUnit||'m';
+    if(!val) return '';
+    const nameHasVal=(ex.name||'').toLowerCase().includes(String(val).toLowerCase());
+    return nameHasVal?'':`${val}${unit}`;
+  }
+  const repsRaw=ex.reps||'';
+  const repsDisplay=repsRaw.includes(',')?repsRaw.split(',').map(r=>r.trim()).join('-'):repsRaw;
+  return ex.sets&&repsDisplay?`${ex.sets}×${repsDisplay}`:repsDisplay;
+}
+
 // ── Render: WOD exercise summary ──────────────────────────────────────────────
 function renderWodSummary(bl){
   const meta=blkMeta(bl);
   const exs=(bl.exercises||[]).filter(e=>e.name).map(e=>{
-    const vol=e.sets&&e.reps?`${e.sets}×${e.reps}`:(e.reps||'');
+    const vol=exVolStr(e);
     return `<div class="wod-sum-ex">${esc([vol,e.name].filter(Boolean).join(' '))}</div>`;
   }).join('');
   if(!meta&&!exs) return '';
