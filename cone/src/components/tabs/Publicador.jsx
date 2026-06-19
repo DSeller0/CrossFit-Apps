@@ -1465,25 +1465,19 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
             allCards.length === 0
               ? React.createElement('span', { className: 'pub-day-rest' }, '— descanso')
               : React.createElement(React.Fragment, null,
-                  (() => {
-                    const cap = allCards.slice(0, 9);
-                    const nR = Math.ceil(cap.length / 3);
-                    const ord = [];
-                    for (let r = 0; r < nR; r++) for (let c = 0; c < 3; c++) { const si = c * nR + r; if (si < cap.length) ord.push(cap[si]); }
-                    return ord.map((card, ci) => {
-                      if (card.kind === 'session') {
-                        return React.createElement('span', { key: ci, className: 'pub-chip pub-chip-sess' },
-                          React.createElement('i', { className: 'ti ti-calendar-event', style: { fontSize: '8px' } }), ' ', card.data.mainTraining || 'Sessão'
-                        );
-                      }
-                      const ev = card.data;
-                      const isPers = ev.type === 'personal';
-                      const done = evStatus(ev) === 'completed';
-                      return React.createElement('span', { key: ci, className: `pub-chip ${isPers ? 'pub-chip-pers' : 'pub-chip-aula'}`, style: { opacity: done ? .65 : 1 } },
-                        done ? '✓ ' : '', ev.time, ' ', svcName(ev)
+                  allCards.slice(0, 9).map((card, ci) => {
+                    if (card.kind === 'session') {
+                      return React.createElement('span', { key: ci, className: 'pub-chip pub-chip-sess' },
+                        React.createElement('i', { className: 'ti ti-calendar-event', style: { fontSize: '8px' } }), ' ', card.data.mainTraining || 'Sessão'
                       );
-                    });
-                  })(),
+                    }
+                    const ev = card.data;
+                    const isPers = ev.type === 'personal';
+                    const done = evStatus(ev) === 'completed';
+                    return React.createElement('span', { key: ci, className: `pub-chip ${isPers ? 'pub-chip-pers' : 'pub-chip-aula'}`, style: { opacity: done ? .65 : 1 } },
+                      done ? '✓ ' : '', ev.time, ' ', svcName(ev)
+                    );
+                  }),
                   allCards.length > 9 && React.createElement('span', { className: 'pub-chip-more' }, `+${allCards.length - 9} mais`)
                 )
           )
