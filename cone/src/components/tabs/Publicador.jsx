@@ -1132,6 +1132,16 @@ function ReportModal({ events, sessions, onClose }) {
 }
 
 // ── AgendaView ────────────────────────────────────────────────────────────────
+function useIsMobile(bp) {
+  const [v, setV] = useState(() => window.innerWidth < (bp || 800));
+  useEffect(() => {
+    const fn = () => setV(window.innerWidth < (bp || 800));
+    window.addEventListener('resize', fn);
+    return () => window.removeEventListener('resize', fn);
+  }, []);
+  return v;
+}
+
 function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLogResult }) {
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth());
@@ -1140,11 +1150,14 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
   const [showReport, setShowReport] = useState(false);
   const [showForm, setShowForm] = useState(null);
   const [formData, setFormData] = useState({});
+  const [viewWeekIdx, setViewWeekIdx] = useState(0);
+  const isMobile = useIsMobile();
 
   const todayISO = toISO(new Date());
   const MONTHS_PT = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   const DAYS_PT_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const BLOCK_C = { 'Força': '#d8a840', 'LPO': '#4ac8c0', 'For Time': '#e87820', 'Core': '#68d8a0', 'Acessórios': '#c884f0', 'AMRAP': '#e87820', 'Cardio': '#64b5f6', 'EMOM': '#ff8a65', 'WOD': '#e87820', 'HIIT': '#ff6d00' };
+  const mobileWeeks = getWeeksOfMonth(year, month);
 
   function evStatus(ev) { return ev.status === 'completed' ? 'completed' : 'scheduled'; }
   function dayEvents(iso) {
@@ -1173,6 +1186,16 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
   });
   const totalEvs = totalAulas + totalPersonal;
   const totalCompleted = completedAulas + completedPersonal;
+
+  useEffect(() => {
+    const now = new Date();
+    if (now.getFullYear() === year && now.getMonth() === month) {
+      const idx = mobileWeeks.findIndex(w => now >= w[0] && now <= w[6]);
+      setViewWeekIdx(idx >= 0 ? idx : 0);
+    } else {
+      setViewWeekIdx(0);
+    }
+  }, [year, month]);
 
   function uid2() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
   function toISO2(y, m, d) { return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`; }
@@ -1381,12 +1404,100 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
     );
   }
 
-  return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', height: '100%' } },
-    React.createElement('div', { className: 'agenda-header', style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderBottom: '1px solid #2a2318', flexWrap: 'wrap', flexShrink: 0 } },
-      React.createElement('button', { onClick: () => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); setSelDay(null); }, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '16px', lineHeight: 1 } }, '‹'),
+  // ── Mobile render helpers ────────────────────────────────────────────────────
+  function prevMonth() { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); setSelDay(null); }
+  function nextMonth() { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); setSelDay(null); }
+
+  function renderMobileHeader() {
+    return React.createElement('div', { className: 'rp-sticktop pub-mobile-hdr' },
+      React.createElement('div', { className: 'rp-month-nav' },
+        React.createElement('button', { type: 'button', className: 'rp-nav-btn', onClick: prevMonth }, '‹'),
+        React.createElement('span', { className: 'rp-month-label' }, `${MONTHS_PT[month]} ${year}`),
+        React.createElement('button', { type: 'button', className: 'rp-nav-btn', onClick: nextMonth }, '›')
+      ),
+      React.createElement('div', { className: 'rp-weeks' },
+        mobileWeeks.map((w, i) => {
+          const lastDay = new Date(year, month + 1, 0).getDate();
+          const s = w[0].getMonth() === month ? w[0].getDate() : 1;
+          const e = w[6].getMonth() === month ? w[6].getDate() : lastDay;
+          return React.createElement('button', { key: i, type: 'button', className: `rp-week-btn${viewWeekIdx === i ? ' on' : ''}`, onClick: () => setViewWeekIdx(i) }, `${s}–${e}`);
+        })
+      ),
+      React.createElement('div', { className: 'pub-mobile-meta' },
+        React.createElement('div', { style: { display: 'flex', gap: '8px', fontSize: '10px', flexWrap: 'wrap', flex: 1 } },
+          React.createElement('span', { style: { color: 'var(--theme-accent)' } }, `${completedAulas}/${totalAulas} aulas`),
+          React.createElement('span', { style: { color: '#d8a840' } }, `${completedPersonal}/${totalPersonal} personal`),
+          React.createElement('span', { style: { color: '#68d8a0' } }, `${totalCompleted}/${totalEvs} concluídas`)
+        ),
+        React.createElement('div', { style: { display: 'flex', gap: '4px', flexShrink: 0 } },
+          ['all', 'scheduled', 'completed'].map(f => React.createElement('button', { key: f, type: 'button', onClick: () => setFilter(f), style: { background: filter === f ? 'var(--theme-accent)' : 'transparent', color: filter === f ? 'var(--theme-accent-text)' : '#806850', border: `1px solid ${filter === f ? 'var(--theme-accent)' : '#2a231c'}`, padding: '2px 6px', cursor: 'pointer', fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', fontFamily: 'inherit' } }, f === 'all' ? 'Todos' : f === 'scheduled' ? 'Agendado' : 'Completo'))
+        ),
+        React.createElement('button', { type: 'button', onClick: () => setShowReport(true), style: { background: 'rgba(216,168,64,.1)', border: '1px solid rgba(216,168,64,.3)', color: '#d8a840', padding: '3px 8px', cursor: 'pointer', fontSize: '10px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'inherit', flexShrink: 0 } }, React.createElement('i', { className: 'ti ti-file-analytics' }), 'Relatório')
+      )
+    );
+  }
+
+  function renderMobileDayList() {
+    const week = mobileWeeks[viewWeekIdx] || mobileWeeks[0];
+    if (!week) return null;
+    return React.createElement('div', { style: { overflowY: 'auto', flex: 1 } },
+      week.map(date => {
+        const iso = toISO(date);
+        const inMonth = date.getMonth() === month;
+        const isToday = iso === todayISO;
+        const gymSessions = dayGymSessions(iso);
+        const evs = dayEvents(iso);
+        const allCards = [...gymSessions.map(s => ({ kind: 'session', data: s })), ...evs.map(ev => ({ kind: 'event', data: ev }))];
+        return React.createElement('div', { key: iso, className: 'pub-day-row', style: { opacity: inMonth ? 1 : .28 }, onClick: () => { if (inMonth) setSelDay(iso); } },
+          React.createElement('div', { className: 'pub-day-left' },
+            React.createElement('div', { className: 'pub-day-name', style: { color: isToday ? 'var(--theme-accent)' : '#806850' } }, DAYS_PT_SHORT[date.getDay()]),
+            isToday
+              ? React.createElement('div', { className: 'pub-day-num today' }, date.getDate())
+              : React.createElement('div', { className: 'pub-day-num' }, date.getDate())
+          ),
+          React.createElement('div', { className: 'pub-day-chips' },
+            allCards.length === 0
+              ? React.createElement('span', { className: 'pub-day-rest' }, '— descanso')
+              : React.createElement(React.Fragment, null,
+                  allCards.slice(0, 3).map((card, ci) => {
+                    if (card.kind === 'session') {
+                      return React.createElement('span', { key: ci, className: 'pub-chip pub-chip-sess' },
+                        React.createElement('i', { className: 'ti ti-calendar-event', style: { fontSize: '8px' } }), ' ', card.data.mainTraining || 'Sessão'
+                      );
+                    }
+                    const ev = card.data;
+                    const isPers = ev.type === 'personal';
+                    const done = evStatus(ev) === 'completed';
+                    return React.createElement('span', { key: ci, className: `pub-chip ${isPers ? 'pub-chip-pers' : 'pub-chip-aula'}`, style: { opacity: done ? .65 : 1 } },
+                      done ? '✓ ' : '', ev.time, ' ', ev.label
+                    );
+                  }),
+                  allCards.length > 3 && React.createElement('span', { className: 'pub-chip-more' }, `+${allCards.length - 3} mais`)
+                )
+          )
+        );
+      })
+    );
+  }
+
+  function renderMobileDayDetail() {
+    return React.createElement(React.Fragment, null,
+      React.createElement('button', { type: 'button', className: 'rp-mobile-back', onClick: () => setSelDay(null) },
+        React.createElement('i', { className: 'ti ti-chevron-left' }), ' Semana'
+      ),
+      React.createElement('div', { style: { flex: 1, overflowY: 'auto' } },
+        React.createElement(DayPane)
+      )
+    );
+  }
+
+  // ── Desktop render helpers ───────────────────────────────────────────────────
+  function renderDesktopHeader() {
+    return React.createElement('div', { className: 'agenda-header', style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderBottom: '1px solid #2a2318', flexWrap: 'wrap', flexShrink: 0 } },
+      React.createElement('button', { onClick: prevMonth, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '16px', lineHeight: 1 } }, '‹'),
       React.createElement('button', { onClick: () => setShowReport(true), style: { background: 'rgba(216,168,64,.1)', border: '1px solid rgba(216,168,64,.3)', color: '#d8a840', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' } }, React.createElement('i', { className: 'ti ti-file-analytics' }), ' Relatório'),
       React.createElement('span', { style: { fontSize: '14px', fontWeight: 700, color: '#c8b090', flex: '1 1 100px', minWidth: '80px', textTransform: 'uppercase', letterSpacing: '.03em' } }, `${MONTHS_PT[month]} ${year}`),
-      React.createElement('button', { onClick: () => { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); setSelDay(null); }, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '16px', lineHeight: 1 } }, '›'),
+      React.createElement('button', { onClick: nextMonth, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '16px', lineHeight: 1 } }, '›'),
       React.createElement('button', { onClick: () => { const now = new Date(); setMonth(now.getMonth()); setYear(now.getFullYear()); setSelDay(now.toISOString().slice(0, 10)); }, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer', fontSize: '11px', fontWeight: 700 } }, 'Hoje'),
       React.createElement('div', { className: 'agenda-stats', style: { display: 'flex', gap: '8px', fontSize: '11px', flexWrap: 'wrap' } },
         React.createElement('span', { style: { color: 'var(--theme-accent)' } }, [completedAulas, '/', totalAulas, ' aulas'].join('')),
@@ -1396,8 +1507,11 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
       React.createElement('div', { style: { display: 'flex', gap: '4px' } },
         ['all', 'scheduled', 'completed'].map(f => React.createElement('button', { key: f, onClick: () => setFilter(f), className: 'agenda-filter-btn', style: { background: filter === f ? 'var(--theme-accent)' : 'transparent', color: filter === f ? 'var(--theme-accent-text)' : '#887060', border: `1px solid ${filter === f ? 'var(--theme-accent)' : '#2a2318'}`, padding: '3px 7px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' } }, f === 'all' ? 'Todos' : f === 'scheduled' ? 'Agendado' : 'Completo'))
       )
-    ),
-    React.createElement('div', { style: { display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' } },
+    );
+  }
+
+  function renderDesktopBody() {
+    return React.createElement('div', { style: { display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' } },
       React.createElement('div', { style: { flex: selDay ? '0 0 60%' : '1', minWidth: 0, overflowY: 'auto', borderRight: selDay ? '1px solid #2a2318' : 'none' } },
         React.createElement('div', { className: 'agenda-day-hdrs', style: { display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', borderBottom: '1px solid #2a2318', position: 'sticky', top: 0, background: '#0d0b08', zIndex: 2 } },
           DAYS_PT_SHORT.map(d => React.createElement('div', { key: d, className: 'agenda-day-hdr' }, d))
@@ -1413,7 +1527,14 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
       selDay && React.createElement('div', { className: 'agenda-pane', style: { minWidth: 0, overflowY: 'auto', background: '#0d0b08' } },
         React.createElement(DayPane)
       )
-    ),
+    );
+  }
+
+  return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', height: '100%' } },
+    isMobile ? renderMobileHeader() : renderDesktopHeader(),
+    isMobile
+      ? (selDay ? renderMobileDayDetail() : renderMobileDayList())
+      : renderDesktopBody(),
     showReport && React.createElement(ReportModal, { events, sessions, onClose: () => setShowReport(false) }),
     showForm && React.createElement(EventFormInner, { showForm, sessions, athletes, initialData: formData, onSave: evs => { const arr = Array.isArray(evs) ? evs : [evs]; arr.forEach(saveEvent); setShowForm(null); }, onCancel: () => setShowForm(null) })
   );
