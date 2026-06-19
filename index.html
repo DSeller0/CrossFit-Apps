@@ -425,6 +425,10 @@ main()
       </div>`;
   });
 
+window.addEventListener('pageshow', e => {
+  if (e.persisted) main().catch(() => {});
+});
+
 // ── PWA ───────────────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
