@@ -33,12 +33,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 
 /* ── Athlete filter bar ── */
 .sel-bar{background:var(--bg);border-bottom:1px solid var(--divider);padding:10px 20px}
-.athlete-sel{font-family:var(--font);font-size:12px;background:var(--stone);border:1px solid var(--divider);color:var(--text);padding:6px 10px;outline:none;cursor:pointer;width:100%;max-width:320px;border-radius:4px}
+.athlete-sel{font-family:var(--font);font-size:12px;background:var(--stone);border:1px solid var(--divider);color:var(--text);padding:6px 10px;outline:none;cursor:pointer;width:100%;max-width:320px}
 
 /* ── Week nav ── */
 .week-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:89px;z-index:19}
 .week-label{font-size:13px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
-.nav-btn{background:transparent;border:1px solid var(--divider);color:var(--muted);font-size:16px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;border-radius:4px}
+.nav-btn{background:transparent;border:1px solid var(--divider);color:var(--muted);font-size:16px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
 .nav-btn:hover{border-color:var(--teal);color:var(--teal)}
 
 /* ── Week grid ── */
@@ -46,7 +46,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 @media(max-width:700px){.week-grid{grid-template-columns:1fr;gap:8px;padding:10px}}
 
 /* ── Day card ── */
-.day-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:visible;transition:border-color .12s}
+.day-card{background:var(--bg2);border:1px solid var(--border);overflow:visible;transition:border-color .12s}
 .day-card.today{border-color:var(--accent)}
 .day-card.past .day-num{color:var(--muted)}
 .day-hdr{padding:8px 10px 6px;display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--border)}
@@ -58,7 +58,10 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 @media(max-width:700px){.day-card.no-sess{display:none}}
 
 /* ── Result card ── */
-.res-card{background:var(--stone);border:1px solid var(--border);border-radius:7px;margin-bottom:6px;transition:border-color .12s}
+.res-card{background:var(--stone);border:1px solid var(--border);margin-bottom:6px;transition:border-color .12s;position:relative}
+.res-card::before,.res-card::after{content:'';position:absolute;width:6px;height:6px}
+.res-card::before{top:-1px;left:-1px;border-top:1px solid var(--gold2);border-left:1px solid var(--gold2)}
+.res-card::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--gold2);border-right:1px solid var(--gold2)}
 .res-card.expanded{border-color:var(--teal)}
 .res-card-hdr{display:flex;align-items:center;gap:8px;padding:9px 11px;cursor:pointer;user-select:none;-webkit-user-select:none}
 .res-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--muted);flex-shrink:0;transition:all .2s}
@@ -69,14 +72,20 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 .res-body-meta{font-size:11px;color:var(--muted)}
 
 /* ── WOD section ── */
-.res-wod{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.res-wod{background:var(--bg);border:1px solid var(--border);padding:10px;display:flex;flex-direction:column;gap:8px}
 .res-wod-hdr{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
 .res-wod-title{font-size:11px;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .res-wod-meta{font-size:10px;color:var(--muted);flex-shrink:0;white-space:nowrap}
 
+/* ── WOD summary (exercise list) ── */
+.wod-summary{padding:8px 10px;background:var(--stone2);border:1px solid var(--border)}
+.wod-sum-meta{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.wod-sum-ex{font-size:11px;color:var(--muted);line-height:1.7}
+.wod-sum-ex:first-child{margin-top:0}
+
 /* ── KPI grid (Todos mode) ── */
 .res-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-.res-kpi{background:var(--stone);border:1px solid var(--border);border-radius:5px;padding:6px 4px;text-align:center}
+.res-kpi{background:var(--stone);border:1px solid var(--border);padding:6px 4px;text-align:center}
 .res-kpi-val{font-size:15px;font-weight:900;color:var(--cream);line-height:1}
 .res-kpi-lbl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px;line-height:1.2}
 
@@ -90,20 +99,20 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 .res-form{display:flex;flex-direction:column;gap:10px}
 .res-form-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
 .res-rpe-row{display:flex;gap:3px;flex-wrap:wrap}
-.res-rpe-btn{width:27px;height:27px;border-radius:4px;border:1px solid var(--border);background:var(--stone);color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .1s;display:flex;align-items:center;justify-content:center}
+.res-rpe-btn{width:27px;height:27px;border:1px solid var(--border);background:var(--stone);color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .1s;display:flex;align-items:center;justify-content:center}
 .res-rpe-btn.on{background:var(--teal);color:#000;border-color:var(--teal)}
 .res-scale-row{display:flex;gap:5px;flex-wrap:wrap}
-.res-scale-btn{padding:5px 9px;border-radius:4px;border:1px solid var(--border);background:var(--stone);color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .1s}
+.res-scale-btn{padding:5px 9px;border:1px solid var(--border);background:var(--stone);color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .1s}
 .res-scale-btn.on{border-color:var(--teal);color:var(--teal);background:rgba(74,200,192,.12)}
-.res-perf-input{background:var(--stone);border:1px solid var(--border);border-radius:5px;color:var(--cream);font-family:inherit;font-size:14px;padding:7px 10px;outline:none;width:110px;transition:border-color .15s;-webkit-appearance:none}
+.res-perf-input{background:var(--stone);border:1px solid var(--border);color:var(--cream);font-family:inherit;font-size:14px;padding:7px 10px;outline:none;width:110px;transition:border-color .15s;-webkit-appearance:none}
 .res-perf-input:focus{border-color:var(--teal)}
 .res-num-row{display:flex;gap:8px;flex-wrap:wrap}
 .res-spinner{text-align:center;padding:18px 0;color:var(--muted);font-size:12px}
 
 /* ── Buttons ── */
-.btn-lb{display:flex;align-items:center;gap:6px;width:100%;padding:7px 10px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--gold);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;font-family:inherit;transition:all .12s}
+.btn-lb{display:flex;align-items:center;gap:6px;width:100%;padding:7px 10px;background:transparent;border:1px solid var(--border);color:var(--gold);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;font-family:inherit;transition:all .12s}
 .btn-lb:hover{border-color:var(--gold);background:rgba(216,168,64,.07)}
-.btn-registrar{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;background:var(--teal);border:none;border-radius:6px;color:#000;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.05em;transition:opacity .15s}
+.btn-registrar{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;background:var(--teal);border:none;color:#000;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.05em;transition:opacity .15s}
 .btn-registrar:disabled{opacity:.5;cursor:not-allowed}
 .res-no-wod{font-size:12px;color:var(--muted);font-style:italic;padding:8px 0}
 
@@ -127,18 +136,34 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 .lb-perf{font-size:13px;font-weight:900;color:var(--cream);flex-shrink:0}
 .lb-empty{padding:28px 16px;font-size:13px;color:var(--muted);text-align:center;font-style:italic}
 
+/* ── Confirm modal ── */
+#confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400}
+#confirm-modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.92);background:var(--stone);border:1px solid var(--border);padding:24px 20px 18px;width:300px;max-width:92vw;z-index:401;opacity:0;transition:transform .18s ease,opacity .18s ease;position:fixed}
+#confirm-modal.open{transform:translate(-50%,-50%) scale(1);opacity:1}
+.confirm-title{font-size:11px;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px}
+.confirm-detail{background:var(--bg);border:1px solid var(--border);padding:10px 12px;margin-bottom:16px;display:flex;flex-direction:column;gap:6px}
+.confirm-wod{font-size:10px;font-weight:900;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.confirm-row{display:flex;justify-content:space-between;font-size:13px}
+.confirm-row-lbl{color:var(--muted)}
+.confirm-row-val{font-weight:700;color:var(--cream)}
+.confirm-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-cancel{font-family:inherit;font-size:13px;font-weight:700;padding:10px;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .12s}
+.btn-cancel:hover{border-color:var(--cream);color:var(--cream)}
+.btn-confirm{font-family:inherit;font-size:13px;font-weight:900;padding:10px;background:var(--teal);border:none;color:#000;cursor:pointer;transition:opacity .12s}
+.btn-confirm:hover{opacity:.88}
+
 /* ── Success modal ── */
-#success-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400}
-#success-modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.9);background:var(--stone);border:1px solid var(--border);border-radius:12px;padding:28px 24px 20px;width:320px;max-width:92vw;z-index:401;text-align:center;opacity:0;transition:transform .2s ease,opacity .2s ease}
+#success-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500}
+#success-modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.9);background:var(--stone);border:1px solid var(--border);padding:28px 24px 20px;width:320px;max-width:92vw;z-index:501;text-align:center;opacity:0;transition:transform .2s ease,opacity .2s ease}
 #success-modal.open{transform:translate(-50%,-50%) scale(1);opacity:1}
 .success-icon{font-size:44px;color:var(--teal);display:block;margin-bottom:12px}
 .success-title{font-size:17px;font-weight:900;color:var(--cream);margin-bottom:14px}
 .success-wod-lbl{font-size:10px;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
-.success-detail{background:var(--bg);border-radius:7px;padding:12px;margin-bottom:16px;display:flex;flex-direction:column;gap:6px}
+.success-detail{background:var(--bg);border:1px solid var(--border);padding:12px;margin-bottom:16px;display:flex;flex-direction:column;gap:6px}
 .success-row{display:flex;justify-content:space-between;font-size:13px}
 .success-row-lbl{color:var(--muted)}
 .success-row-val{font-weight:700;color:var(--cream)}
-.btn-dismiss{width:100%;padding:11px;background:var(--teal);border:none;border-radius:6px;color:#000;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit}
+.btn-dismiss{width:100%;padding:11px;background:var(--teal);border:none;color:#000;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit}
 
 /* ── Bottom nav ── */
 .p-nav{position:fixed;bottom:0;left:0;right:0;background:#0a0807;border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:30}
@@ -162,6 +187,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 <div id="lb-overlay" onclick="closeLb()"></div>
 <div id="lb-pane"><div id="lb-pane-content"></div></div>
 
+<div id="confirm-overlay" onclick="closeConfirmModal()"></div>
+<div id="confirm-modal"></div>
+
 <div id="success-overlay" onclick="dismissModal()"></div>
 <div id="success-modal"></div>
 
@@ -178,7 +206,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 </nav>
 
 <script>
-// ── Supabase ─────────────────────────────────────────────────────────────────
+// ── Supabase ──────────────────────────────────────────────────────────────────
 const _sb = supabase.createClient(
   'https://crsalcpvsedmiabkeibp.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw'
@@ -195,10 +223,11 @@ const SCALE_COL = {RX:'#4ac8c0',Inter:'#e87820',SC:'#9070d8',Adaptado:'#c05050'}
 let cfg={}, state={sessions:{},athletes:[],results:[],settings:{}};
 let weekOffset=0, selectedAthleteId='';
 let expandedSessions=new Set();
-let leaderboardTarget=null; // {sessId, blockId, dateKey}
-let submittingWodKey=null;  // `${sessId}:${blockId}`
+let leaderboardTarget=null;
+let submittingWodKey=null;
+let confirmPending=null; // {sid, bid, dk, inp, lbl, btype, perf}
 let successData=null;
-let logInputs={};           // `${sessId}:${blockId}` → {rpe,scale,perfTime,perfRounds,perfReps}
+let logInputs={};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
@@ -221,7 +250,7 @@ function blkLabel(bl){
 }
 function blkMeta(bl){
   const p=[];
-  if(bl.rounds) p.push(`${bl.rounds} RDS`);
+  if(bl.rounds) p.push(`${bl.rounds} rounds`);
   if(bl.duration) p.push(`CAP ${bl.duration}'`);
   return p.join(' · ');
 }
@@ -280,6 +309,20 @@ function sessionHasDot(sid){
 }
 function sessionLoggedCount(sid){
   return (state.results||[]).filter(r=>r.sessionId===sid&&r.presence==='Presente').length;
+}
+
+// ── Render: WOD exercise summary ──────────────────────────────────────────────
+function renderWodSummary(bl){
+  const meta=blkMeta(bl);
+  const exs=(bl.exercises||[]).filter(e=>e.name).map(e=>{
+    const vol=e.sets&&e.reps?`${e.sets}×${e.reps}`:(e.reps||'');
+    return `<div class="wod-sum-ex">${esc([vol,e.name].filter(Boolean).join(' '))}</div>`;
+  }).join('');
+  if(!meta&&!exs) return '';
+  return `<div class="wod-summary">
+    ${meta?`<div class="wod-sum-meta">${esc(meta)}</div>`:''}
+    ${exs}
+  </div>`;
 }
 
 // ── Render: KPI block ─────────────────────────────────────────────────────────
@@ -345,7 +388,7 @@ function renderForm(sid,bid,btype,dk){
     </div>
     ${perfField}
     <button type="button" class="btn-registrar" ${dis}
-      onclick="submitWod('${esc(sid)}','${esc(bid)}','${esc(dk)}')">
+      onclick="showConfirmModal('${esc(sid)}','${esc(bid)}','${esc(dk)}')">
       <i class="ti ti-check"></i> Registrar Resultado
     </button>
   </div>`;
@@ -354,7 +397,7 @@ function renderForm(sid,bid,btype,dk){
 // ── Render: single WOD section ────────────────────────────────────────────────
 function renderWodSection(sess,bl,dk){
   const sid=sess.id, bid=bl.id, btype=bl.type;
-  const lbl=blkLabel(bl), meta=blkMeta(bl);
+  const lbl=blkLabel(bl);
   let content;
   if(!selectedAthleteId){
     content=renderKPIs(sid,bid,btype);
@@ -365,8 +408,8 @@ function renderWodSection(sess,bl,dk){
   return `<div class="res-wod">
     <div class="res-wod-hdr">
       <span class="res-wod-title">${esc(lbl)}</span>
-      ${meta?`<span class="res-wod-meta">${esc(meta)}</span>`:''}
     </div>
+    ${renderWodSummary(bl)}
     ${content}
     <button type="button" class="btn-lb" onclick="openLb('${esc(sid)}','${esc(bid)}','${esc(dk)}')">
       <i class="ti ti-trophy"></i> Leaderboard
@@ -392,7 +435,7 @@ function renderCard(sess,dk){
         :`<div class="res-no-wod">Nenhum WOD nesta sessão.</div>`}
     </div>`;
   }
-  return `<div class="res-card${isExp?' expanded':''}">
+  return `<div class="res-card${isExp?' expanded':''}" data-sess-id="${esc(sid)}">
     <div class="res-card-hdr" onclick="toggleSession('${esc(sid)}')">
       <div class="res-dot${hasDot?' filled':''}"></div>
       <div class="res-card-name">${esc(name)}</div>
@@ -470,9 +513,53 @@ function setScale(sid,bid,s){
 }
 function setLogInp(sid,bid,field,val){getInp(sid,bid)[field]=val;}
 
+// ── Confirm modal ─────────────────────────────────────────────────────────────
+function showConfirmModal(sid,bid,dk){
+  if(!selectedAthleteId){alert('Selecione um atleta no filtro para registrar resultado.');return;}
+  const inp=getInp(sid,bid);
+  const sess=((state.sessions||{})[dk]||[]).find(s=>s.id===sid);
+  const bl=(sess?.blocks||[]).find(b=>b.id===bid);
+  const lbl=bl?blkLabel(bl):bid;
+  const btype=bl?.type||'';
+  let perf='';
+  if(btype==='For Time') perf=inp.perfTime||'';
+  else if(inp.perfRounds) perf=`${inp.perfRounds} rds${inp.perfReps?' + '+inp.perfReps+' reps':''}`;
+  const plbl=btype==='For Time'?'Tempo':'Resultado';
+  confirmPending={sid,bid,dk};
+
+  document.getElementById('confirm-modal').innerHTML=`
+    <div class="confirm-title">Confirmar registro</div>
+    <div class="confirm-detail">
+      <div class="confirm-wod">${esc(lbl)}</div>
+      <div class="confirm-row"><span class="confirm-row-lbl">Escala</span><span class="confirm-row-val">${esc(inp.scale)}</span></div>
+      <div class="confirm-row"><span class="confirm-row-lbl">RPE</span><span class="confirm-row-val">${inp.rpe}</span></div>
+      ${perf?`<div class="confirm-row"><span class="confirm-row-lbl">${plbl}</span><span class="confirm-row-val">${esc(perf)}</span></div>`:''}
+    </div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirmModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="proceedSubmit()">Confirmar</button>
+    </div>`;
+  document.getElementById('confirm-overlay').style.display='block';
+  const modal=document.getElementById('confirm-modal');
+  modal.style.display='block';
+  requestAnimationFrame(()=>modal.classList.add('open'));
+}
+function closeConfirmModal(){
+  confirmPending=null;
+  const modal=document.getElementById('confirm-modal');
+  modal.classList.remove('open');
+  setTimeout(()=>{modal.style.display='none';document.getElementById('confirm-overlay').style.display='none';},180);
+}
+function proceedSubmit(){
+  if(!confirmPending) return;
+  const {sid,bid,dk}=confirmPending;
+  closeConfirmModal();
+  setTimeout(()=>submitWod(sid,bid,dk),200);
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
 async function submitWod(sid,bid,dk){
   if(submittingWodKey) return;
-  if(!selectedAthleteId){alert('Selecione um atleta no filtro para registrar resultado.');return;}
   const k=inputKey(sid,bid);
   const inp=getInp(sid,bid);
   submittingWodKey=k;
@@ -609,6 +696,27 @@ function dismissModal(){
   render();
 }
 
+// ── URL param: ?session=ID → auto-expand ──────────────────────────────────────
+function handleUrlParams(){
+  const sid=new URLSearchParams(location.search).get('session');
+  if(!sid) return;
+  for(const [dk,sessions] of Object.entries(state.sessions||{})){
+    if(!(sessions||[]).some(s=>s.id===sid)) continue;
+    const d=new Date(dk+'T12:00:00');
+    const now=new Date();
+    const dSun=new Date(d); dSun.setDate(d.getDate()-d.getDay());
+    const nSun=new Date(now); nSun.setDate(now.getDate()-now.getDay());
+    weekOffset=Math.round((dSun-nSun)/(7*24*60*60*1000));
+    expandedSessions.add(sid);
+    render();
+    requestAnimationFrame(()=>{
+      const el=document.querySelector(`[data-sess-id="${sid}"]`);
+      if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'});
+    });
+    return;
+  }
+}
+
 // ── Data loading ──────────────────────────────────────────────────────────────
 async function init(attempt=0){
   try{
@@ -624,13 +732,14 @@ async function init(attempt=0){
     const [s,a,r,st]=rows.map(x=>x.data?.value??null);
     state={sessions:s??{},athletes:a??[],results:r??[],settings:st??{}};
     render();
+    handleUrlParams();
   }catch(e){
     if(attempt<2){setTimeout(()=>init(attempt+1),2000*(attempt+1));return;}
     document.getElementById('app').innerHTML=`
       <div class="error">
         <i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>
         Não foi possível carregar os dados.<br><small>${esc(e.message)}</small><br>
-        <button onclick="init()" style="margin-top:12px;background:transparent;border:1px solid #2e2e2e;color:#666;font-size:13px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit">
+        <button onclick="init()" style="margin-top:12px;background:transparent;border:1px solid #2e2e2e;color:#666;font-size:13px;padding:7px 16px;cursor:pointer;font-family:inherit">
           <i class="ti ti-refresh"></i> Tentar novamente
         </button>
       </div>`;
@@ -641,9 +750,7 @@ init();
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js').catch(()=>{});
-  });
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});
 }
 </script>
 </body>

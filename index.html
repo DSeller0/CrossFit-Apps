@@ -197,15 +197,15 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
         <span class="tile-ic">📅</span>
         <span class="tile-lbl">Agenda</span>
       </a>
-      <a class="nav-tile" id="reg-tile" href="log.html">
+      <a class="nav-tile" id="reg-tile" href="results.html">
         <span class="tile-ic">✏️</span>
-        <span class="tile-lbl">Registrar</span>
+        <span class="tile-lbl">Log</span>
       </a>
       <a class="nav-tile" href="leaderboard.html">
         <span class="tile-ic">🏆</span>
         <span class="tile-lbl">Leaderboard</span>
       </a>
-      <a class="nav-tile" href="cone/#resultados">
+      <a class="nav-tile" href="results.html">
         <span class="tile-ic">📊</span>
         <span class="tile-lbl">Resultados</span>
       </a>
@@ -243,9 +243,9 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
   <div class="sheet-grid">
     <a class="sheet-tile" href="me.html"><span class="sheet-ic">👤</span><span class="sheet-lbl">Meu Perfil</span></a>
     <a class="sheet-tile" href="schedule.html"><span class="sheet-ic">📅</span><span class="sheet-lbl">Agenda</span></a>
-    <a class="sheet-tile" id="sheet-reg" href="log.html"><span class="sheet-ic">✏️</span><span class="sheet-lbl">Registrar</span></a>
+    <a class="sheet-tile" id="sheet-reg" href="results.html"><span class="sheet-ic">✏️</span><span class="sheet-lbl">Log</span></a>
     <a class="sheet-tile" href="leaderboard.html"><span class="sheet-ic">🏆</span><span class="sheet-lbl">Leaderboard</span></a>
-    <a class="sheet-tile" href="cone/#resultados"><span class="sheet-ic">📊</span><span class="sheet-lbl">Resultados</span></a>
+    <a class="sheet-tile" href="results.html"><span class="sheet-ic">📊</span><span class="sheet-lbl">Resultados</span></a>
     <a class="sheet-tile" href="cone/"><span class="sheet-ic">⚙️</span><span class="sheet-lbl">Coach</span></a>
   </div>
   <button class="sheet-close" onclick="closeSheet()">Fechar</button>
@@ -298,7 +298,7 @@ function renderBlock(b) {
 }
 
 function renderCard(sess, dk, count, isToday, isFuture, firstOfDay) {
-  const logUrl = `log.html?date=${dk}&session=${encodeURIComponent(sess.id)}`;
+  const logUrl = `results.html?session=${encodeURIComponent(sess.id)}`;
   const blocks  = sess.blocks || [];
   const expanded = isToday && firstOfDay;
   const cardCls = `sess-card${isToday ? ' today' : (!isFuture ? ' past' : '')}${expanded ? '' : ' collapsed'}`;
@@ -373,7 +373,7 @@ async function main() {
   // Point registrar tiles to today's first session
   const todaySessions = allSessions[todayDK] || [];
   if (todaySessions.length) {
-    const regUrl = `log.html?date=${todayDK}&session=${encodeURIComponent(todaySessions[0].id)}`;
+    const regUrl = `results.html?session=${encodeURIComponent(todaySessions[0].id)}`;
     document.getElementById('reg-tile')?.setAttribute('href', regUrl);
     document.getElementById('sheet-reg')?.setAttribute('href', regUrl);
   }
