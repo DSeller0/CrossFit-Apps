@@ -389,6 +389,7 @@ async function main(){
   }
 }
 main();
+window.addEventListener('pageshow', e => { if (e.persisted) main().catch(() => {}); });
 </script>
 <nav class="p-nav">
   <a class="p-nav-btn" href="index.html"><span class="p-nav-ic">🏠</span><span>Início</span></a>

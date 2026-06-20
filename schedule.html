@@ -829,6 +829,7 @@ async function init(attempt=0){
 }
 
 init();
+window.addEventListener('pageshow', e => { if (e.persisted) init().catch(() => {}); });
 </script>
 
 <div id="log-pane-overlay" onclick="closeLogPane()"></div>

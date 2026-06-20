@@ -231,7 +231,7 @@ export default function ExerciciosTab() {
           )}
         </div>
 
-        {/* List */}
+        {/* List + inline add form */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {exsForPane.length === 0
             ? <div style={{ padding: 20, textAlign: 'center', color: DIM, fontSize: 12, fontStyle: 'italic' }}>
@@ -271,32 +271,30 @@ export default function ExerciciosTab() {
                 );
               })
           }
+          {selBlock !== null && (
+            <div style={{ borderTop: `1px solid ${DIV}`, padding: '10px 12px' }}>
+              {addError && <div style={{ fontSize: 11, color: '#e05848', marginBottom: 6 }}>{addError}</div>}
+              {adding ? (
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <input autoFocus className="ex-input" placeholder="Nome do exercício..." value={newName}
+                    style={{ flex: 1 }}
+                    onChange={e => { setNewName(e.target.value); setAddError(''); }}
+                    onKeyDown={e => { if (e.key === 'Enter') confirmAdd(); if (e.key === 'Escape') { setAdding(false); setNewName(''); setAddError(''); } }} />
+                  <button type="button" className="b bsec" style={{ padding: '6px 9px', flexShrink: 0 }} onClick={confirmAdd} disabled={!newName.trim()}>
+                    <i className="ti ti-check" />
+                  </button>
+                  <button type="button" className="b bd" style={{ padding: '6px 9px', flexShrink: 0 }} onClick={() => { setAdding(false); setNewName(''); setAddError(''); }}>
+                    <i className="ti ti-x" />
+                  </button>
+                </div>
+              ) : (
+                <button type="button" className="b bsec" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setAdding(true)}>
+                  <i className="ti ti-plus" /> Adicionar exercício
+                </button>
+              )}
+            </div>
+          )}
         </div>
-
-        {/* Add form / button */}
-        {selBlock !== null && (
-          <div style={{ borderTop: `1px solid ${DIV}`, padding: '10px 12px', flexShrink: 0 }}>
-            {addError && <div style={{ fontSize: 11, color: '#e05848', marginBottom: 6 }}>{addError}</div>}
-            {adding ? (
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <input autoFocus className="ex-input" placeholder="Nome do exercício..." value={newName}
-                  style={{ flex: 1 }}
-                  onChange={e => { setNewName(e.target.value); setAddError(''); }}
-                  onKeyDown={e => { if (e.key === 'Enter') confirmAdd(); if (e.key === 'Escape') { setAdding(false); setNewName(''); setAddError(''); } }} />
-                <button type="button" className="b bsec" style={{ padding: '6px 9px', flexShrink: 0 }} onClick={confirmAdd} disabled={!newName.trim()}>
-                  <i className="ti ti-check" />
-                </button>
-                <button type="button" className="b bd" style={{ padding: '6px 9px', flexShrink: 0 }} onClick={() => { setAdding(false); setNewName(''); setAddError(''); }}>
-                  <i className="ti ti-x" />
-                </button>
-              </div>
-            ) : (
-              <button type="button" className="b bsec" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setAdding(true)}>
-                <i className="ti ti-plus" /> Adicionar exercício
-              </button>
-            )}
-          </div>
-        )}
       </div>
     );
   };
