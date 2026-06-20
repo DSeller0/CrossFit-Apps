@@ -363,13 +363,17 @@ function openDemo(movements){
     const data=demoMap[(mv.name||'').toLowerCase()]||{};
     const videoId=extractYouTubeId(data.videoUrl||'');
     const desc=data.description||'';
-    const hasVideo=!!videoId;
-    const hasDesc=!!desc;
+    const muscles=data.muscles||'';
+    const notes=data.notes||'';
+    const hasVideo=!!videoId&&data.videoPublished===true;
+    const hasDesc=!!(desc||muscles||notes);
     const hasAny=hasVideo||hasDesc;
     return `<div>
       ${multi?`<div class="demo-section-name">${mv.name}</div>`:''}
       ${hasVideo?`<div class="demo-video-wrap"><iframe src="https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1" allowfullscreen loading="lazy"></iframe></div>`:''}
-      ${hasDesc?`<div class="demo-desc">${desc}</div>`:''}
+      ${desc?`<div class="demo-desc">${desc}</div>`:''}
+      ${muscles?`<div class="demo-desc"><span style="font-size:9px;font-weight:900;color:#4ac8c0;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px">Músculos</span>${muscles}</div>`:''}
+      ${notes?`<div class="demo-desc" style="color:#806850;font-size:12px;margin-top:4px">${notes}</div>`:''}
       ${!hasAny?`<div class="demo-no-content">Sem conteúdo de demo disponível.</div>`:''}
     </div>`;
   }).join('');
@@ -580,7 +584,7 @@ function renderDetail(sess,dateKey){
             const pctNums=loads.map(l=>parseFloat(l)).filter(n=>!isNaN(n));
             if(blRmData?.rm&&pctNums.length)calcStr=pctNums.map(p=>Math.ceil(blRmData.rm*p/100)).join('/')+' '+(blRmData.unit||'kg');
           }else if(ins){loadStr=ins;}
-          const hasDemoCx=mvs.some(m=>!!(demoMap[(m.name||'').toLowerCase()]?.videoUrl||demoMap[(m.name||'').toLowerCase()]?.description));
+          const hasDemoCx=mvs.some(m=>{const d=demoMap[(m.name||'').toLowerCase()]||{};return!!(d.videoUrl||d.description||d.muscles);});
           const cxNames=mvs.map(m=>safeAttr(m.name));
           return `<div class="detail-ex">
             <div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>
@@ -615,7 +619,7 @@ function renderDetail(sess,dateKey){
             const lineKey=`${bl.id}|${ex.id}-${gi}`;
             const lineDone=checkedExercises.has(lineKey);
             const exDataPg=gi===0?demoMap[(ex.name||'').toLowerCase()]||{}:{};
-            const hasDemoPg=gi===0&&!!(exDataPg.videoUrl||exDataPg.description);
+            const hasDemoPg=gi===0&&!!(exDataPg.videoUrl||exDataPg.description||exDataPg.muscles);
             return `<div class="detail-ex">
               <div class="detail-ex-check${lineDone?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}-${gi}')"></div>
               <div class="detail-ex-body">
@@ -631,7 +635,7 @@ function renderDetail(sess,dateKey){
         }
 
         const exDataR=demoMap[(ex.name||'').toLowerCase()]||{};
-        const hasDemoR=!!(exDataR.videoUrl||exDataR.description);
+        const hasDemoR=!!(exDataR.videoUrl||exDataR.description||exDataR.muscles);
         return `<div class="detail-ex">
           <div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>
           <div class="detail-ex-body">
