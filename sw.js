@@ -1,11 +1,11 @@
-const CACHE_VERSION = 'cone-v2';
+const CACHE_VERSION = 'cone-v3';
 
 const PRECACHE_URLS = [
   './index.html',
   './schedule.html',
   './leaderboard.html',
   './me.html',
-  './log.html',
+  './results.html',
   './manifest.json',
 ];
 
@@ -32,6 +32,27 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
+  // HTML pages: network-first so navigations always get the latest version.
+  // Falls back to cache only when offline.
+  if (event.request.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_VERSION).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() =>
+          caches.match(event.request)
+            .then(cached => cached || caches.match('./index.html'))
+        )
+    );
+    return;
+  }
+
+  // Other assets (JS, CSS, images): stale-while-revalidate.
   event.respondWith(
     caches.match(event.request).then(cached => {
       const networkFetch = fetch(event.request).then(response => {
@@ -40,13 +61,8 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_VERSION).then(cache => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => {});
-
-      return cached || networkFetch.catch(() => {
-        if (event.request.headers.get('accept')?.includes('text/html')) {
-          return caches.match('./index.html');
-        }
-      });
+      }).catch(() => null);
+      return cached || networkFetch;
     })
   );
 });
