@@ -151,8 +151,8 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
 .hab-ex.open .hab-ex-name{color:var(--teal)}
 .hab-ex-arr{font-size:9px;flex-shrink:0;color:var(--dim)}
 .hab-btn-add,.hab-btn-edit,.hab-btn-clear{padding:2px 7px;font-family:var(--font);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;letter-spacing:.04em;background:transparent;border:none}
-.hab-btn-add{border:1px solid var(--teal);color:var(--teal)}
-.hab-btn-edit{border:1px solid var(--gold2);color:var(--gold)}
+.hab-btn-add{border:1px solid var(--teal);color:var(--teal);font-size:13px;line-height:1}
+.hab-btn-edit{border:1px solid var(--gold2);color:var(--gold);padding:2px 5px;font-size:11px}
 .hab-btn-clear{color:var(--dim);font-size:12px;padding:2px 4px}
 .hab-ex-detail{overflow:hidden;max-height:0;margin:0;padding:0;border-top:none;transition:max-height .2s cubic-bezier(.4,0,.2,1)}
 .hab-ex-detail.open{max-height:160px;margin:0 10px 4px 10px;padding:6px 0 2px;border-top:1px solid var(--div)}
@@ -458,8 +458,8 @@ function renderPrSection(prs,registry,blockOrder){
         <span class="hab-check ${hasPr?'yes ti ti-check':'no ti ti-circle'}"></span>
         <span class="hab-ex-name"${!hasPr?' style="color:var(--dim)"':''}>${esc(name)}</span>
         ${hasPr
-          ?`<button class="hab-btn-edit" data-ex="${esc(name)}">EDITAR</button><button class="hab-btn-clear" data-ex="${esc(name)}">✕</button><span class="hab-ex-arr">▶</span>`
-          :`<button class="hab-btn-add" data-ex="${esc(name)}">+ ADD</button>`
+          ?`<button class="hab-btn-edit" data-ex="${esc(name)}"><span class="ti ti-pencil" style="pointer-events:none"></span></button><button class="hab-btn-clear" data-ex="${esc(name)}">✕</button><span class="hab-ex-arr">▶</span>`
+          :`<button class="hab-btn-add" data-ex="${esc(name)}">+</button>`
         }
       </div>${detailHtml}`;
     }).join('');
