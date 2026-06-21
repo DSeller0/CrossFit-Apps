@@ -518,12 +518,14 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
   const addGoalSession = goalId => {
     const g = athGoals.find(x=>x.id===goalId);
     if (!g||g.completedSessions>=g.totalSessions) return;
-    updateGoal(goalId, { completedSessions:g.completedSessions+1 });
+    const next = g.completedSessions + 1;
+    const completedAt = next >= g.totalSessions ? (g.completedAt || todayISO()) : g.completedAt;
+    updateGoal(goalId, { completedSessions:next, completedAt });
   };
   const hitMilestone = (goalId, mi, hit) => {
     const g = athGoals.find(x=>x.id===goalId);
     if (!g) return;
-    updateGoal(goalId, { milestones:g.milestones.map((m,i)=>i===mi?{...m,hit}:m) });
+    updateGoal(goalId, { milestones:g.milestones.map((m,i)=>i===mi?{...m,hit,hitDate:hit?(m.hitDate||todayISO()):undefined}:m) });
   };
 
   // PR operations
