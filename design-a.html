@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Status · Arthur · Modelo A — TotK</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;
+  --div:#2a231c;--gold:#d8a840;--gold2:#b88820;
+  --teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;
+  --muted:#806850;--dim:#554a3a;
+  --red:#c83030;--red2:#8a1510;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--cream);font-family:'Raleway',Arial,sans-serif;min-height:100vh;padding:20px 16px 60px;}
+.page{max-width:640px;margin:0 auto;}
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px;}
+.nav a{font-size:10px;font-weight:800;padding:4px 11px;background:var(--stone);border:1px solid var(--div);color:var(--muted);text-decoration:none;letter-spacing:.07em;text-transform:uppercase;}
+.nav a.on{background:var(--div);color:var(--gold);border-color:var(--gold2);}
+.mbadge{position:fixed;top:0;right:0;background:var(--teal);color:var(--bg);font-size:10px;font-weight:900;padding:5px 13px;letter-spacing:.1em;text-transform:uppercase;z-index:200;}
+
+/* ── TotK corner-bracket card ─────────────────────────── */
+.sh{position:relative;background:var(--stone);padding:14px 16px 16px;margin-bottom:10px;}
+.sh::before,.sh::after,.sh-inner::before,.sh-inner::after{content:'';position:absolute;width:14px;height:14px;border-color:var(--gold2);border-style:solid;}
+.sh::before{top:0;left:0;border-width:2px 0 0 2px;}
+.sh::after{top:0;right:0;border-width:2px 2px 0 0;}
+.sh-inner{position:relative;}
+.sh-inner::before{bottom:0;left:0;border-width:0 0 2px 2px;}
+.sh-inner::after{bottom:0;right:0;border-width:0 2px 2px 0;}
+.sh-title{
+  font-size:9px;font-weight:900;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.sh-title::before{content:'';flex:1;height:1px;background:linear-gradient(to right,transparent,var(--div));}
+.sh-title::after{content:'';flex:1;height:1px;background:linear-gradient(to left,transparent,var(--div));}
+.sh-title-r{font-size:8px;font-weight:600;color:var(--dim);letter-spacing:.04em;text-transform:none;margin-left:auto;}
+
+/* ── Universal HP bar (segmented notch style) ─────────── */
+.bar{position:relative;background:var(--div);overflow:hidden;flex-shrink:0;}
+.bar::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,transparent 0,transparent 9px,rgba(13,11,9,.45) 9px,rgba(13,11,9,.45) 10px);
+  pointer-events:none;z-index:1;
+}
+.bar-fill{height:100%;position:relative;z-index:0;}
+.bar.h5{height:5px;}
+.bar.h7{height:7px;}
+.bar.h9{height:9px;}
+.bar.h10{height:10px;}
+.bar.grow{flex:1;} /* for flex rows */
+
+/* ── Diamond bullet ──────────────────────────────────── */
+.di{color:var(--teal);font-size:13px;flex-shrink:0;line-height:1;}
+
+/* ── Profile ──────────────────────────────────────────── */
+.prof-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.av{width:72px;height:72px;border-radius:50%;background:linear-gradient(145deg,#163530,#091e1c);border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:var(--teal);flex-shrink:0;}
+.pname{font-size:21px;font-weight:900;color:var(--cream);line-height:1.1;}
+.ptier{font-size:10px;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin:3px 0 2px;}
+.psub{font-size:11px;color:var(--muted);}
+/* hearts */
+.hearts{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:3px;}
+.h{font-size:15px;line-height:1;}
+.hf{color:var(--red);}
+.ht{color:var(--gold);}
+.he{color:var(--dim);}
+
+/* ── KPI strip ────────────────────────────────────────── */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px;}
+.kpi{background:var(--stone);border:1px solid var(--div);padding:8px 7px;}
+.kpi-v{font-size:17px;font-weight:900;color:var(--cream);}
+.kpi-l{font-size:8px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin:2px 0 1px;}
+.kpi-sub{font-size:9px;color:var(--muted);font-weight:600;line-height:1.2;}
+
+/* ── Sessões Recentes ─────────────────────────────────── */
+.sess-item{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--div);}
+.sess-item:last-child{border-bottom:none;}
+.sess-info{flex:1;min-width:0;}
+.sess-name{color:var(--sub);font-weight:700;font-size:12px;}
+.sess-date{font-size:9px;color:var(--dim);margin-top:1px;}
+.sess-badges{display:flex;gap:3px;flex-shrink:0;}
+.bdg{font-size:9px;font-weight:800;padding:2px 5px;}
+.b-rpe{background:var(--div);color:var(--muted);}
+.b-rx{background:rgba(74,200,192,.12);color:var(--teal);}
+.b-sc{background:rgba(208,120,40,.12);color:#d07828;}
+.b-pr{background:rgba(216,168,64,.12);color:var(--gold);}
+
+/* ── Eventos Recentes ─────────────────────────────────── */
+.ev-item{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid var(--div);}
+.ev-item:last-child{border-bottom:none;}
+.ev-main{flex:1;min-width:0;}
+.ev-title{font-size:11px;font-weight:700;color:var(--sub);}
+.ev-sub{font-size:9px;color:var(--dim);margin-top:2px;}
+.ev-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
+.ev-val{font-size:11px;font-weight:800;}
+.ev-date{font-size:9px;color:var(--dim);}
+
+/* ── Objetivos + milestones ───────────────────────────── */
+.goal-item{margin-bottom:16px;}
+.goal-item:last-child{margin-bottom:0;}
+.goal-hdr{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.goal-name{flex:1;font-size:12px;font-weight:700;color:var(--sub);}
+.goal-pct{font-size:11px;font-weight:800;}
+.goal-marcos{font-size:9px;font-weight:700;color:var(--dim);margin-left:4px;}
+/* milestone details/summary toggle */
+details.ms-details{margin-bottom:4px;}
+details.ms-details>summary{list-style:none;cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent;}
+details.ms-details>summary::-webkit-details-marker{display:none;}
+details.ms-details[open]>summary .ms-hint{display:none;}
+details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);outline-offset:2px;}
+.ms-hint{font-size:8px;color:var(--dim);text-align:right;margin-top:3px;letter-spacing:.04em;}
+.ms-bar{height:7px;background:var(--div);position:relative;overflow:hidden;}
+.ms-bar::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent 9px,rgba(13,11,9,.45) 9px,rgba(13,11,9,.45) 10px);pointer-events:none;z-index:1;}
+.ms-fill{position:absolute;inset:0 auto 0 0;height:100%;z-index:0;}
+.ms-dot{position:absolute;top:50%;transform:translate(-50%,-50%);width:11px;height:11px;border-radius:50%;border:2px solid var(--bg);z-index:2;transition:transform .15s;}
+details.ms-details[open] .ms-dot{cursor:default;}
+.ms-dot.hit{background:var(--gold);}
+.ms-dot.nxt{background:var(--stone2);border-color:var(--teal);}
+.ms-dot.fut{background:var(--stone2);border-color:var(--dim);}
+/* expanded milestone list */
+.ms-list{padding:6px 0 2px;}
+.ms-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:10px;border-bottom:1px solid var(--div);}
+.ms-row:last-child{border-bottom:none;}
+.ms-row-icon{font-size:11px;flex-shrink:0;}
+.ms-row-name{flex:1;font-weight:700;}
+.ms-row-pct{font-size:9px;font-weight:600;color:var(--dim);flex-shrink:0;}
+.ms-row-status{font-size:9px;font-weight:800;flex-shrink:0;}
+.ms-row.hit{color:var(--gold);}
+.ms-row.hit .ms-row-status{color:var(--gold);}
+.ms-row.nxt{color:var(--teal);}
+.ms-row.nxt .ms-row-status{color:var(--teal);}
+.ms-row.fut{color:var(--dim);}
+.goal-sub{font-size:9px;color:var(--dim);margin-top:4px;}
+
+/* ── WODs / Distribuição bar rows ────────────────────── */
+.dist-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.dist-row:last-child{margin-bottom:0;}
+.dist-lbl{font-size:11px;font-weight:700;color:var(--sub);width:72px;flex-shrink:0;}
+.dist-val{font-size:10px;font-weight:700;flex-shrink:0;width:28px;text-align:right;}
+
+/* ── PR drilldown ─────────────────────────────────────── */
+.hab-block{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--div);cursor:pointer;}
+.hab-block:last-child{border-bottom:none;}
+.hab-caret{font-size:9px;color:var(--dim);width:10px;flex-shrink:0;text-align:center;}
+.hab-block.open .hab-caret,.hab-block.open .hab-name{color:var(--teal);}
+.hab-name{flex:1;font-size:12px;font-weight:700;color:var(--sub);}
+.hab-mini{width:80px;flex-shrink:0;}
+.hab-count{font-size:10px;font-weight:700;color:var(--muted);width:50px;text-align:right;flex-shrink:0;}
+.hab-ex-list{background:var(--stone2);border-left:2px solid var(--teal);margin:3px 0 6px 18px;padding:3px 0;}
+.hab-ex{display:flex;align-items:center;gap:8px;padding:5px 10px;cursor:pointer;}
+.hab-ex.open{background:rgba(74,200,192,.05);}
+.hab-check{font-size:12px;flex-shrink:0;}
+.hab-check.yes{color:var(--teal);}
+.hab-check.no{color:var(--dim);}
+.hab-ex-name{flex:1;font-size:11px;color:var(--sub);font-weight:600;}
+.hab-ex.open .hab-ex-name{color:var(--teal);}
+.hab-ex-arr{font-size:9px;flex-shrink:0;}
+.hab-ex-detail{margin:0 10px 4px 10px;padding:6px 0 2px;border-top:1px solid var(--div);}
+.hab-detail-row{display:flex;align-items:center;gap:8px;}
+.hab-detail-val{font-size:11px;font-weight:800;color:var(--cream);white-space:nowrap;flex-shrink:0;}
+.hab-detail-sub{font-size:9px;color:var(--dim);margin-top:3px;text-align:right;}
+</style>
+</head>
+<body>
+<div class="mbadge">A · TotK</div>
+<div class="page">
+
+<div class="nav">
+  <a href="design-a.html" class="on">A · TotK</a>
+  <a href="design-b.html">B · FFT</a>
+  <a href="design-c.html">C · Mercado</a>
+  <a href="design-hybrid.html">Híbrido</a>
+</div>
+
+<!-- ═══════ PERFIL ═══════ -->
+<div class="sh"><div class="sh-inner">
+  <div class="sh-title">Atleta</div>
+  <div class="prof-row">
+    <div class="av">AM</div>
+    <div>
+      <div class="pname">Arthur Medrado</div>
+      <div class="ptier">Tier 02 · Personal</div>
+      <div class="psub">desde 15 Mar 2024 · 459 dias</div>
+    </div>
+  </div>
+  <div class="hearts">
+    <span class="h hf">♥</span><span class="h hf">♥</span><span class="h hf">♥</span><span class="h hf">♥</span>
+    <span class="h hf">♥</span><span class="h hf">♥</span><span class="h hf">♥</span><span class="h hf">♥</span>
+    <span class="h hf">♥</span><span class="h hf">♥</span><span class="h hf">♥</span><span class="h hf">♥</span>
+    <span class="h ht">♥</span>
+    <span class="h he">♡</span><span class="h he">♡</span><span class="h he">♡</span><span class="h he">♡</span>
+    <span class="h he">♡</span><span class="h he">♡</span><span class="h he">♡</span>
+  </div>
+  <div style="font-size:9px;color:var(--dim);margin-top:3px">12 de 20 sessões · meta mensal · Jun 2026</div>
+</div></div>
+
+<!-- ═══════ KPIs ═══════ -->
+<div class="kpi-strip">
+  <div class="kpi">
+    <div class="kpi-v">157</div>
+    <div class="kpi-l">Sessões</div>
+    <div class="kpi-sub">↑ 12 este mês<br>meta: 20</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-v">7 🔥</div>
+    <div class="kpi-l">Streak</div>
+    <div class="kpi-sub">recorde: 14 dias</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-v" style="color:var(--teal)">24</div>
+    <div class="kpi-l">PRs</div>
+    <div class="kpi-sub">3 este mês</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-v" style="color:var(--sub)">68%</div>
+    <div class="kpi-l">Taxa RX</div>
+    <div class="kpi-sub">↑ +4% vs mai</div>
+  </div>
+</div>
+
+<!-- ═══════ SESSÕES RECENTES ═══════ -->
+<div class="sh"><div class="sh-inner">
+  <div class="sh-title">Sessões Recentes <span class="sh-title-r">últimas 5</span></div>
+  <div class="sess-item">
+    <span class="di">◈</span>
+    <div class="sess-info"><div class="sess-name">Força Upper + Skill</div><div class="sess-date">Sáb 21 Jun</div></div>
+    <div class="sess-badges"><span class="bdg b-rpe">RPE 8</span><span class="bdg b-rx">RX</span></div>
+  </div>
+  <div class="sess-item">
+    <span class="di">◈</span>
+    <div class="sess-info"><div class="sess-name">MetCon + Cardio</div><div class="sess-date">Sex 20 Jun</div></div>
+    <div class="sess-badges"><span class="bdg b-rpe">RPE 7</span><span class="bdg b-sc">SC</span></div>
+  </div>
+  <div class="sess-item">
+    <span class="di">◈</span>
+    <div class="sess-info"><div class="sess-name">Força Lower</div><div class="sess-date">Qua 18 Jun</div></div>
+    <div class="sess-badges"><span class="bdg b-rpe">RPE 9</span><span class="bdg b-rx">RX</span><span class="bdg b-pr">PR</span></div>
+  </div>
+  <div class="sess-item">
+    <span class="di">◈</span>
+    <div class="sess-info"><div class="sess-name">LPO Intensificação</div><div class="sess-date">Seg 16 Jun</div></div>
+    <div class="sess-badges"><span class="bdg b-rpe">RPE 8</span><span class="bdg b-rx">RX</span><span class="bdg b-pr">PR</span></div>
+  </div>
+  <div class="sess-item">
+    <span class="di">◈</span>
+    <div class="sess-info"><div class="sess-name">AMRAP 20' Core</div><div class="sess-date">Sex 13 Jun</div></div>
+    <div class="sess-badges"><span class="bdg b-rpe">RPE 6</span><span class="bdg b-rx">RX</span></div>
+  </div>
+</div></div>
+
+<!-- ═══════ EVENTOS RECENTES ═══════ -->
+<div class="sh"><div class="sh-inner">
+  <div class="sh-title">Eventos Recentes <span class="sh-title-r">últimos 5</span></div>
+  <div class="ev-item">
+    <span class="di">◈</span>
+    <div class="ev-main">
+      <div class="ev-title">PR Quebrado — Back Squat</div>
+      <div class="ev-sub">Anterior: 85 kg &nbsp;·&nbsp; melhora de +5 kg</div>
+    </div>
+    <div class="ev-right"><span class="ev-val" style="color:var(--teal)">90 kg</span><span class="ev-date">Jun 18</span></div>
+  </div>
+  <div class="ev-item">
+    <span class="di">◈</span>
+    <div class="ev-main">
+      <div class="ev-title">Marco Atingido — Muscle-up consistente</div>
+      <div class="ev-sub">5 treinos registrados completados</div>
+    </div>
+    <div class="ev-right"><span class="ev-val" style="color:var(--teal)">1/3 marcos</span><span class="ev-date">Jun 15</span></div>
+  </div>
+  <div class="ev-item">
+    <span class="di">◈</span>
+    <div class="ev-main">
+      <div class="ev-title">PR Quebrado — Clean &amp; Jerk</div>
+      <div class="ev-sub">Anterior: 73 kg &nbsp;·&nbsp; melhora de +3 kg</div>
+    </div>
+    <div class="ev-right"><span class="ev-val" style="color:var(--teal)">76 kg</span><span class="ev-date">Jun 9</span></div>
+  </div>
+  <div class="ev-item">
+    <span class="di">◈</span>
+    <div class="ev-main">
+      <div class="ev-title">Streak Recorde</div>
+      <div class="ev-sub">Novo recorde pessoal de sequência de treinos</div>
+    </div>
+    <div class="ev-right"><span class="ev-val" style="color:#e07830">7 dias</span><span class="ev-date">Jun 14</span></div>
+  </div>
+  <div class="ev-item">
+    <span class="di">◈</span>
+    <div class="ev-main">
+      <div class="ev-title">Semana Completa</div>
+      <div class="ev-sub">Todas as sessões planejadas — Sem. 23</div>
+    </div>
+    <div class="ev-right"><span class="ev-val" style="color:var(--teal)">Jun 8–14</span><span class="ev-date">Jun 14</span></div>
+  </div>
+</div></div>
+
+<!-- ═══════ OBJETIVOS ═══════ -->
+<div class="sh"><div class="sh-inner">
+  <div class="sh-title">Objetivos <span class="sh-title-r">3 marcos atingidos</span></div>
+
+  <div class="goal-item">
+    <div class="goal-hdr">
+      <span class="goal-name">Campeonato Regional</span>
+      <span class="goal-pct" style="color:var(--teal)">40%</span>
+      <span class="goal-marcos">1/4 marcos</span>
+    </div>
+    <details class="ms-details">
+      <summary>
+        <div class="ms-bar">
+          <!-- 0–25% gold (achieved), 25–40% teal (in progress) → gold = 25/40 = 62.5% of fill -->
+          <div class="ms-fill" style="width:40%;background:linear-gradient(to right,var(--gold) 62.5%,var(--teal) 62.5%)"></div>
+          <div class="ms-dot hit" style="left:25%"></div>
+          <div class="ms-dot nxt" style="left:50%"></div>
+          <div class="ms-dot fut" style="left:75%"></div>
+          <div class="ms-dot fut" style="left:100%"></div>
+        </div>
+        <div class="ms-hint">◈ ver marcos</div>
+      </summary>
+      <div class="ms-list">
+        <div class="ms-row hit"><span class="ms-row-icon">◆</span><span class="ms-row-name">Preparação Base</span><span class="ms-row-pct">25%</span><span class="ms-row-status">atingido ✓</span></div>
+        <div class="ms-row nxt"><span class="ms-row-icon">◇</span><span class="ms-row-name">Fase Intensiva</span><span class="ms-row-pct">50%</span><span class="ms-row-status">próximo →</span></div>
+        <div class="ms-row fut"><span class="ms-row-icon">◇</span><span class="ms-row-name">Deload</span><span class="ms-row-pct">75%</span></div>
+        <div class="ms-row fut"><span class="ms-row-icon">◇</span><span class="ms-row-name">Competição</span><span class="ms-row-pct">100%</span></div>
+      </div>
+    </details>
+    <div class="goal-sub">8 de 20 semanas · prazo Set 2026</div>
+  </div>
+
+  <div class="goal-item">
+    <div class="goal-hdr">
+      <span class="goal-name">Muscle-up consistente</span>
+      <span class="goal-pct" style="color:var(--teal)">70%</span>
+      <span class="goal-marcos">1/3 marcos</span>
+    </div>
+    <details class="ms-details" open>
+      <summary>
+        <div class="ms-bar">
+          <!-- 0–33.3% gold (achieved), 33.3–70% teal → gold = 33.3/70 = 47.6% of fill -->
+          <div class="ms-fill" style="width:70%;background:linear-gradient(to right,var(--gold) 47.6%,var(--teal) 47.6%)"></div>
+          <div class="ms-dot hit" style="left:33.3%"></div>
+          <div class="ms-dot nxt" style="left:66.6%"></div>
+          <div class="ms-dot fut" style="left:100%"></div>
+        </div>
+        <div class="ms-hint">◈ ver marcos</div>
+      </summary>
+      <div class="ms-list">
+        <div class="ms-row hit"><span class="ms-row-icon">◆</span><span class="ms-row-name">5 treinos registrados</span><span class="ms-row-pct">33%</span><span class="ms-row-status">atingido ✓</span></div>
+        <div class="ms-row nxt"><span class="ms-row-icon">◇</span><span class="ms-row-name">10 treinos registrados</span><span class="ms-row-pct">67%</span><span class="ms-row-status">próximo →</span></div>
+        <div class="ms-row fut"><span class="ms-row-icon">◇</span><span class="ms-row-name">Consistente (20 treinos)</span><span class="ms-row-pct">100%</span></div>
+      </div>
+    </details>
+    <div class="goal-sub">14 de 20 treinos registrados</div>
+  </div>
+
+  <div class="goal-item">
+    <div class="goal-hdr">
+      <span class="goal-name">Back Squat 110 kg</span>
+      <span class="goal-pct" style="color:#70a8f0">82%</span>
+      <span class="goal-marcos">2/3 marcos</span>
+    </div>
+    <details class="ms-details">
+      <summary>
+        <div class="ms-bar">
+          <!-- 0–77.3% gold (2 milestones hit), 77.3–81.8% blue → gold = 77.3/81.8 = 94.5% of fill -->
+          <div class="ms-fill" style="width:81.8%;background:linear-gradient(to right,var(--gold) 94.5%,#5090e0 94.5%)"></div>
+          <div class="ms-dot hit" style="left:45.5%"></div>
+          <div class="ms-dot hit" style="left:77.3%"></div>
+          <div class="ms-dot nxt" style="left:90.9%"></div>
+        </div>
+        <div class="ms-hint">◈ ver marcos</div>
+      </summary>
+      <div class="ms-list">
+        <div class="ms-row hit"><span class="ms-row-icon">◆</span><span class="ms-row-name">50 kg</span><span class="ms-row-pct">45%</span><span class="ms-row-status">atingido ✓</span></div>
+        <div class="ms-row hit"><span class="ms-row-icon">◆</span><span class="ms-row-name">85 kg</span><span class="ms-row-pct">77%</span><span class="ms-row-status">atingido ✓</span></div>
+        <div class="ms-row nxt"><span class="ms-row-icon">◇</span><span class="ms-row-name">100 kg</span><span class="ms-row-pct">91%</span><span class="ms-row-status">próximo →</span></div>
+      </div>
+    </details>
+    <div class="goal-sub">90 kg atual · faltam 20 kg · meta: 110 kg</div>
+  </div>
+</div></div>
+
+<!-- ═══════ WODs ═══════ -->
+<div class="sh"><div class="sh-inner">
+  <div class="sh-title">WODs <span class="sh-title-r">Jun 2026 · 13 WODs no mês</span></div>
+  <!-- bar width = count / max (4) * 100% -->
+  <div class="dist-row">
+    <span class="dist-lbl">MetCon</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:100%;background:#e05848"></div></div>
+    <span class="dist-val" style="color:#e05848">4 ×</span>
+  </div>
+  <div class="dist-row">
+    <span class="dist-lbl">AMRAP</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:75%;background:#d07828"></div></div>
+    <span class="dist-val" style="color:#d07828">3 ×</span>
+  </div>
+  <div class="dist-row">
+    <span class="dist-lbl">EMOM</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:50%;background:#d07828"></div></div>
+    <span class="dist-val" style="color:#d07828">2 ×</span>
+  </div>
+  <div class="dist-row">
+    <span class="dist-lbl">For Time</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:50%;background:#d07828"></div></div>
+    <span class="dist-val" style="color:#d07828">2 ×</span>
+  </div>
+  <div class="dist-row">
+    <span class="dist-lbl">HIIT</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:25%;background:#e05848"></div></div>
+    <span class="dist-val" style="color:#e05848">1 ×</span>
+  </div>
+  <div class="dist-row">
+    <span class="dist-lbl">Estações</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:25%;background:#d07828"></div></div>
+    <span class="dist-val" style="color:#d07828">1 ×</span>
+  </div>
+</div></div>
+
+<!-- ═══════ DISTRIBUIÇÃO ═══════ -->
+<div class="sh"><div class="sh-inner">
+  <div class="sh-title">Distribuição <span class="sh-title-r">Últimos 90 dias · 68 sessões</span></div>
+  <div class="dist-row">
+    <span class="dist-lbl">Força</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:100%;background:#5090e0"></div></div>
+    <span class="dist-val" style="color:#5090e0">18 ×</span>
+  </div>
+  <div class="dist-row">
+    <span class="dist-lbl">Skill</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:78%;background:#4ac8c0"></div></div>
+    <span class="dist-val" style="color:#4ac8c0">14 ×</span>
+  </div>
+  <div class="dist-row">
+    <span class="dist-lbl">LPO</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:67%;background:#4070c0"></div></div>
+    <span class="dist-val" style="color:#4070c0">12 ×</span>
+  </div>
+  <div class="dist-row">
+    <span class="dist-lbl">Core</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:44%;background:#6090d8"></div></div>
+    <span class="dist-val" style="color:#6090d8">8 ×</span>
+  </div>
+  <div class="dist-row">
+    <span class="dist-lbl">Cardio</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:33%;background:#40b878"></div></div>
+    <span class="dist-val" style="color:#40b878">6 ×</span>
+  </div>
+  <div class="dist-row">
+    <span class="dist-lbl">Mobilidade</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:22%;background:#30a868"></div></div>
+    <span class="dist-val" style="color:#30a868">4 ×</span>
+  </div>
+</div></div>
+
+<!-- ═══════ PR (Habilidades drilldown) ═══════ -->
+<div class="sh"><div class="sh-inner">
+  <div class="sh-title">PR <span class="sh-title-r">Clique no bloco → exercícios → ver PR</span></div>
+
+  <!-- Força — ABERTO -->
+  <div class="hab-block open">
+    <span class="hab-caret">▼</span>
+    <span class="hab-name">Força</span>
+    <div class="hab-mini"><div class="bar h5"><div class="bar-fill" style="width:75%;background:#5090e0"></div></div></div>
+    <span class="hab-count" style="color:#5090e0">3 / 4 PRs</span>
+  </div>
+  <div class="hab-ex-list">
+    <!-- Back Squat — expandido -->
+    <div class="hab-ex open">
+      <span class="hab-check yes ti ti-check"></span>
+      <span class="hab-ex-name">Back Squat</span>
+      <span class="hab-ex-arr" style="color:var(--teal)">▼</span>
+    </div>
+    <div class="hab-ex-detail">
+      <div class="hab-detail-row">
+        <div class="bar h10 grow"><div class="bar-fill" style="width:81.8%;background:linear-gradient(to right,#3060a0,#5090e0)"></div></div>
+        <span class="hab-detail-val">90 / 110 kg</span>
+      </div>
+      <div class="hab-detail-sub">faltam 20 kg para a meta</div>
+    </div>
+    <div class="hab-ex">
+      <span class="hab-check yes ti ti-check"></span>
+      <span class="hab-ex-name">Deadlift</span>
+      <span class="hab-ex-arr" style="color:var(--dim)">▶</span>
+    </div>
+    <div class="hab-ex">
+      <span class="hab-check yes ti ti-check"></span>
+      <span class="hab-ex-name">Front Squat</span>
+      <span class="hab-ex-arr" style="color:var(--dim)">▶</span>
+    </div>
+    <div class="hab-ex">
+      <span class="hab-check no ti ti-circle"></span>
+      <span class="hab-ex-name" style="color:var(--dim)">Overhead Squat</span>
+      <span class="hab-ex-arr" style="color:var(--dim)">–</span>
+    </div>
+  </div>
+
+  <div class="hab-block">
+    <span class="hab-caret">▶</span>
+    <span class="hab-name">LPO</span>
+    <div class="hab-mini"><div class="bar h5"><div class="bar-fill" style="width:67%;background:#4070c0"></div></div></div>
+    <span class="hab-count" style="color:#4070c0">2 / 3 PRs</span>
+  </div>
+  <div class="hab-block">
+    <span class="hab-caret">▶</span>
+    <span class="hab-name">Skill</span>
+    <div class="hab-mini"><div class="bar h5"><div class="bar-fill" style="width:40%;background:#4ac8c0"></div></div></div>
+    <span class="hab-count" style="color:var(--muted)">2 / 5 PRs</span>
+  </div>
+  <div class="hab-block">
+    <span class="hab-caret">▶</span>
+    <span class="hab-name">Cardio</span>
+    <div class="hab-mini"><div class="bar h5"><div class="bar-fill" style="width:67%;background:#40b878"></div></div></div>
+    <span class="hab-count" style="color:var(--muted)">2 / 3 PRs</span>
+  </div>
+  <div class="hab-block">
+    <span class="hab-caret">▶</span>
+    <span class="hab-name">Core</span>
+    <div class="hab-mini"><div class="bar h5"><div class="bar-fill" style="width:33%;background:#6090d8"></div></div></div>
+    <span class="hab-count" style="color:var(--muted)">1 / 3 PRs</span>
+  </div>
+  <div class="hab-block">
+    <span class="hab-caret" style="color:var(--dim)">–</span>
+    <span class="hab-name" style="color:var(--dim)">Mobilidade</span>
+    <div class="hab-mini"><div class="bar h5"><div class="bar-fill" style="width:0%"></div></div></div>
+    <span class="hab-count">0 / 2 PRs</span>
+  </div>
+</div></div>
+
+</div>
+</body>
+</html>
