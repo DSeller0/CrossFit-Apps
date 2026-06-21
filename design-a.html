@@ -42,7 +42,7 @@ body{background:var(--bg);color:var(--cream);font-family:'Raleway',Arial,sans-se
 .bar{position:relative;background:var(--div);overflow:hidden;flex-shrink:0;}
 .bar::after{
   content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(90deg,transparent 0,transparent 9px,rgba(13,11,9,.45) 9px,rgba(13,11,9,.45) 10px);
+  background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(13,11,9,.65) calc(10% - 1px),rgba(13,11,9,.65) 10%);
   pointer-events:none;z-index:1;
 }
 .bar-fill{height:100%;position:relative;z-index:0;}
@@ -113,7 +113,7 @@ details.ms-details[open]>summary .ms-hint{display:none;}
 details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);outline-offset:2px;}
 .ms-hint{font-size:8px;color:var(--dim);text-align:right;margin-top:3px;letter-spacing:.04em;}
 .ms-bar{height:7px;background:var(--div);position:relative;overflow:hidden;}
-.ms-bar::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent 9px,rgba(13,11,9,.45) 9px,rgba(13,11,9,.45) 10px);pointer-events:none;z-index:1;}
+.ms-bar::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(13,11,9,.65) calc(10% - 1px),rgba(13,11,9,.65) 10%);pointer-events:none;z-index:1;}
 .ms-fill{position:absolute;inset:0 auto 0 0;height:100%;z-index:0;}
 .ms-dot{position:absolute;top:50%;transform:translate(-50%,-50%);width:11px;height:11px;border-radius:50%;border:2px solid var(--bg);z-index:2;transition:transform .15s;}
 details.ms-details[open] .ms-dot{cursor:default;}
