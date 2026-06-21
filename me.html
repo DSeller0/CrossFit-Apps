@@ -656,27 +656,29 @@ function confirmLsAttempt(){
   doLsSave(numVal,reps,date,note,false);
 }
 
-function doLsSave(val,reps,date,note,isNewPr){
+async function doLsSave(val,reps,date,note,isNewPr){
   const btn=document.getElementById('ls-btn-save');
   btn.disabled=true;btn.textContent='...';
-  try{
-    const pending=JSON.parse(localStorage.getItem('pr_pending')||'[]');
-    pending.push({
-      id:Math.random().toString(36).slice(2)+Date.now().toString(36),
-      date,athleteId:_curAthId,
-      isPrAttempt:true,prBest:isNewPr,
-      prExercise:_lsNameRef,prValue:val,prUnit:_lsUnit,
-      prReps:reps||null,prCategories:_lsCatsRef,
-      note:note||null,
-      savedAt:new Date().toISOString()
-    });
-    localStorage.setItem('pr_pending',JSON.stringify(pending));
-  }catch(e){}
+  const{error}=await _sb.rpc('submit_pr',{
+    p_athlete_id:String(_curAthId),
+    p_exercise:_lsNameRef,
+    p_value:String(val),
+    p_unit:_lsUnit,
+    p_reps:reps||null,
+    p_categories:_lsCatsRef,
+    p_is_pr_best:isNewPr,
+    p_note:note||null,
+    p_date:date
+  });
+  if(error){
+    btn.disabled=false;btn.textContent='SALVAR';
+    document.getElementById('ls-warn-area').innerHTML=`<div class="ls-warn">Erro ao salvar. Verifique conexão.</div>`;
+    return;
+  }
   btn.textContent=isNewPr?'✓ Novo PR!':'✓ Salvo';
   btn.style.background=isNewPr?'var(--gold)':'var(--teal)';
   if(isNewPr)btn.style.color='#000';
-  document.getElementById('ls-warn-area').innerHTML=`<div class="ls-warn">Registrado localmente. Peça ao seu coach para confirmar.</div>`;
-  setTimeout(()=>closeLogSheet(),1800);
+  setTimeout(()=>closeLogSheet(),1200);
 }
 
 // ── Body Metrics Sheet ────────────────────────────────────
