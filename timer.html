@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Timer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
+  --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;
+  --cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;--red:#c83030;
+  --font:'Raleway',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--cream);font-family:var(--font)}
+#root{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── Header ── */
+.t-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px 10px;border-bottom:1px solid var(--div);flex-shrink:0}
+.t-back{background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer;padding:2px 8px 2px 0;-webkit-tap-highlight-color:transparent}
+.t-hdr-mid{flex:1;min-width:0}
+.t-type{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.t-label{font-size:13px;font-weight:800;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-cap{font-size:10px;color:var(--muted);font-weight:700;white-space:nowrap;flex-shrink:0}
+
+/* ── RUNNING body ── */
+.t-body{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.t-clock-area{display:flex;flex-direction:column;align-items:center;padding:20px 16px 8px;flex-shrink:0}
+.t-clock{font-size:84px;font-weight:900;letter-spacing:-.02em;line-height:1;color:var(--cream);font-variant-numeric:tabular-nums;transition:color .3s}
+.t-clock.warn{color:var(--gold)}
+.t-clock.end{color:var(--teal)}
+.t-clock-lbl{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.t-round{font-size:16px;font-weight:800;color:var(--sub);margin-top:10px;letter-spacing:.06em}
+
+/* ── Progress bar ── */
+.t-prog{padding:10px 20px 0;flex-shrink:0}
+.t-prog-bg{height:3px;background:var(--div);overflow:hidden}
+.t-prog-fill{height:100%;background:var(--teal);transition:width .4s linear}
+.t-phase{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:5px}
+.t-phase.work{color:var(--teal)}.t-phase.rest{color:var(--muted)}
+
+/* ── Splits ── */
+.t-splits{display:flex;flex-wrap:wrap;gap:3px 12px;padding:8px 16px 0;flex-shrink:0}
+.t-split-item{font-size:10px;font-weight:700;color:var(--sub)}
+.t-split-item b{color:var(--muted);font-weight:400}
+
+/* ── Exercise list ── */
+.t-exlist{flex:1;padding:8px 16px;border-top:1px solid var(--div);margin-top:8px;overflow-y:auto}
+.t-ex{padding:6px 0;font-size:12px;color:var(--sub);font-weight:600;border-bottom:1px solid rgba(42,35,28,.4);display:flex;align-items:center;gap:8px}
+.t-ex:last-child{border-bottom:none}
+.t-ex.active{color:var(--cream);font-weight:800}
+.t-ex.done-s{color:var(--dim)}
+.t-ex-dot{width:5px;height:5px;border-radius:50%;background:var(--div);flex-shrink:0}
+.t-ex.active .t-ex-dot{background:var(--teal)}
+
+/* ── Controls ── */
+.t-ctrl{display:flex;gap:8px;padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--div);flex-shrink:0}
+.t-btn{flex:1;padding:14px 8px;border:none;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.05em;-webkit-tap-highlight-color:transparent;transition:opacity .15s}
+.t-btn:active{opacity:.7}
+.t-btn-lap{background:var(--stone2);border:1px solid var(--div);color:var(--sub);flex:.65}
+.t-btn-pause{background:var(--stone2);border:1px solid var(--div);color:var(--cream)}
+.t-btn-done{background:var(--stone2);border:1px solid var(--teal);color:var(--teal);flex:.65}
+.t-btn-start{background:var(--teal);color:#000;font-size:15px}
+.t-btn-resume{background:var(--gold);color:#000}
+.t-btn-reg{background:var(--gold);color:#000;flex:2;font-size:14px}
+.t-btn-disc{background:transparent;border:1px solid var(--div);color:var(--muted)}
+
+/* ── READY screen ── */
+.t-ready-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.t-badge{display:inline-block;padding:3px 10px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--teal);color:var(--teal)}
+.t-r-label{font-size:22px;font-weight:900;color:var(--cream);line-height:1.2}
+.t-r-meta{font-size:11px;color:var(--muted)}
+.t-r-exlist{display:flex;flex-direction:column;gap:0}
+.t-r-ex{padding:7px 0;font-size:12px;color:var(--sub);font-weight:600;border-bottom:1px solid rgba(42,35,28,.4);display:flex;align-items:center;gap:8px}
+.t-r-ex:last-child{border-bottom:none}
+.t-r-dot{width:5px;height:5px;border-radius:50%;background:var(--teal);flex-shrink:0}
+
+/* ── FINISHED screen ── */
+.t-fin-body{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.t-fin-ttl{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.t-fin-time{font-size:76px;font-weight:900;color:var(--teal);line-height:1;font-variant-numeric:tabular-nums}
+.t-fin-rounds{font-size:13px;color:var(--sub);font-weight:700;margin-top:4px}
+.t-fin-split-ttl{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;align-self:flex-start;margin-top:14px}
+.t-fin-split-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;width:100%;margin-top:6px}
+.t-fin-split-cell{background:var(--stone);padding:6px 8px;text-align:center}
+.t-fin-split-n{font-size:8px;color:var(--muted);font-weight:700}
+.t-fin-split-v{font-size:12px;color:var(--cream);font-weight:800}
+
+/* ── Recentes ── */
+.t-recentes{display:flex;flex-direction:column;gap:6px}
+.t-rec-ttl{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-bottom:2px}
+.t-rec-item{background:var(--stone);border:1px solid var(--div);padding:10px 12px;display:flex;align-items:center;gap:10px}
+.t-rec-info{flex:1;min-width:0}
+.t-rec-name{font-size:10px;font-weight:700;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-rec-t{font-size:20px;font-weight:900;color:var(--cream)}
+.t-rec-date{font-size:9px;color:var(--muted)}
+.t-rec-btn{padding:5px 10px;background:transparent;border:1px solid var(--gold2);color:var(--gold);font-family:var(--font);font-size:9px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0;letter-spacing:.06em}
+
+/* ── Standalone config form ── */
+.t-cfg{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.t-cfg-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.t-cfg-row{display:flex;gap:8px}
+.t-cfg-sel,.t-cfg-inp,.t-cfg-ta{background:var(--stone2);border:1px solid var(--div);color:var(--cream);font-family:var(--font);font-size:13px;padding:9px 10px;outline:none;width:100%;-webkit-appearance:none}
+.t-cfg-sel:focus,.t-cfg-inp:focus,.t-cfg-ta:focus{border-color:var(--teal)}
+.t-cfg-ta{resize:none;height:90px;font-size:12px}
+.t-cfg-half{flex:1}
+.t-est-opts{display:flex;gap:8px}
+
+/* ── Desktop ── */
+@media(min-width:768px){
+  .t-clock{font-size:108px}
+  .t-round{font-size:20px}
+  .t-btn{padding:16px 10px;font-size:14px}
+  .t-r-label{font-size:26px}
+  .t-ex{font-size:13px}
+  .t-fin-time{font-size:96px}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ── Constants ──────────────────────────────────────────────
+const DAY_PT=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MON_PT=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const MODE_LBL={'For Time':'FOR TIME','AMRAP':'AMRAP','EMOM':'EMOM','Benchmark':'BENCHMARK','Estações':'ESTAÇÕES'};
+const K_CFG='timer_config', K_STATE='timer_state', K_HIST='timer_history', K_PREFILL='timer_prefill';
+
+// ── State ──────────────────────────────────────────────────
+let cfg=null;
+let status='ready';       // cfg | ready | running | paused | finished
+let startEpoch=0, pausedMs=0, pauseStart=0, finalSecs=0;
+let splits=[];            // elapsed secs at each lap
+let tickId=null, wakeLock=null;
+let lastEmomMin=-1, lastStKey=null;
+
+// ── Utils ──────────────────────────────────────────────────
+function fmt(s){s=Math.max(0,Math.floor(s));return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
+function fmtDate(iso){const d=new Date(iso+'T12:00:00');return`${DAY_PT[d.getDay()]} ${d.getDate()} ${MON_PT[d.getMonth()]}`}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function exLabel(ex){
+  if(typeof ex==='string')return ex;
+  const v=[];
+  if(ex.sets&&ex.sets>1)v.push(ex.sets+'x');
+  if(ex.reps)v.push(ex.reps+' reps');
+  if(ex.load)v.push(ex.load+(ex.unit||'kg'));
+  return[ex.name||'',v.join(' ')].filter(Boolean).join(' · ');
+}
+function capSecs(){return(cfg?.timeCap||0)*60}
+function elapsed(){
+  if(status==='ready'||status==='cfg')return 0;
+  if(status==='finished')return finalSecs;
+  const now=status==='paused'?pauseStart:Date.now();
+  return Math.max(0,(now-startEpoch-pausedMs)/1000);
+}
+
+// ── Wake Lock ──────────────────────────────────────────────
+async function acquireWL(){
+  if(!('wakeLock' in navigator))return;
+  try{wakeLock=await navigator.wakeLock.request('screen');}catch(e){}
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&status==='running')acquireWL();
+});
+
+// ── Persist ────────────────────────────────────────────────
+function saveState(){
+  try{localStorage.setItem(K_STATE,JSON.stringify({cfg,status,startEpoch,pausedMs,pauseStart,splits,finalSecs}));}catch(e){}
+}
+
+// ── History ────────────────────────────────────────────────
+function loadHist(){try{return JSON.parse(localStorage.getItem(K_HIST)||'[]');}catch(e){return[];}}
+function pushHist(entry){
+  const h=[entry,...loadHist()].slice(0,3);
+  try{localStorage.setItem(K_HIST,JSON.stringify(h));}catch(e){}
+}
+function dropHist(i){
+  const h=loadHist();h.splice(i,1);
+  try{localStorage.setItem(K_HIST,JSON.stringify(h));}catch(e){}
+}
+
+// ── Timer math ─────────────────────────────────────────────
+function getDisplay(){
+  const e=elapsed(), bt=cfg.blockType;
+  if(bt==='AMRAP')return Math.max(0,capSecs()-e);
+  if(bt==='EMOM')return Math.max(0,60-(e%60));
+  if(bt==='Estações'){
+    const{pos,st,tt}=stCycle();
+    return pos<st?Math.max(0,st-pos):Math.max(0,st+tt-pos);
+  }
+  return e;
+}
+function stCycle(){
+  const st=cfg.stationTime||45, tt=cfg.transitionTime||15;
+  const cycle=st+tt, e=elapsed();
+  return{st,tt,cycle,pos:e%cycle,totalCycles:Math.floor(e/cycle)};
+}
+function stInfo(){
+  const{st,totalCycles}=stCycle();
+  const exes=cfg.exercises||[];
+  return{idx:exes.length?totalCycles%exes.length:0, round:exes.length?Math.floor(totalCycles/exes.length):0};
+}
+function stPhase(){const{pos,st}=stCycle();return pos<st?'work':'rest';}
+function isTimeUp(){
+  const e=elapsed(), cap=capSecs(), bt=cfg.blockType;
+  if(!cap)return false;
+  if(bt==='AMRAP'||bt==='EMOM'||bt==='For Time'||bt==='Benchmark')return e>=cap;
+  if(bt==='Estações'){
+    const exes=cfg.exercises||[], r=cfg.rounds||1;
+    const{st,tt}=stCycle();
+    return e>=(exes.length*r*(st+tt));
+  }
+  return false;
+}
+
+// ── Render ─────────────────────────────────────────────────
+function render(){
+  const root=document.getElementById('root');
+  if(!root)return;
+  if(status==='cfg'){root.innerHTML=renderCfg();return;}
+  if(status==='ready'){root.innerHTML=renderReady();return;}
+  if(status==='finished'){root.innerHTML=renderFinished();return;}
+  root.innerHTML=renderRunning();
+}
+
+function renderHdr(showCap=true){
+  const bt=cfg.blockType, capStr=cfg.timeCap?`${cfg.timeCap}:00`:'';
+  return`<div class="t-hdr">
+    <button class="t-back ti ti-arrow-left" onclick="goBack()"></button>
+    <div class="t-hdr-mid">
+      <div class="t-type">${esc(MODE_LBL[bt]||bt)}</div>
+      <div class="t-label">${esc(cfg.blockLabel||'')}</div>
+    </div>
+    ${showCap&&capStr?`<div class="t-cap">CAP ${esc(capStr)}</div>`:''}
+  </div>`;
+}
+
+function renderCfg(){
+  return`<div class="t-hdr">
+    <button class="t-back ti ti-arrow-left" onclick="goBack()"></button>
+    <div class="t-hdr-mid"><div class="t-label">Configurar Timer</div></div>
+  </div>
+  <div class="t-cfg">
+    <div>
+      <div class="t-cfg-lbl">Tipo de WOD</div>
+      <select class="t-cfg-sel" id="cfg-type" onchange="onCfgType()">
+        <option>For Time</option><option>AMRAP</option><option>EMOM</option>
+        <option>Benchmark</option><option>Estações</option>
+      </select>
+    </div>
+    <div class="t-cfg-row">
+      <div class="t-cfg-half">
+        <div class="t-cfg-lbl">Duração (min)</div>
+        <input class="t-cfg-inp" id="cfg-cap" type="number" min="1" max="90" value="20" placeholder="20">
+      </div>
+      <div class="t-cfg-half" id="cfg-rounds-wrap">
+        <div class="t-cfg-lbl">Rondas</div>
+        <input class="t-cfg-inp" id="cfg-rounds" type="number" min="1" max="50" placeholder="—">
+      </div>
+    </div>
+    <div id="cfg-est-wrap" style="display:none">
+      <div class="t-cfg-lbl">Estações</div>
+      <div class="t-est-opts">
+        <div class="t-cfg-half">
+          <input class="t-cfg-inp" id="cfg-st" type="number" value="45" placeholder="45s trabalho">
+          <div class="t-cfg-lbl" style="margin-top:3px">Trabalho (seg)</div>
+        </div>
+        <div class="t-cfg-half">
+          <input class="t-cfg-inp" id="cfg-tt" type="number" value="15" placeholder="15s transição">
+          <div class="t-cfg-lbl" style="margin-top:3px">Transição (seg)</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="t-cfg-lbl">Nome (opcional)</div>
+      <input class="t-cfg-inp" id="cfg-label" type="text" placeholder="ex: Cindy, Murph...">
+    </div>
+    <div>
+      <div class="t-cfg-lbl">Exercícios (um por linha)</div>
+      <textarea class="t-cfg-ta" id="cfg-exes" placeholder="21 Pull-ups&#10;21 KB Swings 24kg&#10;400m Run"></textarea>
+    </div>
+    ${renderRecentes()}
+  </div>
+  <div class="t-ctrl">
+    <button class="t-btn t-btn-start" onclick="applyCfg()">▶ INICIAR</button>
+  </div>`;
+}
+
+function onCfgType(){
+  const t=document.getElementById('cfg-type')?.value;
+  const estWrap=document.getElementById('cfg-est-wrap');
+  const rdsWrap=document.getElementById('cfg-rounds-wrap');
+  if(estWrap)estWrap.style.display=t==='Estações'?'block':'none';
+  if(rdsWrap)rdsWrap.style.display=(t==='EMOM'||t==='AMRAP')?'none':'';
+}
+
+function applyCfg(){
+  const type=document.getElementById('cfg-type')?.value||'For Time';
+  const cap=parseInt(document.getElementById('cfg-cap')?.value)||20;
+  const rounds=parseInt(document.getElementById('cfg-rounds')?.value)||null;
+  const label=document.getElementById('cfg-label')?.value.trim()||'';
+  const exRaw=(document.getElementById('cfg-exes')?.value||'').split('\n').map(l=>l.trim()).filter(Boolean);
+  const exercises=exRaw.map(l=>l);
+  cfg={
+    blockType:type, blockLabel:label, timeCap:cap, rounds:rounds||null,
+    exercises, sessionId:null, sessionDate:null, athleteId:null, blockId:null,
+    stationTime:parseInt(document.getElementById('cfg-st')?.value)||45,
+    transitionTime:parseInt(document.getElementById('cfg-tt')?.value)||15
+  };
+  status='ready';
+  render();
+}
+
+function renderReady(){
+  const bt=cfg.blockType;
+  const exes=cfg.exercises||[];
+  const metaParts=[
+    cfg.timeCap?`${cfg.timeCap} min`:'',
+    cfg.rounds?`${cfg.rounds} rounds`:'',
+    bt==='Estações'?`${cfg.stationTime||45}s trabalho · ${cfg.transitionTime||15}s transição`:''
+  ].filter(Boolean);
+
+  const exHtml=exes.map(ex=>`<div class="t-r-ex"><span class="t-r-dot"></span>${esc(exLabel(ex))}</div>`).join('');
+
+  return`${renderHdr()}
+  <div class="t-ready-body">
+    <div>
+      <span class="t-badge">${esc(MODE_LBL[bt]||bt)}</span>
+      <div class="t-r-label" style="margin-top:8px">${esc(cfg.blockLabel||'WOD')}</div>
+      ${metaParts.length?`<div class="t-r-meta" style="margin-top:4px">${esc(metaParts.join(' · '))}</div>`:''}
+    </div>
+    ${exHtml?`<div class="t-r-exlist">${exHtml}</div>`:''}
+    ${renderRecentes()}
+  </div>
+  <div class="t-ctrl">
+    <button class="t-btn t-btn-start" onclick="startTimer()">▶ INICIAR</button>
+  </div>`;
+}
+
+function renderRecentes(){
+  const hist=loadHist();
+  if(!hist.length)return'';
+  const items=hist.map((h,i)=>`
+    <div class="t-rec-item">
+      <div class="t-rec-info">
+        <div class="t-rec-name">${esc(h.blockLabel||h.blockType||'WOD')}</div>
+        <div class="t-rec-t">${esc(h.totalTime||'—')}</div>
+        <div class="t-rec-date">${h.date?fmtDate(h.date):''}</div>
+      </div>
+      <button class="t-rec-btn" onclick="registerHist(${i})">REGISTRAR</button>
+    </div>`).join('');
+  return`<div class="t-recentes">
+    <div class="t-rec-ttl">Recentes — resultados salvos localmente</div>
+    ${items}
+  </div>`;
+}
+
+function renderRunning(){
+  const bt=cfg.blockType, isPaused=status==='paused';
+  const e=elapsed(), cap=capSecs();
+  const disp=getDisplay();
+
+  let clockClass='t-clock';
+  if(bt==='AMRAP'&&disp<=30)clockClass+=' warn';
+  if((bt==='For Time'||bt==='Benchmark')&&cap&&e>=cap*.85)clockClass+=' warn';
+
+  let roundHtml='', progHtml='', clockLbl='', exHtml='';
+  const exes=cfg.exercises||[];
+
+  if(bt==='EMOM'){
+    const min=Math.floor(e/60), total=cfg.timeCap||0;
+    const pct=Math.min(100,((60-disp)/60)*100);
+    roundHtml=`<div class="t-round">MINUTO ${min+1} / ${total}</div>`;
+    progHtml=`<div class="t-prog"><div class="t-prog-bg"><div class="t-prog-fill" style="width:${pct}%"></div></div></div>`;
+    clockLbl='até o próximo';
+    exHtml=exes.map(ex=>`<div class="t-ex"><span class="t-ex-dot"></span>${esc(exLabel(ex))}</div>`).join('');
+  } else if(bt==='Estações'){
+    const{idx,round}=stInfo(), phase=stPhase();
+    const rounds=cfg.rounds||1;
+    const{st,tt}=stCycle();
+    const cycleSecs=phase==='work'?st:tt;
+    const pct=Math.min(100,((cycleSecs-disp)/cycleSecs)*100);
+    roundHtml=`<div class="t-round">ESTAÇÃO ${idx+1} / ${exes.length} · ROUND ${round+1} / ${rounds}</div>`;
+    progHtml=`<div class="t-prog">
+      <div class="t-prog-bg"><div class="t-prog-fill" style="width:${pct}%"></div></div>
+      <div class="t-phase ${phase}">${phase==='work'?'TRABALHO':'TRANSIÇÃO'}</div>
+    </div>`;
+    clockLbl=phase==='work'?'trabalhando':'descansando';
+    exHtml=exes.map((ex,i)=>`<div class="t-ex ${i===idx&&phase==='work'?'active':i<idx&&round===0?'done-s':''}">
+      <span class="t-ex-dot"></span>${esc(exLabel(ex))}</div>`).join('');
+  } else {
+    const lapN=splits.length, rounds=cfg.rounds;
+    if(lapN>0||rounds){
+      roundHtml=`<div class="t-round">ROUND ${lapN+1}${rounds?' / '+rounds:''}</div>`;
+    }
+    clockLbl=bt==='AMRAP'?'restando':'decorrido';
+    exHtml=exes.map(ex=>`<div class="t-ex"><span class="t-ex-dot"></span>${esc(exLabel(ex))}</div>`).join('');
+  }
+
+  const splitsHtml=splits.length?`<div class="t-splits">${splits.map((s,i)=>{
+    const prev=i>0?splits[i-1]:0;
+    return`<div class="t-split-item"><b>${i+1} </b>${fmt(s-prev)}</div>`;
+  }).join('')}</div>`:'';
+
+  const showLap=bt!=='EMOM'&&bt!=='Estações';
+
+  return`${renderHdr()}
+  <div class="t-body">
+    <div class="t-clock-area">
+      <div class="${clockClass}">${fmt(disp)}</div>
+      <div class="t-clock-lbl">${clockLbl}</div>
+      ${roundHtml}
+    </div>
+    ${progHtml}
+    ${splitsHtml}
+    ${exHtml?`<div class="t-exlist">${exHtml}</div>`:''}
+  </div>
+  <div class="t-ctrl">
+    ${showLap?`<button class="t-btn t-btn-lap" onclick="doLap()">LAP</button>`:''}
+    ${isPaused
+      ?`<button class="t-btn t-btn-resume" onclick="resumeTimer()">▶ RETOMAR</button>`
+      :`<button class="t-btn t-btn-pause" onclick="pauseTimer()">❚❚ PAUSAR</button>`
+    }
+    <button class="t-btn t-btn-done" onclick="finishTimer()" title="Finalizar">✓</button>
+  </div>`;
+}
+
+function renderFinished(){
+  const rounds=splits.length;
+  const splitsHtml=splits.length?`
+    <div class="t-fin-split-ttl">Splits por round</div>
+    <div class="t-fin-split-grid">${splits.map((s,i)=>{
+      const prev=i>0?splits[i-1]:0;
+      return`<div class="t-fin-split-cell">
+        <div class="t-fin-split-n">RD ${i+1}</div>
+        <div class="t-fin-split-v">${fmt(s-prev)}</div>
+      </div>`;
+    }).join('')}</div>`:'';
+
+  return`${renderHdr(false)}
+  <div class="t-fin-body">
+    <div class="t-fin-ttl">FINALIZADO</div>
+    <div class="t-fin-time">${fmt(finalSecs)}</div>
+    ${rounds?`<div class="t-fin-rounds">${rounds} ROUND${rounds!==1?'S':''}</div>`:''}
+    ${splitsHtml}
+  </div>
+  <div class="t-ctrl">
+    <button class="t-btn t-btn-disc" onclick="doDiscard()">DESCARTAR</button>
+    <button class="t-btn t-btn-reg" onclick="registerResult()">REGISTRAR</button>
+  </div>`;
+}
+
+// ── Actions ────────────────────────────────────────────────
+function startTimer(){
+  startEpoch=Date.now();pausedMs=0;pauseStart=0;finalSecs=0;splits=[];
+  lastEmomMin=-1;lastStKey=null;
+  status='running';
+  acquireWL();startTick();render();
+}
+function pauseTimer(){
+  if(status!=='running')return;
+  pauseStart=Date.now();status='paused';
+  stopTick();saveState();render();
+}
+function resumeTimer(){
+  if(status!=='paused')return;
+  pausedMs+=Date.now()-pauseStart;pauseStart=0;
+  status='running';acquireWL();startTick();render();
+}
+function doLap(){
+  if(status!=='running')return;
+  splits.push(elapsed());saveState();render();
+}
+function finishTimer(){
+  finalSecs=elapsed();
+  if(status==='paused')pausedMs+=Date.now()-pauseStart;
+  status='finished';stopTick();
+  if(wakeLock){wakeLock.release();wakeLock=null;}
+  pushHist({
+    blockType:cfg.blockType,blockLabel:cfg.blockLabel||cfg.blockType||'WOD',
+    sessionId:cfg.sessionId,sessionDate:cfg.sessionDate,
+    athleteId:cfg.athleteId,blockId:cfg.blockId,
+    totalTime:fmt(finalSecs),totalSecs:finalSecs,
+    splits:[...splits],date:new Date().toISOString().slice(0,10),
+    timestamp:Date.now()
+  });
+  localStorage.removeItem(K_STATE);
+  render();
+}
+function doDiscard(){
+  dropHist(0);
+  window.history.back();
+}
+function registerResult(){
+  const prefill={
+    sessionId:cfg.sessionId,sessionDate:cfg.sessionDate,
+    athleteId:cfg.athleteId,blockId:cfg.blockId,
+    blockType:cfg.blockType,blockLabel:cfg.blockLabel,
+    perfTime:fmt(finalSecs),perfTimeSecs:finalSecs,
+    perfRounds:splits.length,splits:[...splits],
+    timestamp:Date.now()
+  };
+  try{localStorage.setItem(K_PREFILL,JSON.stringify(prefill));}catch(e){}
+  const ath=cfg.athleteId?`&athlete=${encodeURIComponent(cfg.athleteId)}`:'';
+  location.href=`results.html?from=timer${ath}`;
+}
+function registerHist(i){
+  const h=loadHist(),entry=h[i];if(!entry)return;
+  try{localStorage.setItem(K_PREFILL,JSON.stringify({...entry,fromHistory:true}));}catch(e){}
+  const ath=entry.athleteId?`&athlete=${encodeURIComponent(entry.athleteId)}`:'';
+  location.href=`results.html?from=timer${ath}`;
+}
+function goBack(){
+  if(status==='running'){if(!confirm('Pausar e sair?'))return;pauseTimer();}
+  window.history.back();
+}
+
+// ── Tick ───────────────────────────────────────────────────
+function startTick(){if(tickId)return;tickId=setInterval(tick,250);}
+function stopTick(){if(tickId){clearInterval(tickId);tickId=null;}}
+function tick(){
+  if(status!=='running')return;
+  const e=elapsed();
+  if(Math.floor(e)%5===0)saveState();
+
+  if(cfg.blockType==='EMOM'){
+    const min=Math.floor(e/60);
+    if(lastEmomMin>=0&&min!==lastEmomMin)navigator.vibrate?.([300,100,300]);
+    lastEmomMin=min;
+  }
+  if(cfg.blockType==='Estações'){
+    const{idx}=stInfo(), phase=stPhase(), key=`${idx}-${phase}`;
+    if(lastStKey!==null&&key!==lastStKey)
+      navigator.vibrate?.(phase==='work'?[400,100,400]:[200]);
+    lastStKey=key;
+  }
+  if(isTimeUp()){
+    navigator.vibrate?.([500,200,500,200,500]);
+    finishTimer();return;
+  }
+  render();
+}
+
+// ── Init ───────────────────────────────────────────────────
+function init(){
+  // Restore crashed/paused session
+  try{
+    const saved=JSON.parse(localStorage.getItem(K_STATE)||'null');
+    if(saved?.cfg&&(saved.status==='running'||saved.status==='paused')){
+      cfg=saved.cfg;status=saved.status;
+      startEpoch=saved.startEpoch;pausedMs=saved.pausedMs||0;
+      pauseStart=saved.pauseStart||0;splits=saved.splits||[];finalSecs=saved.finalSecs||0;
+      lastEmomMin=-1;lastStKey=null;
+      if(status==='running'){startTick();}
+      render();return;
+    }
+  }catch(e){}
+
+  // Fresh config from schedule.html
+  try{cfg=JSON.parse(localStorage.getItem(K_CFG)||'null');}catch(e){}
+
+  if(cfg){status='ready';}else{status='cfg';cfg={blockType:'For Time',blockLabel:'',timeCap:20,rounds:null,exercises:[]};}
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
