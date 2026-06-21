@@ -145,11 +145,15 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
 .hab-ex-list.open{max-height:600px;padding:3px 0}
 .hab-ex{display:flex;align-items:center;gap:8px;padding:5px 10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .hab-ex.open{background:rgba(74,200,192,.05)}
-.hab-check{font-size:12px;flex-shrink:0}
+.hab-check{font-size:12px;flex-shrink:0;pointer-events:none}
 .hab-check.yes{color:var(--teal)}.hab-check.no{color:var(--dim)}
 .hab-ex-name{flex:1;font-size:11px;color:var(--sub);font-weight:600}
 .hab-ex.open .hab-ex-name{color:var(--teal)}
 .hab-ex-arr{font-size:9px;flex-shrink:0;color:var(--dim)}
+.hab-btn-add,.hab-btn-edit,.hab-btn-clear{padding:2px 7px;font-family:var(--font);font-size:9px;font-weight:700;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;letter-spacing:.04em;background:transparent;border:none}
+.hab-btn-add{border:1px solid var(--teal);color:var(--teal)}
+.hab-btn-edit{border:1px solid var(--gold2);color:var(--gold)}
+.hab-btn-clear{color:var(--dim);font-size:12px;padding:2px 4px}
 .hab-ex-detail{overflow:hidden;max-height:0;margin:0;padding:0;border-top:none;transition:max-height .2s cubic-bezier(.4,0,.2,1)}
 .hab-ex-detail.open{max-height:160px;margin:0 10px 4px 10px;padding:6px 0 2px;border-top:1px solid var(--div)}
 .hab-detail-row{display:flex;align-items:center;gap:8px}
@@ -204,7 +208,6 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
 .ls-btn-save{flex:2;padding:11px;background:var(--teal);border:none;color:#000;font-family:var(--font);font-size:13px;font-weight:900;cursor:pointer;letter-spacing:.04em;-webkit-tap-highlight-color:transparent;transition:background .15s,opacity .15s}
 .ls-btn-save:disabled{opacity:.4;cursor:default}
 .ls-btn-sec{flex:1;padding:11px;background:transparent;border:1px solid var(--teal);color:var(--teal);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.hab-check{cursor:pointer}.hab-check:active{opacity:.6}
 
 /* ── Bottom nav ── */
 .p-nav{position:fixed;bottom:0;left:0;right:0;background:#0a0807;border-top:1px solid var(--div);display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:30}
@@ -229,6 +232,7 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
   .hab-caret{font-size:11px}.hab-name{font-size:14px}.hab-count{font-size:12px}
   .hab-check{font-size:14px}.hab-ex-name{font-size:13px}.hab-ex-arr{font-size:11px}
   .hab-detail-val{font-size:13px}.hab-detail-sub{font-size:11px}
+  .hab-btn-add,.hab-btn-edit,.hab-btn-clear{font-size:10px}.hab-btn-clear{font-size:13px}
   .picker-title{font-size:26px}.picker-sub{font-size:16px}
   .picker-input{font-size:18px}.picker-name{font-size:18px}.picker-empty{font-size:16px}
   .p-nav-btn{font-size:11px}.p-nav-ic{font-size:22px}
@@ -453,7 +457,10 @@ function renderPrSection(prs,registry,blockOrder){
       return`<div class="hab-ex" data-ex="${esc(name)}" data-has="${hasPr?'1':'0'}">
         <span class="hab-check ${hasPr?'yes ti ti-check':'no ti ti-circle'}"></span>
         <span class="hab-ex-name"${!hasPr?' style="color:var(--dim)"':''}>${esc(name)}</span>
-        <span class="hab-ex-arr">${hasPr?'▶':'–'}</span>
+        ${hasPr
+          ?`<button class="hab-btn-edit" data-ex="${esc(name)}">EDITAR</button><button class="hab-btn-clear" data-ex="${esc(name)}">✕</button><span class="hab-ex-arr">▶</span>`
+          :`<button class="hab-btn-add" data-ex="${esc(name)}">+ ADD</button>`
+        }
       </div>${detailHtml}`;
     }).join('');
 
@@ -465,6 +472,13 @@ function renderPrSection(prs,registry,blockOrder){
     </div>
     <div class="hab-ex-list">${exHtml}</div>`;
   }).join('');
+}
+
+async function clearPr(name){
+  if(!confirm(`Apagar todos os registros de "${name}"?`))return;
+  const{error}=await _sb.rpc('clear_pr',{p_athlete_id:String(_curAthId),p_exercise:name});
+  if(error){alert('Erro ao apagar. Verifique conexão.');return;}
+  location.reload();
 }
 
 function attachPrInteractions(){
@@ -481,20 +495,24 @@ function attachPrInteractions(){
       if(!isOpen){block.classList.add('open');const c=block.querySelector('.hab-caret');if(c)c.textContent='▼';list.classList.add('open');}
     });
   });
+  document.querySelectorAll('.hab-btn-add,.hab-btn-edit').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const name=btn.dataset.ex;
+      const pr=_curPrs.find(p=>(p.name||'').toLowerCase()===name.toLowerCase())||null;
+      const blockEl=btn.closest('.hab-ex-list')?.previousElementSibling;
+      const bt=blockEl?.dataset.block||'';
+      const cats=pr?(pr.categories||[pr.category].filter(Boolean)):(bt?[bt]:[]);
+      openLogSheet(name,cats,pr);
+    });
+  });
+  document.querySelectorAll('.hab-btn-clear').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      clearPr(btn.dataset.ex);
+    });
+  });
   document.querySelectorAll('.hab-ex').forEach(ex=>{
-    // Check icon → open log sheet for all exercises
-    const chk=ex.querySelector('.hab-check');
-    if(chk){
-      chk.addEventListener('click',e=>{
-        e.stopPropagation();
-        const name=ex.dataset.ex;
-        const pr=_curPrs.find(p=>(p.name||'').toLowerCase()===name.toLowerCase())||null;
-        const blockEl=ex.closest('.hab-ex-list')?.previousElementSibling;
-        const bt=blockEl?.dataset.block||'';
-        const cats=pr?(pr.categories||[pr.category].filter(Boolean)):(bt?[bt]:[]);
-        openLogSheet(name,cats,pr);
-      });
-    }
     // Rest of row → expand detail (only if has PR)
     if(ex.dataset.has!=='1')return;
     ex.addEventListener('click',e=>{
