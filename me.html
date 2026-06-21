@@ -141,7 +141,8 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
 .hab-name{flex:1;font-size:12px;font-weight:700;color:var(--sub)}
 .hab-mini{width:80px;flex-shrink:0}
 .hab-count{font-size:10px;font-weight:700;color:var(--muted);width:52px;text-align:right;flex-shrink:0}
-.hab-ex-list{background:var(--stone2);border-left:2px solid var(--teal);margin:3px 0 6px 18px;padding:3px 0}
+.hab-ex-list{background:var(--stone2);border-left:2px solid var(--teal);margin:3px 0 6px 18px;padding:0;overflow:hidden;max-height:0;transition:max-height .3s cubic-bezier(.4,0,.2,1)}
+.hab-ex-list.open{max-height:600px;padding:3px 0}
 .hab-ex{display:flex;align-items:center;gap:8px;padding:5px 10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .hab-ex.open{background:rgba(74,200,192,.05)}
 .hab-check{font-size:12px;flex-shrink:0}
@@ -149,7 +150,8 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
 .hab-ex-name{flex:1;font-size:11px;color:var(--sub);font-weight:600}
 .hab-ex.open .hab-ex-name{color:var(--teal)}
 .hab-ex-arr{font-size:9px;flex-shrink:0;color:var(--dim)}
-.hab-ex-detail{margin:0 10px 4px 10px;padding:6px 0 2px;border-top:1px solid var(--div)}
+.hab-ex-detail{overflow:hidden;max-height:0;margin:0;padding:0;border-top:none;transition:max-height .2s cubic-bezier(.4,0,.2,1)}
+.hab-ex-detail.open{max-height:160px;margin:0 10px 4px 10px;padding:6px 0 2px;border-top:1px solid var(--div)}
 .hab-detail-row{display:flex;align-items:center;gap:8px}
 .hab-detail-val{font-size:11px;font-weight:800;color:var(--cream);white-space:nowrap;flex-shrink:0}
 .hab-detail-sub{font-size:9px;color:var(--dim);margin-top:3px;text-align:right}
@@ -177,6 +179,27 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
 .p-nav-ic{font-size:18px;line-height:1}
 .p-nav-sep{width:1px;background:var(--div);margin:10px 0}
 .center-msg{text-align:center;padding:64px 14px;color:var(--muted);font-size:13px}
+
+@media (min-width:768px){
+  .brand{font-size:29px}.gym{font-size:12px}.hdr-back{font-size:26px}
+  .pname{font-size:27px}.ptier{font-size:13px}.psub{font-size:14px}
+  .h{font-size:20px}
+  .sh-title{font-size:12px}.sh-title-r{font-size:10px}
+  .kpi-v{font-size:22px}.kpi-l{font-size:10px}.kpi-sub{font-size:12px}
+  .sess-name{font-size:16px}.sess-date{font-size:12px}.bdg{font-size:12px}
+  .ev-title{font-size:14px}.ev-sub{font-size:12px}.ev-val{font-size:14px}.ev-date{font-size:12px}
+  .goal-name{font-size:16px}.goal-pct{font-size:14px}.goal-marcos{font-size:12px}
+  .ms-hint{font-size:10px}.ms-row{font-size:13px}.ms-row-icon{font-size:14px}
+  .ms-row-pct{font-size:12px}.ms-row-status{font-size:12px}.goal-sub{font-size:12px}
+  .dist-lbl{font-size:14px}.dist-val{font-size:13px}
+  .hab-caret{font-size:12px}.hab-name{font-size:16px}.hab-count{font-size:13px}
+  .hab-check{font-size:16px}.hab-ex-name{font-size:14px}.hab-ex-arr{font-size:12px}
+  .hab-detail-val{font-size:14px}.hab-detail-sub{font-size:12px}
+  .picker-title{font-size:29px}.picker-sub{font-size:17px}
+  .picker-input{font-size:20px}.picker-name{font-size:20px}.picker-empty{font-size:17px}
+  .p-nav-btn{font-size:12px}.p-nav-ic{font-size:23px}
+  .di{font-size:17px}.center-msg{font-size:17px}
+}
 </style>
 </head>
 <body>
@@ -326,7 +349,7 @@ function renderPrSection(prs,registry,blockOrder){
         const bestLbl=best?prValLabel(best.value,pr):'—';
         const tgtLbl=pr.target?prValLabel(pr.target,pr):null;
         const dColor=delta?.good===true?'#68d8a0':delta?.good===false?'#e05848':'var(--muted)';
-        detailHtml=`<div class="hab-ex-detail" style="display:none">
+        detailHtml=`<div class="hab-ex-detail">
           <div class="hab-detail-row">
             ${pct!==null?`<div class="bar h10 grow"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>`:'<div style="flex:1"></div>'}
             <span class="hab-detail-val">${esc(bestLbl)}${tgtLbl?' / '+esc(tgtLbl):''}</span>
@@ -348,7 +371,7 @@ function renderPrSection(prs,registry,blockOrder){
       <div class="hab-mini"><div class="bar h5"><div class="bar-fill" style="width:${miniPct}%;background:${color}"></div></div></div>
       <span class="hab-count" style="color:${prCount>0?color:'var(--muted)'}">${prCount} / ${total} PRs</span>
     </div>
-    <div class="hab-ex-list" style="display:none">${exHtml}</div>`;
+    <div class="hab-ex-list">${exHtml}</div>`;
   }).join('');
 }
 
@@ -361,9 +384,9 @@ function attachPrInteractions(){
       document.querySelectorAll('.hab-block').forEach(b=>{
         b.classList.remove('open');
         const c=b.querySelector('.hab-caret');if(c)c.textContent='▶';
-        const l=b.nextElementSibling;if(l?.classList.contains('hab-ex-list'))l.style.display='none';
+        const l=b.nextElementSibling;if(l?.classList.contains('hab-ex-list'))l.classList.remove('open');
       });
-      if(!isOpen){block.classList.add('open');const c=block.querySelector('.hab-caret');if(c)c.textContent='▼';list.style.display='block';}
+      if(!isOpen){block.classList.add('open');const c=block.querySelector('.hab-caret');if(c)c.textContent='▼';list.classList.add('open');}
     });
   });
   document.querySelectorAll('.hab-ex').forEach(ex=>{
@@ -376,9 +399,9 @@ function attachPrInteractions(){
       ex.closest('.hab-ex-list')?.querySelectorAll('.hab-ex').forEach(e2=>{
         e2.classList.remove('open');
         const arr=e2.querySelector('.hab-ex-arr');if(arr&&e2.dataset.has==='1')arr.textContent='▶';
-        const d=e2.nextElementSibling;if(d?.classList.contains('hab-ex-detail'))d.style.display='none';
+        const d=e2.nextElementSibling;if(d?.classList.contains('hab-ex-detail'))d.classList.remove('open');
       });
-      if(!isOpen){ex.classList.add('open');const arr=ex.querySelector('.hab-ex-arr');if(arr)arr.textContent='▼';detail.style.display='block';}
+      if(!isOpen){ex.classList.add('open');const arr=ex.querySelector('.hab-ex-arr');if(arr)arr.textContent='▼';detail.classList.add('open');}
     });
   });
 }
