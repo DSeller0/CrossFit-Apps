@@ -172,6 +172,39 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
 .picker-name{font-size:15px;font-weight:700;color:var(--cream)}
 .picker-empty{text-align:center;padding:24px 0;font-size:13px;color:var(--muted)}
 
+/* ── Log / Body Sheet ── */
+.ls-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;opacity:0;pointer-events:none;transition:opacity .25s}
+.ls-overlay.open{opacity:1;pointer-events:auto}
+.ls-sheet{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--stone);z-index:101;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.ls-sheet.open{transform:translateY(0)}
+.ls-sheet::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold2),transparent)}
+.ls-hdr{padding:14px 16px 12px;border-bottom:1px solid var(--div);display:flex;align-items:flex-start;gap:10px}
+.ls-ex-name{font-size:15px;font-weight:900;color:var(--cream);line-height:1.2;flex:1}
+.ls-body{padding:12px 16px 16px;overflow-y:auto;max-height:72vh}
+.ls-prev{font-size:11px;color:var(--muted);margin-bottom:12px;min-height:14px}
+.ls-toggle{display:flex;gap:4px;margin-bottom:10px}
+.ls-tb{flex:1;padding:5px 0;background:transparent;border:1px solid var(--div);color:var(--muted);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .12s}
+.ls-tb.act{background:var(--div);color:var(--teal);border-color:var(--teal)}
+.ls-inp-row{display:flex;gap:8px;margin-bottom:8px}
+.ls-inp-wrap{flex:1;display:flex;flex-direction:column}
+.ls-inp{background:var(--stone2);border:1px solid var(--div);color:var(--cream);font-family:var(--font);font-size:24px;font-weight:900;padding:10px 8px;outline:none;text-align:center;width:100%;-webkit-appearance:none}
+.ls-inp:focus{border-color:var(--teal)}
+.ls-inp-lbl{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;text-align:center;margin-top:4px}
+.ls-delta{min-height:18px;font-size:11px;font-weight:700;text-align:center;margin-bottom:8px}
+.ls-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ls-lbl{font-size:11px;color:var(--muted)}
+.ls-date{background:transparent;border:none;color:var(--teal);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;outline:none;padding:0}
+.ls-note{width:100%;background:var(--stone2);border:1px solid var(--div);color:var(--cream);font-family:var(--font);font-size:13px;padding:8px 10px;outline:none;resize:none;margin-bottom:10px;display:block}
+.ls-confirm{background:var(--stone2);border:1px solid var(--gold2);padding:10px 12px;margin-bottom:10px;font-size:11px;color:var(--sub);line-height:1.5}
+.ls-confirm-btns{display:flex;gap:6px;margin-top:8px}
+.ls-warn{padding:8px 10px;background:rgba(200,48,48,.1);border:1px solid #c83030;font-size:11px;color:#e05848;margin-bottom:10px}
+.ls-actions{display:flex;gap:8px}
+.ls-btn-cancel{flex:1;padding:11px;background:transparent;border:1px solid var(--div);color:var(--muted);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ls-btn-save{flex:2;padding:11px;background:var(--teal);border:none;color:#000;font-family:var(--font);font-size:13px;font-weight:900;cursor:pointer;letter-spacing:.04em;-webkit-tap-highlight-color:transparent;transition:background .15s,opacity .15s}
+.ls-btn-save:disabled{opacity:.4;cursor:default}
+.ls-btn-sec{flex:1;padding:11px;background:transparent;border:1px solid var(--teal);color:var(--teal);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hab-check{cursor:pointer}.hab-check:active{opacity:.6}
+
 /* ── Bottom nav ── */
 .p-nav{position:fixed;bottom:0;left:0;right:0;background:#0a0807;border-top:1px solid var(--div);display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:30}
 .p-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px;gap:3px;color:var(--muted);text-decoration:none;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.06em;border:none;background:none;cursor:pointer}
@@ -204,6 +237,52 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
 </head>
 <body>
 <div id="root"><div class="center-msg">⏳ carregando...</div></div>
+<!-- PR log sheet -->
+<div id="ls-ov" class="ls-overlay" onclick="closeLogSheet()"></div>
+<div id="ls-sh" class="ls-sheet" onclick="event.stopPropagation()">
+  <div class="ls-hdr">
+    <div style="flex:1">
+      <div class="ls-ex-name" id="ls-ex-name"></div>
+      <span id="ls-cat-pill" style="font-size:10px;font-weight:700;padding:2px 7px;display:none;margin-top:4px;border-radius:3px"></span>
+    </div>
+  </div>
+  <div class="ls-body">
+    <div class="ls-prev" id="ls-prev"></div>
+    <div class="ls-toggle" id="ls-toggle"></div>
+    <div class="ls-inp-row" id="ls-inp-row"></div>
+    <div class="ls-delta" id="ls-delta"></div>
+    <div class="ls-row"><span class="ls-lbl">Data</span><input type="date" class="ls-date" id="ls-date"></div>
+    <textarea class="ls-note" id="ls-note" rows="2" placeholder="Nota opcional..."></textarea>
+    <div id="ls-confirm-area"></div>
+    <div id="ls-warn-area"></div>
+    <div class="ls-actions">
+      <button class="ls-btn-cancel" onclick="closeLogSheet()">CANCELAR</button>
+      <button class="ls-btn-save" id="ls-btn-save" onclick="saveLogSheet()">SALVAR</button>
+    </div>
+  </div>
+</div>
+<!-- Body metrics sheet -->
+<div id="bm-ov" class="ls-overlay" onclick="closeBodySheet()"></div>
+<div id="bm-sh" class="ls-sheet" onclick="event.stopPropagation()">
+  <div class="ls-hdr">
+    <div class="ls-ex-name">Corpo</div>
+    <span id="bm-date-lbl" style="font-size:11px;color:var(--muted);align-self:center"></span>
+  </div>
+  <div class="ls-body">
+    <div class="ls-prev" id="bm-prev"></div>
+    <div class="ls-inp-row">
+      <div class="ls-inp-wrap"><input type="number" class="ls-inp" id="bm-weight" placeholder="—" step="0.1" min="0"><div class="ls-inp-lbl">Peso (kg)</div></div>
+      <div class="ls-inp-wrap"><input type="number" class="ls-inp" id="bm-height" placeholder="—" step="1" min="0" max="300"><div class="ls-inp-lbl">Altura (cm)</div></div>
+      <div class="ls-inp-wrap"><input type="number" class="ls-inp" id="bm-bf" placeholder="—" step="0.1" min="0" max="100"><div class="ls-inp-lbl">Gordura (%)</div></div>
+    </div>
+    <textarea class="ls-note" id="bm-note" rows="2" placeholder="Nota opcional..."></textarea>
+    <div id="bm-warn" class="ls-warn" style="display:none">⚠ Dados ainda não estão sendo salvos remotamente.</div>
+    <div class="ls-actions">
+      <button class="ls-btn-cancel" onclick="closeBodySheet()">CANCELAR</button>
+      <button class="ls-btn-save" onclick="saveBodySheet()">SALVAR</button>
+    </div>
+  </div>
+</div>
 <script>
 const _sb = supabase.createClient(
   'https://crsalcpvsedmiabkeibp.supabase.co',
@@ -221,6 +300,10 @@ const ECOL     = {
 const WOD_TYPES  = ['MetCon','AMRAP','EMOM','For Time','HIIT','Estações'];
 const DIST_TYPES = ['Força','LPO','Acessórios','Skill','Core','Cardio','Mobilidade'];
 const PR_SKIP    = new Set(['-','Aquecimento','Descanso','HIIT','MetCon','EMOM','For Time','AMRAP','Estações']);
+
+// ── Sheet state ───────────────────────────────────────────
+let _curAthId=null,_curPrs=[],_curBodyMetrics=[];
+let _lsUnit='kg',_lsPrRef=null,_lsCatsRef=[],_lsNameRef='',_lsPending=null;
 
 // ── Helpers ───────────────────────────────────────────────
 function toISO(d){return[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
@@ -390,6 +473,20 @@ function attachPrInteractions(){
     });
   });
   document.querySelectorAll('.hab-ex').forEach(ex=>{
+    // Check icon → open log sheet for all exercises
+    const chk=ex.querySelector('.hab-check');
+    if(chk){
+      chk.addEventListener('click',e=>{
+        e.stopPropagation();
+        const name=ex.dataset.ex;
+        const pr=_curPrs.find(p=>(p.name||'').toLowerCase()===name.toLowerCase())||null;
+        const blockEl=ex.closest('.hab-ex-list')?.previousElementSibling;
+        const bt=blockEl?.dataset.block||'';
+        const cats=pr?(pr.categories||[pr.category].filter(Boolean)):(bt?[bt]:[]);
+        openLogSheet(name,cats,pr);
+      });
+    }
+    // Rest of row → expand detail (only if has PR)
     if(ex.dataset.has!=='1')return;
     ex.addEventListener('click',e=>{
       e.stopPropagation();
@@ -404,6 +501,198 @@ function attachPrInteractions(){
       if(!isOpen){ex.classList.add('open');const arr=ex.querySelector('.hab-ex-arr');if(arr)arr.textContent='▼';detail.classList.add('open');}
     });
   });
+}
+
+// ── Log Sheet ─────────────────────────────────────────────
+function catToInputType(cats){
+  if(!cats?.length)return'load';
+  if(cats.some(c=>c==='Benchmark'))return'time';
+  if(cats.some(c=>['Força','LPO','Core','Acessórios'].includes(c)))return'load';
+  if(cats.some(c=>c==='Cardio'))return'dist';
+  if(cats.some(c=>['Skill','Mobilidade'].includes(c)))return'reps';
+  return'load';
+}
+
+function renderLsInputs(pr,cats){
+  const type=pr?.type==='time'?'time':pr?.type==='reps'?'reps':pr?.type==='load'?'load':catToInputType(cats);
+  const toggle=document.getElementById('ls-toggle');
+  const row=document.getElementById('ls-inp-row');
+  const needsToggle=type==='reps'&&cats?.some(c=>['Skill','Mobilidade'].includes(c));
+  const isDistCat=cats?.some(c=>c==='Cardio');
+
+  if(type==='time'){
+    _lsUnit='time';toggle.innerHTML='';
+    row.innerHTML=`<div class="ls-inp-wrap"><input type="text" class="ls-inp" id="ls-val" placeholder="00:00" oninput="updateLsDelta()"><div class="ls-inp-lbl">Tempo (mm:ss)</div></div>`;
+  } else if(isDistCat){
+    if(_lsUnit!=='time')_lsUnit='m';
+    toggle.innerHTML=`<button class="ls-tb${_lsUnit!=='time'?' act':''}" onclick="switchLsUnit('m')">Dist (m)</button><button class="ls-tb${_lsUnit==='time'?' act':''}" onclick="switchLsUnit('time')">Tempo</button>`;
+    if(_lsUnit==='time') row.innerHTML=`<div class="ls-inp-wrap"><input type="text" class="ls-inp" id="ls-val" placeholder="00:00" oninput="updateLsDelta()"><div class="ls-inp-lbl">Tempo (mm:ss)</div></div>`;
+    else row.innerHTML=`<div class="ls-inp-wrap"><input type="number" class="ls-inp" id="ls-val" placeholder="0" step="1" min="0" oninput="updateLsDelta()"><div class="ls-inp-lbl">Distância (m)</div></div>`;
+  } else if(type==='reps'&&needsToggle){
+    if(_lsUnit!=='time')_lsUnit='reps';
+    toggle.innerHTML=`<button class="ls-tb${_lsUnit==='reps'?' act':''}" onclick="switchLsUnit('reps')">Reps</button><button class="ls-tb${_lsUnit==='time'?' act':''}" onclick="switchLsUnit('time')">Tempo</button>`;
+    if(_lsUnit==='time') row.innerHTML=`<div class="ls-inp-wrap"><input type="text" class="ls-inp" id="ls-val" placeholder="00:00" oninput="updateLsDelta()"><div class="ls-inp-lbl">Tempo (mm:ss)</div></div>`;
+    else row.innerHTML=`<div class="ls-inp-wrap"><input type="number" class="ls-inp" id="ls-val" placeholder="0" step="1" min="0" oninput="updateLsDelta()"><div class="ls-inp-lbl">Reps</div></div>`;
+  } else if(type==='reps'){
+    _lsUnit='reps';toggle.innerHTML='';
+    row.innerHTML=`<div class="ls-inp-wrap"><input type="number" class="ls-inp" id="ls-val" placeholder="0" step="1" min="0" oninput="updateLsDelta()"><div class="ls-inp-lbl">Reps</div></div>`;
+  } else {
+    _lsUnit='kg';toggle.innerHTML='';
+    row.innerHTML=`<div class="ls-inp-wrap"><input type="number" class="ls-inp" id="ls-val" placeholder="0" step="0.5" min="0" oninput="updateLsDelta()"><div class="ls-inp-lbl">Peso (kg)</div></div><div class="ls-inp-wrap" style="max-width:88px"><input type="number" class="ls-inp" id="ls-reps" placeholder="—" step="1" min="1"><div class="ls-inp-lbl">Reps</div></div>`;
+  }
+}
+
+function switchLsUnit(unit){_lsUnit=unit;renderLsInputs(_lsPrRef,_lsCatsRef);updateLsDelta();}
+
+function updateLsDelta(){
+  const el=document.getElementById('ls-val'),dEl=document.getElementById('ls-delta');
+  if(!el||!el.value.trim()){dEl.textContent='';return;}
+  const best=_lsPrRef?prBest(_lsPrRef):null;
+  if(!best){dEl.style.color='var(--teal)';dEl.textContent='Primeiro registro!';return;}
+  if(_lsUnit==='time'){
+    const ns=toSecs(el.value.trim()),bs=toSecs(best.value);
+    if(ns===Infinity||bs===Infinity){dEl.textContent='';return;}
+    const d=bs-ns;
+    if(d>0){dEl.style.color='#68d8a0';dEl.textContent='↑ −'+fmtTime(d)+' vs melhor';}
+    else if(d<0){dEl.style.color='#e05848';dEl.textContent='↓ +'+fmtTime(-d)+' vs melhor';}
+    else{dEl.style.color='var(--muted)';dEl.textContent='Igual ao melhor';}
+  } else {
+    const nv=parseFloat(el.value)||0,bv=parseFloat(best.value)||0,d=nv-bv;
+    const u=_lsUnit==='reps'?'reps':_lsUnit==='m'?'m':'kg';
+    if(d>0){dEl.style.color='#68d8a0';dEl.textContent='↑ +'+d+' '+u+' vs melhor';}
+    else if(d<0){dEl.style.color='#e05848';dEl.textContent='↓ '+d+' '+u+' vs melhor';}
+    else{dEl.style.color='var(--muted)';dEl.textContent='Igual ao melhor';}
+  }
+}
+
+function openLogSheet(name,cats,pr){
+  _lsNameRef=name;_lsCatsRef=cats||[];_lsPrRef=pr;_lsPending=null;
+  _lsUnit=pr?.type==='time'?'time':pr?.unit||'kg';
+  if(!['kg','reps','m','time'].includes(_lsUnit))_lsUnit='kg';
+
+  document.getElementById('ls-ex-name').textContent=name;
+  const mainCat=(cats||[])[0]||'';
+  const pill=document.getElementById('ls-cat-pill');
+  if(mainCat){
+    const c=ECOL[mainCat]||'#888';
+    pill.textContent=mainCat;
+    pill.style.cssText=`font-size:10px;font-weight:700;padding:2px 7px;background:${c}22;color:${c};border:1px solid ${c}44;border-radius:3px;display:inline-block;margin-top:4px`;
+  } else pill.style.display='none';
+
+  const best=pr?prBest(pr):null;
+  const prevEl=document.getElementById('ls-prev');
+  if(best) prevEl.textContent='Melhor: '+prValLabel(best.value,pr)+(best.date?' · '+fmtDate(best.date):'');
+  else prevEl.textContent='Primeiro registro';
+
+  document.getElementById('ls-date').value=todayISO();
+  document.getElementById('ls-note').value='';
+  document.getElementById('ls-delta').textContent='';
+  document.getElementById('ls-confirm-area').innerHTML='';
+  document.getElementById('ls-warn-area').innerHTML='';
+  const btn=document.getElementById('ls-btn-save');
+  btn.textContent='SALVAR';btn.disabled=false;btn.style.background='';
+
+  renderLsInputs(pr,cats);
+  document.getElementById('ls-ov').classList.add('open');
+  document.getElementById('ls-sh').classList.add('open');
+  document.body.style.overflow='hidden';
+  setTimeout(()=>document.getElementById('ls-val')?.focus(),320);
+}
+
+function closeLogSheet(){
+  document.getElementById('ls-ov').classList.remove('open');
+  document.getElementById('ls-sh').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+async function saveLogSheet(){
+  const valEl=document.getElementById('ls-val');
+  if(!valEl||!valEl.value.trim())return;
+  const raw=valEl.value.trim();
+  const repsEl=document.getElementById('ls-reps');
+  const reps=repsEl?parseInt(repsEl.value)||null:null;
+  const date=document.getElementById('ls-date').value||todayISO();
+  const note=document.getElementById('ls-note').value.trim();
+  const best=_lsPrRef?prBest(_lsPrRef):null;
+
+  let numVal,isNewPr;
+  if(_lsUnit==='time'){
+    numVal=raw;
+    isNewPr=!best||toSecs(raw)<toSecs(best.value);
+  } else {
+    numVal=parseFloat(raw)||0;
+    isNewPr=!best||numVal>parseFloat(best.value||0);
+  }
+
+  if(!isNewPr&&!_lsPending){
+    const bestStr=prValLabel(best.value,_lsPrRef);
+    _lsPending={numVal,reps,date,note};
+    document.getElementById('ls-confirm-area').innerHTML=`<div class="ls-confirm">Não bateu o recorde atual (${esc(bestStr)}). Salvar como última tentativa?<div class="ls-confirm-btns"><button class="ls-btn-sec" onclick="confirmLsAttempt()">Salvar tentativa</button><button class="ls-btn-cancel" style="flex:1" onclick="cancelLsConfirm()">Cancelar</button></div></div>`;
+    return;
+  }
+  await doLsSave(numVal,reps,date,note,isNewPr);
+}
+
+function cancelLsConfirm(){
+  _lsPending=null;
+  document.getElementById('ls-confirm-area').innerHTML='';
+}
+
+async function confirmLsAttempt(){
+  if(!_lsPending)return;
+  const{numVal,reps,date,note}=_lsPending;
+  _lsPending=null;
+  document.getElementById('ls-confirm-area').innerHTML='';
+  await doLsSave(numVal,reps,date,note,false);
+}
+
+async function doLsSave(val,reps,date,note,isNewPr){
+  const btn=document.getElementById('ls-btn-save');
+  btn.disabled=true;btn.textContent='...';
+  try{
+    const entry={
+      id:Math.random().toString(36).slice(2)+Date.now().toString(36),
+      date,athleteId:_curAthId,
+      isPrAttempt:true,prBest:isNewPr,
+      prExercise:_lsNameRef,prValue:val,prUnit:_lsUnit,
+      prReps:reps||null,prCategories:_lsCatsRef,
+      note:note||null
+    };
+    const{error}=await _sb.from('results').insert(entry);
+    if(error)throw error;
+    btn.textContent=isNewPr?'✓ Novo PR!':'✓ Salvo';
+    btn.style.background=isNewPr?'var(--gold)':'var(--teal)';
+    if(isNewPr)btn.style.color='#000';
+    setTimeout(()=>closeLogSheet(),900);
+  }catch(e){
+    document.getElementById('ls-warn-area').innerHTML=`<div class="ls-warn">Erro ao salvar. Tente novamente.</div>`;
+    btn.disabled=false;btn.textContent='SALVAR';btn.style.background='';
+  }
+}
+
+// ── Body Metrics Sheet ────────────────────────────────────
+function openBodySheet(){
+  const d=new Date();
+  document.getElementById('bm-date-lbl').textContent=d.getDate()+' '+MON_PT[d.getMonth()]+' '+d.getFullYear();
+  const prev=_curBodyMetrics.length?_curBodyMetrics[_curBodyMetrics.length-1]:null;
+  const prevEl=document.getElementById('bm-prev');
+  if(prev) prevEl.textContent='Último ('+prev.date+'): '+(prev.weight?prev.weight+'kg':'')+(prev.height?' · '+prev.height+'cm':'')+(prev.bodyFat?' · '+prev.bodyFat+'%':'');
+  else prevEl.textContent='Nenhum registro anterior.';
+  ['bm-weight','bm-height','bm-bf','bm-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('bm-warn').style.display='none';
+  document.getElementById('bm-ov').classList.add('open');
+  document.getElementById('bm-sh').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeBodySheet(){
+  document.getElementById('bm-ov').classList.remove('open');
+  document.getElementById('bm-sh').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function saveBodySheet(){
+  document.getElementById('bm-warn').style.display='block';
 }
 
 // ── Picker ────────────────────────────────────────────────
@@ -437,6 +726,7 @@ function renderProfile(athlete,myResults,allSessions,goalsData,registry){
   const id=String(athlete.id);
   const prs=(goalsData?.prs||{})[id]||[];
   const goals=(goalsData?.athleteGoals||{})[id]||[];
+  _curAthId=id;_curPrs=prs;_curBodyMetrics=athlete.bodyMetrics||[];
   const color=athlete.color||'var(--teal)';
 
   const now=new Date(),td=todayISO();
@@ -578,7 +868,7 @@ function renderProfile(athlete,myResults,allSessions,goalsData,registry){
     <div class="sh"><div class="sh-inner">
       <div class="sh-title">Atleta</div>
       <div class="prof-row">
-        <div class="av" style="background:linear-gradient(145deg,${color}22,${color}08);border-color:${color}"><span style="color:${color}">${esc(initials(athlete.name))}</span></div>
+        <div class="av" style="background:linear-gradient(145deg,${color}22,${color}08);border-color:${color};cursor:pointer" onclick="openBodySheet()"><span style="color:${color}">${esc(initials(athlete.name))}</span></div>
         <div>
           <div class="pname">${esc(athlete.name)}</div>
           ${athlete.level?`<div class="ptier" style="color:${color}">${esc(athlete.level)}</div>`:''}
