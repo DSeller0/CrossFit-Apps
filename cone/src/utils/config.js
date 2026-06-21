@@ -13,7 +13,7 @@ export const APP_CONFIG = {
   athleteLevels: ['Iniciante','Intermediário','Avançado','Competidor'],
   athleteGoals: ['Saúde geral','Força','Condicionamento','Competição'],
   blockColors: {},
-  blockNames: ['-','HIIT','MetCon','EMOM','For Time','AMRAP','Estações','Força','LPO','Core','Acessórios','Aquecimento','Skill','Cardio','Mobilidade','Descanso'],
+  blockNames: ['-','HIIT','MetCon','EMOM','For Time','AMRAP','Estações','Força','LPO','Core','Acessórios','Aquecimento','Skill','Cardio','Mobilidade','Benchmark'],
   appTitle: 'Cone — Treinos',
   appDescription: 'Criador e publicador de treinos Cone',
   scheduleTitle: 'Cone — Treinos',
@@ -38,7 +38,7 @@ export const APP_CONFIG = {
   mobileWeeklyLabels: ['Mobile Semanal 01','Mobile Semanal 02']
 };
 
-export const DEFAULT_TYPES = ['Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Estações','Descanso'];
+export const DEFAULT_TYPES = ['Aquecimento','Força','Cardio','Mobilidade','HIIT','MetCon','EMOM','For Time','AMRAP','Estações','Benchmark'];
 export const TYPES = DEFAULT_TYPES;
 export const ZONES = ['Zona 01','Zona 02','Zona 03'];
 
@@ -77,6 +77,8 @@ export const BTC = {
   'Mobilidade':'bt-mo','Mobility':'bt-mo',
   // Neutral
   'Descanso':'bt-re','Rest':'bt-re',
+  // Gold — Benchmark
+  'Benchmark':'bt-bm',
 };
 
 export const PLC = {
@@ -101,6 +103,8 @@ export const PLC = {
   'Mobilidade':'p-mo','Mobility':'p-mo',
   // Neutral
   'Descanso':'p-re','Rest':'p-re',
+  // Gold — Benchmark
+  'Benchmark':'p-bm',
 };
 
 const ECOL_BASE = {
@@ -125,6 +129,8 @@ const ECOL_BASE = {
   'Mobilidade':{text:'#30a868',bg:'#061a10'},'Mobility':{text:'#30a868',bg:'#061a10'},
   // Neutral
   'Descanso': {text:'#555',bg:'#111'},'Rest':{text:'#555',bg:'#111'},
+  // Gold — Benchmark
+  'Benchmark':{text:'#d8a840',bg:'#1a1200'},
 };
 export const ECOL = new Proxy(ECOL_BASE, {
   get: (t, k) => APP_CONFIG.blockColors?.[k]

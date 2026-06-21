@@ -14,7 +14,7 @@ const DIM   = '#554a3a';
 const BLOCK_ORDER = [
   'HIIT','MetCon','EMOM','For Time','AMRAP',
   'Estações','Força','LPO','Core','Acessórios',
-  'Aquecimento','Skill','Cardio','Mobilidade','Descanso',
+  'Aquecimento','Skill','Cardio','Mobilidade','Benchmark',
 ];
 
 const getExName = ex => typeof ex === 'string' ? ex : (ex?.name || '');

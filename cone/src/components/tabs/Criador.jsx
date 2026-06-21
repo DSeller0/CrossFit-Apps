@@ -49,8 +49,8 @@ const TYPE_CONFIG = {
   'Skill':      { icon: 'ti-target',      color: '#4ac8c0', desc: 'Técnica e habilidade',         showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Cardio':     { icon: 'ti-run',         color: '#40b878', desc: 'Cardio / Aeróbico',             showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
   'Mobilidade': { icon: 'ti-leaf',        color: '#30a868', desc: 'Mobilidade e flexibilidade',   showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
-  // NEUTRAL
-  'Descanso':   { icon: 'ti-moon',        color: '#555',    desc: 'Descanso / Recovery',           showDuration: true,  showRounds: true,  durationLabel: 'Duração (min)' },
+  // GOLD — Benchmark
+  'Benchmark':  { icon: 'ti-trophy',      color: '#d8a840', desc: 'Benchmark WOD (Girls, Heroes, Custom)', showDuration: true, showRounds: true, durationLabel: 'Time cap (min)' },
 };
 const DEFAULT_TYPE_CFG = { icon: 'ti-edit', color: '#888', desc: 'Bloco livre', showDuration: true, showRounds: true, durationLabel: 'Duração (min)' };
 const getTypeCfg = t => TYPE_CONFIG[t] || DEFAULT_TYPE_CFG;

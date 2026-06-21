@@ -96,6 +96,8 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .bt-mo .blk-bar{background:#081a10}.bt-mo .blk-sel{background:#102a1a;color:#30a868}.bt-mo .blk-zone-sel{background:#081a10}
 /* block colours — NEUTRAL */
 .bt-re .blk-bar{background:#161616}.bt-re .blk-sel{background:#222;color:#666}.bt-re .blk-zone-sel{background:#161616}
+/* block colours — GOLD: Benchmark */
+.bt-bm .blk-bar{background:#1a1200}.bt-bm .blk-sel{background:#2c2000;color:#d8a840}.bt-bm .blk-zone-sel{background:#1a1200}
 
 /* exercise */
 .ex-card{background:#1a1a1a;border:1px solid #252525;border-radius:6px;padding:10px;margin-bottom:8px}
@@ -171,6 +173,8 @@ html,body{background:#0a0a0a;min-height:100vh;font-family:-apple-system,BlinkMac
 .p-mo{background:#102a1a;color:#30a868;border:1px solid #184028}
 /* pill colours — NEUTRAL */
 .p-re{background:#222;color:#666;border:1px solid #333}
+/* pill colours — GOLD: Benchmark */
+.p-bm{background:#2c2000;color:#d8a840;border:1px solid #4a3800}
 
 /* ── publisher controls ── */
 .agenda-wrap{height:600px}
