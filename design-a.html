@@ -139,7 +139,7 @@ details.ms-details[open] .ms-dot{cursor:default;}
 .dist-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .dist-row:last-child{margin-bottom:0;}
 .dist-lbl{font-size:11px;font-weight:700;color:var(--sub);width:72px;flex-shrink:0;}
-.dist-val{font-size:10px;font-weight:700;flex-shrink:0;width:28px;text-align:right;}
+.dist-val{font-size:10px;font-weight:700;flex-shrink:0;width:36px;text-align:right;}
 
 /* ── PR drilldown ─────────────────────────────────────── */
 .hab-block{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--div);cursor:pointer;}
@@ -380,72 +380,73 @@ details.ms-details[open] .ms-dot{cursor:default;}
 
 <!-- ═══════ WODs ═══════ -->
 <div class="sh"><div class="sh-inner">
-  <div class="sh-title">WODs <span class="sh-title-r">Jun 2026 · 13 WODs no mês</span></div>
-  <!-- bar width = count / max (4) * 100% -->
+  <div class="sh-title">WODs <span class="sh-title-r">Jun 2026 · executados/planejados</span></div>
+  <!-- bar width = executed / planned * 100% -->
   <div class="dist-row">
     <span class="dist-lbl">MetCon</span>
-    <div class="bar h7 grow"><div class="bar-fill" style="width:100%;background:#e05848"></div></div>
-    <span class="dist-val" style="color:#e05848">4 ×</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:80%;background:#e05848"></div></div>
+    <span class="dist-val" style="color:#e05848">4/5</span>
   </div>
   <div class="dist-row">
     <span class="dist-lbl">AMRAP</span>
     <div class="bar h7 grow"><div class="bar-fill" style="width:75%;background:#d07828"></div></div>
-    <span class="dist-val" style="color:#d07828">3 ×</span>
+    <span class="dist-val" style="color:#d07828">3/4</span>
   </div>
   <div class="dist-row">
     <span class="dist-lbl">EMOM</span>
-    <div class="bar h7 grow"><div class="bar-fill" style="width:50%;background:#d07828"></div></div>
-    <span class="dist-val" style="color:#d07828">2 ×</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:67%;background:#d07828"></div></div>
+    <span class="dist-val" style="color:#d07828">2/3</span>
   </div>
   <div class="dist-row">
     <span class="dist-lbl">For Time</span>
-    <div class="bar h7 grow"><div class="bar-fill" style="width:50%;background:#d07828"></div></div>
-    <span class="dist-val" style="color:#d07828">2 ×</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:100%;background:#d07828"></div></div>
+    <span class="dist-val" style="color:#d07828">2/2</span>
   </div>
   <div class="dist-row">
     <span class="dist-lbl">HIIT</span>
-    <div class="bar h7 grow"><div class="bar-fill" style="width:25%;background:#e05848"></div></div>
-    <span class="dist-val" style="color:#e05848">1 ×</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:50%;background:#e05848"></div></div>
+    <span class="dist-val" style="color:#e05848">1/2</span>
   </div>
   <div class="dist-row">
     <span class="dist-lbl">Estações</span>
-    <div class="bar h7 grow"><div class="bar-fill" style="width:25%;background:#d07828"></div></div>
-    <span class="dist-val" style="color:#d07828">1 ×</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:100%;background:#d07828"></div></div>
+    <span class="dist-val" style="color:#d07828">1/1</span>
   </div>
 </div></div>
 
 <!-- ═══════ DISTRIBUIÇÃO ═══════ -->
 <div class="sh"><div class="sh-inner">
-  <div class="sh-title">Distribuição <span class="sh-title-r">Últimos 90 dias · 68 sessões</span></div>
+  <div class="sh-title">Distribuição <span class="sh-title-r">Últimos 90 dias · executados/planejados</span></div>
+  <!-- bar width = executed / planned * 100% -->
   <div class="dist-row">
     <span class="dist-lbl">Força</span>
-    <div class="bar h7 grow"><div class="bar-fill" style="width:100%;background:#5090e0"></div></div>
-    <span class="dist-val" style="color:#5090e0">18 ×</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:82%;background:#5090e0"></div></div>
+    <span class="dist-val" style="color:#5090e0">18/22</span>
   </div>
   <div class="dist-row">
     <span class="dist-lbl">Skill</span>
-    <div class="bar h7 grow"><div class="bar-fill" style="width:78%;background:#4ac8c0"></div></div>
-    <span class="dist-val" style="color:#4ac8c0">14 ×</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:88%;background:#4ac8c0"></div></div>
+    <span class="dist-val" style="color:#4ac8c0">14/16</span>
   </div>
   <div class="dist-row">
     <span class="dist-lbl">LPO</span>
-    <div class="bar h7 grow"><div class="bar-fill" style="width:67%;background:#4070c0"></div></div>
-    <span class="dist-val" style="color:#4070c0">12 ×</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:86%;background:#4070c0"></div></div>
+    <span class="dist-val" style="color:#4070c0">12/14</span>
   </div>
   <div class="dist-row">
     <span class="dist-lbl">Core</span>
-    <div class="bar h7 grow"><div class="bar-fill" style="width:44%;background:#6090d8"></div></div>
-    <span class="dist-val" style="color:#6090d8">8 ×</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:80%;background:#6090d8"></div></div>
+    <span class="dist-val" style="color:#6090d8">8/10</span>
   </div>
   <div class="dist-row">
     <span class="dist-lbl">Cardio</span>
-    <div class="bar h7 grow"><div class="bar-fill" style="width:33%;background:#40b878"></div></div>
-    <span class="dist-val" style="color:#40b878">6 ×</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:75%;background:#40b878"></div></div>
+    <span class="dist-val" style="color:#40b878">6/8</span>
   </div>
   <div class="dist-row">
     <span class="dist-lbl">Mobilidade</span>
-    <div class="bar h7 grow"><div class="bar-fill" style="width:22%;background:#30a868"></div></div>
-    <span class="dist-val" style="color:#30a868">4 ×</span>
+    <div class="bar h7 grow"><div class="bar-fill" style="width:80%;background:#30a868"></div></div>
+    <span class="dist-val" style="color:#30a868">4/5</span>
   </div>
 </div></div>
 
