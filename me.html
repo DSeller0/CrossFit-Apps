@@ -175,8 +175,8 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
 /* ── Log / Body Sheet ── */
 .ls-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;opacity:0;pointer-events:none;transition:opacity .25s}
 .ls-overlay.open{opacity:1;pointer-events:auto}
-.ls-sheet{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--stone);z-index:101;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
-.ls-sheet.open{transform:translateY(0)}
+.ls-sheet{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--stone);z-index:101;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.ls-sheet.open{transform:translateY(0);pointer-events:auto}
 .ls-sheet::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold2),transparent)}
 .ls-hdr{padding:14px 16px 12px;border-bottom:1px solid var(--div);display:flex;align-items:flex-start;gap:10px}
 .ls-ex-name{font-size:15px;font-weight:900;color:var(--cream);line-height:1.2;flex:1}
@@ -302,6 +302,7 @@ const ECOL     = {
   'Skill':'#4ac8c0','Cardio':'#40b878','Mobilidade':'#30a868',
   'MetCon':'#c84040','HIIT':'#e05848','EMOM':'#d07828',
   'For Time':'#c86828','AMRAP':'#e09830','Estações':'#c8a030',
+  'Benchmark':'#d8a840',
 };
 const WOD_TYPES  = ['MetCon','AMRAP','EMOM','For Time','HIIT','Estações'];
 const DIST_TYPES = ['Força','LPO','Acessórios','Skill','Core','Cardio','Mobilidade'];
@@ -552,7 +553,10 @@ function switchLsUnit(unit){_lsUnit=unit;renderLsInputs(_lsPrRef,_lsCatsRef);upd
 
 function updateLsDelta(){
   const el=document.getElementById('ls-val'),dEl=document.getElementById('ls-delta');
-  if(!el||!el.value.trim()){dEl.textContent='';return;}
+  const saveBtn=document.getElementById('ls-btn-save');
+  const hasVal=!!(el&&el.value.trim());
+  if(saveBtn)saveBtn.disabled=!hasVal;
+  if(!hasVal){dEl.textContent='';return;}
   const best=_lsPrRef?prBest(_lsPrRef):null;
   if(!best){dEl.style.color='var(--teal)';dEl.textContent='Primeiro registro!';return;}
   if(_lsUnit==='time'){
@@ -596,7 +600,7 @@ function openLogSheet(name,cats,pr){
   document.getElementById('ls-confirm-area').innerHTML='';
   document.getElementById('ls-warn-area').innerHTML='';
   const btn=document.getElementById('ls-btn-save');
-  btn.textContent='SALVAR';btn.disabled=false;btn.style.background='';
+  btn.textContent='SALVAR';btn.disabled=true;btn.style.background='';btn.style.color='';
 
   renderLsInputs(pr,cats);
   document.getElementById('ls-ov').classList.add('open');
