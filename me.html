@@ -194,6 +194,7 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
 .ls-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .ls-lbl{font-size:11px;color:var(--muted)}
 .ls-date{background:transparent;border:none;color:var(--teal);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;outline:none;padding:0}
+.ls-goal-inp{background:transparent;border:none;border-bottom:1px solid var(--div);color:var(--cream);font-family:var(--font);font-size:15px;font-weight:900;width:72px;text-align:right;outline:none;padding:2px 4px;-webkit-appearance:none}
 .ls-note{width:100%;background:var(--stone2);border:1px solid var(--div);color:var(--cream);font-family:var(--font);font-size:13px;padding:8px 10px;outline:none;resize:none;margin-bottom:10px;display:block}
 .ls-confirm{background:var(--stone2);border:1px solid var(--gold2);padding:10px 12px;margin-bottom:10px;font-size:11px;color:var(--sub);line-height:1.5}
 .ls-confirm-btns{display:flex;gap:6px;margin-top:8px}
@@ -258,6 +259,7 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
     <div class="ls-inp-row" id="ls-inp-row"></div>
     <div class="ls-delta" id="ls-delta"></div>
     <div class="ls-row"><span class="ls-lbl">Data</span><input type="date" class="ls-date" id="ls-date"></div>
+    <div class="ls-row"><span class="ls-lbl">Objetivo</span><input class="ls-goal-inp" id="ls-goal" placeholder="—"><span class="ls-lbl" id="ls-goal-unit" style="min-width:28px"></span></div>
     <textarea class="ls-note" id="ls-note" rows="2" placeholder="Nota opcional..."></textarea>
     <div id="ls-confirm-area"></div>
     <div id="ls-warn-area"></div>
@@ -549,7 +551,20 @@ function renderLsInputs(pr,cats){
   }
 }
 
-function switchLsUnit(unit){_lsUnit=unit;renderLsInputs(_lsPrRef,_lsCatsRef);updateLsDelta();}
+function lsUnitLabel(){
+  if(_lsUnit==='time')return'mm:ss';
+  if(_lsUnit==='reps')return'reps';
+  if(_lsUnit==='m')return'm';
+  return'kg';
+}
+function switchLsUnit(unit){
+  _lsUnit=unit;
+  renderLsInputs(_lsPrRef,_lsCatsRef);
+  updateLsDelta();
+  const g=document.getElementById('ls-goal'),gu=document.getElementById('ls-goal-unit');
+  if(g)g.placeholder=unit==='time'?'00:00':'—';
+  if(gu)gu.textContent=lsUnitLabel();
+}
 
 function updateLsDelta(){
   const el=document.getElementById('ls-val'),dEl=document.getElementById('ls-delta');
@@ -603,6 +618,9 @@ function openLogSheet(name,cats,pr){
   btn.textContent='SALVAR';btn.disabled=true;btn.style.background='';btn.style.color='';
 
   renderLsInputs(pr,cats);
+  document.getElementById('ls-goal').value=pr?.target||'';
+  document.getElementById('ls-goal').placeholder=_lsUnit==='time'?'00:00':'—';
+  document.getElementById('ls-goal-unit').textContent=lsUnitLabel();
   document.getElementById('ls-ov').classList.add('open');
   document.getElementById('ls-sh').classList.add('open');
   document.body.style.overflow='hidden';
@@ -659,6 +677,7 @@ function confirmLsAttempt(){
 async function doLsSave(val,reps,date,note,isNewPr){
   const btn=document.getElementById('ls-btn-save');
   btn.disabled=true;btn.textContent='...';
+  const target=document.getElementById('ls-goal')?.value.trim()||null;
   const{error}=await _sb.rpc('submit_pr',{
     p_athlete_id:String(_curAthId),
     p_exercise:_lsNameRef,
@@ -668,7 +687,8 @@ async function doLsSave(val,reps,date,note,isNewPr){
     p_categories:_lsCatsRef,
     p_is_pr_best:isNewPr,
     p_note:note||null,
-    p_date:date
+    p_date:date,
+    p_target:target
   });
   if(error){
     btn.disabled=false;btn.textContent='SALVAR';
@@ -678,7 +698,7 @@ async function doLsSave(val,reps,date,note,isNewPr){
   btn.textContent=isNewPr?'✓ Novo PR!':'✓ Salvo';
   btn.style.background=isNewPr?'var(--gold)':'var(--teal)';
   if(isNewPr)btn.style.color='#000';
-  setTimeout(()=>closeLogSheet(),1200);
+  setTimeout(()=>location.reload(),1200);
 }
 
 // ── Body Metrics Sheet ────────────────────────────────────
