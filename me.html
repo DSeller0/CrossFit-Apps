@@ -232,6 +232,12 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
   .picker-input{font-size:18px}.picker-name{font-size:18px}.picker-empty{font-size:16px}
   .p-nav-btn{font-size:11px}.p-nav-ic{font-size:22px}
   .di{font-size:16px}.center-msg{font-size:16px}
+  /* sheets → centered modal on desktop */
+  .ls-sheet{bottom:auto;left:50%;right:auto;top:50%;width:440px;max-width:90vw;margin:0;
+    transform:translate(-50%,-46%);opacity:0;
+    transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .25s}
+  .ls-sheet.open{transform:translate(-50%,-50%);opacity:1}
+  .ls-body{max-height:calc(85vh - 64px)}
 }
 </style>
 </head>
