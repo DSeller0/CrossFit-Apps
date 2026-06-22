@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -154,7 +154,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-
 .rm-unit-sel{font-family:var(--sc-font);font-size:11px;padding:5px 6px;border:1px solid var(--divider);background:var(--stone2);color:var(--sub);outline:none;cursor:pointer}
 .rm-confirm-btn{font-family:var(--sc-font);font-size:12px;font-weight:900;padding:5px 10px;border:1px solid var(--teal);background:transparent;color:var(--teal);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .rm-confirm-btn:hover,.rm-confirm-btn:active{background:var(--teal);color:#000}
-.rm-calc-badge{display:inline-block;font-size:10px;font-weight:700;color:var(--gold);background:rgba(216,168,64,.1);border:1px solid rgba(216,168,64,.28);padding:1px 6px;margin-top:3px}
+.rm-calc-badge{display:inline-block;font-size:10px;font-weight:700;color:var(--gold);background:rgba(216,168,64,.1);border:1px solid rgba(216,168,64,.28);padding:1px 6px}
+.rm-calc-badge.auto{color:var(--teal);background:rgba(74,200,192,.1);border-color:rgba(74,200,192,.28)}
+.rm-vol-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px}
 
 /* ── Demo button + panel ── */
 .demo-btn{font-family:var(--sc-font);font-size:9px;font-weight:900;padding:2px 7px;border:1px solid #3a3a3a;background:transparent;color:#666;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;-webkit-tap-highlight-color:transparent;transition:all .12s;flex-shrink:0;line-height:1.4}
@@ -198,7 +200,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-
 let cfg={}, state={}, selectedAthlete='', weekOffset=0;
 let expandedDays=new Set(); // "dateKey|sessIdx"
 let checkedExercises=new Set(); // "blockId|exId"
-let rmValues={}; // exKey → {rm:number, unit:'kg'|'lbs'}
+let rmValues={}; // ex.id → {rm:number, unit:'kg'|'lbs', source:'auto'|'manual'}
 let rmEditKey=null; // currently-open RM input key
 let demoMap={}; // exerciseName.toLowerCase() → {name, videoUrl?, description?}
 
@@ -372,9 +374,35 @@ function confirmRm(){
   const inp=document.getElementById('rm-inp');
   const sel=document.getElementById('rm-unit-sel');
   const num=parseFloat(inp?.value);
-  if(num>0)rmValues[rmEditKey]={rm:num,unit:sel?.value||'kg'};
+  if(num>0)rmValues[rmEditKey]={rm:num,unit:sel?.value||'kg',source:'manual'};
   rmEditKey=null;
   render();
+}
+
+// ── PR auto-fill ──────────────────────────────────────────────────────────────
+function prBest(pr){
+  if(!pr?.results?.length)return null;
+  return pr.results.reduce((b,r)=>Number(r.value)>Number(b.value)?r:b);
+}
+function autofillRmFromPr(){
+  if(!selectedAthlete)return;
+  const ath=(state.athletes||[]).find(a=>a.name===selectedAthlete);
+  if(!ath)return;
+  const prs=(state.athleteGoalsData?.prs||{})[ath.id]||[];
+  Object.values(state.sessions||{}).forEach(daySessions=>{
+    (daySessions||[]).forEach(sess=>{
+      (sess.blocks||[]).forEach(bl=>{
+        (bl.exercises||[]).filter(e=>e.name&&e.intensity?.mode==='progression').forEach(ex=>{
+          if(rmValues[ex.id]?.source==='manual')return;
+          const pr=prs.find(p=>p.type==='load'&&(p.name||'').toLowerCase()===(ex.name||'').toLowerCase());
+          if(!pr)return;
+          const best=prBest(pr);
+          if(!best?.value)return;
+          rmValues[ex.id]={rm:Math.round(Number(best.value)*10)/10,unit:pr.unit||'kg',source:'auto'};
+        });
+      });
+    });
+  });
 }
 
 // ── Toggle helpers ────────────────────────────────────────────────────────────
@@ -620,9 +648,6 @@ function renderDetail(sess,dateKey){
       }
 
       const exs=(bl.exercises||[]).filter(e=>e.name||e.isComplex);
-      const hasProgEx=exs.some(e=>e.intensity?.mode==='progression');
-      const blRmData=rmValues[bl.id];
-      const blIsEdit=rmEditKey===bl.id;
 
       // Build progression lines for display
       const exRows=exs.map(ex=>{
@@ -638,6 +663,7 @@ function renderDetail(sess,dateKey){
           const displayName=ex.name||mvs.map(m=>m.name).join(' + ')||'Complexo';
           const sets=ex.sets||'';
           const volStr=[sets,notation?`(${notation})`:''].filter(Boolean).join('×');
+          const exRmData=rmValues[ex.id];
           let loadStr='';let calcStr='';
           if(isProg){
             const steps=ex.intensity?.steps||[];
@@ -645,7 +671,7 @@ function renderDetail(sess,dateKey){
             const loads=steps.map(s=>s.load).filter(Boolean);
             if(loads.length)loadStr=loads.join(' / ')+' '+unit;
             const pctNums=loads.map(l=>parseFloat(l)).filter(n=>!isNaN(n));
-            if(blRmData?.rm&&pctNums.length)calcStr=pctNums.map(p=>Math.ceil(blRmData.rm*p/100)).join('/')+' '+(blRmData.unit||'kg');
+            if(exRmData?.rm&&pctNums.length)calcStr=pctNums.map(p=>Math.ceil(exRmData.rm*p/100)).join('/')+' '+(exRmData.unit||'kg');
           }else if(ins){loadStr=ins;}
           const hasDemoCx=mvs.some(m=>{const d=demoMap[(m.name||'').toLowerCase()]||{};return!!(d.videoUrl||d.description||d.muscles);});
           const cxNames=mvs.map(m=>safeAttr(m.name));
@@ -654,11 +680,24 @@ function renderDetail(sess,dateKey){
             <div class="detail-ex-body">
               <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
                 <div class="detail-ex-name${!isWod&&done?' done':''}">${[volStr,displayName.toUpperCase()].filter(Boolean).join(' ')}</div>
-                <button class="demo-btn${hasDemoCx?'':' no-demo'}" onclick="event.stopPropagation();openDemoByNames(['${cxNames.join("','")}'])">Demo</button>
+                <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+                  ${isProg?`<button class="rm-chip${exRmData?' has-rm':''}" onclick="event.stopPropagation();toggleRmEdit('${ex.id}')">${exRmData?exRmData.rm+' '+(exRmData.unit||'kg'):'RM'}</button>`:''}
+                  <button class="demo-btn${hasDemoCx?'':' no-demo'}" onclick="event.stopPropagation();openDemoByNames(['${cxNames.join("','")}'])">Demo</button>
+                </div>
               </div>
               ${mvs.map(m=>`<div class="detail-ex-movement">· ${[m.reps?m.reps+'×':'',m.name.toUpperCase()].filter(Boolean).join(' ')}</div>`).join('')}
-              ${loadStr?`<div class="detail-ex-vol">${loadStr}</div>`:''}
-              ${calcStr?`<div class="rm-calc-badge">${calcStr}</div>`:''}
+              ${isProg&&rmEditKey===ex.id?`<div class="rm-input-wrap" onclick="event.stopPropagation()">
+                <input id="rm-inp" type="number" class="rm-input" placeholder="100" min="1" step="1" inputmode="numeric" value="${exRmData?.rm||''}" onkeydown="if(event.key==='Enter'){event.preventDefault();event.stopPropagation();confirmRm()}"/>
+                <select id="rm-unit-sel" class="rm-unit-sel" onclick="event.stopPropagation()">
+                  <option value="kg"${(exRmData?.unit||'kg')==='kg'?' selected':''}>kg</option>
+                  <option value="lbs"${exRmData?.unit==='lbs'?' selected':''}>lbs</option>
+                </select>
+                <button class="rm-confirm-btn" onclick="event.preventDefault();event.stopPropagation();confirmRm()">✓</button>
+              </div>`:''}
+              ${loadStr||calcStr?`<div class="rm-vol-row">
+                ${loadStr?`<div class="detail-ex-vol">${loadStr}</div>`:''}
+                ${calcStr?`<div class="rm-calc-badge${exRmData?.source==='auto'?' auto':''}">${calcStr}</div>`:''}
+              </div>`:''}
               ${ex.note?`<div class="detail-ex-note">${ex.note}</div>`:''}
             </div>
           </div>`;
@@ -673,12 +712,13 @@ function renderDetail(sess,dateKey){
             if(existing){if(s.load)existing.loads.push(s.load);}
             else groups.push({reps,loads:s.load?[s.load]:[]});
           });
+          const exRmData=rmValues[ex.id];
           return groups.map((g,gi)=>{
             const repsPrefix=ex.sets&&g.reps?`${g.sets||ex.sets}×${g.reps}`:g.reps;
             const pctNums=g.loads.map(l=>parseFloat(l)).filter(n=>!isNaN(n));
             const pctStr=pctNums.length?pctNums.join('/')+'% RM':'';
-            const calcStr=blRmData?.rm&&pctNums.length?
-              pctNums.map(p=>Math.ceil(blRmData.rm*p/100)).join('/')+' '+(blRmData.unit||'kg'):'';
+            const calcStr=exRmData?.rm&&pctNums.length?
+              pctNums.map(p=>Math.ceil(exRmData.rm*p/100)).join('/')+' '+(exRmData.unit||'kg'):'';
             const lineKey=`${bl.id}|${ex.id}-${gi}`;
             const lineDone=checkedExercises.has(lineKey);
             const exDataPg=gi===0?demoMap[(ex.name||'').toLowerCase()]||{}:{};
@@ -688,10 +728,23 @@ function renderDetail(sess,dateKey){
               <div class="detail-ex-body">
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
                   <div class="detail-ex-name${!isWod&&lineDone?' done':''}">${[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
-                  ${gi===0?`<button class="demo-btn${hasDemoPg?'':' no-demo'}" onclick="event.stopPropagation();openDemoByName('${safeAttr(ex.name)}')">Demo</button>`:''}
+                  ${gi===0?`<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+                    <button class="rm-chip${exRmData?' has-rm':''}" onclick="event.stopPropagation();toggleRmEdit('${ex.id}')">${exRmData?exRmData.rm+' '+(exRmData.unit||'kg'):'RM'}</button>
+                    <button class="demo-btn${hasDemoPg?'':' no-demo'}" onclick="event.stopPropagation();openDemoByName('${safeAttr(ex.name)}')">Demo</button>
+                  </div>`:''}
                 </div>
-                ${pctStr?`<div class="detail-ex-vol">${pctStr}</div>`:''}
-                ${calcStr?`<div class="rm-calc-badge">${calcStr}</div>`:''}
+                ${gi===0&&rmEditKey===ex.id?`<div class="rm-input-wrap" onclick="event.stopPropagation()">
+                  <input id="rm-inp" type="number" class="rm-input" placeholder="100" min="1" step="1" inputmode="numeric" value="${exRmData?.rm||''}" onkeydown="if(event.key==='Enter'){event.preventDefault();event.stopPropagation();confirmRm()}"/>
+                  <select id="rm-unit-sel" class="rm-unit-sel" onclick="event.stopPropagation()">
+                    <option value="kg"${(exRmData?.unit||'kg')==='kg'?' selected':''}>kg</option>
+                    <option value="lbs"${exRmData?.unit==='lbs'?' selected':''}>lbs</option>
+                  </select>
+                  <button class="rm-confirm-btn" onclick="event.preventDefault();event.stopPropagation();confirmRm()">✓</button>
+                </div>`:''}
+                ${pctStr||calcStr?`<div class="rm-vol-row">
+                  ${pctStr?`<div class="detail-ex-vol">${pctStr}</div>`:''}
+                  ${calcStr?`<div class="rm-calc-badge${exRmData?.source==='auto'?' auto':''}">${calcStr}</div>`:''}
+                </div>`:''}
                 ${gi===0&&ex.note?`<div class="detail-ex-note">${ex.note}</div>`:''}
               </div>
             </div>`;
@@ -718,19 +771,10 @@ function renderDetail(sess,dateKey){
           <span class="detail-block-title" style="color:${col}">${label}</span>
           <div style="display:flex;align-items:center;gap:6px">
             ${isWod?`<button class="timer-btn" onclick="event.stopPropagation();openTimer('${bl.id}','${sess.id}','${dateKey}')"><i class="ti ti-player-play"></i> Timer</button>`:''}
-            ${!isWod&&hasProgEx?`<button class="rm-chip${blRmData?' has-rm':''}" onclick="event.stopPropagation();toggleRmEdit('${bl.id}')">${blRmData?blRmData.rm+' '+(blRmData.unit||'kg'):'RM'}</button>`:''}
             ${meta?`<span class="detail-block-meta" style="background:${col};color:#000">${meta}</span>`:''}
             ${blDone?`<span class="detail-block-done">✓ Completo</span>`:''}
           </div>
         </div>
-        ${blIsEdit?`<div class="rm-input-wrap" style="padding:0 12px 10px" onclick="event.stopPropagation()">
-          <input id="rm-inp" type="number" class="rm-input" placeholder="100" min="1" step="1" inputmode="numeric" value="${blRmData?.rm||''}" onkeydown="if(event.key==='Enter'){event.preventDefault();event.stopPropagation();confirmRm()}"/>
-          <select id="rm-unit-sel" class="rm-unit-sel" onclick="event.stopPropagation()">
-            <option value="kg"${(blRmData?.unit||'kg')==='kg'?' selected':''}>kg</option>
-            <option value="lbs"${blRmData?.unit==='lbs'?' selected':''}>lbs</option>
-          </select>
-          <button class="rm-confirm-btn" onclick="event.preventDefault();event.stopPropagation();confirmRm()">✓</button>
-        </div>`:''}
         ${exRows}
         ${bl.notes?`<div class="detail-block-notes">${bl.notes}</div>`:''}
         ${isWod?`<a class="lb-link" href="leaderboard.html?wod=${bl.id}&session=${sess.id}&date=${dateKey}" target="_blank">
@@ -872,7 +916,14 @@ function dateToWeekOffset(dateKey){
   return Math.round((targetSun-todaySun)/(7*24*60*60*1000));
 }
 function changeWeek(dir){weekOffset+=dir;expandedDays.clear();checkedExercises.clear();rmEditKey=null;render();}
-function setAthlete(val){selectedAthlete=val;expandedDays.clear();rmEditKey=null;render();}
+function setAthlete(val){
+  selectedAthlete=val;
+  expandedDays.clear();
+  rmEditKey=null;
+  Object.keys(rmValues).forEach(k=>{if(rmValues[k].source==='auto')delete rmValues[k];});
+  autofillRmFromPr();
+  render();
+}
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const _sb=supabase.createClient('https://crsalcpvsedmiabkeibp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw');
@@ -904,6 +955,7 @@ async function init(attempt=0){
     const pAthlete=sp.get('athlete'),pPrefill=sp.get('prefill'),pPrefillRounds=sp.get('prefillRounds');
     if(pDate)weekOffset=dateToWeekOffset(pDate);
     if(pAthlete){const a=(state.athletes||[]).find(x=>x.id===pAthlete);if(a)selectedAthlete=a.name;}
+    autofillRmFromPr();
     render();
     if(pOpenLog&&pDate){
       const prefillData=pBlockId?{blockId:pBlockId,athleteId:pAthlete||'',perfTime:pPrefill||'',perfRounds:pPrefillRounds||''}:null;
