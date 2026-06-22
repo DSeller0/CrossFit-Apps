@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spirit Blossom · Design Kit</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+/* ─── Kit globals ───────────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0eaf8;font-family:'Raleway',sans-serif;padding:0 0 80px;color:#1a0d2e}
+
+/* ─── Page header ───────────────────────────────────────────────────────── */
+.kit-header{
+  background:linear-gradient(135deg,#09070f 0%,#1a0d2e 40%,#2d1040 70%,#180820 100%);
+  padding:48px 24px 40px;text-align:center;position:relative;overflow:hidden;
+}
+.kit-header::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 30% 40%,#e0549018 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 75% 60%,#38c4d018 0%,transparent 55%);
+}
+.kit-title{font-size:11px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#e05490;margin-bottom:10px;position:relative}
+.kit-name{font-size:42px;font-weight:900;color:#ede4f8;letter-spacing:-.5px;position:relative}
+.kit-name span{color:#e05490}
+.kit-sub{font-size:12px;color:#7d5090;margin-top:6px;position:relative;letter-spacing:.08em}
+
+/* ─── Petal decoration ──────────────────────────────────────────────────── */
+.petal{position:absolute;border-radius:50% 0 50% 0;background:#ff82b8;}
+.p1{width:10px;height:14px;top:18px;left:15%;transform:rotate(30deg);opacity:.3}
+.p2{width:7px;height:10px;top:60px;left:78%;transform:rotate(-25deg);opacity:.2}
+.p3{width:12px;height:16px;top:35px;right:12%;transform:rotate(55deg);opacity:.25}
+.p4{width:8px;height:11px;bottom:20px;left:40%;transform:rotate(-15deg);opacity:.2}
+.p5{width:6px;height:9px;bottom:40px;left:60%;transform:rotate(40deg);opacity:.15}
+
+/* ─── Section layout ────────────────────────────────────────────────────── */
+.kit-body{max-width:900px;margin:0 auto;padding:32px 20px}
+.kit-section{margin-bottom:48px}
+.kit-section-title{
+  font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;
+  color:#8a68a8;margin-bottom:20px;display:flex;align-items:center;gap:10px;
+}
+.kit-section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#cdb8ea,transparent)}
+
+/* ─── Color palette ─────────────────────────────────────────────────────── */
+.palette{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-bottom:28px}
+.swatch{border-radius:10px;overflow:hidden;box-shadow:0 2px 8px #c0a8d820}
+.swatch-color{height:64px}
+.swatch-info{padding:8px 10px;background:#fff}
+.swatch-name{font-size:10px;font-weight:800;color:#1a0d2e;letter-spacing:.04em}
+.swatch-hex{font-size:10px;color:#8a68a8;margin-top:1px;font-family:monospace}
+.swatch-role{font-size:9px;color:#bda8d8;margin-top:2px}
+.palette-label{font-size:11px;font-weight:800;color:#4a2868;margin-bottom:8px;margin-top:16px;letter-spacing:.06em;text-transform:uppercase}
+
+/* ─── Side-by-side theme split ──────────────────────────────────────────── */
+.theme-split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.theme-split{grid-template-columns:1fr}}
+
+.theme-panel{border-radius:12px;overflow:hidden;box-shadow:0 4px 20px #c0a8d830}
+.theme-label{font-size:9px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;padding:8px 14px;text-align:center}
+.theme-dark .theme-label{background:#100d1c;color:#7d5090;border-bottom:1px solid #221638}
+.theme-light .theme-label{background:#f3ecff;color:#8a68a8;border-bottom:1px solid #e2d4f5}
+
+/* ─── Typography ────────────────────────────────────────────────────────── */
+.type-grid{display:flex;flex-direction:column;gap:16px}
+.type-row{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline}
+.type-meta{font-size:10px;color:#8a68a8;font-family:monospace;line-height:1.5}
+.type-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bda8d8;margin-bottom:2px}
+.type-sample-dark{background:#09070f;padding:20px;border-radius:10px}
+.type-sample-light{background:#faf5ff;padding:20px;border-radius:10px;border:1px solid #e2d4f5}
+
+/* ─── Icon grid ─────────────────────────────────────────────────────────── */
+.icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px}
+.icon-tile{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;border-radius:8px;border:1px solid #e2d4f5;background:#fff;font-size:9px;color:#8a68a8;text-align:center}
+.icon-tile i{font-size:22px}
+.icon-tile.pink i{color:#c83878}
+.icon-tile.teal i{color:#1898a8}
+.icon-tile.purple i{color:#6040b8}
+.icon-tile.green i{color:#1e8a50}
+.icon-tile.gold i{color:#a07008}
+
+/* ─── Component swatches ────────────────────────────────────────────────── */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:600px){.comp-grid{grid-template-columns:1fr}}
+.comp-panel{border-radius:12px;overflow:hidden;box-shadow:0 2px 12px #c0a8d820}
+.comp-dark{background:#09070f;padding:16px;border:1px solid #221638}
+.comp-light{background:#faf5ff;padding:16px;border:1px solid #e2d4f5}
+
+/* ─── Block bars ────────────────────────────────────────────────────────── */
+/* Dark block bars */
+.blk-d{border-radius:8px;overflow:hidden;border:1px solid #221638;margin-bottom:6px;display:flex;align-items:center}
+.blk-d-bar{width:4px;align-self:stretch;flex-shrink:0}
+.blk-d-body{flex:1;padding:8px 10px}
+.blk-d-type{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;display:inline-block;padding:2px 7px;border-radius:4px;margin-bottom:3px}
+.blk-d-name{font-size:13px;font-weight:700;color:#ede4f8}
+/* Light block bars */
+.blk-l{border-radius:8px;overflow:hidden;border:1px solid #e2d4f5;margin-bottom:6px;display:flex;align-items:center;background:#fff;box-shadow:0 1px 4px #c0a8d810}
+.blk-l-bar{width:4px;align-self:stretch;flex-shrink:0}
+.blk-l-body{flex:1;padding:8px 10px}
+.blk-l-type{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;display:inline-block;padding:2px 7px;border-radius:4px;margin-bottom:3px}
+.blk-l-name{font-size:13px;font-weight:700;color:#1a0d2e}
+
+/* ─── Buttons ───────────────────────────────────────────────────────────── */
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.btn{font-family:inherit;font-size:12px;font-weight:800;padding:8px 14px;border-radius:8px;border:1px solid;cursor:pointer;display:inline-flex;align-items:center;gap:6px;letter-spacing:.02em}
+/* Dark buttons */
+.btn-d-ghost{background:transparent;border-color:#221638;color:#7d5090}
+.btn-d-primary{background:#e05490;border-color:#b83872;color:#fff}
+.btn-d-teal{background:#38c4d0;border-color:#1e9aaa;color:#09070f}
+.btn-d-danger{background:transparent;border-color:#3a1030;color:#c82850}
+/* Light buttons */
+.btn-l-ghost{background:transparent;border-color:#e2d4f5;color:#8a68a8}
+.btn-l-primary{background:#c83878;border-color:#a02860;color:#fff}
+.btn-l-teal{background:#1898a8;border-color:#126880;color:#fff}
+.btn-l-danger{background:transparent;border-color:#f0c0d0;color:#c82850}
+
+/* ─── Badges ────────────────────────────────────────────────────────────── */
+.badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;border:1px solid}
+/* Dark */
+.bd-gold{color:#d8b840;background:rgba(216,184,64,.1);border-color:rgba(216,184,64,.28)}
+.bd-teal{color:#38c4d0;background:rgba(56,196,208,.1);border-color:rgba(56,196,208,.28)}
+.bd-pink{color:#e05490;background:rgba(224,84,144,.1);border-color:rgba(224,84,144,.28)}
+.bd-purple{color:#9070d8;background:rgba(144,112,216,.1);border-color:rgba(144,112,216,.28)}
+/* Light */
+.bl-gold{color:#a07008;background:#fef8e0;border-color:#f0d890}
+.bl-teal{color:#1898a8;background:#d0f0f4;border-color:#a8dce8}
+.bl-pink{color:#c83878;background:#fce8f0;border-color:#f8c0d8}
+.bl-purple{color:#6040b8;background:#ece8fc;border-color:#d0c0f0}
+
+/* ─── Input samples ─────────────────────────────────────────────────────── */
+.inp-d{font-family:inherit;font-size:13px;background:#09070f;border:1px solid #221638;color:#ede4f8;padding:8px 11px;border-radius:6px;width:100%;outline:none;margin-bottom:8px}
+.inp-d::placeholder{color:#4a2d60}
+.inp-l{font-family:inherit;font-size:13px;background:#faf5ff;border:1px solid #e2d4f5;color:#1a0d2e;padding:8px 11px;border-radius:6px;width:100%;outline:none;margin-bottom:8px}
+.inp-l::placeholder{color:#bda8d8}
+
+/* ─── Motion / glow notes ───────────────────────────────────────────────── */
+.note-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.note-grid{grid-template-columns:1fr}}
+.note-card{border-radius:10px;padding:16px;border:1px solid}
+.note-card.dark{background:#100d1c;border-color:#221638}
+.note-card.light{background:#fff;border-color:#e2d4f5}
+.note-card-title{font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.nc-d .note-card-title{color:#7d5090}
+.nc-l .note-card-title{color:#8a68a8}
+.note-item{font-size:12px;line-height:1.7;display:flex;gap:8px}
+.note-item::before{content:'·';flex-shrink:0}
+.nc-d .note-item{color:#c4a0d0}
+.nc-l .note-item{color:#4a2868}
+
+/* ─── Comparison strip ──────────────────────────────────────────────────── */
+.compare-strip{display:grid;grid-template-columns:1fr 1fr;border-radius:12px;overflow:hidden;border:1px solid #e2d4f5;box-shadow:0 4px 20px #c0a8d820}
+.cs-dark{background:#09070f;padding:20px}
+.cs-light{background:#fff;padding:20px;border-left:1px solid #e2d4f5}
+.cs-label{font-size:9px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;margin-bottom:14px}
+.cs-dark .cs-label{color:#4a2d60}
+.cs-light .cs-label{color:#bda8d8}
+.cs-card{border-radius:8px;padding:12px;margin-bottom:8px}
+.cs-dark .cs-card{background:#100d1c;border:1px solid #221638}
+.cs-light .cs-card{background:#faf5ff;border:1px solid #e2d4f5}
+.cs-card-title{font-size:12px;font-weight:800;margin-bottom:4px}
+.cs-dark .cs-card-title{color:#ede4f8}
+.cs-light .cs-card-title{color:#1a0d2e}
+.cs-card-sub{font-size:10px}
+.cs-dark .cs-card-sub{color:#7d5090}
+.cs-light .cs-card-sub{color:#8a68a8}
+</style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<div class="kit-header">
+  <div class="petal p1"></div><div class="petal p2"></div>
+  <div class="petal p3"></div><div class="petal p4"></div><div class="petal p5"></div>
+  <div class="kit-title">Design System</div>
+  <div class="kit-name">Spirit <span>Blossom</span></div>
+  <div class="kit-sub">Inspired by the Spirit Blossom skin line · League of Legends</div>
+</div>
+
+<div class="kit-body">
+
+  <!-- ── 1. Color Tokens ──────────────────────────────────────────────────── -->
+  <div class="kit-section">
+    <div class="kit-section-title">Color Tokens</div>
+
+    <div class="palette-label">— Shared (both themes)</div>
+    <div class="palette">
+      <div class="swatch"><div class="swatch-color" style="background:#e05490"></div><div class="swatch-info"><div class="swatch-name">Cherry</div><div class="swatch-hex">#e05490</div><div class="swatch-role">primary · WOD</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#b83872"></div><div class="swatch-info"><div class="swatch-name">Rose</div><div class="swatch-hex">#b83872</div><div class="swatch-role">cherry dark</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#ff82b8"></div><div class="swatch-info"><div class="swatch-name">Petal</div><div class="swatch-hex">#ff82b8</div><div class="swatch-role">highlight only</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#38c4d0"></div><div class="swatch-info"><div class="swatch-name">Spirit</div><div class="swatch-hex">#38c4d0</div><div class="swatch-role">secondary · teal</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#1e9aaa"></div><div class="swatch-info"><div class="swatch-name">Deep Fox</div><div class="swatch-hex">#1e9aaa</div><div class="swatch-role">teal dark</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#9070d8"></div><div class="swatch-info"><div class="swatch-name">Twilight</div><div class="swatch-hex">#9070d8</div><div class="swatch-role">Força · LPO</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#6040b8"></div><div class="swatch-info"><div class="swatch-name">Dusk</div><div class="swatch-hex">#6040b8</div><div class="swatch-role">purple dark</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#50d890"></div><div class="swatch-info"><div class="swatch-name">Leaf</div><div class="swatch-hex">#50d890</div><div class="swatch-role">Cardio · Skill</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#d8b840"></div><div class="swatch-info"><div class="swatch-name">Blossom Gold</div><div class="swatch-hex">#d8b840</div><div class="swatch-role">Benchmark · goal</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#c82850"></div><div class="swatch-info"><div class="swatch-name">Danger</div><div class="swatch-hex">#c82850</div><div class="swatch-role">delete · error</div></div></div>
+    </div>
+
+    <div class="palette-label">— Dark theme surfaces</div>
+    <div class="palette">
+      <div class="swatch"><div class="swatch-color" style="background:#09070f"></div><div class="swatch-info"><div class="swatch-name">Void</div><div class="swatch-hex">#09070f</div><div class="swatch-role">--bg · page</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#100d1c"></div><div class="swatch-info"><div class="swatch-name">Shadow</div><div class="swatch-hex">#100d1c</div><div class="swatch-role">--stone · card</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#17122a"></div><div class="swatch-info"><div class="swatch-name">Dusk</div><div class="swatch-hex">#17122a</div><div class="swatch-role">--stone2 · elevated</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#221638"></div><div class="swatch-info"><div class="swatch-name">Ink</div><div class="swatch-hex">#221638</div><div class="swatch-role">--div · borders</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#2d1e50"></div><div class="swatch-info"><div class="swatch-name">Deep Ink</div><div class="swatch-hex">#2d1e50</div><div class="swatch-role">--div2 · accent border</div></div></div>
+    </div>
+
+    <div class="palette-label">— Dark theme text</div>
+    <div class="palette">
+      <div class="swatch"><div class="swatch-color" style="background:#ede4f8"></div><div class="swatch-info"><div class="swatch-name">Moonveil</div><div class="swatch-hex">#ede4f8</div><div class="swatch-role">--cream · primary text</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#c4a0d0"></div><div class="swatch-info"><div class="swatch-name">Lavender</div><div class="swatch-hex">#c4a0d0</div><div class="swatch-role">--sub · secondary</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#7d5090"></div><div class="swatch-info"><div class="swatch-name">Amethyst</div><div class="swatch-hex">#7d5090</div><div class="swatch-role">--muted</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#4a2d60"></div><div class="swatch-info"><div class="swatch-name">Umbra</div><div class="swatch-hex">#4a2d60</div><div class="swatch-role">--dim · subtle</div></div></div>
+    </div>
+
+    <div class="palette-label">— Light theme surfaces</div>
+    <div class="palette">
+      <div class="swatch"><div class="swatch-color" style="background:#faf5ff;border:1px solid #e2d4f5"></div><div class="swatch-info"><div class="swatch-name">Parchment</div><div class="swatch-hex">#faf5ff</div><div class="swatch-role">--bg · page</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#ffffff;border:1px solid #e2d4f5"></div><div class="swatch-info"><div class="swatch-name">Bloom</div><div class="swatch-hex">#ffffff</div><div class="swatch-role">--stone · card</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#f3ecff"></div><div class="swatch-info"><div class="swatch-name">Petal Mist</div><div class="swatch-hex">#f3ecff</div><div class="swatch-role">--stone2 · elevated</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#e2d4f5"></div><div class="swatch-info"><div class="swatch-name">Silk</div><div class="swatch-hex">#e2d4f5</div><div class="swatch-role">--div · borders</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#cdb8ea"></div><div class="swatch-info"><div class="swatch-name">Wisteria</div><div class="swatch-hex">#cdb8ea</div><div class="swatch-role">--div2 · accent border</div></div></div>
+    </div>
+
+    <div class="palette-label">— Light theme text</div>
+    <div class="palette">
+      <div class="swatch"><div class="swatch-color" style="background:#1a0d2e"></div><div class="swatch-info"><div class="swatch-name">Midnight</div><div class="swatch-hex">#1a0d2e</div><div class="swatch-role">--cream · primary text</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#4a2868"></div><div class="swatch-info"><div class="swatch-name">Elderberry</div><div class="swatch-hex">#4a2868</div><div class="swatch-role">--sub · secondary</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#8a68a8"></div><div class="swatch-info"><div class="swatch-name">Iris</div><div class="swatch-hex">#8a68a8</div><div class="swatch-role">--muted</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#bda8d8"></div><div class="swatch-info"><div class="swatch-name">Mist</div><div class="swatch-hex">#bda8d8</div><div class="swatch-role">--dim · subtle</div></div></div>
+    </div>
+  </div>
+
+  <!-- ── 2. Typography ─────────────────────────────────────────────────────── -->
+  <div class="kit-section">
+    <div class="kit-section-title">Typography · Raleway</div>
+    <div class="comp-grid">
+      <div class="comp-dark">
+        <div style="margin-bottom:16px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#4a2d60">Dark Theme</div>
+        <div style="font-size:28px;font-weight:900;color:#ede4f8;letter-spacing:-.3px;margin-bottom:8px">Treino · Força A</div>
+        <div style="font-size:18px;font-weight:800;color:#ede4f8;margin-bottom:8px">Back Squat 5×3</div>
+        <div style="font-size:14px;font-weight:700;color:#c4a0d0;margin-bottom:6px">Sessão publicada</div>
+        <div style="font-size:12px;color:#7d5090;margin-bottom:6px">3 blocos · 21 jun 2026</div>
+        <div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#4a2d60">ZONA 01 · 20 MIN</div>
+      </div>
+      <div class="comp-light">
+        <div style="margin-bottom:16px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#bda8d8">Light Theme</div>
+        <div style="font-size:28px;font-weight:900;color:#1a0d2e;letter-spacing:-.3px;margin-bottom:8px">Treino · Força A</div>
+        <div style="font-size:18px;font-weight:800;color:#1a0d2e;margin-bottom:8px">Back Squat 5×3</div>
+        <div style="font-size:14px;font-weight:700;color:#4a2868;margin-bottom:6px">Sessão publicada</div>
+        <div style="font-size:12px;color:#8a68a8;margin-bottom:6px">3 blocos · 21 jun 2026</div>
+        <div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#bda8d8">ZONA 01 · 20 MIN</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3. Block bars side-by-side ───────────────────────────────────────── -->
+  <div class="kit-section">
+    <div class="kit-section-title">Block Bars</div>
+    <div class="comp-grid">
+      <div class="comp-dark">
+        <div style="margin-bottom:12px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#4a2d60">Dark Theme</div>
+        <!-- WOD -->
+        <div class="blk-d" style="background:linear-gradient(180deg,#e0549033,transparent)">
+          <div class="blk-d-bar" style="background:#e05490"></div>
+          <div class="blk-d-body"><div class="blk-d-type" style="background:#e0549020;color:#e05490">For Time</div><div class="blk-d-name">Fran · 21-15-9</div></div>
+        </div>
+        <!-- Força -->
+        <div class="blk-d" style="background:linear-gradient(180deg,#9070d828,transparent)">
+          <div class="blk-d-bar" style="background:#9070d8"></div>
+          <div class="blk-d-body"><div class="blk-d-type" style="background:#9070d818;color:#9070d8">Força</div><div class="blk-d-name">Back Squat</div></div>
+        </div>
+        <!-- Cardio -->
+        <div class="blk-d" style="background:linear-gradient(180deg,#38c4d022,transparent)">
+          <div class="blk-d-bar" style="background:#38c4d0"></div>
+          <div class="blk-d-body"><div class="blk-d-type" style="background:#38c4d018;color:#38c4d0">Aquecimento</div><div class="blk-d-name">Mobilidade Geral</div></div>
+        </div>
+        <!-- Benchmark -->
+        <div class="blk-d" style="background:linear-gradient(180deg,#d8b84022,transparent)">
+          <div class="blk-d-bar" style="background:#d8b840"></div>
+          <div class="blk-d-body"><div class="blk-d-type" style="background:#d8b84018;color:#d8b840">Benchmark</div><div class="blk-d-name">Murph</div></div>
+        </div>
+      </div>
+      <div class="comp-light">
+        <div style="margin-bottom:12px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#bda8d8">Light Theme</div>
+        <div class="blk-l" style="background:linear-gradient(90deg,#f8d8e818,#fff 40%)">
+          <div class="blk-l-bar" style="background:#c83878"></div>
+          <div class="blk-l-body"><div class="blk-l-type" style="background:#fce8f0;color:#c83878">For Time</div><div class="blk-l-name">Fran · 21-15-9</div></div>
+        </div>
+        <div class="blk-l" style="background:linear-gradient(90deg,#dcd0f818,#fff 40%)">
+          <div class="blk-l-bar" style="background:#6040b8"></div>
+          <div class="blk-l-body"><div class="blk-l-type" style="background:#ece8fc;color:#6040b8">Força</div><div class="blk-l-name">Back Squat</div></div>
+        </div>
+        <div class="blk-l" style="background:linear-gradient(90deg,#c8f0f018,#fff 40%)">
+          <div class="blk-l-bar" style="background:#1898a8"></div>
+          <div class="blk-l-body"><div class="blk-l-type" style="background:#d0f0f4;color:#1898a8">Aquecimento</div><div class="blk-l-name">Mobilidade Geral</div></div>
+        </div>
+        <div class="blk-l" style="background:linear-gradient(90deg,#f8ead018,#fff 40%)">
+          <div class="blk-l-bar" style="background:#a07008"></div>
+          <div class="blk-l-body"><div class="blk-l-type" style="background:#fef8e0;color:#a07008">Benchmark</div><div class="blk-l-name">Murph</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 4. Buttons & Badges ───────────────────────────────────────────────── -->
+  <div class="kit-section">
+    <div class="kit-section-title">Buttons & Badges</div>
+    <div class="comp-grid">
+      <div class="comp-dark">
+        <div style="margin-bottom:12px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#4a2d60">Dark</div>
+        <div class="btn-row">
+          <button class="btn btn-d-primary"><i class="ti ti-check"></i> Salvar</button>
+          <button class="btn btn-d-teal"><i class="ti ti-send"></i> Publicar</button>
+          <button class="btn btn-d-ghost"><i class="ti ti-template"></i> Modelo</button>
+          <button class="btn btn-d-danger"><i class="ti ti-trash"></i></button>
+        </div>
+        <div class="badge-row">
+          <span class="badge bd-gold">75 kg · manual</span>
+          <span class="badge bd-teal">80 kg · auto PR</span>
+          <span class="badge bd-pink">For Time</span>
+          <span class="badge bd-purple">Força</span>
+        </div>
+      </div>
+      <div class="comp-light">
+        <div style="margin-bottom:12px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#bda8d8">Light</div>
+        <div class="btn-row">
+          <button class="btn btn-l-primary"><i class="ti ti-check"></i> Salvar</button>
+          <button class="btn btn-l-teal"><i class="ti ti-send"></i> Publicar</button>
+          <button class="btn btn-l-ghost"><i class="ti ti-template"></i> Modelo</button>
+          <button class="btn btn-l-danger"><i class="ti ti-trash"></i></button>
+        </div>
+        <div class="badge-row">
+          <span class="badge bl-gold">75 kg · manual</span>
+          <span class="badge bl-teal">80 kg · auto PR</span>
+          <span class="badge bl-pink">For Time</span>
+          <span class="badge bl-purple">Força</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 5. Inputs ─────────────────────────────────────────────────────────── -->
+  <div class="kit-section">
+    <div class="kit-section-title">Inputs</div>
+    <div class="comp-grid">
+      <div class="comp-dark">
+        <input class="inp-d" value="Back Squat">
+        <input class="inp-d" placeholder="Nome da sessão...">
+        <input class="inp-d" value="06:30" style="width:100px">
+      </div>
+      <div class="comp-light">
+        <input class="inp-l" value="Back Squat">
+        <input class="inp-l" placeholder="Nome da sessão...">
+        <input class="inp-l" value="06:30" style="width:100px">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 6. Icons ──────────────────────────────────────────────────────────── -->
+  <div class="kit-section">
+    <div class="kit-section-title">Icon Vocabulary</div>
+    <div class="icon-grid">
+      <div class="icon-tile pink"><i class="ti ti-flame"></i>WOD</div>
+      <div class="icon-tile pink"><i class="ti ti-clock"></i>For Time</div>
+      <div class="icon-tile pink"><i class="ti ti-repeat"></i>AMRAP</div>
+      <div class="icon-tile teal"><i class="ti ti-timer"></i>EMOM</div>
+      <div class="icon-tile purple"><i class="ti ti-barbell"></i>Força</div>
+      <div class="icon-tile purple"><i class="ti ti-shield"></i>LPO</div>
+      <div class="icon-tile green"><i class="ti ti-wind"></i>Aquec.</div>
+      <div class="icon-tile green"><i class="ti ti-run"></i>Cardio</div>
+      <div class="icon-tile gold"><i class="ti ti-trophy"></i>Benchmark</div>
+      <div class="icon-tile pink"><i class="ti ti-venus"></i>Girls</div>
+      <div class="icon-tile gold"><i class="ti ti-shield-star"></i>Heroes</div>
+      <div class="icon-tile teal"><i class="ti ti-sparkles"></i>Custom</div>
+      <div class="icon-tile purple"><i class="ti ti-lock"></i>Locked</div>
+      <div class="icon-tile gold"><i class="ti ti-bookmark-plus"></i>Save BM</div>
+      <div class="icon-tile teal"><i class="ti ti-player-play"></i>Timer</div>
+      <div class="icon-tile pink"><i class="ti ti-pencil"></i>Criador</div>
+      <div class="icon-tile green"><i class="ti ti-calendar"></i>Agenda</div>
+      <div class="icon-tile purple"><i class="ti ti-users"></i>Atletas</div>
+    </div>
+  </div>
+
+  <!-- ── 7. Design Principles ──────────────────────────────────────────────── -->
+  <div class="kit-section">
+    <div class="kit-section-title">Design Principles</div>
+    <div class="note-grid">
+      <div class="note-card dark nc-d">
+        <div class="note-card-title">Dark Theme</div>
+        <div class="note-item">Deep void backgrounds — no pure black</div>
+        <div class="note-item">Translucent color fills on blocks (20–30% opacity)</div>
+        <div class="note-item">Radial ambient glows on key elements</div>
+        <div class="note-item">Cherry petal floaters for atmosphere</div>
+        <div class="note-item">Text hierarchy: moonveil → lavender → amethyst → umbra</div>
+        <div class="note-item">Teal = actions/nav; cherry = primary/WOD; purple = strength</div>
+      </div>
+      <div class="note-card light nc-l">
+        <div class="note-card-title">Light Theme</div>
+        <div class="note-item">Lavender parchment bg — not pure white</div>
+        <div class="note-item">Pastel fills on block chips; full-white card surfaces</div>
+        <div class="note-item">Soft elevation shadows (box-shadow) instead of glows</div>
+        <div class="note-item">Same petal floaters at higher opacity</div>
+        <div class="note-item">Text: midnight → elderberry → iris → mist</div>
+        <div class="note-item">Cherry/teal darken on light for WCAG contrast</div>
+      </div>
+      <div class="note-card dark nc-d">
+        <div class="note-card-title">Shared Rules</div>
+        <div class="note-item">Font: Raleway 400/700/800/900 only</div>
+        <div class="note-item">Border-radius: 6–12px on cards; 4–6px on chips</div>
+        <div class="note-item">Accent borders: 28–40% opacity versions of accent color</div>
+        <div class="note-item">Auto-fill RM badge → teal; manual RM badge → gold</div>
+        <div class="note-item">No pure #000 or #fff anywhere in UI</div>
+      </div>
+      <div class="note-card light nc-l">
+        <div class="note-card-title">Block Family Colors</div>
+        <div class="note-item">WOD / MetCon / For Time / AMRAP → Cherry Pink</div>
+        <div class="note-item">EMOM → Spirit Teal</div>
+        <div class="note-item">Força / LPO / Core / Acessórios → Twilight Purple</div>
+        <div class="note-item">Aquecimento / Skill / Cardio / Mobilidade → Leaf Green</div>
+        <div class="note-item">Benchmark → Blossom Gold</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 8. Dark vs Light comparison ──────────────────────────────────────── -->
+  <div class="kit-section">
+    <div class="kit-section-title">Side-by-Side Comparison</div>
+    <div class="compare-strip">
+      <div class="cs-dark">
+        <div class="cs-label">Dark · Void Night</div>
+        <div class="cs-card">
+          <div class="cs-card-title">Nova Sessão</div>
+          <div class="cs-card-sub">Treino · 22 jun 2026</div>
+        </div>
+        <div class="cs-card" style="background:#17122a;border-color:#2d1e50;">
+          <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#e05490;margin-bottom:4px">Benchmark</div>
+          <div class="cs-card-title">Fran</div>
+          <div class="cs-card-sub">21-15-9 · Thrusters + Pull-ups</div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#e0549020;color:#e05490;border:1px solid #e0549040">For Time</span>
+          <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#38c4d018;color:#38c4d0;border:1px solid #38c4d030">10 min</span>
+        </div>
+      </div>
+      <div class="cs-light">
+        <div class="cs-label">Light · Blossom Day</div>
+        <div class="cs-card">
+          <div class="cs-card-title">Nova Sessão</div>
+          <div class="cs-card-sub">Treino · 22 jun 2026</div>
+        </div>
+        <div class="cs-card" style="background:#fffdf0;border-color:#f0d890;">
+          <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#a07008;margin-bottom:4px">Benchmark</div>
+          <div class="cs-card-title">Fran</div>
+          <div class="cs-card-sub">21-15-9 · Thrusters + Pull-ups</div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#fce8f0;color:#c83878;border:1px solid #f8c0d8">For Time</span>
+          <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#d0f0f4;color:#1898a8;border:1px solid #a8dce8">10 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /kit-body -->
+</body>
+</html>
