@@ -32,11 +32,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 .gym{text-align:center;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;margin-top:1px}
 
 /* ── Athlete filter bar ── */
-.sel-bar{background:var(--bg);border-bottom:1px solid var(--divider);padding:10px 20px}
+.sel-bar{background:var(--bg);border-bottom:1px solid var(--divider);padding:10px 20px;position:sticky;top:88px;z-index:18}
 .athlete-sel{font-family:var(--font);font-size:12px;background:var(--stone);border:1px solid var(--divider);color:var(--text);padding:6px 10px;outline:none;cursor:pointer;width:100%;max-width:320px}
 
 /* ── Week nav ── */
-.week-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:89px;z-index:19}
+.week-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:136px;z-index:19}
 .week-label{font-size:13px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
 .nav-btn{background:transparent;border:1px solid var(--divider);color:var(--muted);font-size:16px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
 .nav-btn:hover{border-color:var(--teal);color:var(--teal)}
@@ -238,7 +238,7 @@ const SCALE_COL = {RX:'#4ac8c0',Inter:'#e87820',SC:'#9070d8',Adaptado:'#c05050'}
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let cfg={}, state={sessions:{},athletes:[],results:[],settings:{}};
-let weekOffset=0, selectedAthleteId='';
+let weekOffset=0, selectedAthleteId=localStorage.getItem('results_athlete')||'';
 let expandedSessions=new Set();
 let leaderboardTarget=null;
 let submittingWodKey=null;
@@ -529,7 +529,7 @@ function render(){
 
 // ── Event handlers ────────────────────────────────────────────────────────────
 function changeWeek(dir){weekOffset+=dir;expandedSessions.clear();closeLbSilent();render();}
-function setAthlete(val){selectedAthleteId=val;expandedSessions.clear();closeLbSilent();render();}
+function setAthlete(val){selectedAthleteId=val;try{localStorage.setItem('results_athlete',val)}catch(e){}expandedSessions.clear();closeLbSilent();render();}
 function toggleSession(sid){
   if(expandedSessions.has(sid)) expandedSessions.delete(sid);
   else expandedSessions.add(sid);

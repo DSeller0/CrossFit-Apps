@@ -32,7 +32,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-
 .brand{font-size:22px;font-weight:900;letter-spacing:8px;color:var(--cream);text-align:center}
 .gym{text-align:center;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;margin-top:1px}
 /* ── Athlete selector bar ── */
-.sel-bar{background:var(--bg);border-bottom:1px solid var(--divider);padding:10px 20px}
+.sel-bar{background:var(--bg);border-bottom:1px solid var(--divider);padding:10px 20px;position:sticky;top:88px;z-index:18}
 .athlete-sel{font-family:var(--sc-font);font-size:12px;background:var(--stone);border:1px solid var(--divider);color:var(--text);padding:6px 10px;outline:none;cursor:pointer;width:100%;max-width:320px}
 /* ── Bottom nav ── */
 .p-nav{position:fixed;bottom:0;left:0;right:0;background:#0a0807;border-top:1px solid var(--divider);display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:30}
@@ -43,7 +43,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-
 .p-nav-sep{width:1px;background:var(--divider);margin:10px 0}
 
 /* ── Week nav ── */
-.week-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:90px;z-index:19}
+.week-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:136px;z-index:19}
 .week-label{font-size:13px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
 .nav-btn{background:transparent;border:1px solid var(--divider);color:var(--muted);font-size:16px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
 .nav-btn:hover{border-color:var(--teal);color:var(--teal)}
@@ -197,7 +197,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-
 <div id="app"><div class="loading"><i class="ti ti-loader"></i> Carregando...</div></div>
 <script>
 // ── State ────────────────────────────────────────────────────────────────────
-let cfg={}, state={}, selectedAthlete='', weekOffset=0;
+let cfg={}, state={}, selectedAthlete=localStorage.getItem('sched_athlete')||'', weekOffset=0;
 let expandedDays=new Set(); // "dateKey|sessIdx"
 let checkedExercises=new Set(); // "blockId|exId"
 let rmValues={}; // ex.id → {rm:number, unit:'kg'|'lbs', source:'auto'|'manual'}
@@ -918,6 +918,7 @@ function dateToWeekOffset(dateKey){
 function changeWeek(dir){weekOffset+=dir;expandedDays.clear();checkedExercises.clear();rmEditKey=null;render();}
 function setAthlete(val){
   selectedAthlete=val;
+  try{localStorage.setItem('sched_athlete',val)}catch(e){}
   expandedDays.clear();
   rmEditKey=null;
   Object.keys(rmValues).forEach(k=>{if(rmValues[k].source==='auto')delete rmValues[k];});
