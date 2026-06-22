@@ -692,6 +692,7 @@ function renderDetail(sess,dateKey){
                 </div>
                 ${pctStr?`<div class="detail-ex-vol">${pctStr}</div>`:''}
                 ${calcStr?`<div class="rm-calc-badge">${calcStr}</div>`:''}
+                ${gi===0&&ex.note?`<div class="detail-ex-note">${ex.note}</div>`:''}
               </div>
             </div>`;
           }).join('');
