@@ -495,24 +495,22 @@ function doDiscard(){
   dropHist(0);
   window.history.back();
 }
+function buildScheduleUrl(sessId,sessDate,blockId,athId,perfTime,perfRounds){
+  const p=new URLSearchParams();
+  if(sessDate)p.set('date',sessDate);
+  if(sessId)p.set('openLog',sessId);
+  if(blockId)p.set('blockId',blockId);
+  if(athId)p.set('athlete',athId);
+  if(perfTime)p.set('prefill',perfTime);
+  if(perfRounds)p.set('prefillRounds',String(perfRounds));
+  return'schedule.html?'+p.toString();
+}
 function registerResult(){
-  const prefill={
-    sessionId:cfg.sessionId,sessionDate:cfg.sessionDate,
-    athleteId:cfg.athleteId,blockId:cfg.blockId,
-    blockType:cfg.blockType,blockLabel:cfg.blockLabel,
-    perfTime:fmt(finalSecs),perfTimeSecs:finalSecs,
-    perfRounds:splits.length,splits:[...splits],
-    timestamp:Date.now()
-  };
-  try{localStorage.setItem(K_PREFILL,JSON.stringify(prefill));}catch(e){}
-  const ath=cfg.athleteId?`&athlete=${encodeURIComponent(cfg.athleteId)}`:'';
-  location.href=`results.html?from=timer${ath}`;
+  location.href=buildScheduleUrl(cfg.sessionId,cfg.sessionDate,cfg.blockId,cfg.athleteId,fmt(finalSecs),splits.length||'');
 }
 function registerHist(i){
-  const h=loadHist(),entry=h[i];if(!entry)return;
-  try{localStorage.setItem(K_PREFILL,JSON.stringify({...entry,fromHistory:true}));}catch(e){}
-  const ath=entry.athleteId?`&athlete=${encodeURIComponent(entry.athleteId)}`:'';
-  location.href=`results.html?from=timer${ath}`;
+  const h=loadHist(),e=h[i];if(!e)return;
+  location.href=buildScheduleUrl(e.sessionId,e.sessionDate,e.blockId,e.athleteId,e.totalTime,e.splits?.length||'');
 }
 function goBack(){
   if(status==='running'){if(!confirm('Pausar e sair?'))return;pauseTimer();}

@@ -744,21 +744,28 @@ function renderDetail(sess,dateKey){
 }
 
 // ── Log Pane ──────────────────────────────────────────────────────────────────
-const WOD_LOG_TYPES=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
+const WOD_LOG_TYPES=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT','Benchmark'];
 const LOG_SCALES=['RX','Inter','SC','Adaptado'];
 let logForm={dateKey:'',sessId:'',sess:null,athleteId:'',assignedAth:[],blocks:[]};
 function lpUid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
 
-function openLogPane(dateKey,sessId){
+function openLogPane(dateKey,sessId,prefillData=null){
   const sess=(state.sessions[dateKey]||[]).find(s=>s.id===sessId);
   if(!sess) return;
   const targets=Array.isArray(sess.mainTraining)?sess.mainTraining:(sess.mainTraining?[sess.mainTraining]:[]);
   const assignedAth=(state.athletes||[]).filter(a=>targets.includes(a.name));
   const wodBlocks=(sess.blocks||[]).filter(b=>WOD_LOG_TYPES.includes(b.type)||WOD_LOG_TYPES.includes(b.label));
   logForm={
-    dateKey,sessId,sess,athleteId:'',assignedAth,
+    dateKey,sessId,sess,athleteId:prefillData?.athleteId||'',assignedAth,
     blocks:wodBlocks.map(b=>({blockId:b.id,blockType:b.type,blockLabel:b.label&&b.type&&b.label!==b.type?`${b.label} · ${b.type}`:b.label||b.type,rpe:7,scale:'RX',perfTime:'',perfRounds:'',perfReps:''}))
   };
+  if(prefillData?.blockId){
+    const bi=logForm.blocks.findIndex(b=>b.blockId===prefillData.blockId);
+    if(bi>=0){
+      if(prefillData.perfTime)logForm.blocks[bi].perfTime=prefillData.perfTime;
+      if(prefillData.perfRounds)logForm.blocks[bi].perfRounds=prefillData.perfRounds;
+    }
+  }
   renderLogPaneContent();
   document.getElementById('log-pane-overlay').style.display='block';
   const pane=document.getElementById('log-pane');
@@ -787,7 +794,7 @@ function renderLogPaneContent(){
         <div class="lp-section-title">Atleta</div>
         <select class="lp-select" onchange="logForm.athleteId=this.value">
           <option value="">— Selecione —</option>
-          ${assignedAth.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}
+          ${assignedAth.map(a=>`<option value="${a.id}"${logForm.athleteId===a.id?' selected':''}>${a.name}</option>`).join('')}
         </select>
       </div>
       ${blocks.length>0?`<div class="lp-section">
@@ -803,11 +810,11 @@ function renderLogPaneContent(){
             <div class="lp-scale-row" id="lp-scale-${i}">
               ${LOG_SCALES.map(s=>`<button type="button" class="lp-scale-btn${bl.scale===s?' on':''}" onclick="setLogScale(${i},'${s}')">${s}</button>`).join('')}
             </div>
-            ${bl.blockType==='For Time'
-              ?`<span class="lp-lbl">Tempo (MM:SS)</span><input class="lp-input" type="text" placeholder="ex: 12:34" inputmode="numeric" oninput="logForm.blocks[${i}].perfTime=this.value"/>`
+            ${(bl.blockType==='For Time'||bl.blockType==='Benchmark')
+              ?`<span class="lp-lbl">Tempo (MM:SS)</span><input class="lp-input" type="text" placeholder="ex: 12:34" inputmode="numeric" value="${bl.perfTime||''}" oninput="logForm.blocks[${i}].perfTime=this.value"/>`
               :`<div class="lp-row2">
-                  <div><span class="lp-lbl">Rounds</span><input class="lp-input" type="number" placeholder="0" min="0" inputmode="numeric" oninput="logForm.blocks[${i}].perfRounds=this.value"/></div>
-                  <div><span class="lp-lbl">Reps</span><input class="lp-input" type="number" placeholder="0" min="0" inputmode="numeric" oninput="logForm.blocks[${i}].perfReps=this.value"/></div>
+                  <div><span class="lp-lbl">Rounds</span><input class="lp-input" type="number" placeholder="0" min="0" inputmode="numeric" value="${bl.perfRounds||''}" oninput="logForm.blocks[${i}].perfRounds=this.value"/></div>
+                  <div><span class="lp-lbl">Reps</span><input class="lp-input" type="number" placeholder="0" min="0" inputmode="numeric" value="${bl.perfReps||''}" oninput="logForm.blocks[${i}].perfReps=this.value"/></div>
                 </div>`}
           </div>`).join('')}
       </div>`:''}
@@ -856,6 +863,13 @@ async function submitLogPane(){
 }
 
 // ── Controls ──────────────────────────────────────────────────────────────────
+function dateToWeekOffset(dateKey){
+  const now=new Date();
+  const todaySun=new Date(now);todaySun.setDate(now.getDate()-now.getDay());todaySun.setHours(0,0,0,0);
+  const target=new Date(dateKey+'T12:00:00');
+  const targetSun=new Date(target);targetSun.setDate(target.getDate()-target.getDay());targetSun.setHours(0,0,0,0);
+  return Math.round((targetSun-todaySun)/(7*24*60*60*1000));
+}
 function changeWeek(dir){weekOffset+=dir;expandedDays.clear();checkedExercises.clear();rmEditKey=null;render();}
 function setAthlete(val){selectedAthlete=val;expandedDays.clear();rmEditKey=null;render();}
 
@@ -883,7 +897,18 @@ async function init(attempt=0){
     }
     state=stateData;
     buildDemoMap(state.exerciseRegistry);
+    // Handle return from timer
+    const sp=new URLSearchParams(location.search);
+    const pDate=sp.get('date'),pOpenLog=sp.get('openLog'),pBlockId=sp.get('blockId');
+    const pAthlete=sp.get('athlete'),pPrefill=sp.get('prefill'),pPrefillRounds=sp.get('prefillRounds');
+    if(pDate)weekOffset=dateToWeekOffset(pDate);
+    if(pAthlete){const a=(state.athletes||[]).find(x=>x.id===pAthlete);if(a)selectedAthlete=a.name;}
     render();
+    if(pOpenLog&&pDate){
+      const prefillData=pBlockId?{blockId:pBlockId,athleteId:pAthlete||'',perfTime:pPrefill||'',perfRounds:pPrefillRounds||''}:null;
+      openLogPane(pDate,pOpenLog,prefillData);
+      history.replaceState({},'','schedule.html');
+    }
   }catch(e){
     if(attempt<2){setTimeout(()=>init(attempt+1),2000*(attempt+1));return;}
     document.getElementById('app').innerHTML=`
