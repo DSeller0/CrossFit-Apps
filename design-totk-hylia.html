@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TotK · Hylia Serif + Outfit</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+@font-face{
+  font-family:'HyliaSerif';
+  src:url('fonts/hylia-serif/Hylia Serif Beta v0-009/HyliaSerifBeta-Regular.otf') format('opentype');
+  font-weight:400;font-style:normal;font-display:swap
+}
+
+:root{
+  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;
+  --div:#2a231c;--div2:#3a2f22;
+  --gold:#d8a840;--gold2:#b88820;
+  --teal:#4ac8c0;--teal2:#2a9890;
+  --cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+  --red:#e05848;--green:#28cc48;--purple:#9070d8;
+  --f-display:'HyliaSerif',serif;
+  --f-body:'Outfit',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size:14px;min-height:100vh}
+
+/* ── Font label banner ── */
+.font-banner{background:var(--stone2);border-bottom:1px solid var(--div2);
+  padding:12px 20px;display:flex;align-items:center;gap:16px}
+.font-swatch{flex:1}
+.font-swatch-label{font-family:var(--f-body);font-size:10px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px}
+.font-swatch-name{font-family:var(--f-display);font-size:20px;color:var(--gold)}
+.font-swatch-name.body-swatch{font-family:var(--f-body);font-weight:700;font-size:18px;color:var(--teal)}
+.font-divider{width:1px;height:40px;background:var(--div2)}
+
+/* ── Nav header ── */
+.hdr{background:var(--stone);border-bottom:1px solid var(--div);
+  padding:14px 20px 10px;position:sticky;top:0;z-index:30}
+.hdr-top{display:flex;align-items:center;gap:10px}
+.hdr-title{font-family:var(--f-display);font-size:22px;color:var(--gold);letter-spacing:.04em}
+.hdr-sub{font-family:var(--f-body);font-size:11px;font-weight:500;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+
+/* ── Tabs ── */
+.tabs{display:flex;border-bottom:1px solid var(--div);background:var(--stone);
+  position:sticky;top:57px;z-index:29}
+.tab{flex:1;padding:9px 4px;font-family:var(--f-body);font-size:10px;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;background:transparent;border:none;
+  border-bottom:2px solid transparent;color:var(--dim);cursor:pointer;transition:color .12s}
+.tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.tab i{display:block;font-size:15px;margin-bottom:2px}
+
+/* ── Panels ── */
+.panel{display:none;max-width:480px;margin:0 auto;padding:14px 14px 40px}.panel.on{display:block}
+
+/* ── Week nav ── */
+.week-nav{display:flex;align-items:center;gap:10px;padding:10px 0;margin-bottom:8px}
+.week-nav-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--div);
+  background:transparent;color:var(--muted);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center}
+.week-label{font-family:var(--f-display);font-size:16px;color:var(--cream);flex:1;text-align:center;letter-spacing:.04em}
+
+/* ── Day card ── */
+.day{background:var(--stone);border:1px solid var(--div);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.day-hdr{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--div)}
+.day-num{font-family:var(--f-display);font-size:24px;color:var(--gold);line-height:1;width:28px;text-align:center}
+.day-label{font-family:var(--f-body);font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--muted);flex:1}
+.day-badge{font-family:var(--f-body);font-size:10px;font-weight:600;color:var(--teal);
+  background:#4ac8c018;border:1px solid #4ac8c030;padding:2px 8px;border-radius:3px}
+
+/* ── Block ── */
+.blk{border-bottom:1px solid var(--div)}
+.blk:last-child{border-bottom:none}
+.blk-hdr{display:flex;align-items:center;gap:8px;padding:8px 12px}
+.blk-bar{width:3px;align-self:stretch;flex-shrink:0;border-radius:2px}
+.blk-bar.purple{background:var(--purple)}
+.blk-bar.gold{background:var(--gold)}
+.blk-bar.teal{background:var(--teal)}
+.blk-type{font-family:var(--f-body);font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;padding:2px 6px;border-radius:3px;flex-shrink:0}
+.blk-type.purple{color:var(--purple);background:#9070d818;border:1px solid #9070d830}
+.blk-type.gold{color:var(--gold);background:#d8a84018;border:1px solid #d8a84030}
+.blk-type.teal{color:var(--teal);background:#4ac8c018;border:1px solid #4ac8c030}
+.blk-name{font-family:var(--f-display);font-size:14px;color:var(--cream);flex:1;letter-spacing:.03em}
+.blk-rounds{font-family:var(--f-body);font-size:10px;font-weight:600;color:var(--dim)}
+
+/* ── Exercise rows ── */
+.ex-list{padding:2px 0}
+.ex-row{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--div)}
+.ex-row:last-child{border-bottom:none}
+.ex-icon{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--div2);
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--dim);flex-shrink:0}
+.ex-name{font-family:var(--f-body);font-size:13px;font-weight:500;color:var(--cream);flex:1}
+.ex-vol{font-family:var(--f-body);font-size:11px;color:var(--muted);flex-shrink:0}
+.ex-load{font-family:var(--f-body);font-size:10px;font-weight:600;color:var(--purple);
+  background:#9070d818;border:1px solid #9070d830;padding:2px 6px;border-radius:3px;flex-shrink:0}
+
+/* ── Notes row ── */
+.notes-row{padding:6px 12px 8px 44px;font-family:var(--f-body);
+  font-size:12px;color:var(--muted);line-height:1.5;font-style:italic;border-top:1px solid var(--div)}
+
+/* ── Athlete filter ── */
+.sel-bar{background:var(--bg);border-bottom:1px solid var(--div);padding:10px 14px}
+.sel-label{font-family:var(--f-body);font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--dim);margin-bottom:6px}
+.sel-pills{display:flex;gap:6px;flex-wrap:wrap}
+.sel-pill{font-family:var(--f-body);font-size:12px;font-weight:600;padding:5px 12px;
+  border-radius:20px;border:1px solid var(--div);background:var(--stone);color:var(--muted);
+  cursor:pointer;transition:all .12s}
+.sel-pill.on{background:#d8a84018;border-color:var(--gold);color:var(--gold)}
+
+/* ── Result cards ── */
+.result{background:var(--stone);border:1px solid var(--div);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.result-hdr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--div)}
+.result-date{font-family:var(--f-display);font-size:16px;color:var(--gold);letter-spacing:.04em}
+.result-type{font-family:var(--f-body);font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--teal);background:#4ac8c018;border:1px solid #4ac8c030;
+  padding:2px 7px;border-radius:3px}
+.result-body{padding:10px 12px}
+.result-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.result-row:last-child{margin-bottom:0}
+.result-ex{font-family:var(--f-body);font-size:12px;color:var(--sub);flex:1}
+.result-val{font-family:var(--f-display);font-size:20px;color:var(--cream);letter-spacing:.02em}
+.result-unit{font-family:var(--f-body);font-size:10px;font-weight:500;color:var(--muted)}
+.result-pr{font-family:var(--f-body);font-size:10px;font-weight:700;color:var(--gold);
+  background:#d8a84018;border:1px solid #d8a84030;padding:2px 6px;border-radius:3px}
+.result-time{font-family:var(--f-display);font-size:28px;color:var(--teal);letter-spacing:.04em}
+
+/* ── PR section ── */
+.sh{background:var(--stone);border:1px solid var(--div);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.sh-title{font-family:var(--f-display);font-size:15px;color:var(--gold);
+  padding:10px 12px;border-bottom:1px solid var(--div);letter-spacing:.04em}
+.pr-row{display:flex;align-items:baseline;gap:8px;padding:7px 12px;border-bottom:1px solid var(--div)}
+.pr-row:last-child{border-bottom:none}
+.pr-ex{font-family:var(--f-body);font-size:12px;color:var(--sub);flex:1}
+.pr-val{font-family:var(--f-display);font-size:18px;color:var(--cream)}
+.pr-unit{font-family:var(--f-body);font-size:10px;color:var(--muted)}
+.pr-detail{font-family:var(--f-body);font-size:10px;color:var(--dim)}
+
+/* ── Heatmap ── */
+.heatmap-wrap{background:var(--stone);border:1px solid var(--div);border-radius:8px;padding:12px;margin-bottom:10px}
+.heatmap-title{font-family:var(--f-display);font-size:15px;color:var(--gold);margin-bottom:10px;letter-spacing:.04em}
+.hm-grid{display:grid;grid-template-columns:repeat(13,1fr);gap:3px}
+.hm-cell{aspect-ratio:1;border-radius:2px;background:var(--div)}
+.hm-cell.l1{background:#d8a84030}.hm-cell.l2{background:#d8a84060}.hm-cell.l3{background:#d8a84090}.hm-cell.l4{background:var(--gold)}
+
+/* ── Font comparison strip ── */
+.compare{background:var(--stone);border:1px solid var(--div2);border-radius:8px;padding:14px;margin-bottom:14px}
+.compare-title{font-family:var(--f-body);font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--dim);margin-bottom:12px}
+.compare-row{display:flex;gap:0;border-radius:6px;overflow:hidden;margin-bottom:6px}
+.cmp-side{flex:1;padding:10px 12px;background:var(--stone2)}
+.cmp-side+.cmp-side{border-left:1px solid var(--div)}
+.cmp-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--dim);margin-bottom:6px;font-family:var(--f-body)}
+.cmp-sample{font-size:20px;color:var(--cream);line-height:1.2}
+.cmp-sample.old{font-family:'Raleway',sans-serif;font-weight:800}
+.cmp-sample.new{font-family:var(--f-display)}
+.cmp-problem{color:var(--red);font-size:10px;font-weight:600;margin-top:4px;font-family:var(--f-body)}
+.cmp-ok{color:var(--green);font-size:10px;font-weight:600;margin-top:4px;font-family:var(--f-body)}
+</style>
+</head>
+<body>
+
+<!-- Font info banner -->
+<div class="font-banner">
+  <div class="font-swatch">
+    <div class="font-swatch-label">Display</div>
+    <div class="font-swatch-name">Hylia Serif Beta</div>
+  </div>
+  <div class="font-divider"></div>
+  <div class="font-swatch">
+    <div class="font-swatch-label">Body</div>
+    <div class="font-swatch-name body-swatch">Outfit</div>
+  </div>
+</div>
+
+<!-- App header -->
+<div class="hdr">
+  <div class="hdr-top">
+    <div style="flex:1">
+      <div class="hdr-title">CrossFit Apps</div>
+      <div class="hdr-sub">TotK · Hylia Serif + Outfit</div>
+    </div>
+    <i class="ti ti-bell" style="color:var(--dim);font-size:20px"></i>
+    <i class="ti ti-user-circle" style="color:var(--muted);font-size:22px"></i>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab on" onclick="showTab('agenda',this)"><i class="ti ti-calendar-week"></i>Agenda</button>
+  <button class="tab" onclick="showTab('results',this)"><i class="ti ti-chart-bar"></i>Resultados</button>
+  <button class="tab" onclick="showTab('profile',this)"><i class="ti ti-user"></i>Perfil</button>
+  <button class="tab" onclick="showTab('compare',this)"><i class="ti ti-typography"></i>Fontes</button>
+</div>
+
+<!-- ── AGENDA ── -->
+<div id="t-agenda" class="panel on">
+  <div class="sel-bar">
+    <div class="sel-label">Atleta</div>
+    <div class="sel-pills">
+      <span class="sel-pill on">Arthur</span>
+      <span class="sel-pill">Mariana</span>
+      <span class="sel-pill">João</span>
+    </div>
+  </div>
+
+  <div style="padding:0 0 0;margin-top:12px">
+    <div class="week-nav">
+      <button class="week-nav-btn"><i class="ti ti-chevron-left"></i></button>
+      <span class="week-label">22 – 28 Jun 2026</span>
+      <button class="week-nav-btn"><i class="ti ti-chevron-right"></i></button>
+    </div>
+
+    <!-- Day: Segunda -->
+    <div class="day">
+      <div class="day-hdr">
+        <div class="day-num">23</div>
+        <div>
+          <div class="day-label">Segunda-feira</div>
+        </div>
+        <div class="day-badge">3 blocos</div>
+      </div>
+
+      <div class="blk">
+        <div class="blk-hdr">
+          <div class="blk-bar purple"></div>
+          <span class="blk-type purple">Força</span>
+          <span class="blk-name">Back Squat</span>
+          <span class="blk-rounds">5×3</span>
+        </div>
+        <div class="ex-list">
+          <div class="ex-row">
+            <div class="ex-icon"><i class="ti ti-circle"></i></div>
+            <span class="ex-name">Back Squat</span>
+            <span class="ex-vol">5×3</span>
+            <span class="ex-load">@85% RM</span>
+          </div>
+          <div class="ex-row">
+            <div class="ex-icon"><i class="ti ti-circle"></i></div>
+            <span class="ex-name">Romanian DL</span>
+            <span class="ex-vol">4×6</span>
+            <span class="ex-load">70 kg</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="blk">
+        <div class="blk-hdr">
+          <div class="blk-bar teal"></div>
+          <span class="blk-type teal">Metcon</span>
+          <span class="blk-name">AMRAP 12</span>
+          <span class="blk-rounds">AMRAP</span>
+        </div>
+        <div class="ex-list">
+          <div class="ex-row">
+            <div class="ex-icon"><i class="ti ti-circle"></i></div>
+            <span class="ex-name">Burpee Box Jump</span>
+            <span class="ex-vol">10 reps</span>
+          </div>
+          <div class="ex-row">
+            <div class="ex-icon"><i class="ti ti-circle"></i></div>
+            <span class="ex-name">Kettlebell Swing</span>
+            <span class="ex-vol">15 reps</span>
+            <span class="ex-load">24 kg</span>
+          </div>
+          <div class="ex-row">
+            <div class="ex-icon"><i class="ti ti-circle"></i></div>
+            <span class="ex-name">Wall Ball</span>
+            <span class="ex-vol">20 reps</span>
+            <span class="ex-load">9 kg</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="blk">
+        <div class="blk-hdr">
+          <div class="blk-bar gold"></div>
+          <span class="blk-type gold">Acessório</span>
+          <span class="blk-name">Core</span>
+        </div>
+        <div class="ex-list">
+          <div class="ex-row">
+            <div class="ex-icon"><i class="ti ti-circle"></i></div>
+            <span class="ex-name">Plank</span>
+            <span class="ex-vol">3×60s</span>
+          </div>
+        </div>
+        <div class="notes-row">Manter core ativo durante todo o movimento; não deixar os quadris caírem.</div>
+      </div>
+    </div>
+
+    <!-- Day: Terça -->
+    <div class="day">
+      <div class="day-hdr">
+        <div class="day-num">24</div>
+        <div><div class="day-label">Terça-feira</div></div>
+        <div class="day-badge">Descanso</div>
+      </div>
+    </div>
+
+    <!-- Day: Quarta -->
+    <div class="day">
+      <div class="day-hdr">
+        <div class="day-num">25</div>
+        <div><div class="day-label">Quarta-feira</div></div>
+        <div class="day-badge">2 blocos</div>
+      </div>
+      <div class="blk">
+        <div class="blk-hdr">
+          <div class="blk-bar purple"></div>
+          <span class="blk-type purple">Força</span>
+          <span class="blk-name">Press</span>
+          <span class="blk-rounds">5×5</span>
+        </div>
+        <div class="ex-list">
+          <div class="ex-row">
+            <div class="ex-icon"><i class="ti ti-circle"></i></div>
+            <span class="ex-name">Strict Press</span>
+            <span class="ex-vol">5×5</span>
+            <span class="ex-load">@75% RM</span>
+          </div>
+          <div class="ex-row">
+            <div class="ex-icon"><i class="ti ti-circle"></i></div>
+            <span class="ex-name">Push Press</span>
+            <span class="ex-vol">3×8</span>
+            <span class="ex-load">50 kg</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESULTS ── -->
+<div id="t-results" class="panel">
+  <div style="margin-bottom:12px;margin-top:4px">
+    <div class="week-nav">
+      <button class="week-nav-btn"><i class="ti ti-chevron-left"></i></button>
+      <span class="week-label">Jun 2026</span>
+      <button class="week-nav-btn"><i class="ti ti-chevron-right"></i></button>
+    </div>
+  </div>
+
+  <div class="result">
+    <div class="result-hdr">
+      <div>
+        <div class="result-date">23 Jun</div>
+        <div style="font-size:10px;font-weight:500;color:var(--muted);margin-top:2px;font-family:var(--f-body)">Segunda · Força + Metcon</div>
+      </div>
+      <div style="flex:1"></div>
+      <span class="result-type">Completado</span>
+    </div>
+    <div class="result-body">
+      <div class="result-row">
+        <span class="result-ex">Back Squat</span>
+        <span class="result-val">127</span>
+        <span class="result-unit">kg</span>
+        <span class="result-pr">PR</span>
+      </div>
+      <div class="result-row">
+        <span class="result-ex">AMRAP 12 — rounds</span>
+        <span class="result-val">6</span>
+        <span class="result-unit">+ 14 reps</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="result">
+    <div class="result-hdr">
+      <div>
+        <div class="result-date">20 Jun</div>
+        <div style="font-size:10px;font-weight:500;color:var(--muted);margin-top:2px;font-family:var(--f-body)">Sexta · Força</div>
+      </div>
+      <div style="flex:1"></div>
+      <span class="result-type">Completado</span>
+    </div>
+    <div class="result-body">
+      <div class="result-row">
+        <span class="result-ex">Deadlift</span>
+        <span class="result-val">182</span>
+        <span class="result-unit">kg</span>
+      </div>
+      <div class="result-row">
+        <span class="result-ex">Tempo — 3 km run</span>
+        <span class="result-time">12:34</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="result">
+    <div class="result-hdr">
+      <div>
+        <div class="result-date">18 Jun</div>
+        <div style="font-size:10px;font-weight:500;color:var(--muted);margin-top:2px;font-family:var(--f-body)">Quarta · Metcon</div>
+      </div>
+      <div style="flex:1"></div>
+      <span class="result-type">Completado</span>
+    </div>
+    <div class="result-body">
+      <div class="result-row">
+        <span class="result-ex">Fran — tempo</span>
+        <span class="result-time" style="color:var(--gold)">3:47</span>
+        <span class="result-pr">PR</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PROFILE ── -->
+<div id="t-profile" class="panel">
+  <div class="sh" style="margin-top:4px">
+    <div class="sh-title">PRs por bloco</div>
+    <div class="pr-row">
+      <span class="pr-ex">Back Squat</span>
+      <span class="pr-val">127</span>
+      <span class="pr-unit">kg</span>
+      <span class="pr-detail" style="margin-left:auto">23 Jun 2026</span>
+    </div>
+    <div class="pr-row">
+      <span class="pr-ex">Deadlift</span>
+      <span class="pr-val">182</span>
+      <span class="pr-unit">kg</span>
+      <span class="pr-detail" style="margin-left:auto">20 Jun 2026</span>
+    </div>
+    <div class="pr-row">
+      <span class="pr-ex">Strict Press</span>
+      <span class="pr-val">72</span>
+      <span class="pr-unit">kg</span>
+      <span class="pr-detail" style="margin-left:auto">15 Jun 2026</span>
+    </div>
+    <div class="pr-row">
+      <span class="pr-ex">Clean & Jerk</span>
+      <span class="pr-val">95</span>
+      <span class="pr-unit">kg</span>
+      <span class="pr-detail" style="margin-left:auto">8 Jun 2026</span>
+    </div>
+    <div class="pr-row">
+      <span class="pr-ex">Snatch</span>
+      <span class="pr-val">72</span>
+      <span class="pr-unit">kg</span>
+      <span class="pr-detail" style="margin-left:auto">1 Jun 2026</span>
+    </div>
+  </div>
+
+  <div class="heatmap-wrap">
+    <div class="heatmap-title">Frequência · 2026</div>
+    <div class="hm-grid" id="hm"></div>
+  </div>
+</div>
+
+<!-- ── FONT COMPARISON ── -->
+<div id="t-compare" class="panel">
+  <div class="compare" style="margin-top:4px">
+    <div class="compare-title">Raleway (atual) vs Hylia Serif Beta (sugerido)</div>
+
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;font-family:var(--f-body);line-height:1.6">
+      Raleway usa variantes geométricas de M, W e Q que podem causar desalinhamento
+      óptico no Windows. Hylia Serif Beta é a fonte do jogo BotW/TotK — sem ambiguidade de glifos.
+    </div>
+
+    <div class="compare-row">
+      <div class="cmp-side">
+        <div class="cmp-label">Raleway 800 — atual</div>
+        <div class="cmp-sample old">AMRAP WOD<br>Quinta-feira<br>12 Weeks</div>
+        <div class="cmp-problem">▲ M/W/Q óptico instável no Windows</div>
+      </div>
+      <div class="cmp-side">
+        <div class="cmp-label">Hylia Serif — sugerido</div>
+        <div class="cmp-sample new">AMRAP WOD<br>Quinta-feira<br>12 Weeks</div>
+        <div class="cmp-ok">✓ Serifa clássica — sem problema de alinhamento</div>
+      </div>
+    </div>
+
+    <div class="compare-row" style="margin-top:8px">
+      <div class="cmp-side">
+        <div class="cmp-label">Raleway — números</div>
+        <div class="cmp-sample old" style="font-size:32px">127 kg</div>
+        <div class="cmp-sample old" style="font-size:18px">23/28</div>
+      </div>
+      <div class="cmp-side">
+        <div class="cmp-label">Hylia Serif — números</div>
+        <div class="cmp-sample new" style="font-size:32px">127 kg</div>
+        <div class="cmp-sample new" style="font-size:18px">23/28</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;border-top:1px solid var(--div);padding-top:12px">
+      <div class="compare-title" style="margin-bottom:8px">Body: Outfit (sugerido para substituir Raleway corpo)</div>
+      <div style="font-family:var(--f-body);color:var(--cream);font-size:14px;font-weight:500;line-height:1.7">
+        Back Squat · 5×3 · @85% RM<br>
+        <span style="color:var(--muted);font-size:12px;font-weight:400">Manter core ativo durante todo o movimento; não deixar os quadris caírem.</span>
+      </div>
+      <div style="font-family:var(--f-body);font-size:10px;color:var(--dim);margin-top:6px">
+        Outfit 300/400/500/600/700 — legível, clean, sem ambiguidade de glifos
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Heatmap
+const hm = document.getElementById('hm');
+const levels = [0,0,0,1,0,2,3,0,1,0,2,1,0,0,3,0,1,2,0,0,4,0,2,1,0,0,1,0,3,2,0,1,0,0,2,3,0,0,1,2,0,4,0,1,0,0,2,0,1,3,0,0,2,0,1,0,0,3,4,0,0,2,1,0,0,3,0,2,1,0,0,4,3,0,1,0,2,0,0,1,0,3,2,4,0,1,0,0,2,3,0,0,1,0,2,3,0,0,1,0,4,0,2,3,0,0,1,2,0,0,4,3,0,1,0,2,0,0,3,0,1,2,0,0,4,3,0,0,1,0,2,0,0,3,4,0,1,0,2,0,0,1,3,0,0,2,4,0,1,0,0,2,0,3,0,0,1,0,2,4,0,1,0,3,0,2,0,0,1,4,0,2,3,0,0];
+levels.slice(0,91).forEach(l=>{
+  const c=document.createElement('div');
+  c.className='hm-cell'+(l?' l'+l:'');
+  hm.appendChild(c);
+});
+
+// Tabs
+function showTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('t-'+id).classList.add('on');
+  btn.classList.add('on');
+}
+</script>
+</body>
+</html>
