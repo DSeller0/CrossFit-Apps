@@ -191,6 +191,15 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-
   .p-nav-btn{font-size:11px}.p-nav-ic{font-size:22px}
   .loading{font-size:16px}.error{font-size:16px}
 }
+/* ── Round tracking ── */
+.b-counter{width:20px;height:20px;border-radius:4px;border:1px solid #2e2e2e;background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;font-family:var(--sc-font);transition:all .12s;margin-top:1px;user-select:none;-webkit-tap-highlight-color:transparent;line-height:1}
+.b-counter.idle{color:#333}
+.b-counter.active{color:var(--gold);border-color:var(--gold2);background:rgba(216,168,64,.1)}
+.b-counter.done{color:var(--teal);border-color:var(--teal);background:rgba(74,200,192,.1)}
+.rd-prog{font-size:10px;font-weight:700;padding:1px 7px;border-radius:2px;letter-spacing:.04em;white-space:nowrap;border:1px solid transparent}
+.rd-prog.idle{color:var(--muted);background:#1a1a1a;border-color:#2a2a2a}
+.rd-prog.partial{color:var(--gold);background:rgba(216,168,64,.12);border-color:rgba(216,168,64,.3)}
+.rd-prog.complete{color:var(--teal);background:rgba(74,200,192,.12);border-color:rgba(74,200,192,.3)}
 </style>
 </head>
 <body>
@@ -203,6 +212,7 @@ let checkedExercises=new Set(); // "blockId|exId"
 let rmValues={}; // ex.id → {rm:number, unit:'kg'|'lbs', source:'auto'|'manual'}
 let rmEditKey=null; // currently-open RM input key
 let demoMap={}; // exerciseName.toLowerCase() → {name, videoUrl?, description?}
+let roundState={}; // "blockId|exId" → current round count, persisted to localStorage
 
 const WOD_BLOCK_TYPES=['For Time','AMRAP','EMOM','MetCon','HIIT','WOD','Benchmark','Estações'];
 function isWodBlock(bl){return WOD_BLOCK_TYPES.includes(bl.type)||WOD_BLOCK_TYPES.includes(bl.label);}
@@ -211,6 +221,74 @@ function isWodLogged(sess,bl){
   const ath=(state.athletes||[]).find(a=>a.name===selectedAthlete);
   if(!ath)return false;
   return (state.results||[]).some(r=>r.sessionId===sess.id&&r.athleteId===ath.id&&(r.blocks||[]).some(b=>b.blockId===bl.id));
+}
+// ── Round tracking helpers ────────────────────────────────────────────────────
+function isRoundBlock(bl){ return !isWodBlock(bl) && Number(bl.rounds) > 0; }
+function getRound(blId,exId){ return roundState[`${blId}|${exId}`]||0; }
+function setRound(blId,exId,val){
+  roundState[`${blId}|${exId}`]=val;
+  try{localStorage.setItem('sched_rounds',JSON.stringify(roundState));}catch(e){}
+}
+function loadRoundState(){
+  try{const s=localStorage.getItem('sched_rounds');roundState=s?JSON.parse(s):{};}catch(e){roundState={};}
+}
+function clearRoundState(){
+  roundState={};
+  try{localStorage.removeItem('sched_rounds');}catch(e){}
+}
+function advanceRound(blId,exId,total){
+  const cur=getRound(blId,exId);
+  setRound(blId,exId,cur>=total?0:cur+1);
+  render();
+}
+function rdCounterHtml(blId,exId,total){
+  const cur=getRound(blId,exId),tot=Number(total);
+  const cls=cur>=tot?'done':cur>0?'active':'idle';
+  const inner=cur>=tot?'<i class="ti ti-check" style="font-size:9px"></i>':cur>0?String(cur):'<i class="ti ti-minus" style="font-size:8px;opacity:.4"></i>';
+  return `<div class="b-counter ${cls}" data-blid="${blId}" data-exid="${exId}" data-total="${tot}">${inner}</div>`;
+}
+function rdBadge(bl){
+  const exs=(bl.exercises||[]).filter(e=>e.name||e.isComplex);
+  if(!exs.length) return `<span class="rd-prog idle">${bl.rounds} RDS</span>`;
+  const keys=[];
+  exs.forEach(ex=>{
+    if(!ex.isComplex&&ex.intensity?.mode==='progression'){
+      const steps=ex.intensity?.steps||[];const groups=[];
+      steps.forEach(s=>{const r=s.reps||ex.reps||'';if(!groups.find(g=>g===r))groups.push(r);});
+      if(!groups.length)groups.push('');
+      groups.forEach((_,gi)=>keys.push(`${ex.id}-${gi}`));
+    }else{keys.push(ex.id);}
+  });
+  const dones=keys.map(k=>getRound(bl.id,k));
+  const minDone=dones.length?Math.min(...dones):0;
+  const allDone=dones.length>0&&dones.every(d=>d>=Number(bl.rounds));
+  if(allDone) return `<span class="rd-prog complete">✓</span>`;
+  if(minDone>0) return `<span class="rd-prog partial">RD ${minDone} / ${bl.rounds}</span>`;
+  return `<span class="rd-prog idle">${bl.rounds} RDS</span>`;
+}
+function attachRoundCounters(){
+  document.querySelectorAll('.b-counter').forEach(el=>{
+    const blId=el.dataset.blid,exId=el.dataset.exid,total=parseInt(el.dataset.total)||0;
+    let pressTimer=null,didLong=false,touchHandled=false;
+    el.addEventListener('touchstart',()=>{
+      didLong=false;touchHandled=false;
+      pressTimer=setTimeout(()=>{didLong=true;touchHandled=true;setRound(blId,exId,0);render();},600);
+    },{passive:true});
+    el.addEventListener('touchend',()=>{
+      clearTimeout(pressTimer);
+      if(!didLong){touchHandled=true;advanceRound(blId,exId,total);}
+    },{passive:true});
+    el.addEventListener('touchmove',()=>clearTimeout(pressTimer),{passive:true});
+    el.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(touchHandled){touchHandled=false;return;}
+      advanceRound(blId,exId,total);
+    });
+    el.addEventListener('contextmenu',e=>{
+      e.preventDefault();e.stopPropagation();
+      setRound(blId,exId,0);render();
+    });
+  });
 }
 function openTimer(blockId,sessId,dateKey){
   const dayData=(state.sessions[dateKey]||[]);
@@ -334,6 +412,18 @@ function blockProgress(bl,sess){
   const exs=(bl.exercises||[]).filter(e=>e.name||e.isComplex);
   if(!exs.length) return {done:0,total:0};
   let done=0;
+  if(isRoundBlock(bl)){
+    exs.forEach(ex=>{
+      const isProg=!ex.isComplex&&ex.intensity?.mode==='progression';
+      if(isProg){
+        const steps=ex.intensity?.steps||[];const groups=[];
+        steps.forEach(s=>{const r=s.reps||ex.reps||'';if(!groups.find(g=>g===r))groups.push(r);});
+        if(!groups.length)groups.push('');
+        if(groups.every((_,gi)=>getRound(bl.id,`${ex.id}-${gi}`)>=Number(bl.rounds))) done++;
+      }else{if(getRound(bl.id,ex.id)>=Number(bl.rounds)) done++;}
+    });
+    return {done,total:exs.length};
+  }
   exs.forEach(ex=>{
     const isProg=!ex.isComplex&&ex.intensity?.mode==='progression';
     if(isProg){
@@ -592,6 +682,7 @@ function render(){
       }).join('')}
     </div>
   `;
+  requestAnimationFrame(attachRoundCounters);
 }
 
 function renderDetail(sess,dateKey){
@@ -602,6 +693,7 @@ function renderDetail(sess,dateKey){
       const col=blockColor();
       const meta=[bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
       const isWod=isWodBlock(bl);
+      const isRd=isRoundBlock(bl);
       const prog=blockProgress(bl,sess);
       const blDone=isWod?isWodLogged(sess,bl):(prog.total>0&&prog.done===prog.total);
       // ── Estações block ──────────────────────────────────────────────────────
@@ -676,7 +768,7 @@ function renderDetail(sess,dateKey){
           const hasDemoCx=mvs.some(m=>{const d=demoMap[(m.name||'').toLowerCase()]||{};return!!(d.videoUrl||d.description||d.muscles);});
           const cxNames=mvs.map(m=>safeAttr(m.name));
           return `<div class="detail-ex">
-            ${!isWod?`<div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>`:''}
+            ${!isWod?(isRd?rdCounterHtml(bl.id,ex.id,bl.rounds):`<div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>`):''}
             <div class="detail-ex-body">
               <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
                 <div class="detail-ex-name${!isWod&&done?' done':''}">${[volStr,displayName.toUpperCase()].filter(Boolean).join(' ')}</div>
@@ -724,7 +816,7 @@ function renderDetail(sess,dateKey){
             const exDataPg=gi===0?demoMap[(ex.name||'').toLowerCase()]||{}:{};
             const hasDemoPg=gi===0&&!!(exDataPg.videoUrl||exDataPg.description||exDataPg.muscles);
             return `<div class="detail-ex">
-              ${!isWod?`<div class="detail-ex-check${lineDone?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}-${gi}')"></div>`:''}
+              ${!isWod?(isRd?rdCounterHtml(bl.id,`${ex.id}-${gi}`,bl.rounds):`<div class="detail-ex-check${lineDone?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}-${gi}')"></div>`):''}
               <div class="detail-ex-body">
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
                   <div class="detail-ex-name${!isWod&&lineDone?' done':''}">${[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
@@ -754,7 +846,7 @@ function renderDetail(sess,dateKey){
         const exDataR=demoMap[(ex.name||'').toLowerCase()]||{};
         const hasDemoR=!!(exDataR.videoUrl||exDataR.description||exDataR.muscles);
         return `<div class="detail-ex">
-          ${!isWod?`<div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>`:''}
+          ${!isWod?(isRd?rdCounterHtml(bl.id,ex.id,bl.rounds):`<div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>`):''}
           <div class="detail-ex-body">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
               <div class="detail-ex-name${!isWod&&done?' done':''}">${[vol,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
@@ -771,8 +863,8 @@ function renderDetail(sess,dateKey){
           <span class="detail-block-title" style="color:${col}">${label}</span>
           <div style="display:flex;align-items:center;gap:6px">
             ${isWod?`<button class="timer-btn" onclick="event.stopPropagation();openTimer('${bl.id}','${sess.id}','${dateKey}')"><i class="ti ti-player-play"></i> Timer</button>`:''}
-            ${meta?`<span class="detail-block-meta" style="background:${col};color:#000">${meta}</span>`:''}
-            ${blDone?`<span class="detail-block-done">✓ Completo</span>`:''}
+            ${isRd?rdBadge(bl):(meta?`<span class="detail-block-meta" style="background:${col};color:#000">${meta}</span>`:'')}
+            ${!isRd&&blDone?`<span class="detail-block-done">✓ Completo</span>`:''}
           </div>
         </div>
         ${exRows}
@@ -915,12 +1007,13 @@ function dateToWeekOffset(dateKey){
   const targetSun=new Date(target);targetSun.setDate(target.getDate()-target.getDay());targetSun.setHours(0,0,0,0);
   return Math.round((targetSun-todaySun)/(7*24*60*60*1000));
 }
-function changeWeek(dir){weekOffset+=dir;expandedDays.clear();checkedExercises.clear();rmEditKey=null;render();}
+function changeWeek(dir){weekOffset+=dir;expandedDays.clear();checkedExercises.clear();clearRoundState();rmEditKey=null;render();}
 function setAthlete(val){
   selectedAthlete=val;
   try{localStorage.setItem('sched_athlete',val)}catch(e){}
   expandedDays.clear();
   rmEditKey=null;
+  clearRoundState();
   Object.keys(rmValues).forEach(k=>{if(rmValues[k].source==='auto')delete rmValues[k];});
   autofillRmFromPr();
   render();
@@ -957,6 +1050,7 @@ async function init(attempt=0){
     if(pDate)weekOffset=dateToWeekOffset(pDate);
     if(pAthlete){const a=(state.athletes||[]).find(x=>x.id===pAthlete);if(a)selectedAthlete=a.name;}
     autofillRmFromPr();
+    loadRoundState();
     render();
     if(pOpenLog&&pDate){
       const prefillData=pBlockId?{blockId:pBlockId,athleteId:pAthlete||'',perfTime:pPrefill||'',perfRounds:pPrefillRounds||''}:null;
