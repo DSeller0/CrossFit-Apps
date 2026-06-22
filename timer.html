@@ -11,13 +11,13 @@
 <style>
 :root{
   --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
-  --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;
+  --gold:#d8a840;--gold2:#b88820;--teal:#18cc30;
   --cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;--red:#c83030;
   --font:'Raleway',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--cream);font-family:var(--font)}
-#root{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+#root{height:100dvh;height:100%;display:flex;flex-direction:column;overflow:hidden}
 
 /* ── Header ── */
 .t-hdr{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--div);flex-shrink:0}
@@ -271,13 +271,13 @@ function stInfo(){
 function stPhase(){const{pos,st}=stCycle();return pos<st?'work':'rest';}
 function isTimeUp(){
   const e=elapsed(), cap=capSecs(), bt=cfg.blockType;
-  if(!cap)return false;
-  if(bt==='AMRAP'||bt==='EMOM'||bt==='For Time'||bt==='Benchmark')return e>=cap;
   if(bt==='Estações'){
     const exes=cfg.exercises||[], r=cfg.rounds||1;
     const{st,tt}=stCycle();
     return e>=(exes.length*r*(st+tt));
   }
+  if(!cap)return false;
+  if(bt==='AMRAP'||bt==='EMOM'||bt==='For Time'||bt==='Benchmark')return e>=cap;
   return false;
 }
 
@@ -535,7 +535,12 @@ function resumeTimer(){
 }
 function doLap(){
   if(status!=='running')return;
-  splits.push(elapsed());saveState();render();
+  splits.push(elapsed());
+  const bt=cfg.blockType;
+  if(cfg.rounds&&splits.length>=cfg.rounds&&(bt==='For Time'||bt==='Benchmark')){
+    finishTimer();return;
+  }
+  saveState();render();
 }
 function finishTimer(){
   finalSecs=elapsed();
@@ -612,6 +617,11 @@ function init(){
   if(cfg){status='ready';}else{status='cfg';cfg={blockType:'For Time',blockLabel:'',timeCap:20,rounds:null,exercises:[]};}
   render();
 }
+
+// Fix iOS Safari where 100dvh/100vh can be wrong on first paint
+function fixVh(){const r=document.getElementById('root');if(r)r.style.height=window.innerHeight+'px';}
+window.addEventListener('resize',fixVh);
+fixVh();
 
 init();
 </script>
