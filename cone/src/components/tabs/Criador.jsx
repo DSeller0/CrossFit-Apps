@@ -372,9 +372,9 @@ function BlockTypePicker({ blockNames, onSelect, onClose }) {
     : bmCategory === 'heroes' ? BENCHMARK_HEROES
     : (loadSettings().customBenchmarks || []);
 
-  const title = level === 2
-    ? (bmCategory === 'girls' ? 'Girls' : bmCategory === 'heroes' ? 'Heroes' : 'Custom')
-    : 'Qual tipo de bloco?';
+  const title = level === 0 ? 'Qual tipo de bloco?'
+    : level === 1 ? 'Escolha o Benchmark'
+    : (bmCategory === 'girls' ? 'Girls' : bmCategory === 'heroes' ? 'Heroes' : 'Custom');
 
   const goBack = () => level === 2 ? setLevel(1) : setLevel(0);
 
