@@ -109,6 +109,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-
 .lb-link:hover{background:#0a1e28}
 .log-btn{display:flex;align-items:center;gap:6px;width:100%;margin-top:10px;padding:8px 10px;background:transparent;border:1px solid #3a2a1a;border-radius:5px;color:#e87820;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;font-family:inherit;transition:background .12s}
 .log-btn:hover{background:#1a1008;border-color:#e87820}
+.timer-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:transparent;border:1px solid var(--gold2);color:var(--gold);font-family:var(--sc-font);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .12s}
+.timer-btn:hover{background:rgba(216,168,64,.15)}
 
 /* ── Log Pane ── */
 #log-pane-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200}
@@ -200,6 +202,46 @@ let rmValues={}; // exKey → {rm:number, unit:'kg'|'lbs'}
 let rmEditKey=null; // currently-open RM input key
 let demoMap={}; // exerciseName.toLowerCase() → {name, videoUrl?, description?}
 
+const WOD_BLOCK_TYPES=['For Time','AMRAP','EMOM','MetCon','HIIT','WOD','Benchmark','Estações'];
+function isWodBlock(bl){return WOD_BLOCK_TYPES.includes(bl.type)||WOD_BLOCK_TYPES.includes(bl.label);}
+function isWodLogged(sess,bl){
+  if(!selectedAthlete)return false;
+  const ath=(state.athletes||[]).find(a=>a.name===selectedAthlete);
+  if(!ath)return false;
+  return (state.results||[]).some(r=>r.sessionId===sess.id&&r.athleteId===ath.id&&(r.blocks||[]).some(b=>b.blockId===bl.id));
+}
+function openTimer(blockId,sessId,dateKey){
+  const dayData=(state.sessions[dateKey]||[]);
+  const sess=dayData.find(s=>s.id===sessId);
+  if(!sess)return;
+  const bl=(sess.blocks||[]).find(b=>b.id===blockId);
+  if(!bl)return;
+  const ath=selectedAthlete?(state.athletes||[]).find(a=>a.name===selectedAthlete):null;
+  let exercises,stationTime=45,transitionTime=15;
+  if(bl.type==='Estações'){
+    const nonRest=(bl.stations||[]).filter(st=>!st.isRest);
+    const rest=(bl.stations||[]).filter(st=>st.isRest);
+    exercises=nonRest.map(st=>({name:st.name||(st.exercises||[]).map(e=>e.name).filter(Boolean).join(' + ')}));
+    if(nonRest[0]?.duration)stationTime=Math.round(parseDurMins(nonRest[0].duration)*60);
+    if(rest[0]?.duration)transitionTime=Math.round(parseDurMins(rest[0].duration)*60);
+  }else{
+    exercises=(bl.exercises||[]).filter(e=>e.name||e.isComplex).map(e=>({
+      name:e.isComplex?(e.name||(e.complexMovements||[]).map(m=>m.name).filter(Boolean).join(' + ')):e.name,
+      sets:e.sets,reps:e.reps
+    }));
+  }
+  const config={
+    blockType:bl.type||bl.label,
+    blockLabel:(bl.label&&bl.label!==bl.type&&bl.label!=='-')?bl.label:(bl.label||bl.type||'WOD'),
+    timeCap:bl.duration?parseInt(bl.duration):null,
+    rounds:bl.rounds||null,
+    exercises,sessionId:sess.id,sessionDate:dateKey,
+    athleteId:ath?.id||null,blockId:bl.id,stationTime,transitionTime
+  };
+  try{localStorage.setItem('timer_config',JSON.stringify(config));}catch(e){}
+  location.href='timer.html';
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const DAY_PT=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
 const MONTH_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -282,14 +324,17 @@ function stationsCapMins(bl){
 }
 
 // ── Progress tracking ─────────────────────────────────────────────────────────
-function blockProgress(bl){
+function blockProgress(bl,sess){
+  if(isWodBlock(bl)){
+    if(!sess)return{done:0,total:0};
+    return{done:isWodLogged(sess,bl)?1:0,total:1};
+  }
   const exs=(bl.exercises||[]).filter(e=>e.name||e.isComplex);
   if(!exs.length) return {done:0,total:0};
   let done=0;
   exs.forEach(ex=>{
     const isProg=!ex.isComplex&&ex.intensity?.mode==='progression';
     if(isProg){
-      // progression exercises render one checkbox per reps-group; all must be checked
       const steps=ex.intensity?.steps||[];
       const groups=[];
       steps.forEach(s=>{
@@ -306,8 +351,9 @@ function blockProgress(bl){
 
 function sessionProgress(sess){
   const blocks=(sess.blocks||[]);
-  const done=blocks.filter(bl=>{const p=blockProgress(bl);return p.total>0&&p.done===p.total;}).length;
-  return {done,total:blocks.filter(bl=>(bl.exercises||[]).some(e=>e.name||e.isComplex)).length};
+  const relevant=blocks.filter(bl=>isWodBlock(bl)||(bl.exercises||[]).some(e=>e.name||e.isComplex));
+  const done=relevant.filter(bl=>{const p=blockProgress(bl,sess);return p.total>0&&p.done===p.total;}).length;
+  return{done,total:relevant.length};
 }
 
 // ── RM helpers ────────────────────────────────────────────────────────────────
@@ -495,7 +541,7 @@ function render(){
                       ${blocks.map(bl=>{
                         const _l=bl.label&&bl.label!=='-'?bl.label:null;const _t=bl.type&&bl.type!=='-'?bl.type:null;const label=_l&&_t&&_l!==_t?`${_l} · ${_t}`:_l||_t||'';
                         const col=blockColor();
-                        const p=blockProgress(bl);
+                        const p=blockProgress(bl,sess);
                         const blDone=p.total>0&&p.done===p.total;
                         return `<span class="block-badge" style="background:${col}20;color:${col};border:1px solid ${col}40">${blDone?'✓ ':''}${label}</span>`;
                       }).join('')}
@@ -521,20 +567,20 @@ function render(){
 }
 
 function renderDetail(sess,dateKey){
-  const WOD_TYPES=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
   return `<div class="day-detail">
     ${sess.mainTraining?`<div class="detail-sess-title">${sess.mainTraining}</div>`:''}
     ${(sess.blocks||[]).map(bl=>{
       const _l=bl.label&&bl.label!=='-'?bl.label:null;const _t=bl.type&&bl.type!=='-'?bl.type:null;const label=_l&&_t&&_l!==_t?`${_l} · ${_t}`:_l||_t||'';
       const col=blockColor();
       const meta=[bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
-      const isWod=WOD_TYPES.includes(bl.label)||WOD_TYPES.includes(bl.type);
-      const prog=blockProgress(bl);
-      const blDone=prog.total>0&&prog.done===prog.total;
+      const isWod=isWodBlock(bl);
+      const prog=blockProgress(bl,sess);
+      const blDone=isWod?isWodLogged(sess,bl):(prog.total>0&&prog.done===prog.total);
       // ── Estações block ──────────────────────────────────────────────────────
       if(bl.type==='Estações'){
         const stations=bl.stations||[];
         const repeat=(bl.stationRepeat||1)>1?`×${bl.stationRepeat}`:'';
+        const estDone=isWodLogged(sess,bl);
         const stRows=stations.map(st=>{
           if(st.isRest){
             return `<div class="detail-station-rest">${st.name||'Descanso'}${st.duration?` — ${st.duration}`:''}</div>`;
@@ -561,8 +607,10 @@ function renderDetail(sess,dateKey){
           <div class="detail-block-hdr">
             <span class="detail-block-title" style="color:${col}">${label}</span>
             <div style="display:flex;align-items:center;gap:6px">
+              <button class="timer-btn" onclick="event.stopPropagation();openTimer('${bl.id}','${sess.id}','${dateKey}')"><i class="ti ti-player-play"></i> Timer</button>
               ${repeat?`<span class="detail-block-meta" style="background:${col};color:#000">${repeat}</span>`:''}
               ${capMins>0?`<span class="detail-block-meta" style="background:#1e1e1e;color:#aaa;border:1px solid #333">Cap ${capMins}'</span>`:''}
+              ${estDone?`<span class="detail-block-done">✓ Completo</span>`:''}
             </div>
           </div>
           ${stRows}
@@ -602,10 +650,10 @@ function renderDetail(sess,dateKey){
           const hasDemoCx=mvs.some(m=>{const d=demoMap[(m.name||'').toLowerCase()]||{};return!!(d.videoUrl||d.description||d.muscles);});
           const cxNames=mvs.map(m=>safeAttr(m.name));
           return `<div class="detail-ex">
-            <div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>
+            ${!isWod?`<div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>`:''}
             <div class="detail-ex-body">
               <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
-                <div class="detail-ex-name${done?' done':''}">${[volStr,displayName.toUpperCase()].filter(Boolean).join(' ')}</div>
+                <div class="detail-ex-name${!isWod&&done?' done':''}">${[volStr,displayName.toUpperCase()].filter(Boolean).join(' ')}</div>
                 <button class="demo-btn${hasDemoCx?'':' no-demo'}" onclick="event.stopPropagation();openDemoByNames(['${cxNames.join("','")}'])">Demo</button>
               </div>
               ${mvs.map(m=>`<div class="detail-ex-movement">· ${[m.reps?m.reps+'×':'',m.name.toUpperCase()].filter(Boolean).join(' ')}</div>`).join('')}
@@ -636,10 +684,10 @@ function renderDetail(sess,dateKey){
             const exDataPg=gi===0?demoMap[(ex.name||'').toLowerCase()]||{}:{};
             const hasDemoPg=gi===0&&!!(exDataPg.videoUrl||exDataPg.description||exDataPg.muscles);
             return `<div class="detail-ex">
-              <div class="detail-ex-check${lineDone?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}-${gi}')"></div>
+              ${!isWod?`<div class="detail-ex-check${lineDone?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}-${gi}')"></div>`:''}
               <div class="detail-ex-body">
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
-                  <div class="detail-ex-name${lineDone?' done':''}">${[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
+                  <div class="detail-ex-name${!isWod&&lineDone?' done':''}">${[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
                   ${gi===0?`<button class="demo-btn${hasDemoPg?'':' no-demo'}" onclick="event.stopPropagation();openDemoByName('${safeAttr(ex.name)}')">Demo</button>`:''}
                 </div>
                 ${pctStr?`<div class="detail-ex-vol">${pctStr}</div>`:''}
@@ -652,10 +700,10 @@ function renderDetail(sess,dateKey){
         const exDataR=demoMap[(ex.name||'').toLowerCase()]||{};
         const hasDemoR=!!(exDataR.videoUrl||exDataR.description||exDataR.muscles);
         return `<div class="detail-ex">
-          <div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>
+          ${!isWod?`<div class="detail-ex-check${done?' done':''}" onclick="event.stopPropagation();toggleCheck('${bl.id}','${ex.id}')"></div>`:''}
           <div class="detail-ex-body">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
-              <div class="detail-ex-name${done?' done':''}">${[vol,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
+              <div class="detail-ex-name${!isWod&&done?' done':''}">${[vol,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
               <button class="demo-btn${hasDemoR?'':' no-demo'}" onclick="event.stopPropagation();openDemoByName('${safeAttr(ex.name)}')">Demo</button>
             </div>
             ${ins?`<div class="detail-ex-vol">${ins}</div>`:''}
@@ -668,7 +716,8 @@ function renderDetail(sess,dateKey){
         <div class="detail-block-hdr">
           <span class="detail-block-title" style="color:${col}">${label}</span>
           <div style="display:flex;align-items:center;gap:6px">
-            ${hasProgEx?`<button class="rm-chip${blRmData?' has-rm':''}" onclick="event.stopPropagation();toggleRmEdit('${bl.id}')">${blRmData?blRmData.rm+' '+(blRmData.unit||'kg'):'RM'}</button>`:''}
+            ${isWod?`<button class="timer-btn" onclick="event.stopPropagation();openTimer('${bl.id}','${sess.id}','${dateKey}')"><i class="ti ti-player-play"></i> Timer</button>`:''}
+            ${!isWod&&hasProgEx?`<button class="rm-chip${blRmData?' has-rm':''}" onclick="event.stopPropagation();toggleRmEdit('${bl.id}')">${blRmData?blRmData.rm+' '+(blRmData.unit||'kg'):'RM'}</button>`:''}
             ${meta?`<span class="detail-block-meta" style="background:${col};color:#000">${meta}</span>`:''}
             ${blDone?`<span class="detail-block-done">✓ Completo</span>`:''}
           </div>
