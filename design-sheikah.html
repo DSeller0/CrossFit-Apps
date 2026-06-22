@@ -4,18 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sheikah Slate · Design Mockup</title>
-<link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
 <style>
-/* ── Font declarations ── */
 @font-face{
   font-family:'ReturnOfGanon';
   src:url('fonts/return-of-ganon/ReturnofGanon.ttf') format('truetype');
-  font-display:swap
-}
-@font-face{
-  font-family:'WildBreath';
-  src:url('fonts/the-wild-breath-of-zelda/The Wild Breath of Zelda.otf') format('opentype');
   font-display:swap
 }
 @font-face{
@@ -24,81 +17,43 @@
   font-display:swap
 }
 @font-face{
-  font-family:'Triforce';
-  src:url('fonts/triforce-font/Triforce.ttf') format('truetype');
-  font-display:swap
-}
-@font-face{
-  font-family:'HylianSymbols';
-  src:url('fonts/hylian-symbols/HylianSymbols.ttf') format('truetype');
-  font-display:swap
-}
-@font-face{
   font-family:'NESFont';
   src:url('fonts/nintendo-nes-font/nintendo-nes-font.ttf') format('truetype');
   font-display:swap
 }
 
-/* ── Palette: Sheikah Slate ── */
 :root{
   --bg:#090d14;--stone:#0f1820;--stone2:#162030;
   --div:#1e3040;--div2:#2a4060;
-  --eye:#38c8e0;    /* Sheikah eye cyan */
-  --eye2:#1898b0;
-  --amber:#c8882a;  /* ancient amber */
-  --amber2:#986820;
-  --tri:#d8a820;    /* Triforce gold */
-  --cream:#c8d8e0;
-  --sub:#7898a8;
-  --muted:#4a6878;
-  --dim:#2a4058;
-  --red:#e04838;
-  --green:#28c870;
-  --rune:#8860d0;   /* Rune purple */
+  --eye:#38c8e0;--eye2:#1898b0;
+  --amber:#c8882a;--amber2:#986820;
+  --tri:#d8a820;
+  --cream:#c8d8e0;--sub:#7898a8;--muted:#4a6878;--dim:#2a4058;
+  --red:#e04838;--green:#28c870;--rune:#8860d0;
 
-  --f-title:'ReturnOfGanon',serif;
-  --f-display:'WildBreath',serif;
-  --f-pixel:'ZeldaOracles',monospace;
-  --f-body:'RocknRoll One',sans-serif;
-  --f-label:'NESFont',monospace;
-  --f-hylian:'HylianSymbols',sans-serif;
-  --f-tri:'Triforce',sans-serif;
+  --f-display:'ReturnOfGanon',serif;
+  --f-num:'ZeldaOracles',monospace;
+  --f-body:'NESFont',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size:13px;min-height:100vh}
-
-/* ── Sheikah eye glow effect ── */
-.eye-glow{
-  text-shadow:0 0 8px #38c8e088,0 0 24px #38c8e044;
-  color:var(--eye)
-}
+body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size:10px;min-height:100vh}
 
 /* ── App header ── */
 .hdr{background:var(--stone);border-bottom:1px solid var(--div);
   padding:12px 18px;position:sticky;top:0;z-index:30;
   box-shadow:0 2px 20px #38c8e010}
 .hdr-row{display:flex;align-items:center;gap:12px}
-.hdr-title{font-family:var(--f-title);font-size:20px;letter-spacing:.06em;
+.hdr-title{font-family:var(--f-display);font-size:22px;letter-spacing:.06em;
   background:linear-gradient(135deg,var(--eye),var(--tri));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   line-height:1}
-.hdr-sub{font-family:var(--f-label);font-size:7px;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--muted);margin-top:3px}
-.hdr-eye{font-family:var(--f-hylian);font-size:22px;color:var(--eye);
-  text-shadow:0 0 12px #38c8e060;flex-shrink:0}
-
-/* ── Sheikah eye ornament ── */
-.rune-divider{text-align:center;font-family:var(--f-hylian);font-size:14px;
-  color:var(--div2);letter-spacing:.3em;padding:4px 0}
-
-/* ── Triforce ornament ── */
-.tri-mark{font-family:var(--f-tri);color:var(--tri);font-size:12px;
-  text-shadow:0 0 6px #d8a82040;flex-shrink:0}
+.hdr-sub{font-family:var(--f-body);font-size:7px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);margin-top:4px}
 
 /* ── Tabs ── */
 .tabs{display:flex;border-bottom:1px solid var(--div);background:var(--stone);
   position:sticky;top:57px;z-index:29}
-.tab{flex:1;padding:9px 4px;font-family:var(--f-label);font-size:7px;font-weight:400;
+.tab{flex:1;padding:9px 4px;font-family:var(--f-body);font-size:7px;
   letter-spacing:.06em;text-transform:uppercase;background:transparent;border:none;
   border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;transition:color .12s}
 .tab.on{color:var(--eye);border-bottom-color:var(--eye)}
@@ -108,25 +63,20 @@ body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size
 .panel{display:none;max-width:480px;margin:0 auto;padding:14px 14px 40px}
 .panel.on{display:block}
 
-/* ── Section title ── */
-.sec-title{font-family:var(--f-display);font-size:18px;color:var(--eye);
-  margin-bottom:10px;letter-spacing:.04em;
-  text-shadow:0 0 12px #38c8e028}
-
 /* ── Week nav ── */
 .week-nav{display:flex;align-items:center;gap:10px;padding:8px 0;margin-bottom:8px}
 .week-nav-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--div);
   background:transparent;color:var(--muted);font-size:14px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-family:inherit}
+  display:flex;align-items:center;justify-content:center}
 .week-label{font-family:var(--f-display);font-size:15px;color:var(--cream);flex:1;
   text-align:center;letter-spacing:.04em}
 
 /* ── Athlete filter ── */
 .sel-bar{background:var(--bg);border-bottom:1px solid var(--div);padding:9px 14px}
-.sel-label{font-family:var(--f-label);font-size:7px;text-transform:uppercase;
+.sel-label{font-family:var(--f-body);font-size:7px;text-transform:uppercase;
   letter-spacing:.1em;color:var(--dim);margin-bottom:6px}
 .sel-pills{display:flex;gap:6px;flex-wrap:wrap}
-.sel-pill{font-family:var(--f-label);font-size:7px;padding:5px 10px;
+.sel-pill{font-family:var(--f-body);font-size:7px;padding:5px 10px;
   border-radius:20px;border:1px solid var(--div);background:var(--stone);color:var(--muted);
   cursor:pointer;transition:all .12s;letter-spacing:.04em}
 .sel-pill.on{background:#38c8e018;border-color:var(--eye);color:var(--eye)}
@@ -136,11 +86,11 @@ body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size
   margin-bottom:10px;overflow:hidden}
 .day-hdr{display:flex;align-items:center;gap:10px;padding:9px 12px;
   border-bottom:1px solid var(--div);background:linear-gradient(90deg,#38c8e00a,transparent)}
-.day-num{font-family:var(--f-pixel);font-size:28px;color:var(--tri);line-height:1;
+.day-num{font-family:var(--f-num);font-size:28px;color:var(--tri);line-height:1;
   width:32px;text-align:center;text-shadow:0 0 8px #d8a82040}
-.day-name{font-family:var(--f-label);font-size:7px;text-transform:uppercase;
+.day-name{font-family:var(--f-body);font-size:7px;text-transform:uppercase;
   letter-spacing:.1em;color:var(--muted);flex:1}
-.day-badge{font-family:var(--f-label);font-size:6px;color:var(--eye);
+.day-badge{font-family:var(--f-body);font-size:6px;color:var(--eye);
   background:#38c8e018;border:1px solid #38c8e030;padding:3px 8px;border-radius:3px;
   text-transform:uppercase;letter-spacing:.06em}
 
@@ -152,30 +102,31 @@ body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size
 .blk-bar.eye{background:var(--eye)}
 .blk-bar.amber{background:var(--amber)}
 .blk-bar.rune{background:var(--rune)}
-.blk-type-chip{font-family:var(--f-label);font-size:6px;text-transform:uppercase;
+.blk-type-chip{font-family:var(--f-body);font-size:6px;text-transform:uppercase;
   letter-spacing:.08em;padding:2px 6px;border-radius:3px;flex-shrink:0}
 .blk-type-chip.eye{color:var(--eye);background:#38c8e018;border:1px solid #38c8e030}
 .blk-type-chip.amber{color:var(--amber);background:#c8882a18;border:1px solid #c8882a30}
 .blk-type-chip.rune{color:var(--rune);background:#8860d018;border:1px solid #8860d030}
-.blk-name{font-family:var(--f-display);font-size:14px;color:var(--cream);flex:1;letter-spacing:.03em}
-.blk-detail{font-family:var(--f-pixel);font-size:11px;color:var(--amber);flex-shrink:0}
+.blk-name{font-family:var(--f-display);font-size:15px;color:var(--cream);flex:1;letter-spacing:.03em}
+.blk-detail{font-family:var(--f-num);font-size:12px;color:var(--amber);flex-shrink:0}
 
 /* ── Exercise rows ── */
 .ex-list{padding:2px 0}
-.ex-row{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--div)}
+.ex-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--div)}
 .ex-row:last-child{border-bottom:none}
 .ex-icon{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--div2);
   display:flex;align-items:center;justify-content:center;font-size:12px;
   color:var(--muted);flex-shrink:0}
-.ex-name{font-family:var(--f-body);font-size:12px;color:var(--cream);flex:1}
-.ex-vol{font-family:var(--f-pixel);font-size:10px;color:var(--sub);flex-shrink:0}
-.ex-load{font-family:var(--f-label);font-size:7px;color:var(--rune);
+.ex-name{font-family:var(--f-body);font-size:9px;color:var(--cream);flex:1;
+  letter-spacing:.04em;line-height:1.4}
+.ex-vol{font-family:var(--f-num);font-size:10px;color:var(--sub);flex-shrink:0}
+.ex-load{font-family:var(--f-body);font-size:7px;color:var(--rune);
   background:#8860d018;border:1px solid #8860d030;padding:2px 6px;border-radius:3px;
   flex-shrink:0;letter-spacing:.04em}
 
 /* ── Notes ── */
 .notes-row{padding:6px 12px 8px 44px;font-family:var(--f-body);
-  font-size:11px;color:var(--muted);line-height:1.5;font-style:italic;
+  font-size:8px;color:var(--muted);line-height:1.8;letter-spacing:.03em;
   border-top:1px solid var(--div)}
 
 /* ── Result cards ── */
@@ -183,83 +134,80 @@ body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size
   margin-bottom:10px;overflow:hidden}
 .result-hdr{display:flex;align-items:center;gap:10px;padding:10px 12px;
   border-bottom:1px solid var(--div)}
-.result-date{font-family:var(--f-pixel);font-size:18px;color:var(--tri);
+.result-date{font-family:var(--f-num);font-size:18px;color:var(--tri);
   text-shadow:0 0 8px #d8a82040}
-.result-sub{font-family:var(--f-label);font-size:6px;text-transform:uppercase;
+.result-sub{font-family:var(--f-body);font-size:6px;text-transform:uppercase;
   letter-spacing:.1em;color:var(--muted);margin-top:4px}
-.result-type-chip{font-family:var(--f-label);font-size:6px;color:var(--eye);
+.result-type-chip{font-family:var(--f-body);font-size:6px;color:var(--eye);
   background:#38c8e018;border:1px solid #38c8e030;padding:2px 8px;border-radius:3px;
   letter-spacing:.04em}
 .result-body{padding:10px 12px}
 .result-row{display:flex;align-items:baseline;gap:8px;margin-bottom:7px}
 .result-row:last-child{margin-bottom:0}
-.result-ex{font-family:var(--f-body);font-size:11px;color:var(--sub);flex:1}
-.result-big{font-family:var(--f-pixel);font-size:26px;color:var(--cream);letter-spacing:.04em}
-.result-unit{font-family:var(--f-label);font-size:8px;color:var(--muted)}
-.result-pr{font-family:var(--f-label);font-size:6px;color:var(--tri);
+.result-ex{font-family:var(--f-body);font-size:8px;color:var(--sub);flex:1;letter-spacing:.04em}
+.result-big{font-family:var(--f-num);font-size:26px;color:var(--cream);letter-spacing:.04em}
+.result-unit{font-family:var(--f-body);font-size:8px;color:var(--muted)}
+.result-pr{font-family:var(--f-body);font-size:6px;color:var(--tri);
   background:#d8a82018;border:1px solid #d8a82030;padding:2px 6px;border-radius:3px;
   letter-spacing:.04em}
-.result-time{font-family:var(--f-pixel);font-size:28px;color:var(--eye);
+.result-time{font-family:var(--f-num);font-size:28px;color:var(--eye);
   letter-spacing:.06em;text-shadow:0 0 10px #38c8e040}
 
 /* ── PR section ── */
 .sh{background:var(--stone);border:1px solid var(--div);border-radius:8px;
   margin-bottom:10px;overflow:hidden}
-.sh-title{font-family:var(--f-display);font-size:14px;color:var(--tri);
+.sh-title{font-family:var(--f-display);font-size:15px;color:var(--tri);
   padding:10px 12px;border-bottom:1px solid var(--div);letter-spacing:.04em}
 .pr-row{display:flex;align-items:baseline;gap:8px;padding:8px 12px;border-bottom:1px solid var(--div)}
 .pr-row:last-child{border-bottom:none}
-.pr-ex{font-family:var(--f-body);font-size:12px;color:var(--sub);flex:1}
-.pr-val{font-family:var(--f-pixel);font-size:22px;color:var(--cream)}
-.pr-unit{font-family:var(--f-label);font-size:8px;color:var(--muted)}
-.pr-date{font-family:var(--f-label);font-size:6px;color:var(--dim);margin-left:auto}
+.pr-ex{font-family:var(--f-body);font-size:9px;color:var(--sub);flex:1;letter-spacing:.04em}
+.pr-val{font-family:var(--f-num);font-size:22px;color:var(--cream)}
+.pr-unit{font-family:var(--f-body);font-size:8px;color:var(--muted)}
+.pr-date{font-family:var(--f-body);font-size:6px;color:var(--dim);margin-left:auto}
 
 /* ── Heatmap ── */
 .heatmap-wrap{background:var(--stone);border:1px solid var(--div);border-radius:8px;
   padding:12px;margin-bottom:10px}
-.heatmap-title{font-family:var(--f-display);font-size:14px;color:var(--tri);margin-bottom:10px}
+.heatmap-title{font-family:var(--f-display);font-size:15px;color:var(--tri);margin-bottom:10px}
 .hm-grid{display:grid;grid-template-columns:repeat(13,1fr);gap:3px}
 .hm-cell{aspect-ratio:1;border-radius:2px;background:var(--div)}
-.hm-cell.l1{background:#38c8e028}.hm-cell.l2{background:#38c8e055}.hm-cell.l3{background:#38c8e088}.hm-cell.l4{background:var(--eye)}
-
-/* ── Font specimen panel ── */
-.specimen{background:var(--stone);border:1px solid var(--div);border-radius:8px;
-  margin-bottom:10px;overflow:hidden}
-.spec-hdr{background:var(--stone2);padding:10px 12px;border-bottom:1px solid var(--div)}
-.spec-hdr-name{font-family:var(--f-label);font-size:7px;text-transform:uppercase;
-  letter-spacing:.12em;color:var(--muted)}
-.spec-hdr-use{font-family:var(--f-label);font-size:6px;color:var(--dim);margin-top:3px;letter-spacing:.06em}
-.spec-body{padding:12px}
-.spec-sample{margin-bottom:6px}
-.spec-size{font-family:var(--f-label);font-size:6px;color:var(--dim);margin-bottom:2px;letter-spacing:.04em}
+.hm-cell.l1{background:#38c8e028}.hm-cell.l2{background:#38c8e055}
+.hm-cell.l3{background:#38c8e088}.hm-cell.l4{background:var(--eye)}
 
 /* ── Stat cards ── */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 .stat-card{background:var(--stone);border:1px solid var(--div);border-radius:8px;padding:10px 12px}
-.stat-label{font-family:var(--f-label);font-size:6px;text-transform:uppercase;
+.stat-label{font-family:var(--f-body);font-size:6px;text-transform:uppercase;
   letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
-.stat-val{font-family:var(--f-pixel);font-size:28px;color:var(--cream);line-height:1}
-.stat-unit{font-family:var(--f-label);font-size:8px;color:var(--muted);margin-top:2px}
+.stat-val{font-family:var(--f-num);font-size:28px;color:var(--cream);line-height:1}
+.stat-unit{font-family:var(--f-body);font-size:8px;color:var(--muted);margin-top:2px}
 .stat-card.highlight{border-color:#38c8e040;background:#38c8e00a}
 .stat-card.highlight .stat-val{color:var(--eye);text-shadow:0 0 8px #38c8e040}
+
+/* ── Font specimen ── */
+.specimen{background:var(--stone);border:1px solid var(--div);border-radius:8px;
+  margin-bottom:10px;overflow:hidden}
+.spec-hdr{background:var(--stone2);padding:10px 12px;border-bottom:1px solid var(--div)}
+.spec-hdr-name{font-family:var(--f-body);font-size:7px;text-transform:uppercase;
+  letter-spacing:.12em;color:var(--muted)}
+.spec-hdr-use{font-family:var(--f-body);font-size:6px;color:var(--dim);margin-top:3px;letter-spacing:.06em}
+.spec-body{padding:12px}
+.spec-sample{margin-bottom:6px}
+.spec-size{font-family:var(--f-body);font-size:6px;color:var(--dim);margin-bottom:4px;letter-spacing:.04em}
 </style>
 </head>
 <body>
 
-<!-- App header -->
 <div class="hdr">
   <div class="hdr-row">
-    <span class="hdr-eye">P</span>
     <div style="flex:1">
       <div class="hdr-title">CrossFit Apps</div>
       <div class="hdr-sub">SHEIKAH SLATE · THEME MOCKUP</div>
     </div>
-    <span class="tri-mark">D</span>
     <i class="ti ti-user-circle" style="color:var(--muted);font-size:20px"></i>
   </div>
 </div>
 
-<!-- Tabs -->
 <div class="tabs">
   <button class="tab on" onclick="showTab('agenda',this)"><i class="ti ti-calendar-week"></i>Agenda</button>
   <button class="tab" onclick="showTab('results',this)"><i class="ti ti-chart-bar"></i>Result</button>
@@ -358,14 +306,14 @@ body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size
             <span class="ex-vol">3×60s</span>
           </div>
         </div>
-        <div class="notes-row">Core ativo durante todo o movimento; não deixar os quadris caírem.</div>
+        <div class="notes-row">Core ativo durante todo o movimento. Nao deixar os quadris cairem.</div>
       </div>
     </div>
 
     <div class="day">
       <div class="day-hdr">
         <div class="day-num">24</div>
-        <div><div class="day-name">TERÇA-FEIRA</div></div>
+        <div><div class="day-name">TERCA-FEIRA</div></div>
         <div class="day-badge">DESCANSO</div>
       </div>
     </div>
@@ -412,12 +360,12 @@ body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size
 
   <div class="stats-grid">
     <div class="stat-card highlight">
-      <div class="stat-label">TREINOS · MÊS</div>
+      <div class="stat-label">TREINOS · MES</div>
       <div class="stat-val">14</div>
-      <div class="stat-unit">sessões</div>
+      <div class="stat-unit">sessoes</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">PRs · MÊS</div>
+      <div class="stat-label">PRs · MES</div>
       <div class="stat-val">3</div>
       <div class="stat-unit">recordes</div>
     </div>
@@ -427,7 +375,7 @@ body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size
     <div class="result-hdr">
       <div>
         <div class="result-date">23 Jun</div>
-        <div class="result-sub">SEGUNDA · FORÇA + METCON</div>
+        <div class="result-sub">SEGUNDA · FORCA + METCON</div>
       </div>
       <div style="flex:1"></div>
       <span class="result-type-chip">COMPLETO</span>
@@ -451,7 +399,7 @@ body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size
     <div class="result-hdr">
       <div>
         <div class="result-date">20 Jun</div>
-        <div class="result-sub">SEXTA · FORÇA</div>
+        <div class="result-sub">SEXTA · FORCA</div>
       </div>
       <div style="flex:1"></div>
       <span class="result-type-chip">COMPLETO</span>
@@ -527,140 +475,90 @@ body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size
 <!-- ══ FONTS SPECIMEN ══ -->
 <div id="t-fonts" class="panel">
 
-  <!-- ReturnOfGanon -->
   <div class="specimen">
     <div class="spec-hdr">
       <div class="spec-hdr-name">Return of Ganon</div>
-      <div class="spec-hdr-use">USO · App title / main logo</div>
+      <div class="spec-hdr-use">USO · App title · Block names · Section headers · Week label</div>
     </div>
     <div class="spec-body">
-      <div class="spec-size">36px</div>
-      <div class="spec-sample" style="font-family:'ReturnOfGanon';font-size:36px;color:var(--eye);background:linear-gradient(135deg,var(--eye),var(--tri));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">CrossFit Apps</div>
-      <div class="spec-size" style="margin-top:10px">20px</div>
-      <div class="spec-sample" style="font-family:'ReturnOfGanon';font-size:20px;color:var(--tri)">Sheikah · Hyrule · Power</div>
+      <div class="spec-size">36px · title</div>
+      <div class="spec-sample" style="font-family:'ReturnOfGanon';font-size:36px;
+        background:linear-gradient(135deg,var(--eye),var(--tri));
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">CrossFit Apps</div>
+      <div class="spec-size" style="margin-top:12px">22px · week label</div>
+      <div class="spec-sample" style="font-family:'ReturnOfGanon';font-size:22px;color:var(--cream)">22–28 Jun 2026</div>
+      <div class="spec-size" style="margin-top:12px">16px · block names</div>
+      <div class="spec-sample" style="font-family:'ReturnOfGanon';font-size:16px;color:var(--eye)">Back Squat · Força</div>
+      <div class="spec-sample" style="font-family:'ReturnOfGanon';font-size:16px;color:var(--tri)">PRs · Levantamentos</div>
     </div>
   </div>
 
-  <!-- WildBreath -->
-  <div class="specimen">
-    <div class="spec-hdr">
-      <div class="spec-hdr-name">The Wild Breath of Zelda</div>
-      <div class="spec-hdr-use">USO · Section headers / block names / week labels</div>
-    </div>
-    <div class="spec-body">
-      <div class="spec-size">22px</div>
-      <div class="spec-sample" style="font-family:'WildBreath';font-size:22px;color:var(--cream)">22–28 Jun 2026</div>
-      <div class="spec-size" style="margin-top:10px">16px</div>
-      <div class="spec-sample" style="font-family:'WildBreath';font-size:16px;color:var(--eye)">Back Squat · Força</div>
-      <div class="spec-sample" style="font-family:'WildBreath';font-size:16px;color:var(--tri)">PRs · Levantamentos</div>
-    </div>
-  </div>
-
-  <!-- ZeldaOracles -->
   <div class="specimen">
     <div class="spec-hdr">
       <div class="spec-hdr-name">Zelda Oracles</div>
-      <div class="spec-hdr-use">USO · Numbers / day numbers / metric values</div>
+      <div class="spec-hdr-use">USO · Day numbers · Metric values · Timers · Volume notation</div>
     </div>
     <div class="spec-body">
       <div class="spec-size">32px · metric values</div>
       <div class="spec-sample" style="font-family:'ZeldaOracles';font-size:32px;color:var(--cream)">127 kg</div>
-      <div class="spec-size" style="margin-top:10px">24px · day numbers</div>
-      <div class="spec-sample" style="font-family:'ZeldaOracles';font-size:24px;color:var(--tri)">23  24  25</div>
-      <div class="spec-size" style="margin-top:10px">18px · timer</div>
-      <div class="spec-sample" style="font-family:'ZeldaOracles';font-size:18px;color:var(--eye)">12:34  3:47</div>
+      <div class="spec-size" style="margin-top:12px">28px · day numbers</div>
+      <div class="spec-sample" style="font-family:'ZeldaOracles';font-size:28px;color:var(--tri);letter-spacing:.1em">23  24  25</div>
+      <div class="spec-size" style="margin-top:12px">20px · timers</div>
+      <div class="spec-sample" style="font-family:'ZeldaOracles';font-size:20px;color:var(--eye);text-shadow:0 0 10px #38c8e040">12:34  3:47</div>
+      <div class="spec-size" style="margin-top:12px">12px · volume</div>
+      <div class="spec-sample" style="font-family:'ZeldaOracles';font-size:12px;color:var(--sub)">5×3  4×6  3×60s  AMRAP</div>
     </div>
   </div>
 
-  <!-- RocknRoll One -->
-  <div class="specimen">
-    <div class="spec-hdr">
-      <div class="spec-hdr-name">Rock'n'Roll One</div>
-      <div class="spec-hdr-use">USO · Body text / exercise names / notes</div>
-    </div>
-    <div class="spec-body">
-      <div class="spec-size">13px · body</div>
-      <div class="spec-sample" style="font-family:'RocknRoll One';font-size:13px;color:var(--cream);line-height:1.7">
-        Back Squat · 5×3 · @85% RM<br>
-        <span style="color:var(--muted);font-size:11px">Core ativo durante todo o movimento. Não deixar os quadris caírem.</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- NESFont -->
   <div class="specimen">
     <div class="spec-hdr">
       <div class="spec-hdr-name">Nintendo NES Font</div>
-      <div class="spec-hdr-use">USO · Chips / badges / labels / tiny UI text</div>
+      <div class="spec-hdr-use">USO · All body text · Labels · Badges · Chips · Notes · Exercise names</div>
     </div>
     <div class="spec-body">
-      <div class="spec-size">8px · labels</div>
-      <div class="spec-sample" style="font-family:'NESFont';font-size:8px;color:var(--eye);letter-spacing:.1em;line-height:2">
-        ATLETA · FORÇA · METCON · AMRAP<br>
+      <div class="spec-size">9px · exercise names</div>
+      <div class="spec-sample" style="font-family:'NESFont';font-size:9px;color:var(--cream);letter-spacing:.04em;line-height:1.8">
+        Back Squat<br>Romanian Deadlift<br>Burpee Box Jump
+      </div>
+      <div class="spec-size" style="margin-top:12px">7px · labels &amp; chips</div>
+      <div class="spec-sample" style="font-family:'NESFont';font-size:7px;letter-spacing:.1em;line-height:2.2">
+        <span style="color:var(--eye)">ATLETA · FORCA · METCON · AMRAP</span><br>
         <span style="color:var(--tri)">SEGUNDA-FEIRA · 23 JUN 2026</span><br>
         <span style="color:var(--muted)">DESCANSO · COMPLETO · PR</span>
       </div>
-    </div>
-  </div>
-
-  <!-- HylianSymbols -->
-  <div class="specimen">
-    <div class="spec-hdr">
-      <div class="spec-hdr-name">Hylian Symbols</div>
-      <div class="spec-hdr-use">USO · Ornamental glyphs / icon accents / dividers</div>
-    </div>
-    <div class="spec-body">
-      <div class="spec-size">Selected glyphs (A–Z mapped to Hylian alphabet)</div>
-      <div class="spec-sample" style="font-family:'HylianSymbols';font-size:28px;color:var(--eye);
-        letter-spacing:.3em;text-shadow:0 0 10px #38c8e050">ABCDEFGHIJ</div>
-      <div class="spec-sample" style="font-family:'HylianSymbols';font-size:28px;color:var(--tri);
-        letter-spacing:.3em;text-shadow:0 0 10px #d8a82050;margin-top:4px">KLMNOPQRST</div>
-      <div style="font-family:'NESFont';font-size:6px;color:var(--dim);margin-top:8px;letter-spacing:.08em">
-        CADA LETRA MAPEIA PARA UM GLIFO HYLIANO</div>
-    </div>
-  </div>
-
-  <!-- Triforce -->
-  <div class="specimen">
-    <div class="spec-hdr">
-      <div class="spec-hdr-name">Triforce Font</div>
-      <div class="spec-hdr-use">USO · Ornamental decoration / logo accent</div>
-    </div>
-    <div class="spec-body">
-      <div class="spec-size">Glyphs</div>
-      <div class="spec-sample" style="font-family:'Triforce';font-size:48px;color:var(--tri);
-        letter-spacing:.4em;text-shadow:0 0 16px #d8a82060">ABC DEF</div>
-      <div style="font-family:'NESFont';font-size:6px;color:var(--dim);margin-top:8px;letter-spacing:.08em">
-        FONTE ORNAMENTAL — USAR COM MODERAÇÃO</div>
+      <div class="spec-size" style="margin-top:12px">8px · notes / body copy</div>
+      <div class="spec-sample" style="font-family:'NESFont';font-size:8px;color:var(--muted);letter-spacing:.03em;line-height:1.8">
+        Core ativo durante todo o<br>movimento. Nao deixar os<br>quadris cairem.
+      </div>
     </div>
   </div>
 
   <!-- Color palette -->
   <div class="sh">
-    <div class="sh-title" style="font-family:'NESFont';font-size:8px;letter-spacing:.1em;color:var(--muted)">PALETA · SHEIKAH SLATE</div>
+    <div class="sh-title">Paleta · Sheikah Slate</div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px">
-      <div style="background:#090d14;padding:12px 8px;text-align:center">
+      <div style="background:#090d14;padding:14px 8px;text-align:center">
         <div style="font-family:'NESFont';font-size:5px;color:#38c8e080;letter-spacing:.06em">BG</div>
       </div>
-      <div style="background:#0f1820;padding:12px 8px;text-align:center">
+      <div style="background:#0f1820;padding:14px 8px;text-align:center">
         <div style="font-family:'NESFont';font-size:5px;color:#38c8e080;letter-spacing:.06em">STONE</div>
       </div>
-      <div style="background:#38c8e0;padding:12px 8px;text-align:center">
+      <div style="background:#38c8e0;padding:14px 8px;text-align:center">
         <div style="font-family:'NESFont';font-size:5px;color:#090d14;letter-spacing:.06em">EYE</div>
       </div>
-      <div style="background:#d8a820;padding:12px 8px;text-align:center">
+      <div style="background:#d8a820;padding:14px 8px;text-align:center">
         <div style="font-family:'NESFont';font-size:5px;color:#090d14;letter-spacing:.06em">TRI</div>
       </div>
-      <div style="background:#c8882a;padding:12px 8px;text-align:center">
+      <div style="background:#c8882a;padding:14px 8px;text-align:center">
         <div style="font-family:'NESFont';font-size:5px;color:#090d14;letter-spacing:.06em">AMBER</div>
       </div>
-      <div style="background:#8860d0;padding:12px 8px;text-align:center">
+      <div style="background:#8860d0;padding:14px 8px;text-align:center">
         <div style="font-family:'NESFont';font-size:5px;color:#090d14;letter-spacing:.06em">RUNE</div>
       </div>
-      <div style="background:#c8d8e0;padding:12px 8px;text-align:center">
+      <div style="background:#c8d8e0;padding:14px 8px;text-align:center">
         <div style="font-family:'NESFont';font-size:5px;color:#0f1820;letter-spacing:.06em">CREAM</div>
       </div>
-      <div style="background:#28c870;padding:12px 8px;text-align:center">
+      <div style="background:#28c870;padding:14px 8px;text-align:center">
         <div style="font-family:'NESFont';font-size:5px;color:#090d14;letter-spacing:.06em">GREEN</div>
       </div>
     </div>
@@ -668,7 +566,6 @@ body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-size
 </div>
 
 <script>
-// Heatmap
 const hm = document.getElementById('hm');
 const levels=[0,0,0,1,0,2,3,0,1,0,2,1,0,0,3,0,1,2,0,0,4,0,2,1,0,0,1,0,3,2,0,1,0,0,2,3,0,0,1,2,0,4,0,1,0,0,2,0,1,3,0,0,2,0,1,0,0,3,4,0,0,2,1,0,0,3,0,2,1,0,0,4,3,0,1,0,2,0,0,1,0,3,2,4,0,1,0,0,2,3];
 levels.slice(0,91).forEach(l=>{
