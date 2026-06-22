@@ -465,6 +465,7 @@ function renderRunning(){
   const exHtml=exes.map((ex,i)=>{
     let cls='t-ex';
     if(bt==='Estações'){const{idx}=stInfo();const ph=stPhase();if(i===idx&&ph==='work')cls+=' active';else if(i<idx&&stInfo().round===0)cls+=' done-s';}
+    else if(bt==='EMOM'&&exes.length>0){const curIdx=Math.floor(elapsed()/60)%exes.length;if(i===curIdx)cls+=' active';else if(i<curIdx)cls+=' done-s';}
     return`<div class="${cls}"><span class="t-ex-dot"></span>${esc(exLabel(ex))}</div>`;
   }).join('');
 
