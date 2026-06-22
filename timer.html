@@ -11,7 +11,7 @@
 <style>
 :root{
   --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
-  --gold:#d8a840;--gold2:#b88820;--teal:#18cc30;
+  --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
   --cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;--red:#c83030;
   --font:'Raleway',sans-serif;
 }
@@ -197,7 +197,7 @@ function ringColor(){
   const e=elapsed(), cap=capSecs(), bt=cfg?.blockType;
   const isCountdown=bt==='AMRAP'||bt==='EMOM'||bt==='Estações';
   const rem=isCountdown?ringProgress():(cap?(cap-e)/cap:1);
-  if(rem>0.5)return'var(--teal)';
+  if(rem>0.5)return'var(--green)';
   if(rem>0.2)return'var(--gold)';
   return'var(--red)';
 }
