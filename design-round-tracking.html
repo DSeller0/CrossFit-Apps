@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Round Tracking · Options</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;
+  --div:#2a231c;--div2:#3a2f22;
+  --gold:#d8a840;--gold2:#b88820;
+  --teal:#4ac8c0;--teal2:#2a9890;
+  --cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+  --red:#e05848;--green:#18cc30;--purple:#9070d8;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--cream);font-family:'Raleway',sans-serif;min-height:100vh;padding-bottom:40px}
+
+/* ── Top strip ── */
+.top-strip{background:linear-gradient(90deg,var(--gold2),var(--div2) 40%,var(--teal2));
+  color:var(--cream);font-size:10px;font-weight:800;padding:6px 20px;
+  letter-spacing:.14em;text-transform:uppercase;text-align:center;
+  border-bottom:1px solid var(--div2)}
+
+/* ── Option tabs ── */
+.opt-tabs{display:flex;border-bottom:1px solid var(--div);background:var(--stone);position:sticky;top:0;z-index:20}
+.opt-tab{flex:1;padding:13px 6px;font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.05em;
+  text-transform:uppercase;background:transparent;border:none;border-bottom:2px solid transparent;
+  color:var(--dim);cursor:pointer;transition:color .12s,border-color .12s;text-align:center}
+.opt-tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.opt-tab i{display:block;font-size:16px;margin-bottom:3px}
+
+/* ── Panels ── */
+.panel{display:none;padding:16px 14px;max-width:480px;margin:0 auto}.panel.on{display:block}
+.panel-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px;
+  padding:10px 12px;background:var(--stone);border-left:3px solid var(--gold);border-radius:0 4px 4px 0}
+.panel-hint{font-size:11px;color:var(--dim);margin-bottom:14px;font-style:italic}
+
+/* ── Block card ── */
+.blk{background:var(--stone);border:1px solid var(--div);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.blk-hdr{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:linear-gradient(180deg,#9070d828,transparent);border-bottom:1px solid var(--div)}
+.blk-hdr-bar{width:3px;align-self:stretch;flex-shrink:0;background:var(--purple);border-radius:2px}
+.blk-hdr-type{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--purple);background:#9070d818;border:1px solid #9070d830;padding:2px 7px;border-radius:3px;flex-shrink:0}
+.blk-hdr-name{font-size:14px;font-weight:800;color:var(--cream);flex:1}
+.blk-hdr-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+
+/* ── Exercise rows ── */
+.ex-list{padding:4px 0}
+.ex-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--div);
+  transition:background .15s;position:relative;overflow:hidden}
+.ex-row:last-child{border-bottom:none}
+.ex-row.done-row{background:#18cc3010}
+.ex-icon{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--div2);
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+  flex-shrink:0;cursor:pointer;transition:all .15s;user-select:none}
+.ex-icon.idle{color:var(--dim)}
+.ex-icon.active{color:var(--teal);border-color:var(--teal)}
+.ex-icon.done{background:var(--teal);border-color:var(--teal);color:var(--bg)}
+.ex-icon.pr-done{background:var(--gold);border-color:var(--gold);color:var(--bg)}
+.ex-name{font-size:13px;font-weight:700;color:var(--cream);flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-name.done-name{color:var(--teal);text-decoration:line-through;text-decoration-color:#4ac8c050}
+.ex-vol{font-size:11px;color:var(--muted);flex-shrink:0}
+.ex-load{font-size:10px;font-weight:700;color:var(--purple);background:#9070d818;
+  border:1px solid #9070d830;padding:2px 6px;border-radius:3px;flex-shrink:0}
+
+/* ── Shared badge ── */
+.round-badge{font-size:11px;font-weight:800;color:var(--gold);background:#d8a84018;
+  border:1px solid #d8a84030;padding:3px 8px;border-radius:4px;cursor:pointer;
+  flex-shrink:0;transition:all .15s;user-select:none;white-space:nowrap}
+.round-badge.done-badge{color:var(--teal);background:#4ac8c018;border-color:#4ac8c030}
+.round-badge:active{transform:scale(.93)}
+
+/* ── Block progress pill ── */
+.blk-prog{font-size:11px;font-weight:800;padding:3px 8px;border-radius:4px;white-space:nowrap}
+.blk-prog.idle{color:var(--dim);background:var(--stone2);border:1px solid var(--div)}
+.blk-prog.partial{color:var(--gold);background:#d8a84018;border:1px solid #d8a84030}
+.blk-prog.complete{color:var(--teal);background:#4ac8c018;border:1px solid #4ac8c030}
+
+/* ── Option C: round strip ── */
+.rd-strip{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--div);flex-wrap:wrap}
+.rd-btn{width:32px;height:32px;border-radius:6px;border:1.5px solid var(--div2);
+  background:var(--stone2);color:var(--dim);font-size:12px;font-weight:800;
+  cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;user-select:none;flex-shrink:0}
+.rd-btn.rd-done{background:#4ac8c018;border-color:var(--teal);color:var(--teal)}
+.rd-btn.rd-current{background:var(--gold);border-color:var(--gold2);color:var(--bg)}
+.rd-btn.rd-future{opacity:.45}
+.rd-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);align-self:center;margin-right:4px}
+
+/* ── Option D: swipe ── */
+.swipe-hint{font-size:10px;color:var(--dim);text-align:right;padding-right:12px;
+  padding-bottom:4px;letter-spacing:.04em}
+.swipe-track{position:relative;overflow:hidden}
+.swipe-flash{position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--teal)22,transparent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;color:var(--teal);letter-spacing:.06em;
+  opacity:0;pointer-events:none;transition:opacity .08s}
+.swipe-flash.show{opacity:1}
+.ex-row.swipe-active{background:var(--teal)12}
+/* desktop swipe sim button */
+.swipe-btn{width:28px;height:28px;border-radius:4px;border:1px solid var(--div2);
+  background:transparent;color:var(--dim);font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .12s}
+.swipe-btn:active{color:var(--teal);border-color:var(--teal);background:#4ac8c010}
+
+/* ── Reset btn ── */
+.reset-btn{display:flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--div);
+  color:var(--dim);font-family:inherit;font-size:11px;font-weight:700;padding:6px 12px;
+  border-radius:4px;cursor:pointer;margin-top:10px;letter-spacing:.04em;transition:all .12s}
+.reset-btn:hover{color:var(--muted);border-color:var(--div2)}
+.reset-btn i{font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="top-strip">Round Tracking · Opções de UI · Interativo</div>
+
+<div class="opt-tabs">
+  <button class="opt-tab on" onclick="showOpt('a',this)"><i class="ti ti-tag"></i>A · Pill</button>
+  <button class="opt-tab" onclick="showOpt('b',this)"><i class="ti ti-refresh"></i>B · Ciclo</button>
+  <button class="opt-tab" onclick="showOpt('c',this)"><i class="ti ti-layout-rows"></i>C · Strip</button>
+  <button class="opt-tab" onclick="showOpt('d',this)"><i class="ti ti-hand-finger"></i>D · Gesto</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     OPTION A — Round counter pill inline
+     ══════════════════════════════════════════════════════════════ -->
+<div id="opt-a" class="panel on">
+  <div class="panel-desc">
+    Cada exercício tem um pill <strong>[X/N]</strong> no lado direito da linha.
+    Toque incrementa; toque longo (ou duplo toque no mobile) reseta.
+    O cabeçalho do bloco mostra o progresso agregado.
+  </div>
+  <div class="panel-hint">Toque no pill para avançar · Toque longo para resetar</div>
+
+  <div class="blk" id="blk-a">
+    <div class="blk-hdr">
+      <div class="blk-hdr-bar"></div>
+      <span class="blk-hdr-type">Força</span>
+      <span class="blk-hdr-name">Back Squat</span>
+      <div class="blk-hdr-right">
+        <span class="blk-prog idle" id="a-blk-prog">5 RDS</span>
+      </div>
+    </div>
+    <div class="ex-list" id="a-exlist"></div>
+  </div>
+  <button class="reset-btn" onclick="initA()"><i class="ti ti-refresh"></i>Resetar demo</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     OPTION B — Icon cycles through round count
+     ══════════════════════════════════════════════════════════════ -->
+<div id="opt-b" class="panel">
+  <div class="panel-desc">
+    O ícone de check/círculo <strong>vira o contador de rounds</strong>.
+    Toque no ícone avança: ○ → 1 → 2 → … → ✓ → ○.
+    O cabeçalho exibe o round atual do bloco (mínimo dos exercícios).
+  </div>
+  <div class="panel-hint">Toque no ícone da esquerda para avançar o round</div>
+
+  <div class="blk" id="blk-b">
+    <div class="blk-hdr">
+      <div class="blk-hdr-bar"></div>
+      <span class="blk-hdr-type">Força</span>
+      <span class="blk-hdr-name">Back Squat</span>
+      <div class="blk-hdr-right">
+        <span class="blk-prog idle" id="b-blk-prog">RD —</span>
+      </div>
+    </div>
+    <div class="ex-list" id="b-exlist"></div>
+  </div>
+  <button class="reset-btn" onclick="initB()"><i class="ti ti-refresh"></i>Resetar demo</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     OPTION C — Round strip below block header
+     ══════════════════════════════════════════════════════════════ -->
+<div id="opt-c" class="panel">
+  <div class="panel-desc">
+    Uma faixa de botões de round fica abaixo do cabeçalho do bloco.
+    Toque no número = "estou no round X". Rounds anteriores ficam verdes,
+    o atual fica dourado, os próximos ficam apagados.
+  </div>
+  <div class="panel-hint">Toque em um número de round na faixa</div>
+
+  <div class="blk" id="blk-c">
+    <div class="blk-hdr">
+      <div class="blk-hdr-bar"></div>
+      <span class="blk-hdr-type">Força</span>
+      <span class="blk-hdr-name">Back Squat</span>
+      <div class="blk-hdr-right">
+        <span class="blk-prog idle" id="c-blk-prog">RD —</span>
+      </div>
+    </div>
+    <div class="rd-strip" id="c-strip"></div>
+    <div class="ex-list" id="c-exlist"></div>
+  </div>
+  <button class="reset-btn" onclick="initC()"><i class="ti ti-refresh"></i>Resetar demo</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     OPTION D — Swipe right to log round
+     ══════════════════════════════════════════════════════════════ -->
+<div id="opt-d" class="panel">
+  <div class="panel-desc">
+    <strong>Arraste para a direita</strong> na linha do exercício para registrar
+    um round. Um flash breve confirma o gesto. Sem elemento visual persistente —
+    o único feedback é a animação. Em desktop, use o botão <i class="ti ti-arrow-right"></i>.
+  </div>
+  <div class="panel-hint">Deslize para a direita na linha · ou use → no desktop</div>
+
+  <div class="blk" id="blk-d">
+    <div class="blk-hdr">
+      <div class="blk-hdr-bar"></div>
+      <span class="blk-hdr-type">Força</span>
+      <span class="blk-hdr-name">Back Squat</span>
+      <div class="blk-hdr-right">
+        <span class="blk-prog idle" id="d-blk-prog">5 RDS</span>
+      </div>
+    </div>
+    <div class="swipe-hint">← deslize para direita</div>
+    <div class="ex-list" id="d-exlist"></div>
+  </div>
+  <button class="reset-btn" onclick="initD()"><i class="ti ti-refresh"></i>Resetar demo</button>
+</div>
+
+<script>
+// ── Shared data ───────────────────────────────────────────────
+const EXERCISES = [
+  {name:'Back Squat',     vol:'5×3', load:'@85% RM', rounds:5},
+  {name:'Romanian DL',   vol:'5×5', load:'70 kg',   rounds:5},
+  {name:'Leg Press',     vol:'5×10',load:'',         rounds:5},
+];
+
+function showOpt(id, btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.opt-tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('opt-'+id).classList.add('on');
+  btn.classList.add('on');
+}
+
+// ════════════════════════════════════════════════════════════════
+// OPTION A — Pill counter
+// ════════════════════════════════════════════════════════════════
+let aState = [];
+
+function initA(){
+  aState = EXERCISES.map(e=>({...e, done:0}));
+  renderA();
+}
+
+function renderA(){
+  const list = document.getElementById('a-exlist');
+  list.innerHTML = aState.map((ex,i)=>{
+    const isDone = ex.done >= ex.rounds;
+    return `<div class="ex-row${isDone?' done-row':''}">
+      <div class="ex-icon ${isDone?'pr-done':'idle'}">
+        <i class="ti ti-${isDone?'check':'circle'}"></i>
+      </div>
+      <span class="ex-name${isDone?' done-name':''}">${ex.name}</span>
+      <span class="ex-vol">${ex.vol}</span>
+      ${ex.load?`<span class="ex-load">${ex.load}</span>`:''}
+      <span class="round-badge${isDone?' done-badge':''}"
+        onclick="aTap(${i})"
+        oncontextmenu="aReset(${i});return false"
+        id="a-pill-${i}"
+      >${isDone?'✓':ex.done+'/'+ex.rounds}</span>
+    </div>`;
+  }).join('');
+
+  // long-press on mobile
+  aState.forEach((_,i)=>{
+    const pill = document.getElementById('a-pill-'+i);
+    if(!pill) return;
+    let t;
+    pill.addEventListener('touchstart',()=>{t=setTimeout(()=>aReset(i),600)},{passive:true});
+    pill.addEventListener('touchend',()=>clearTimeout(t),{passive:true});
+    pill.addEventListener('touchmove',()=>clearTimeout(t),{passive:true});
+  });
+
+  updateAHeader();
+}
+
+function aTap(i){
+  if(aState[i].done < aState[i].rounds) aState[i].done++;
+  renderA();
+}
+function aReset(i){ aState[i].done=0; renderA(); }
+
+function updateAHeader(){
+  const prog = document.getElementById('a-blk-prog');
+  const total = aState[0]?.rounds || 5;
+  const minDone = Math.min(...aState.map(e=>e.done));
+  const allDone = aState.every(e=>e.done>=e.rounds);
+  if(allDone){ prog.className='blk-prog complete'; prog.textContent='✓ Concluído'; }
+  else if(minDone>0){ prog.className='blk-prog partial'; prog.textContent='RD '+minDone+'/'+total; }
+  else { prog.className='blk-prog idle'; prog.textContent=total+' RDS'; }
+}
+
+// ════════════════════════════════════════════════════════════════
+// OPTION B — Icon cycles ○ → 1 → 2 → … → ✓
+// ════════════════════════════════════════════════════════════════
+let bState = [];
+
+function initB(){
+  bState = EXERCISES.map(e=>({...e, done:0}));
+  renderB();
+}
+
+function renderB(){
+  const list = document.getElementById('b-exlist');
+  list.innerHTML = bState.map((ex,i)=>{
+    const isDone = ex.done >= ex.rounds;
+    const isStarted = ex.done > 0 && !isDone;
+    let iconContent, iconClass;
+    if(isDone){ iconContent='<i class="ti ti-check"></i>'; iconClass='done'; }
+    else if(isStarted){ iconContent=`<strong>${ex.done}</strong>`; iconClass='active'; }
+    else { iconContent='<i class="ti ti-circle"></i>'; iconClass='idle'; }
+
+    return `<div class="ex-row${isDone?' done-row':''}">
+      <div class="ex-icon ${iconClass}" onclick="bTap(${i})" style="cursor:pointer;font-size:12px">
+        ${iconContent}
+      </div>
+      <span class="ex-name${isDone?' done-name':''}">${ex.name}</span>
+      <span class="ex-vol">${ex.vol}</span>
+      ${ex.load?`<span class="ex-load">${ex.load}</span>`:''}
+    </div>`;
+  }).join('');
+
+  updateBHeader();
+}
+
+function bTap(i){
+  bState[i].done = bState[i].done >= bState[i].rounds ? 0 : bState[i].done + 1;
+  renderB();
+}
+
+function updateBHeader(){
+  const prog = document.getElementById('b-blk-prog');
+  const total = bState[0]?.rounds || 5;
+  const allDone = bState.every(e=>e.done>=e.rounds);
+  const minDone = Math.min(...bState.map(e=>e.done));
+  if(allDone){ prog.className='blk-prog complete'; prog.textContent='✓ Bloco Completo'; }
+  else if(minDone>0){ prog.className='blk-prog partial'; prog.textContent='RD '+minDone+' / '+total; }
+  else { prog.className='blk-prog idle'; prog.textContent='RD —'; }
+}
+
+// ════════════════════════════════════════════════════════════════
+// OPTION C — Round strip
+// ════════════════════════════════════════════════════════════════
+let cRound = 0; // 0=not started, 1..N=current round
+
+function initC(){
+  cRound = 0;
+  renderC();
+}
+
+function renderC(){
+  const total = EXERCISES[0].rounds;
+
+  // strip
+  const strip = document.getElementById('c-strip');
+  let html = '<span class="rd-label">RD</span>';
+  for(let r=1;r<=total;r++){
+    let cls = 'rd-btn';
+    if(r < cRound) cls += ' rd-done';
+    else if(r === cRound) cls += ' rd-current';
+    else cls += ' rd-future';
+    html += `<button class="${cls}" onclick="cSetRound(${r})">${r<cRound?'✓':r}</button>`;
+  }
+  strip.innerHTML = html;
+
+  // exercises — they're all the same within a round; show status per exercise
+  const list = document.getElementById('c-exlist');
+  list.innerHTML = EXERCISES.map((ex,i)=>{
+    const exDone = ex.rounds <= cRound && cRound > ex.rounds ? true : (cRound > ex.rounds);
+    // exercise is "done" when current round passes its rounds
+    const done = cRound > ex.rounds;
+    const inProgress = cRound > 0 && !done;
+    return `<div class="ex-row${done?' done-row':''}">
+      <div class="ex-icon ${done?'pr-done':inProgress?'active':'idle'}">
+        <i class="ti ti-${done?'check':inProgress?'arrow-right':'circle'}"></i>
+      </div>
+      <span class="ex-name${done?' done-name':''}">${ex.name}</span>
+      <span class="ex-vol">${ex.vol}</span>
+      ${ex.load?`<span class="ex-load">${ex.load}</span>`:''}
+      ${inProgress?`<span style="font-size:10px;color:var(--gold);font-weight:800;margin-left:auto">RD ${cRound}</span>`:''}
+    </div>`;
+  }).join('');
+
+  // header
+  const prog = document.getElementById('c-blk-prog');
+  if(cRound === 0){ prog.className='blk-prog idle'; prog.textContent='RD —'; }
+  else if(cRound > total){ prog.className='blk-prog complete'; prog.textContent='✓ Concluído'; }
+  else { prog.className='blk-prog partial'; prog.textContent='RD '+cRound+' / '+total; }
+}
+
+function cSetRound(r){
+  cRound = (cRound === r) ? r+1 : r; // tap current round again = advance
+  renderC();
+}
+
+// ════════════════════════════════════════════════════════════════
+// OPTION D — Swipe right
+// ════════════════════════════════════════════════════════════════
+let dState = [];
+let dTouchX = {};
+
+function initD(){
+  dState = EXERCISES.map(e=>({...e, done:0}));
+  renderD();
+}
+
+function renderD(){
+  const list = document.getElementById('d-exlist');
+  list.innerHTML = dState.map((ex,i)=>{
+    const isDone = ex.done >= ex.rounds;
+    return `<div class="swipe-track">
+      <div class="swipe-flash" id="d-flash-${i}"></div>
+      <div class="ex-row${isDone?' done-row':''}" id="d-row-${i}"
+        data-idx="${i}"
+        ontouchstart="dTouchStart(event,${i})"
+        ontouchend="dTouchEnd(event,${i})"
+        ontouchmove="dTouchMove(event,${i})">
+        <div class="ex-icon ${isDone?'pr-done':'idle'}">
+          <i class="ti ti-${isDone?'check':'circle'}"></i>
+        </div>
+        <span class="ex-name${isDone?' done-name':''}">${ex.name}</span>
+        <span class="ex-vol">${ex.vol}</span>
+        ${ex.load?`<span class="ex-load">${ex.load}</span>`:''}
+        <span style="flex:1"></span>
+        ${isDone
+          ? `<span style="font-size:11px;font-weight:800;color:var(--teal)">✓</span>`
+          : `<button class="swipe-btn" onclick="dAdvance(${i})" title="Simular swipe">
+              <i class="ti ti-arrow-right"></i>
+            </button>`
+        }
+        ${!isDone ? `<span style="font-size:11px;color:var(--dim);margin-left:4px;min-width:28px;text-align:right">${ex.done>0?ex.done+'/'+ex.rounds:''}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  updateDHeader();
+}
+
+function dTouchStart(e,i){ dTouchX[i] = e.touches[0].clientX; }
+function dTouchMove(e,i){
+  if(!dTouchX[i]) return;
+  const dx = e.touches[0].clientX - dTouchX[i];
+  if(dx > 30) {
+    const row = document.getElementById('d-row-'+i);
+    if(row) row.style.background='#4ac8c012';
+  }
+}
+function dTouchEnd(e,i){
+  if(!dTouchX[i]) return;
+  const endX = e.changedTouches[0].clientX;
+  const dx = endX - dTouchX[i];
+  dTouchX[i] = null;
+  const row = document.getElementById('d-row-'+i);
+  if(row) row.style.background='';
+  if(dx > 50) dAdvance(i);
+}
+
+function dAdvance(i){
+  if(dState[i].done >= dState[i].rounds) return;
+  dState[i].done++;
+  const isDone = dState[i].done >= dState[i].rounds;
+  const flash = document.getElementById('d-flash-'+i);
+  if(flash){
+    flash.textContent = isDone ? '✓ Completo!' : 'Round '+dState[i].done+' / '+dState[i].rounds+' ✓';
+    flash.classList.add('show');
+    setTimeout(()=>{ flash.classList.remove('show'); setTimeout(()=>renderD(),120); },700);
+  }
+  updateDHeader();
+}
+
+function updateDHeader(){
+  const prog = document.getElementById('d-blk-prog');
+  const total = dState[0]?.rounds || 5;
+  const allDone = dState.every(e=>e.done>=e.rounds);
+  const minDone = Math.min(...dState.map(e=>e.done));
+  if(allDone){ prog.className='blk-prog complete'; prog.textContent='✓ Concluído'; }
+  else if(minDone>0){ prog.className='blk-prog partial'; prog.textContent='RD '+minDone+'/'+total; }
+  else { prog.className='blk-prog idle'; prog.textContent=total+' RDS'; }
+}
+
+// ── Boot ──────────────────────────────────────────────────────
+initA(); initB(); initC(); initD();
+</script>
+</body>
+</html>
