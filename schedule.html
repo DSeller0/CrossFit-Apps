@@ -238,7 +238,7 @@ function openTimer(blockId,sessId,dateKey){
     exercises,sessionId:sess.id,sessionDate:dateKey,
     athleteId:ath?.id||null,blockId:bl.id,stationTime,transitionTime
   };
-  try{localStorage.setItem('timer_config',JSON.stringify(config));}catch(e){}
+  try{localStorage.setItem('timer_config',JSON.stringify(config));localStorage.removeItem('timer_state');}catch(e){}
   location.href='timer.html';
 }
 
