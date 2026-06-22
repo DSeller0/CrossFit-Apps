@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Schedule · Round Tracking B</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;
+  --divider:#2a231c;--gold:#d8a840;--gold2:#b88820;
+  --teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+  --purple:#9070d8;--red:#e05848;--amber:#c88828;
+  --sc-font:'Raleway',sans-serif;
+}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--sc-font);min-height:100vh;padding-bottom:72px}
+
+/* ── Header (exact schedule.html) ── */
+.hdr{padding:18px 20px 14px;border-bottom:1px solid var(--divider);background:var(--bg);position:sticky;top:0;z-index:20}
+.hdr-rule{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.hdr-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold2))}
+.hdr-line.r{background:linear-gradient(270deg,transparent,var(--gold2))}
+.hdr-diamond{width:5px;height:5px;border:1px solid var(--gold);transform:rotate(45deg);flex-shrink:0}
+.brand{font-size:22px;font-weight:900;letter-spacing:8px;color:var(--cream);text-align:center}
+.gym{text-align:center;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;margin-top:1px}
+
+/* ── Athlete selector bar ── */
+.sel-bar{background:var(--bg);border-bottom:1px solid var(--divider);padding:10px 20px;position:sticky;top:88px;z-index:18}
+.athlete-sel{font-family:var(--sc-font);font-size:12px;background:var(--stone);border:1px solid var(--divider);color:var(--cream);padding:6px 10px;outline:none;cursor:pointer;width:100%;max-width:320px}
+
+/* ── Week nav ── */
+.week-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--divider);position:sticky;top:136px;z-index:19}
+.week-label{font-size:13px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
+.nav-btn{background:transparent;border:1px solid var(--divider);color:var(--muted);font-size:16px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.nav-btn:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ── Day header (collapsed card, tap to expand — shown as already expanded) ── */
+.day-hdr-bar{display:flex;align-items:baseline;justify-content:space-between;padding:10px 20px 8px;border-bottom:1px solid var(--divider)}
+.day-dow{font-size:11px;font-weight:900;color:var(--teal);text-transform:uppercase;letter-spacing:.1em}
+.day-num-lbl{font-size:13px;font-weight:700;color:var(--sub)}
+
+/* ── Expanded detail (exact schedule.html) ── */
+.day-detail{background:#0d0d0d;padding:12px 14px 4px}
+.detail-sess{margin-bottom:14px}
+.detail-sess-title{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+
+.detail-block{margin-bottom:10px;padding:8px 10px;background:#111;border-radius:6px;border-left:2px solid var(--teal)}
+.detail-block.strength{border-left-color:var(--purple)}
+.detail-block.metcon{border-left-color:var(--amber)}
+
+.detail-block-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px}
+.detail-block-title{font-size:12px;font-weight:900;color:var(--teal);text-transform:uppercase;letter-spacing:.07em;font-family:var(--sc-font);flex:1;min-width:0}
+.detail-block.strength .detail-block-title{color:var(--purple)}
+.detail-block.metcon .detail-block-title{color:var(--amber)}
+.detail-block-hdr-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+
+/* round progress badge (replaces .detail-block-meta for round-tracked blocks) */
+.rd-prog{font-size:10px;font-weight:700;padding:1px 7px;border-radius:2px;letter-spacing:.04em;white-space:nowrap;transition:all .15s}
+.rd-prog.idle{color:var(--muted);background:#1a1a1a;border:1px solid #2a2a2a}
+.rd-prog.partial{color:var(--gold);background:rgba(216,168,64,.12);border:1px solid rgba(216,168,64,.3)}
+.rd-prog.complete{color:var(--teal);background:rgba(74,200,192,.12);border:1px solid rgba(74,200,192,.3)}
+
+/* existing meta badge (for non-round blocks) */
+.detail-block-meta{font-size:10px;color:#000;background:var(--amber);padding:1px 6px;border-radius:2px;font-weight:700}
+
+/* ── RM chip (exact schedule.html) ── */
+.rm-chip{font-family:var(--sc-font);font-size:9px;font-weight:900;padding:2px 8px;border:1px solid var(--gold2);background:transparent;color:var(--gold2);cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .12s;flex-shrink:0;line-height:1.4}
+.rm-chip.has-rm{border-color:var(--gold);color:var(--gold);background:rgba(216,168,64,.1)}
+.rm-calc-badge{display:block;font-size:10px;font-weight:700;color:var(--gold);background:rgba(216,168,64,.1);border:1px solid rgba(216,168,64,.28);padding:1px 6px;margin-top:3px;width:fit-content}
+
+/* ── Exercise row (exact schedule.html) ── */
+.detail-ex{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid #1a1a1a}
+.detail-ex:last-of-type{border-bottom:none}
+.detail-ex-body{flex:1;min-width:0}
+.detail-ex-name{font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em;line-height:1.3;font-family:var(--sc-font)}
+.detail-ex-name.done{color:#444;text-decoration:line-through}
+.detail-ex-vol{display:inline-block;font-size:10px;font-weight:700;color:#ffd700;background:rgba(0,0,0,.4);border:1px solid rgba(255,215,0,.2);border-radius:3px;padding:1px 6px;margin-top:2px}
+
+/* ── Regular check (existing, for non-round blocks) ── */
+.detail-ex-check{width:18px;height:18px;border-radius:4px;border:1px solid #2e2e2e;background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s;margin-top:1px}
+.detail-ex-check.done{background:#1a3a1a;border-color:#3a7a3a}
+.detail-ex-check.done::after{content:'✓';font-size:11px;color:#4caf50;font-weight:900}
+
+/* ── Round counter (NEW — replaces check for round-tracked blocks) ── */
+.b-counter{
+  width:20px;height:20px;border-radius:4px;
+  border:1px solid #2e2e2e;background:transparent;
+  cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:900;font-family:var(--sc-font);
+  transition:all .12s;margin-top:1px;
+  user-select:none;line-height:1;
+}
+.b-counter.idle{color:#333}
+.b-counter.active{color:var(--gold);border-color:var(--gold2);background:rgba(216,168,64,.1)}
+.b-counter.done{color:var(--teal);border-color:var(--teal);background:rgba(74,200,192,.1)}
+
+/* ── Log / timer buttons (exact schedule.html) ── */
+.log-btn{display:flex;align-items:center;gap:6px;width:100%;margin-top:10px;padding:8px 10px;background:transparent;border:1px solid #3a2a1a;border-radius:5px;color:#e87820;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;font-family:inherit;transition:background .12s}
+.log-btn:hover{background:#1a1008;border-color:#e87820}
+.timer-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:transparent;border:1px solid var(--gold2);color:var(--gold);font-family:var(--sc-font);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;transition:background .12s}
+.timer-btn:hover{background:rgba(216,168,64,.15)}
+
+/* ── Block notes ── */
+.detail-block-notes{font-size:10px;color:#555;font-style:italic;margin-top:6px;padding-top:6px;border-top:1px solid #1a1a1a}
+
+/* ── Bottom nav (exact schedule.html) ── */
+.p-nav{position:fixed;bottom:0;left:0;right:0;background:#0a0807;border-top:1px solid var(--divider);display:flex;z-index:30}
+.p-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px;gap:3px;color:var(--muted);text-decoration:none;font-family:var(--sc-font);font-size:9px;font-weight:700;letter-spacing:.06em;border:none;background:none;cursor:pointer;transition:color .15s}
+.p-nav-btn.active{color:var(--teal)}
+.p-nav-ic{font-size:18px;line-height:1}
+.p-nav-sep{width:1px;background:var(--divider);margin:10px 0}
+
+/* ── Long-press hint ── */
+.lp-hint{font-size:9px;color:var(--dim);font-style:italic;margin-top:2px;letter-spacing:.02em}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <div class="hdr-rule">
+    <div class="hdr-line"></div>
+    <div class="hdr-diamond"></div>
+    <div class="hdr-line r"></div>
+  </div>
+  <div class="brand">TEAM MEDRADO</div>
+  <div class="gym">Cross Training</div>
+</div>
+
+<!-- Athlete selector -->
+<div class="sel-bar">
+  <select class="athlete-sel">
+    <option>Arthur</option>
+    <option>Mariana</option>
+    <option>João</option>
+  </select>
+</div>
+
+<!-- Week nav -->
+<div class="week-nav">
+  <button class="nav-btn"><i class="ti ti-chevron-left"></i></button>
+  <span class="week-label">22 – 28 Jun 2026</span>
+  <button class="nav-btn"><i class="ti ti-chevron-right"></i></button>
+</div>
+
+<!-- Day header (expanded) -->
+<div class="day-hdr-bar">
+  <span class="day-dow">Segunda-feira</span>
+  <span class="day-num-lbl">23 Jun</span>
+</div>
+
+<!-- Expanded day content -->
+<div class="day-detail">
+  <div class="detail-sess">
+    <div class="detail-sess-title">Treino Principal</div>
+
+    <!-- ══ FORÇA block — round tracking ON ══ -->
+    <div class="detail-block strength">
+      <div class="detail-block-hdr">
+        <span class="detail-block-title">Força · Back Squat</span>
+        <div class="detail-block-hdr-right">
+          <button class="rm-chip has-rm">RM 120kg</button>
+          <span class="rd-prog idle" id="s-prog">5 RDS</span>
+        </div>
+      </div>
+
+      <!-- exercise 1 -->
+      <div class="detail-ex">
+        <div class="b-counter idle" id="c-0" data-idx="0">
+          <i class="ti ti-minus" style="font-size:8px;opacity:.4"></i>
+        </div>
+        <div class="detail-ex-body">
+          <div class="detail-ex-name" id="n-0">Back Squat</div>
+          <span class="detail-ex-vol">5×3</span>
+          <span class="rm-calc-badge">85% · 102 kg</span>
+        </div>
+      </div>
+
+      <!-- exercise 2 -->
+      <div class="detail-ex">
+        <div class="b-counter idle" id="c-1" data-idx="1">
+          <i class="ti ti-minus" style="font-size:8px;opacity:.4"></i>
+        </div>
+        <div class="detail-ex-body">
+          <div class="detail-ex-name" id="n-1">Romanian Deadlift</div>
+          <span class="detail-ex-vol">4×6</span>
+          <span class="rm-calc-badge">70% · 84 kg</span>
+        </div>
+      </div>
+
+      <!-- exercise 3 -->
+      <div class="detail-ex">
+        <div class="b-counter idle" id="c-2" data-idx="2">
+          <i class="ti ti-minus" style="font-size:8px;opacity:.4"></i>
+        </div>
+        <div class="detail-ex-body">
+          <div class="detail-ex-name" id="n-2">Leg Press</div>
+          <span class="detail-ex-vol">4×10</span>
+        </div>
+      </div>
+
+      <div class="detail-block-notes">Descanso 2–3 min entre séries. Manter postura neutra na coluna.</div>
+      <div class="lp-hint">Toque para avançar · toque longo para resetar</div>
+    </div>
+
+    <!-- ══ AMRAP block — round tracking OFF (regular checks) ══ -->
+    <div class="detail-block metcon">
+      <div class="detail-block-hdr">
+        <span class="detail-block-title">Metcon · AMRAP 12</span>
+        <div class="detail-block-hdr-right">
+          <button class="timer-btn"><i class="ti ti-player-play"></i>Timer</button>
+          <span class="detail-block-meta">AMRAP</span>
+        </div>
+      </div>
+
+      <div class="detail-ex">
+        <div class="detail-ex-check" onclick="toggleCheck(this)"></div>
+        <div class="detail-ex-body">
+          <div class="detail-ex-name">Burpee Box Jump</div>
+          <span class="detail-ex-vol">10 reps</span>
+        </div>
+      </div>
+      <div class="detail-ex">
+        <div class="detail-ex-check" onclick="toggleCheck(this)"></div>
+        <div class="detail-ex-body">
+          <div class="detail-ex-name">Kettlebell Swing</div>
+          <span class="detail-ex-vol">15 reps · 24 kg</span>
+        </div>
+      </div>
+      <div class="detail-ex">
+        <div class="detail-ex-check" onclick="toggleCheck(this)"></div>
+        <div class="detail-ex-body">
+          <div class="detail-ex-name">Wall Ball</div>
+          <span class="detail-ex-vol">20 reps · 9 kg</span>
+        </div>
+      </div>
+
+      <button class="log-btn"><i class="ti ti-pencil"></i>Registrar resultado</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Bottom nav -->
+<nav class="p-nav">
+  <a class="p-nav-btn" href="#"><span class="p-nav-ic"><i class="ti ti-home"></i></span>Início</a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn" href="#"><span class="p-nav-ic"><i class="ti ti-trophy"></i></span>Ranking</a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn" href="#"><span class="p-nav-ic"><i class="ti ti-chart-bar"></i></span>Resultados</a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn" href="#"><span class="p-nav-ic"><i class="ti ti-user"></i></span>Perfil</a>
+  <div class="p-nav-sep"></div>
+  <a class="p-nav-btn active" href="#"><span class="p-nav-ic"><i class="ti ti-calendar-week"></i></span>Agenda</a>
+</nav>
+
+<script>
+// ── Round tracking state ──────────────────────────────────────
+const TOTAL_ROUNDS = 5;
+const state = [0, 0, 0]; // one counter per exercise
+
+// Map exercise index → rounds for that exercise
+const exRounds = [5, 4, 4]; // Back Squat 5 rounds, RDL+Leg Press 4 rounds
+
+function updateCounter(idx) {
+  const rounds = exRounds[idx];
+  const done = state[idx];
+  const el = document.getElementById('c-' + idx);
+  const nameEl = document.getElementById('n-' + idx);
+
+  if (done >= rounds) {
+    el.className = 'b-counter done';
+    el.innerHTML = '<i class="ti ti-check" style="font-size:9px"></i>';
+    nameEl.classList.add('done');
+  } else if (done > 0) {
+    el.className = 'b-counter active';
+    el.textContent = done;
+    nameEl.classList.remove('done');
+  } else {
+    el.className = 'b-counter idle';
+    el.innerHTML = '<i class="ti ti-minus" style="font-size:8px;opacity:.4"></i>';
+    nameEl.classList.remove('done');
+  }
+
+  updateBlockProgress();
+}
+
+function updateBlockProgress() {
+  const prog = document.getElementById('s-prog');
+  // Use minimum done across exercises as current block round
+  const minDone = Math.min(...state.map((d, i) => d));
+  const allDone = state.every((d, i) => d >= exRounds[i]);
+
+  if (allDone) {
+    prog.className = 'rd-prog complete';
+    prog.textContent = '✓';
+  } else if (minDone > 0) {
+    prog.className = 'rd-prog partial';
+    prog.textContent = 'RD ' + minDone + ' / ' + TOTAL_ROUNDS;
+  } else {
+    prog.className = 'rd-prog idle';
+    prog.textContent = TOTAL_ROUNDS + ' RDS';
+  }
+}
+
+function advanceCounter(idx) {
+  if (state[idx] < exRounds[idx]) state[idx]++;
+  updateCounter(idx);
+}
+
+function resetCounter(idx) {
+  state[idx] = 0;
+  updateCounter(idx);
+}
+
+// ── Attach tap + long-press to each counter ───────────────────
+[0, 1, 2].forEach(idx => {
+  const el = document.getElementById('c-' + idx);
+  let pressTimer = null;
+  let didLongPress = false;
+
+  // Touch
+  el.addEventListener('touchstart', e => {
+    didLongPress = false;
+    pressTimer = setTimeout(() => {
+      didLongPress = true;
+      resetCounter(idx);
+      // brief visual feedback
+      el.style.opacity = '.4';
+      setTimeout(() => el.style.opacity = '', 200);
+    }, 600);
+  }, { passive: true });
+
+  el.addEventListener('touchend', e => {
+    clearTimeout(pressTimer);
+    if (!didLongPress) advanceCounter(idx);
+  }, { passive: true });
+
+  el.addEventListener('touchmove', () => clearTimeout(pressTimer), { passive: true });
+
+  // Mouse (desktop)
+  el.addEventListener('mousedown', () => {
+    didLongPress = false;
+    pressTimer = setTimeout(() => {
+      didLongPress = true;
+      resetCounter(idx);
+    }, 600);
+  });
+
+  el.addEventListener('mouseup', () => {
+    clearTimeout(pressTimer);
+    if (!didLongPress) advanceCounter(idx);
+  });
+
+  el.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+  el.addEventListener('contextmenu', e => { e.preventDefault(); resetCounter(idx); });
+});
+
+// ── Regular check toggle (AMRAP block) ───────────────────────
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  const name = el.closest('.detail-ex')?.querySelector('.detail-ex-name');
+  if (name) name.classList.toggle('done', el.classList.contains('done'));
+}
+</script>
+</body>
+</html>
