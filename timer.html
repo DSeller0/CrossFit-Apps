@@ -17,107 +17,112 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--cream);font-family:var(--font)}
+
+/* Root: strict column, never taller than viewport */
 #root{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 
 /* ── Header ── */
-.t-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px 10px;border-bottom:1px solid var(--div);flex-shrink:0}
-.t-back{background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer;padding:2px 8px 2px 0;-webkit-tap-highlight-color:transparent}
+.t-hdr{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--div);flex-shrink:0}
+.t-back{background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer;padding:4px 10px 4px 0;-webkit-tap-highlight-color:transparent;line-height:1}
 .t-hdr-mid{flex:1;min-width:0}
 .t-type{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
 .t-label{font-size:13px;font-weight:800;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .t-cap{font-size:10px;color:var(--muted);font-weight:700;white-space:nowrap;flex-shrink:0}
 
-/* ── RUNNING body ── */
-.t-body{flex:1;overflow-y:auto;display:flex;flex-direction:column}
-.t-clock-area{display:flex;flex-direction:column;align-items:center;padding:20px 16px 8px;flex-shrink:0}
-.t-clock{font-size:84px;font-weight:900;letter-spacing:-.02em;line-height:1;color:var(--cream);font-variant-numeric:tabular-nums;transition:color .3s}
+/* ── RUNNING body — min-height:0 is the key fix ── */
+.t-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+
+.t-clock-area{flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:14px 16px 6px}
+.t-clock{font-size:72px;font-weight:900;letter-spacing:-.02em;line-height:1;color:var(--cream);font-variant-numeric:tabular-nums;transition:color .3s}
 .t-clock.warn{color:var(--gold)}
-.t-clock.end{color:var(--teal)}
-.t-clock-lbl{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
-.t-round{font-size:16px;font-weight:800;color:var(--sub);margin-top:10px;letter-spacing:.06em}
+.t-clock.paused{color:var(--dim)}
+.t-clock-lbl{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.t-round{font-size:13px;font-weight:700;color:var(--sub);margin-top:6px;letter-spacing:.06em}
 
 /* ── Progress bar ── */
-.t-prog{padding:10px 20px 0;flex-shrink:0}
+.t-prog{padding:8px 20px 0;flex-shrink:0}
 .t-prog-bg{height:3px;background:var(--div);overflow:hidden}
 .t-prog-fill{height:100%;background:var(--teal);transition:width .4s linear}
-.t-phase{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:5px}
+.t-phase{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:4px}
 .t-phase.work{color:var(--teal)}.t-phase.rest{color:var(--muted)}
 
-/* ── Splits ── */
-.t-splits{display:flex;flex-wrap:wrap;gap:3px 12px;padding:8px 16px 0;flex-shrink:0}
-.t-split-item{font-size:10px;font-weight:700;color:var(--sub)}
-.t-split-item b{color:var(--muted);font-weight:400}
+/* ── Scrollable middle (splits + exercises) ── */
+.t-scroll{flex:1;min-height:0;overflow-y:auto;padding:6px 16px 4px}
 
-/* ── Exercise list ── */
-.t-exlist{flex:1;padding:8px 16px;border-top:1px solid var(--div);margin-top:8px;overflow-y:auto}
-.t-ex{padding:6px 0;font-size:12px;color:var(--sub);font-weight:600;border-bottom:1px solid rgba(42,35,28,.4);display:flex;align-items:center;gap:8px}
+.t-splits{display:flex;flex-wrap:wrap;gap:2px 10px;padding:4px 0 8px;border-bottom:1px solid var(--div);margin-bottom:6px}
+.t-splits:empty{display:none}
+.t-split-item{font-size:10px;font-weight:700;color:var(--sub)}
+.t-split-item b{color:var(--dim);font-weight:400}
+
+.t-ex{padding:5px 0;font-size:12px;color:var(--sub);font-weight:600;border-bottom:1px solid rgba(42,35,28,.35);display:flex;align-items:center;gap:8px}
 .t-ex:last-child{border-bottom:none}
 .t-ex.active{color:var(--cream);font-weight:800}
 .t-ex.done-s{color:var(--dim)}
 .t-ex-dot{width:5px;height:5px;border-radius:50%;background:var(--div);flex-shrink:0}
 .t-ex.active .t-ex-dot{background:var(--teal)}
 
-/* ── Controls ── */
-.t-ctrl{display:flex;gap:8px;padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--div);flex-shrink:0}
-.t-btn{flex:1;padding:14px 8px;border:none;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.05em;-webkit-tap-highlight-color:transparent;transition:opacity .15s}
-.t-btn:active{opacity:.7}
-.t-btn-lap{background:var(--stone2);border:1px solid var(--div);color:var(--sub);flex:.65}
-.t-btn-pause{background:var(--stone2);border:1px solid var(--div);color:var(--cream)}
-.t-btn-done{background:var(--stone2);border:1px solid var(--teal);color:var(--teal);flex:.65}
+/* ── Controls — always at bottom ── */
+.t-ctrl{flex-shrink:0;display:flex;gap:8px;padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--div)}
+.t-btn{flex:1;padding:16px 8px;border:none;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.05em;-webkit-tap-highlight-color:transparent;transition:opacity .12s;line-height:1}
+.t-btn:active{opacity:.65}
+.t-btn-lap{background:var(--stone2);border:1px solid var(--div);color:var(--sub);flex:.6}
+.t-btn-pause{background:var(--stone2);border:1px solid var(--div);color:var(--cream);font-size:15px}
+.t-btn-done{background:var(--stone2);border:1px solid var(--teal);color:var(--teal);flex:.6}
 .t-btn-start{background:var(--teal);color:#000;font-size:15px}
-.t-btn-resume{background:var(--gold);color:#000}
+.t-btn-resume{background:var(--gold);color:#000;font-size:15px}
 .t-btn-reg{background:var(--gold);color:#000;flex:2;font-size:14px}
 .t-btn-disc{background:transparent;border:1px solid var(--div);color:var(--muted)}
+.t-btn-close{background:var(--stone2);border:1px solid var(--div);color:var(--sub);font-size:15px}
 
 /* ── READY screen ── */
-.t-ready-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.t-ready-body{flex:1;min-height:0;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
 .t-badge{display:inline-block;padding:3px 10px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--teal);color:var(--teal)}
-.t-r-label{font-size:22px;font-weight:900;color:var(--cream);line-height:1.2}
-.t-r-meta{font-size:11px;color:var(--muted)}
-.t-r-exlist{display:flex;flex-direction:column;gap:0}
-.t-r-ex{padding:7px 0;font-size:12px;color:var(--sub);font-weight:600;border-bottom:1px solid rgba(42,35,28,.4);display:flex;align-items:center;gap:8px}
+.t-r-label{font-size:20px;font-weight:900;color:var(--cream);line-height:1.2;margin-top:6px}
+.t-r-meta{font-size:11px;color:var(--muted);margin-top:3px}
+.t-r-exlist{display:flex;flex-direction:column}
+.t-r-ex{padding:6px 0;font-size:12px;color:var(--sub);font-weight:600;border-bottom:1px solid rgba(42,35,28,.4);display:flex;align-items:center;gap:8px}
 .t-r-ex:last-child{border-bottom:none}
 .t-r-dot{width:5px;height:5px;border-radius:50%;background:var(--teal);flex-shrink:0}
 
 /* ── FINISHED screen ── */
-.t-fin-body{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.t-fin-body{flex:1;min-height:0;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;align-items:center}
 .t-fin-ttl{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
-.t-fin-time{font-size:76px;font-weight:900;color:var(--teal);line-height:1;font-variant-numeric:tabular-nums}
-.t-fin-rounds{font-size:13px;color:var(--sub);font-weight:700;margin-top:4px}
-.t-fin-split-ttl{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;align-self:flex-start;margin-top:14px}
-.t-fin-split-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;width:100%;margin-top:6px}
+.t-fin-time{font-size:72px;font-weight:900;color:var(--teal);line-height:1;font-variant-numeric:tabular-nums;margin-top:4px}
+.t-fin-rounds{font-size:12px;color:var(--sub);font-weight:700;margin-top:6px}
+.t-fin-split-ttl{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;align-self:flex-start;margin-top:18px;margin-bottom:6px}
+.t-fin-split-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:5px;width:100%}
 .t-fin-split-cell{background:var(--stone);padding:6px 8px;text-align:center}
 .t-fin-split-n{font-size:8px;color:var(--muted);font-weight:700}
-.t-fin-split-v{font-size:12px;color:var(--cream);font-weight:800}
+.t-fin-split-v{font-size:13px;color:var(--cream);font-weight:800}
 
 /* ── Recentes ── */
-.t-recentes{display:flex;flex-direction:column;gap:6px}
-.t-rec-ttl{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-bottom:2px}
-.t-rec-item{background:var(--stone);border:1px solid var(--div);padding:10px 12px;display:flex;align-items:center;gap:10px}
+.t-recentes{display:flex;flex-direction:column;gap:5px}
+.t-rec-ttl{font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-bottom:2px}
+.t-rec-item{background:var(--stone);border:1px solid var(--div);padding:9px 12px;display:flex;align-items:center;gap:10px}
 .t-rec-info{flex:1;min-width:0}
 .t-rec-name{font-size:10px;font-weight:700;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.t-rec-t{font-size:20px;font-weight:900;color:var(--cream)}
+.t-rec-t{font-size:18px;font-weight:900;color:var(--cream)}
 .t-rec-date{font-size:9px;color:var(--muted)}
 .t-rec-btn{padding:5px 10px;background:transparent;border:1px solid var(--gold2);color:var(--gold);font-family:var(--font);font-size:9px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0;letter-spacing:.06em}
 
 /* ── Standalone config form ── */
-.t-cfg{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-.t-cfg-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.t-cfg{flex:1;min-height:0;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.t-cfg-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
 .t-cfg-row{display:flex;gap:8px}
 .t-cfg-sel,.t-cfg-inp,.t-cfg-ta{background:var(--stone2);border:1px solid var(--div);color:var(--cream);font-family:var(--font);font-size:13px;padding:9px 10px;outline:none;width:100%;-webkit-appearance:none}
 .t-cfg-sel:focus,.t-cfg-inp:focus,.t-cfg-ta:focus{border-color:var(--teal)}
-.t-cfg-ta{resize:none;height:90px;font-size:12px}
+.t-cfg-ta{resize:none;height:80px;font-size:12px}
 .t-cfg-half{flex:1}
 .t-est-opts{display:flex;gap:8px}
+.t-cfg-sep{height:1px;background:var(--div);flex-shrink:0}
 
-/* ── Desktop ── */
-@media(min-width:768px){
-  .t-clock{font-size:108px}
-  .t-round{font-size:20px}
-  .t-btn{padding:16px 10px;font-size:14px}
-  .t-r-label{font-size:26px}
+@media(min-width:600px){
+  .t-clock{font-size:96px}
+  .t-round{font-size:16px}
+  .t-btn{padding:18px 10px;font-size:14px}
+  .t-r-label{font-size:24px}
   .t-ex{font-size:13px}
-  .t-fin-time{font-size:96px}
+  .t-fin-time{font-size:92px}
 }
 </style>
 </head>
@@ -128,13 +133,13 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--cream);fo
 const DAY_PT=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const MON_PT=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const MODE_LBL={'For Time':'FOR TIME','AMRAP':'AMRAP','EMOM':'EMOM','Benchmark':'BENCHMARK','Estações':'ESTAÇÕES'};
-const K_CFG='timer_config', K_STATE='timer_state', K_HIST='timer_history', K_PREFILL='timer_prefill';
+const K_CFG='timer_config', K_STATE='timer_state', K_HIST='timer_history';
 
 // ── State ──────────────────────────────────────────────────
 let cfg=null;
 let status='ready';       // cfg | ready | running | paused | finished
 let startEpoch=0, pausedMs=0, pauseStart=0, finalSecs=0;
-let splits=[];            // elapsed secs at each lap
+let splits=[];
 let tickId=null, wakeLock=null;
 let lastEmomMin=-1, lastStKey=null;
 
@@ -151,6 +156,7 @@ function exLabel(ex){
   return[ex.name||'',v.join(' ')].filter(Boolean).join(' · ');
 }
 function capSecs(){return(cfg?.timeCap||0)*60}
+function hasSession(){return!!(cfg?.sessionId)}
 function elapsed(){
   if(status==='ready'||status==='cfg')return 0;
   if(status==='finished')return finalSecs;
@@ -233,12 +239,13 @@ function renderHdr(showCap=true){
     <button class="t-back ti ti-arrow-left" onclick="goBack()"></button>
     <div class="t-hdr-mid">
       <div class="t-type">${esc(MODE_LBL[bt]||bt)}</div>
-      <div class="t-label">${esc(cfg.blockLabel||'')}</div>
+      <div class="t-label">${esc(cfg.blockLabel||'Timer')}</div>
     </div>
     ${showCap&&capStr?`<div class="t-cap">CAP ${esc(capStr)}</div>`:''}
   </div>`;
 }
 
+// ── Config screen ───────────────────────────────────────────
 function renderCfg(){
   return`<div class="t-hdr">
     <button class="t-back ti ti-arrow-left" onclick="goBack()"></button>
@@ -255,7 +262,7 @@ function renderCfg(){
     <div class="t-cfg-row">
       <div class="t-cfg-half">
         <div class="t-cfg-lbl">Duração (min)</div>
-        <input class="t-cfg-inp" id="cfg-cap" type="number" min="1" max="90" value="20" placeholder="20">
+        <input class="t-cfg-inp" id="cfg-cap" type="number" min="1" max="90" value="20">
       </div>
       <div class="t-cfg-half" id="cfg-rounds-wrap">
         <div class="t-cfg-lbl">Rondas</div>
@@ -266,11 +273,11 @@ function renderCfg(){
       <div class="t-cfg-lbl">Estações</div>
       <div class="t-est-opts">
         <div class="t-cfg-half">
-          <input class="t-cfg-inp" id="cfg-st" type="number" value="45" placeholder="45s trabalho">
+          <input class="t-cfg-inp" id="cfg-st" type="number" value="45">
           <div class="t-cfg-lbl" style="margin-top:3px">Trabalho (seg)</div>
         </div>
         <div class="t-cfg-half">
-          <input class="t-cfg-inp" id="cfg-tt" type="number" value="15" placeholder="15s transição">
+          <input class="t-cfg-inp" id="cfg-tt" type="number" value="15">
           <div class="t-cfg-lbl" style="margin-top:3px">Transição (seg)</div>
         </div>
       </div>
@@ -283,7 +290,7 @@ function renderCfg(){
       <div class="t-cfg-lbl">Exercícios (um por linha)</div>
       <textarea class="t-cfg-ta" id="cfg-exes" placeholder="21 Pull-ups&#10;21 KB Swings 24kg&#10;400m Run"></textarea>
     </div>
-    ${renderRecentes()}
+    ${renderRecentes(false)}
   </div>
   <div class="t-ctrl">
     <button class="t-btn t-btn-start" onclick="applyCfg()">▶ INICIAR</button>
@@ -304,10 +311,9 @@ function applyCfg(){
   const rounds=parseInt(document.getElementById('cfg-rounds')?.value)||null;
   const label=document.getElementById('cfg-label')?.value.trim()||'';
   const exRaw=(document.getElementById('cfg-exes')?.value||'').split('\n').map(l=>l.trim()).filter(Boolean);
-  const exercises=exRaw.map(l=>l);
   cfg={
     blockType:type, blockLabel:label, timeCap:cap, rounds:rounds||null,
-    exercises, sessionId:null, sessionDate:null, athleteId:null, blockId:null,
+    exercises:exRaw, sessionId:null, sessionDate:null, athleteId:null, blockId:null,
     stationTime:parseInt(document.getElementById('cfg-st')?.value)||45,
     transitionTime:parseInt(document.getElementById('cfg-tt')?.value)||15
   };
@@ -315,13 +321,14 @@ function applyCfg(){
   render();
 }
 
+// ── Ready screen ────────────────────────────────────────────
 function renderReady(){
   const bt=cfg.blockType;
   const exes=cfg.exercises||[];
   const metaParts=[
     cfg.timeCap?`${cfg.timeCap} min`:'',
     cfg.rounds?`${cfg.rounds} rounds`:'',
-    bt==='Estações'?`${cfg.stationTime||45}s trabalho · ${cfg.transitionTime||15}s transição`:''
+    bt==='Estações'?`${cfg.stationTime||45}s / ${cfg.transitionTime||15}s transição`:''
   ].filter(Boolean);
 
   const exHtml=exes.map(ex=>`<div class="t-r-ex"><span class="t-r-dot"></span>${esc(exLabel(ex))}</div>`).join('');
@@ -330,81 +337,86 @@ function renderReady(){
   <div class="t-ready-body">
     <div>
       <span class="t-badge">${esc(MODE_LBL[bt]||bt)}</span>
-      <div class="t-r-label" style="margin-top:8px">${esc(cfg.blockLabel||'WOD')}</div>
-      ${metaParts.length?`<div class="t-r-meta" style="margin-top:4px">${esc(metaParts.join(' · '))}</div>`:''}
+      <div class="t-r-label">${esc(cfg.blockLabel||'WOD')}</div>
+      ${metaParts.length?`<div class="t-r-meta">${esc(metaParts.join(' · '))}</div>`:''}
     </div>
     ${exHtml?`<div class="t-r-exlist">${exHtml}</div>`:''}
-    ${renderRecentes()}
+    ${renderRecentes(false)}
   </div>
   <div class="t-ctrl">
     <button class="t-btn t-btn-start" onclick="startTimer()">▶ INICIAR</button>
   </div>`;
 }
 
-function renderRecentes(){
+// ── Recentes — showRegister=true only on finished screen ────
+function renderRecentes(showRegister){
   const hist=loadHist();
   if(!hist.length)return'';
-  const items=hist.map((h,i)=>`
-    <div class="t-rec-item">
+  const items=hist.map((h,i)=>{
+    const canReg=showRegister&&!!(h.sessionId);
+    return`<div class="t-rec-item">
       <div class="t-rec-info">
-        <div class="t-rec-name">${esc(h.blockLabel||h.blockType||'WOD')}</div>
+        <div class="t-rec-name">${esc(h.blockLabel||h.blockType||'Timer')}</div>
         <div class="t-rec-t">${esc(h.totalTime||'—')}</div>
         <div class="t-rec-date">${h.date?fmtDate(h.date):''}</div>
       </div>
-      <button class="t-rec-btn" onclick="registerHist(${i})">REGISTRAR</button>
-    </div>`).join('');
+      ${canReg?`<button class="t-rec-btn" onclick="registerHist(${i})">REGISTRAR</button>`:''}
+    </div>`;
+  }).join('');
   return`<div class="t-recentes">
-    <div class="t-rec-ttl">Recentes — resultados salvos localmente</div>
+    <div class="t-rec-ttl">Histórico local</div>
     ${items}
   </div>`;
 }
 
+// ── Running screen ──────────────────────────────────────────
 function renderRunning(){
   const bt=cfg.blockType, isPaused=status==='paused';
   const e=elapsed(), cap=capSecs();
   const disp=getDisplay();
 
   let clockClass='t-clock';
-  if(bt==='AMRAP'&&disp<=30)clockClass+=' warn';
-  if((bt==='For Time'||bt==='Benchmark')&&cap&&e>=cap*.85)clockClass+=' warn';
+  if(isPaused)clockClass+=' paused';
+  else if(bt==='AMRAP'&&disp<=30)clockClass+=' warn';
+  else if((bt==='For Time'||bt==='Benchmark')&&cap&&e>=cap*.85)clockClass+=' warn';
 
-  let roundHtml='', progHtml='', clockLbl='', exHtml='';
+  let roundHtml='', progHtml='', clockLbl='';
   const exes=cfg.exercises||[];
 
   if(bt==='EMOM'){
     const min=Math.floor(e/60), total=cfg.timeCap||0;
     const pct=Math.min(100,((60-disp)/60)*100);
-    roundHtml=`<div class="t-round">MINUTO ${min+1} / ${total}</div>`;
+    roundHtml=`<div class="t-round">MIN ${min+1} / ${total}</div>`;
     progHtml=`<div class="t-prog"><div class="t-prog-bg"><div class="t-prog-fill" style="width:${pct}%"></div></div></div>`;
-    clockLbl='até o próximo';
-    exHtml=exes.map(ex=>`<div class="t-ex"><span class="t-ex-dot"></span>${esc(exLabel(ex))}</div>`).join('');
+    clockLbl=isPaused?'pausado':'até o próximo';
   } else if(bt==='Estações'){
     const{idx,round}=stInfo(), phase=stPhase();
     const rounds=cfg.rounds||1;
     const{st,tt}=stCycle();
     const cycleSecs=phase==='work'?st:tt;
     const pct=Math.min(100,((cycleSecs-disp)/cycleSecs)*100);
-    roundHtml=`<div class="t-round">ESTAÇÃO ${idx+1} / ${exes.length} · ROUND ${round+1} / ${rounds}</div>`;
+    roundHtml=`<div class="t-round">EST ${idx+1}/${exes.length} · RD ${round+1}/${rounds}</div>`;
     progHtml=`<div class="t-prog">
       <div class="t-prog-bg"><div class="t-prog-fill" style="width:${pct}%"></div></div>
       <div class="t-phase ${phase}">${phase==='work'?'TRABALHO':'TRANSIÇÃO'}</div>
     </div>`;
-    clockLbl=phase==='work'?'trabalhando':'descansando';
-    exHtml=exes.map((ex,i)=>`<div class="t-ex ${i===idx&&phase==='work'?'active':i<idx&&round===0?'done-s':''}">
-      <span class="t-ex-dot"></span>${esc(exLabel(ex))}</div>`).join('');
+    clockLbl=isPaused?'pausado':phase==='work'?'trabalhando':'descansando';
   } else {
     const lapN=splits.length, rounds=cfg.rounds;
-    if(lapN>0||rounds){
-      roundHtml=`<div class="t-round">ROUND ${lapN+1}${rounds?' / '+rounds:''}</div>`;
-    }
-    clockLbl=bt==='AMRAP'?'restando':'decorrido';
-    exHtml=exes.map(ex=>`<div class="t-ex"><span class="t-ex-dot"></span>${esc(exLabel(ex))}</div>`).join('');
+    if(lapN>0||rounds)roundHtml=`<div class="t-round">ROUND ${lapN+1}${rounds?'/'+rounds:''}</div>`;
+    clockLbl=isPaused?'pausado':bt==='AMRAP'?'restando':'decorrido';
   }
 
   const splitsHtml=splits.length?`<div class="t-splits">${splits.map((s,i)=>{
     const prev=i>0?splits[i-1]:0;
-    return`<div class="t-split-item"><b>${i+1} </b>${fmt(s-prev)}</div>`;
-  }).join('')}</div>`:'';
+    return`<div class="t-split-item"><b>R${i+1} </b>${fmt(s-prev)}</div>`;
+  }).join('')}</div>`:' ';
+
+  const exHtml=exes.length?exes.map((ex,i)=>{
+    let cls='t-ex';
+    if(bt==='Estações'){const{idx}=stInfo();const ph=stPhase();cls+=(i===stInfo().idx&&ph==='work')?' active':(i<stInfo().idx&&stInfo().round===0)?' done-s':'';}
+    return`<div class="${cls}"><span class="t-ex-dot"></span>${esc(exLabel(ex))}</div>`;
+  }).join(''):'';
 
   const showLap=bt!=='EMOM'&&bt!=='Estações';
 
@@ -416,21 +428,25 @@ function renderRunning(){
       ${roundHtml}
     </div>
     ${progHtml}
-    ${splitsHtml}
-    ${exHtml?`<div class="t-exlist">${exHtml}</div>`:''}
+    <div class="t-scroll">
+      ${splitsHtml}
+      ${exHtml}
+    </div>
   </div>
   <div class="t-ctrl">
     ${showLap?`<button class="t-btn t-btn-lap" onclick="doLap()">LAP</button>`:''}
     ${isPaused
       ?`<button class="t-btn t-btn-resume" onclick="resumeTimer()">▶ RETOMAR</button>`
-      :`<button class="t-btn t-btn-pause" onclick="pauseTimer()">❚❚ PAUSAR</button>`
+      :`<button class="t-btn t-btn-pause" onclick="pauseTimer()">❚❚</button>`
     }
-    <button class="t-btn t-btn-done" onclick="finishTimer()" title="Finalizar">✓</button>
+    <button class="t-btn t-btn-done" onclick="finishTimer()">✓ FIM</button>
   </div>`;
 }
 
+// ── Finished screen ─────────────────────────────────────────
 function renderFinished(){
   const rounds=splits.length;
+  const canReg=hasSession();
   const splitsHtml=splits.length?`
     <div class="t-fin-split-ttl">Splits por round</div>
     <div class="t-fin-split-grid">${splits.map((s,i)=>{
@@ -447,10 +463,14 @@ function renderFinished(){
     <div class="t-fin-time">${fmt(finalSecs)}</div>
     ${rounds?`<div class="t-fin-rounds">${rounds} ROUND${rounds!==1?'S':''}</div>`:''}
     ${splitsHtml}
+    ${renderRecentes(true)}
   </div>
   <div class="t-ctrl">
     <button class="t-btn t-btn-disc" onclick="doDiscard()">DESCARTAR</button>
-    <button class="t-btn t-btn-reg" onclick="registerResult()">REGISTRAR</button>
+    ${canReg
+      ?`<button class="t-btn t-btn-reg" onclick="registerResult()">REGISTRAR</button>`
+      :`<button class="t-btn t-btn-close" onclick="goBack()">FECHAR</button>`
+    }
   </div>`;
 }
 
@@ -481,7 +501,7 @@ function finishTimer(){
   status='finished';stopTick();
   if(wakeLock){wakeLock.release();wakeLock=null;}
   pushHist({
-    blockType:cfg.blockType,blockLabel:cfg.blockLabel||cfg.blockType||'WOD',
+    blockType:cfg.blockType,blockLabel:cfg.blockLabel||cfg.blockType||'Timer',
     sessionId:cfg.sessionId,sessionDate:cfg.sessionDate,
     athleteId:cfg.athleteId,blockId:cfg.blockId,
     totalTime:fmt(finalSecs),totalSecs:finalSecs,
@@ -524,7 +544,6 @@ function tick(){
   if(status!=='running')return;
   const e=elapsed();
   if(Math.floor(e)%5===0)saveState();
-
   if(cfg.blockType==='EMOM'){
     const min=Math.floor(e/60);
     if(lastEmomMin>=0&&min!==lastEmomMin)navigator.vibrate?.([300,100,300]);
@@ -532,8 +551,7 @@ function tick(){
   }
   if(cfg.blockType==='Estações'){
     const{idx}=stInfo(), phase=stPhase(), key=`${idx}-${phase}`;
-    if(lastStKey!==null&&key!==lastStKey)
-      navigator.vibrate?.(phase==='work'?[400,100,400]:[200]);
+    if(lastStKey!==null&&key!==lastStKey)navigator.vibrate?.(phase==='work'?[400,100,400]:[200]);
     lastStKey=key;
   }
   if(isTimeUp()){
@@ -545,7 +563,6 @@ function tick(){
 
 // ── Init ───────────────────────────────────────────────────
 function init(){
-  // Restore crashed/paused session
   try{
     const saved=JSON.parse(localStorage.getItem(K_STATE)||'null');
     if(saved?.cfg&&(saved.status==='running'||saved.status==='paused')){
@@ -553,14 +570,11 @@ function init(){
       startEpoch=saved.startEpoch;pausedMs=saved.pausedMs||0;
       pauseStart=saved.pauseStart||0;splits=saved.splits||[];finalSecs=saved.finalSecs||0;
       lastEmomMin=-1;lastStKey=null;
-      if(status==='running'){startTick();}
+      if(status==='running')startTick();
       render();return;
     }
   }catch(e){}
-
-  // Fresh config from schedule.html
   try{cfg=JSON.parse(localStorage.getItem(K_CFG)||'null');}catch(e){}
-
   if(cfg){status='ready';}else{status='cfg';cfg={blockType:'For Time',blockLabel:'',timeCap:20,rounds:null,exercises:[]};}
   render();
 }
