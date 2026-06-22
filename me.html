@@ -315,7 +315,7 @@ const DIST_TYPES = ['Força','LPO','Acessórios','Skill','Core','Cardio','Mobili
 const PR_SKIP    = new Set(['-','Aquecimento','Descanso','HIIT','MetCon','EMOM','For Time','AMRAP','Estações']);
 
 // ── Sheet state ───────────────────────────────────────────
-let _curAthId=null,_curPrs=[],_curBodyMetrics=[];
+let _curAthId=null,_curPrs=[],_curBodyMetrics=[],_curRegistry=null;
 let _lsUnit='kg',_lsPrRef=null,_lsCatsRef=[],_lsNameRef='',_lsPending=null;
 
 // ── Helpers ───────────────────────────────────────────────
@@ -716,7 +716,19 @@ async function doLsSave(val,reps,date,note,isNewPr){
   btn.textContent=isNewPr?'✓ Novo PR!':'✓ Salvo';
   btn.style.background=isNewPr?'var(--gold)':'var(--teal)';
   if(isNewPr)btn.style.color='#000';
-  setTimeout(()=>location.reload(),1200);
+  setTimeout(async()=>{
+    const{data:gd}=await _sb.from('goals_data').select('value').eq('id',1).maybeSingle();
+    const freshPrs=(gd?.value?.prs||{})[String(_curAthId)]||[];
+    _curPrs=freshPrs;
+    const bo=Object.keys(_curRegistry||{});
+    const html=renderPrSection(freshPrs,_curRegistry||{},bo);
+    const wrap=document.getElementById('pr-wrap');
+    if(wrap){
+      wrap.querySelector('.sh-inner').innerHTML=`<div class="sh-title">PR <span class="sh-title-r">bloco → exercício → detalhe</span></div>${html}`;
+      attachPrInteractions();
+    }
+    closeLogSheet();
+  },900);
 }
 
 // ── Body Metrics Sheet ────────────────────────────────────
@@ -898,8 +910,9 @@ function renderProfile(athlete,myResults,allSessions,goalsData,registry){
   }).join('');
 
   // PR section
-  const blockOrder=Object.keys(registry||{});
-  const prHtml=renderPrSection(prs,registry||{},blockOrder);
+  _curRegistry=registry||{};
+  const blockOrder=Object.keys(_curRegistry);
+  const prHtml=renderPrSection(prs,_curRegistry,blockOrder);
 
   // Since label
   const sinceStr=athlete.since?new Date(athlete.since+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}):'';
@@ -960,7 +973,7 @@ function renderProfile(athlete,myResults,allSessions,goalsData,registry){
       ${distRows}
     </div></div>`:''}
 
-    ${prHtml?`<div class="sh"><div class="sh-inner">
+    ${prHtml?`<div id="pr-wrap" class="sh"><div class="sh-inner">
       <div class="sh-title">PR <span class="sh-title-r">bloco → exercício → detalhe</span></div>
       ${prHtml}
     </div></div>`:''}
