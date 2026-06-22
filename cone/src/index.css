@@ -650,6 +650,30 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .btp-name{font-size:12px;font-weight:800;color:#e0e0e0;letter-spacing:.04em}
 .btp-desc{font-size:10px;color:#555;text-align:center;line-height:1.35}
 
+/* Benchmark list (BlockTypePicker level 2) */
+.bm-list{display:flex;flex-direction:column;gap:4px;padding:2px 0}
+.bm-list-empty{display:flex;flex-direction:column;align-items:center;gap:6px;padding:28px 16px;color:#444;font-size:12px;text-align:center}
+.bm-list-empty i{font-size:28px;margin-bottom:2px}
+.bm-list-item{background:#141414;border:1px solid #222;border-radius:8px;padding:10px 12px;cursor:pointer;text-align:left;font-family:inherit;transition:background .1s,border-color .1s;-webkit-tap-highlight-color:transparent}
+.bm-list-item:hover{background:#1c1c1c;border-color:#333}
+.bm-list-item:active{transform:scale(.98)}
+.bm-list-top{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.bm-list-name{font-size:14px;font-weight:800;color:#e0e0e0}
+.bm-list-type{font-size:10px;color:#555;border:1px solid #2a2a2a;border-radius:4px;padding:2px 6px;text-transform:uppercase;letter-spacing:.05em}
+.bm-list-cap{font-size:10px;color:#806850;margin-left:auto}
+.bm-list-desc{font-size:11px;color:#484848}
+/* Locked benchmark block view */
+.bm-locked-badge{display:flex;align-items:center;gap:6px;font-size:10px;color:#554a3a;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.bm-locked-desc{font-size:12px;color:#554a3a;font-style:italic;margin-bottom:8px}
+.bm-locked-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #1a1a1a;font-size:12px;color:#806850}
+.bm-locked-row:last-child{border-bottom:none}
+.bm-locked-row-num{font-size:10px;color:#333;width:18px;text-align:center;flex-shrink:0}
+.bm-locked-row-name{flex:1}
+/* Save as Benchmark button */
+.bm-save-btn{width:100%;margin-top:8px;color:#806850;border-color:#2a231c;font-size:11px;justify-content:center}
+.bm-save-btn:hover{color:#d8a840;border-color:#b8882044}
+.bm-save-flash{color:#4ac8c0!important;border-color:#4ac8c044!important}
+
 /* Block bar redesign */
 .blk-bar{flex-wrap:nowrap;overflow:hidden}
 .blk-type-chip{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;padding:4px 9px;border-radius:5px;border:1px solid;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}

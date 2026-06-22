@@ -4,6 +4,7 @@ import {
   uid, toISO, todayISO,
   loadAthletes, loadRegistry,
   loadTemplates, saveTemplates,
+  loadSettings, saveSettings,
   getTargets,
 } from '../../utils/storage';
 import { APP_CONFIG, ZONES, BTC, PLC, ECOL } from '../../utils/config';
@@ -55,6 +56,64 @@ const TYPE_CONFIG = {
 const DEFAULT_TYPE_CFG = { icon: 'ti-edit', color: '#888', desc: 'Bloco livre', showDuration: true, showRounds: true, durationLabel: 'Duração (min)' };
 const getTypeCfg = t => TYPE_CONFIG[t] || DEFAULT_TYPE_CFG;
 
+// ── Benchmark data ────────────────────────────────────────────────────────────
+const BENCHMARK_GIRLS = [
+  { name:'Fran',      type:'For Time', duration:10, rounds:null, desc:'21-15-9 · Thrusters + Pull-ups',
+    exercises:[{name:'Thruster',sets:'3',reps:'21-15-9',intensity:{mode:'gender',Masculino_RX:'43',Masculino_unit:'kg',Feminino_RX:'30',Feminino_unit:'kg'}},{name:'Pull-up',sets:'3',reps:'21-15-9',intensity:null}]},
+  { name:'Grace',     type:'For Time', duration:10, rounds:null, desc:'30 Clean and Jerks',
+    exercises:[{name:'Clean and Jerk',sets:'1',reps:'30',intensity:{mode:'gender',Masculino_RX:'60',Masculino_unit:'kg',Feminino_RX:'43',Feminino_unit:'kg'}}]},
+  { name:'Helen',     type:'For Time', duration:15, rounds:3,    desc:'3 rounds · 400m Run + 21 KB Swings + 12 Pull-ups',
+    exercises:[{name:'Run',sets:'3',reps:'400m',intensity:{mode:'cardio',cardioVal:'400',cardioUnit:'m'}},{name:'Kettlebell Swing',sets:'3',reps:'21',intensity:{mode:'gender',Masculino_RX:'24',Masculino_unit:'kg',Feminino_RX:'16',Feminino_unit:'kg'}},{name:'Pull-up',sets:'3',reps:'12',intensity:null}]},
+  { name:'Annie',     type:'For Time', duration:15, rounds:null, desc:'50-40-30-20-10 · Double-unders + Sit-ups',
+    exercises:[{name:'Double-under',sets:'5',reps:'50-40-30-20-10',intensity:null},{name:'Sit-up',sets:'5',reps:'50-40-30-20-10',intensity:null}]},
+  { name:'Cindy',     type:'AMRAP',    duration:20, rounds:null, desc:'20 min AMRAP · 5 Pull-ups + 10 Push-ups + 15 Air Squats',
+    exercises:[{name:'Pull-up',sets:'',reps:'5',intensity:null},{name:'Push-up',sets:'',reps:'10',intensity:null},{name:'Air Squat',sets:'',reps:'15',intensity:null}]},
+  { name:'Diane',     type:'For Time', duration:10, rounds:null, desc:'21-15-9 · Deadlifts + Handstand Push-ups',
+    exercises:[{name:'Deadlift',sets:'3',reps:'21-15-9',intensity:{mode:'gender',Masculino_RX:'102',Masculino_unit:'kg',Feminino_RX:'70',Feminino_unit:'kg'}},{name:'Handstand Push-up',sets:'3',reps:'21-15-9',intensity:null}]},
+  { name:'Elizabeth', type:'For Time', duration:15, rounds:null, desc:'21-15-9 · Cleans + Ring Dips',
+    exercises:[{name:'Clean',sets:'3',reps:'21-15-9',intensity:{mode:'gender',Masculino_RX:'61',Masculino_unit:'kg',Feminino_RX:'43',Feminino_unit:'kg'}},{name:'Ring Dip',sets:'3',reps:'21-15-9',intensity:null}]},
+  { name:'Isabel',    type:'For Time', duration:10, rounds:null, desc:'30 Snatches',
+    exercises:[{name:'Snatch',sets:'1',reps:'30',intensity:{mode:'gender',Masculino_RX:'60',Masculino_unit:'kg',Feminino_RX:'43',Feminino_unit:'kg'}}]},
+  { name:'Karen',     type:'For Time', duration:20, rounds:null, desc:'150 Wall Balls',
+    exercises:[{name:'Wall Ball',sets:'1',reps:'150',intensity:{mode:'gender',Masculino_RX:'9',Masculino_unit:'kg',Feminino_RX:'6',Feminino_unit:'kg'}}]},
+  { name:'Amanda',    type:'For Time', duration:15, rounds:null, desc:'9-7-5 · Muscle-ups + Snatches',
+    exercises:[{name:'Muscle-up',sets:'3',reps:'9-7-5',intensity:null},{name:'Snatch',sets:'3',reps:'9-7-5',intensity:{mode:'gender',Masculino_RX:'60',Masculino_unit:'kg',Feminino_RX:'43',Feminino_unit:'kg'}}]},
+];
+
+const BENCHMARK_HEROES = [
+  { name:'Murph',   type:'For Time', duration:60, rounds:null, desc:'1 mile Run + 100 Pull-ups + 200 Push-ups + 300 Air Squats + 1 mile Run',
+    exercises:[{name:'Run',sets:'1',reps:'1600m',intensity:{mode:'cardio',cardioVal:'1600',cardioUnit:'m'}},{name:'Pull-up',sets:'1',reps:'100',intensity:null},{name:'Push-up',sets:'1',reps:'200',intensity:null},{name:'Air Squat',sets:'1',reps:'300',intensity:null},{name:'Run',sets:'1',reps:'1600m',intensity:{mode:'cardio',cardioVal:'1600',cardioUnit:'m'}}]},
+  { name:'DT',      type:'For Time', duration:20, rounds:5,    desc:'5 rounds · 12 Deadlifts + 9 Hang Power Cleans + 6 Push Jerks',
+    exercises:[{name:'Deadlift',sets:'5',reps:'12',intensity:{mode:'gender',Masculino_RX:'70',Masculino_unit:'kg',Feminino_RX:'47',Feminino_unit:'kg'}},{name:'Hang Power Clean',sets:'5',reps:'9',intensity:{mode:'gender',Masculino_RX:'70',Masculino_unit:'kg',Feminino_RX:'47',Feminino_unit:'kg'}},{name:'Push Jerk',sets:'5',reps:'6',intensity:{mode:'gender',Masculino_RX:'70',Masculino_unit:'kg',Feminino_RX:'47',Feminino_unit:'kg'}}]},
+  { name:'JT',      type:'For Time', duration:20, rounds:null, desc:'21-15-9 · Handstand Push-ups + Ring Dips + Push-ups',
+    exercises:[{name:'Handstand Push-up',sets:'3',reps:'21-15-9',intensity:null},{name:'Ring Dip',sets:'3',reps:'21-15-9',intensity:null},{name:'Push-up',sets:'3',reps:'21-15-9',intensity:null}]},
+  { name:'Nate',    type:'AMRAP',    duration:20, rounds:null, desc:'20 min AMRAP · 2 Muscle-ups + 4 HSPU + 8 KB Swings',
+    exercises:[{name:'Muscle-up',sets:'',reps:'2',intensity:null},{name:'Handstand Push-up',sets:'',reps:'4',intensity:null},{name:'Kettlebell Swing',sets:'',reps:'8',intensity:{mode:'gender',Masculino_RX:'32',Masculino_unit:'kg',Feminino_RX:'24',Feminino_unit:'kg'}}]},
+  { name:'Daniel',  type:'For Time', duration:30, rounds:null, desc:'50 Pull-ups + 400m + 21 Thrusters + 800m + 21 Thrusters + 400m + 50 Pull-ups',
+    exercises:[{name:'Pull-up',sets:'',reps:'50',intensity:null},{name:'Run',sets:'',reps:'400m',intensity:{mode:'cardio',cardioVal:'400',cardioUnit:'m'}},{name:'Thruster',sets:'',reps:'21',intensity:{mode:'gender',Masculino_RX:'43',Masculino_unit:'kg',Feminino_RX:'30',Feminino_unit:'kg'}},{name:'Run',sets:'',reps:'800m',intensity:{mode:'cardio',cardioVal:'800',cardioUnit:'m'}},{name:'Thruster',sets:'',reps:'21',intensity:{mode:'gender',Masculino_RX:'43',Masculino_unit:'kg',Feminino_RX:'30',Feminino_unit:'kg'}},{name:'Run',sets:'',reps:'400m',intensity:{mode:'cardio',cardioVal:'400',cardioUnit:'m'}},{name:'Pull-up',sets:'',reps:'50',intensity:null}]},
+  { name:'Badger',  type:'For Time', duration:40, rounds:3,    desc:'3 rounds · 30 Squat Cleans + 30 Pull-ups + 800m Run',
+    exercises:[{name:'Squat Clean',sets:'3',reps:'30',intensity:{mode:'gender',Masculino_RX:'43',Masculino_unit:'kg',Feminino_RX:'30',Feminino_unit:'kg'}},{name:'Pull-up',sets:'3',reps:'30',intensity:null},{name:'Run',sets:'3',reps:'800m',intensity:{mode:'cardio',cardioVal:'800',cardioUnit:'m'}}]},
+];
+
+function buildBenchmarkBlock(bm, category, locked = true) {
+  return {
+    id: uid(),
+    type: 'Benchmark',
+    label: bm.name,
+    zone: 'Zona 01',
+    notes: bm.desc || '',
+    duration: bm.duration || '',
+    rounds: bm.rounds || '',
+    ladderMode: false,
+    exercises: (bm.exercises || []).map(ex => ({
+      id: uid(), name: ex.name || '', sets: ex.sets || '', reps: ex.reps || '',
+      intensity: ex.intensity || null, note: '', isComplex: false, complexMovements: [],
+    })),
+    ...(locked ? { benchmarkRef: bm.name, benchmarkCategory: category } : {}),
+    coachNote: '',
+  };
+}
+
 function stationsCapStr(block) {
   if (block.type !== 'Estações') return null;
   const parse = v => { if (!v) return 0; const p = String(v).split(':'); return p.length >= 2 ? (+p[0]||0)*60+(+p[1]||0) : (+p[0]||0)*60; };
@@ -69,6 +128,7 @@ function stationsCapStr(block) {
 }
 
 function blockSummary(block) {
+  if (block.benchmarkRef) return block.benchmarkRef;
   if (block.type === 'Estações') {
     const groups = (block.stations || []).filter(s => !s.isRest).length;
     const rests  = (block.stations || []).filter(s => s.isRest).length;
@@ -290,30 +350,102 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
 
 // ── BlockTypePicker ───────────────────────────────────────────────────────────
 function BlockTypePicker({ blockNames, onSelect, onClose }) {
+  const [level, setLevel] = useState(0);        // 0=type grid, 1=bm category, 2=bm list
+  const [bmCategory, setBmCategory] = useState(null);
+
   const known = Object.keys(TYPE_CONFIG);
   const extra = (blockNames || APP_CONFIG.blockNames || []).filter(n => n !== '-' && !known.includes(n));
   const types = [...known, ...extra];
+
+  const handleTypeClick = type => {
+    if (type === 'Benchmark') { setLevel(1); return; }
+    onSelect(type);
+  };
+
+  const handleCategoryClick = cat => { setBmCategory(cat); setLevel(2); };
+
+  const handleBmSelect = bm => {
+    onSelect(buildBenchmarkBlock(bm, bmCategory, bmCategory !== 'custom'));
+  };
+
+  const benchmarks = bmCategory === 'girls' ? BENCHMARK_GIRLS
+    : bmCategory === 'heroes' ? BENCHMARK_HEROES
+    : (loadSettings().customBenchmarks || []);
+
+  const title = level === 2
+    ? (bmCategory === 'girls' ? 'Girls' : bmCategory === 'heroes' ? 'Heroes' : 'Custom')
+    : 'Qual tipo de bloco?';
+
+  const goBack = () => level === 2 ? setLevel(1) : setLevel(0);
 
   return (
     <div className="btp-backdrop" onClick={onClose}>
       <div className="btp-modal" onClick={e => e.stopPropagation()}>
         <div className="btp-header">
-          <span>Que tipo de bloco?</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {level > 0 && (
+              <button type="button" className="b bsm" style={{ padding: '3px 8px' }} onClick={goBack}>
+                <i className="ti ti-arrow-left" />
+              </button>
+            )}
+            <span>{title}</span>
+          </div>
           <button type="button" className="b bsm" onClick={onClose}><i className="ti ti-x" /></button>
         </div>
-        <div className="btp-grid">
-          {types.map(type => {
-            const cfg = getTypeCfg(type);
-            return (
-              <button key={type} type="button" className="btp-card" onClick={() => onSelect(type)}
-                style={{ '--btp-color': cfg.color }}>
-                <i className={`ti ${cfg.icon} btp-icon`} />
-                <span className="btp-name">{type}</span>
-                <span className="btp-desc">{cfg.desc}</span>
+
+        {level === 0 && (
+          <div className="btp-grid">
+            {types.map(type => {
+              const cfg = getTypeCfg(type);
+              return (
+                <button key={type} type="button" className="btp-card" onClick={() => handleTypeClick(type)}
+                  style={{ '--btp-color': cfg.color }}>
+                  <i className={`ti ${cfg.icon} btp-icon`} />
+                  <span className="btp-name">{type}</span>
+                  <span className="btp-desc">{cfg.desc}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {level === 1 && (
+          <div className="btp-grid">
+            {[
+              { key:'girls',  label:'Girls',  icon:'ti-trophy',   color:'#d8a840', desc:'Fran, Grace, Helen, Annie...' },
+              { key:'heroes', label:'Heroes', icon:'ti-shield',   color:'#5090e0', desc:'Murph, DT, JT, Nate...'       },
+              { key:'custom', label:'Custom', icon:'ti-bookmark', color:'#9070d8', desc:'Benchmarks salvos'             },
+            ].map(cat => (
+              <button key={cat.key} type="button" className="btp-card" onClick={() => handleCategoryClick(cat.key)}
+                style={{ '--btp-color': cat.color }}>
+                <i className={`ti ${cat.icon} btp-icon`} />
+                <span className="btp-name">{cat.label}</span>
+                <span className="btp-desc">{cat.desc}</span>
               </button>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {level === 2 && (
+          <div className="bm-list">
+            {benchmarks.length === 0 ? (
+              <div className="bm-list-empty">
+                <i className="ti ti-bookmark-off" />
+                <span>Nenhum benchmark salvo.</span>
+                <span>Monte um bloco e clique em "Salvar como Benchmark".</span>
+              </div>
+            ) : benchmarks.map((bm, i) => (
+              <button key={i} type="button" className="bm-list-item" onClick={() => handleBmSelect(bm)}>
+                <div className="bm-list-top">
+                  <span className="bm-list-name">{bm.name}</span>
+                  <span className="bm-list-type">{bm.type}</span>
+                  {bm.duration && <span className="bm-list-cap">{bm.duration}'</span>}
+                </div>
+                {bm.desc && <div className="bm-list-desc">{bm.desc}</div>}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -732,6 +864,7 @@ function StationEditor({ block, onUpdate }) {
 // ── BlockEditor ───────────────────────────────────────────────────────────────
 function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy, collapsed, onToggleCollapse, dragBlkIdx, dragOverBlkIdx, setDragOverBlkIdx, reorderBlocks, blockIdx, changedFields }) {
   const [showTypePicker, setShowTypePicker] = useState(false);
+  const [bmSaveFlash, setBmSaveFlash] = useState(false);
   const dragExIdx = useRef(null);
   const [dragOverExIdx, setDragOverExIdx] = useState(null);
 
@@ -763,9 +896,32 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
     onUpdate({ ...block, exercises: block.exercises.filter(x => x.id !== id) });
   };
 
-  const changeType = newType => {
-    onUpdate({ ...block, type: newType, label: customName || newType });
+  const changeType = newTypeOrBlock => {
+    if (typeof newTypeOrBlock === 'string') {
+      onUpdate({ ...block, type: newTypeOrBlock, label: customName || newTypeOrBlock });
+    } else {
+      onUpdate({ ...newTypeOrBlock, id: block.id });
+    }
     setShowTypePicker(false);
+  };
+
+  const saveCustomBenchmark = () => {
+    const name = (block.label && block.label !== block.type) ? block.label : null;
+    if (!name) { window.alert('Dê um nome personalizado ao bloco antes de salvar como benchmark.'); return; }
+    const bm = {
+      name,
+      type: block.type,
+      desc: block.notes || (block.exercises||[]).filter(e=>e.name).map(e=>e.name).join(' + '),
+      duration: block.duration || '',
+      rounds: block.rounds || '',
+      exercises: (block.exercises||[]).map(e => ({ name:e.name, sets:e.sets, reps:e.reps, intensity:e.intensity })),
+      benchmarkCategory: 'custom',
+    };
+    const settings = loadSettings();
+    const customs = settings.customBenchmarks || [];
+    saveSettings({ ...settings, customBenchmarks: [...customs.filter(c=>c.name!==bm.name), bm] });
+    setBmSaveFlash(true);
+    setTimeout(() => setBmSaveFlash(false), 2500);
   };
 
   return (
@@ -836,6 +992,49 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
       {!collapsed && (
         <div className="blk-body">
           {(() => {
+            // ── Locked benchmark view ──────────────────────────────────────
+            if (block.benchmarkRef) {
+              return (
+                <>
+                  <div className="bm-locked-badge">
+                    <i className="ti ti-lock" /> Benchmark oficial · somente leitura
+                  </div>
+                  {block.notes && <div className="bm-locked-desc">{block.notes}</div>}
+                  <div className="blk-ex-list" style={{ margin:'8px 0' }}>
+                    {(block.exercises||[]).map((ex,i) => {
+                      const badge = loadBadgeStr(ex);
+                      const vol = ex.sets&&ex.reps ? `${ex.sets}×${ex.reps}` : (ex.reps||ex.sets||'');
+                      return (
+                        <div key={ex.id} className="bm-locked-row">
+                          <span className="bm-locked-row-num">{i+1}</span>
+                          <span className="bm-locked-row-name">{vol ? `${vol} ${ex.name}` : ex.name}</span>
+                          {badge && <span className="ex-load-badge">{badge}</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="fg" style={{ marginTop:4 }}>
+                    <span className="lbl">Nota do coach</span>
+                    <textarea
+                      className="blk-notes-quick"
+                      placeholder="Escala, adaptações, contexto para hoje..."
+                      value={block.coachNote||''}
+                      onChange={e => onUpdate({...block, coachNote:e.target.value})}
+                    />
+                  </div>
+                  <div className="blk-meta-row" style={{ marginTop:6 }}>
+                    <label className="blk-meta-field">
+                      <span>Zona</span>
+                      <select value={block.zone||'Zona 01'} onChange={e => onUpdate({...block, zone:e.target.value})}
+                        style={{background:'#111',border:'1px solid #2e2e2e',borderRadius:5,color:'#ccc',padding:'8px 10px',fontFamily:'inherit',fontSize:13,outline:'none'}}>
+                        {ZONES.map(z=><option key={z}>{z}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                </>
+              );
+            }
+
             const fch = (...fields) => fields.some(f => changedFields?.has(f)) ? { borderColor: 'rgba(74,200,192,0.65)' } : {};
             return (<>
           {/* Drag strip — second grab point when block is expanded */}
@@ -944,6 +1143,14 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
               </select>
             </label>
           </div>
+
+          {block.type !== 'Estações' && (block.exercises||[]).some(e => e.name?.trim()) && (
+            <button type="button" className={`b bsm bm-save-btn${bmSaveFlash?' bm-save-flash':''}`}
+              onClick={saveCustomBenchmark}>
+              <i className={`ti ${bmSaveFlash?'ti-check':'ti-bookmark-plus'}`} />
+              {bmSaveFlash ? 'Salvo!' : 'Salvar como Benchmark'}
+            </button>
+          )}
             </>);
           })()}
         </div>
@@ -1157,8 +1364,8 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
 
   // Block management
   const [insertAtIdx, setInsertAtIdx] = useState(null);
-  const addBlock = type => {
-    const newBlk = emptyBlock(type);
+  const addBlock = typeOrBlock => {
+    const newBlk = typeof typeOrBlock === 'string' ? emptyBlock(typeOrBlock) : { ...typeOrBlock, id: uid() };
     setBlocks(b => {
       if (insertAtIdx === null) return [...b, newBlk];
       const next = [...b]; next.splice(insertAtIdx + 1, 0, newBlk); return next;
