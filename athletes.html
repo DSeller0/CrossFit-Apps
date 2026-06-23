@@ -390,19 +390,21 @@ async function fetchState(){
   return{sessions:s??{},athletes:a??[],results:r??[],events:ev??{},locations:loc??[],coachProfile:cp??{},settings:st??{},athleteGoalsData:gd??{athleteGoals:{},prs:{}},lbColors:lb??{}};
 }
 
-function loadData(){
-  return Promise.all([
-    fetch('./config.json?v='+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({})),
-    fetchState()
-  ]).then(([c,s])=>{
+async function loadData(attempt=0){
+  try{
+    const [c,s]=await Promise.all([
+      fetch('./config.json?v='+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({})),
+      fetchState()
+    ]);
     cfg=c;if(cfg.colors&&typeof cfg.colors==='object')cfg={...cfg,...cfg.colors};
     state=s;
     const p=new URLSearchParams(window.location.search);
     if(p.get('athlete'))selAthlete=p.get('athlete');
     render();
-  }).catch(err=>{
+  }catch(err){
+    if(attempt<2){setTimeout(()=>loadData(attempt+1),2000*(attempt+1));return;}
     document.getElementById('app').innerHTML=`<div class="error"><i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>Não foi possível carregar os dados.<br><small>${err.message}</small><br><button class="retry-btn" onclick="loadData()"><i class="ti ti-refresh"></i> Tentar novamente</button></div>`;
-  });
+  }
 }
 loadData();
 </script>

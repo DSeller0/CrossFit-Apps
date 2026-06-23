@@ -979,7 +979,7 @@ function renderProfile(athlete,myResults,allSessions,goalsData,registry){
 }
 
 // ── Main ──────────────────────────────────────────────────
-async function main(){
+async function main(attempt=0){
   const id=new URLSearchParams(location.search).get('id');
   try{
     const [athRow,sessRow,resRow,goalsRow,regRow]=await Promise.all([
@@ -1003,8 +1003,9 @@ async function main(){
       renderPicker(athletes);
     }
   }catch(e){
+    if(attempt<2){setTimeout(()=>main(attempt+1),2000*(attempt+1));return;}
     console.error(e);
-    document.getElementById('root').innerHTML='<div class="center-msg" style="padding:40px;color:#806850">Erro ao carregar. Tente novamente.</div>';
+    document.getElementById('root').innerHTML='<div class="center-msg" style="padding:40px;color:var(--muted)">Erro ao carregar.<br><button onclick="main()" style="margin-top:12px;background:transparent;border:1px solid var(--div);color:var(--muted);font-size:13px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit">↺ Tentar novamente</button></div>';
   }
 }
 main();

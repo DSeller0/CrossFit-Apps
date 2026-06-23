@@ -116,8 +116,9 @@ const SESSION_ID = p.get('session');
 
 let state = { session: null, athletes: [], selectedAthleteId: '', blocks: [], submitted: false };
 
-async function load() {
+async function load(attempt=0) {
   if (!DATE_KEY || !SESSION_ID) { showError('Link inválido — sessão não encontrada.'); return; }
+  try {
   const [sessRes, athRes] = await Promise.all([
     _sb.from('sessions').select('value').eq('id', 1).maybeSingle(),
     _sb.from('athletes').select('value').eq('id', 1).maybeSingle(),
@@ -143,6 +144,10 @@ async function load() {
   document.getElementById('topbar-sub').textContent = dateStr;
 
   render();
+  } catch(e) {
+    if (attempt < 2) { setTimeout(() => load(attempt + 1), 2000 * (attempt + 1)); return; }
+    showError('Não foi possível carregar a sessão. Verifique sua conexão.');
+  }
 }
 
 function showError(msg) {
@@ -310,7 +315,7 @@ function renderSuccess() {
 }
 
 // Entry
-load().catch(() => showError('Não foi possível carregar a sessão. Verifique sua conexão.'));
+load();
 </script>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
