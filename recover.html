@@ -4,30 +4,35 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Cone — Recuperar dados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<script>!function(){var t=localStorage.getItem('cone_theme')||'totk-dark';document.documentElement.classList.add('theme-'+t)}();</script>
+<link rel="stylesheet" href="themes.css"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Amarante&display=swap"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0a0a0a;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{background:#111;border:1px solid #222;border-radius:12px;padding:28px;max-width:480px;width:100%}
-h1{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px}
-.sub{font-size:13px;color:#666;margin-bottom:20px}
-.row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#161616;border-radius:7px;border:1px solid #1e1e1e;margin-bottom:8px}
-.row-label{font-size:12px;color:#888}
-.row-val{font-size:15px;font-weight:700;color:#4ac8c0}
-.none{color:#333;font-size:15px;font-weight:700}
+body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:var(--stone);border:1px solid var(--div);border-radius:12px;padding:28px;max-width:480px;width:100%}
+h1{font-size:18px;font-weight:700;color:var(--cream);margin-bottom:4px}
+.sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--stone2);border-radius:7px;border:1px solid var(--div);margin-bottom:8px}
+.row-label{font-size:12px;color:var(--muted)}
+.row-val{font-size:15px;font-weight:700;color:var(--teal)}
+.none{color:var(--dim);font-size:15px;font-weight:700}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:13px;border-radius:8px;border:none;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:opacity .15s}
 .btn:hover{opacity:.88}
-.btn-dl{background:#4ac8c0;color:#000}
-.btn-copy{background:#2a2a2a;color:#e0e0e0;border:1px solid #333}
-.btn-copy.ok{background:#1a3a1a;color:#4caf50;border-color:#2a5a2a}
-.warn{font-size:11px;color:#e87820;margin-top:14px;line-height:1.5;padding:10px;background:#1a1208;border-radius:6px;border:1px solid #3a2a1a}
-.empty{text-align:center;padding:20px;color:#555;font-size:14px}
+.btn-dl{background:var(--teal);color:var(--accent-text,#000)}
+.btn-copy{background:var(--stone2);color:var(--sub);border:1px solid var(--div)}
+.btn-copy.ok{background:var(--stone2);color:var(--green);border-color:var(--green)}
+.warn{font-size:11px;color:var(--gold);margin-top:14px;line-height:1.5;padding:10px;background:var(--stone2);border-radius:6px;border:1px solid var(--div)}
+.empty{text-align:center;padding:20px;color:var(--dim);font-size:14px}
 </style>
 </head>
 <body>
 <div class="card">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
     <h1 style="margin-bottom:0">Cone — Recuperar dados</h1>
-    <a href="index.html" style="color:#4ac8c0;font-size:13px;text-decoration:none;font-weight:700;letter-spacing:.04em;opacity:.7;transition:opacity .15s" title="Início" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">← Início</a>
+    <a href="index.html" style="color:var(--teal);font-size:13px;text-decoration:none;font-weight:700;letter-spacing:.04em;opacity:.7;transition:opacity .15s" title="Início" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">← Início</a>
   </div>
   <p class="sub">Lendo localStorage deste navegador...</p>
   <div id="summary"></div>
