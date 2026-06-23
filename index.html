@@ -51,6 +51,10 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-he
 
 /* ── Sessions pane ── */
 .pane-left{padding:16px 16px 20px}
+.pane-left::-webkit-scrollbar{width:3px}
+.pane-left::-webkit-scrollbar-track{background:transparent}
+.pane-left::-webkit-scrollbar-thumb{background:var(--dim)}
+.pane-left{scrollbar-width:thin;scrollbar-color:var(--dim) transparent}
 
 /* ── Day label ── */
 .day-lbl-row{display:flex;align-items:center;gap:10px;margin:16px 0 8px}
