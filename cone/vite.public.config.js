@@ -19,7 +19,7 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        index:       resolve(root, 'index.html'),
+        index:       resolve(root, 'index.html'),   // React
         schedule:    resolve(root, 'schedule.html'),
         me:          resolve(root, 'me.html'),
         results:     resolve(root, 'results.html'),
