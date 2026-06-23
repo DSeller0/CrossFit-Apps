@@ -15,17 +15,12 @@
 <title>Team Medrado Cross Training</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;900&display=swap"/>
+<script>!function(){var t=localStorage.getItem('cone_theme')||'totk-dark';document.documentElement.classList.add('theme-'+t)}();</script>
+<link rel="stylesheet" href="themes.css"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Amarante&display=swap"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;
-  --divider:#2a231c;--gold:#d8a840;--gold2:#b88820;
-  --teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;
-  --muted:#806850;--dim:#554a3a;
-  --font:'Raleway',sans-serif;
-}
 html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh}
 @media(max-width:699px){body{padding-bottom:64px}}
 
@@ -379,6 +374,17 @@ async function main() {
 
   const allSessions = sessRes.data?.value || {};
   const allResults  = resRes.data?.value || [];
+
+  // Sync theme from Supabase settings
+  const _storedSettings = settRes.data?.value || {};
+  if (_storedSettings.theme) {
+    const _cur = localStorage.getItem('cone_theme');
+    if (_cur !== _storedSettings.theme) {
+      localStorage.setItem('cone_theme', _storedSettings.theme);
+      document.documentElement.className =
+        document.documentElement.className.replace(/\btheme-\S+/g,'').trim() + ' theme-' + _storedSettings.theme;
+    }
+  }
 
   const countBySess = {};
   allResults.forEach(r => {

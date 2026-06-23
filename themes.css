@@ -1,0 +1,69 @@
+/*
+ * Cone — theme definitions
+ *
+ * Applied as a class on <html>: html.theme-totk-dark, html.theme-totk-light,
+ * html.theme-spirit-blossom, html.theme-spirit-blossom-light
+ *
+ * :root provides totk-dark as the no-JS fallback.
+ * All aliases (--divider, --sc-font, --lb-font, etc.) are kept so each
+ * page works without changes to any selector beyond its :root block.
+ *
+ * Fonts loaded by each page:
+ *   Cinzel + Crimson Pro  → TotK themes
+ *   Amarante              → Spirit Blossom themes
+ */
+
+/* ── Fallback (totk-dark, no class) ─────────────────────────────────────── */
+:root{
+  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
+  --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
+  --red:#c83030;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+  --font:'Cinzel',serif;--font-body:'Crimson Pro',serif;
+  --divider:#2a231c;--border:#2a231c;--accent:#4ac8c0;--accent-text:#000;
+  --text:#f0e8d0;--cyan:#4ac8c0;--sc-font:'Cinzel',serif;--lb-font:'Cinzel',serif;
+  --bg2:#161210;--bg3:#1e1a16;--err:#c83030;
+}
+
+/* ── TotK Dark ───────────────────────────────────────────────────────────── */
+html.theme-totk-dark{
+  --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
+  --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
+  --red:#c83030;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+  --font:'Cinzel',serif;--font-body:'Crimson Pro',serif;
+  --divider:#2a231c;--border:#2a231c;--accent:#4ac8c0;--accent-text:#000;
+  --text:#f0e8d0;--cyan:#4ac8c0;--sc-font:'Cinzel',serif;--lb-font:'Cinzel',serif;
+  --bg2:#161210;--bg3:#1e1a16;--err:#c83030;
+}
+
+/* ── TotK Light ──────────────────────────────────────────────────────────── */
+html.theme-totk-light{
+  --bg:#ede8dc;--stone:#f5f1e8;--stone2:#e8e2d4;--div:#d4cab8;
+  --gold:#9a6c14;--gold2:#7a5008;--teal:#1c6860;--green:#1a6830;
+  --red:#b83020;--cream:#1c1508;--sub:#503828;--muted:#7a6448;--dim:#a89070;
+  --font:'Cinzel',serif;--font-body:'Crimson Pro',serif;
+  --divider:#d4cab8;--border:#d4cab8;--accent:#1c6860;--accent-text:#fff;
+  --text:#1c1508;--cyan:#1c6860;--sc-font:'Cinzel',serif;--lb-font:'Cinzel',serif;
+  --bg2:#f5f1e8;--bg3:#e8e2d4;--err:#b83020;
+}
+
+/* ── Spirit Blossom Dark ─────────────────────────────────────────────────── */
+html.theme-spirit-blossom{
+  --bg:#09070f;--stone:#100d1c;--stone2:#17122a;--div:#221638;
+  --gold:#e05490;--gold2:#b83872;--teal:#38c4d0;--green:#50d890;
+  --red:#c82850;--cream:#ede4f8;--sub:#c4a0d0;--muted:#7d5090;--dim:#4a2d60;
+  --font:'Amarante',serif;--font-body:'Amarante',serif;
+  --divider:#221638;--border:#221638;--accent:#38c4d0;--accent-text:#09070f;
+  --text:#ede4f8;--cyan:#38c4d0;--sc-font:'Amarante',serif;--lb-font:'Amarante',serif;
+  --bg2:#100d1c;--bg3:#17122a;--err:#c82850;
+}
+
+/* ── Spirit Blossom Light ────────────────────────────────────────────────── */
+html.theme-spirit-blossom-light{
+  --bg:#f4eefb;--stone:#ffffff;--stone2:#f0e8f8;--div:#e2d4f0;
+  --gold:#c83070;--gold2:#a02258;--teal:#1490a0;--green:#28a064;
+  --red:#c02040;--cream:#1a0828;--sub:#4a2460;--muted:#7840a0;--dim:#9070b0;
+  --font:'Amarante',serif;--font-body:'Amarante',serif;
+  --divider:#e2d4f0;--border:#e2d4f0;--accent:#1490a0;--accent-text:#fff;
+  --text:#1a0828;--cyan:#1490a0;--sc-font:'Amarante',serif;--lb-font:'Amarante',serif;
+  --bg2:#ffffff;--bg3:#f0e8f8;--err:#c02040;
+}
