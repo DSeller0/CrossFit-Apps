@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="cone-client.js"></script>
+<script src="cone-utils.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh;padding-bottom:70px}
@@ -310,9 +311,6 @@ let _curAthId=null,_curPrs=[],_curBodyMetrics=[],_curRegistry=null;
 let _lsUnit='kg',_lsPrRef=null,_lsCatsRef=[],_lsNameRef='',_lsPending=null;
 
 // ── Helpers ───────────────────────────────────────────────
-function toISO(d){return[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
-function todayISO(){return toISO(new Date())}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function initials(name){return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()}
 function getTargets(s){if(!s?.mainTraining)return[];return Array.isArray(s.mainTraining)?s.mainTraining:[s.mainTraining]}
 function matchesAthlete(s,name){return getTargets(s).includes(name)}

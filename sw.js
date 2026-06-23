@@ -12,6 +12,7 @@ const PRECACHE_URLS = [
   './recover.html',
   './themes.css',
   './cone-client.js',
+  './cone-utils.js',
   './manifest.json',
 ];
 

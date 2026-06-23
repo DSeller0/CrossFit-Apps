@@ -163,6 +163,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--cream);fo
   .t-ring-area{padding:16px 28px 8px}
 }
 </style>
+<script src="cone-utils.js"></script>
 </head>
 <body>
 <div id="root"></div>
@@ -185,7 +186,6 @@ let lastEmomMin=-1, lastStKey=null;
 // ── Utils ──────────────────────────────────────────────────
 function fmt(s){s=Math.max(0,Math.floor(s));return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
 function fmtDate(iso){const d=new Date(iso+'T12:00:00');return`${DAY_PT[d.getDay()]} ${d.getDate()} ${MON_PT[d.getMonth()]}`}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function exLabel(ex){
   if(typeof ex==='string')return ex;
   const v=[];
