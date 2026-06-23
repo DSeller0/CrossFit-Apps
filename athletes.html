@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Amarante&display=swap"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="cone-client.js"></script>
+<script src="cone-utils.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh}
@@ -137,7 +138,6 @@ const WOD_TYPES=['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
 const DAY_PT=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
 function snapPct(p){return Math.round(p/10)*10;}
-function toISO(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function toSecs(t){if(!t)return Infinity;const p=String(t).split(':');return p.length===2?parseInt(p[0])*60+parseInt(p[1]):parseInt(t)||Infinity;}
 // Backwards compat: mainTraining may be string or array
 function getTargets(s){if(!s?.mainTraining)return[];return Array.isArray(s.mainTraining)?s.mainTraining:[s.mainTraining];}

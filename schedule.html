@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Amarante&display=swap"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="cone-client.js"></script>
+<script src="cone-utils.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);color:var(--text);font-family:var(--sc-font);min-height:100vh;-webkit-text-size-adjust:100%;padding-bottom:72px}
@@ -326,11 +327,6 @@ function openTimer(blockId,sessId,dateKey){
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const DAY_PT=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
 const MONTH_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-
-function toISO(d){
-  const pad=n=>String(n).padStart(2,'0');
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
 
 function getWeek(offset){
   const now=new Date();
