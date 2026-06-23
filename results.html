@@ -373,9 +373,9 @@ function renderKPIs(sid,bid,btype){
 function renderLogged(br,btype){
   const scol=SCALE_COL[br.scale]||'#888';
   const perf=btype==='For Time'
-    ?(br.perfTime||'—')
+    ?(br.perfTime||(br.perfRounds?`${br.perfRounds} rds (DNF)`:'—'))
     :`${br.perfRounds||'—'} rds${br.perfReps?' + '+br.perfReps+' reps':''}`;
-  const plbl=btype==='For Time'?'Tempo':'Resultado';
+  const plbl=btype==='For Time'?(br.perfTime?'Tempo':'Resultado'):'Resultado';
   return `<div class="res-logged">
     <div class="res-logged-item"><div class="res-logged-lbl">Escala</div><div class="res-logged-val" style="color:${scol}">${esc(br.scale||'—')}</div></div>
     <div class="res-logged-item"><div class="res-logged-lbl">RPE</div><div class="res-logged-val">${br.rpe||'—'}</div></div>
@@ -384,7 +384,8 @@ function renderLogged(br,btype){
 }
 
 // ── Render: log form ──────────────────────────────────────────────────────────
-function renderForm(sid,bid,btype,dk){
+function renderForm(sid,bid,bl,dk){
+  const btype=bl.type, blRounds=Number(bl.rounds)||0;
   const k=inputKey(sid,bid);
   const inp=getInp(sid,bid);
   if(submittingWodKey===k) return `<div class="res-spinner"><i class="ti ti-loader-2 spin" style="font-size:26px;color:var(--teal)"></i><div style="margin-top:6px">Salvando...</div></div>`;
@@ -394,7 +395,12 @@ function renderForm(sid,bid,btype,dk){
         <div class="res-form-lbl">Tempo (MM:SS)</div>
         <input class="res-perf-input" type="text" inputmode="numeric" placeholder="12:34" value="${esc(inp.perfTime)}" ${dis}
                oninput="setLogInp('${esc(sid)}','${esc(bid)}','perfTime',this.value)"/>
-      </div>`
+      </div>${blRounds>0?`
+      <div>
+        <div class="res-form-lbl">Rounds completos de ${blRounds} (DNF)</div>
+        <input class="res-perf-input" type="number" min="0" max="${blRounds}" inputmode="numeric" placeholder="0/${blRounds}" value="${esc(inp.perfRounds)}" ${dis} style="width:100px"
+               oninput="setLogInp('${esc(sid)}','${esc(bid)}','perfRounds',this.value)"/>
+      </div>`:''}`
     :`<div class="res-num-row">
         <div><div class="res-form-lbl">Rounds</div>
           <input class="res-perf-input" type="number" min="0" inputmode="numeric" placeholder="0" value="${esc(inp.perfRounds)}" ${dis} style="width:80px"
@@ -435,7 +441,7 @@ function renderWodSection(sess,bl,dk){
     content=renderKPIs(sid,bid,btype);
   } else {
     const br=getAthleteBlockResult(sid,bid);
-    content=br?renderLogged(br,btype):renderForm(sid,bid,btype,dk);
+    content=br?renderLogged(br,btype):renderForm(sid,bid,bl,dk);
   }
   return `<div class="res-wod">
     <div class="res-wod-hdr">
@@ -554,9 +560,9 @@ function showConfirmModal(sid,bid,dk){
   const lbl=bl?blkLabel(bl):bid;
   const btype=bl?.type||'';
   let perf='';
-  if(btype==='For Time') perf=inp.perfTime||'';
+  if(btype==='For Time') perf=inp.perfTime||(inp.perfRounds?`${inp.perfRounds} rds (DNF)`:'');
   else if(inp.perfRounds) perf=`${inp.perfRounds} rds${inp.perfReps?' + '+inp.perfReps+' reps':''}`;
-  const plbl=btype==='For Time'?'Tempo':'Resultado';
+  const plbl=btype==='For Time'?(inp.perfTime?'Tempo':'Resultado'):'Resultado';
   confirmPending={sid,bid,dk};
 
   document.getElementById('confirm-modal').innerHTML=`
@@ -622,7 +628,7 @@ async function submitWod(sid,bid,dk){
   delete logInputs[k];
 
   let perf='';
-  if(btype==='For Time') perf=inp.perfTime||'';
+  if(btype==='For Time') perf=inp.perfTime||(inp.perfRounds?`${inp.perfRounds} rds (DNF)`:'');
   else if(inp.perfRounds) perf=`${inp.perfRounds} rds${inp.perfReps?' + '+inp.perfReps+' reps':''}`;
 
   successData={blockLabel:lbl,scale:inp.scale,rpe:inp.rpe,perf,btype};
