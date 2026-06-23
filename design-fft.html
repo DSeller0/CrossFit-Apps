@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Design — Final Fantasy Tactics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#07091a;
+  --stone:#0d1126;
+  --stone2:#151c38;
+  --div:#252d50;
+  --gold:#c8a428;
+  --gold2:#9a7810;
+  --crystal:#4e6ec8;
+  --crystal2:#2a4090;
+  --cream:#e8dfc0;
+  --sub:#b09a70;
+  --muted:#6a5c40;
+  --dim:#1e2448;
+  --red:#c03050;
+  --purple:#7860c8;
+  --green:#3aa860;
+  --font:'Cinzel',serif;
+  --font-body:'Crimson Pro',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--font-body);min-height:100%}
+
+/* ── Layout ── */
+.page{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+
+/* ── Header ── */
+.hdr{padding:14px 16px 10px;background:var(--stone);border-bottom:1px solid var(--div);position:relative;flex-shrink:0}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 5%,var(--gold2) 30%,var(--gold) 50%,var(--gold2) 70%,transparent 95%)}
+.hdr-top{display:flex;align-items:flex-start;justify-content:space-between}
+.hdr-brand{font-family:var(--font);font-size:8px;font-weight:400;letter-spacing:.25em;color:var(--muted);text-transform:uppercase}
+.hdr-title{font-family:var(--font);font-size:15px;font-weight:900;color:var(--cream);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.hdr-ath{font-family:var(--font);font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.1em;text-align:right}
+.hdr-job{font-family:var(--font);font-size:7px;color:var(--muted);letter-spacing:.15em;text-align:right;margin-top:2px}
+
+/* ── Tab bar ── */
+.tab-bar{display:flex;border-bottom:1px solid var(--div);background:var(--stone);flex-shrink:0}
+.tab-btn{flex:1;padding:8px 4px;font-family:var(--font);font-size:7px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border:none;background:none;cursor:pointer;position:relative;transition:color .15s}
+.tab-btn.active{color:var(--gold)}
+.tab-btn.active::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2px;background:var(--gold)}
+
+/* ── Bottom nav ── */
+.nav{display:flex;border-top:1px solid var(--div);background:var(--stone);flex-shrink:0;position:relative}
+.nav::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 5%,var(--gold2) 30%,var(--gold) 50%,var(--gold2) 70%,transparent 95%)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 10px;font-family:var(--font);font-size:6px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;cursor:pointer;position:relative}
+.nav-item i{font-size:18px}
+.nav-item.active{color:var(--gold)}
+.nav-item.active i{color:var(--gold)}
+
+/* ── Tabs content ── */
+.tab-content{display:none;flex:1;overflow-y:auto;padding:14px 16px;flex-direction:column;gap:12px}
+.tab-content.active{display:flex}
+
+/* ── Ornamental divider ── */
+.orn-rule{display:flex;align-items:center;gap:8px;margin:2px 0}
+.orn-rule::before,.orn-rule::after{content:'';flex:1;height:1px;background:var(--div)}
+.orn-diamond{width:5px;height:5px;background:var(--gold2);transform:rotate(45deg);flex-shrink:0}
+
+/* ── Theme banner ── */
+.theme-banner{background:var(--stone);border:1px solid var(--div);padding:12px 14px;position:relative}
+.theme-banner::before{content:'';position:absolute;top:0;left:0;width:12px;height:12px;border-top:2px solid var(--gold2);border-left:2px solid var(--gold2)}
+.theme-banner::after{content:'';position:absolute;bottom:0;right:0;width:12px;height:12px;border-bottom:2px solid var(--gold2);border-right:2px solid var(--gold2)}
+.theme-banner-title{font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.15em;color:var(--gold);text-transform:uppercase}
+.theme-banner-sub{font-family:var(--font-body);font-size:12px;color:var(--sub);font-style:italic;margin-top:3px;line-height:1.4}
+.theme-banner-palette{display:flex;gap:6px;margin-top:10px}
+.swatch{width:20px;height:20px;border:1px solid rgba(255,255,255,.08)}
+
+/* ── Section header ── */
+.sec-hdr{font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;margin-top:2px}
+
+/* ── Day card ── */
+.day-card{background:var(--stone);border:1px solid var(--div);position:relative}
+.day-card::before{content:'';position:absolute;top:0;left:0;width:12px;height:12px;border-top:2px solid var(--gold2);border-left:2px solid var(--gold2);pointer-events:none}
+.day-card::after{content:'';position:absolute;bottom:0;right:0;width:12px;height:12px;border-bottom:2px solid var(--gold2);border-right:2px solid var(--gold2);pointer-events:none}
+.day-card-hdr{padding:8px 12px;background:var(--stone2);border-bottom:1px solid var(--div);display:flex;align-items:center;justify-content:space-between}
+.day-card-name{font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--sub);text-transform:uppercase}
+.day-card-name.today{color:var(--gold)}
+.day-card-date{font-family:var(--font-body);font-size:10px;color:var(--muted);font-style:italic}
+.day-card-body{padding:8px 12px;display:flex;flex-direction:column;gap:4px}
+
+/* ── Block row ── */
+.blk-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(37,45,80,.5)}
+.blk-row:last-child{border-bottom:none}
+.blk-crystal-dot{width:7px;height:7px;transform:rotate(45deg);flex-shrink:0}
+.blk-crystal-dot.wod{background:var(--red)}
+.blk-crystal-dot.str{background:var(--crystal)}
+.blk-crystal-dot.warm{background:var(--green)}
+.blk-crystal-dot.mob{background:var(--purple)}
+.blk-crystal-dot.acess{background:var(--muted)}
+.blk-type{font-family:var(--font);font-size:7px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;flex-shrink:0;min-width:32px}
+.blk-sep{color:var(--dim);margin:0 2px;font-size:10px}
+.blk-label{font-family:var(--font-body);font-size:12px;color:var(--sub);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.blk-meta{font-family:var(--font);font-size:7px;color:var(--muted);white-space:nowrap;letter-spacing:.06em}
+.blk-check{width:14px;height:14px;border:1px solid var(--div);flex-shrink:0;display:flex;align-items:center;justify-content:center;transform:rotate(45deg)}
+.blk-check.done{border-color:var(--gold2);background:rgba(200,164,40,.12)}
+.blk-check.done i{transform:rotate(-45deg);color:var(--gold);font-size:9px}
+
+/* ── Rest day ── */
+.day-rest{padding:10px 12px;font-family:var(--font-body);font-size:12px;color:var(--dim);font-style:italic;display:flex;align-items:center;gap:6px}
+
+/* ── Heatmap ── */
+.heatmap-wrap{background:var(--stone);border:1px solid var(--div);padding:12px 14px;position:relative}
+.heatmap-wrap::before{content:'';position:absolute;top:0;left:0;width:10px;height:10px;border-top:2px solid var(--gold2);border-left:2px solid var(--gold2)}
+.heatmap-wrap::after{content:'';position:absolute;bottom:0;right:0;width:10px;height:10px;border-bottom:2px solid var(--gold2);border-right:2px solid var(--gold2)}
+.heatmap-title{font-family:var(--font);font-size:7px;font-weight:700;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.heatmap-days{display:flex;justify-content:space-between;margin-bottom:3px}
+.heatmap-day-lbl{font-family:var(--font);font-size:6px;color:var(--dim);width:calc(100%/7);text-align:center;letter-spacing:.05em}
+.heatmap-grid{display:grid;grid-template-columns:repeat(13,1fr);gap:3px}
+.hm-cell{aspect-ratio:1}
+.hm-0{background:var(--stone2)}
+.hm-1{background:rgba(78,110,200,.25)}
+.hm-2{background:rgba(78,110,200,.5)}
+.hm-3{background:rgba(78,110,200,.75)}
+.hm-4{background:rgba(78,110,200,1)}
+
+/* ── Resultados tab ── */
+.res-card{background:var(--stone);border:1px solid var(--div);position:relative}
+.res-card::before{content:'';position:absolute;top:0;left:0;width:10px;height:10px;border-top:2px solid var(--gold2);border-left:2px solid var(--gold2)}
+.res-card-hdr{padding:9px 12px;background:var(--stone2);border-bottom:1px solid var(--div);display:flex;align-items:baseline;justify-content:space-between}
+.res-card-title{font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--cream)}
+.res-card-sub{font-family:var(--font);font-size:7px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.res-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);padding:12px;gap:4px}
+.res-kpi{text-align:center}
+.res-kpi-val{font-family:var(--font);font-size:20px;font-weight:900;color:var(--cream)}
+.res-kpi-lbl{font-family:var(--font);font-size:6px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-top:3px}
+.lb-row{display:flex;align-items:center;gap:8px;padding:7px 12px;border-top:1px solid var(--div)}
+.lb-rank{font-family:var(--font);font-size:13px;font-weight:900;color:var(--muted);width:22px;text-align:center}
+.lb-rank.gold{color:var(--gold)}
+.lb-rank.silver{color:#909cc0}
+.lb-rank.bronze{color:#a07040}
+.lb-name{font-family:var(--font-body);font-size:13px;color:var(--cream);flex:1;font-weight:600}
+.lb-scale{font-family:var(--font);font-size:6px;font-weight:700;letter-spacing:.12em;color:var(--crystal);border:1px solid var(--crystal2);padding:2px 5px;text-transform:uppercase}
+.lb-perf{font-family:var(--font);font-size:13px;font-weight:700;color:var(--gold)}
+
+/* ── Perfil tab ── */
+.prof-hero{background:var(--stone);border:1px solid var(--div);padding:16px;display:flex;align-items:center;gap:14px;position:relative}
+.prof-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 10%,var(--gold2) 40%,var(--gold2) 60%,transparent 90%)}
+.prof-avatar{width:56px;height:56px;background:var(--stone2);border:2px solid var(--gold2);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:22px;font-weight:900;color:var(--gold);flex-shrink:0;position:relative}
+.prof-avatar::before{content:'';position:absolute;top:-4px;left:-4px;width:10px;height:10px;border-top:2px solid var(--gold);border-left:2px solid var(--gold)}
+.prof-avatar::after{content:'';position:absolute;bottom:-4px;right:-4px;width:10px;height:10px;border-bottom:2px solid var(--gold);border-right:2px solid var(--gold)}
+.prof-name{font-family:var(--font);font-size:18px;font-weight:900;color:var(--cream);letter-spacing:.04em}
+.prof-job{font-family:var(--font);font-size:8px;font-weight:400;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;margin-top:3px}
+.prof-since{font-family:var(--font-body);font-size:11px;color:var(--muted);font-style:italic;margin-top:5px}
+.prof-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--div)}
+.prof-stat{padding:10px 8px;text-align:center;border-right:1px solid var(--div)}
+.prof-stat:last-child{border-right:none}
+.prof-stat-val{font-family:var(--font);font-size:18px;font-weight:900;color:var(--cream)}
+.prof-stat-lbl{font-family:var(--font);font-size:6px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-top:3px}
+.pr-row{background:var(--stone);border:1px solid var(--div);padding:10px 12px;display:flex;align-items:center;gap:10px;position:relative}
+.pr-row::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:2px;background:var(--crystal2)}
+.pr-crystal{width:6px;height:6px;transform:rotate(45deg);background:var(--crystal);flex-shrink:0}
+.pr-ex{font-family:var(--font-body);font-size:13px;color:var(--sub);flex:1;font-weight:600}
+.pr-val{font-family:var(--font);font-size:14px;font-weight:900;color:var(--cream)}
+.pr-unit{font-family:var(--font);font-size:8px;color:var(--muted);letter-spacing:.08em}
+.goal-row{background:var(--stone);border:1px solid var(--div);padding:10px 12px}
+.goal-name{font-family:var(--font-body);font-size:13px;color:var(--sub);font-weight:600;margin-bottom:6px}
+.goal-bar-track{height:3px;background:var(--div)}
+.goal-bar-fill{height:100%;background:linear-gradient(90deg,var(--crystal2),var(--crystal))}
+.goal-prog{font-family:var(--font);font-size:7px;color:var(--muted);letter-spacing:.1em;margin-top:5px;text-transform:uppercase}
+
+/* ── Fontes tab ── */
+.font-card{background:var(--stone);border:1px solid var(--div);padding:16px;position:relative}
+.font-card::before{content:'';position:absolute;top:0;left:0;width:10px;height:10px;border-top:2px solid var(--gold2);border-left:2px solid var(--gold2)}
+.font-card-lbl{font-family:var(--font);font-size:7px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+.font-display{font-family:var(--font);font-size:26px;font-weight:900;color:var(--cream);letter-spacing:.04em;line-height:1.1}
+.font-display-sub{font-family:var(--font);font-size:9px;font-weight:400;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-top:4px}
+.font-body-sample{font-family:var(--font-body);font-size:14px;color:var(--sub);line-height:1.7;margin-top:8px}
+.font-body-sample em{color:var(--cream);font-style:italic}
+.font-body-meta{font-family:var(--font);font-size:7px;letter-spacing:.15em;color:var(--dim);text-transform:uppercase;margin-top:8px}
+.font-specimen-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.font-specimen-item{font-family:var(--font);color:var(--sub);font-size:11px;letter-spacing:.06em}
+.font-specimen-item b{color:var(--cream);font-weight:900}
+.font-specimen-item.sm{font-size:8px;letter-spacing:.14em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- Header -->
+<header class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="hdr-brand">Team Medrado</div>
+      <div class="hdr-title">Agenda</div>
+    </div>
+    <div>
+      <div class="hdr-ath">Rodrigo M.</div>
+      <div class="hdr-job">Knight · Tier 02</div>
+    </div>
+  </div>
+</header>
+
+<!-- Tab bar -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('agenda',this)">Agenda</button>
+  <button class="tab-btn" onclick="switchTab('resultados',this)">Resultados</button>
+  <button class="tab-btn" onclick="switchTab('perfil',this)">Perfil</button>
+  <button class="tab-btn" onclick="switchTab('fontes',this)">Fontes</button>
+</div>
+
+<!-- ── Tab: Agenda ──────────────────────────────────── -->
+<div class="tab-content active" id="tab-agenda">
+
+  <!-- Theme banner -->
+  <div class="theme-banner">
+    <div class="theme-banner-title">⚔ Final Fantasy Tactics · Ivalice Dark</div>
+    <div class="theme-banner-sub">The lion war is over. The brave story begins. — Cinzel + Crimson Pro</div>
+    <div class="theme-banner-palette">
+      <div class="swatch" style="background:var(--bg)" title="bg"></div>
+      <div class="swatch" style="background:var(--stone)" title="stone"></div>
+      <div class="swatch" style="background:var(--div)" title="div"></div>
+      <div class="swatch" style="background:var(--gold)" title="gold"></div>
+      <div class="swatch" style="background:var(--crystal)" title="crystal"></div>
+      <div class="swatch" style="background:var(--cream)" title="cream"></div>
+      <div class="swatch" style="background:var(--sub)" title="sub"></div>
+      <div class="swatch" style="background:var(--red)" title="red"></div>
+      <div class="swatch" style="background:var(--purple)" title="purple"></div>
+    </div>
+  </div>
+
+  <div class="orn-rule"><div class="orn-diamond"></div></div>
+
+  <!-- Heatmap -->
+  <div class="heatmap-wrap">
+    <div class="heatmap-title">Frequência · Últimas 13 Semanas</div>
+    <div class="heatmap-grid" id="hm-grid"></div>
+  </div>
+
+  <div class="sec-hdr">Semana de 22 Jun</div>
+
+  <!-- Yesterday -->
+  <div class="day-card">
+    <div class="day-card-hdr">
+      <span class="day-card-name">Domingo</span>
+      <span class="day-card-date">22 Jun</span>
+    </div>
+    <div class="day-rest">
+      <i class="ti ti-moon" style="color:var(--dim)"></i>
+      Descanso
+    </div>
+  </div>
+
+  <!-- Today -->
+  <div class="day-card">
+    <div class="day-card-hdr">
+      <span class="day-card-name today">⬧ Segunda-feira</span>
+      <span class="day-card-date">23 Jun</span>
+    </div>
+    <div class="day-card-body">
+      <div class="blk-row">
+        <div class="blk-crystal-dot warm"></div>
+        <span class="blk-type">Aquec.</span>
+        <span class="blk-sep">·</span>
+        <span class="blk-label">Mobilidade de Quadril + Ativação</span>
+        <span class="blk-meta">10 min</span>
+        <div class="blk-check done"><i class="ti ti-check"></i></div>
+      </div>
+      <div class="blk-row">
+        <div class="blk-crystal-dot str"></div>
+        <span class="blk-type">Força</span>
+        <span class="blk-sep">·</span>
+        <span class="blk-label">Back Squat</span>
+        <span class="blk-meta">5×5 @75%</span>
+        <div class="blk-check done"><i class="ti ti-check"></i></div>
+      </div>
+      <div class="blk-row">
+        <div class="blk-crystal-dot wod"></div>
+        <span class="blk-type">For Time</span>
+        <span class="blk-sep">·</span>
+        <span class="blk-label">Thruster + Bar Muscle-Up</span>
+        <span class="blk-meta">10 rds · CAP 20</span>
+        <div class="blk-check"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tomorrow -->
+  <div class="day-card">
+    <div class="day-card-hdr">
+      <span class="day-card-name">Terça-feira</span>
+      <span class="day-card-date">24 Jun</span>
+    </div>
+    <div class="day-card-body">
+      <div class="blk-row">
+        <div class="blk-crystal-dot warm"></div>
+        <span class="blk-type">Aquec.</span>
+        <span class="blk-sep">·</span>
+        <span class="blk-label">Row + Dinâmico</span>
+        <span class="blk-meta">8 min</span>
+        <div class="blk-check"></div>
+      </div>
+      <div class="blk-row">
+        <div class="blk-crystal-dot str"></div>
+        <span class="blk-type">LPO</span>
+        <span class="blk-sep">·</span>
+        <span class="blk-label">Power Clean + Jerk</span>
+        <span class="blk-meta">7×1 @80%</span>
+        <div class="blk-check"></div>
+      </div>
+      <div class="blk-row">
+        <div class="blk-crystal-dot wod"></div>
+        <span class="blk-type">AMRAP</span>
+        <span class="blk-sep">·</span>
+        <span class="blk-label">Cindy Modificado</span>
+        <span class="blk-meta">20 min</span>
+        <div class="blk-check"></div>
+      </div>
+      <div class="blk-row">
+        <div class="blk-crystal-dot mob"></div>
+        <span class="blk-type">Mobil.</span>
+        <span class="blk-sep">·</span>
+        <span class="blk-label">Alongamento de Ombro</span>
+        <span class="blk-meta">5 min</span>
+        <div class="blk-check"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /tab-agenda -->
+
+<!-- ── Tab: Resultados ──────────────────────────────── -->
+<div class="tab-content" id="tab-resultados">
+
+  <div class="sec-hdr">Semana de 22 Jun · Todos os atletas</div>
+
+  <!-- WOD 1 -->
+  <div class="res-card">
+    <div class="res-card-hdr">
+      <span class="res-card-title">Thruster + Bar Muscle-Up</span>
+      <span class="res-card-sub">For Time · 10 rds</span>
+    </div>
+    <div class="res-kpi-row">
+      <div class="res-kpi"><div class="res-kpi-val">8</div><div class="res-kpi-lbl">Atletas</div></div>
+      <div class="res-kpi"><div class="res-kpi-val">7.9</div><div class="res-kpi-lbl">RPE Méd.</div></div>
+      <div class="res-kpi"><div class="res-kpi-val">62%</div><div class="res-kpi-lbl">% RX</div></div>
+      <div class="res-kpi"><div class="res-kpi-val">16:42</div><div class="res-kpi-lbl">Tempo Méd.</div></div>
+    </div>
+    <div class="orn-rule" style="margin:0 12px"><div class="orn-diamond"></div></div>
+    <div class="lb-row">
+      <span class="lb-rank gold">I</span>
+      <span class="lb-name">Ana Lima</span>
+      <span class="lb-scale">RX</span>
+      <span class="lb-perf">14:38</span>
+    </div>
+    <div class="lb-row">
+      <span class="lb-rank silver">II</span>
+      <span class="lb-name">Carlos Melo</span>
+      <span class="lb-scale">RX</span>
+      <span class="lb-perf">15:12</span>
+    </div>
+    <div class="lb-row">
+      <span class="lb-rank bronze">III</span>
+      <span class="lb-name">Fernanda T.</span>
+      <span class="lb-scale" style="color:var(--sub);border-color:var(--div)">Inter</span>
+      <span class="lb-perf">16:05</span>
+    </div>
+    <div class="lb-row">
+      <span class="lb-rank">IV</span>
+      <span class="lb-name">Rodrigo M.</span>
+      <span class="lb-scale">RX</span>
+      <span class="lb-perf" style="color:var(--sub)">8 rds (DNF)</span>
+    </div>
+    <div class="lb-row">
+      <span class="lb-rank">V</span>
+      <span class="lb-name">Juliana F.</span>
+      <span class="lb-scale" style="color:var(--sub);border-color:var(--div)">SC</span>
+      <span class="lb-perf" style="color:var(--sub)">17:50</span>
+    </div>
+  </div>
+
+  <!-- WOD 2 -->
+  <div class="res-card">
+    <div class="res-card-hdr">
+      <span class="res-card-title">Cindy Modificado</span>
+      <span class="res-card-sub">AMRAP · 20 min</span>
+    </div>
+    <div class="res-kpi-row">
+      <div class="res-kpi"><div class="res-kpi-val">11</div><div class="res-kpi-lbl">Atletas</div></div>
+      <div class="res-kpi"><div class="res-kpi-val">8.2</div><div class="res-kpi-lbl">RPE Méd.</div></div>
+      <div class="res-kpi"><div class="res-kpi-val">45%</div><div class="res-kpi-lbl">% RX</div></div>
+      <div class="res-kpi"><div class="res-kpi-val">19.4</div><div class="res-kpi-lbl">Rds Méd.</div></div>
+    </div>
+  </div>
+
+</div><!-- /tab-resultados -->
+
+<!-- ── Tab: Perfil ──────────────────────────────────── -->
+<div class="tab-content" id="tab-perfil">
+
+  <!-- Hero -->
+  <div class="prof-hero">
+    <div class="prof-avatar">R</div>
+    <div>
+      <div class="prof-name">Rodrigo</div>
+      <div class="prof-job">⬧ Knight · Personal · Tier 02</div>
+      <div class="prof-since">Membro desde Jan 2023</div>
+    </div>
+  </div>
+
+  <!-- Stats strip -->
+  <div class="day-card" style="overflow:hidden">
+    <div class="prof-stats">
+      <div class="prof-stat">
+        <div class="prof-stat-val">142</div>
+        <div class="prof-stat-lbl">Sessões</div>
+      </div>
+      <div class="prof-stat">
+        <div class="prof-stat-val">8.1</div>
+        <div class="prof-stat-lbl">RPE Méd.</div>
+      </div>
+      <div class="prof-stat">
+        <div class="prof-stat-val">71%</div>
+        <div class="prof-stat-lbl">% RX</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-hdr">Recordes Pessoais</div>
+
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <div class="pr-row">
+      <div class="pr-crystal"></div>
+      <span class="pr-ex">Back Squat</span>
+      <span class="pr-val">140</span><span class="pr-unit" style="margin-left:3px">kg</span>
+    </div>
+    <div class="pr-row">
+      <div class="pr-crystal"></div>
+      <span class="pr-ex">Clean &amp; Jerk</span>
+      <span class="pr-val">110</span><span class="pr-unit" style="margin-left:3px">kg</span>
+    </div>
+    <div class="pr-row">
+      <div class="pr-crystal"></div>
+      <span class="pr-ex">Fran</span>
+      <span class="pr-val">04:32</span>
+    </div>
+    <div class="pr-row">
+      <div class="pr-crystal"></div>
+      <span class="pr-ex">Strict Pull-up</span>
+      <span class="pr-val">22</span><span class="pr-unit" style="margin-left:3px">reps</span>
+    </div>
+  </div>
+
+  <div class="orn-rule"><div class="orn-diamond"></div></div>
+  <div class="sec-hdr">Objetivos</div>
+
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <div class="goal-row">
+      <div class="goal-name">Muscle-Up Unbroken — 5 reps</div>
+      <div class="goal-bar-track"><div class="goal-bar-fill" style="width:60%"></div></div>
+      <div class="goal-prog">3 de 5 sessões · 60%</div>
+    </div>
+    <div class="goal-row">
+      <div class="goal-name">Back Squat 150 kg</div>
+      <div class="goal-bar-track"><div class="goal-bar-fill" style="width:85%"></div></div>
+      <div class="goal-prog">140 kg atual · 93%</div>
+    </div>
+  </div>
+
+</div><!-- /tab-perfil -->
+
+<!-- ── Tab: Fontes ──────────────────────────────────── -->
+<div class="tab-content" id="tab-fontes">
+
+  <div class="font-card">
+    <div class="font-card-lbl">Display — Cinzel</div>
+    <div class="font-display">Team Medrado</div>
+    <div class="font-display-sub">Cross Training · Ivalice Division</div>
+    <div class="font-specimen-row">
+      <span class="font-specimen-item"><b>900</b> Black</span>
+      <span class="font-specimen-item"><b>700</b> Bold</span>
+      <span class="font-specimen-item"><b>600</b> SemiBold</span>
+      <span class="font-specimen-item"><b>400</b> Regular</span>
+    </div>
+    <div class="font-specimen-row" style="margin-top:6px">
+      <span class="font-specimen-item sm">AGENDA</span>
+      <span class="font-specimen-item sm">FOR TIME</span>
+      <span class="font-specimen-item sm">10 ROUNDS</span>
+      <span class="font-specimen-item sm">RPE 8</span>
+      <span class="font-specimen-item sm">RX</span>
+    </div>
+  </div>
+
+  <div class="orn-rule"><div class="orn-diamond"></div></div>
+
+  <div class="font-card">
+    <div class="font-card-lbl">Body — Crimson Pro</div>
+    <div class="font-body-sample">Back Squat · 5×5 a 75% do RM. <em>Descanso de 3 minutos entre séries.</em> Foco em postura e profundidade — a bravura está nos detalhes que ninguém vê.</div>
+    <div class="font-body-sample" style="font-style:italic;color:var(--muted);margin-top:6px;font-size:12px">Nota do coach: "Mantenha o core ativado e empurre o chão para baixo na saída do buraco."</div>
+    <div class="font-specimen-row" style="margin-top:10px">
+      <span class="font-specimen-item" style="font-family:var(--font-body);font-size:12px"><b style="font-size:14px">Aa</b> Regular</span>
+      <span class="font-specimen-item" style="font-family:var(--font-body);font-size:12px;font-weight:600"><b style="font-size:14px">Aa</b> SemiBold</span>
+      <span class="font-specimen-item" style="font-family:var(--font-body);font-size:12px;font-style:italic"><b style="font-size:14px">Aa</b> Italic</span>
+    </div>
+    <div class="font-body-meta">Crimson Pro · Google Fonts · Old-style Serif</div>
+  </div>
+
+  <div class="orn-rule"><div class="orn-diamond"></div></div>
+
+  <!-- Color reference -->
+  <div class="font-card">
+    <div class="font-card-lbl">Paleta Ivalice</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px">
+      <div>
+        <div style="height:32px;background:var(--bg);border:1px solid var(--div)"></div>
+        <div style="font-family:var(--font);font-size:6px;color:var(--muted);letter-spacing:.1em;margin-top:4px">BG #07091a</div>
+      </div>
+      <div>
+        <div style="height:32px;background:var(--stone);border:1px solid var(--div)"></div>
+        <div style="font-family:var(--font);font-size:6px;color:var(--muted);letter-spacing:.1em;margin-top:4px">STONE #0d1126</div>
+      </div>
+      <div>
+        <div style="height:32px;background:var(--gold)"></div>
+        <div style="font-family:var(--font);font-size:6px;color:var(--muted);letter-spacing:.1em;margin-top:4px">GOLD #c8a428</div>
+      </div>
+      <div>
+        <div style="height:32px;background:var(--crystal)"></div>
+        <div style="font-family:var(--font);font-size:6px;color:var(--muted);letter-spacing:.1em;margin-top:4px">CRYSTAL #4e6ec8</div>
+      </div>
+      <div>
+        <div style="height:32px;background:var(--cream)"></div>
+        <div style="font-family:var(--font);font-size:6px;color:var(--muted);letter-spacing:.1em;margin-top:4px">CREAM #e8dfc0</div>
+      </div>
+      <div>
+        <div style="height:32px;background:var(--purple)"></div>
+        <div style="font-family:var(--font);font-size:6px;color:var(--muted);letter-spacing:.1em;margin-top:4px">PURPLE #7860c8</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /tab-fontes -->
+
+<!-- Bottom nav -->
+<nav class="nav">
+  <div class="nav-item">
+    <i class="ti ti-home"></i>Início
+  </div>
+  <div class="nav-item">
+    <i class="ti ti-trophy"></i>Ranking
+  </div>
+  <div class="nav-item active">
+    <i class="ti ti-calendar"></i>Agenda
+  </div>
+  <div class="nav-item">
+    <i class="ti ti-chart-bar"></i>Resultados
+  </div>
+  <div class="nav-item">
+    <i class="ti ti-user"></i>Perfil
+  </div>
+</nav>
+
+</div><!-- /page -->
+
+<script>
+// Heatmap
+const hm=document.getElementById('hm-grid');
+const data=[0,1,3,4,3,2,0,1,2,3,2,1,0,0,2,3,4,3,2,1,0,0,1,2,3,4,3,0,1,2,3,2,1,0,0,3,4,3,2,1,2,0,1,2,3,4,3,2,0,0,2,3,2,1,0,1,2,3,4,3,2,1,0,0,1,2,3,2,4,0,0,2,3,4,3,2,1,0,1,2,3,2,1,0,4,3,2,1,0,1,2];
+hm.innerHTML=data.map(v=>`<div class="hm-cell hm-${v}"></div>`).join('');
+
+// Tabs
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  document.querySelector('.hdr-title').textContent=btn.textContent.trim();
+}
+</script>
+</body>
+</html>
