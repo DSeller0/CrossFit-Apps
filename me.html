@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Amarante&display=swap"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="cone-client.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh;padding-bottom:70px}
@@ -291,11 +292,6 @@ details.ms-details[open]>summary .ms-bar{outline:1px solid rgba(74,200,192,.25);
   </div>
 </div>
 <script>
-const _sb = supabase.createClient(
-  'https://crsalcpvsedmiabkeibp.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw'
-);
-
 const DAY_PT   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const MON_PT   = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const ECOL     = {

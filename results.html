@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="themes.css"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Amarante&display=swap"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="cone-client.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;padding-bottom:72px;-webkit-text-size-adjust:100%}
@@ -218,11 +219,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 </nav>
 
 <script>
-// ── Supabase ──────────────────────────────────────────────────────────────────
-const _sb = supabase.createClient(
-  'https://crsalcpvsedmiabkeibp.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyc2FsY3B2c2VkbWlhYmtlaWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjkxNDgsImV4cCI6MjA5Njg0NTE0OH0.OuVSJRFgTp5C4rSM9Wi_fT2Q2RwpHEIIkUOdBNxUTJw'
-);
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const WOD_TYPES = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
