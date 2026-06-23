@@ -360,50 +360,59 @@ function renderDay(dk, sessions, countBySess, offset) {
   ).join('');
 }
 
-async function main() {
+async function main(attempt=0) {
   const todayDK = dateKey(0);
   const yesterDK = dateKey(-1);
   const tomorDK  = dateKey(1);
+  try {
+    const [sessRes, resRes, settRes] = await Promise.all([
+      _sb.from('sessions').select('value').eq('id',1).single(),
+      _sb.from('results').select('value').eq('id',1).single(),
+      _sb.from('settings').select('value').eq('id',1).maybeSingle(),
+    ]);
 
-  const [sessRes, resRes, settRes] = await Promise.all([
-    _sb.from('sessions').select('value').eq('id',1).single(),
-    _sb.from('results').select('value').eq('id',1).single(),
-    _sb.from('settings').select('value').eq('id',1).maybeSingle(),
-  ]);
+    const allSessions = sessRes.data?.value || {};
+    const allResults  = resRes.data?.value || [];
 
-
-  const allSessions = sessRes.data?.value || {};
-  const allResults  = resRes.data?.value || [];
-
-  // Sync theme from Supabase settings
-  const _storedSettings = settRes.data?.value || {};
-  if (_storedSettings.theme) {
-    const _cur = localStorage.getItem('cone_theme');
-    if (_cur !== _storedSettings.theme) {
-      localStorage.setItem('cone_theme', _storedSettings.theme);
-      document.documentElement.className =
-        document.documentElement.className.replace(/\btheme-\S+/g,'').trim() + ' theme-' + _storedSettings.theme;
+    // Sync theme from Supabase settings
+    const _storedSettings = settRes.data?.value || {};
+    if (_storedSettings.theme) {
+      const _cur = localStorage.getItem('cone_theme');
+      if (_cur !== _storedSettings.theme) {
+        localStorage.setItem('cone_theme', _storedSettings.theme);
+        document.documentElement.className =
+          document.documentElement.className.replace(/\btheme-\S+/g,'').trim() + ' theme-' + _storedSettings.theme;
+      }
     }
+
+    const countBySess = {};
+    allResults.forEach(r => {
+      if (r.sessionId) countBySess[r.sessionId] = (countBySess[r.sessionId] || 0) + 1;
+    });
+
+    // Point registrar tiles to today's first session
+    const todaySessions = allSessions[todayDK] || [];
+    if (todaySessions.length) {
+      const regUrl = `results.html?session=${encodeURIComponent(todaySessions[0].id)}`;
+      document.getElementById('reg-tile')?.setAttribute('href', regUrl);
+      document.getElementById('sheet-reg')?.setAttribute('href', regUrl);
+    }
+
+    document.getElementById('sessionsPane').innerHTML = [
+      renderDay(yesterDK, allSessions[yesterDK] || [], countBySess, -1),
+      renderDay(todayDK,  todaySessions,               countBySess,  0),
+      renderDay(tomorDK,  allSessions[tomorDK]  || [], countBySess,  1),
+    ].join('');
+
+    setInterval(refreshCounts, 30000);
+  } catch(err) {
+    if (attempt < 2) { setTimeout(() => main(attempt + 1), 2000 * (attempt + 1)); return; }
+    document.getElementById('sessionsPane').innerHTML =
+      `<div class="error-msg">⚠️ Erro ao carregar.<br>
+        <span style="font-size:12px;color:var(--muted)">${esc(err.message)}</span><br>
+        <button onclick="main()" style="margin-top:12px;background:transparent;border:1px solid var(--div);color:var(--muted);font-size:13px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit">↺ Tentar novamente</button>
+      </div>`;
   }
-
-  const countBySess = {};
-  allResults.forEach(r => {
-    if (r.sessionId) countBySess[r.sessionId] = (countBySess[r.sessionId] || 0) + 1;
-  });
-
-  // Point registrar tiles to today's first session
-  const todaySessions = allSessions[todayDK] || [];
-  if (todaySessions.length) {
-    const regUrl = `results.html?session=${encodeURIComponent(todaySessions[0].id)}`;
-    document.getElementById('reg-tile')?.setAttribute('href', regUrl);
-    document.getElementById('sheet-reg')?.setAttribute('href', regUrl);
-  }
-
-  document.getElementById('sessionsPane').innerHTML = [
-    renderDay(yesterDK, allSessions[yesterDK] || [], countBySess, -1),
-    renderDay(todayDK,  todaySessions,               countBySess,  0),
-    renderDay(tomorDK,  allSessions[tomorDK]  || [], countBySess,  1),
-  ].join('');
 }
 
 async function refreshCounts() {
@@ -437,14 +446,7 @@ function closeSheet() {
   sh.addEventListener('touchend',   e => { if (e.changedTouches[0].clientY - sy > 60) closeSheet(); }, { passive:true });
 })();
 
-main()
-  .then(() => setInterval(refreshCounts, 30000))
-  .catch(err => {
-    document.getElementById('sessionsPane').innerHTML =
-      `<div class="error-msg">⚠️ Erro ao carregar.<br>
-        <span style="font-size:12px;color:var(--muted)">${esc(err.message)}</span>
-      </div>`;
-  });
+main();
 
 window.addEventListener('pageshow', e => {
   if (e.persisted) main().catch(() => {});

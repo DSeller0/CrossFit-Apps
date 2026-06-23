@@ -265,7 +265,7 @@ async function fetchState(){
 }
 
 // Fetch config + state
-async function init(){
+async function init(attempt=0){
   try{
     const [cfgData,stateData]=await Promise.all([
       fetch('./config.json?v='+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({})),
@@ -277,6 +277,7 @@ async function init(){
     applyUrlParams();
     render();
   }catch(err){
+    if(attempt<2){setTimeout(()=>init(attempt+1),2000*(attempt+1));return;}
     document.getElementById('app').innerHTML=`<div class="error"><i class="ti ti-alert-circle" style="font-size:32px"></i><br><br>Não foi possível carregar os resultados.<br><small>${err.message}</small><br><button onclick="init()" style="margin-top:12px;background:transparent;border:1px solid #1e1e1e;color:#666;font-size:13px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit"><i class="ti ti-refresh"></i> Tentar novamente</button></div>`;
   }
 }
