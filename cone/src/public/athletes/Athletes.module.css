@@ -1,0 +1,112 @@
+/* ── Topbar ── */
+.topbar { background: #0d0b09; border-bottom: 2px solid var(--accent); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.gymRow { display: flex; align-items: center; gap: 10px; }
+.gymLogo { width: 34px; height: 34px; object-fit: contain; border-radius: 4px; }
+.gymName { font-size: 18px; font-weight: 900; color: var(--cream); text-transform: uppercase; letter-spacing: .08em; }
+.backBtn { background: transparent; border: 1px solid var(--divider); color: var(--sub); font-size: 13px; padding: 6px 14px; border-radius: 5px; cursor: pointer; font-family: var(--font); transition: all .12s; display: flex; align-items: center; gap: 5px; }
+.backBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── List page ── */
+.page { padding: 18px 20px; max-width: 1200px; margin: 0 auto; }
+.sectionLabel { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; }
+.athleteGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+@media (max-width: 400px) { .athleteGrid { grid-template-columns: 1fr; } }
+.athCard { background: var(--bg2); border: 1px solid var(--divider); border-radius: 10px; padding: 16px; cursor: pointer; transition: all .12s; }
+.athCard:hover { border-color: var(--accent); background: var(--bg3); }
+.athCardTop { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.athDot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.athName { font-size: 15px; font-weight: 700; color: var(--cream); flex: 1; }
+.athPct { font-size: 13px; color: var(--gold); font-weight: 700; }
+.hpMini { display: flex; gap: 2px; }
+.hpBlock { flex: 1; height: 9px; border-radius: 2px; background: var(--bg3); border: 1px solid var(--divider); position: relative; overflow: hidden; }
+.hpFill { position: absolute; top: 0; left: 0; bottom: 0; }
+.noGoals { font-size: 12px; color: var(--muted); font-style: italic; padding: 4px 0; }
+
+/* ── Detail page ── */
+.detailPage { padding: 18px 20px; max-width: 920px; margin: 0 auto; }
+.athHeader { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.athTitle { font-size: 22px; font-weight: 900; color: var(--cream); }
+.athLevel { font-size: 12px; color: var(--gold); font-weight: 600; padding: 2px 9px; background: rgba(216,168,64,.12); border: 1px solid rgba(216,168,64,.35); border-radius: 4px; }
+.section { background: var(--bg2); border: 1px solid var(--divider); border-radius: 10px; padding: 18px; margin-bottom: 14px; }
+.sectionTitle { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .09em; margin-bottom: 14px; }
+
+/* ── Stat rows ── */
+.statRow { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--divider); }
+.statRow:last-child { border-bottom: none; }
+.statNameCol { min-width: 140px; flex-shrink: 0; font-size: 14px; font-weight: 700; color: var(--cream); }
+.statSub { font-size: 12px; color: var(--sub); margin-top: 4px; }
+.statBarWrap { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.statBar { display: flex; gap: 2px; }
+.statBlock { flex: 1; height: 16px; border-radius: 2px; background: var(--bg3); border: 1px solid var(--divider); position: relative; overflow: hidden; }
+.statFill { position: absolute; top: 0; left: 0; bottom: 0; border-radius: 2px; }
+.statPct { font-size: 15px; font-weight: 900; color: var(--cream); min-width: 44px; text-align: right; flex-shrink: 0; }
+@media (max-width: 500px) {
+  .statRow { flex-wrap: wrap; gap: 6px; }
+  .statNameCol { min-width: 100%; margin-bottom: 2px; }
+  .statPct { min-width: auto; }
+}
+
+/* ── Sessions grid ── */
+.sessGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (max-width: 640px) { .sessGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 360px) { .sessGrid { grid-template-columns: 1fr; } }
+.sessCard { background: var(--bg3); border: 1px solid var(--divider); border-radius: 8px; overflow: hidden; cursor: pointer; transition: border-color .12s; }
+.sessCard:hover { border-color: var(--accent); }
+.sessPast { opacity: .85; }
+.sessFuture { border-style: dashed; }
+.sessToday { border-color: var(--accent); }
+.sessHdr { padding: 8px 10px 6px; border-bottom: 1px solid var(--divider); display: flex; align-items: center; justify-content: space-between; }
+.sessDow { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; }
+.sessDate { font-size: 12px; color: var(--sub); }
+.sessBody { padding: 8px 10px; }
+.blockBadges { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 6px; }
+.blockBadge { font-size: 10px; font-weight: 700; padding: 2px 5px; border-radius: 3px; text-transform: uppercase; letter-spacing: .04em; background: rgba(74,200,192,.12); color: var(--accent); border: 1px solid rgba(74,200,192,.3); }
+.sessPerf { font-size: 11px; color: var(--sub); margin-top: 4px; }
+.sessExpand { background: var(--bg2); border-top: 1px solid var(--divider); padding: 10px; }
+.sessExRow { font-size: 12px; color: var(--cream); padding: 3px 0; display: flex; gap: 8px; align-items: center; }
+.sessExScale { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+.lbLink { display: flex; align-items: center; gap: 5px; margin-top: 6px; padding: 5px 8px; background: rgba(74,200,192,.08); border: 1px solid rgba(74,200,192,.3); border-radius: 5px; color: var(--accent); font-size: 11px; font-weight: 700; text-decoration: none; text-transform: uppercase; letter-spacing: .05em; }
+
+/* ── PR rows ── */
+.prRow { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); flex-wrap: wrap; }
+.prRow:last-child { border-bottom: none; }
+.prInfo { min-width: 140px; flex-shrink: 0; }
+.prName { font-size: 14px; font-weight: 700; color: var(--cream); }
+.prCat { font-size: 12px; color: var(--gold); margin-top: 2px; font-weight: 600; }
+.prBarWrap { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 120px; }
+.prBar { display: flex; gap: 2px; }
+.prBarBlock { flex: 1; height: 14px; border-radius: 2px; background: var(--bg3); border: 1px solid var(--divider); position: relative; overflow: hidden; }
+.prBarFill { position: absolute; top: 0; left: 0; bottom: 0; }
+.prMeta { font-size: 12px; color: var(--sub); margin-top: 2px; }
+.prBest { text-align: right; flex-shrink: 0; min-width: 76px; }
+.prValue { font-size: 15px; font-weight: 900; color: var(--cream); }
+.prDate { font-size: 12px; color: var(--sub); margin-top: 2px; }
+.prDelta { font-size: 12px; font-weight: 700; flex-shrink: 0; min-width: 56px; text-align: right; }
+
+/* ── Goals ── */
+.goalRow { margin-bottom: 14px; }
+.goalRow:last-child { margin-bottom: 0; }
+.goalHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.goalName { font-size: 14px; font-weight: 700; color: var(--cream); }
+.goalCount { font-size: 13px; color: var(--gold); font-weight: 600; }
+.hpBar { display: flex; gap: 2px; cursor: pointer; }
+.hpBarBlock { flex: 1; height: 22px; border-radius: 2px; background: var(--bg3); border: 1px solid var(--divider); position: relative; overflow: hidden; }
+.hpBarFill { position: absolute; top: 0; left: 0; bottom: 0; }
+.hpTick { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--gold); z-index: 1; }
+.milestonePcts { position: relative; height: 16px; margin-top: 3px; }
+.mpLabel { position: absolute; transform: translateX(-50%); font-size: 10px; color: var(--gold); white-space: nowrap; font-weight: 600; }
+.milestonesPanel { margin-top: 8px; padding: 10px 14px; background: var(--bg); border-radius: 6px; border: 1px solid var(--divider); }
+.msRow { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--divider); font-size: 13px; }
+.msRow:last-child { border-bottom: none; }
+.msCheck { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; background: var(--bg3); border: 1px solid var(--divider); }
+.msCheckHit { background: rgba(104,216,160,.15); color: var(--green); border: 1px solid rgba(104,216,160,.4); }
+.msLabel { flex: 1; color: var(--cream); }
+.msLabelDone { color: var(--muted); text-decoration: line-through; }
+.msPct { font-size: 12px; color: var(--gold); font-weight: 600; }
+
+/* ── Status ── */
+.loading { text-align: center; padding: 60px 20px; color: var(--accent); font-size: 13px; text-transform: uppercase; letter-spacing: .1em; }
+.error { text-align: center; padding: 40px 20px; color: #e05050; font-size: 13px; line-height: 1.8; }
+.retryBtn { margin-top: 14px; background: transparent; border: 1px solid var(--divider); color: var(--sub); font-size: 13px; padding: 7px 16px; border-radius: 5px; cursor: pointer; font-family: var(--font); }
+.retryBtn:hover { border-color: var(--accent); color: var(--accent); }
+.emptyMsg { font-size: 13px; color: var(--muted); font-style: italic; }
