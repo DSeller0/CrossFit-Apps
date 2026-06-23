@@ -10,232 +10,327 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 /*
- * Final Fantasy Tactics — Ivalice Dark
+ * FFT: The Ivalice Chronicles — accurate
  *
- * Background: deep blue-black night sky (atmospheric, not action)
- * Gold:       THE sole accent — nav, active, badges, borders
- * No cobalt / no bright blue as interactive color
- * Warm block indicators by type; heatmap in amber-gold
+ * Background: warm dark stone floor (brown-black, zero blue)
+ * Panels:     cream/parchment boxes with dark ink text
+ * Gold:       accent only — values, coins, active states
+ * Tabs:       FFT-style — active tab is parchment, inactive is darker
  */
 :root{
-  --bg:#080818;
-  --stone:#0d1025;
-  --stone2:#12182e;
-  --div:#1e2545;
-  --gold:#c8a028;
-  --gold2:#8a6a10;
-  --gold3:#4a3808;
-  --amber:#b86820;
-  --amber2:#7a4210;
-  --cream:#eae4d8;
-  --sub:#8890a8;
-  --muted:#4a5268;
-  --dim:#141838;
-  --red:#c03838;
-  --red2:#7a1818;
-  --purple:#6848a8;
-  --purple2:#2e1e60;
-  --forest:#2a6838;
+  /* Stone floor */
+  --bg:#181410;
+  --stone:#201c16;
+  --stone2:#2c2820;
+  --stone-border:#383028;
+
+  /* Parchment panels */
+  --panel:#ddd0a0;
+  --panel2:#cfc090;
+  --panel-border:#b8a870;
+  --panel-shadow:0 3px 14px rgba(0,0,0,.65);
+
+  /* Ink — text ON cream panels */
+  --ink:#181008;
+  --ink2:#483818;
+  --ink3:#786040;
+  --ink4:#a08860;
+
+  /* Light — text ON dark stone */
+  --light:#e8e0c8;
+  --light2:#a09078;
+  --light3:#605040;
+
+  /* Accents */
+  --gold:#c89010;
+  --gold2:#a07008;
+  --gold3:#604408;
+  --green:#3a8020;
+  --blue:#1848a8;
+  --ct-color:#7a9820;
+  --red:#b02020;
+  --amber:#b07010;
+  --forest:#286030;
+  --purple:#503890;
+
   --font:'Cinzel',serif;
   --font-body:'Crimson Pro',serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg);color:var(--cream);font-family:var(--font-body);min-height:100%}
+html,body{
+  background:var(--bg);
+  /* Stone tile pattern suggestion */
+  background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.06) 0px,rgba(0,0,0,.06) 1px,transparent 1px,transparent 32px),
+                   repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0px,rgba(0,0,0,.06) 1px,transparent 1px,transparent 32px);
+  color:var(--ink);
+  font-family:var(--font-body);
+  min-height:100%;
+}
 
 /* ── Page shell ── */
-.page{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg);position:relative}
+.page{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 
-/* subtle noise overlay for depth */
-.page::before{content:'';position:fixed;inset:0;max-width:430px;margin:0 auto;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  opacity:.025;z-index:0}
-
-/* ── Header ── */
-.hdr{padding:14px 16px 12px;background:var(--stone);border-bottom:1px solid var(--div);position:relative;flex-shrink:0;z-index:1}
-/* double gold rule at bottom */
-.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent 0%,var(--gold3) 15%,var(--gold2) 35%,var(--gold) 50%,var(--gold2) 65%,var(--gold3) 85%,transparent 100%)}
-.hdr-inner{display:flex;align-items:flex-start;justify-content:space-between}
-.hdr-brand{font-family:var(--font);font-size:7px;font-weight:400;letter-spacing:.3em;color:var(--muted);text-transform:uppercase}
-.hdr-title{font-family:var(--font);font-size:16px;font-weight:900;color:var(--cream);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+/* ── Header / breadcrumb ── */
+.hdr{
+  background:var(--stone);
+  border-bottom:2px solid var(--stone-border);
+  padding:10px 14px 8px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  flex-shrink:0;
+}
+.hdr-left{}
+.hdr-crumb{font-family:var(--font);font-size:7px;font-weight:400;letter-spacing:.2em;color:var(--light3);text-transform:uppercase}
+.hdr-title{font-family:var(--font);font-size:15px;font-weight:900;color:var(--light);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
 .hdr-right{text-align:right}
-.hdr-ath{font-family:var(--font);font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.12em}
-.hdr-job{font-family:var(--font);font-size:7px;color:var(--muted);letter-spacing:.18em;margin-top:2px}
+.hdr-ath{font-family:var(--font);font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em}
+.hdr-job{font-family:var(--font);font-size:7px;color:var(--light3);letter-spacing:.16em;margin-top:2px}
 
-/* ── Tab bar ── */
-.tab-bar{display:flex;border-bottom:1px solid var(--div);background:var(--stone);flex-shrink:0;z-index:1;position:relative}
-.tab-btn{flex:1;padding:9px 4px;font-family:var(--font);font-size:7px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:none;background:none;cursor:pointer;transition:color .15s;position:relative}
-.tab-btn.active{color:var(--gold)}
-.tab-btn.active::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--gold)}
+/* ── Tab bar ── FFT style: parchment active, darker inactive ── */
+.tab-bar{
+  background:var(--stone);
+  padding:0 12px;
+  display:flex;
+  gap:3px;
+  border-bottom:2px solid var(--panel-border);
+  flex-shrink:0;
+}
+.tab-btn{
+  padding:7px 10px 6px;
+  font-family:var(--font);font-size:7px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;
+  background:var(--stone2);color:var(--light3);
+  border:1px solid var(--stone-border);border-bottom:none;
+  border-radius:3px 3px 0 0;
+  cursor:pointer;transition:all .15s;
+  position:relative;top:2px;
+}
+.tab-btn.active{
+  background:var(--panel);color:var(--ink2);
+  border-color:var(--panel-border);
+  border-bottom:2px solid var(--panel);
+  top:2px;z-index:1;
+}
 
 /* ── Tab content ── */
-.tab-content{display:none;flex:1;overflow-y:auto;padding:14px 16px 20px;flex-direction:column;gap:12px;position:relative;z-index:1}
+.tab-content{display:none;flex:1;overflow-y:auto;padding:14px 12px 24px;flex-direction:column;gap:10px}
 .tab-content.active{display:flex}
 
-/* ── Bottom nav ── */
-.nav{display:flex;border-top:1px solid var(--div);background:var(--stone);flex-shrink:0;z-index:1;position:relative}
-.nav::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent 0%,var(--gold3) 15%,var(--gold2) 35%,var(--gold) 50%,var(--gold2) 65%,var(--gold3) 85%,transparent 100%)}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 11px;font-family:var(--font);font-size:6px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;cursor:pointer}
+/* ── Bottom nav ── dark bar, gold active ── */
+.nav{
+  display:flex;
+  background:var(--stone);
+  border-top:2px solid var(--stone-border);
+  flex-shrink:0;
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:9px 4px 11px;
+  font-family:var(--font);font-size:6px;letter-spacing:.1em;
+  color:var(--light3);text-transform:uppercase;cursor:pointer;
+  position:relative;
+}
 .nav-item i{font-size:18px}
 .nav-item.active{color:var(--gold)}
 .nav-item.active i{color:var(--gold)}
+.nav-item.active::before{
+  content:'';position:absolute;top:0;left:20%;right:20%;height:2px;
+  background:var(--gold);
+}
 
-/* ── Ornamental divider ── */
-.orn-rule{display:flex;align-items:center;gap:6px;margin:2px 0}
-.orn-rule::before,.orn-rule::after{content:'';flex:1;height:1px;background:var(--div)}
-.orn-gem{width:5px;height:5px;background:var(--gold2);transform:rotate(45deg);flex-shrink:0}
+/* ── Parchment panel ── */
+.panel{
+  background:var(--panel);
+  border:1px solid var(--panel-border);
+  border-radius:3px;
+  box-shadow:var(--panel-shadow);
+  overflow:hidden;
+}
+.panel-hdr{
+  background:var(--panel2);
+  border-bottom:1px solid var(--panel-border);
+  padding:8px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-title{font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--ink2);text-transform:uppercase}
+.panel-title.today{color:var(--gold2)}
+.panel-meta{font-family:var(--font-body);font-size:11px;color:var(--ink3);font-style:italic}
+.panel-body{padding:6px 12px 8px;display:flex;flex-direction:column;gap:0}
 
-/* ── Theme banner ── */
-.theme-banner{background:var(--stone);border:1px solid var(--div);padding:14px;position:relative;overflow:hidden}
-.theme-banner::before{content:'';position:absolute;top:0;left:0;width:14px;height:14px;border-top:2px solid var(--gold2);border-left:2px solid var(--gold2)}
-.theme-banner::after{content:'';position:absolute;bottom:0;right:0;width:14px;height:14px;border-bottom:2px solid var(--gold2);border-right:2px solid var(--gold2)}
-/* inner decorative corners */
-.theme-banner .corner-tr{position:absolute;top:0;right:0;width:14px;height:14px;border-top:2px solid var(--gold2);border-right:2px solid var(--gold2)}
-.theme-banner .corner-bl{position:absolute;bottom:0;left:0;width:14px;height:14px;border-bottom:2px solid var(--gold2);border-left:2px solid var(--gold2)}
-.banner-title{font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
-.banner-sub{font-family:var(--font-body);font-size:12px;color:var(--sub);font-style:italic;margin-top:4px;line-height:1.5}
-.banner-palette{display:flex;gap:5px;margin-top:12px;align-items:center}
-.swatch{width:18px;height:18px;border:1px solid rgba(255,255,255,.06);flex-shrink:0}
-.swatch-lbl{font-family:var(--font);font-size:6px;color:var(--muted);letter-spacing:.1em;margin-top:3px;text-align:center}
-
-/* ── Section header ── */
-.sec-hdr{font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-top:2px}
-
-/* ── Card (base) ── */
-.card{background:var(--stone);border:1px solid var(--div);position:relative}
-.card::before{content:'';position:absolute;top:0;left:0;width:12px;height:12px;border-top:2px solid var(--gold2);border-left:2px solid var(--gold2);pointer-events:none}
-.card::after{content:'';position:absolute;bottom:0;right:0;width:12px;height:12px;border-bottom:2px solid var(--gold2);border-right:2px solid var(--gold2);pointer-events:none}
-.card-hdr{padding:9px 12px;background:var(--stone2);border-bottom:1px solid var(--div);display:flex;align-items:center;justify-content:space-between}
-.card-title{font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--sub);text-transform:uppercase}
-.card-title.today{color:var(--gold)}
-.card-date{font-family:var(--font-body);font-size:11px;color:var(--muted);font-style:italic}
-.card-body{padding:8px 12px;display:flex;flex-direction:column;gap:5px}
-
-/* ── Block row ── */
-.blk-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(30,37,69,.7)}
+/* ── Block row (inside cream panel) ── */
+.blk-row{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 0;
+  border-bottom:1px solid rgba(184,168,112,.45);
+}
 .blk-row:last-child{border-bottom:none}
-/* gem-shaped type indicator */
 .blk-gem{width:7px;height:7px;transform:rotate(45deg);flex-shrink:0}
 .blk-gem.wod{background:var(--red)}
 .blk-gem.str{background:var(--amber)}
 .blk-gem.warm{background:var(--forest)}
 .blk-gem.mob{background:var(--purple)}
-.blk-gem.acess{background:var(--muted)}
-.blk-type{font-family:var(--font);font-size:7px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;flex-shrink:0;min-width:34px}
-.blk-sep{color:var(--div);margin:0 1px;font-size:12px}
-.blk-label{font-family:var(--font-body);font-size:13px;color:var(--sub);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
-.blk-meta{font-family:var(--font);font-size:7px;color:var(--muted);white-space:nowrap;letter-spacing:.07em}
-/* checkbox as gold gem */
-.blk-chk{width:14px;height:14px;border:1px solid var(--div);transform:rotate(45deg);flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.blk-chk.done{border-color:var(--gold2);background:rgba(200,160,40,.1)}
-.blk-chk.done::after{content:'';width:5px;height:5px;background:var(--gold);display:block}
+.blk-gem.acess{background:var(--ink4)}
+.blk-type{font-family:var(--font);font-size:7px;font-weight:700;letter-spacing:.1em;color:var(--ink3);text-transform:uppercase;min-width:34px;flex-shrink:0}
+.blk-sep{color:var(--panel-border);margin:0 1px}
+.blk-label{font-family:var(--font-body);font-size:13px;color:var(--ink);font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.blk-meta{font-family:var(--font);font-size:7px;color:var(--gold2);white-space:nowrap;letter-spacing:.06em}
+/* checkbox: small square FFT-style */
+.blk-chk{width:14px;height:14px;border:1px solid var(--panel-border);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--panel2)}
+.blk-chk.done{border-color:var(--gold2);background:rgba(168,128,16,.18)}
+.blk-chk.done::after{content:'✓';font-size:9px;color:var(--gold2);line-height:1;font-family:var(--font)}
 
-/* ── Rest row ── */
-.day-rest{padding:10px 12px;font-family:var(--font-body);font-size:12px;color:var(--muted);font-style:italic;display:flex;align-items:center;gap:7px}
+/* rest row */
+.day-rest{
+  padding:10px 12px;
+  font-family:var(--font-body);font-size:12px;color:var(--ink3);font-style:italic;
+  display:flex;align-items:center;gap:8px;
+}
 
-/* ── Heatmap ── */
-.heatmap{background:var(--stone);border:1px solid var(--div);padding:13px 14px;position:relative}
-.heatmap::before{content:'';position:absolute;top:0;left:0;width:10px;height:10px;border-top:2px solid var(--gold2);border-left:2px solid var(--gold2)}
-.heatmap::after{content:'';position:absolute;bottom:0;right:0;width:10px;height:10px;border-bottom:2px solid var(--gold2);border-right:2px solid var(--gold2)}
-.heatmap-ttl{font-family:var(--font);font-size:7px;font-weight:700;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+/* ── Section header (on stone, above panels) ── */
+.sec-hdr{
+  font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:.22em;
+  color:var(--light3);text-transform:uppercase;
+  padding:0 2px;margin-top:2px;
+}
+
+/* ── Theme banner (in panel) ── */
+.banner{
+  background:var(--panel);border:1px solid var(--panel-border);
+  border-radius:3px;box-shadow:var(--panel-shadow);
+  padding:14px;
+}
+.banner-hdr{
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid var(--panel-border);
+  padding-bottom:10px;margin-bottom:10px;
+}
+.banner-gem{width:10px;height:10px;transform:rotate(45deg);background:var(--gold);flex-shrink:0}
+.banner-title{font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.15em;color:var(--ink2);text-transform:uppercase}
+.banner-sub{font-family:var(--font-body);font-size:12px;color:var(--ink3);font-style:italic;line-height:1.6}
+.banner-palette{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.swatch{width:20px;height:20px;border:1px solid var(--panel-border);border-radius:1px}
+
+/* ── Heatmap (dark panel) ── */
+.heatmap{
+  background:var(--stone);border:1px solid var(--stone-border);
+  border-radius:3px;padding:12px 14px;
+}
+.heatmap-ttl{font-family:var(--font);font-size:7px;font-weight:700;letter-spacing:.22em;color:var(--light3);text-transform:uppercase;margin-bottom:8px}
 .heatmap-grid{display:grid;grid-template-columns:repeat(13,1fr);gap:3px}
-.hm{aspect-ratio:1}
+.hm{aspect-ratio:1;border-radius:1px}
 .hm-0{background:var(--stone2)}
-.hm-1{background:rgba(184,104,32,.25)}
-.hm-2{background:rgba(184,104,32,.5)}
-.hm-3{background:rgba(184,104,32,.78)}
+.hm-1{background:rgba(184,112,16,.28)}
+.hm-2{background:rgba(184,112,16,.54)}
+.hm-3{background:rgba(184,112,16,.80)}
 .hm-4{background:var(--amber)}
 
-/* ── Results tab ── */
-.res-card-hdr{padding:9px 12px;background:var(--stone2);border-bottom:1px solid var(--div);display:flex;align-items:baseline;justify-content:space-between}
-.res-card-name{font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--cream)}
-.res-card-meta{font-family:var(--font);font-size:7px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
-.res-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);padding:12px}
-.res-kpi{text-align:center}
-.res-kpi-val{font-family:var(--font);font-size:20px;font-weight:900;color:var(--cream)}
-.res-kpi-lbl{font-family:var(--font);font-size:6px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-top:3px}
-/* leaderboard */
-.lb-rule{height:1px;background:var(--div);margin:0 12px}
-.lb-row{display:flex;align-items:center;gap:8px;padding:7px 12px}
-.lb-rank{font-family:var(--font);font-size:12px;font-weight:900;width:22px;text-align:center;color:var(--muted)}
+/* ── Results ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);padding:12px 12px 10px}
+.kpi{text-align:center}
+.kpi-val{font-family:var(--font);font-size:20px;font-weight:900;color:var(--ink)}
+.kpi-lbl{font-family:var(--font);font-size:6px;letter-spacing:.14em;color:var(--ink3);text-transform:uppercase;margin-top:3px}
+.lb-row{display:flex;align-items:center;gap:8px;padding:7px 12px;border-top:1px solid rgba(184,168,112,.45)}
+.lb-rank{font-family:var(--font);font-size:13px;font-weight:900;width:22px;text-align:center;color:var(--ink3)}
 .lb-rank.i{color:var(--gold)}
-.lb-rank.ii{color:#909090}
-.lb-rank.iii{color:#a07040}
-.lb-name{font-family:var(--font-body);font-size:13px;color:var(--cream);flex:1;font-weight:600}
-.lb-scale{font-family:var(--font);font-size:6px;font-weight:700;letter-spacing:.12em;color:var(--sub);border:1px solid var(--div);padding:2px 5px;text-transform:uppercase}
-.lb-scale.rx{color:var(--gold);border-color:var(--gold3)}
-.lb-perf{font-family:var(--font);font-size:13px;font-weight:700;color:var(--gold)}
-.lb-perf.dnf{color:var(--sub);font-size:11px}
+.lb-rank.ii{color:#808080}
+.lb-rank.iii{color:var(--amber)}
+.lb-name{font-family:var(--font-body);font-size:13px;color:var(--ink);font-weight:600;flex:1}
+.lb-scale{font-family:var(--font);font-size:6px;font-weight:700;letter-spacing:.12em;color:var(--ink3);border:1px solid var(--panel-border);padding:2px 5px;text-transform:uppercase}
+.lb-scale.rx{color:var(--gold2);border-color:var(--gold3)}
+.lb-perf{font-family:var(--font);font-size:13px;font-weight:700;color:var(--gold2)}
+.lb-perf.dnf{color:var(--ink3);font-size:11px}
 
-/* ── Profile tab ── */
-.prof-hero{background:var(--stone);border:1px solid var(--div);padding:16px;display:flex;align-items:center;gap:14px;position:relative}
-.prof-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent 10%,var(--gold3) 35%,var(--gold2) 55%,var(--gold3) 75%,transparent 90%)}
-.prof-avatar{width:56px;height:56px;background:var(--stone2);border:1px solid var(--gold2);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:22px;font-weight:900;color:var(--gold);flex-shrink:0;position:relative}
-.prof-avatar::before{content:'';position:absolute;top:-3px;left:-3px;width:10px;height:10px;border-top:2px solid var(--gold);border-left:2px solid var(--gold)}
-.prof-avatar::after{content:'';position:absolute;bottom:-3px;right:-3px;width:10px;height:10px;border-bottom:2px solid var(--gold);border-right:2px solid var(--gold)}
-.prof-name{font-family:var(--font);font-size:18px;font-weight:900;color:var(--cream);letter-spacing:.05em}
-.prof-class{font-family:var(--font);font-size:8px;font-weight:400;letter-spacing:.22em;color:var(--gold);text-transform:uppercase;margin-top:4px}
-.prof-since{font-family:var(--font-body);font-size:11px;color:var(--muted);font-style:italic;margin-top:5px}
+/* ── Profile ── */
+.prof-hero{
+  background:var(--stone);border:1px solid var(--stone-border);
+  border-radius:3px;padding:14px;
+  display:flex;align-items:center;gap:14px;
+}
+.prof-avatar{
+  width:54px;height:54px;background:var(--stone2);border:1px solid var(--stone-border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font);font-size:22px;font-weight:900;color:var(--gold);
+  flex-shrink:0;border-radius:2px;
+}
+.prof-name{font-family:var(--font);font-size:17px;font-weight:900;color:var(--light);letter-spacing:.04em}
+.prof-class{font-family:var(--font);font-size:8px;font-weight:400;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-top:3px}
+.prof-since{font-family:var(--font-body);font-size:11px;color:var(--light3);font-style:italic;margin-top:5px}
+
+/* ── HP/MP bar style ── */
+.stat-bar-row{display:flex;align-items:center;gap:6px;margin-top:4px}
+.stat-bar-lbl{font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--light2);width:20px}
+.stat-bar-track{flex:1;height:6px;background:rgba(0,0,0,.4);border-radius:1px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:1px}
+.stat-bar-fill.hp{background:linear-gradient(90deg,#286018,var(--green))}
+.stat-bar-fill.xp{background:linear-gradient(90deg,#485808,var(--ct-color))}
+.stat-bar-val{font-family:var(--font);font-size:9px;font-weight:700;color:var(--light);min-width:30px;text-align:right}
+
+/* stats panel (cream) */
 .prof-stats{display:grid;grid-template-columns:repeat(3,1fr)}
-.prof-stat{padding:11px 8px;text-align:center;border-right:1px solid var(--div)}
+.prof-stat{padding:10px 8px;text-align:center;border-right:1px solid var(--panel-border)}
 .prof-stat:last-child{border-right:none}
-.prof-stat-val{font-family:var(--font);font-size:20px;font-weight:900;color:var(--cream)}
-.prof-stat-lbl{font-family:var(--font);font-size:6px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-top:3px}
-.pr-row{background:var(--stone);border:1px solid var(--div);padding:10px 12px;display:flex;align-items:center;gap:10px;position:relative}
-.pr-row::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:2px;background:var(--gold3)}
+.prof-stat-val{font-family:var(--font);font-size:20px;font-weight:900;color:var(--ink)}
+.prof-stat-lbl{font-family:var(--font);font-size:6px;letter-spacing:.16em;color:var(--ink3);text-transform:uppercase;margin-top:3px}
+
+.pr-row{padding:9px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(184,168,112,.45)}
+.pr-row:last-child{border-bottom:none}
 .pr-gem{width:6px;height:6px;transform:rotate(45deg);background:var(--gold2);flex-shrink:0}
-.pr-ex{font-family:var(--font-body);font-size:13px;color:var(--sub);flex:1;font-weight:600}
-.pr-val{font-family:var(--font);font-size:15px;font-weight:900;color:var(--cream)}
-.pr-unit{font-family:var(--font);font-size:7px;color:var(--muted);letter-spacing:.1em;margin-left:3px}
-.goal-row{background:var(--stone);border:1px solid var(--div);padding:10px 12px}
-.goal-name{font-family:var(--font-body);font-size:13px;color:var(--sub);font-weight:600;margin-bottom:7px}
-.goal-track{height:3px;background:var(--div)}
-.goal-fill{height:100%;background:linear-gradient(90deg,var(--gold3),var(--gold2))}
-.goal-prog{font-family:var(--font);font-size:7px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:5px}
+.pr-ex{font-family:var(--font-body);font-size:13px;color:var(--ink);flex:1;font-weight:600}
+.pr-val{font-family:var(--font);font-size:15px;font-weight:900;color:var(--gold2)}
+.pr-unit{font-family:var(--font);font-size:7px;color:var(--ink3);letter-spacing:.1em;margin-left:3px}
+
+.goal-row{padding:9px 12px;border-bottom:1px solid rgba(184,168,112,.45)}
+.goal-row:last-child{border-bottom:none}
+.goal-name{font-family:var(--font-body);font-size:13px;color:var(--ink);font-weight:600;margin-bottom:6px}
+.goal-track{height:6px;background:rgba(0,0,0,.12);border-radius:1px;overflow:hidden}
+.goal-fill{height:100%;background:linear-gradient(90deg,var(--gold3),var(--gold2));border-radius:1px}
+.goal-prog{font-family:var(--font);font-size:7px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:5px}
 
 /* ── Fonts tab ── */
-.font-card{background:var(--stone);border:1px solid var(--div);padding:16px;position:relative}
-.font-card::before{content:'';position:absolute;top:0;left:0;width:10px;height:10px;border-top:2px solid var(--gold2);border-left:2px solid var(--gold2)}
-.font-lbl{font-family:var(--font);font-size:7px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
-.font-display{font-family:var(--font);font-size:26px;font-weight:900;color:var(--cream);letter-spacing:.05em;line-height:1.1}
-.font-display-sub{font-family:var(--font);font-size:8px;font-weight:400;letter-spacing:.25em;color:var(--gold);text-transform:uppercase;margin-top:5px}
+.font-card{background:var(--panel);border:1px solid var(--panel-border);border-radius:3px;box-shadow:var(--panel-shadow);padding:16px}
+.font-lbl{font-family:var(--font);font-size:7px;letter-spacing:.22em;color:var(--ink3);text-transform:uppercase;margin-bottom:10px}
+.font-display{font-family:var(--font);font-size:26px;font-weight:900;color:var(--ink);letter-spacing:.05em;line-height:1.1}
+.font-display-sub{font-family:var(--font);font-size:8px;font-weight:400;letter-spacing:.25em;color:var(--gold2);text-transform:uppercase;margin-top:5px}
 .font-weights{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.fw{font-family:var(--font);color:var(--sub);font-size:11px;letter-spacing:.06em}
-.fw b{color:var(--cream)}
+.fw{font-family:var(--font);color:var(--ink3);font-size:11px;letter-spacing:.06em}
+.fw b{color:var(--ink)}
 .caps-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.cap-item{font-family:var(--font);font-size:7px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
-.font-body-sample{font-family:var(--font-body);font-size:14px;color:var(--sub);line-height:1.75;margin-top:8px}
-.font-body-sample em{color:var(--cream)}
-.font-body-italic{font-family:var(--font-body);font-style:italic;font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px}
-.font-body-meta{font-family:var(--font);font-size:6px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-top:10px}
+.cap{font-family:var(--font);font-size:7px;letter-spacing:.16em;color:var(--ink3);text-transform:uppercase}
+.font-body-sample{font-family:var(--font-body);font-size:14px;color:var(--ink2);line-height:1.75}
+.font-body-sample em{color:var(--ink);font-weight:600}
+.font-body-italic{font-family:var(--font-body);font-style:italic;font-size:12px;color:var(--ink3);line-height:1.6;margin-top:6px}
 
+/* color palette swatch grid */
 .color-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
 .color-cell{}
-.color-swatch{height:34px;border:1px solid var(--div)}
-.color-name{font-family:var(--font);font-size:6px;color:var(--muted);letter-spacing:.1em;margin-top:4px}
-.color-hex{font-family:var(--font);font-size:8px;color:var(--sub);letter-spacing:.06em}
+.color-swatch{height:32px;border:1px solid var(--panel-border);border-radius:2px}
+.color-name{font-family:var(--font);font-size:6px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.color-hex{font-family:var(--font);font-size:8px;color:var(--ink2)}
+
+/* dark version of panel for hm and prof-hero */
+.panel-dark{background:var(--stone);border:1px solid var(--stone-border);border-radius:3px}
+
+/* ornamental divider (light) on dark bg */
+.orn{display:flex;align-items:center;gap:8px;margin:2px 0}
+.orn::before,.orn::after{content:'';flex:1;height:1px;background:var(--stone-border)}
+.orn-gem{width:5px;height:5px;background:var(--gold3);transform:rotate(45deg);flex-shrink:0}
 </style>
 </head>
 <body>
 <div class="page">
 
-<!-- Header -->
+<!-- ── Header ── -->
 <header class="hdr">
-  <div class="hdr-inner">
-    <div>
-      <div class="hdr-brand">Team Medrado</div>
-      <div class="hdr-title">Agenda</div>
-    </div>
-    <div class="hdr-right">
-      <div class="hdr-ath">Rodrigo M. ◆</div>
-      <div class="hdr-job">Knight · Tier 02</div>
-    </div>
+  <div class="hdr-left">
+    <div class="hdr-crumb">Team Medrado · Agenda</div>
+    <div class="hdr-title">Agenda</div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-ath">Rodrigo M.</div>
+    <div class="hdr-job">Gallant Knight · Lv. 40</div>
   </div>
 </header>
 
-<!-- Tab bar -->
+<!-- ── Tab bar (FFT style) ── -->
 <div class="tab-bar">
   <button class="tab-btn active" onclick="switchTab('agenda',this)">Agenda</button>
   <button class="tab-btn" onclick="switchTab('resultados',this)">Resultados</button>
@@ -243,49 +338,31 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font-body);m
   <button class="tab-btn" onclick="switchTab('fontes',this)">Fontes</button>
 </div>
 
-<!-- ════════════════ Tab: Agenda ════════════════ -->
+<!-- ════ Tab: Agenda ════ -->
 <div class="tab-content active" id="tab-agenda">
 
   <!-- Theme banner -->
-  <div class="theme-banner">
-    <div class="corner-tr"></div>
-    <div class="corner-bl"></div>
-    <div class="banner-title">⚔ Final Fantasy Tactics · Ivalice</div>
-    <div class="banner-sub">The bravery of the fallen. The tactics of the wise.<br>Cinzel · Crimson Pro · Ivalice Dark</div>
+  <div class="banner">
+    <div class="banner-hdr">
+      <div class="banner-gem"></div>
+      <div class="banner-title">Final Fantasy Tactics · Ivalice</div>
+    </div>
+    <div class="banner-sub">Parchment cream panels on warm dark stone.<br>Cinzel · Crimson Pro · Gold as sole accent.</div>
     <div class="banner-palette">
-      <div>
-        <div class="swatch" style="background:var(--bg)"></div>
-      </div>
-      <div>
-        <div class="swatch" style="background:var(--stone)"></div>
-      </div>
-      <div>
-        <div class="swatch" style="background:var(--div)"></div>
-      </div>
-      <div>
-        <div class="swatch" style="background:var(--gold)"></div>
-      </div>
-      <div>
-        <div class="swatch" style="background:var(--amber)"></div>
-      </div>
-      <div>
-        <div class="swatch" style="background:var(--cream)"></div>
-      </div>
-      <div>
-        <div class="swatch" style="background:var(--red)"></div>
-      </div>
-      <div>
-        <div class="swatch" style="background:var(--purple)"></div>
-      </div>
-      <div>
-        <div class="swatch" style="background:var(--forest)"></div>
-      </div>
+      <div class="swatch" style="background:var(--bg)" title="#181410"></div>
+      <div class="swatch" style="background:var(--stone)" title="#201c16"></div>
+      <div class="swatch" style="background:var(--panel)" title="#ddd0a0"></div>
+      <div class="swatch" style="background:var(--panel2)" title="#cfc090"></div>
+      <div class="swatch" style="background:var(--gold)" title="#c89010"></div>
+      <div class="swatch" style="background:var(--ink)" title="#181008"></div>
+      <div class="swatch" style="background:var(--red)" title="#b02020"></div>
+      <div class="swatch" style="background:var(--amber)" title="#b07010"></div>
+      <div class="swatch" style="background:var(--forest)" title="#286030"></div>
+      <div class="swatch" style="background:var(--purple)" title="#503890"></div>
     </div>
   </div>
 
-  <div class="orn-rule"><div class="orn-gem"></div></div>
-
-  <!-- Heatmap -->
+  <!-- Heatmap (dark panel) -->
   <div class="heatmap">
     <div class="heatmap-ttl">Frequência · Últimas 13 Semanas</div>
     <div class="heatmap-grid" id="hm-grid"></div>
@@ -294,24 +371,24 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font-body);m
   <div class="sec-hdr">Semana de 22 Jun</div>
 
   <!-- Sunday: rest -->
-  <div class="card">
-    <div class="card-hdr">
-      <span class="card-title">Domingo</span>
-      <span class="card-date">22 Jun</span>
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Domingo</span>
+      <span class="panel-meta">22 Jun</span>
     </div>
     <div class="day-rest">
-      <i class="ti ti-moon" style="font-size:15px;color:var(--div)"></i>
+      <i class="ti ti-moon" style="font-size:14px;color:var(--ink4)"></i>
       Descanso
     </div>
   </div>
 
   <!-- Monday: today -->
-  <div class="card">
-    <div class="card-hdr">
-      <span class="card-title today">◆ Segunda-feira</span>
-      <span class="card-date">23 Jun</span>
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title today">◆ Segunda-feira</span>
+      <span class="panel-meta">23 Jun</span>
     </div>
-    <div class="card-body">
+    <div class="panel-body">
       <div class="blk-row">
         <div class="blk-gem warm"></div>
         <span class="blk-type">Aquec.</span>
@@ -340,12 +417,12 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font-body);m
   </div>
 
   <!-- Tuesday -->
-  <div class="card">
-    <div class="card-hdr">
-      <span class="card-title">Terça-feira</span>
-      <span class="card-date">24 Jun</span>
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Terça-feira</span>
+      <span class="panel-meta">24 Jun</span>
     </div>
-    <div class="card-body">
+    <div class="panel-body">
       <div class="blk-row">
         <div class="blk-gem warm"></div>
         <span class="blk-type">Aquec.</span>
@@ -383,130 +460,97 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font-body);m
 
 </div><!-- /tab-agenda -->
 
-<!-- ════════════════ Tab: Resultados ════════════════ -->
+<!-- ════ Tab: Resultados ════ -->
 <div class="tab-content" id="tab-resultados">
 
   <div class="sec-hdr">Semana de 22 Jun · Todos</div>
 
-  <!-- WOD 1 -->
-  <div class="card">
-    <div class="res-card-hdr">
-      <span class="res-card-name">Thruster + Bar Muscle-Up</span>
-      <span class="res-card-meta">For Time · 10 rds</span>
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Thruster + Bar Muscle-Up</span>
+      <span class="panel-meta">For Time · 10 rds</span>
     </div>
-    <div class="res-kpi-row">
-      <div class="res-kpi"><div class="res-kpi-val">8</div><div class="res-kpi-lbl">Atletas</div></div>
-      <div class="res-kpi"><div class="res-kpi-val">7.9</div><div class="res-kpi-lbl">RPE Méd.</div></div>
-      <div class="res-kpi"><div class="res-kpi-val">62%</div><div class="res-kpi-lbl">% RX</div></div>
-      <div class="res-kpi"><div class="res-kpi-val">16:42</div><div class="res-kpi-lbl">Tempo Méd.</div></div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-val">8</div><div class="kpi-lbl">Atletas</div></div>
+      <div class="kpi"><div class="kpi-val">7.9</div><div class="kpi-lbl">RPE Méd.</div></div>
+      <div class="kpi"><div class="kpi-val">62%</div><div class="kpi-lbl">% RX</div></div>
+      <div class="kpi"><div class="kpi-val">16:42</div><div class="kpi-lbl">Tempo Méd.</div></div>
     </div>
-    <div class="lb-rule"></div>
-    <div class="lb-row">
-      <span class="lb-rank i">I</span>
-      <span class="lb-name">Ana Lima</span>
-      <span class="lb-scale rx">RX</span>
-      <span class="lb-perf">14:38</span>
+    <div class="lb-row" style="border-top:1px solid rgba(184,168,112,.45)">
+      <span class="lb-rank i">I</span><span class="lb-name">Ana Lima</span><span class="lb-scale rx">RX</span><span class="lb-perf">14:38</span>
     </div>
     <div class="lb-row">
-      <span class="lb-rank ii">II</span>
-      <span class="lb-name">Carlos Melo</span>
-      <span class="lb-scale rx">RX</span>
-      <span class="lb-perf">15:12</span>
+      <span class="lb-rank ii">II</span><span class="lb-name">Carlos Melo</span><span class="lb-scale rx">RX</span><span class="lb-perf">15:12</span>
     </div>
     <div class="lb-row">
-      <span class="lb-rank iii">III</span>
-      <span class="lb-name">Fernanda T.</span>
-      <span class="lb-scale">Inter</span>
-      <span class="lb-perf">16:05</span>
+      <span class="lb-rank iii">III</span><span class="lb-name">Fernanda T.</span><span class="lb-scale">Inter</span><span class="lb-perf" style="color:var(--ink3)">16:05</span>
     </div>
     <div class="lb-row">
-      <span class="lb-rank">IV</span>
-      <span class="lb-name">Rodrigo M.</span>
-      <span class="lb-scale rx">RX</span>
-      <span class="lb-perf dnf">8 rds (DNF)</span>
+      <span class="lb-rank">IV</span><span class="lb-name">Rodrigo M.</span><span class="lb-scale rx">RX</span><span class="lb-perf dnf">8 rds (DNF)</span>
     </div>
     <div class="lb-row">
-      <span class="lb-rank">V</span>
-      <span class="lb-name">Juliana F.</span>
-      <span class="lb-scale">SC</span>
-      <span class="lb-perf" style="color:var(--sub)">17:50</span>
+      <span class="lb-rank">V</span><span class="lb-name">Juliana F.</span><span class="lb-scale">SC</span><span class="lb-perf" style="color:var(--ink3)">17:50</span>
     </div>
   </div>
 
-  <!-- WOD 2 -->
-  <div class="card">
-    <div class="res-card-hdr">
-      <span class="res-card-name">Cindy Modificado</span>
-      <span class="res-card-meta">AMRAP · 20 min</span>
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Cindy Modificado</span>
+      <span class="panel-meta">AMRAP · 20 min</span>
     </div>
-    <div class="res-kpi-row">
-      <div class="res-kpi"><div class="res-kpi-val">11</div><div class="res-kpi-lbl">Atletas</div></div>
-      <div class="res-kpi"><div class="res-kpi-val">8.2</div><div class="res-kpi-lbl">RPE Méd.</div></div>
-      <div class="res-kpi"><div class="res-kpi-val">45%</div><div class="res-kpi-lbl">% RX</div></div>
-      <div class="res-kpi"><div class="res-kpi-val">19.4</div><div class="res-kpi-lbl">Rds Méd.</div></div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-val">11</div><div class="kpi-lbl">Atletas</div></div>
+      <div class="kpi"><div class="kpi-val">8.2</div><div class="kpi-lbl">RPE Méd.</div></div>
+      <div class="kpi"><div class="kpi-val">45%</div><div class="kpi-lbl">% RX</div></div>
+      <div class="kpi"><div class="kpi-val">19.4</div><div class="kpi-lbl">Rds Méd.</div></div>
     </div>
   </div>
 
 </div><!-- /tab-resultados -->
 
-<!-- ════════════════ Tab: Perfil ════════════════ -->
+<!-- ════ Tab: Perfil ════ -->
 <div class="tab-content" id="tab-perfil">
 
+  <!-- Dark hero (like FFT's character status dark header) -->
   <div class="prof-hero">
     <div class="prof-avatar">R</div>
-    <div>
+    <div style="flex:1">
       <div class="prof-name">Rodrigo</div>
-      <div class="prof-class">◆ Knight · Personal · Tier 02</div>
-      <div class="prof-since">Membro desde Janeiro de 2023</div>
+      <div class="prof-class">Gallant Knight · Tier 02</div>
+      <div class="stat-bar-row">
+        <span class="stat-bar-lbl">HP</span>
+        <div class="stat-bar-track"><div class="stat-bar-fill hp" style="width:100%"></div></div>
+        <span class="stat-bar-val">512/512</span>
+      </div>
+      <div class="stat-bar-row">
+        <span class="stat-bar-lbl">XP</span>
+        <div class="stat-bar-track"><div class="stat-bar-fill xp" style="width:62%"></div></div>
+        <span class="stat-bar-val">142 sess.</span>
+      </div>
     </div>
   </div>
 
-  <div class="card" style="overflow:hidden">
+  <!-- Stats (cream panel) -->
+  <div class="panel" style="overflow:hidden">
     <div class="prof-stats">
-      <div class="prof-stat">
-        <div class="prof-stat-val">142</div>
-        <div class="prof-stat-lbl">Sessões</div>
-      </div>
-      <div class="prof-stat">
-        <div class="prof-stat-val">8.1</div>
-        <div class="prof-stat-lbl">RPE Méd.</div>
-      </div>
-      <div class="prof-stat">
-        <div class="prof-stat-val">71%</div>
-        <div class="prof-stat-lbl">% RX</div>
-      </div>
+      <div class="prof-stat"><div class="prof-stat-val">142</div><div class="prof-stat-lbl">Sessões</div></div>
+      <div class="prof-stat"><div class="prof-stat-val">8.1</div><div class="prof-stat-lbl">RPE Méd.</div></div>
+      <div class="prof-stat"><div class="prof-stat-val">71%</div><div class="prof-stat-lbl">% RX</div></div>
     </div>
   </div>
 
   <div class="sec-hdr">Recordes Pessoais</div>
 
-  <div style="display:flex;flex-direction:column;gap:4px">
-    <div class="pr-row">
-      <div class="pr-gem"></div>
-      <span class="pr-ex">Back Squat</span>
-      <span class="pr-val">140</span><span class="pr-unit">kg</span>
-    </div>
-    <div class="pr-row">
-      <div class="pr-gem"></div>
-      <span class="pr-ex">Clean &amp; Jerk</span>
-      <span class="pr-val">110</span><span class="pr-unit">kg</span>
-    </div>
-    <div class="pr-row">
-      <div class="pr-gem"></div>
-      <span class="pr-ex">Fran</span>
-      <span class="pr-val">04:32</span>
-    </div>
-    <div class="pr-row">
-      <div class="pr-gem"></div>
-      <span class="pr-ex">Strict Pull-up</span>
-      <span class="pr-val">22</span><span class="pr-unit">reps</span>
-    </div>
+  <div class="panel">
+    <div class="pr-row"><div class="pr-gem"></div><span class="pr-ex">Back Squat</span><span class="pr-val">140</span><span class="pr-unit">kg</span></div>
+    <div class="pr-row"><div class="pr-gem"></div><span class="pr-ex">Clean &amp; Jerk</span><span class="pr-val">110</span><span class="pr-unit">kg</span></div>
+    <div class="pr-row"><div class="pr-gem"></div><span class="pr-ex">Fran</span><span class="pr-val">04:32</span></div>
+    <div class="pr-row"><div class="pr-gem"></div><span class="pr-ex">Strict Pull-up</span><span class="pr-val">22</span><span class="pr-unit">reps</span></div>
   </div>
 
-  <div class="orn-rule"><div class="orn-gem"></div></div>
   <div class="sec-hdr">Objetivos</div>
 
-  <div style="display:flex;flex-direction:column;gap:4px">
+  <div class="panel">
     <div class="goal-row">
       <div class="goal-name">Muscle-Up Unbroken — 5 reps</div>
       <div class="goal-track"><div class="goal-fill" style="width:60%"></div></div>
@@ -521,10 +565,9 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font-body);m
 
 </div><!-- /tab-perfil -->
 
-<!-- ════════════════ Tab: Fontes ════════════════ -->
+<!-- ════ Tab: Fontes ════ -->
 <div class="tab-content" id="tab-fontes">
 
-  <!-- Cinzel specimen -->
   <div class="font-card">
     <div class="font-lbl">Display — Cinzel</div>
     <div class="font-display">Team Medrado</div>
@@ -532,91 +575,40 @@ html,body{background:var(--bg);color:var(--cream);font-family:var(--font-body);m
     <div class="font-weights">
       <span class="fw"><b>900</b> Black</span>
       <span class="fw"><b>700</b> Bold</span>
-      <span class="fw"><b>600</b> SemiBold</span>
       <span class="fw"><b>400</b> Regular</span>
     </div>
     <div class="caps-row">
-      <span class="cap-item">Agenda</span>
-      <span class="cap-item">For Time</span>
-      <span class="cap-item">10 Rounds</span>
-      <span class="cap-item">RPE 8</span>
-      <span class="cap-item">Knight</span>
-      <span class="cap-item">RX</span>
+      <span class="cap">Agenda</span><span class="cap">For Time</span>
+      <span class="cap">10 Rounds</span><span class="cap">Knight</span><span class="cap">RX</span>
     </div>
   </div>
 
-  <div class="orn-rule"><div class="orn-gem"></div></div>
-
-  <!-- Crimson Pro specimen -->
   <div class="font-card">
     <div class="font-lbl">Body — Crimson Pro</div>
-    <div class="font-body-sample">Back Squat · 5×5 a 75% do RM. <em>Descanso de 3 minutos entre séries.</em> Foco em postura e profundidade — a bravura está nos detalhes que ninguém vê.</div>
-    <div class="font-body-italic">"Mantenha o core ativado. Empurre o chão para baixo na saída do buraco. A força verdadeira nasce da técnica."</div>
+    <div class="font-body-sample">Back Squat · 5×5 a 75% do RM. <em>Descanso de 3 minutos entre séries.</em> A bravura está nos detalhes que ninguém vê.</div>
+    <div class="font-body-italic">"Mantenha o core ativado. Empurre o chão na saída do buraco. A força verdadeira nasce da técnica."</div>
     <div class="font-weights" style="margin-top:10px">
       <span class="fw" style="font-family:var(--font-body)"><b>Aa</b> 400</span>
       <span class="fw" style="font-family:var(--font-body);font-weight:600"><b>Aa</b> 600</span>
       <span class="fw" style="font-family:var(--font-body);font-style:italic"><b>Aa</b> Italic</span>
     </div>
-    <div class="font-body-meta">Crimson Pro · Google Fonts · Old-style Serif</div>
   </div>
 
-  <div class="orn-rule"><div class="orn-gem"></div></div>
-
-  <!-- Color palette reference -->
   <div class="font-card">
-    <div class="font-lbl">Paleta Ivalice Dark</div>
+    <div class="font-lbl">Paleta Ivalice</div>
     <div class="color-grid">
-      <div class="color-cell">
-        <div class="color-swatch" style="background:var(--bg)"></div>
-        <div class="color-name">BG</div>
-        <div class="color-hex">#080818</div>
-      </div>
-      <div class="color-cell">
-        <div class="color-swatch" style="background:var(--stone)"></div>
-        <div class="color-name">STONE</div>
-        <div class="color-hex">#0d1025</div>
-      </div>
-      <div class="color-cell">
-        <div class="color-swatch" style="background:var(--div)"></div>
-        <div class="color-name">DIV</div>
-        <div class="color-hex">#1e2545</div>
-      </div>
-      <div class="color-cell">
-        <div class="color-swatch" style="background:var(--gold)"></div>
-        <div class="color-name">GOLD</div>
-        <div class="color-hex">#c8a028</div>
-      </div>
-      <div class="color-cell">
-        <div class="color-swatch" style="background:var(--amber)"></div>
-        <div class="color-name">AMBER</div>
-        <div class="color-hex">#b86820</div>
-      </div>
-      <div class="color-cell">
-        <div class="color-swatch" style="background:var(--cream)"></div>
-        <div class="color-name">CREAM</div>
-        <div class="color-hex">#eae4d8</div>
-      </div>
-      <div class="color-cell">
-        <div class="color-swatch" style="background:var(--sub)"></div>
-        <div class="color-name">SUB</div>
-        <div class="color-hex">#8890a8</div>
-      </div>
-      <div class="color-cell">
-        <div class="color-swatch" style="background:var(--red)"></div>
-        <div class="color-name">WAR RED</div>
-        <div class="color-hex">#c03838</div>
-      </div>
-      <div class="color-cell">
-        <div class="color-swatch" style="background:var(--purple)"></div>
-        <div class="color-name">MAGIC</div>
-        <div class="color-hex">#6848a8</div>
-      </div>
+      <div class="color-cell"><div class="color-swatch" style="background:var(--bg)"></div><div class="color-name">Stone BG</div><div class="color-hex">#181410</div></div>
+      <div class="color-cell"><div class="color-swatch" style="background:var(--panel)"></div><div class="color-name">Parchment</div><div class="color-hex">#ddd0a0</div></div>
+      <div class="color-cell"><div class="color-swatch" style="background:var(--panel2)"></div><div class="color-name">Parchment 2</div><div class="color-hex">#cfc090</div></div>
+      <div class="color-cell"><div class="color-swatch" style="background:var(--gold)"></div><div class="color-name">Gold</div><div class="color-hex">#c89010</div></div>
+      <div class="color-cell"><div class="color-swatch" style="background:var(--red)"></div><div class="color-name">War Red</div><div class="color-hex">#b02020</div></div>
+      <div class="color-cell"><div class="color-swatch" style="background:var(--ink)"></div><div class="color-name">Ink</div><div class="color-hex">#181008</div></div>
     </div>
   </div>
 
 </div><!-- /tab-fontes -->
 
-<!-- Bottom nav -->
+<!-- ── Bottom nav ── -->
 <nav class="nav">
   <div class="nav-item"><i class="ti ti-home"></i>Início</div>
   <div class="nav-item"><i class="ti ti-trophy"></i>Ranking</div>
