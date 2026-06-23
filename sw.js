@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'cone-v5';
+const CACHE_VERSION = 'cone-v6';
 
 // Only precache HTML and manifest. CSS/JS assets (themes.css, cone-client.js,
 // cone-utils.js) are fingerprinted by the Vite build, so their filenames change
@@ -11,7 +11,6 @@ const PRECACHE_URLS = [
   './results.html',
   './athletes.html',
   './timer.html',
-  './log.html',
   './recover.html',
   './manifest.json',
 ];
