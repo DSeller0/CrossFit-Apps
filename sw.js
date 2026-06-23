@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'cone-v3';
+const CACHE_VERSION = 'cone-v4';
 
 const PRECACHE_URLS = [
   './index.html',
@@ -6,6 +6,12 @@ const PRECACHE_URLS = [
   './leaderboard.html',
   './me.html',
   './results.html',
+  './athletes.html',
+  './timer.html',
+  './log.html',
+  './recover.html',
+  './themes.css',
+  './cone-client.js',
   './manifest.json',
 ];
 
