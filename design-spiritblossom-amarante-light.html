@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Criador · Spirit Blossom Light · Amarante</title>
+<link href="https://fonts.googleapis.com/css2?family=Amarante&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+/* ── Spirit Blossom Light palette ───────────────────────────────────────── */
+:root{
+  --bg:#f4eefb;
+  --stone:#ffffff;
+  --stone2:#f0e8f8;
+  --div:#e2d4f0;
+  --div2:#c8a8e4;
+  --pink:#c83070;
+  --pink2:#a02258;
+  --pink3:#e85898;
+  --teal:#1490a0;
+  --teal2:#0e7080;
+  --cream:#1a0828;   /* inverted — primary text is now dark ink */
+  --sub:#4a2460;     /* secondary text — dark purple */
+  --muted:#7840a0;
+  --dim:#9070b0;
+  --red:#c02040;
+  --gold:#a07808;
+  --purple:#6840c8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);color:var(--cream);
+  font-family:'Amarante',serif;
+  min-height:100vh;padding:0 0 80px;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 80% 10%, #e8b4f428 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 10% 90%, #b4d8e820 0%, transparent 50%);
+}
+
+/* ── Decorative petal scatter ───────────────────────────────────────────── */
+.petals{position:fixed;top:0;left:0;right:0;height:200px;pointer-events:none;overflow:hidden;opacity:.5;}
+.petal{position:absolute;border-radius:50% 0 50% 0;background:var(--pink3);opacity:0;}
+.petal:nth-child(1){width:6px;height:9px;left:12%;top:20px;transform:rotate(30deg);opacity:.4;}
+.petal:nth-child(2){width:5px;height:8px;left:28%;top:50px;transform:rotate(-20deg);opacity:.25;}
+.petal:nth-child(3){width:7px;height:10px;left:55%;top:15px;transform:rotate(50deg);opacity:.35;}
+.petal:nth-child(4){width:4px;height:7px;left:72%;top:70px;transform:rotate(-40deg);opacity:.25;}
+.petal:nth-child(5){width:6px;height:9px;left:88%;top:35px;transform:rotate(15deg);opacity:.38;}
+.petal:nth-child(6){width:5px;height:8px;left:42%;top:80px;transform:rotate(-55deg);opacity:.2;}
+.petal:nth-child(7){width:8px;height:11px;left:6%;top:90px;transform:rotate(70deg);opacity:.18;}
+.petal:nth-child(8){width:4px;height:6px;left:65%;top:55px;transform:rotate(-10deg);opacity:.28;}
+
+/* ── Page layout ────────────────────────────────────────────────────────── */
+.page{max-width:520px;margin:0 auto;padding:16px 14px;}
+
+/* ── Mockup badge ───────────────────────────────────────────────────────── */
+.mbadge{
+  background:linear-gradient(90deg,var(--pink),#d090e0 40%,var(--teal));
+  color:#fff;font-size:13px;padding:8px 20px;
+  letter-spacing:.12em;text-align:center;
+  border-bottom:1px solid var(--div);
+}
+
+/* ── Section nav ────────────────────────────────────────────────────────── */
+.snav{display:flex;gap:0;border-bottom:1px solid var(--div);margin-bottom:20px;overflow-x:auto;}
+.snav button{
+  font-family:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  background:transparent;border:none;border-bottom:2px solid transparent;
+  color:var(--dim);padding:11px 12px;cursor:pointer;white-space:nowrap;transition:color .12s,border-color .12s;
+}
+.snav button.on{color:var(--pink);border-bottom-color:var(--pink);}
+.section{display:none;}.section.on{display:block;}
+
+/* ── App chrome ─────────────────────────────────────────────────────────── */
+.app-chrome{background:var(--stone);border:1px solid var(--div);border-radius:12px;overflow:hidden;margin-bottom:24px;box-shadow:0 2px 12px rgba(160,80,200,.08);}
+.app-tabs{display:flex;gap:0;background:var(--stone);border-bottom:1px solid var(--div);padding:0 4px;overflow-x:auto;}
+.app-tab{
+  font-family:inherit;font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+  background:transparent;border:none;border-bottom:2px solid transparent;
+  color:var(--dim);padding:12px 12px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;
+}
+.app-tab.on{color:var(--pink);border-bottom-color:var(--pink);}
+.app-tab i{font-size:13px;}
+.app-body{padding:14px;}
+
+/* ── Form card ──────────────────────────────────────────────────────────── */
+.sc-card{
+  background:var(--stone);border:1px solid var(--div);border-radius:10px;
+  padding:16px;margin-bottom:10px;position:relative;overflow:hidden;
+  box-shadow:0 1px 6px rgba(160,80,200,.06);
+}
+.sc-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--pink3)40,var(--teal)60,transparent);
+  opacity:.5;
+}
+.sc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sc-title{font-size:17px;color:var(--cream);letter-spacing:.02em;}
+.sc-subtitle{font-size:12px;color:var(--teal);margin-top:3px;letter-spacing:.04em;}
+
+/* ── Inputs ─────────────────────────────────────────────────────────────── */
+.lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;display:block;}
+.fg{display:flex;flex-direction:column;gap:3px;}
+.fg input,.fg select,.fg textarea{
+  font-family:inherit;font-size:14px;border:1px solid var(--div);border-radius:6px;
+  padding:9px 11px;background:var(--bg);color:var(--cream);outline:none;width:100%;
+  -webkit-appearance:none;transition:border-color .15s;
+}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--dim);}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--div2);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+
+/* ── Athletes button ────────────────────────────────────────────────────── */
+.cr-athletes-btn{
+  display:flex;align-items:center;gap:10px;width:100%;
+  background:var(--bg);border:1px solid var(--div);border-radius:8px;
+  padding:10px 12px;cursor:pointer;text-align:left;font-family:inherit;
+  transition:border-color .12s;
+}
+.cr-athletes-btn:hover{border-color:var(--div2);}
+.cr-ath-avatars{display:flex;gap:-4px;}
+.cr-ath-av{
+  width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:#fff;border:2px solid var(--stone);
+}
+.cr-ath-av:nth-child(1){background:linear-gradient(135deg,var(--pink2),var(--pink3));margin-left:0;}
+.cr-ath-av:nth-child(2){background:linear-gradient(135deg,var(--teal2),var(--teal));margin-left:-6px;}
+.cr-ath-av:nth-child(3){background:linear-gradient(135deg,var(--purple),#8060d8);margin-left:-6px;}
+.cr-ath-text{flex:1;}
+.cr-ath-label{font-size:13px;color:var(--sub);letter-spacing:.02em;}
+.cr-ath-names{font-size:11px;color:var(--dim);letter-spacing:.03em;}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────  */
+.b{
+  font-family:inherit;font-size:13px;border-radius:8px;
+  border:1px solid var(--div);background:transparent;color:var(--sub);
+  padding:9px 16px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  transition:background .12s,border-color .12s,color .12s;letter-spacing:.04em;
+  -webkit-tap-highlight-color:transparent;
+}
+.b:hover{background:var(--stone2);}
+.b.bprimary{background:var(--pink);border-color:var(--pink2);color:#fff;}
+.b.bprimary:hover{background:var(--pink2);}
+.b.bteal{background:var(--teal);border-color:var(--teal2);color:#fff;}
+.b.bteal:hover{background:var(--teal2);}
+.b.bsm{font-size:11px;padding:7px 12px;}
+.b.bfull{width:100%;justify-content:center;}
+.b.bdanger{color:var(--red);border-color:#f0c0cc;}
+.b.bdanger:hover{background:#fceef0;}
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+
+/* ── Block bar ──────────────────────────────────────────────────────────── */
+.blk-bar{
+  display:flex;align-items:center;border-radius:10px;overflow:hidden;
+  border:1px solid var(--div);margin-bottom:6px;cursor:pointer;
+  transition:border-color .12s;
+}
+.blk-bar:hover{border-color:var(--div2);}
+.blk-bar-color{width:4px;align-self:stretch;flex-shrink:0;}
+.blk-bar-body{flex:1;padding:9px 10px;min-width:0;}
+.blk-bar-top{display:flex;align-items:center;gap:8px;}
+.blk-type-tag{
+  font-size:9px;text-transform:uppercase;letter-spacing:.09em;
+  padding:2px 7px;border-radius:4px;flex-shrink:0;
+}
+.blk-bar-label{font-size:14px;color:var(--cream);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.01em;}
+.blk-bar-meta{font-size:11px;color:var(--dim);margin-top:3px;letter-spacing:.03em;}
+.blk-bar-actions{display:flex;align-items:center;gap:2px;padding:0 8px;flex-shrink:0;}
+.blk-action{background:transparent;border:none;color:var(--div2);font-size:15px;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:color .1s,background .1s;}
+.blk-action:hover{color:var(--sub);background:var(--stone2);}
+
+/* Block color families — lighter tints on white */
+.bc-pink{background:linear-gradient(180deg,rgba(200,48,112,.07),transparent);}
+.bc-pink .blk-bar-color{background:var(--pink);}
+.bc-pink .blk-type-tag{background:rgba(200,48,112,.10);color:var(--pink);}
+.bc-teal{background:linear-gradient(180deg,rgba(20,144,160,.07),transparent);}
+.bc-teal .blk-bar-color{background:var(--teal);}
+.bc-teal .blk-type-tag{background:rgba(20,144,160,.10);color:var(--teal);}
+.bc-purple{background:linear-gradient(180deg,rgba(104,64,200,.07),transparent);}
+.bc-purple .blk-bar-color{background:var(--purple);}
+.bc-purple .blk-type-tag{background:rgba(104,64,200,.10);color:var(--purple);}
+.bc-green{background:linear-gradient(180deg,rgba(40,160,100,.07),transparent);}
+.bc-green .blk-bar-color{background:#28a064;}
+.bc-green .blk-type-tag{background:rgba(40,160,100,.10);color:#28a064;}
+.bc-bm{background:linear-gradient(180deg,rgba(160,120,8,.07),transparent);}
+.bc-bm .blk-bar-color{background:var(--gold);}
+.bc-bm .blk-type-tag{background:rgba(160,120,8,.10);color:var(--gold);}
+
+/* ── Block body (expanded) ──────────────────────────────────────────────── */
+.blk-body{
+  background:var(--stone2);border:1px solid var(--div);border-radius:10px;
+  padding:14px;margin-bottom:8px;position:relative;overflow:hidden;
+}
+.blk-body::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--div2),transparent);
+}
+.blk-body-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.blk-name-inp{
+  flex:1;font-family:inherit;font-size:16px;
+  background:transparent;border:none;border-bottom:1px solid var(--div);
+  color:var(--cream);padding:4px 0;outline:none;letter-spacing:.03em;
+}
+.blk-name-inp::placeholder{color:var(--dim);}
+.blk-meta-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.blk-meta-field{display:flex;flex-direction:column;gap:2px;flex:1;min-width:70px;}
+.blk-meta-field span{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+.blk-meta-field input,.blk-meta-field select{
+  font-family:inherit;font-size:13px;background:var(--bg);border:1px solid var(--div);
+  border-radius:5px;color:var(--cream);padding:6px 8px;outline:none;
+}
+.blk-notes-quick{
+  width:100%;font-family:inherit;font-size:12px;background:var(--bg);
+  border:1px solid var(--div);border-radius:6px;color:var(--sub);
+  padding:8px 10px;resize:none;height:52px;outline:none;letter-spacing:.02em;
+}
+.blk-notes-quick::placeholder{color:var(--dim);}
+
+/* ── Exercise rows ──────────────────────────────────────────────────────── */
+.ex-row{
+  display:flex;align-items:center;gap:6px;
+  border-bottom:1px solid var(--div);padding:7px 0;
+}
+.ex-row:last-child{border-bottom:none;}
+.ex-drag{color:var(--div2);font-size:14px;cursor:grab;}
+.ex-name-inp{
+  flex:1;font-family:inherit;font-size:13px;background:transparent;
+  border:none;color:var(--cream);padding:4px 6px;outline:none;min-width:0;
+  border-radius:4px;letter-spacing:.02em;
+}
+.ex-name-inp:focus{background:var(--bg);}
+.ex-mini{display:flex;gap:4px;}
+.ex-mini input{
+  width:52px;font-family:inherit;font-size:12px;background:var(--bg);
+  border:1px solid var(--div);border-radius:4px;color:var(--sub);
+  padding:5px 6px;outline:none;text-align:center;
+}
+.ex-load-badge{
+  font-size:10px;padding:2px 7px;border-radius:4px;
+  background:rgba(104,64,200,.10);color:var(--purple);white-space:nowrap;letter-spacing:.04em;
+}
+.ex-del{background:transparent;border:none;color:var(--div2);font-size:13px;cursor:pointer;padding:2px;}
+.ex-del:hover{color:var(--red);}
+.ex-add-row{display:flex;align-items:center;gap:6px;padding:8px 0 0;border-top:1px solid var(--div);margin-top:4px;}
+.ex-add-inp{
+  flex:1;font-family:inherit;font-size:12px;background:var(--bg);
+  border:1px solid var(--div);border-radius:5px;color:var(--sub);
+  padding:6px 9px;outline:none;letter-spacing:.02em;
+}
+.ex-add-inp::placeholder{color:var(--dim);}
+
+/* ── Block type picker ──────────────────────────────────────────────────── */
+.btp-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.btp-header span{font-size:17px;color:var(--cream);letter-spacing:.03em;}
+.btp-header .b{padding:5px 10px;font-size:11px;}
+.btp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.btp-tile{
+  background:var(--stone2);border:1px solid var(--div);border-radius:10px;
+  padding:16px 10px;cursor:pointer;text-align:center;font-family:inherit;
+  transition:border-color .12s,background .12s;-webkit-tap-highlight-color:transparent;
+}
+.btp-tile:hover{background:var(--div);border-color:var(--div2);}
+.btp-tile i{font-size:24px;margin-bottom:7px;display:block;}
+.btp-tile-name{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;}
+.bt-pink i,.bt-pink .btp-tile-name{color:var(--pink);}
+.bt-teal i,.bt-teal .btp-tile-name{color:var(--teal);}
+.bt-purple i,.bt-purple .btp-tile-name{color:var(--purple);}
+.bt-green i,.bt-green .btp-tile-name{color:#28a064;}
+.bt-gold i,.bt-gold .btp-tile-name{color:var(--gold);}
+.bt-pink:hover{border-color:rgba(200,48,112,.3);}
+.bt-teal:hover{border-color:rgba(20,144,160,.3);}
+.bt-purple:hover{border-color:rgba(104,64,200,.3);}
+.bt-green:hover{border-color:rgba(40,160,100,.25);}
+.bt-gold:hover{border-color:rgba(160,120,8,.3);}
+
+/* ── Benchmark picker ───────────────────────────────────────────────────── */
+.bm-cat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.bm-cat-card{
+  background:var(--stone2);border:1px solid var(--div);border-radius:10px;
+  padding:18px 10px;cursor:pointer;text-align:center;font-family:inherit;
+  transition:border-color .12s;-webkit-tap-highlight-color:transparent;
+}
+.bm-cat-card:hover{border-color:var(--div2);}
+.bm-cat-card i{font-size:28px;display:block;margin-bottom:8px;}
+.bm-cat-name{font-size:12px;text-transform:uppercase;letter-spacing:.08em;}
+.bm-cat-girls i{color:var(--pink);}
+.bm-cat-girls .bm-cat-name{color:var(--pink);}
+.bm-cat-girls:hover{border-color:rgba(200,48,112,.3);}
+.bm-cat-heroes i{color:var(--gold);}
+.bm-cat-heroes .bm-cat-name{color:var(--gold);}
+.bm-cat-heroes:hover{border-color:rgba(160,120,8,.3);}
+.bm-cat-custom i{color:var(--teal);}
+.bm-cat-custom .bm-cat-name{color:var(--teal);}
+.bm-cat-custom:hover{border-color:rgba(20,144,160,.3);}
+
+/* ── Benchmark list ─────────────────────────────────────────────────────── */
+.bm-list{display:flex;flex-direction:column;gap:5px;}
+.bm-list-item{
+  background:var(--stone2);border:1px solid var(--div);border-radius:9px;
+  padding:11px 13px;cursor:pointer;text-align:left;font-family:inherit;
+  transition:background .1s,border-color .1s;-webkit-tap-highlight-color:transparent;
+}
+.bm-list-item:hover{background:var(--div);border-color:var(--div2);}
+.bm-list-item:active{transform:scale(.98);}
+.bm-list-top{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+.bm-list-name{font-size:15px;color:var(--cream);letter-spacing:.02em;}
+.bm-list-type{
+  font-size:10px;color:var(--muted);border:1px solid var(--div2);border-radius:4px;
+  padding:2px 6px;text-transform:uppercase;letter-spacing:.07em;
+}
+.bm-list-cap{font-size:10px;color:var(--pink);margin-left:auto;letter-spacing:.05em;}
+.bm-list-desc{font-size:11px;color:var(--dim);letter-spacing:.03em;}
+
+/* ── Locked benchmark ───────────────────────────────────────────────────── */
+.bm-locked-badge{
+  display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;
+}
+.bm-locked-badge i{color:var(--gold);}
+.bm-locked-desc{font-size:12px;color:var(--dim);margin-bottom:8px;letter-spacing:.03em;}
+.bm-locked-row{
+  display:flex;align-items:center;gap:8px;padding:5px 0;
+  border-bottom:1px solid var(--div);font-size:12px;color:var(--muted);letter-spacing:.02em;
+}
+.bm-locked-row:last-child{border-bottom:none;}
+.bm-locked-row-num{font-size:10px;color:var(--dim);width:18px;text-align:center;flex-shrink:0;}
+.bm-locked-row-name{flex:1;color:var(--sub);}
+
+/* ── Week grid ──────────────────────────────────────────────────────────── */
+.grid-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.grid-hdr-title{font-size:17px;color:var(--cream);letter-spacing:.04em;}
+.grid-nav{display:flex;align-items:center;gap:8px;}
+.grid-nav button{
+  background:var(--stone2);border:1px solid var(--div);border-radius:6px;
+  color:var(--sub);font-size:14px;padding:5px 10px;cursor:pointer;font-family:inherit;
+}
+.grid-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.grid-cell{
+  background:var(--stone);border:1px solid var(--div);border-radius:8px;
+  min-height:78px;padding:7px 6px;position:relative;overflow:hidden;
+}
+.grid-cell.today{border-color:var(--pink);box-shadow:0 0 10px rgba(200,48,112,.15);}
+.grid-cell.today::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--pink2),var(--pink3));
+}
+.grid-cell-day{font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;}
+.grid-cell-num{font-size:16px;color:var(--sub);margin:2px 0 5px;}
+.today .grid-cell-num{color:var(--pink);}
+.grid-card{
+  font-size:9px;letter-spacing:.03em;border-radius:4px;padding:3px 5px;margin-bottom:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.gc-pink{background:rgba(200,48,112,.10);color:var(--pink);}
+.gc-teal{background:rgba(20,144,160,.10);color:var(--teal);}
+.gc-purple{background:rgba(104,64,200,.10);color:var(--purple);}
+.gc-rest{display:flex;align-items:center;justify-content:center;height:40px;color:var(--div2);font-size:18px;}
+
+/* ── Modal ──────────────────────────────────────────────────────────────── */
+.modal-title{font-size:17px;color:var(--cream);margin-bottom:14px;letter-spacing:.03em;}
+.tpl-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--stone2);border:1px solid var(--div);border-radius:8px;
+  padding:10px 12px;margin-bottom:6px;cursor:pointer;
+  transition:border-color .12s;
+}
+.tpl-item:hover{border-color:var(--div2);}
+.tpl-item i{font-size:16px;color:var(--pink);flex-shrink:0;}
+.tpl-item-name{font-size:13px;color:var(--sub);flex:1;letter-spacing:.02em;}
+.tpl-item-meta{font-size:10px;color:var(--dim);letter-spacing:.04em;}
+
+/* ── Bottom nav ─────────────────────────────────────────────────────────── */
+.p-nav{
+  position:fixed;bottom:0;left:0;right:0;height:60px;
+  background:var(--stone);border-top:1px solid var(--div);
+  display:flex;align-items:stretch;z-index:50;
+  box-shadow:0 -4px 20px rgba(160,80,200,.10);
+}
+.p-nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-family:inherit;font-size:9px;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--dim);background:transparent;border:none;cursor:pointer;
+  transition:color .12s;
+}
+.p-nav-item.on{color:var(--teal);}
+.p-nav-item i{font-size:18px;}
+
+/* ── Save bar ───────────────────────────────────────────────────────────── */
+.save-bar{
+  background:var(--stone);border-top:1px solid var(--div);
+  padding:10px 14px;display:flex;align-items:center;gap:10px;margin-top:16px;
+  border-radius:0 0 12px 12px;
+}
+.save-bar-info{flex:1;font-size:11px;color:var(--muted);letter-spacing:.04em;}
+.save-bar-dot{width:7px;height:7px;border-radius:50%;background:var(--pink);display:inline-block;margin-right:5px;}
+
+/* ── Glow accents ───────────────────────────────────────────────────────── */
+.glow-pink{box-shadow:0 0 16px rgba(200,48,112,.18);}
+.glow-teal{box-shadow:0 0 16px rgba(20,144,160,.18);}
+</style>
+</head>
+<body>
+
+<div class="petals">
+  <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+  <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+  <div class="petal"></div><div class="petal"></div>
+</div>
+
+<div class="mbadge">Spirit Blossom Light · Amarante · Criador</div>
+
+<div class="page">
+
+  <!-- Section nav -->
+  <div class="snav">
+    <button class="on" onclick="show('s1',this)">Formulário</button>
+    <button onclick="show('s2',this)">Blocos</button>
+    <button onclick="show('s3',this)">Tipo Picker</button>
+    <button onclick="show('s4',this)">Benchmark</button>
+    <button onclick="show('s5',this)">Modais</button>
+    <button onclick="show('s6',this)">Grade</button>
+  </div>
+
+  <!-- ── S1: Session form ─────────────────────────────────────────────────── -->
+  <div id="s1" class="section on">
+    <div class="app-chrome">
+      <div class="app-tabs">
+        <button class="app-tab on"><i class="ti ti-pencil"></i>Criador</button>
+        <button class="app-tab"><i class="ti ti-users"></i>Atletas</button>
+        <button class="app-tab"><i class="ti ti-barbell"></i>Exerc.</button>
+        <button class="app-tab"><i class="ti ti-calendar"></i>Agenda</button>
+        <button class="app-tab"><i class="ti ti-settings"></i>Config</button>
+      </div>
+      <div class="app-body">
+
+        <div class="sc-card">
+          <div class="sc-hdr">
+            <div>
+              <div class="sc-title">Nova Sessão</div>
+              <div class="sc-subtitle">Treino · 22 jun 2026</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="b bsm"><i class="ti ti-template"></i> Modelo</button>
+              <button class="b bsm"><i class="ti ti-dots-vertical"></i></button>
+            </div>
+          </div>
+
+          <div class="g2">
+            <div class="fg">
+              <span class="lbl">Nome da sessão</span>
+              <input value="Treino Força + MetCon" placeholder="ex: Treino A">
+            </div>
+            <div class="fg">
+              <span class="lbl">Data</span>
+              <input type="date" value="2026-06-22">
+            </div>
+          </div>
+
+          <div class="g2">
+            <div class="fg">
+              <span class="lbl">Horário</span>
+              <input value="06:30">
+            </div>
+            <div class="fg">
+              <span class="lbl">Modalidade</span>
+              <select>
+                <option selected>CrossFit</option>
+                <option>Weightlifting</option>
+                <option>Endurance</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom:10px;">
+            <span class="lbl">Atletas</span>
+            <button class="cr-athletes-btn">
+              <div class="cr-ath-avatars">
+                <div class="cr-ath-av">R</div>
+                <div class="cr-ath-av">A</div>
+                <div class="cr-ath-av">L</div>
+              </div>
+              <div class="cr-ath-text">
+                <div class="cr-ath-label">3 atletas selecionados</div>
+                <div class="cr-ath-names">Rod, Ana, Leo +5</div>
+              </div>
+              <i class="ti ti-chevron-right" style="color:var(--div2);font-size:14px;"></i>
+            </button>
+          </div>
+
+          <div class="fg">
+            <span class="lbl">Nota geral</span>
+            <textarea placeholder="Observações sobre a sessão..."></textarea>
+          </div>
+        </div>
+
+        <div class="sc-card" style="display:flex;align-items:center;gap:12px;padding:12px 16px;">
+          <i class="ti ti-eye" style="font-size:18px;color:var(--teal);"></i>
+          <div style="flex:1;">
+            <div style="font-size:14px;color:var(--sub);letter-spacing:.02em;">Publicar sessão</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px;letter-spacing:.03em;">Visível para atletas no schedule</div>
+          </div>
+          <div style="width:40px;height:22px;background:var(--teal);border-radius:11px;position:relative;cursor:pointer;">
+            <div style="position:absolute;right:2px;top:2px;width:18px;height:18px;background:#fff;border-radius:50%;"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S2: Blocks ────────────────────────────────────────────────────────── -->
+  <div id="s2" class="section">
+    <div class="app-chrome">
+      <div class="app-tabs">
+        <button class="app-tab on"><i class="ti ti-pencil"></i>Criador</button>
+        <button class="app-tab"><i class="ti ti-users"></i>Atletas</button>
+      </div>
+      <div class="app-body">
+
+        <div class="blk-bar bc-teal">
+          <div class="blk-bar-color"></div>
+          <div class="blk-bar-body">
+            <div class="blk-bar-top">
+              <span class="blk-type-tag">Aquecimento</span>
+              <span class="blk-bar-label">Mobilidade Geral</span>
+            </div>
+            <div class="blk-bar-meta">3 exercícios · 15 min</div>
+          </div>
+          <div class="blk-bar-actions">
+            <button class="blk-action"><i class="ti ti-chevron-down"></i></button>
+            <button class="blk-action"><i class="ti ti-grip-vertical"></i></button>
+            <button class="blk-action"><i class="ti ti-dots"></i></button>
+          </div>
+        </div>
+
+        <!-- Expanded block -->
+        <div class="blk-body">
+          <div class="blk-body-header">
+            <span class="blk-type-tag" style="background:rgba(104,64,200,.10);color:var(--purple);font-size:9px;padding:2px 7px;border-radius:4px;letter-spacing:.09em;text-transform:uppercase;">Força</span>
+            <input class="blk-name-inp" value="Back Squat">
+            <button class="blk-action" style="color:var(--div2);"><i class="ti ti-chevron-up"></i></button>
+          </div>
+
+          <div class="blk-meta-row">
+            <div class="blk-meta-field">
+              <span>Duração</span>
+              <input value="20 min">
+            </div>
+            <div class="blk-meta-field">
+              <span>Zona</span>
+              <select><option>Zona 01</option><option>Zona 02</option></select>
+            </div>
+            <div class="blk-meta-field">
+              <span>Rounds</span>
+              <input value="5">
+            </div>
+          </div>
+
+          <div style="border:1px solid var(--div);border-radius:7px;padding:4px 10px;margin-bottom:10px;">
+            <div class="ex-row">
+              <i class="ti ti-grip-vertical ex-drag"></i>
+              <input class="ex-name-inp" value="Back Squat">
+              <div class="ex-mini">
+                <input placeholder="séries" value="5">
+                <input placeholder="reps" value="3">
+              </div>
+              <span class="ex-load-badge">@85% RM</span>
+              <button class="ex-del"><i class="ti ti-x"></i></button>
+            </div>
+            <div class="ex-row">
+              <i class="ti ti-grip-vertical ex-drag"></i>
+              <input class="ex-name-inp" value="Romanian Deadlift">
+              <div class="ex-mini">
+                <input placeholder="séries" value="3">
+                <input placeholder="reps" value="8">
+              </div>
+              <span class="ex-load-badge">60 kg</span>
+              <button class="ex-del"><i class="ti ti-x"></i></button>
+            </div>
+            <div class="ex-add-row">
+              <i class="ti ti-plus" style="color:var(--div2);font-size:13px;"></i>
+              <input class="ex-add-inp" placeholder="Adicionar exercício...">
+            </div>
+          </div>
+
+          <div class="fg" style="margin-bottom:8px;">
+            <span class="lbl">Notas do bloco</span>
+            <textarea class="blk-notes-quick" placeholder="Instruções, escalas, contexto..."></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button class="b bsm"><i class="ti ti-copy"></i> Duplicar</button>
+            <button class="b bsm bdanger"><i class="ti ti-trash"></i> Remover</button>
+          </div>
+        </div>
+
+        <!-- Benchmark locked block -->
+        <div class="blk-body bc-bm" style="border-color:rgba(160,120,8,.2);">
+          <div class="blk-body-header">
+            <span class="blk-type-tag" style="background:rgba(160,120,8,.10);color:var(--gold);font-size:9px;padding:2px 7px;border-radius:4px;letter-spacing:.09em;text-transform:uppercase;">Benchmark</span>
+            <span style="font-size:16px;color:var(--cream);flex:1;letter-spacing:.03em;">Fran</span>
+          </div>
+          <div class="bm-locked-badge">
+            <i class="ti ti-lock"></i> Benchmark oficial · somente leitura
+          </div>
+          <div class="bm-locked-desc">21-15-9 · Thrusters + Pull-ups</div>
+          <div style="border:1px solid var(--div);border-radius:7px;padding:4px 10px;margin-bottom:10px;">
+            <div class="bm-locked-row">
+              <span class="bm-locked-row-num">1</span>
+              <span class="bm-locked-row-name">21-15-9 Thruster</span>
+              <span class="ex-load-badge">43 kg ♂ · 30 kg ♀</span>
+            </div>
+            <div class="bm-locked-row">
+              <span class="bm-locked-row-num">2</span>
+              <span class="bm-locked-row-name">21-15-9 Pull-up</span>
+            </div>
+          </div>
+          <div class="fg" style="margin-bottom:8px;">
+            <span class="lbl">Nota do coach</span>
+            <textarea class="blk-notes-quick" placeholder="Escala, adaptações, contexto para hoje..."></textarea>
+          </div>
+          <div class="blk-meta-row">
+            <div class="blk-meta-field">
+              <span>Zona</span>
+              <select><option>Zona 01</option><option selected>Zona 02</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="blk-bar bc-pink">
+          <div class="blk-bar-color"></div>
+          <div class="blk-bar-body">
+            <div class="blk-bar-top">
+              <span class="blk-type-tag">For Time</span>
+              <span class="blk-bar-label">Box Jump + KB Swing</span>
+            </div>
+            <div class="blk-bar-meta">12 min cap · 3 exercícios</div>
+          </div>
+          <div class="blk-bar-actions">
+            <button class="blk-action"><i class="ti ti-chevron-down"></i></button>
+            <button class="blk-action"><i class="ti ti-grip-vertical"></i></button>
+          </div>
+        </div>
+
+        <button class="b bfull" style="margin-top:10px;border-style:dashed;color:var(--dim);">
+          <i class="ti ti-plus"></i> Adicionar bloco
+        </button>
+
+        <div class="save-bar">
+          <div class="save-bar-info"><span class="save-bar-dot"></span>3 blocos · alterações não salvas</div>
+          <button class="b bsm bteal">Salvar</button>
+          <button class="b bsm bprimary">Publicar</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S3: Block type picker ─────────────────────────────────────────────── -->
+  <div id="s3" class="section">
+    <div style="position:relative;min-height:520px;background:var(--stone);border:1px solid var(--div);border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(160,80,200,.08);">
+      <div style="padding:14px;opacity:.35;pointer-events:none;">
+        <div class="blk-bar bc-purple" style="margin-bottom:0;">
+          <div class="blk-bar-color"></div>
+          <div class="blk-bar-body">
+            <div class="blk-bar-top"><span class="blk-type-tag">Força</span><span class="blk-bar-label">Back Squat</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute;bottom:0;left:0;right:0;background:var(--stone);border:1px solid var(--div);border-radius:16px 16px 0 0;padding:20px 18px;">
+        <div style="width:36px;height:3px;border-radius:2px;background:var(--div);margin:0 auto 18px;"></div>
+        <div class="btp-header">
+          <span>Qual tipo de bloco?</span>
+        </div>
+        <div class="btp-grid">
+          <button class="btp-tile bt-pink"><i class="ti ti-flame"></i><div class="btp-tile-name">WOD / MetCon</div></button>
+          <button class="btp-tile bt-pink"><i class="ti ti-clock"></i><div class="btp-tile-name">For Time</div></button>
+          <button class="btp-tile bt-pink"><i class="ti ti-repeat"></i><div class="btp-tile-name">AMRAP</div></button>
+          <button class="btp-tile bt-teal"><i class="ti ti-timer"></i><div class="btp-tile-name">EMOM</div></button>
+          <button class="btp-tile bt-purple"><i class="ti ti-barbell"></i><div class="btp-tile-name">Força</div></button>
+          <button class="btp-tile bt-purple"><i class="ti ti-shield"></i><div class="btp-tile-name">LPO</div></button>
+          <button class="btp-tile bt-green"><i class="ti ti-wind"></i><div class="btp-tile-name">Aquecimento</div></button>
+          <button class="btp-tile bt-green"><i class="ti ti-run"></i><div class="btp-tile-name">Cardio</div></button>
+          <button class="btp-tile bt-gold"><i class="ti ti-trophy"></i><div class="btp-tile-name">Benchmark</div></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S4: Benchmark ─────────────────────────────────────────────────────── -->
+  <div id="s4" class="section">
+
+    <div style="background:var(--stone);border:1px solid var(--div);border-radius:12px;padding:20px 18px;margin-bottom:20px;box-shadow:0 2px 12px rgba(160,80,200,.08);">
+      <div style="width:36px;height:3px;border-radius:2px;background:var(--div);margin:0 auto 18px;"></div>
+      <div class="btp-header">
+        <button class="b bsm"><i class="ti ti-chevron-left"></i></button>
+        <span>Escolha o Benchmark</span>
+      </div>
+      <div class="bm-cat-grid">
+        <button class="bm-cat-card bm-cat-girls">
+          <i class="ti ti-venus"></i>
+          <div class="bm-cat-name">Girls</div>
+        </button>
+        <button class="bm-cat-card bm-cat-heroes">
+          <i class="ti ti-shield-star"></i>
+          <div class="bm-cat-name">Heroes</div>
+        </button>
+        <button class="bm-cat-card bm-cat-custom">
+          <i class="ti ti-sparkles"></i>
+          <div class="bm-cat-name">Custom</div>
+        </button>
+      </div>
+    </div>
+
+    <div style="background:var(--stone);border:1px solid var(--div);border-radius:12px;padding:20px 18px;box-shadow:0 2px 12px rgba(160,80,200,.08);">
+      <div style="width:36px;height:3px;border-radius:2px;background:var(--div);margin:0 auto 18px;"></div>
+      <div class="btp-header">
+        <button class="b bsm"><i class="ti ti-chevron-left"></i></button>
+        <span>Girls</span>
+      </div>
+      <div class="bm-list">
+        <button class="bm-list-item">
+          <div class="bm-list-top">
+            <span class="bm-list-name">Fran</span>
+            <span class="bm-list-type">For Time</span>
+            <span class="bm-list-cap">10 min</span>
+          </div>
+          <div class="bm-list-desc">21-15-9 · Thrusters + Pull-ups</div>
+        </button>
+        <button class="bm-list-item">
+          <div class="bm-list-top">
+            <span class="bm-list-name">Grace</span>
+            <span class="bm-list-type">For Time</span>
+            <span class="bm-list-cap">10 min</span>
+          </div>
+          <div class="bm-list-desc">30 Clean & Jerks · 60 kg ♂ / 43 kg ♀</div>
+        </button>
+        <button class="bm-list-item">
+          <div class="bm-list-top">
+            <span class="bm-list-name">Helen</span>
+            <span class="bm-list-type">For Time</span>
+            <span class="bm-list-cap">15 min</span>
+          </div>
+          <div class="bm-list-desc">3 rounds: 400 m Run + 21 KB Swings + 12 Pull-ups</div>
+        </button>
+        <button class="bm-list-item">
+          <div class="bm-list-top">
+            <span class="bm-list-name">Annie</span>
+            <span class="bm-list-type">For Time</span>
+            <span class="bm-list-cap">15 min</span>
+          </div>
+          <div class="bm-list-desc">50-40-30-20-10 · Double-unders + Sit-ups</div>
+        </button>
+        <button class="bm-list-item">
+          <div class="bm-list-top">
+            <span class="bm-list-name">Cindy</span>
+            <span class="bm-list-type">AMRAP</span>
+            <span class="bm-list-cap">20 min</span>
+          </div>
+          <div class="bm-list-desc">5 Pull-ups + 10 Push-ups + 15 Air Squats</div>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── S5: Modais ─────────────────────────────────────────────────────────── -->
+  <div id="s5" class="section">
+
+    <div style="background:var(--stone);border:1px solid var(--div);border-radius:14px;padding:20px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(160,80,200,.08);">
+      <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--pink3)40,var(--teal)60,transparent);opacity:.6;"></div>
+      <div class="modal-title"><i class="ti ti-template" style="color:var(--pink);margin-right:6px;"></i>Modelos Salvos</div>
+      <div class="tpl-item">
+        <i class="ti ti-layout-list"></i>
+        <div>
+          <div class="tpl-item-name">Treino A — Força + Metcon</div>
+          <div class="tpl-item-meta">4 blocos · salvo 18 jun</div>
+        </div>
+      </div>
+      <div class="tpl-item">
+        <i class="ti ti-layout-list"></i>
+        <div>
+          <div class="tpl-item-name">Endurance · Fartlek 5km</div>
+          <div class="tpl-item-meta">3 blocos · salvo 15 jun</div>
+        </div>
+      </div>
+      <div class="tpl-item">
+        <i class="ti ti-layout-list"></i>
+        <div>
+          <div class="tpl-item-name">Mobilidade + Skill</div>
+          <div class="tpl-item-meta">2 blocos · salvo 10 jun</div>
+        </div>
+      </div>
+      <button class="b bfull" style="margin-top:12px;border-style:dashed;color:var(--dim);font-size:11px;">
+        <i class="ti ti-plus"></i> Salvar sessão atual como modelo
+      </button>
+    </div>
+
+    <div style="margin-bottom:20px;padding:10px 14px;background:var(--stone2);border:1px solid var(--div2);border-radius:10px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:12px;color:var(--sub);flex:1;letter-spacing:.03em;">Bloco "Back Squat" removido</span>
+      <button style="font-size:12px;color:var(--teal);background:transparent;border:none;cursor:pointer;font-family:inherit;letter-spacing:.06em;text-transform:uppercase;">Desfazer</button>
+    </div>
+
+    <div style="background:var(--stone);border:1px solid var(--div);border-radius:14px;padding:20px;position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(160,80,200,.08);">
+      <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--teal)40,var(--pink3)60,transparent);opacity:.6;"></div>
+      <div class="modal-title"><i class="ti ti-users" style="color:var(--teal);margin-right:6px;"></i>Selecionar Atletas</div>
+      <div style="margin-bottom:10px;">
+        <input style="width:100%;font-family:inherit;font-size:13px;background:var(--bg);border:1px solid var(--div);border-radius:6px;color:var(--cream);padding:8px 11px;outline:none;letter-spacing:.02em;" placeholder="Buscar atleta...">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--stone2);border:1px solid rgba(200,48,112,.3);border-radius:8px;">
+          <div class="cr-ath-av" style="background:linear-gradient(135deg,var(--pink2),var(--pink3));">R</div>
+          <span style="flex:1;font-size:13px;color:var(--sub);letter-spacing:.02em;">Rodrigo Medrado</span>
+          <i class="ti ti-check" style="color:var(--pink);font-size:16px;"></i>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--stone2);border:1px solid var(--div);border-radius:8px;">
+          <div class="cr-ath-av" style="background:linear-gradient(135deg,var(--teal2),var(--teal));">A</div>
+          <span style="flex:1;font-size:13px;color:var(--sub);letter-spacing:.02em;">Ana Flores</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--stone2);border:1px solid var(--div);border-radius:8px;">
+          <div class="cr-ath-av" style="background:linear-gradient(135deg,var(--purple),#8060d8);">L</div>
+          <span style="flex:1;font-size:13px;color:var(--sub);letter-spacing:.02em;">Leo Santos</span>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="b bsm" style="flex:1;">Cancelar</button>
+        <button class="b bsm bprimary" style="flex:1;">Confirmar (1)</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── S6: Week grid ─────────────────────────────────────────────────────── -->
+  <div id="s6" class="section">
+    <div class="app-chrome">
+      <div class="app-tabs">
+        <button class="app-tab"><i class="ti ti-pencil"></i>Criador</button>
+        <button class="app-tab on"><i class="ti ti-layout-grid"></i>Grade</button>
+      </div>
+      <div class="app-body">
+
+        <div class="grid-hdr">
+          <div class="grid-hdr-title">Jun 2026</div>
+          <div class="grid-nav">
+            <button><i class="ti ti-chevron-left"></i></button>
+            <button style="font-size:12px;color:var(--teal);letter-spacing:.05em;">Hoje</button>
+            <button><i class="ti ti-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;">
+          <div style="font-size:8px;color:var(--dim);text-align:center;letter-spacing:.06em;text-transform:uppercase;">Dom</div>
+          <div style="font-size:8px;color:var(--dim);text-align:center;letter-spacing:.06em;text-transform:uppercase;">Seg</div>
+          <div style="font-size:8px;color:var(--dim);text-align:center;letter-spacing:.06em;text-transform:uppercase;">Ter</div>
+          <div style="font-size:8px;color:var(--dim);text-align:center;letter-spacing:.06em;text-transform:uppercase;">Qua</div>
+          <div style="font-size:8px;color:var(--dim);text-align:center;letter-spacing:.06em;text-transform:uppercase;">Qui</div>
+          <div style="font-size:8px;color:var(--dim);text-align:center;letter-spacing:.06em;text-transform:uppercase;">Sex</div>
+          <div style="font-size:8px;color:var(--dim);text-align:center;letter-spacing:.06em;text-transform:uppercase;">Sáb</div>
+        </div>
+
+        <div class="grid-week">
+          <div class="grid-cell">
+            <div class="grid-cell-day">Dom</div>
+            <div class="grid-cell-num">14</div>
+            <div class="gc-rest"><i class="ti ti-moon"></i></div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-cell-day">Seg</div>
+            <div class="grid-cell-num">15</div>
+            <div class="grid-card gc-purple">Força A</div>
+            <div class="grid-card gc-pink">MetCon 12'</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-cell-day">Ter</div>
+            <div class="grid-cell-num">16</div>
+            <div class="grid-card gc-teal">Cardio</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-cell-day">Qua</div>
+            <div class="grid-cell-num">17</div>
+            <div class="grid-card gc-purple">LPO</div>
+            <div class="grid-card gc-pink">AMRAP 20'</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-cell-day">Qui</div>
+            <div class="grid-cell-num">18</div>
+            <div class="gc-rest"><i class="ti ti-moon"></i></div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-cell-day">Sex</div>
+            <div class="grid-cell-num">19</div>
+            <div class="grid-card gc-pink">Fran</div>
+            <div class="grid-card gc-purple">Força B</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-cell-day">Sáb</div>
+            <div class="grid-cell-num">20</div>
+            <div class="grid-card gc-teal">WOD Equipe</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-cell-day">Dom</div>
+            <div class="grid-cell-num">21</div>
+            <div class="gc-rest"><i class="ti ti-moon"></i></div>
+          </div>
+          <div class="grid-cell today">
+            <div class="grid-cell-day">Seg</div>
+            <div class="grid-cell-num">22</div>
+            <div class="grid-card gc-purple">Back Squat</div>
+            <div class="grid-card gc-pink">For Time</div>
+          </div>
+          <div class="grid-cell"><div class="grid-cell-day">Ter</div><div class="grid-cell-num">23</div></div>
+          <div class="grid-cell"><div class="grid-cell-day">Qua</div><div class="grid-cell-num">24</div></div>
+          <div class="grid-cell"><div class="grid-cell-day">Qui</div><div class="grid-cell-num">25</div></div>
+          <div class="grid-cell"><div class="grid-cell-day">Sex</div><div class="grid-cell-num">26</div></div>
+          <div class="grid-cell"><div class="grid-cell-day">Sáb</div><div class="grid-cell-num">27</div></div>
+        </div>
+
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);letter-spacing:.04em;">
+            <div style="width:8px;height:8px;border-radius:2px;background:var(--pink);"></div>WOD
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);letter-spacing:.04em;">
+            <div style="width:8px;height:8px;border-radius:2px;background:var(--purple);"></div>Força/LPO
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);letter-spacing:.04em;">
+            <div style="width:8px;height:8px;border-radius:2px;background:var(--teal);"></div>Cardio/Skill
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<div class="p-nav">
+  <button class="p-nav-item"><i class="ti ti-home"></i>Início</button>
+  <button class="p-nav-item"><i class="ti ti-trophy"></i>Ranking</button>
+  <button class="p-nav-item"><i class="ti ti-chart-bar"></i>Results</button>
+  <button class="p-nav-item on"><i class="ti ti-user"></i>Perfil</button>
+  <button class="p-nav-item"><i class="ti ti-calendar"></i>Agenda</button>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.snav button').forEach(b => b.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+}
+</script>
+</body>
+</html>
