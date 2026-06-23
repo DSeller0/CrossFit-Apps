@@ -24,20 +24,22 @@ jobs:
         run: npm ci
         working-directory: cone
 
-      - name: Build Cone app
-        run: npm run build
+      - name: Build Cone app and public pages
+        run: npm run build:all
         working-directory: cone
 
       - name: Assemble deploy folder
         run: |
           mkdir -p deploy/cone
-          # Public pages and assets at root
-          cp athletes.html leaderboard.html schedule.html recover.html index.html me.html results.html timer.html log.html deploy/
-          cp themes.css cone-client.js cone-utils.js config.json manifest.json sw.js deploy/
+          # Public pages build (HTML + fingerprinted assets)
+          cp -r public-dist/. deploy/
+          # React app build
+          cp -r cone/dist/. deploy/cone/
+          # Static files not processed by Vite
+          # cone-client.js and cone-utils.js are classic scripts — Vite skips them
+          cp cone-client.js cone-utils.js config.json manifest.json sw.js deploy/
           cp icon-192.png icon-512.png deploy/
           cp -f icon-192.jpeg icon-512.jpeg deploy/ 2>/dev/null || true
-          # Vite build goes into cone/ subfolder
-          cp -r cone/dist/. deploy/cone/
 
       - name: Deploy to gh-pages branch
         uses: JamesIves/github-pages-deploy-action@v4
