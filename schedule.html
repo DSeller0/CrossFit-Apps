@@ -301,7 +301,13 @@ function openTimer(blockId,sessId,dateKey){
   if(bl.type==='Estações'){
     const nonRest=(bl.stations||[]).filter(st=>!st.isRest);
     const rest=(bl.stations||[]).filter(st=>st.isRest);
-    exercises=nonRest.map(st=>({name:st.name||(st.exercises||[]).map(e=>e.name).filter(Boolean).join(' + ')}));
+    exercises=nonRest.map(st=>({
+      name:st.name||'Grupo',
+      exercises:(st.exercises||[]).filter(e=>e.name||e.isComplex).map(e=>({
+        name:e.isComplex?(e.name||(e.complexMovements||[]).map(m=>m.name).filter(Boolean).join(' + ')):e.name,
+        sets:e.sets,reps:e.reps
+      }))
+    }));
     if(nonRest[0]?.duration)stationTime=Math.round(parseDurMins(nonRest[0].duration)*60);
     if(rest[0]?.duration)transitionTime=Math.round(parseDurMins(rest[0].duration)*60);
   }else{
