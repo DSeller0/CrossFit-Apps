@@ -18,6 +18,11 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--cream);font-family:var(--font)}
 #root{height:100dvh;height:100%;display:flex;flex-direction:column;overflow:hidden}
+/* desktop center column */
+@media(min-width:600px){
+  body{display:flex;justify-content:center}
+  #root{max-width:520px;width:100%;border-left:1px solid var(--div);border-right:1px solid var(--div)}
+}
 
 /* ── Header ── */
 .t-hdr{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--div);flex-shrink:0}
@@ -67,16 +72,19 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--cream);fo
 .t-splits{display:flex;flex-wrap:wrap;gap:2px 10px;padding:4px 0 6px;border-bottom:1px solid var(--div);margin-bottom:4px}
 .t-split-item{font-size:10px;font-weight:700;color:var(--sub)}
 .t-split-item b{color:var(--dim);font-weight:400}
-.t-ex{padding:5px 0;font-size:12px;color:var(--sub);font-weight:600;border-bottom:1px solid rgba(42,35,28,.35);display:flex;align-items:center;gap:8px}
+.t-ex{padding:6px 6px;font-size:13px;color:var(--sub);font-weight:600;border-bottom:1px solid rgba(42,35,28,.35);display:flex;align-items:flex-start;gap:10px;border-radius:4px;margin:0 -6px}
 .t-ex:last-child{border-bottom:none}
-.t-ex.active{color:var(--cream);font-weight:800}
+.t-ex.active{color:var(--cream);font-weight:800;background:rgba(74,200,192,.06)}
 .t-ex.done-s{color:var(--dim)}
-.t-ex-dot{width:5px;height:5px;border-radius:50%;background:var(--div);flex-shrink:0}
+.t-ex-dot{width:6px;height:6px;border-radius:50%;background:var(--div);flex-shrink:0;margin-top:5px}
 .t-ex.active .t-ex-dot{background:var(--teal)}
+.t-ex-body{flex:1;min-width:0}
+.t-sub-ex{font-size:11px;color:var(--muted);font-weight:500;margin-top:3px;padding-left:1px;line-height:1.4}
+.t-ex.active .t-sub-ex{color:var(--sub)}
 
 /* ── Controls ── */
 .t-ctrl{flex-shrink:0;display:flex;gap:8px;padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--div)}
-.t-btn{flex:1;padding:16px 8px;border:none;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.04em;-webkit-tap-highlight-color:transparent;transition:opacity .12s;line-height:1}
+.t-btn{flex:1;padding:16px 8px;border:none;border-radius:4px;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.04em;-webkit-tap-highlight-color:transparent;transition:opacity .12s;line-height:1}
 .t-btn:active{opacity:.65}
 .t-btn-lap{background:var(--stone2);border:1px solid var(--div);color:var(--sub);flex:.55}
 .t-btn-pause{background:var(--stone2);border:1px solid var(--div);color:var(--cream);font-size:16px}
@@ -93,9 +101,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--cream);fo
 .t-r-label{font-size:20px;font-weight:900;color:var(--cream);line-height:1.2;margin-top:6px}
 .t-r-meta{font-size:11px;color:var(--muted);margin-top:3px}
 .t-r-exlist{display:flex;flex-direction:column}
-.t-r-ex{padding:6px 0;font-size:12px;color:var(--sub);font-weight:600;border-bottom:1px solid rgba(42,35,28,.4);display:flex;align-items:center;gap:8px}
+.t-r-ex{padding:7px 0;font-size:13px;color:var(--sub);font-weight:600;border-bottom:1px solid rgba(42,35,28,.4);display:flex;align-items:flex-start;gap:10px}
 .t-r-ex:last-child{border-bottom:none}
-.t-r-dot{width:5px;height:5px;border-radius:50%;background:var(--teal);flex-shrink:0}
+.t-r-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;margin-top:4px}
+.t-r-ex-body{flex:1;min-width:0}
+.t-r-sub-ex{font-size:11px;color:var(--muted);font-weight:500;margin-top:3px;padding-left:1px;line-height:1.4}
 
 /* ── Finished screen ── */
 .t-fin-body{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;align-items:center;gap:4px}
@@ -129,12 +139,24 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--cream);fo
 .t-est-opts{display:flex;gap:8px}
 
 @media(min-width:600px){
-  .t-ring-wrap{width:min(240px,50vw,38vh);height:min(240px,50vw,38vh)}
-  .t-clock{font-size:clamp(44px,10vw,68px)}
-  .t-round{font-size:12px}
-  .t-btn{padding:18px 10px;font-size:14px}
+  .t-ring-wrap{width:min(268px,52%,44vh);height:min(268px,52%,44vh)}
+  .t-clock{font-size:clamp(48px,11vw,72px)}
+  .t-clock-lbl{font-size:9px}
+  .t-round{font-size:13px;padding:0 8px}
+  .t-btn{padding:20px 10px;font-size:15px}
   .t-r-label{font-size:24px}
+  .t-r-ex{font-size:14px}
+  .t-r-sub-ex{font-size:12px}
   .t-fin-time{font-size:84px}
+  .t-ex{font-size:14px;padding:8px 6px}
+  .t-sub-ex{font-size:12px}
+  .t-scroll{padding:6px 20px 6px}
+  .t-ctrl{padding:12px 20px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .t-hdr{padding:12px 20px 10px}
+  .t-ready-body{padding:18px 20px}
+  .t-cfg{padding:18px 20px}
+  .t-fin-body{padding:20px}
+  .t-ring-area{padding:14px 20px 6px}
 }
 </style>
 </head>
@@ -385,7 +407,12 @@ function renderReady(){
     cfg.rounds?`${cfg.rounds} rounds`:'',
     bt==='Estações'?`${cfg.stationTime||45}s / ${cfg.transitionTime||15}s transição`:''
   ].filter(Boolean);
-  const exHtml=exes.map(ex=>`<div class="t-r-ex"><span class="t-r-dot"></span>${esc(exLabel(ex))}</div>`).join('');
+  const exHtml=exes.map(ex=>{
+    const subHtml=(bt==='Estações'&&ex.exercises?.length)
+      ?`<div class="t-r-sub-list">${ex.exercises.map(se=>`<div class="t-r-sub-ex">${esc(exLabel(se))}</div>`).join('')}</div>`
+      :'';
+    return`<div class="t-r-ex"><span class="t-r-dot"></span><div class="t-r-ex-body">${esc(exLabel(ex))}${subHtml}</div></div>`;
+  }).join('');
   return`${renderHdr()}
   <div class="t-ready-body">
     <div>
@@ -466,7 +493,10 @@ function renderRunning(){
     let cls='t-ex';
     if(bt==='Estações'){const{idx}=stInfo();const ph=stPhase();if(i===idx&&ph==='work')cls+=' active';else if(i<idx&&stInfo().round===0)cls+=' done-s';}
     else if(bt==='EMOM'&&exes.length>0){const curIdx=Math.floor(elapsed()/60)%exes.length;if(i===curIdx)cls+=' active';else if(i<curIdx)cls+=' done-s';}
-    return`<div class="${cls}"><span class="t-ex-dot"></span>${esc(exLabel(ex))}</div>`;
+    const subHtml=(bt==='Estações'&&ex.exercises?.length)
+      ?`<div class="t-sub-list">${ex.exercises.map(se=>`<div class="t-sub-ex">${esc(exLabel(se))}</div>`).join('')}</div>`
+      :'';
+    return`<div class="${cls}"><span class="t-ex-dot"></span><div class="t-ex-body">${esc(exLabel(ex))}${subHtml}</div></div>`;
   }).join('');
 
   const showLap=bt!=='EMOM'&&bt!=='Estações';
