@@ -1,0 +1,142 @@
+/* ── Header ── */
+.hdr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--div);
+  flex-shrink: 0;
+}
+.back {
+  background: none;
+  border: none;
+  color: var(--sub);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 10px 4px 0;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
+}
+.hdrMid { flex: 1; min-width: 0; }
+.type { font-size: 9px; font-weight: 700; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+.label { font-size: 13px; font-weight: 800; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.capTag { font-size: 10px; color: var(--muted); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+
+/* ── Running body ── */
+.body { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── Ring ── */
+.ringArea { flex-shrink: 0; display: flex; justify-content: center; padding: 12px 16px 5px; }
+.ringWrap { position: relative; width: min(216px,58vw,42vh); height: min(216px,58vw,42vh); }
+.ringSvg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ringTrack { fill: none; stroke: var(--stone2); stroke-width: 11; }
+.ringFill { fill: none; stroke-width: 11; stroke-linecap: round; transition: stroke-dashoffset .35s linear, stroke .4s ease; }
+.ringInner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+
+/* ── Clock ── */
+.clock { font-size: clamp(40px,12.5vw,62px); font-weight: 900; letter-spacing: -.02em; line-height: 1; color: var(--cream); font-variant-numeric: tabular-nums; transition: color .3s; }
+.warn   { color: var(--gold); }
+.paused { color: var(--dim); }
+.clockLbl { font-size: 8px; color: var(--muted); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-top: 2px; }
+.round { font-size: 11px; font-weight: 700; color: var(--sub); letter-spacing: .06em; text-align: center; padding: 0 6px; }
+
+/* ── Scroll + exercises ── */
+.scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 5px 16px 4px; }
+.splits { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 4px 0 6px; border-bottom: 1px solid var(--div); margin-bottom: 4px; }
+.splitItem { font-size: 10px; font-weight: 700; color: var(--sub); }
+.splitLbl { color: var(--dim); font-weight: 400; }
+.ex { padding: 7px 6px; font-size: 13px; color: var(--sub); font-weight: 600; border-bottom: 1px solid rgba(42,35,28,.35); display: flex; align-items: flex-start; gap: 10px; border-radius: 4px; margin: 0 -6px; }
+.ex:last-child { border-bottom: none; }
+.exActive { color: var(--cream); font-weight: 800; background: rgba(74,200,192,.06); }
+.exDone { color: var(--dim); }
+.exDot { width: 6px; height: 6px; border-radius: 50%; background: var(--div); flex-shrink: 0; margin-top: 5px; }
+.exActive .exDot { background: var(--teal); }
+.exBody { flex: 1; min-width: 0; }
+.subEx { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 3px; padding-left: 1px; line-height: 1.4; }
+.exActive .subEx { color: var(--sub); }
+
+/* ── Controls ── */
+.ctrl { flex-shrink: 0; display: flex; gap: 8px; padding: 11px 16px; padding-bottom: calc(11px + env(safe-area-inset-bottom,0px)); border-top: 1px solid var(--div); }
+.btn { flex: 1; padding: 18px 8px; border: none; border-radius: 4px; font-family: var(--font); font-size: 14px; font-weight: 800; cursor: pointer; letter-spacing: .04em; -webkit-tap-highlight-color: transparent; transition: opacity .12s; line-height: 1; }
+.btn:active { opacity: .65; }
+.btnLap    { background: var(--stone2); border: 1px solid var(--div); color: var(--sub); flex: .55; }
+.btnPause  { background: var(--stone2); border: 1px solid var(--div); color: var(--cream); font-size: 16px; }
+.btnDone   { background: var(--stone2); border: 1px solid var(--teal); color: var(--teal); flex: .55; }
+.btnStart  { background: var(--teal); color: #000; font-size: 15px; }
+.btnResume { background: var(--gold); color: #000; font-size: 15px; }
+.btnReg    { background: var(--gold); color: #000; flex: 2; font-size: 14px; }
+.btnDisc   { background: transparent; border: 1px solid var(--div); color: var(--muted); }
+.btnClose  { background: var(--stone2); border: 1px solid var(--div); color: var(--sub); }
+
+/* ── Ready screen ── */
+.readyBody { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.badge { display: inline-block; padding: 3px 10px; font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--teal); color: var(--teal); }
+.rLabel { font-size: 22px; font-weight: 900; color: var(--cream); line-height: 1.2; margin-top: 6px; }
+.rMeta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.rExlist { display: flex; flex-direction: column; }
+.rEx { padding: 8px 0; font-size: 14px; color: var(--sub); font-weight: 600; border-bottom: 1px solid rgba(42,35,28,.4); display: flex; align-items: flex-start; gap: 10px; }
+.rEx:last-child { border-bottom: none; }
+.rDot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); flex-shrink: 0; margin-top: 4px; }
+.rExBody { flex: 1; min-width: 0; }
+.rSubEx { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 3px; padding-left: 1px; line-height: 1.4; }
+
+/* ── Finished screen ── */
+.finBody { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.finTtl { font-size: 9px; font-weight: 700; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+.finTime { font-size: 74px; font-weight: 900; color: var(--teal); line-height: 1; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.finRounds { font-size: 12px; color: var(--sub); font-weight: 700; margin-top: 4px; }
+.finSplitTtl { font-size: 9px; font-weight: 700; letter-spacing: .1em; color: var(--dim); text-transform: uppercase; align-self: flex-start; margin-top: 14px; margin-bottom: 5px; }
+.finSplitGrid { display: grid; grid-template-columns: repeat(auto-fill,minmax(66px,1fr)); gap: 5px; width: 100%; }
+.finSplitCell { background: var(--stone); padding: 6px 8px; text-align: center; }
+.finSplitN { font-size: 8px; color: var(--muted); font-weight: 700; }
+.finSplitV { font-size: 13px; color: var(--cream); font-weight: 800; }
+
+/* ── Recentes ── */
+.recentes { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+.recTtl { font-size: 8px; font-weight: 700; letter-spacing: .1em; color: var(--dim); text-transform: uppercase; margin-bottom: 2px; }
+.recItem { background: var(--stone); border: 1px solid var(--div); padding: 9px 12px; display: flex; align-items: center; gap: 10px; }
+.recInfo { flex: 1; min-width: 0; }
+.recName { font-size: 10px; font-weight: 700; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recT { font-size: 18px; font-weight: 900; color: var(--cream); }
+.recDate { font-size: 9px; color: var(--muted); }
+.recBtn { padding: 5px 10px; background: transparent; border: 1px solid var(--gold2); color: var(--gold); font-family: var(--font); font-size: 9px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; flex-shrink: 0; letter-spacing: .06em; }
+
+/* ── Config form ── */
+.cfg { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.cfgLbl { font-size: 9px; font-weight: 700; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
+.cfgRow { display: flex; gap: 8px; }
+.cfgSel, .cfgInp, .cfgTa { background: var(--stone2); border: 1px solid var(--div); color: var(--cream); font-family: var(--font); font-size: 13px; padding: 9px 10px; outline: none; width: 100%; -webkit-appearance: none; }
+.cfgSel:focus, .cfgInp:focus, .cfgTa:focus { border-color: var(--teal); }
+.cfgTa { resize: none; height: 80px; font-size: 12px; }
+.cfgHalf { flex: 1; }
+.estOpts { display: flex; gap: 8px; }
+
+/* ── Responsive ── */
+@media (max-width: 359px) {
+  .ringWrap { width: min(180px,52vw,36vh); height: min(180px,52vw,36vh); }
+  .clock    { font-size: clamp(34px,11.5vw,48px); }
+  .btn      { padding: 14px 8px; font-size: 12px; }
+  .rLabel   { font-size: 19px; }
+  .rEx      { font-size: 12px; }
+  .finTime  { font-size: 62px; }
+}
+@media (min-width: 600px) {
+  .ringWrap { width: min(360px,42vh); height: min(360px,42vh); }
+  .clock    { font-size: clamp(52px,5.5vh,88px); }
+  .clockLbl { font-size: 10px; }
+  .round    { font-size: 14px; padding: 0 10px; }
+  .btn      { padding: 22px 10px; font-size: 16px; }
+  .rLabel   { font-size: 26px; }
+  .rEx      { font-size: 15px; padding: 10px 0; }
+  .rSubEx   { font-size: 13px; }
+  .finTime  { font-size: 96px; }
+  .ex       { font-size: 15px; padding: 9px 8px; }
+  .subEx    { font-size: 13px; }
+  .scroll   { padding: 8px 28px 6px; }
+  .ctrl     { padding: 14px 28px; padding-bottom: calc(14px + env(safe-area-inset-bottom,0px)); }
+  .hdr      { padding: 14px 28px 12px; }
+  .readyBody { padding: 22px 28px; }
+  .cfg      { padding: 22px 28px; }
+  .finBody  { padding: 24px 28px; }
+  .ringArea { padding: 16px 28px 8px; }
+}

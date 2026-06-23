@@ -8,8 +8,7 @@ const root = resolve(__dirname, '..')
 
 // Vite build config for the public HTML pages at the repo root.
 // Base differs from the React app (/CrossFit-Apps/ vs /CrossFit-Apps/cone/),
-// so a separate config is needed. recover.html is now a React entry point;
-// others convert as item 5 progresses.
+// so a separate config is needed. log.html is retired and excluded.
 export default defineConfig({
   root,
   base: '/CrossFit-Apps/',
@@ -27,7 +26,6 @@ export default defineConfig({
         leaderboard: resolve(root, 'leaderboard.html'),
         athletes:    resolve(root, 'athletes.html'),
         timer:       resolve(root, 'timer.html'),
-        log:         resolve(root, 'log.html'),
         recover:     resolve(root, 'recover.html'),
       }
     }
