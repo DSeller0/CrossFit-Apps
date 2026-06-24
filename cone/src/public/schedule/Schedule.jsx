@@ -553,8 +553,17 @@ export default function Schedule() {
       demoMapRef.current=buildDemoMap(erD)
       goalsRef.current=gdD
 
+      // Resolve final athlete before auto-fill so URL param ?athlete= wins over localStorage
+      const sp=new URLSearchParams(location.search)
+      const pDate=sp.get('date'),pOpenLog=sp.get('openLog'),pBlockId=sp.get('blockId')
+      const pAthlete=sp.get('athlete'),pPrefill=sp.get('prefill'),pPrefillRounds=sp.get('prefillRounds')
+
       const curAth=localStorage.getItem('cone_athlete_filter')||''
-      const newAuto=autofillRm(sD,aD,curAth,gdD)
+      let athId=curAth
+      if(pDate)setWeekOffset(dateToWeekOffset(pDate))
+      if(pAthlete){const a=aD.find(x=>String(x.id)===String(pAthlete));if(a){athId=a.id;setSelAth(a.id);localStorage.setItem('cone_athlete_filter',a.id)}}
+
+      const newAuto=autofillRm(sD,aD,athId,gdD)
 
       setSessions(sD);setAthletes(aD);setResults(rD)
       setGymName(gName);setRestLabel(restLbl);setBlockAccent(accColor)
@@ -562,14 +571,6 @@ export default function Schedule() {
         const manual=Object.fromEntries(Object.entries(prev).filter(([,v])=>v.source==='manual'))
         return{...newAuto,...manual}
       })
-
-      const sp=new URLSearchParams(location.search)
-      const pDate=sp.get('date'),pOpenLog=sp.get('openLog'),pBlockId=sp.get('blockId')
-      const pAthlete=sp.get('athlete'),pPrefill=sp.get('prefill'),pPrefillRounds=sp.get('prefillRounds')
-
-      let athId=curAth
-      if(pDate)setWeekOffset(dateToWeekOffset(pDate))
-      if(pAthlete){const a=aD.find(x=>x.id===pAthlete);if(a){athId=a.id;setSelAth(a.id);localStorage.setItem('cone_athlete_filter',a.id)}}
 
       setStatus('ok')
 
