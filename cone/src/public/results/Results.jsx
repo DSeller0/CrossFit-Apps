@@ -28,7 +28,7 @@ export default function Results() {
   const [results, setResults] = useState([])
   const [gymName, setGymName] = useState('Cone')
   const [weekOffset, setWeekOffset] = useState(0)
-  const [selAth, setSelAth] = useState(() => localStorage.getItem('results_athlete')||'')
+  const [selAth, setSelAth] = useState(() => localStorage.getItem('cone_athlete_filter')||'')
   const [expanded, setExpanded] = useState(new Set())
   const [logInputs, setLogInputs] = useState({})
   const [lbTarget, setLbTarget] = useState(null)
@@ -97,7 +97,7 @@ export default function Results() {
   }
   function changeWeek(dir) { setWeekOffset(w=>w+dir); setExpanded(new Set()); setLbTarget(null) }
   function changeAth(val) {
-    setSelAth(val); try{localStorage.setItem('results_athlete',val)}catch(e){}
+    setSelAth(val); try{localStorage.setItem('cone_athlete_filter',val)}catch(e){}
     setExpanded(new Set()); setLbTarget(null)
   }
   function toggleSess(sid) {

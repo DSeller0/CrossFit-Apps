@@ -60,9 +60,9 @@ function buildDemoMap(registry) {
     })
   });return map
 }
-function autofillRm(sD,aths,athName,gdD) {
-  if(!athName)return {}
-  const ath=aths.find(a=>a.name===athName);if(!ath)return {}
+function autofillRm(sD,aths,athId,gdD) {
+  if(!athId)return {}
+  const ath=aths.find(a=>a.id===athId);if(!ath)return {}
   const prs=(gdD?.prs||{})[ath.id]||[],rm={}
   Object.values(sD||{}).forEach(daySess=>{
     (daySess||[]).forEach(sess=>{
@@ -487,7 +487,7 @@ export default function Schedule() {
   const [restLabel,setRestLabel]=useState('Descanso')
   const [blockAccent,setBlockAccent]=useState('#68d8a0')
   const [weekOffset,setWeekOffset]=useState(0)
-  const [selAth,setSelAth]=useState(()=>localStorage.getItem('sched_athlete')||'')
+  const [selAth,setSelAth]=useState(()=>localStorage.getItem('cone_athlete_filter')||'')
   const [expanded,setExpanded]=useState(new Set())
   const [checked,setChecked]=useState(new Set())
   const [roundState,setRoundState]=useState({})
@@ -553,7 +553,7 @@ export default function Schedule() {
       demoMapRef.current=buildDemoMap(erD)
       goalsRef.current=gdD
 
-      const curAth=localStorage.getItem('sched_athlete')||''
+      const curAth=localStorage.getItem('cone_athlete_filter')||''
       const newAuto=autofillRm(sD,aD,curAth,gdD)
 
       setSessions(sD);setAthletes(aD);setResults(rD)
@@ -567,9 +567,9 @@ export default function Schedule() {
       const pDate=sp.get('date'),pOpenLog=sp.get('openLog'),pBlockId=sp.get('blockId')
       const pAthlete=sp.get('athlete'),pPrefill=sp.get('prefill'),pPrefillRounds=sp.get('prefillRounds')
 
-      let athName=curAth
+      let athId=curAth
       if(pDate)setWeekOffset(dateToWeekOffset(pDate))
-      if(pAthlete){const a=aD.find(x=>x.id===pAthlete);if(a){athName=a.name;setSelAth(a.name);localStorage.setItem('sched_athlete',a.name)}}
+      if(pAthlete){const a=aD.find(x=>x.id===pAthlete);if(a){athId=a.id;setSelAth(a.id);localStorage.setItem('cone_athlete_filter',a.id)}}
 
       setStatus('ok')
 
@@ -577,7 +577,7 @@ export default function Schedule() {
         const sess=(sD[pDate]||[]).find(s=>s.id===pOpenLog)
         if(sess){
           const prefill=pBlockId?{blockId:pBlockId,athId:pAthlete||'',perfTime:pPrefill||'',perfRounds:pPrefillRounds||''}:null
-          doOpenLog(sess,pDate,aD,athName,prefill)
+          doOpenLog(sess,pDate,aD,athId,prefill)
         }
         history.replaceState({},'','schedule.html')
       }
@@ -595,13 +595,13 @@ export default function Schedule() {
   function sessionsForDay(dateKey){
     const all=(sessions[dateKey]||[])
     if(!selAth)return all.filter(s=>s.blocks&&s.blocks.length)
-    return all.filter(s=>{const t=getTargets(s);return t.length===0||t.includes(selAth)}).filter(s=>s.blocks&&s.blocks.length)
+    const athName=athletes.find(a=>a.id===selAth)?.name
+    return all.filter(s=>{const t=getTargets(s);return t.length===0||t.includes(athName)}).filter(s=>s.blocks&&s.blocks.length)
   }
 
   function isWodLogged(sess,bl){
     if(!selAth)return false
-    const ath=athletes.find(a=>a.name===selAth);if(!ath)return false
-    return results.some(r=>r.sessionId===sess.id&&r.athleteId===ath.id&&(r.blocks||[]).some(b=>b.blockId===bl.id))
+    return results.some(r=>r.sessionId===sess.id&&r.athleteId===selAth&&(r.blocks||[]).some(b=>b.blockId===bl.id))
   }
 
   function getRd(blId,exId){return roundState[`${blId}|${exId}`]||0}
@@ -660,7 +660,7 @@ export default function Schedule() {
 
   function changeAth(val){
     setSelAth(val)
-    try{localStorage.setItem('sched_athlete',val)}catch(e){}
+    try{localStorage.setItem('cone_athlete_filter',val)}catch(e){}
     setExpanded(new Set());setRmEditKey(null)
     const newAuto=autofillRm(sessions,athletes,val,goalsRef.current)
     setRmValues(prev=>{
@@ -676,7 +676,7 @@ export default function Schedule() {
   }
 
   function openTimer(bl,sess,dateKey){
-    const ath=selAth?athletes.find(a=>a.name===selAth):null
+    const ath=selAth?athletes.find(a=>a.id===selAth):null
     let exercises,stationTime=45,transitionTime=15
     if(bl.type==='Estações'){
       const nonRest=(bl.stations||[]).filter(st=>!st.isRest),rest=(bl.stations||[]).filter(st=>st.isRest)
@@ -691,15 +691,15 @@ export default function Schedule() {
     location.href='timer.html?src=sched'
   }
 
-  function doOpenLog(sess,dateKey,aths,athName,prefill=null){
+  function doOpenLog(sess,dateKey,aths,athId,prefill=null){
     const targets=Array.isArray(sess.mainTraining)?sess.mainTraining:(sess.mainTraining?[sess.mainTraining]:[])
     const assignedAth=(aths||athletes).filter(a=>targets.includes(a.name))
     const wodBls=(sess.blocks||[]).filter(b=>WOD_LOG_TYPES.includes(b.type)||WOD_LOG_TYPES.includes(b.label))
     const blocks=wodBls.map(b=>({blockId:b.id,blockType:b.type,blockLabel:b.label&&b.type&&b.label!==b.type?`${b.label} · ${b.type}`:b.label||b.type,rpe:7,scale:'RX',perfTime:'',perfRounds:'',perfReps:''}))
     if(prefill?.blockId){const bi=blocks.findIndex(b=>b.blockId===prefill.blockId);if(bi>=0){if(prefill.perfTime)blocks[bi].perfTime=prefill.perfTime;if(prefill.perfRounds)blocks[bi].perfRounds=prefill.perfRounds}}
-    const athId=prefill?.athId||(athName?(aths||athletes).find(a=>a.name===athName)?.id:'')||''
+    const resolvedAthId=prefill?.athId||athId||''
     setLogPane({sess,dateKey,assignedAth})
-    setLogAthId(athId);setLogBlocks(blocks)
+    setLogAthId(resolvedAthId);setLogBlocks(blocks)
     setLogSubmitting(false);setLogSuccess(false);setLogError('')
   }
 
@@ -736,7 +736,7 @@ export default function Schedule() {
       <div className={styles.selBar}>
         <select className={styles.athleteSel} value={selAth} onChange={e=>changeAth(e.target.value)}>
           <option value="">— Todos —</option>
-          {athletes.map(a=><option key={a.id} value={a.name}>{a.name}</option>)}
+          {athletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
       </div>
       <div className={styles.weekNav}>
