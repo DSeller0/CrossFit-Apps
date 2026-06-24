@@ -108,14 +108,14 @@
 .errState {
   text-align: center;
   padding: 40px 20px;
-  color: #e05050;
+  color: var(--err);
   font-size: 13px;
 }
 .retryBtn {
   margin-top: 12px;
   background: transparent;
-  border: 1px solid #1e1e1e;
-  color: #666;
+  border: 1px solid var(--divider);
+  color: var(--muted);
   font-size: 13px;
   padding: 7px 16px;
   cursor: pointer;

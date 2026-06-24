@@ -21,7 +21,7 @@
 /* ── Loading / error ── */
 .loading { display:flex; flex-direction:column; align-items:center; gap:12px; padding:60px 16px; color:var(--cream); opacity:.7; font-size:.95rem; }
 .errorMsg { text-align:center; padding:60px 16px; color:var(--cream); opacity:.8; line-height:1.7; }
-.retryBtn { margin-top:14px; background:var(--teal); color:#000; border:none; border-radius:8px; padding:9px 20px; font-size:.9rem; cursor:pointer; font-weight:600; }
+.retryBtn { margin-top:14px; background:var(--teal); color:var(--accent-text); border:none; border-radius:8px; padding:9px 20px; font-size:.9rem; cursor:pointer; font-weight:600; }
 
 /* ── Week grid ── */
 .weekGrid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; padding:12px 12px 100px; min-height:60vh; }
@@ -78,16 +78,16 @@
 .resFormLbl { font-size:.72rem; color:var(--cream); opacity:.65; margin-bottom:4px; }
 .resRpeRow { display:flex; gap:3px; flex-wrap:wrap; }
 .resRpeBtn { width:26px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,.15); background:transparent; color:var(--cream); font-size:.78rem; cursor:pointer; transition:all .12s; }
-.resRpeBtnOn { background:var(--teal); border-color:var(--teal); color:#000; font-weight:700; }
+.resRpeBtnOn { background:var(--teal); border-color:var(--teal); color:var(--accent-text); font-weight:700; }
 .resScaleRow { display:flex; gap:5px; flex-wrap:wrap; }
 .resScaleBtn { padding:4px 10px; border-radius:6px; border:1px solid rgba(255,255,255,.15); background:transparent; color:var(--cream); font-size:.78rem; cursor:pointer; transition:all .12s; }
-.resScaleBtnOn { background:var(--teal); border-color:var(--teal); color:#000; font-weight:700; }
+.resScaleBtnOn { background:var(--teal); border-color:var(--teal); color:var(--accent-text); font-weight:700; }
 .resPerfInput { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15); border-radius:6px; color:var(--cream); padding:6px 10px; font-size:.88rem; font-family:var(--font); outline:none; transition:border-color .15s; }
 .resPerfInput:focus { border-color:var(--teal); }
 .resNumRow { display:flex; gap:14px; }
 .resSpinner { text-align:center; padding:14px; opacity:.7; font-size:.82rem; color:var(--cream); }
 
-.btnRegistrar { width:100%; padding:10px; background:var(--teal); color:#000; border:none; border-radius:8px; font-size:.9rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:opacity .15s; }
+.btnRegistrar { width:100%; padding:10px; background:var(--teal); color:var(--accent-text); border:none; border-radius:8px; font-size:.9rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:opacity .15s; }
 .btnRegistrar:hover { opacity:.85; }
 .btnRegistrar:disabled { opacity:.45; cursor:not-allowed; }
 
@@ -132,7 +132,7 @@
 .confirmBtns { display:flex; gap:8px; }
 .btnCancel { flex:1; padding:9px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:8px; color:var(--cream); font-size:.88rem; cursor:pointer; transition:background .15s; }
 .btnCancel:hover { background:rgba(255,255,255,.14); }
-.btnConfirm { flex:1; padding:9px; background:var(--teal); border:none; border-radius:8px; color:#000; font-size:.88rem; font-weight:700; cursor:pointer; transition:opacity .15s; }
+.btnConfirm { flex:1; padding:9px; background:var(--teal); border:none; border-radius:8px; color:var(--accent-text); font-size:.88rem; font-weight:700; cursor:pointer; transition:opacity .15s; }
 .btnConfirm:hover { opacity:.85; }
 
 .successIcon { font-size:2.4rem; color:var(--teal); display:block; text-align:center; margin-bottom:8px; }
@@ -142,4 +142,4 @@
 .successRow { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid rgba(255,255,255,.06); font-size:.84rem; }
 .successRowLbl { color:var(--cream); opacity:.55; }
 .successRowVal { color:var(--cream); font-weight:600; }
-.btnDismiss { width:100%; padding:9px; background:var(--teal); border:none; border-radius:8px; color:#000; font-size:.88rem; font-weight:700; cursor:pointer; }
+.btnDismiss { width:100%; padding:9px; background:var(--teal); border:none; border-radius:8px; color:var(--accent-text); font-size:.88rem; font-weight:700; cursor:pointer; }

@@ -190,10 +190,10 @@
 .lsNote { width: 100%; background: var(--stone2); border: 1px solid var(--divider); color: var(--cream); font-family: var(--font); font-size: 13px; padding: 8px 10px; outline: none; resize: none; margin-bottom: 10px; display: block; }
 .lsConfirm { background: var(--stone2); border: 1px solid var(--gold2); padding: 10px 12px; margin-bottom: 10px; font-size: 11px; color: var(--sub); line-height: 1.5; }
 .lsConfirmBtns { display: flex; gap: 6px; margin-top: 8px; }
-.lsWarn { padding: 8px 10px; background: rgba(200,48,48,.1); border: 1px solid #c83030; font-size: 11px; color: #e05848; margin-bottom: 10px; }
+.lsWarn { padding: 8px 10px; background: color-mix(in srgb,var(--err) 10%,transparent); border: 1px solid var(--err); font-size: 11px; color: var(--err); margin-bottom: 10px; }
 .lsActions { display: flex; gap: 8px; }
 .lsBtnCancel { flex: 1; padding: 11px; background: transparent; border: 1px solid var(--divider); color: var(--muted); font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.lsBtnSave { flex: 2; padding: 11px; background: var(--teal); border: none; color: #000; font-family: var(--font); font-size: 13px; font-weight: 900; cursor: pointer; letter-spacing: .04em; -webkit-tap-highlight-color: transparent; transition: background .15s, opacity .15s; }
+.lsBtnSave { flex: 2; padding: 11px; background: var(--teal); border: none; color: var(--accent-text); font-family: var(--font); font-size: 13px; font-weight: 900; cursor: pointer; letter-spacing: .04em; -webkit-tap-highlight-color: transparent; transition: background .15s, opacity .15s; }
 .lsBtnSave:disabled { opacity: .4; cursor: default; }
 .lsBtnSec { flex: 1; padding: 11px; background: transparent; border: 1px solid var(--teal); color: var(--teal); font-family: var(--font); font-size: 12px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 

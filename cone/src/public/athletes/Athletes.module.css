@@ -1,5 +1,5 @@
 /* ── Topbar ── */
-.topbar { background: #0d0b09; border-bottom: 2px solid var(--accent); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.topbar { background: var(--bg); border-bottom: 2px solid var(--accent); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .gymRow { display: flex; align-items: center; gap: 10px; }
 .gymLogo { width: 34px; height: 34px; object-fit: contain; border-radius: 4px; }
 .gymName { font-size: 18px; font-weight: 900; color: var(--cream); text-transform: uppercase; letter-spacing: .08em; }
@@ -106,7 +106,7 @@
 
 /* ── Status ── */
 .loading { text-align: center; padding: 60px 20px; color: var(--accent); font-size: 13px; text-transform: uppercase; letter-spacing: .1em; }
-.error { text-align: center; padding: 40px 20px; color: #e05050; font-size: 13px; line-height: 1.8; }
+.error { text-align: center; padding: 40px 20px; color: var(--err); font-size: 13px; line-height: 1.8; }
 .retryBtn { margin-top: 14px; background: transparent; border: 1px solid var(--divider); color: var(--sub); font-size: 13px; padding: 7px 16px; border-radius: 5px; cursor: pointer; font-family: var(--font); }
 .retryBtn:hover { border-color: var(--accent); color: var(--accent); }
 .emptyMsg { font-size: 13px; color: var(--muted); font-style: italic; }
