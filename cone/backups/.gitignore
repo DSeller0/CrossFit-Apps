@@ -1,0 +1,3 @@
+# Backup dumps contain real athlete data — never commit to the public repo.
+# The folder itself is tracked (via this file); the backup directories are not.
+*/
