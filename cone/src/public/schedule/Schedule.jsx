@@ -78,6 +78,19 @@ function autofillRm(sD,aths,athName,gdD) {
   });return rm
 }
 
+function toTitleCase(s) {
+  return (s||'').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())
+}
+
+const BLOCK_FAMILY={
+  'WOD':'red','HIIT':'red','MetCon':'red',
+  'For Time':'amber','AMRAP':'amber','EMOM':'amber','Benchmark':'amber','Estações':'amber',
+  'Força':'blue','LPO':'blue','Core':'blue','Acessórios':'blue',
+  'Aquecimento':'green','Skill':'green','Cardio':'green','Mobilidade':'green',
+}
+const FAMILY_COLOR={red:'#c84038',amber:'#d8a840',blue:'#4878d8',green:'#48b860'}
+function blkColor(bl){return FAMILY_COLOR[BLOCK_FAMILY[bl.type]||BLOCK_FAMILY[bl.label]]||'#d8a840'}
+
 // ── Round Counter ─────────────────────────────────────────────────────────────
 function RdCounter({blId,exId,total,cur,onAdvance,onReset}) {
   const pressRef=useRef(null),didLongRef=useRef(false),touchHandledRef=useRef(false)
@@ -273,13 +286,14 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
           :<div className={`${styles.detailExCheck}${done?' '+styles.detailExCheckDone:''}`} onClick={()=>onCheck(bl.id,ex.id)}/>)}
         <div className={styles.detailExBody}>
           <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
-            <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{[volStr,displayName.toUpperCase()].filter(Boolean).join(' ')}</div>
+            <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{toTitleCase(displayName)}</div>
             <div style={{display:'flex',alignItems:'center',gap:4,flexShrink:0}}>
+              {volStr&&<span className={styles.pillVol}>{volStr}</span>}
               {cxIsProg&&<button className={`${styles.rmChip}${exRm?' '+styles.rmChipHasRm:''}`} onClick={e=>{e.stopPropagation();onRmToggle(ex.id)}}>{exRm?exRm.rm+' '+(exRm.unit||'kg'):'RM'}</button>}
               <button className={`${styles.demoBtn}${hasDemoCx?'':' '+styles.demoBtnNoDemo}`} onClick={e=>{e.stopPropagation();onDemo(mvNames.map(n=>({name:n})))}} disabled={!hasDemoCx}>Demo</button>
             </div>
           </div>
-          {mvs.map((m,mi)=><div key={mi} className={styles.detailExMovement}>· {[m.reps?m.reps+'×':'',m.name.toUpperCase()].filter(Boolean).join(' ')}</div>)}
+          {mvs.map((m,mi)=><div key={mi} className={styles.detailExMovement}>· {[m.reps?m.reps+'×':'',toTitleCase(m.name)].filter(Boolean).join(' ')}</div>)}
           {cxIsProg&&rmEditKey===ex.id&&<div className={styles.rmInputWrap} onClick={e=>e.stopPropagation()}>
             <input ref={rmInputRef} type="number" className={styles.rmInput} placeholder="100" min="1" step="1" inputMode="numeric" defaultValue={exRm?.rm||''} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();confirmRm()}}}/>
             <select ref={unitSelRef} className={styles.rmUnitSel} defaultValue={exRm?.unit||'kg'} onClick={e=>e.stopPropagation()}>
@@ -288,8 +302,8 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
             <button className={styles.rmConfirmBtn} onClick={confirmRm}>✓</button>
           </div>}
           {(loadStr||calcStr)&&<div className={styles.rmVolRow}>
-            {loadStr&&<div className={styles.detailExVol}>{loadStr}</div>}
-            {calcStr&&<div className={`${styles.rmCalcBadge}${exRm?.source==='auto'?' '+styles.rmCalcBadgeAuto:''}`}>{calcStr}</div>}
+            {loadStr&&<span className={loadStr.includes('%')?styles.pillVol:styles.pillWt}>{loadStr}</span>}
+            {calcStr&&<span className={exRm?.source==='auto'?styles.pillVol:styles.pillWt}>{calcStr}</span>}
           </div>}
           {ex.note&&<div className={styles.detailExNote}>{ex.note}</div>}
         </div>
@@ -315,11 +329,12 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
             :<div className={`${styles.detailExCheck}${lineDone?' '+styles.detailExCheckDone:''}`} onClick={()=>onCheck(bl.id,`${ex.id}-${gi}`)}/>)}
           <div className={styles.detailExBody}>
             <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
-              <div className={`${styles.detailExName}${!isWod&&lineDone?' '+styles.detailExNameDone:''}`}>{[repsPrefix,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
-              {gi===0&&<div style={{display:'flex',alignItems:'center',gap:4,flexShrink:0}}>
-                <button className={`${styles.rmChip}${exRm?' '+styles.rmChipHasRm:''}`} onClick={e=>{e.stopPropagation();onRmToggle(ex.id)}}>{exRm?exRm.rm+' '+(exRm.unit||'kg'):'RM'}</button>
-                <button className={`${styles.demoBtn}${hasDemoPg?'':' '+styles.demoBtnNoDemo}`} onClick={e=>{e.stopPropagation();onDemo([{name:ex.name}])}} disabled={!hasDemoPg}>Demo</button>
-              </div>}
+              <div className={`${styles.detailExName}${!isWod&&lineDone?' '+styles.detailExNameDone:''}`}>{toTitleCase(ex.name)}</div>
+              <div style={{display:'flex',alignItems:'center',gap:3,flexShrink:0}}>
+                {repsPrefix&&<span className={styles.pillVol}>{repsPrefix}</span>}
+                {gi===0&&<button className={`${styles.rmChip}${exRm?' '+styles.rmChipHasRm:''}`} onClick={e=>{e.stopPropagation();onRmToggle(ex.id)}}>{exRm?exRm.rm+' '+(exRm.unit||'kg'):'RM'}</button>}
+                {gi===0&&<button className={`${styles.demoBtn}${hasDemoPg?'':' '+styles.demoBtnNoDemo}`} onClick={e=>{e.stopPropagation();onDemo([{name:ex.name}])}} disabled={!hasDemoPg}>Demo</button>}
+              </div>
             </div>
             {gi===0&&rmEditKey===ex.id&&<div className={styles.rmInputWrap} onClick={e=>e.stopPropagation()}>
               <input ref={rmInputRef} type="number" className={styles.rmInput} placeholder="100" min="1" step="1" inputMode="numeric" defaultValue={exRm?.rm||''} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();confirmRm()}}}/>
@@ -329,8 +344,8 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
               <button className={styles.rmConfirmBtn} onClick={confirmRm}>✓</button>
             </div>}
             {(pctStr||calcStr)&&<div className={styles.rmVolRow}>
-              {pctStr&&<div className={styles.detailExVol}>{pctStr}</div>}
-              {calcStr&&<div className={`${styles.rmCalcBadge}${exRm?.source==='auto'?' '+styles.rmCalcBadgeAuto:''}`}>{calcStr}</div>}
+              {pctStr&&<span className={styles.pillVol}>{pctStr}</span>}
+              {calcStr&&<span className={exRm?.source==='auto'?styles.pillVol:styles.pillWt}>{calcStr}</span>}
             </div>}
             {gi===0&&ex.note&&<div className={styles.detailExNote}>{ex.note}</div>}
           </div>
@@ -347,10 +362,13 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
         :<div className={`${styles.detailExCheck}${done?' '+styles.detailExCheckDone:''}`} onClick={()=>onCheck(bl.id,ex.id)}/>)}
       <div className={styles.detailExBody}>
         <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
-          <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{[vol,ex.name.toUpperCase()].filter(Boolean).join(' ')}</div>
-          <button className={`${styles.demoBtn}${hasDemo?'':' '+styles.demoBtnNoDemo}`} onClick={e=>{e.stopPropagation();onDemo([{name:ex.name}])}} disabled={!hasDemo}>Demo</button>
+          <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{toTitleCase(ex.name)}</div>
+          <div style={{display:'flex',alignItems:'center',gap:3,flexShrink:0}}>
+            {vol&&<span className={styles.pillVol}>{vol}</span>}
+            {ins&&<span className={ins.includes('%')?styles.pillVol:styles.pillWt}>{ins}</span>}
+            <button className={`${styles.demoBtn}${hasDemo?'':' '+styles.demoBtnNoDemo}`} onClick={e=>{e.stopPropagation();onDemo([{name:ex.name}])}} disabled={!hasDemo}>Demo</button>
+          </div>
         </div>
-        {ins&&<div className={styles.detailExVol}>{ins}</div>}
         {ex.note&&<div className={styles.detailExNote}>{ex.note}</div>}
       </div>
     </div>
@@ -358,7 +376,7 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
 }
 
 function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditKey,demoMap,isWodLogged,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo,onTimer}) {
-  const label=blkLabel(bl),col=accent
+  const label=blkLabel(bl),col=blkColor(bl)
   const isWod=isWodBlock(bl),isRd=isRoundBlock(bl)
   const wodDone=isWodLogged(bl)
 
@@ -375,7 +393,7 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
           <span className={styles.detailBlockTitle} style={{color:col}}>{label}</span>
           <div style={{display:'flex',alignItems:'center',gap:6}}>
             <button className={styles.timerBtn} onClick={e=>{e.stopPropagation();onTimer(bl)}}><i className="ti ti-player-play"/> Timer</button>
-            {repeat&&<span className={styles.detailBlockMeta} style={{background:col,color:'#000'}}>{repeat}</span>}
+            {repeat&&<span className={styles.detailBlockMeta} style={{background:col,color:'#fff'}}>{repeat}</span>}
             {capMins>0&&<span className={styles.detailBlockMeta} style={{background:'#1e1e1e',color:'#aaa',border:'1px solid #333'}}>Cap {capMins}'</span>}
             {wodDone&&<span className={styles.detailBlockDone}>✓ Completo</span>}
           </div>
@@ -427,7 +445,7 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
         <span className={styles.detailBlockTitle} style={{color:col}}>{label}</span>
         <div style={{display:'flex',alignItems:'center',gap:6}}>
           {isWod&&<button className={styles.timerBtn} onClick={e=>{e.stopPropagation();onTimer(bl)}}><i className="ti ti-player-play"/> Timer</button>}
-          {isRd?rdBadgeEl:(meta?<span className={styles.detailBlockMeta} style={{background:col,color:'#000'}}>{meta}</span>:null)}
+          {isRd?rdBadgeEl:(meta?<span className={styles.detailBlockMeta} style={{background:col,color:'#fff'}}>{meta}</span>:null)}
           {!isRd&&blDone&&<span className={styles.detailBlockDone}>✓ Completo</span>}
         </div>
       </div>
@@ -750,7 +768,7 @@ export default function Schedule() {
                 {hasSess?daySess.map((sess,si)=>{
                   const prog=sessionProgress(sess),isExp=expanded.has(`${dk}|${si}`)
                   const blocks=sess.blocks||[]
-                  const exNames=[...new Set(blocks.flatMap(bl=>(bl.exercises||[]).filter(e=>e.name).map(e=>e.name.toUpperCase())))].slice(0,3)
+                  const exNames=[...new Set(blocks.flatMap(bl=>(bl.exercises||[]).filter(e=>e.name).map(e=>toTitleCase(e.name))))].slice(0,3)
                   const moreEx=blocks.flatMap(b=>(b.exercises||[])).filter(e=>e.name).length>3
                   return(
                     <div key={sess.id}>
@@ -760,7 +778,7 @@ export default function Schedule() {
                         <div className={styles.blockBadges}>
                           {blocks.map(bl=>{
                             const lbl=blkLabel(bl),p=blockProgress(bl,sess),blDone=p.total>0&&p.done===p.total
-                            return(<span key={bl.id} className={styles.blockBadge} style={{background:`${blockAccent}20`,color:blockAccent,border:`1px solid ${blockAccent}40`}}>{blDone?'✓ ':''}{lbl}</span>)
+                            const bc=blkColor(bl);return(<span key={bl.id} className={styles.blockBadge} style={{background:`${bc}22`,color:bc,border:`1px solid ${bc}44`}}>{blDone?'✓ ':''}{lbl}</span>)
                           })}
                         </div>
                         {exNames.length>0&&<div className={styles.exPreview}>{exNames.join(' · ')}{moreEx?'…':''}</div>}
