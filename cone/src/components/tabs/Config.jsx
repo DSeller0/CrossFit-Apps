@@ -1,12 +1,31 @@
 import { useState } from 'react';
 import { loadSettings, saveSettings } from '../../utils/storage';
 
+const THEMES = [
+  { id: 'totk-dark',              label: 'TotK Dark'              },
+  { id: 'totk-light',             label: 'TotK Light'             },
+  { id: 'spirit-blossom',         label: 'Spirit Blossom Dark'    },
+  { id: 'spirit-blossom-light',   label: 'Spirit Blossom Light'   },
+];
+
+function getTheme() {
+  return localStorage.getItem('cone_theme') || 'totk-dark';
+}
+
+function applyTheme(id) {
+  const root = document.documentElement;
+  THEMES.forEach(t => root.classList.remove('theme-' + t.id));
+  root.classList.add('theme-' + id);
+  localStorage.setItem('cone_theme', id);
+}
+
 export default function ConfigTab() {
   const init = loadSettings();
   const [gymName, setGymName]   = useState(init.gymName || '');
   const [label,   setLabel]     = useState(init.label   || '');
   const [logo,    setLogo]      = useState(init.logo    || '');
   const [flash,   setFlash]     = useState(false);
+  const [theme,   setTheme]     = useState(getTheme);
 
   const save = () => {
     saveSettings({ ...loadSettings(), gymName: gymName.trim(), label: label.trim(), logo: logo.trim() });
@@ -64,6 +83,24 @@ export default function ConfigTab() {
             />
           </div>
         )}
+      </div>
+
+      <div className="cfg-section">
+        <div className="cfg-section-title">
+          <i className="ti ti-palette" /> Tema
+        </div>
+        <div className="cfg-theme-grid">
+          {THEMES.map(t => (
+            <button
+              key={t.id}
+              className={'cfg-theme-btn' + (theme === t.id ? ' active' : '')}
+              onClick={() => { applyTheme(t.id); setTheme(t.id); }}
+            >
+              <span className={'cfg-theme-swatch theme-' + t.id} />
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="cfg-save-row">
