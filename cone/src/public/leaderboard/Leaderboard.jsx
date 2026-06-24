@@ -62,10 +62,14 @@ function buildWodList(sessions, results) {
 }
 
 async function fetchState() {
-  const tables = ['sessions', 'athletes', 'results', 'events', 'locations', 'coach_profile', 'settings', 'goals_data', 'lb_colors']
-  const rows = await Promise.all(tables.map(t => sb.from(t).select('value').eq('id', 1).maybeSingle()))
-  const [sessions, athletes, results, , , , settings, , lbColors] = rows.map(x => x.data?.value ?? null)
-  return { sessions: sessions ?? {}, athletes: athletes ?? [], results: results ?? [], settings: settings ?? {}, lbColors: lbColors ?? {} }
+  const blobTables = ['sessions', 'athletes', 'events', 'locations', 'coach_profile', 'settings', 'goals_data', 'lb_colors']
+  const [blobRows, resRaw] = await Promise.all([
+    Promise.all(blobTables.map(t => sb.from(t).select('value').eq('id', 1).maybeSingle())),
+    sb.from('results_v2').select('*'),
+  ])
+  const [sessions, athletes, , , , settings, , lbColors] = blobRows.map(x => x.data?.value ?? null)
+  const results = (resRaw.data||[]).map(r=>({id:r.id,date:r.date,athleteId:r.athlete_id,sessionId:r.session_id,presence:r.presence,energyLevel:r.energy_level,blocks:r.blocks,coachNote:r.coach_note,flagForReview:r.flag_for_review,loggedByAthlete:r.logged_by_athlete}))
+  return { sessions: sessions ?? {}, athletes: athletes ?? [], results, settings: settings ?? {}, lbColors: lbColors ?? {} }
 }
 
 export default function Leaderboard() {

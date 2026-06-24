@@ -19,18 +19,44 @@ export const markSessionsSaved = () => {
   _sessionsTs = new Date(Date.now() + 6000).toISOString();
 };
 
-// ── Storage keys ──────────────────────────────────────────────────────────────
-export const LS_KEY       = 'gym_v9';
-export const LS_ATHLETES  = 'eagles_athletes_v1';
-export const LS_RESULTS   = 'eagles_results_v1';
-export const LS_SETTINGS  = 'eagles_settings_v1';
-export const LS_REGISTRY  = 'eagles_block_registry_v1';
-export const LS_GOALS     = 'eagles_athlete_goals_v1';
-export const LS_EVENTS    = 'eagles_events_v1';
-export const LS_LOCATIONS = 'eagles_locations_v1';
-export const LS_COACH     = 'eagles_coach_v1';
-export const LS_LB_COLORS  = 'eagles_lb_colors_v1';
-export const LS_TEMPLATES  = 'cone_templates_v1';
+// ── Storage keys (cone_* naming, Phase 4) ────────────────────────────────────
+export const LS_KEY       = 'cone_sessions_v1';
+export const LS_ATHLETES  = 'cone_athletes_v1';
+export const LS_RESULTS   = 'cone_results_v1';
+export const LS_SETTINGS  = 'cone_settings_v1';
+export const LS_REGISTRY  = 'cone_registry_v1';
+export const LS_GOALS     = 'cone_goals_v1';
+export const LS_EVENTS    = 'cone_events_v1';
+export const LS_LOCATIONS = 'cone_locations_v1';
+export const LS_COACH     = 'cone_coach_v1';
+export const LS_LB_COLORS = 'cone_lb_colors_v1';
+export const LS_TEMPLATES = 'cone_templates_v1';
+
+// One-time shim: copy old eagles_*/gym_v9 keys to cone_* equivalents.
+// Runs on module load; safe to call multiple times (noop after first run).
+;(function migrateLocalStorageKeys() {
+  const renames = [
+    ['gym_v9',                   'cone_sessions_v1'],
+    ['eagles_athletes_v1',       'cone_athletes_v1'],
+    ['eagles_results_v1',        'cone_results_v1'],
+    ['eagles_settings_v1',       'cone_settings_v1'],
+    ['eagles_block_registry_v1', 'cone_registry_v1'],
+    ['eagles_athlete_goals_v1',  'cone_goals_v1'],
+    ['eagles_events_v1',         'cone_events_v1'],
+    ['eagles_locations_v1',      'cone_locations_v1'],
+    ['eagles_coach_v1',          'cone_coach_v1'],
+    ['eagles_lb_colors_v1',      'cone_lb_colors_v1'],
+  ];
+  try {
+    renames.forEach(([oldKey, newKey]) => {
+      const old = localStorage.getItem(oldKey);
+      if (old !== null && localStorage.getItem(newKey) === null) {
+        localStorage.setItem(newKey, old);
+        localStorage.removeItem(oldKey);
+      }
+    });
+  } catch { /* localStorage unavailable (SSR/test env) */ }
+}());
 
 // ── Utility helpers ───────────────────────────────────────────────────────────
 export const uid = () => (Date.now().toString(36) + Math.random().toString(36).slice(2));

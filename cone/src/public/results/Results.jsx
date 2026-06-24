@@ -49,14 +49,14 @@ export default function Results() {
   async function load(attempt=0) {
     if(attempt===0) setStatus('loading')
     try {
-      const [sR,aR,rR,stR] = await Promise.all([
+      const [sR,aR,rRaw,stR] = await Promise.all([
         sb.from('sessions').select('value').eq('id',1).maybeSingle(),
         sb.from('athletes').select('value').eq('id',1).maybeSingle(),
-        sb.from('results').select('value').eq('id',1).maybeSingle(),
+        sb.from('results_v2').select('*'),
         sb.from('settings').select('value').eq('id',1).maybeSingle(),
       ])
       const sD=sR.data?.value||{}, aD=aR.data?.value||[]
-      const rD=Array.isArray(rR.data?.value)?rR.data.value:[]
+      const rD=(rRaw.data||[]).map(r=>({id:r.id,date:r.date,athleteId:r.athlete_id,sessionId:r.session_id,presence:r.presence,energyLevel:r.energy_level,blocks:r.blocks,coachNote:r.coach_note,flagForReview:r.flag_for_review,loggedByAthlete:r.logged_by_athlete}))
       const stD=stR.data?.value||{}
       setSessions(sD); setAthletes(aD); setResults(rD)
       setGymName(stD.gymName||'Cone')
@@ -163,7 +163,7 @@ export default function Results() {
       :{id:uid(),date:dk,athleteId:selAth,sessionId:sid,presence:'Presente',
         energyLevel:3,blocks:[blockEntry],coachNote:'',flagForReview:false,loggedByAthlete:true}
     const next=[...existing.filter(r=>!(r.sessionId===sid&&r.athleteId===selAth)),newResult]
-    const {error:e}=await sb.from('results').upsert({id:1,value:next,updated_at:new Date().toISOString()})
+    const {error:e}=await sb.from('results_v2').upsert({id:String(newResult.id),date:newResult.date,athlete_id:newResult.athleteId,session_id:newResult.sessionId?String(newResult.sessionId):null,presence:newResult.presence,energy_level:newResult.energyLevel??null,blocks:newResult.blocks,coach_note:newResult.coachNote||'',flag_for_review:!!newResult.flagForReview,logged_by_athlete:!!newResult.loggedByAthlete,updated_at:new Date().toISOString()},{onConflict:'id'})
     setSubmittingKey(null)
     if(e){alert('Erro ao salvar. Verifique sua conexão e tente novamente.');return}
     setResults(next)

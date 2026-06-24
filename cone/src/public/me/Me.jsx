@@ -176,16 +176,16 @@ export default function Me() {
     setStatus('loading')
     const id = new URLSearchParams(location.search).get('id')
     try {
-      const [athRow,sessRow,resRow,goalsRow,regRow] = await Promise.all([
+      const [athRow,sessRow,resRaw,goalsRow,regRow] = await Promise.all([
         sb.from('athletes').select('value').eq('id',1).maybeSingle(),
         sb.from('sessions').select('value').eq('id',1).maybeSingle(),
-        sb.from('results').select('value').eq('id',1).maybeSingle(),
+        sb.from('results_v2').select('*'),
         sb.from('goals_data').select('value').eq('id',1).maybeSingle(),
         sb.from('exercise_registry').select('value').eq('id',1).maybeSingle(),
       ])
       const athList = athRow.data?.value || []
       const sessData = sessRow.data?.value || {}
-      const resData = Array.isArray(resRow.data?.value) ? resRow.data.value : []
+      const resData = (resRaw.data||[]).map(r=>({id:r.id,date:r.date,athleteId:r.athlete_id,sessionId:r.session_id,presence:r.presence,energyLevel:r.energy_level,blocks:r.blocks,coachNote:r.coach_note,flagForReview:r.flag_for_review,loggedByAthlete:r.logged_by_athlete}))
       const goalsD = goalsRow.data?.value || { athleteGoals:{}, prs:{} }
       const regData = regRow.data?.value || {}
       setAthletes(athList)

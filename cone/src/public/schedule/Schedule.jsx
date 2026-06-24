@@ -498,17 +498,17 @@ export default function Schedule() {
   async function load(attempt=0){
     if(attempt===0)setStatus('loading')
     try{
-      const[cfgRes,sR,aR,rR,stR,gdR,erR]=await Promise.all([
+      const[cfgRes,sR,aR,rRaw,stR,gdR,erR]=await Promise.all([
         fetch('./config.json?v='+Date.now()).catch(()=>null),
         sb.from('sessions').select('value').eq('id',1).maybeSingle(),
         sb.from('athletes').select('value').eq('id',1).maybeSingle(),
-        sb.from('results').select('value').eq('id',1).maybeSingle(),
+        sb.from('results_v2').select('*'),
         sb.from('settings').select('value').eq('id',1).maybeSingle(),
         sb.from('goals_data').select('value').eq('id',1).maybeSingle(),
         sb.from('exercise_registry').select('value').eq('id',1).maybeSingle(),
       ])
       const sD=sR.data?.value||{},aD=aR.data?.value||[]
-      const rD=Array.isArray(rR.data?.value)?rR.data.value:[]
+      const rD=(rRaw.data||[]).map(r=>({id:r.id,date:r.date,athleteId:r.athlete_id,sessionId:r.session_id,presence:r.presence,energyLevel:r.energy_level,blocks:r.blocks,coachNote:r.coach_note,flagForReview:r.flag_for_review,loggedByAthlete:r.logged_by_athlete}))
       const stD=stR.data?.value||{},gdD=gdR.data?.value||{athleteGoals:{},prs:{}}
       const erD=erR.data?.value||{}
 
@@ -692,7 +692,7 @@ export default function Schedule() {
     const result={id:uid(),date:dateKey,athleteId:logAthId,sessionId:sess.id,presence:'Presente',energyLevel:3,blocks:logBlocks,coachNote:'',flagForReview:false,loggedByAthlete:true}
     const existing=Array.isArray(results)?results:[]
     const next=[...existing.filter(r=>!(r.athleteId===logAthId&&r.sessionId===sess.id)),result]
-    const{error}=await sb.from('results').upsert({id:1,value:next,updated_at:new Date().toISOString()})
+    const{error}=await sb.from('results_v2').upsert({id:String(result.id),date:result.date,athlete_id:result.athleteId,session_id:result.sessionId?String(result.sessionId):null,presence:result.presence,energy_level:result.energyLevel??null,blocks:result.blocks,coach_note:result.coachNote||'',flag_for_review:!!result.flagForReview,logged_by_athlete:!!result.loggedByAthlete,updated_at:new Date().toISOString()},{onConflict:'id'})
     if(error){setLogSubmitting(false);setLogError('Erro ao enviar. Tente novamente.');return}
     setResults(next);setLogSubmitting(false);setLogSuccess(true)
   }

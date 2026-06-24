@@ -46,14 +46,53 @@ export async function dbSaveAthletes(athletes) {
   return dbSave('athletes', athletes);
 }
 
-// ── Results ───────────────────────────────────────────────────────────────────
+// ── Results (normalized — results_v2) ────────────────────────────────────────
+// One row per result; replaces the single-row JSONB blob in the old results table.
+
+function rowToResult(r) {
+  return {
+    id:                r.id,
+    date:              r.date,
+    athleteId:         r.athlete_id,
+    sessionId:         r.session_id,
+    presence:          r.presence,
+    energyLevel:       r.energy_level,
+    blocks:            r.blocks,
+    coachNote:         r.coach_note,
+    flagForReview:     r.flag_for_review,
+    loggedByAthlete:   r.logged_by_athlete,
+  };
+}
+
+function resultToRow(r) {
+  return {
+    id:                String(r.id),
+    date:              r.date || '',
+    athlete_id:        r.athleteId || null,
+    session_id:        r.sessionId ? String(r.sessionId) : null,
+    presence:          r.presence || 'Presente',
+    energy_level:      r.energyLevel ?? null,
+    blocks:            r.blocks || [],
+    coach_note:        r.coachNote || '',
+    flag_for_review:   !!r.flagForReview,
+    logged_by_athlete: !!r.loggedByAthlete,
+    updated_at:        new Date().toISOString(),
+  };
+}
 
 export async function dbLoadResults() {
-  return dbLoad('results');
+  const { data, error } = await supabase
+    .from('results_v2').select('*').order('date', { ascending: true });
+  if (error) { console.warn('[supabase] load results_v2', error.message); return null; }
+  return (data || []).map(rowToResult);
 }
 
 export async function dbSaveResults(results) {
-  return dbSave('results', results);
+  if (!Array.isArray(results) || results.length === 0) return;
+  const rows = results.map(resultToRow);
+  const { error } = await supabase
+    .from('results_v2').upsert(rows, { onConflict: 'id' });
+  if (error) console.warn('[supabase] save results_v2', error.message);
 }
 
 // ── Events ────────────────────────────────────────────────────────────────────

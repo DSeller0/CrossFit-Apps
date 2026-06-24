@@ -138,13 +138,13 @@ export default function Index() {
   // ── Data loading ─────────────────────────────────────────────────────────
   async function load(attempt = 0) {
     try {
-      const [sessRes, resRes, settRes] = await Promise.all([
+      const [sessRes, resRaw, settRes] = await Promise.all([
         sb.from('sessions').select('value').eq('id',1).maybeSingle(),
-        sb.from('results').select('value').eq('id',1).maybeSingle(),
+        sb.from('results_v2').select('session_id'),
         sb.from('settings').select('value').eq('id',1).maybeSingle(),
       ])
       const allSessions = sessRes.data?.value || {}
-      const allResults  = resRes.data?.value  || []
+      const allResults  = (resRaw.data||[]).map(r=>({sessionId:r.session_id}))
       const settings    = settRes.data?.value || {}
 
       // Theme sync from Supabase
@@ -175,10 +175,9 @@ export default function Index() {
   }
 
   async function refreshCounts() {
-    const { data } = await sb.from('results').select('value').eq('id',1).maybeSingle()
-    const results = data?.value || []
-    const counts  = {}
-    results.forEach(r => { if (r.sessionId) counts[r.sessionId] = (counts[r.sessionId] || 0) + 1 })
+    const { data } = await sb.from('results_v2').select('session_id')
+    const counts = {}
+    ;(data||[]).forEach(r => { if (r.session_id) counts[r.session_id] = (counts[r.session_id] || 0) + 1 })
     setCountBySess(counts)
   }
 
