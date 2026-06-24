@@ -5,4 +5,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/CrossFit-Apps/cone/',
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.js'],
+  },
 })
