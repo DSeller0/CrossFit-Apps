@@ -1,6 +1,8 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useAuth } from './context/AuthContext';
+import { useSync } from './context/SyncContext';
 import {
-  loadLS, saveLS,
+  loadLS,
   loadAthletes, saveAthletes,
   loadResults, saveResults,
   loadSettings, saveSettings,
@@ -10,11 +12,9 @@ import {
   loadLocations, saveLocations,
   loadCoach, saveCoach,
   loadLBColors,
-  syncFromSupabase,
-  getSessionsTs,
   toISO,
 } from './utils/storage';
-import { supabase, dbGetUpdatedAt } from './utils/supabase';
+import { supabase } from './utils/supabase';
 import { APP_CONFIG, normaliseType, normaliseZone, GF } from './utils/config';
 import ServicosTab from './components/tabs/Servicos';
 import ExerciciosTab from './components/tabs/Exercicios';
@@ -38,34 +38,20 @@ const TABS = [
 ];
 
 export default function App() {
-  const [session, setSession]               = useState(null);
-  const [authLoading, setAuthLoading]       = useState(true);
+  const { session, authLoading } = useAuth();
+  const { sessions, setSessions, events, setEvents, syncState, handleSync } = useSync();
+
   const [tab, setTab]                       = useState('creator');
-  const [sessions, setSessions]             = useState(loadLS);
-  const [events, setEvents]                 = useState(loadEvents);
   const [creatorPreload, setCreatorPreload] = useState(null);
   const [resultsPreload, setResultsPreload] = useState(null);
   const [saved, setSaved]                   = useState(false);
   const [toast, setToast]                   = useState(null);
-  const [syncState, setSyncState]           = useState('idle'); // 'idle'|'syncing'|'synced'|'conflict'
   const [blockNames, setBlockNames]         = useState(APP_CONFIG.blockNames);
   const [saveFileName, setSaveFileName]     = useState('');
   const [showSaveName, setShowSaveName]     = useState(false);
   const [configLoaded, setConfigLoaded]     = useState(false);
-  const fileInputRef = useRef();
-
-  // ── Auth ──────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setAuthLoading(false);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setSession(session);
-      setAuthLoading(false);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+  const fileInputRef  = useRef();
+  const savedMount    = useRef(true);
 
   // ── Apply CSS variables from APP_CONFIG on mount ──────────────────────────
   useEffect(() => {
@@ -74,44 +60,6 @@ export default function App() {
     document.documentElement.style.setProperty('--theme-accent-text', APP_CONFIG.themeAccentText);
     document.title = APP_CONFIG.appTitle;
   }, []);
-
-  // ── Pull latest data from Supabase on startup ────────────────────────────
-  useEffect(() => {
-    syncFromSupabase().then(fresh => {
-      if (fresh.sessions)  setSessions(fresh.sessions);
-      if (fresh.events)    setEvents(fresh.events);
-    }).catch(() => {});
-  }, []);
-
-  // ── Manual sync handler ───────────────────────────────────────────────────
-  const handleSync = async () => {
-    setSyncState('syncing');
-    try {
-      const fresh = await syncFromSupabase();
-      if (fresh.sessions) setSessions(fresh.sessions);
-      if (fresh.events)   setEvents(fresh.events);
-      setSyncState('synced');
-      setTimeout(() => setSyncState('idle'), 2200);
-    } catch {
-      setSyncState('idle');
-    }
-  };
-
-  // ── Conflict detection — poll every 30s ──────────────────────────────────
-  useEffect(() => {
-    if (!session) return;
-    const check = async () => {
-      try {
-        const remoteTs = await dbGetUpdatedAt('sessions');
-        const localTs  = getSessionsTs();
-        if (remoteTs && localTs && remoteTs > localTs) {
-          setSyncState(s => s === 'syncing' || s === 'synced' ? s : 'conflict');
-        }
-      } catch {}
-    };
-    const id = setInterval(check, 30000);
-    return () => clearInterval(id);
-  }, [session]);
 
   // ── Fetch config.json on first empty-state visit ──────────────────────────
   useEffect(() => {
@@ -182,7 +130,7 @@ export default function App() {
           } catch {}
         }
       });
-  }, []);
+  }, [configLoaded]);
 
   // ── URL param deep-links ──────────────────────────────────────────────────
   useEffect(() => {
@@ -198,16 +146,13 @@ export default function App() {
     }
   }, []);
 
-  // ── Auto-save sessions ────────────────────────────────────────────────────
+  // ── Saved badge (skip initial mount) ─────────────────────────────────────
   useEffect(() => {
-    saveLS(sessions);
+    if (savedMount.current) { savedMount.current = false; return; }
     setSaved(true);
     const t = setTimeout(() => setSaved(false), 1400);
     return () => clearTimeout(t);
   }, [sessions]);
-
-  // ── Auto-save events ──────────────────────────────────────────────────────
-  useEffect(() => { saveEvents(events); }, [events]);
 
   const showToast = (msg, type = 'ok') => {
     setToast({ msg, type });
@@ -233,8 +178,8 @@ export default function App() {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     const name = (customName || saveFileName || '').trim()
-      .replace(/[^a-zA-Z0-9\u00C0-\u024F\-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-    const gymSlug = (APP_CONFIG.gymName || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036F]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      .replace(/[^a-zA-Z0-9À-ɏ\-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    const gymSlug = (APP_CONFIG.gymName || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     a.download = `${name || (gymSlug ? `grade-${gymSlug}` : 'grade-treino') + '-' + toISO(new Date())}.json`;
     a.href = URL.createObjectURL(blob);
     a.click();
@@ -266,12 +211,11 @@ export default function App() {
           }));
         });
         setSessions(migrated);
-        saveLS(migrated);
         if (parsed.exerciseRegistry && typeof parsed.exerciseRegistry === 'object') saveRegistry(parsed.exerciseRegistry);
         if (parsed.athleteGoalsData && typeof parsed.athleteGoalsData === 'object') saveGoalsData(parsed.athleteGoalsData);
         if (parsed.athletes?.length)   saveAthletes(parsed.athletes);
         if (parsed.results)            saveResults(parsed.results);
-        if (parsed.events && typeof parsed.events === 'object') { saveEvents(parsed.events); setEvents(parsed.events); }
+        if (parsed.events && typeof parsed.events === 'object') setEvents(parsed.events);
         if (parsed.locations)          saveLocations(parsed.locations);
         if (parsed.coachProfile && typeof parsed.coachProfile === 'object') saveCoach(parsed.coachProfile);
         if (parsed.settings && typeof parsed.settings === 'object') {
@@ -362,7 +306,6 @@ export default function App() {
             onClick={() => {
               if (!window.confirm('Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.')) return;
               setSessions({});
-              saveLS({});
               showToast('Estado limpo.');
             }}
             title="Apagar todos os treinos do estado atual"
