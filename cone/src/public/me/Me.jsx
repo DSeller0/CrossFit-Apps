@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Nav from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
+import { toISO, todayISO } from '../lib/week.js'
 import styles from './Me.module.css'
 
 const DAY_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
@@ -18,8 +19,6 @@ const DIST_TYPES = ['Força','LPO','Acessórios','Skill','Core','Cardio','Mobili
 const PR_SKIP    = new Set(['-','Aquecimento','Descanso','HIIT','MetCon','EMOM','For Time','AMRAP','Estações'])
 const SCLS = { RX:'bRx', SC:'bSc', Inter:'bInter', Adaptado:'bAdp' }
 
-function todayISO() { return new Date().toISOString().slice(0,10) }
-function toISO(d) { return d.toISOString().slice(0,10) }
 function initials(n) { return n.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase() }
 function getTargets(s) { if(!s?.mainTraining)return[]; return Array.isArray(s.mainTraining)?s.mainTraining:[s.mainTraining] }
 function matchesAthlete(s,name) { return getTargets(s).includes(name) }
