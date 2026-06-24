@@ -67,3 +67,11 @@ html.theme-spirit-blossom-light{
   --text:#1a0828;--cyan:#1490a0;--sc-font:'Amarante',serif;--lb-font:'Amarante',serif;
   --bg2:#ffffff;--bg3:#f0e8f8;--err:#c02040;
 }
+
+/* ── Scrollbar (all themes) ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--stone)}
+::-webkit-scrollbar-thumb{background:var(--dim);border:1px solid var(--teal);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--teal)}
+::-webkit-scrollbar-corner{background:var(--bg)}
+*{scrollbar-width:thin;scrollbar-color:var(--dim) var(--stone)}
