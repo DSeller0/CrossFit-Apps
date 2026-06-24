@@ -3,34 +3,15 @@ import Nav from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import styles from './Results.module.css'
+import { MONTH_PT, DAY_PT, toISO, todayISO, getWeek } from '../lib/week.js'
+import { uid, blkLabel, exVolStr, toSecs, fmtSecs } from '../lib/wod.js'
 
 const WOD_TYPES = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']
-const DAY_PT    = ['DOM','SEG','TER','QUA','QUI','SEX','SAB']
-const MONTH_PT  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 const SCALES    = ['RX','Inter','SC','Adaptado']
 const SCALE_COL = {RX:'#4ac8c0',Inter:'#e87820',SC:'#9070d8',Adaptado:'#c05050'}
 const DEF_INP   = () => ({rpe:7,scale:'RX',perfTime:'',perfRounds:'',perfReps:''})
 
-function todayISO() { return new Date().toISOString().slice(0,10) }
-function toISO(d) { return d.toISOString().slice(0,10) }
-function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2) }
-function getWeek(off) {
-  const now=new Date(),sun=new Date(now)
-  sun.setDate(now.getDate()-now.getDay()+off*7)
-  return Array.from({length:7},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return d})
-}
-function toSecs(t) {
-  if(!t) return Infinity
-  const p=String(t).split(':')
-  return p.length===2?parseInt(p[0])*60+(parseInt(p[1])||0):parseInt(t)||Infinity
-}
-function fmtSecs(s) { const m=Math.floor(s/60),r=s%60; return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}` }
 function inputKey(sid,bid) { return `${sid}:${bid}` }
-function blkLabel(bl) {
-  const l=bl.label&&bl.label!=='-'?bl.label:null
-  const t=bl.type&&bl.type!=='-'?bl.type:null
-  return l&&t&&l!==t?`${l} · ${t}`:l||t||''
-}
 function blkMeta(bl) {
   const p=[]
   if(bl.rounds) p.push(`${bl.rounds} rounds`)
@@ -39,17 +20,6 @@ function blkMeta(bl) {
 }
 function wodBlocks(sess) { return (sess.blocks||[]).filter(b=>WOD_TYPES.includes(b.type)) }
 function sessionsForDay(sessions,dk) { return ((sessions||{})[dk]||[]).filter(s=>s.blocks&&s.blocks.length) }
-function exVolStr(ex) {
-  const isCardio=ex.intensity?.mode==='cardio'
-  if(isCardio){
-    const val=ex.intensity?.cardioVal,unit=ex.intensity?.cardioUnit||'m'
-    if(!val) return ''
-    return (ex.name||'').toLowerCase().includes(String(val).toLowerCase())?'':`${val}${unit}`
-  }
-  const repsRaw=ex.reps||''
-  const repsDisplay=repsRaw.includes(',')?repsRaw.split(',').map(r=>r.trim()).join('-'):repsRaw
-  return ex.sets&&repsDisplay?`${ex.sets}×${repsDisplay}`:repsDisplay
-}
 
 export default function Results() {
   const [status, setStatus] = useState('loading')

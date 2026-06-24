@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import s from './Athletes.module.css'
+import { toISO } from '../lib/week.js'
+import { toSecs } from '../lib/wod.js'
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const SCALE_RANK   = { RX: 4, Inter: 3, SC: 2, Adaptado: 1 }
@@ -11,8 +13,6 @@ const WOD_TYPES    = ['WOD', 'For Time', 'AMRAP', 'EMOM', 'MetCon', 'HIIT']
 const DAY_PT       = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
 
 // ── Pure helpers ──────────────────────────────────────────────────────────
-function toISO(d) { const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}` }
-function toSecs(t) { if (!t) return Infinity; const p = String(t).split(':'); return p.length === 2 ? parseInt(p[0])*60+parseInt(p[1]) : parseInt(t)||Infinity }
 function snapPct(p) { return Math.round(p/10)*10 }
 function getTargets(sess) { if (!sess?.mainTraining) return []; return Array.isArray(sess.mainTraining) ? sess.mainTraining : [sess.mainTraining] }
 

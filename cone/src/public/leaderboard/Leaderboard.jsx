@@ -4,6 +4,7 @@ import { sb } from '../supabaseClient.js'
 import Header from '../Header.jsx'
 import Nav from '../Nav.jsx'
 import s from './Leaderboard.module.css'
+import { toSecs, rankResults, perfStr } from '../lib/wod.js'
 
 const WOD_TYPES   = ['WOD', 'For Time', 'AMRAP', 'EMOM', 'MetCon', 'HIIT']
 const SCALES      = ['Todos', 'RX', 'Inter', 'SC', 'Adaptado']
@@ -37,12 +38,6 @@ function buildLbc(lbColors = {}) {
   }
 }
 
-function toSecs(s) {
-  if (!s) return Infinity
-  const p = String(s).split(':')
-  return p.length === 2 ? parseInt(p[0]) * 60 + parseInt(p[1]) : parseInt(s) || Infinity
-}
-
 function buildWodList(sessions, results) {
   const list = []
   const sessObj = typeof sessions === 'object' && !Array.isArray(sessions) ? sessions : {}
@@ -64,24 +59,6 @@ function buildWodList(sessions, results) {
     })
   })
   return list
-}
-
-function rankResults(results, blType) {
-  const isForTime = blType === 'For Time'
-  return [...results].sort((a, b) => {
-    if (isForTime) return toSecs(a.perfTime) - toSecs(b.perfTime)
-    const ra = parseInt(a.perfRounds) || 0, rb = parseInt(b.perfRounds) || 0
-    if (ra !== rb) return rb - ra
-    return (parseInt(b.perfReps) || 0) - (parseInt(a.perfReps) || 0)
-  })
-}
-
-function perfStr(r, blType) {
-  if (blType === 'For Time') return r.perfTime || '—'
-  const p = []
-  if (r.perfRounds) p.push(`${r.perfRounds} rds`)
-  if (r.perfReps)   p.push(`${r.perfReps} reps`)
-  return p.join(' + ') || '—'
 }
 
 async function fetchState() {

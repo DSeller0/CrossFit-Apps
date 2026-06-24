@@ -3,43 +3,16 @@ import Nav from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import styles from './Schedule.module.css'
+import { MONTH_PT, DAY_PT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
+import { uid, blkLabel, exVolStr } from '../lib/wod.js'
 
 const WOD_TYPES     = ['For Time','AMRAP','EMOM','MetCon','HIIT','WOD','Benchmark','Estações']
 const WOD_LOG_TYPES = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT','Benchmark']
 const LOG_SCALES    = ['RX','Inter','SC','Adaptado']
-const DAY_PT   = ['DOM','SEG','TER','QUA','QUI','SEX','SAB']
-const MONTH_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
 // ── Pure helpers ──────────────────────────────────────────────────────────────
-function toISO(d) { return d.toISOString().slice(0,10) }
-function uid()    { return Date.now().toString(36)+Math.random().toString(36).slice(2) }
-function getWeek(off) {
-  const now=new Date(),sun=new Date(now)
-  sun.setDate(now.getDate()-now.getDay()+off*7)
-  return Array.from({length:7},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return d})
-}
-function dateToWeekOffset(dateKey) {
-  const now=new Date()
-  const todaySun=new Date(now);todaySun.setDate(now.getDate()-now.getDay());todaySun.setHours(0,0,0,0)
-  const target=new Date(dateKey+'T12:00:00')
-  const targetSun=new Date(target);targetSun.setDate(target.getDate()-target.getDay());targetSun.setHours(0,0,0,0)
-  return Math.round((targetSun-todaySun)/(7*24*60*60*1000))
-}
 function isWodBlock(bl) { return WOD_TYPES.includes(bl.type)||WOD_TYPES.includes(bl.label) }
 function isRoundBlock(bl) { return !isWodBlock(bl)&&Number(bl.rounds)>0 }
-function blkLabel(bl) {
-  const l=bl.label&&bl.label!=='-'?bl.label:null,t=bl.type&&bl.type!=='-'?bl.type:null
-  return l&&t&&l!==t?`${l} · ${t}`:l||t||''
-}
-function exVolStr(ex) {
-  if(ex.intensity?.mode==='cardio'){
-    const val=ex.intensity?.cardioVal,unit=ex.intensity?.cardioUnit||'m'
-    if(!val)return ''
-    return (ex.name||'').toLowerCase().includes(String(val).toLowerCase())?'':`${val}${unit}`
-  }
-  const r=ex.reps||'',rd=r.includes(',')?r.split(',').map(x=>x.trim()).join('-'):r
-  return ex.sets&&rd?`${ex.sets}×${rd}`:rd
-}
 function fmtIntensity(ins) {
   if(!ins?.mode)return null
   if(ins.mode==='progression'){
