@@ -42,6 +42,7 @@
 /* ── Session summary ── */
 .sessSummary { margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--divider); cursor:pointer; user-select:none; }
 .sessSummary:last-of-type { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+.sessName { font-size:12px; font-weight:700; color:var(--cream); margin-bottom:3px; }
 .sessAlvo { font-size:10px; color:var(--sub); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
 .blockBadges { display:flex; flex-wrap:wrap; gap:3px; margin-bottom:4px; }
 .blockBadge { font-size:9px; font-weight:700; padding:2px 5px; border-radius:3px; text-transform:uppercase; letter-spacing:.05em; }

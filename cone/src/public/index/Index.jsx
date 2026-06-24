@@ -130,10 +130,7 @@ export default function Index() {
   const deferredPromptRef = useRef(null)
   const sheetRef          = useRef(null)
 
-  const todayFirstUrl = useMemo(() => {
-    const todaySess = sessions[TODAY_DK] || []
-    return todaySess.length ? `results.html?session=${encodeURIComponent(todaySess[0].id)}` : 'timer.html'
-  }, [sessions])
+  const todayFirstUrl = 'timer.html'
 
   // ── Data loading ─────────────────────────────────────────────────────────
   async function load(attempt = 0) {

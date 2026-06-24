@@ -443,7 +443,7 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
 function SessionDetail({sess,dateKey,accent,checked,roundState,rmValues,rmEditKey,demoMap,isWodLogged,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo,onTimer,onLog}) {
   return(
     <div className={styles.dayDetail} onClick={e=>e.stopPropagation()}>
-      {sess.mainTraining&&<div className={styles.detailSessTitle}>{sess.mainTraining}</div>}
+      {sess.sessionName&&<div className={styles.detailSessTitle}>{sess.sessionName}</div>}
       {(sess.blocks||[]).map(bl=>(
         <BlockDetail key={bl.id} bl={bl} sess={sess} dateKey={dateKey} accent={accent}
           checked={checked} roundState={roundState} rmValues={rmValues} rmEditKey={rmEditKey}
@@ -755,7 +755,8 @@ export default function Schedule() {
                   return(
                     <div key={sess.id}>
                       <div className={styles.sessSummary} onClick={()=>setExpanded(prev=>{const n=new Set(prev);const k=`${dk}|${si}`;n.has(k)?n.delete(k):n.add(k);return n})}>
-                        {sess.mainTraining&&<div className={styles.sessAlvo}>{sess.mainTraining}</div>}
+                        {sess.sessionName&&<div className={styles.sessName}>{sess.sessionName}</div>}
+                        {sess.mainTraining&&<div className={styles.sessAlvo}>{Array.isArray(sess.mainTraining)?sess.mainTraining.join(', '):sess.mainTraining}</div>}
                         <div className={styles.blockBadges}>
                           {blocks.map(bl=>{
                             const lbl=blkLabel(bl),p=blockProgress(bl,sess),blDone=p.total>0&&p.done===p.total
