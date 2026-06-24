@@ -2,7 +2,8 @@
   "name": "Cone — Treinos CrossFit",
   "short_name": "Cone",
   "description": "Treinos do dia, leaderboard e perfil do atleta",
-  "start_url": "./index.html",
+  "scope": "/CrossFit-Apps/",
+  "start_url": "/CrossFit-Apps/index.html",
   "display": "standalone",
   "background_color": "#0d0b09",
   "theme_color": "#4ac8c0",
@@ -24,17 +25,17 @@
   "shortcuts": [
     {
       "name": "Leaderboard",
-      "url": "./leaderboard.html",
+      "url": "/CrossFit-Apps/leaderboard.html",
       "description": "Ranking dos WODs"
     },
     {
       "name": "Agenda",
-      "url": "./schedule.html",
+      "url": "/CrossFit-Apps/schedule.html",
       "description": "Grade semanal de treinos"
     },
     {
       "name": "Meu perfil",
-      "url": "./me.html",
+      "url": "/CrossFit-Apps/me.html",
       "description": "Perfil e histórico do atleta"
     }
   ]
