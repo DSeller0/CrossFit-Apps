@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import html2canvas from 'html2canvas';
 import {
   loadResults, saveResults,
   loadAthletes,
@@ -819,6 +818,7 @@ function LeaderboardView({ athletes, sessions, results }) {
 
   const doExport=async()=>{
     const el=imgRef.current; if(!el) return;
+    const html2canvas=(await import('html2canvas')).default;
     const cv=await html2canvas(el,{scale:APP_CONFIG.exportScale||2,backgroundColor:lbBg,useCORS:true,logging:false,width:1080,height:el.scrollHeight,windowWidth:1080});
     const a=document.createElement('a');
     const lbl=selObj?`${selObj.dt}-${selObj.blLabel}-${scaleFilter}`.replace(/[^a-zA-Z0-9\-]/g,'-').toLowerCase():'leaderboard';

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useAuth } from './context/AuthContext';
 import { useSync } from './context/SyncContext';
 import {
@@ -16,14 +16,16 @@ import {
 } from './utils/storage';
 import { supabase } from './utils/supabase';
 import { APP_CONFIG, normaliseType, normaliseZone, GF } from './utils/config';
-import ServicosTab from './components/tabs/Servicos';
-import ExerciciosTab from './components/tabs/Exercicios';
-import AtletasTab from './components/tabs/Atletas';
-import ResultadosTab from './components/tabs/Resultados';
-import PublicadorTab, { AgendaView } from './components/tabs/Publicador';
-import CriadorTab from './components/tabs/Criador';
 import LoginScreen from './components/LoginScreen';
-import ConfigTab from './components/tabs/Config';
+
+const CriadorTab    = lazy(() => import('./components/tabs/Criador'));
+const AtletasTab    = lazy(() => import('./components/tabs/Atletas'));
+const ExerciciosTab = lazy(() => import('./components/tabs/Exercicios'));
+const ServicosTab   = lazy(() => import('./components/tabs/Servicos'));
+const ResultadosTab = lazy(() => import('./components/tabs/Resultados'));
+const ConfigTab     = lazy(() => import('./components/tabs/Config'));
+const PublicadorTab = lazy(() => import('./components/tabs/Publicador'));
+const AgendaView    = lazy(() => import('./components/tabs/Publicador').then(m => ({ default: m.AgendaView })));
 
 
 const TABS = [
@@ -378,14 +380,16 @@ export default function App() {
       </div>
 
       <div className="pane">
-        {tab === 'creator'   && <CriadorTab sessions={sessions} setSessions={setSessions} blockNames={blockNames} preload={creatorPreload} onPreloadConsumed={() => setCreatorPreload(null)} onGoToPublish={() => setTab('publisher')} />}
-        {tab === 'athletes'  && <AtletasTab sessions={sessions} results={loadResults()} onEditSession={s => { setCreatorPreload(s); setTab('creator'); }} onLogResult={({athleteId, date}) => { setResultsPreload({athleteId, date}); setTab('results'); }} />}
-        {tab === 'exercises' && <ExerciciosTab />}
-        {tab === 'locations' && <ServicosTab />}
-        {tab === 'results'   && <div className="res-pane"><ResultadosTab sessions={sessions} preload={resultsPreload} onPreloadConsumed={() => setResultsPreload(null)} /></div>}
-        {tab === 'agenda'    && <div className="pub-pane"><AgendaView sessions={sessions} events={events} setEvents={setEvents} athletes={loadAthletes()} onEditSession={s => { setCreatorPreload(s); setTab('creator'); }} onLogResult={({athleteId, date}) => { setResultsPreload({athleteId, date}); setTab('results'); }} /></div>}
-        {tab === 'publisher' && <div className="pub-pane"><PublicadorTab sessions={sessions} /></div>}
-        {tab === 'config'    && <ConfigTab />}
+        <Suspense fallback={null}>
+          {tab === 'creator'   && <CriadorTab sessions={sessions} setSessions={setSessions} blockNames={blockNames} preload={creatorPreload} onPreloadConsumed={() => setCreatorPreload(null)} onGoToPublish={() => setTab('publisher')} />}
+          {tab === 'athletes'  && <AtletasTab sessions={sessions} results={loadResults()} onEditSession={s => { setCreatorPreload(s); setTab('creator'); }} onLogResult={({athleteId, date}) => { setResultsPreload({athleteId, date}); setTab('results'); }} />}
+          {tab === 'exercises' && <ExerciciosTab />}
+          {tab === 'locations' && <ServicosTab />}
+          {tab === 'results'   && <div className="res-pane"><ResultadosTab sessions={sessions} preload={resultsPreload} onPreloadConsumed={() => setResultsPreload(null)} /></div>}
+          {tab === 'agenda'    && <div className="pub-pane"><AgendaView sessions={sessions} events={events} setEvents={setEvents} athletes={loadAthletes()} onEditSession={s => { setCreatorPreload(s); setTab('creator'); }} onLogResult={({athleteId, date}) => { setResultsPreload({athleteId, date}); setTab('results'); }} /></div>}
+          {tab === 'publisher' && <div className="pub-pane"><PublicadorTab sessions={sessions} /></div>}
+          {tab === 'config'    && <ConfigTab />}
+        </Suspense>
       </div>
     </div>
   );

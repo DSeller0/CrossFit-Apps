@@ -1,5 +1,4 @@
 ﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
-import html2canvas from 'html2canvas';
 import {
   loadAthletes, loadSettings, saveSettings,
   loadLocations, loadCoach,
@@ -1676,6 +1675,7 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
     setExporting(true);
     await new Promise(r => setTimeout(r, 250));
     try {
+      const html2canvas = (await import('html2canvas')).default;
       const W = 1920, H = 1080;
       const c = await html2canvas(el, { scale: 1, backgroundColor: '#000', useCORS: true, logging: false, width: W, height: H, windowWidth: W });
       const out = document.createElement('canvas');
@@ -1715,6 +1715,7 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
     setExporting(true);
     await new Promise(r => setTimeout(r, 250));
     try {
+      const html2canvas = (await import('html2canvas')).default;
       const W = 1080;
       const H = el.scrollHeight || 1920;
       const c = await html2canvas(el, { scale: 2, backgroundColor: '#000', useCORS: true, logging: false, width: W, height: H, windowWidth: W });
@@ -1743,6 +1744,7 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
     setExporting(true);
     await new Promise(r => setTimeout(r, 250));
     try {
+      const html2canvas = (await import('html2canvas')).default;
       const W = 1080; const H = el.scrollHeight || 3000;
       const cv = await html2canvas(el, { scale: APP_CONFIG.exportScale || 2, backgroundColor: variant === 'A' ? (APP_CONFIG.mobileEaglesBg || '#0d0b09') : (APP_CONFIG.mobileMegaManBg || '#000'), useCORS: true, logging: false, width: W, height: H, windowWidth: W });
       const out = document.createElement('canvas');

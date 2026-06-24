@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import '../../fonts.js'
 import { registerSW } from '../registerSW.js'
 import Leaderboard from './Leaderboard.jsx'
 
