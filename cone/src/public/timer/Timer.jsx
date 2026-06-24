@@ -45,9 +45,10 @@ function loadSavedCfg() { try { return JSON.parse(localStorage.getItem(K_CFG) ||
 // ── Component ─────────────────────────────────────────────────────────────
 export default function Timer() {
   // State
-  const initSaved = loadSaved()
-  const initCfg   = initSaved?.cfg ?? loadSavedCfg() ?? DEFAULT_CFG
-  const initStatus = initSaved ? initSaved.status : (loadSavedCfg() ? 'ready' : 'cfg')
+  const fromSched  = new URLSearchParams(location.search).get('src') === 'sched'
+  const initSaved  = loadSaved()
+  const initCfg    = initSaved?.cfg ?? loadSavedCfg() ?? DEFAULT_CFG
+  const initStatus = initSaved ? initSaved.status : (fromSched && loadSavedCfg() ? 'ready' : 'cfg')
 
   const [status,      setStatus]      = useState(initStatus)
   const [cfg,         setCfg]         = useState(initCfg)
