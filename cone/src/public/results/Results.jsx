@@ -206,8 +206,8 @@ export default function Results() {
 
   const week=getWeek(weekOffset)
   const today=todayISO()
-  const mon=week[1],sun=week[6]
-  const weekLabel=`${mon.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${sun.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} · ${MONTH_PT[mon.getMonth()]} ${mon.getFullYear()}`
+  const wkStart=week[0],wkEnd=week[6]
+  const weekLabel=`${wkStart.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${wkEnd.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} · ${MONTH_PT[wkStart.getMonth()]} ${wkStart.getFullYear()}`
 
   // LB pane content
   let lbTitle='', lbRows=null

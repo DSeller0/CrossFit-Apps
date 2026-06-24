@@ -374,7 +374,13 @@ export default function Athletes() {
     }
   }
 
-  useEffect(() => { registerSW(); load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    registerSW()
+    load()
+    const onShow = e => { if (e.persisted) load() }
+    window.addEventListener('pageshow', onShow)
+    return () => window.removeEventListener('pageshow', onShow)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // URL param deep-link
   useEffect(() => {

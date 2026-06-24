@@ -139,8 +139,8 @@ export default function Index() {
   async function load(attempt = 0) {
     try {
       const [sessRes, resRes, settRes] = await Promise.all([
-        sb.from('sessions').select('value').eq('id',1).single(),
-        sb.from('results').select('value').eq('id',1).single(),
+        sb.from('sessions').select('value').eq('id',1).maybeSingle(),
+        sb.from('results').select('value').eq('id',1).maybeSingle(),
         sb.from('settings').select('value').eq('id',1).maybeSingle(),
       ])
       const allSessions = sessRes.data?.value || {}
@@ -175,7 +175,7 @@ export default function Index() {
   }
 
   async function refreshCounts() {
-    const { data } = await sb.from('results').select('value').eq('id',1).single()
+    const { data } = await sb.from('results').select('value').eq('id',1).maybeSingle()
     const results = data?.value || []
     const counts  = {}
     results.forEach(r => { if (r.sessionId) counts[r.sessionId] = (counts[r.sessionId] || 0) + 1 })
