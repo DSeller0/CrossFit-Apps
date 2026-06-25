@@ -15,8 +15,8 @@ const MONTHS_PT    = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out
 
 function buildLbc(lbColors = {}) {
   return {
-    lbBg:          lbColors.lbBg          || '#000000',
-    lbRowAlt:      lbColors.lbRowAlt      || '#020809',
+    lbBg:          lbColors.lbBg          || 'transparent',
+    lbRowAlt:      lbColors.lbRowAlt      || 'rgba(255,255,255,0.04)',
     lbP1Bg:        lbColors.lbP1Bg        || 'rgba(255,215,0,0.06)',
     lbP2Bg:        lbColors.lbP2Bg        || 'rgba(192,192,192,0.05)',
     lbP3Bg:        lbColors.lbP3Bg        || 'rgba(205,127,50,0.05)',
