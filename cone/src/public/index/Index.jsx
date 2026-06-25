@@ -253,14 +253,14 @@ export default function Index() {
   return (
     <>
       <div className={s.layout}>
+        <header className={s.hdr}>
+          <div className={s.hdrRule}>
+            <div className={s.hdrLine} /><div className={s.hdrDiamond} /><div className={`${s.hdrLine} ${s.hdrLineR}`} />
+          </div>
+          <div className={s.brand}>{gymName}</div>
+          <div className={s.hdrFoot}><div className={s.gym}>{gymSub}</div></div>
+        </header>
         <div className={s.paneLeft}>
-          <header className={s.hdr}>
-            <div className={s.hdrRule}>
-              <div className={s.hdrLine} /><div className={s.hdrDiamond} /><div className={`${s.hdrLine} ${s.hdrLineR}`} />
-            </div>
-            <div className={s.brand}>{gymName}</div>
-            <div className={s.hdrFoot}><div className={s.gym}>{gymSub}</div></div>
-          </header>
           {sessionsPaneJsx}
         </div>
       </div>
