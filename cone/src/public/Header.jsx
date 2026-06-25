@@ -2,7 +2,7 @@ import s from './Header.module.css'
 
 export default function Header({ brand = 'CONE', sub, backHref, backTitle }) {
   return (
-    <header className={s.hdr} style={{ position: 'relative' }}>
+    <header className={s.hdr}>
       {backHref && (
         <a className={s.back} href={backHref} title={backTitle}>←</a>
       )}

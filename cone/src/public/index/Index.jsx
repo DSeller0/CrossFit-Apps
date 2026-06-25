@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
+import Nav from '../Nav.jsx'
 import s from './Index.module.css'
 
 // ── Constants ─────────────────────────────────────────────────────────────
@@ -124,13 +125,9 @@ export default function Index() {
   const [gymSub,      setGymSub]      = useState('CrossFit')
   const [error,       setError]       = useState(null)
   const [expandedSet, setExpandedSet] = useState(new Set())
-  const [sheetOpen,   setSheetOpen]   = useState(false)
   const [pwaShow,     setPwaShow]     = useState(false)
 
   const deferredPromptRef = useRef(null)
-  const sheetRef          = useRef(null)
-
-  const todayFirstUrl = 'timer.html'
 
   // ── Data loading ─────────────────────────────────────────────────────────
   async function load(attempt = 0) {
@@ -212,18 +209,6 @@ export default function Index() {
     return () => window.removeEventListener('pageshow', handler)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Sheet swipe-to-close
-  useEffect(() => {
-    const sh = sheetRef.current
-    if (!sh) return
-    let sy = 0
-    const onStart = e => { sy = e.touches[0].clientY }
-    const onEnd   = e => { if (e.changedTouches[0].clientY - sy > 60) setSheetOpen(false) }
-    sh.addEventListener('touchstart', onStart, { passive: true })
-    sh.addEventListener('touchend',   onEnd,   { passive: true })
-    return () => { sh.removeEventListener('touchstart', onStart); sh.removeEventListener('touchend', onEnd) }
-  }, [])
-
   // ── Actions ───────────────────────────────────────────────────────────────
   function toggleCard(sessId) {
     setExpandedSet(prev => { const next = new Set(prev); next.has(sessId) ? next.delete(sessId) : next.add(sessId); return next })
@@ -267,28 +252,16 @@ export default function Index() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Header */}
-      <header className={s.hdr}>
-        <div className={s.hdrRule}>
-          <div className={s.hdrLine} /><div className={s.hdrDiamond} /><div className={`${s.hdrLine} ${s.hdrLineR}`} />
-        </div>
-        <div className={s.brand}>{gymName}</div>
-        <div className={s.hdrFoot}><div className={s.gym}>{gymSub}</div></div>
-      </header>
-
-      {/* Two-pane layout */}
       <div className={s.layout}>
-        <div className={s.paneLeft}>{sessionsPaneJsx}</div>
-        <div className={s.paneRight}>
-          <div className={s.rightTitle}>Navegar</div>
-          <div className={s.navGrid}>
-            <a className={s.navTile} href="me.html"><span className={s.tileIc}>👤</span><span className={s.tileLbl}>Meu Perfil</span></a>
-            <a className={s.navTile} href="schedule.html"><span className={s.tileIc}>📅</span><span className={s.tileLbl}>Agenda</span></a>
-            <a className={s.navTile} href={todayFirstUrl}><span className={s.tileIc}>⏱️</span><span className={s.tileLbl}>Timer</span></a>
-            <a className={s.navTile} href="leaderboard.html"><span className={s.tileIc}>🏆</span><span className={s.tileLbl}>Leaderboard</span></a>
-            <a className={s.navTile} href="results.html"><span className={s.tileIc}>📊</span><span className={s.tileLbl}>Resultados</span></a>
-            <a className={s.navTile} href="cone/"><span className={s.tileIc}>⚙️</span><span className={s.tileLbl}>Coach</span></a>
-          </div>
+        <div className={s.paneLeft}>
+          <header className={s.hdr}>
+            <div className={s.hdrRule}>
+              <div className={s.hdrLine} /><div className={s.hdrDiamond} /><div className={`${s.hdrLine} ${s.hdrLineR}`} />
+            </div>
+            <div className={s.brand}>{gymName}</div>
+            <div className={s.hdrFoot}><div className={s.gym}>{gymSub}</div></div>
+          </header>
+          {sessionsPaneJsx}
         </div>
       </div>
 
@@ -303,33 +276,7 @@ export default function Index() {
         <button className={s.pwaDismiss} onClick={dismissPwa} aria-label="Fechar">✕</button>
       </div>
 
-      {/* Mobile nav */}
-      <nav className={s.mobileNav}>
-        <a className={s.mnBtn} href="leaderboard.html"><span className={s.mnIc}>🏆</span><span>Ranking</span></a>
-        <div className={s.mnSep} />
-        <a className={s.mnBtn} href="me.html"><span className={s.mnIc}>👤</span><span>Perfil</span></a>
-        <div className={s.mnSep} />
-        <a className={s.mnBtn} href="schedule.html"><span className={s.mnIc}>📅</span><span>Agenda</span></a>
-        <div className={s.mnSep} />
-        <button className={s.mnBtn} onClick={() => setSheetOpen(true)}><span className={s.mnIc}>⊞</span><span>Mais</span></button>
-      </nav>
-
-      {/* Sheet overlay */}
-      {sheetOpen && <div className={s.overlay} onClick={() => setSheetOpen(false)} />}
-
-      {/* Slide-up sheet */}
-      <div ref={sheetRef} className={`${s.sheet}${sheetOpen ? ' '+s.sheetOpen : ''}`}>
-        <div className={s.sheetHandle} />
-        <div className={s.sheetGrid}>
-          <a className={s.sheetTile} href="me.html"><span className={s.sheetIc}>👤</span><span className={s.sheetLbl}>Meu Perfil</span></a>
-          <a className={s.sheetTile} href="schedule.html"><span className={s.sheetIc}>📅</span><span className={s.sheetLbl}>Agenda</span></a>
-          <a className={s.sheetTile} href={todayFirstUrl}><span className={s.sheetIc}>⏱️</span><span className={s.sheetLbl}>Timer</span></a>
-          <a className={s.sheetTile} href="leaderboard.html"><span className={s.sheetIc}>🏆</span><span className={s.sheetLbl}>Leaderboard</span></a>
-          <a className={s.sheetTile} href="results.html"><span className={s.sheetIc}>📊</span><span className={s.sheetLbl}>Resultados</span></a>
-          <a className={s.sheetTile} href="cone/"><span className={s.sheetIc}>⚙️</span><span className={s.sheetLbl}>Coach</span></a>
-        </div>
-        <button className={s.sheetClose} onClick={() => setSheetOpen(false)}>Fechar</button>
-      </div>
+      <Nav active="index" />
     </>
   )
 }

@@ -1,6 +1,15 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin .9s linear infinite; display: inline-block; }
 
+/* ── Desktop layout ── */
+.pageRoot { padding-bottom: 70px; }
+.inner { }
+@media(min-width:768px) {
+  .pageRoot { margin-left:220px; display:flex; justify-content:center; min-height:100vh; padding-bottom:0; }
+  .inner { width:80%; max-width:1400px; border-left:1px solid var(--divider); border-right:1px solid var(--divider); min-height:100vh; }
+  .weekGrid { padding-bottom:40px; }
+}
+
 /* ── Header ── */
 .hdr { padding:18px 20px 14px; border-bottom:1px solid var(--divider); background:var(--bg); position:sticky; top:0; z-index:20; }
 .hdrRule { display:flex; align-items:center; gap:8px; margin-bottom:10px; }

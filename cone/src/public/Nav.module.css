@@ -1,14 +1,51 @@
+/* ── Mobile overflow sheet ── */
+.ovOverlay { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:35; }
+.ovSheet { position:fixed; left:0; right:0; bottom:0; background:var(--stone); border-top:1px solid var(--divider); z-index:36; transform:translateY(100%); transition:transform .25s ease; padding-bottom:env(safe-area-inset-bottom,0); }
+.ovSheetOpen { transform:translateY(0); }
+.ovHandle { width:32px; height:3px; background:var(--divider); border-radius:2px; margin:10px auto 14px; }
+.ovGrid { display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--divider); border-top:1px solid var(--divider); }
+.ovTile { background:var(--stone); padding:20px 8px; text-align:center; text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:7px; -webkit-tap-highlight-color:transparent; }
+.ovTile:active { background:var(--stone2); }
+.ovIc { font-size:24px; line-height:1; }
+.ovLbl { font-size:9px; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+
+/* ── Nav (mobile: fixed bottom bar) ── */
 .nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
   background: var(--stone);
   border-top: 1px solid var(--divider);
   display: flex;
+  flex-direction: column;
   padding-bottom: env(safe-area-inset-bottom, 0);
   z-index: 30;
 }
+
+/* Pill handle (mobile only) */
+.pill {
+  width: 100%;
+  padding: 5px 0 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.pillBar { width: 32px; height: 3px; background: var(--muted); border-radius: 2px; opacity: .55; }
+
+/* Desktop sidebar brand — hidden on mobile */
+.sideBrand { display: none; }
+.sideName { font-size:16px; font-weight:900; letter-spacing:6px; color:var(--cream); font-family:var(--font); }
+
+/* Tab row */
+.tabRow { display: flex; flex-direction: row; }
+
+/* Desktop extra links — hidden on mobile */
+.sideExtra { display: none; }
+
+/* Tab / link button */
 .btn {
   flex: 1;
   display: flex;
@@ -27,19 +64,64 @@
   background: none;
   cursor: pointer;
   transition: color .15s;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn:hover { color: var(--sub); }
 .btn.active { color: var(--teal); }
-.ic {
-  font-size: 18px;
-  line-height: 1;
-}
-.sep {
-  width: 1px;
-  background: var(--divider);
-  margin: 10px 0;
-}
+.ic { font-size: 18px; line-height: 1; }
+.sep { width: 1px; background: var(--divider); margin: 10px 0; }
+
+/* ── Desktop: left sidebar ── */
 @media (min-width: 768px) {
-  .btn { font-size: 11px; }
-  .ic  { font-size: 22px; }
+  /* Hide mobile-only elements */
+  .ovOverlay, .ovSheet { display: none; }
+  .pill { display: none; }
+
+  /* Sidebar layout */
+  .nav {
+    top: 0; bottom: 0;
+    right: auto;
+    width: 220px;
+    height: 100vh;
+    flex-direction: column;
+    border-top: none;
+    border-right: 1px solid var(--divider);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 0;
+    align-items: stretch;
+  }
+
+  /* Show sidebar brand */
+  .sideBrand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 22px 16px 18px;
+    border-bottom: 1px solid var(--divider);
+    flex-shrink: 0;
+  }
+
+  /* Tab row becomes vertical column */
+  .tabRow { flex-direction: column; }
+
+  /* Show desktop extra links */
+  .sideExtra { display: flex; flex-direction: column; }
+
+  /* Button: row layout, left-aligned */
+  .btn {
+    flex: none;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 14px 20px;
+    gap: 14px;
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-align: left;
+  }
+
+  .ic { font-size: 20px; }
+
+  /* Separator becomes horizontal line */
+  .sep { width: auto; height: 1px; margin: 0; }
 }

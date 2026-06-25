@@ -1,5 +1,13 @@
+/* ── Desktop layout ── */
+.pageRoot { padding-bottom: 70px; }
+.inner { }
+@media(min-width:768px) {
+  .pageRoot { margin-left:220px; display:flex; justify-content:center; min-height:100vh; padding-bottom:0; }
+  .inner { width:80%; max-width:1400px; border-left:1px solid var(--divider); border-right:1px solid var(--divider); min-height:100vh; }
+}
+
 /* ── Header ── */
-.hdr { padding: 18px 20px 14px; border-bottom: 1px solid var(--divider); background: var(--bg); position: relative; }
+.hdr { padding: 18px 20px 14px; border-bottom: 1px solid var(--divider); background: var(--bg); position: sticky; top: 0; z-index: 20; }
 .hdrRule { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .hdrLine { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold2)); }
 .hdrLineR { background: linear-gradient(270deg, transparent, var(--gold2)); }

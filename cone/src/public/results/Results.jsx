@@ -282,6 +282,7 @@ export default function Results() {
         })()}
       </div>
 
+      <div className={styles.pageRoot}><div className={styles.inner}>
       {/* ── Header ── */}
       <div className={styles.hdr}>
         <div className={styles.hdrRule}><div className={styles.hdrLine}/><div className={styles.hdrDiamond}/><div className={`${styles.hdrLine} ${styles.hdrLineR}`}/></div>
@@ -351,6 +352,7 @@ export default function Results() {
         </div>
       )}
 
+      </div></div>
       <Nav active="results" lockedId={lockedId}/>
     </>
   )

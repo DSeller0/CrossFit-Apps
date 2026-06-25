@@ -1,3 +1,11 @@
+/* ── Desktop layout ── */
+.pageRoot { padding-bottom: 70px; }
+.inner { }
+@media(min-width:768px) {
+  .pageRoot { margin-left:220px; display:flex; justify-content:center; min-height:100vh; padding-bottom:0; }
+  .inner { width:80%; max-width:1400px; border-left:1px solid var(--divider); border-right:1px solid var(--divider); min-height:100vh; }
+}
+
 .controls {
   background: var(--bg);
   border-bottom: 1px solid var(--divider);

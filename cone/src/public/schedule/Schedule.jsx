@@ -733,6 +733,7 @@ export default function Schedule() {
       onSubmit={submitLog} onClose={()=>{setLogPane(null);setLogSuccess(false);setLogError('')}}
       lockedAthName={lockedId?athletes.find(a=>String(a.id)===String(lockedId))?.name||'':''}/>
 
+    <div className={styles.pageRoot}><div className={styles.inner}>
     <div className={styles.hdr}>
       <div className={styles.hdrRule}><div className={styles.hdrLine}/><div className={styles.hdrDiamond}/><div className={`${styles.hdrLine} ${styles.hdrLineR}`}/></div>
       <div className={styles.brand}>CONE</div>
@@ -818,6 +819,7 @@ export default function Schedule() {
         })}
       </div>
     )}
+    </div></div>
     <Nav active="schedule" lockedId={lockedId}/>
   </>)
 }

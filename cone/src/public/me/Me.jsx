@@ -542,6 +542,7 @@ export default function Me() {
         </div>
       </div>
 
+      <div className={styles.pageRoot}><div className={styles.inner}>
       {/* ── Header ── */}
       <header className={styles.hdr}>
         <div className={styles.hdrRule}>
@@ -742,6 +743,7 @@ export default function Me() {
         </div>
       )}
 
+      </div></div>
       <Nav active="me" />
     </>
   )

@@ -162,30 +162,35 @@ export default function Leaderboard() {
 
   if (status === 'loading') return (
     <>
-      <Header brand="CONE" sub="Leaderboard" />
-      <div className={s.loading}>Carregando resultados...</div>
+      <div className={s.pageRoot}><div className={s.inner}>
+        <Header brand="CONE" sub="Leaderboard" />
+        <div className={s.loading}>Carregando resultados...</div>
+      </div></div>
       <Nav active="leaderboard" />
     </>
   )
 
   if (status === 'error') return (
     <>
-      <Header brand="CONE" sub="Leaderboard" />
-      <div className={s.errState}>
-        <IconAlertCircle size={32} />
-        <br /><br />
-        Não foi possível carregar os resultados.<br />
-        <small>{error}</small><br />
-        <button className={s.retryBtn} onClick={() => { setStatus('loading'); setError(null); load() }}>
-          <IconRefresh size={14} /> Tentar novamente
-        </button>
-      </div>
+      <div className={s.pageRoot}><div className={s.inner}>
+        <Header brand="CONE" sub="Leaderboard" />
+        <div className={s.errState}>
+          <IconAlertCircle size={32} />
+          <br /><br />
+          Não foi possível carregar os resultados.<br />
+          <small>{error}</small><br />
+          <button className={s.retryBtn} onClick={() => { setStatus('loading'); setError(null); load() }}>
+            <IconRefresh size={14} /> Tentar novamente
+          </button>
+        </div>
+      </div></div>
       <Nav active="leaderboard" />
     </>
   )
 
   return (
     <>
+      <div className={s.pageRoot}><div className={s.inner}>
       <Header brand="CONE" sub={gymName} />
 
       <div className={s.controls}>
@@ -251,6 +256,7 @@ export default function Leaderboard() {
         <div className={s.empty} style={{ color: lbc.lbRank }}>Selecione um WOD para ver o ranking.</div>
       )}
 
+      </div></div>
       <Nav active="leaderboard" />
     </>
   )
