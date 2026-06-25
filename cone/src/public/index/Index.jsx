@@ -276,7 +276,7 @@ export default function Index() {
         <button className={s.pwaDismiss} onClick={dismissPwa} aria-label="Fechar">✕</button>
       </div>
 
-      <Nav active="index" />
+      <Nav active="index" gymName={gymName} />
     </>
   )
 }

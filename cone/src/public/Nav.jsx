@@ -2,14 +2,15 @@ import { useState, Fragment } from 'react'
 import s from './Nav.module.css'
 
 const TABS = [
-  { key: 'index',       href: 'index.html',      icon: '🏠', label: 'Início',     lockable: false },
-  { key: 'leaderboard', href: 'leaderboard.html', icon: '🏆', label: 'Ranking',    lockable: false },
-  { key: 'results',     href: 'results.html',     icon: '📊', label: 'Resultados', lockable: true  },
-  { key: 'me',          href: 'me.html',          icon: '👤', label: 'Perfil',     lockable: true  },
-  { key: 'schedule',    href: 'schedule.html',    icon: '📅', label: 'Agenda',     lockable: true  },
+  { key: 'index',       href: 'index.html',      icon: '🏠', label: 'Início',     lockable: false, desktopOnly: false },
+  { key: 'leaderboard', href: 'leaderboard.html', icon: '🏆', label: 'Ranking',    lockable: false, desktopOnly: false },
+  { key: 'results',     href: 'results.html',     icon: '📊', label: 'Resultados', lockable: true,  desktopOnly: false },
+  { key: 'me',          href: 'me.html',          icon: '👤', label: 'Perfil',     lockable: true,  desktopOnly: false },
+  { key: 'schedule',    href: 'schedule.html',    icon: '📅', label: 'Agenda',     lockable: true,  desktopOnly: false },
+  { key: 'timer',       href: 'timer.html',       icon: '⏱️', label: 'Timer',      lockable: false, desktopOnly: true  },
 ]
 
-export default function Nav({ active, lockedId }) {
+export default function Nav({ active, lockedId, gymName = '' }) {
   const [ovOpen, setOvOpen] = useState(false)
 
   return (
@@ -43,6 +44,7 @@ export default function Nav({ active, lockedId }) {
         {/* Desktop sidebar brand */}
         <div className={s.sideBrand}>
           <span className={s.sideName}>CONE</span>
+          {gymName && <span className={s.sideGym}>{gymName}</span>}
         </div>
 
         {/* Tab row */}
@@ -52,7 +54,7 @@ export default function Nav({ active, lockedId }) {
             return (
               <Fragment key={tab.key}>
                 {i > 0 && <div className={s.sep} />}
-                <a className={`${s.btn}${tab.key === active ? ' ' + s.active : ''}`} href={href}>
+                <a className={`${s.btn}${tab.key === active ? ' ' + s.active : ''}${tab.desktopOnly ? ' ' + s.desktopTab : ''}`} href={href}>
                   <span className={s.ic}>{tab.icon}</span>
                   <span>{tab.label}</span>
                 </a>
@@ -62,22 +64,15 @@ export default function Nav({ active, lockedId }) {
         </div>
 
         {/* Desktop-only extra links */}
-        <div className={s.sideExtra}>
-          <div className={s.sep} />
-          <a className={s.btn} href="timer.html">
-            <span className={s.ic}>⏱️</span>
-            <span>Timer</span>
-          </a>
-          {!lockedId && (
-            <>
-              <div className={s.sep} />
-              <a className={s.btn} href="cone/">
-                <span className={s.ic}>⚙️</span>
-                <span>Coach</span>
-              </a>
-            </>
-          )}
-        </div>
+        {!lockedId && (
+          <div className={s.sideExtra}>
+            <div className={s.sep} />
+            <a className={s.btn} href="cone/">
+              <span className={s.ic}>⚙️</span>
+              <span>Coach</span>
+            </a>
+          </div>
+        )}
       </nav>
     </>
   )
