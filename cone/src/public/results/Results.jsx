@@ -19,7 +19,11 @@ function blkMeta(bl) {
   return p.join(' · ')
 }
 function wodBlocks(sess) { return (sess.blocks||[]).filter(b=>WOD_TYPES.includes(b.type)) }
-function sessionsForDay(sessions,dk) { return ((sessions||{})[dk]||[]).filter(s=>s.blocks&&s.blocks.length) }
+function sessionsForDay(sessions,dk,lockedAthName) {
+  const all=((sessions||{})[dk]||[]).filter(s=>s.blocks&&s.blocks.length)
+  if(!lockedAthName) return all
+  return all.filter(s=>{const t=Array.isArray(s.mainTraining)?s.mainTraining:(s.mainTraining?[s.mainTraining]:[]);return t.length===0||t.includes(lockedAthName)})
+}
 
 export default function Results() {
   const [status, setStatus] = useState('loading')
@@ -28,7 +32,8 @@ export default function Results() {
   const [results, setResults] = useState([])
   const [gymName, setGymName] = useState('Cone')
   const [weekOffset, setWeekOffset] = useState(0)
-  const [selAth, setSelAth] = useState(() => localStorage.getItem('cone_athlete_filter')||'')
+  const [lockedId] = useState(() => new URLSearchParams(location.search).get('id')||'')
+  const [selAth, setSelAth] = useState(() => new URLSearchParams(location.search).get('id')||localStorage.getItem('cone_athlete_filter')||'')
   const [expanded, setExpanded] = useState(new Set())
   const [logInputs, setLogInputs] = useState({})
   const [lbTarget, setLbTarget] = useState(null)
@@ -60,6 +65,7 @@ export default function Results() {
       const stD=stR.data?.value||{}
       setSessions(sD); setAthletes(aD); setResults(rD)
       setGymName(stD.gymName||'Cone')
+      if(lockedId){setSelAth(lockedId);try{localStorage.setItem('cone_athlete_filter',lockedId)}catch(e){}}
       setStatus('ok')
       const urlSid=new URLSearchParams(location.search).get('session')
       if(urlSid) {
@@ -285,12 +291,12 @@ export default function Results() {
 
       {status!=='loading'&&<>
         {/* ── Athlete filter ── */}
-        <div className={styles.selBar}>
+        {!lockedId&&<div className={styles.selBar}>
           <select className={styles.athleteSel} value={selAth} onChange={e=>changeAth(e.target.value)}>
             <option value="">— Todos —</option>
             {athletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
-        </div>
+        </div>}
         {/* ── Week nav ── */}
         <div className={styles.weekNav}>
           <button className={styles.navBtn} onClick={()=>changeWeek(-1)}><i className="ti ti-chevron-left"/></button>
@@ -306,7 +312,8 @@ export default function Results() {
         <div className={styles.weekGrid}>
           {week.map(date=>{
             const dk=toISO(date),isPast=dk<today,isToday=dk===today
-            const daySess=sessionsForDay(sessions,dk),hasSess=daySess.length>0
+            const lockedAthName=lockedId?athletes.find(a=>String(a.id)===String(lockedId))?.name||'':''
+            const daySess=sessionsForDay(sessions,dk,lockedAthName),hasSess=daySess.length>0
             return(
               <div key={dk} className={`${styles.dayCard}${isToday?' '+styles.dayCardToday:''}${hasSess?'':' '+styles.dayCardNoSess}`}>
                 <div className={styles.dayHdr}>
@@ -344,7 +351,7 @@ export default function Results() {
         </div>
       )}
 
-      <Nav active="results" />
+      <Nav active="results" lockedId={lockedId}/>
     </>
   )
 }

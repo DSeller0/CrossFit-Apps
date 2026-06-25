@@ -167,7 +167,7 @@ function DemoPanel({target,demoMap,onClose}) {
 }
 
 // ── Log Pane ──────────────────────────────────────────────────────────────────
-function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,success,error,onSubmit,onClose}) {
+function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,success,error,onSubmit,onClose,lockedAthName}) {
   const isOpen=!!pane
   function setRpe(i,n){onBlocks(prev=>prev.map((b,j)=>j===i?{...b,rpe:n}:b))}
   function setScale(i,s){onBlocks(prev=>prev.map((b,j)=>j===i?{...b,scale:s}:b))}
@@ -199,10 +199,12 @@ function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,success,error,on
             <div style={{fontSize:12,color:'#888'}}>{dateStr}{pane.sess.sessionName?` · ${pane.sess.sessionName}`:''}</div>
             <div className={styles.lpSection}>
               <div className={styles.lpSectionTitle}>Atleta</div>
-              <select className={styles.lpSelect} value={athId} onChange={e=>onAthId(e.target.value)}>
-                <option value="">— Selecione —</option>
-                {pane.assignedAth.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
-              </select>
+              {lockedAthName
+                ?<div style={{padding:'4px 0',color:'var(--cream)',fontWeight:700,fontSize:14}}>{lockedAthName}</div>
+                :<select className={styles.lpSelect} value={athId} onChange={e=>onAthId(e.target.value)}>
+                  <option value="">— Selecione —</option>
+                  {pane.assignedAth.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>}
             </div>
             {blocks.length>0&&<div className={styles.lpSection}>
               <div className={styles.lpSectionTitle}>Resultados</div>
@@ -501,6 +503,8 @@ export default function Schedule() {
   const [logSuccess,setLogSuccess]=useState(false)
   const [logError,setLogError]=useState('')
 
+  const [lockedId]=useState(()=>new URLSearchParams(location.search).get('id')||'')
+
   const demoMapRef=useRef({})
   const goalsRef=useRef({})
 
@@ -558,10 +562,11 @@ export default function Schedule() {
       const pDate=sp.get('date'),pOpenLog=sp.get('openLog'),pBlockId=sp.get('blockId')
       const pAthlete=sp.get('athlete'),pPrefill=sp.get('prefill'),pPrefillRounds=sp.get('prefillRounds')
 
-      const curAth=localStorage.getItem('cone_athlete_filter')||''
+      const curAth=lockedId||localStorage.getItem('cone_athlete_filter')||''
       let athId=curAth
       if(pDate)setWeekOffset(dateToWeekOffset(pDate))
-      if(pAthlete){const a=aD.find(x=>String(x.id)===String(pAthlete));if(a){athId=a.id;setSelAth(a.id);localStorage.setItem('cone_athlete_filter',a.id)}}
+      if(lockedId){setSelAth(lockedId);localStorage.setItem('cone_athlete_filter',lockedId)}
+      else if(pAthlete){const a=aD.find(x=>String(x.id)===String(pAthlete));if(a){athId=a.id;setSelAth(a.id);localStorage.setItem('cone_athlete_filter',a.id)}}
 
       const newAuto=autofillRm(sD,aD,athId,gdD)
 
@@ -725,7 +730,8 @@ export default function Schedule() {
     <LogPane pane={logPane} athId={logAthId} onAthId={setLogAthId}
       blocks={logBlocks} onBlocks={setLogBlocks}
       submitting={logSubmitting} success={logSuccess} error={logError}
-      onSubmit={submitLog} onClose={()=>{setLogPane(null);setLogSuccess(false);setLogError('')}}/>
+      onSubmit={submitLog} onClose={()=>{setLogPane(null);setLogSuccess(false);setLogError('')}}
+      lockedAthName={lockedId?athletes.find(a=>String(a.id)===String(lockedId))?.name||'':''}/>
 
     <div className={styles.hdr}>
       <div className={styles.hdrRule}><div className={styles.hdrLine}/><div className={styles.hdrDiamond}/><div className={`${styles.hdrLine} ${styles.hdrLineR}`}/></div>
@@ -734,12 +740,12 @@ export default function Schedule() {
     </div>
 
     {status!=='loading'&&<>
-      <div className={styles.selBar}>
+      {!lockedId&&<div className={styles.selBar}>
         <select className={styles.athleteSel} value={selAth} onChange={e=>changeAth(e.target.value)}>
           <option value="">— Todos —</option>
           {athletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
-      </div>
+      </div>}
       <div className={styles.weekNav}>
         <button className={styles.navBtn} onClick={()=>changeWeek(-1)}><i className="ti ti-chevron-left"/></button>
         <span className={styles.weekLabel}>{weekLabel}</span>
@@ -775,7 +781,7 @@ export default function Schedule() {
                     <div key={sess.id}>
                       <div className={styles.sessSummary} onClick={()=>setExpanded(prev=>{const n=new Set(prev);const k=`${dk}|${si}`;n.has(k)?n.delete(k):n.add(k);return n})}>
                         {sess.sessionName&&<div className={styles.sessName}>{sess.sessionName}</div>}
-                        {sess.mainTraining&&<div className={styles.sessAlvo}>{Array.isArray(sess.mainTraining)?sess.mainTraining.join(', '):sess.mainTraining}</div>}
+                        {sess.mainTraining&&!lockedId&&<div className={styles.sessAlvo}>{Array.isArray(sess.mainTraining)?sess.mainTraining.join(', '):sess.mainTraining}</div>}
                         <div className={styles.blockBadges}>
                           {blocks.map(bl=>{
                             const lbl=blkLabel(bl),p=blockProgress(bl,sess),blDone=p.total>0&&p.done===p.total
@@ -812,6 +818,6 @@ export default function Schedule() {
         })}
       </div>
     )}
-    <Nav active="schedule"/>
+    <Nav active="schedule" lockedId={lockedId}/>
   </>)
 }
