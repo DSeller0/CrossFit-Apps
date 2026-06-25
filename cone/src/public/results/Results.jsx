@@ -10,6 +10,8 @@ const WOD_TYPES = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']
 const SCALES    = ['RX','Inter','SC','Adaptado']
 const SCALE_COL = {RX:'#4ac8c0',Inter:'#e87820',SC:'#9070d8',Adaptado:'#c05050'}
 const DEF_INP   = () => ({rpe:7,scale:'RX',perfTime:'',perfRounds:'',perfReps:''})
+const MEDALS    = ['🥇','🥈','🥉']
+const CAL_DAYS  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
 
 function inputKey(sid,bid) { return `${sid}:${bid}` }
 function blkMeta(bl) {
@@ -24,23 +26,31 @@ function sessionsForDay(sessions,dk,lockedAthName) {
   if(!lockedAthName) return all
   return all.filter(s=>{const t=Array.isArray(s.mainTraining)?s.mainTraining:(s.mainTraining?[s.mainTraining]:[]);return t.length===0||t.includes(lockedAthName)})
 }
+function sessName(sess,dk) {
+  if(sess.sessionName||sess.name) return sess.sessionName||sess.name
+  const [y,m,d]=dk.split('-').map(Number)
+  return CAL_DAYS[new Date(y,m-1,d).getDay()]
+}
 
 export default function Results() {
-  const [status, setStatus] = useState('loading')
-  const [sessions, setSessions] = useState({})
-  const [athletes, setAthletes] = useState([])
-  const [results, setResults] = useState([])
-  const [gymName, setGymName] = useState('Cone')
-  const [weekOffset, setWeekOffset] = useState(0)
-  const [lockedId] = useState(() => new URLSearchParams(location.search).get('id')||'')
-  const [selAth, setSelAth] = useState(() => new URLSearchParams(location.search).get('id')||localStorage.getItem('cone_athlete_filter')||'')
-  const [expanded, setExpanded] = useState(new Set())
-  const [logInputs, setLogInputs] = useState({})
-  const [lbTarget, setLbTarget] = useState(null)
+  const [status,      setStatus]      = useState('loading')
+  const [sessions,    setSessions]    = useState({})
+  const [athletes,    setAthletes]    = useState([])
+  const [results,     setResults]     = useState([])
+  const [gymName,     setGymName]     = useState('Cone')
+  const [weekOffset,  setWeekOffset]  = useState(0)
+  const [lockedId]                    = useState(() => new URLSearchParams(location.search).get('id')||'')
+  const [selAth,      setSelAth]      = useState(() => new URLSearchParams(location.search).get('id')||localStorage.getItem('cone_athlete_filter')||'')
+  const [expanded,    setExpanded]    = useState(new Set())
+  const [logInputs,   setLogInputs]   = useState({})
+  const [lbTarget,    setLbTarget]    = useState(null)   // mobile flyout
+  const [selWod,      setSelWod]      = useState(null)   // desktop: {sid,bid,dk}
+  const [athSearch,   setAthSearch]   = useState('')
+  const [lbScale,     setLbScale]     = useState('Todos')
   const [confirmPending, setConfirmPending] = useState(null)
-  const [successData, setSuccessData] = useState(null)
-  const [submittingKey, setSubmittingKey] = useState(null)
-  const [errMsg, setErrMsg] = useState('')
+  const [successData,    setSuccessData]    = useState(null)
+  const [submittingKey,  setSubmittingKey]  = useState(null)
+  const [errMsg,         setErrMsg]         = useState('')
   const didUrlScroll = useRef(false)
 
   useEffect(() => {
@@ -101,7 +111,7 @@ export default function Results() {
     const k=inputKey(sid,bid)
     setLogInputs(prev=>({...prev,[k]:{...(prev[k]||DEF_INP()),...upd}}))
   }
-  function changeWeek(dir) { setWeekOffset(w=>w+dir); setExpanded(new Set()); setLbTarget(null) }
+  function changeWeek(dir) { setWeekOffset(w=>w+dir); setExpanded(new Set()); setLbTarget(null); setSelWod(null) }
   function changeAth(val) {
     setSelAth(val); try{localStorage.setItem('cone_athlete_filter',val)}catch(e){}
     setExpanded(new Set()); setLbTarget(null)
@@ -109,7 +119,6 @@ export default function Results() {
   function toggleSess(sid) {
     setExpanded(prev=>{const n=new Set(prev);n.has(sid)?n.delete(sid):n.add(sid);return n})
   }
-
   function getAthBlock(sid,bid) {
     if(!selAth) return null
     const r=results.find(r=>r.sessionId===sid&&r.athleteId===selAth)
@@ -121,6 +130,7 @@ export default function Results() {
     return results.some(r=>r.sessionId===sid&&r.athleteId===selAth&&r.presence==='Presente')
   }
   function loggedCount(sid) { return results.filter(r=>r.sessionId===sid&&r.presence==='Presente').length }
+
   function calcKPIs(sid,bid,btype) {
     const brs=results.filter(r=>r.sessionId===sid&&r.presence==='Presente')
       .map(r=>({...(r.blocks||[]).find(b=>b.blockId===bid)||{},aid:r.athleteId}))
@@ -141,6 +151,30 @@ export default function Results() {
     return {count,avgRpe,rxPct,perfKpi}
   }
 
+  function calcExtKpis(sid,bid,btype) {
+    const brs=results.filter(r=>r.sessionId===sid&&r.presence==='Presente')
+      .map(r=>({...(r.blocks||[]).find(b=>b.blockId===bid)||{},athId:String(r.athleteId)}))
+      .filter(b=>b.blockId)
+    const count=brs.length
+    if(!count) return {count:0,avgRpe:null,rxPct:null,perfKpi:null,bestPerf:null,worstPerf:null,median:null,dnfCount:0,avgSecs:0}
+    const avgRpe=(brs.reduce((s,b)=>s+(Number(b.rpe)||0),0)/count).toFixed(1)
+    const scales=brs.map(b=>b.scale).filter(Boolean)
+    const rxPct=scales.length?Math.round(scales.filter(s=>s==='RX').length/scales.length*100):null
+    const scalePct = sc => scales.length ? Math.round(scales.filter(s=>s===sc).length/scales.length*100)+'%' : '—'
+    let perfKpi=null,avgSecs=0
+    if(btype==='For Time'){
+      const times=brs.map(b=>b.perfTime).filter(Boolean).map(toSecs).filter(t=>t>0&&t<Infinity)
+      if(times.length){
+        avgSecs=times.reduce((a,b)=>a+b,0)/times.length
+        perfKpi=fmtSecs(Math.round(avgSecs))
+      }
+    } else {
+      const rounds=brs.map(b=>parseInt(b.perfRounds)||0).filter(r=>r>0)
+      if(rounds.length) perfKpi=(rounds.reduce((a,b)=>a+b,0)/rounds.length).toFixed(1)+' rds'
+    }
+    return {count,avgRpe,rxPct,perfKpi,avgSecs,rxPctStr:scalePct('RX'),interPct:scalePct('Inter'),scPct:scalePct('SC')}
+  }
+
   function showConfirm(sid,bid,dk) {
     if(!selAth){alert('Selecione um atleta no filtro para registrar resultado.');return}
     setConfirmPending({sid,bid,dk})
@@ -151,7 +185,6 @@ export default function Results() {
     setConfirmPending(null)
     setTimeout(()=>doSubmit(sid,bid,dk),200)
   }
-
   async function doSubmit(sid,bid,dk) {
     const k=inputKey(sid,bid)
     if(submittingKey) return
@@ -180,12 +213,44 @@ export default function Results() {
     setSuccessData({blockLabel:lbl,scale:inp.scale,rpe:inp.rpe,perf,btype})
   }
 
-  const week=getWeek(weekOffset)
-  const today=todayISO()
-  const wkStart=week[0],wkEnd=week[6]
-  const weekLabel=`${wkStart.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${wkEnd.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} · ${MONTH_PT[wkStart.getMonth()]} ${wkStart.getFullYear()}`
+  // ── Computed ──
+  const week        = getWeek(weekOffset)
+  const today       = todayISO()
+  const wkStart     = week[0], wkEnd=week[6]
+  const weekLabel   = `${wkStart.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${wkEnd.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} · ${MONTH_PT[wkStart.getMonth()]} ${wkStart.getFullYear()}`
+  const lockedAthName = lockedId ? athletes.find(a=>String(a.id)===String(lockedId))?.name||'' : ''
+  const sortedAthletes = [...athletes].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'))
+  const filteredAthletes = athSearch
+    ? sortedAthletes.filter(a=>a.name.toLowerCase().includes(athSearch.toLowerCase()))
+    : sortedAthletes
 
-  // LB pane content
+  // Desktop: selected WOD data
+  const selSess     = selWod ? (sessions[selWod.dk]||[]).find(s=>s.id===selWod.sid) : null
+  const selBlock    = selSess ? (selSess.blocks||[]).find(b=>b.id===selWod.bid) : null
+  const selAthBlock = (selWod&&selBlock) ? getAthBlock(selWod.sid,selWod.bid) : null
+  const extKpis     = (selWod&&selBlock) ? calcExtKpis(selWod.sid,selWod.bid,selBlock.type) : null
+  const isForTimeSel = selBlock?.type==='For Time'
+
+  // Desktop LB
+  const lbEntries = selWod ? results
+    .filter(r=>r.sessionId===selWod.sid&&r.presence==='Presente')
+    .map(r=>{
+      const br=(r.blocks||[]).find(b=>b.blockId===selWod.bid); if(!br) return null
+      const ath=(athletes||[]).find(a=>String(a.id)===String(r.athleteId))
+      return {name:ath?.name||'?',athId:String(r.athleteId),...br}
+    })
+    .filter(Boolean)
+    .filter(e=>lbScale==='Todos'||e.scale===lbScale)
+    .sort((a,b)=>{
+      if(isForTimeSel) return toSecs(a.perfTime)-toSecs(b.perfTime)
+      const ra=parseInt(a.perfRounds)||0,rb=parseInt(b.perfRounds)||0
+      if(ra!==rb) return rb-ra
+      return (parseInt(b.perfReps)||0)-(parseInt(a.perfReps)||0)
+    }) : []
+  const selAthLbIdx = selAth ? lbEntries.findIndex(e=>e.athId===selAth) : -1
+  const selAthRank  = selAthLbIdx>=0 ? selAthLbIdx+1 : null
+
+  // Mobile LB pane
   let lbTitle='', lbRows=null
   if(lbTarget){
     const {sid,bid,dk}=lbTarget
@@ -204,13 +269,12 @@ export default function Results() {
       if(ra!==rb) return rb-ra
       return (parseInt(b.perfReps)||0)-(parseInt(a.perfReps)||0)
     })
-    const medals=['🥇','🥈','🥉']
     lbRows=sorted.length
       ?sorted.map((e,i)=>{
           const scol=SCALE_COL[e.scale]||'#666'
           const perf=isForTime?(e.perfTime||'—'):`${e.perfRounds||'—'}${e.perfReps?' + '+e.perfReps:''}`
           return(<div key={i} className={styles.lbEntry}>
-            <span className={styles.lbRank}>{medals[i]||i+1}</span>
+            <span className={styles.lbRank}>{MEDALS[i]||i+1}</span>
             <span className={styles.lbName}>{e.name}</span>
             <span className={styles.lbScale} style={{color:scol}}>{e.scale||''}</span>
             <span className={styles.lbPerf}>{perf}</span>
@@ -219,7 +283,7 @@ export default function Results() {
       :[<div key="empty" className={styles.lbEmpty}>Nenhum resultado registrado.</div>]
   }
 
-  // Confirm modal content
+  // Confirm modal
   let confirmContent=null
   if(confirmPending){
     const {sid,bid,dk}=confirmPending
@@ -248,7 +312,7 @@ export default function Results() {
 
   return (
     <>
-      {/* ── LB pane ── */}
+      {/* Mobile LB flyout */}
       <div className={`${styles.lbOverlay}${lbTarget?' '+styles.lbOverlayOpen:''}`} onClick={()=>setLbTarget(null)} />
       <div className={`${styles.lbPane}${lbTarget?' '+styles.lbPaneOpen:''}`}>
         <div className={styles.lbPaneHdr}>
@@ -258,11 +322,11 @@ export default function Results() {
         <div className={styles.lbList}>{lbRows}</div>
       </div>
 
-      {/* ── Confirm modal ── */}
+      {/* Confirm modal */}
       <div className={`${styles.modalOverlay}${confirmPending?' '+styles.modalOverlayOpen:''}`} onClick={()=>setConfirmPending(null)} />
       <div className={`${styles.confirmModal}${confirmPending?' '+styles.confirmModalOpen:''}`}>{confirmContent}</div>
 
-      {/* ── Success modal ── */}
+      {/* Success modal */}
       <div className={`${styles.modalOverlay}${successData?' '+styles.modalOverlayOpen:''}`} style={{zIndex:500}} onClick={()=>setSuccessData(null)} />
       <div className={`${styles.successModal}${successData?' '+styles.successModalOpen:''}`}>
         {successData&&(()=>{
@@ -282,82 +346,306 @@ export default function Results() {
         })()}
       </div>
 
-      <div className={styles.pageRoot}><div className={styles.inner}>
-      {/* ── Header ── */}
-      <div className={styles.hdr}>
-        <div className={styles.hdrRule}><div className={styles.hdrLine}/><div className={styles.hdrDiamond}/><div className={`${styles.hdrLine} ${styles.hdrLineR}`}/></div>
-        <div className={styles.brand}>CONE</div>
-        <div className={styles.gym}>{gymName} · Resultados</div>
-      </div>
-
-      {status!=='loading'&&<>
-        {/* ── Athlete filter ── */}
-        {!lockedId&&<div className={styles.selBar}>
-          <select className={styles.athleteSel} value={selAth} onChange={e=>changeAth(e.target.value)}>
-            <option value="">— Todos —</option>
-            {athletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
-          </select>
-        </div>}
-        {/* ── Week nav ── */}
-        <div className={styles.weekNav}>
-          <button className={styles.navBtn} onClick={()=>changeWeek(-1)}><i className="ti ti-chevron-left"/></button>
-          <span className={styles.weekLabel}>{weekLabel}</span>
-          <button className={styles.navBtn} onClick={()=>changeWeek(1)}><i className="ti ti-chevron-right"/></button>
+      <div className={styles.pageRoot}>
+        {/* Header */}
+        <div className={styles.hdr}>
+          <div className={styles.hdrRule}><div className={styles.hdrLine}/><div className={styles.hdrDiamond}/><div className={`${styles.hdrLine} ${styles.hdrLineR}`}/></div>
+          <div className={styles.brand}>CONE</div>
+          <div className={styles.gym}>{gymName} · Resultados</div>
         </div>
-      </>}
 
-      {status==='loading'&&<div className={styles.loading}><i className={`ti ti-loader ${styles.spin}`} style={{fontSize:'32px'}}/>Carregando...</div>}
-      {status==='error'&&<div className={styles.errorMsg}><i className="ti ti-alert-circle" style={{fontSize:'32px'}}/><br/><br/>Não foi possível carregar os dados.<br/><small>{errMsg}</small><br/><button className={styles.retryBtn} onClick={()=>load()}>↺ Tentar novamente</button></div>}
+        {status!=='loading'&&<>
+          {/* Mobile athlete filter */}
+          {!lockedId&&<div className={`${styles.selBar} ${styles.mobileOnly}`}>
+            <select className={styles.athleteSel} value={selAth} onChange={e=>changeAth(e.target.value)}>
+              <option value="">— Todos —</option>
+              {athletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+          </div>}
+          {/* Week nav */}
+          <div className={styles.weekNav}>
+            <button className={styles.navBtn} onClick={()=>changeWeek(-1)}><i className="ti ti-chevron-left"/></button>
+            <span className={styles.weekLabel}>{weekLabel}</span>
+            <button className={styles.navBtn} onClick={()=>changeWeek(1)}><i className="ti ti-chevron-right"/></button>
+          </div>
+        </>}
 
-      {status==='ok'&&(
-        <div className={styles.weekGrid}>
-          {week.map(date=>{
-            const dk=toISO(date),isPast=dk<today,isToday=dk===today
-            const lockedAthName=lockedId?athletes.find(a=>String(a.id)===String(lockedId))?.name||'':''
-            const daySess=sessionsForDay(sessions,dk,lockedAthName),hasSess=daySess.length>0
-            return(
-              <div key={dk} className={`${styles.dayCard}${isToday?' '+styles.dayCardToday:''}${hasSess?'':' '+styles.dayCardNoSess}`}>
-                <div className={styles.dayHdr}>
-                  <span className={styles.dayDow}>{DAY_PT[date.getDay()]}</span>
-                  <div style={{display:'flex',alignItems:'center',gap:'3px'}}>
-                    <span className={`${styles.dayNum}${isPast?' '+styles.dayNumPast:''}`}>{date.getDate()}</span>
-                    {isToday&&<div className={styles.dayTodayDot}/>}
+        {status==='loading'&&<div className={styles.loading}><i className={`ti ti-loader ${styles.spin}`} style={{fontSize:'32px'}}/>Carregando...</div>}
+        {status==='error'&&<div className={styles.errorMsg}><i className="ti ti-alert-circle" style={{fontSize:'32px'}}/><br/><br/>Não foi possível carregar os dados.<br/><small>{errMsg}</small><br/><button className={styles.retryBtn} onClick={()=>load()}>↺ Tentar novamente</button></div>}
+
+        {status==='ok'&&<>
+          {/* ── DESKTOP: compact calendar + three panes ── */}
+          <div className={styles.desktopView}>
+            <div className={styles.calStrip}>
+              {week.map(date=>{
+                const dk=toISO(date),isPast=dk<today,isToday=dk===today
+                const daySess=sessionsForDay(sessions,dk,lockedAthName)
+                const hasWods=daySess.some(s=>wodBlocks(s).length>0)
+                return(
+                  <div key={dk} className={`${styles.calDay}${isToday?' '+styles.calDayToday:''}`}>
+                    <div className={styles.calDayHdr}>
+                      <span className={styles.calDow}>{DAY_PT[date.getDay()]}</span>
+                      <span className={`${styles.calNum}${isPast?' '+styles.calNumPast:''}`}>{date.getDate()}</span>
+                    </div>
+                    {hasWods
+                      ? daySess.flatMap(sess=>
+                          wodBlocks(sess).map(bl=>{
+                            const isSel=selWod?.sid===sess.id&&selWod?.bid===bl.id
+                            const cnt=loggedCount(sess.id)
+                            const name=sessName(sess,dk)
+                            const dot=hasDot(sess.id)
+                            return(
+                              <div key={`${sess.id}:${bl.id}`}
+                                className={`${styles.calCard}${isSel?' '+styles.calCardSel:''}`}
+                                onClick={()=>{setSelWod({sid:sess.id,bid:bl.id,dk});setLbScale('Todos')}}>
+                                <div className={styles.calCardRow}>
+                                  <span className={`${styles.calDot}${dot?' '+styles.calDotFill:''}`}/>
+                                  <span className={styles.calCardName}>{name}</span>
+                                  <span className={styles.calCardType}>{bl.type}</span>
+                                </div>
+                                <div className={styles.calCardCount}>{cnt} resultado{cnt!==1?'s':''}</div>
+                              </div>
+                            )
+                          })
+                        )
+                      : <div className={styles.calRest}><i className="ti ti-moon"/></div>
+                    }
                   </div>
-                </div>
-                <div className={styles.dayBody}>
-                  {hasSess
-                    ?daySess.map(sess=>(
-                        <SessionCard key={sess.id} sess={sess} dk={dk}
-                          isExpanded={expanded.has(sess.id)}
-                          hasDot={hasDot(sess.id)}
-                          loggedCount={loggedCount(sess.id)}
-                          onToggle={()=>toggleSess(sess.id)}
-                          selAth={selAth}
-                          logInputs={logInputs}
-                          submittingKey={submittingKey}
-                          kpisFn={(bid,btype)=>calcKPIs(sess.id,bid,btype)}
-                          athBlockFn={(bid)=>getAthBlock(sess.id,bid)}
-                          onRpe={(bid,n)=>setInp(sess.id,bid,{rpe:n})}
-                          onScale={(bid,s)=>setInp(sess.id,bid,{scale:s})}
-                          onField={(bid,f,v)=>setInp(sess.id,bid,{[f]:v})}
-                          onSubmitReq={(bid)=>showConfirm(sess.id,bid,dk)}
-                          onLbOpen={(bid)=>setLbTarget({sid:sess.id,bid,dk})}
-                        />
-                      ))
-                    :<div className={styles.restLabel}><i className="ti ti-moon"/></div>}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
+                )
+              })}
+            </div>
 
-      </div></div>
+            {/* Three panes */}
+            <div className={styles.threePane}>
+              {/* LEFT: athlete selector */}
+              <div className={styles.athPane}>
+                <div className={styles.paneHdrLbl}>Atleta</div>
+                {lockedId
+                  ? <div className={styles.athLocked}>{athletes.find(a=>String(a.id)===lockedId)?.name||'—'}</div>
+                  : <>
+                      <div className={styles.athSearchWrap}>
+                        <i className={`ti ti-search ${styles.athSearchIc}`}/>
+                        <input className={styles.athSearchInput} type="text" placeholder="Buscar..."
+                          value={athSearch} onChange={e=>setAthSearch(e.target.value)}/>
+                      </div>
+                      <div className={styles.athList}>
+                        <div className={`${styles.athRow} ${styles.athRowTodos}${!selAth?' '+styles.athRowSel:''}`}
+                             onClick={()=>changeAth('')}>◈ Todos</div>
+                        {filteredAthletes.map(a=>(
+                          <div key={a.id}
+                               className={`${styles.athRow}${selAth===String(a.id)?' '+styles.athRowSel:''}`}
+                               onClick={()=>changeAth(String(a.id))}>
+                            {a.name}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                }
+              </div>
+
+              {/* MIDDLE: WOD details */}
+              <div className={styles.midPane}>
+                {selWod&&selBlock
+                  ? <>
+                      <div className={styles.paneHdrLbl}>{blkLabel(selBlock)} · {selBlock.type}</div>
+                      <div className={styles.midScroll}>
+                        {/* WOD meta */}
+                        {blkMeta(selBlock)&&(
+                          <div className={styles.wodMetaRow}>
+                            {blkMeta(selBlock).split(' · ').map((m,i)=>(
+                              <span key={i} className={styles.wodMetaPill}>{m}</span>
+                            ))}
+                          </div>
+                        )}
+                        {/* Exercises */}
+                        {(selBlock.exercises||[]).filter(e=>e.name).length>0&&(
+                          <div className={styles.exList}>
+                            <div className={styles.exListLbl}>Exercícios</div>
+                            {(selBlock.exercises||[]).filter(e=>e.name).map((e,i)=>(
+                              <div key={i} className={styles.exRow}>
+                                {exVolStr(e)&&<span className={styles.exVol}>{exVolStr(e)}</span>}
+                                <span className={styles.exName}>{e.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {/* No athlete: extended KPI grid */}
+                        {!selAth&&extKpis&&<ExtKpiGrid kpis={extKpis} btype={selBlock.type}/>}
+                        {/* Athlete with result */}
+                        {selAth&&selAthBlock&&(
+                          <div className={styles.athResultSec}>
+                            <div className={styles.exListLbl}>
+                              Resultado · {athletes.find(a=>String(a.id)===selAth)?.name||''}
+                            </div>
+                            <LoggedResult br={selAthBlock} btype={selBlock.type}/>
+                            {selAthRank&&(
+                              <div className={styles.relKpiRow}>
+                                <div className={styles.relKpi}>
+                                  <div className={styles.relKpiVal}>{MEDALS[selAthRank-1]||`${selAthRank}º`} / {lbEntries.length}</div>
+                                  <div className={styles.relKpiLbl}>Posição</div>
+                                </div>
+                                {extKpis?.avgSecs>0&&selAthBlock.perfTime&&(()=>{
+                                  const diff=extKpis.avgSecs-toSecs(selAthBlock.perfTime)
+                                  return(
+                                    <div className={styles.relKpi}>
+                                      <div className={styles.relKpiVal} style={{color:diff>0?'var(--teal)':'var(--err)'}}>
+                                        {diff>0?'−':'+'}{fmtSecs(Math.abs(Math.round(diff)))}
+                                      </div>
+                                      <div className={styles.relKpiLbl}>Vs. Média</div>
+                                    </div>
+                                  )
+                                })()}
+                                {lbEntries.length>0&&(
+                                  <div className={styles.relKpi}>
+                                    <div className={styles.relKpiVal}>Top {Math.round(selAthRank/lbEntries.length*100)}%</div>
+                                    <div className={styles.relKpiLbl}>Percentil</div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {/* Athlete without result: log form */}
+                        {selAth&&!selAthBlock&&(
+                          <div className={styles.midLogForm}>
+                            <div className={styles.exListLbl}>
+                              Registrar · {athletes.find(a=>String(a.id)===selAth)?.name||''}
+                            </div>
+                            <LogForm bl={selBlock} inp={getInp(selWod.sid,selWod.bid)}
+                              isSubmitting={submittingKey===inputKey(selWod.sid,selWod.bid)}
+                              onRpe={n=>setInp(selWod.sid,selWod.bid,{rpe:n})}
+                              onScale={s=>setInp(selWod.sid,selWod.bid,{scale:s})}
+                              onField={(f,v)=>setInp(selWod.sid,selWod.bid,{[f]:v})}
+                              onSubmit={()=>showConfirm(selWod.sid,selWod.bid,selWod.dk)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  : <div className={styles.paneEmpty}>
+                      <i className="ti ti-layout-grid" style={{fontSize:'26px',opacity:.3}}/>
+                      Selecione um WOD acima
+                    </div>
+                }
+              </div>
+
+              {/* RIGHT: leaderboard */}
+              <div className={styles.deskLbPane}>
+                <div className={styles.paneHdrLbl}>Leaderboard</div>
+                {selWod
+                  ? <>
+                      <div className={styles.lbScaleBar}>
+                        {['Todos',...SCALES].map(sc=>(
+                          <button key={sc}
+                            className={`${styles.lbScalePill}${lbScale===sc?' '+styles.lbScalePillOn:''}`}
+                            onClick={()=>setLbScale(sc)}>{sc}</button>
+                        ))}
+                      </div>
+                      <div className={styles.deskLbList}>
+                        {lbEntries.length
+                          ? lbEntries.map((e,i)=>{
+                              const isHl=selAth&&e.athId===selAth
+                              const scol=SCALE_COL[e.scale]||'#666'
+                              const perf=isForTimeSel?(e.perfTime||'—'):`${e.perfRounds||'—'}${e.perfReps?' + '+e.perfReps:''}`
+                              return(
+                                <div key={i} className={`${styles.deskLbRow}${isHl?' '+styles.deskLbRowHl:''}`}>
+                                  <span className={styles.deskLbRank}>{MEDALS[i]||`${i+1}º`}</span>
+                                  <span className={styles.deskLbName} style={isHl?{color:'var(--teal)'}:{}}>{e.name}</span>
+                                  <span className={styles.deskLbScale} style={{color:scol}}>{e.scale}</span>
+                                  <span className={styles.deskLbPerf}>{perf}</span>
+                                </div>
+                              )
+                            })
+                          : <div className={styles.deskLbEmpty}>Nenhum resultado registrado.</div>
+                        }
+                      </div>
+                    </>
+                  : <div className={styles.paneEmpty}>
+                      <i className="ti ti-trophy" style={{fontSize:'26px',opacity:.3}}/>
+                      Selecione um WOD acima
+                    </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          {/* ── MOBILE: week grid with expandable session cards ── */}
+          <div className={styles.mobileView}>
+            <div className={styles.weekGrid}>
+              {week.map(date=>{
+                const dk=toISO(date),isPast=dk<today,isToday=dk===today
+                const daySess=sessionsForDay(sessions,dk,lockedAthName),hasSess=daySess.length>0
+                return(
+                  <div key={dk} className={`${styles.dayCard}${isToday?' '+styles.dayCardToday:''}${hasSess?'':' '+styles.dayCardNoSess}`}>
+                    <div className={styles.dayHdr}>
+                      <span className={styles.dayDow}>{DAY_PT[date.getDay()]}</span>
+                      <div style={{display:'flex',alignItems:'center',gap:'3px'}}>
+                        <span className={`${styles.dayNum}${isPast?' '+styles.dayNumPast:''}`}>{date.getDate()}</span>
+                        {isToday&&<div className={styles.dayTodayDot}/>}
+                      </div>
+                    </div>
+                    <div className={styles.dayBody}>
+                      {hasSess
+                        ?daySess.map(sess=>(
+                            <SessionCard key={sess.id} sess={sess} dk={dk}
+                              isExpanded={expanded.has(sess.id)}
+                              hasDot={hasDot(sess.id)}
+                              loggedCount={loggedCount(sess.id)}
+                              onToggle={()=>toggleSess(sess.id)}
+                              selAth={selAth}
+                              logInputs={logInputs}
+                              submittingKey={submittingKey}
+                              kpisFn={(bid,btype)=>calcKPIs(sess.id,bid,btype)}
+                              athBlockFn={(bid)=>getAthBlock(sess.id,bid)}
+                              onRpe={(bid,n)=>setInp(sess.id,bid,{rpe:n})}
+                              onScale={(bid,s)=>setInp(sess.id,bid,{scale:s})}
+                              onField={(bid,f,v)=>setInp(sess.id,bid,{[f]:v})}
+                              onSubmitReq={(bid)=>showConfirm(sess.id,bid,dk)}
+                              onLbOpen={(bid)=>setLbTarget({sid:sess.id,bid,dk})}
+                            />
+                          ))
+                        :<div className={styles.restLabel}><i className="ti ti-moon"/></div>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </>}
+      </div>
       <Nav active="results" lockedId={lockedId}/>
     </>
   )
 }
 
+// ── Desktop-only ExtKpiGrid ──
+function ExtKpiGrid({ kpis, btype }) {
+  const {count,avgRpe,perfKpi,avgSecs,rxPctStr,interPct,scPct} = kpis
+  const isForTime = btype==='For Time'
+  const items = [
+    {val:count,          lbl:'Atletas'},
+    {val:avgRpe||'—',    lbl:'RPE Médio'},
+    {val:perfKpi||'—',   lbl:isForTime?'Tempo Médio':'Rds Médio'},
+    {val:rxPctStr,       lbl:'% RX'},
+    {val:interPct,       lbl:'% Inter'},
+    {val:scPct,          lbl:'% SC'},
+  ]
+  return(
+    <div className={styles.extKpiSec}>
+      <div className={styles.exListLbl}>Resumo · Todos os atletas</div>
+      <div className={styles.extKpiGrid}>
+        {items.map((k,i)=>(
+          <div key={i} className={styles.extKpi}>
+            <div className={styles.extKpiVal}>{k.val}</div>
+            <div className={styles.extKpiLbl}>{k.lbl}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Mobile sub-components (unchanged) ──
 function SessionCard({ sess, dk, isExpanded, hasDot, loggedCount, onToggle, selAth, logInputs, submittingKey, kpisFn, athBlockFn, onRpe, onScale, onField, onSubmitReq, onLbOpen }) {
   const name = sess.sessionName||sess.name||(()=>{
     const [y,m,d]=dk.split('-').map(Number)
