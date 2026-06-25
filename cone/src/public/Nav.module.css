@@ -106,8 +106,15 @@
     gap: 4px;
     padding: 0 16px;
     min-height: 93px;
-    border-bottom: 1px solid var(--divider);
+    position: relative;
     flex-shrink: 0;
+  }
+  .sideBrand::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, var(--divider) 65%, transparent);
   }
 
   /* Tab row becomes vertical column */

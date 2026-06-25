@@ -1,10 +1,16 @@
 .hdr {
   padding: 18px 20px 14px;
-  border-bottom: 1px solid var(--divider);
   background: var(--bg);
   position: sticky;
   top: 0;
   z-index: 20;
+}
+.hdr::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--divider) 8%);
 }
 .back {
   position: absolute;
