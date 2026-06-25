@@ -162,7 +162,7 @@ export default function Leaderboard() {
 
   if (status === 'loading') return (
     <>
-      <Header brand="CONE" sub="Leaderboard" backHref="index.html" backTitle="Início" />
+      <Header brand="CONE" sub="Leaderboard" />
       <div className={s.loading}>Carregando resultados...</div>
       <Nav active="leaderboard" />
     </>
@@ -170,7 +170,7 @@ export default function Leaderboard() {
 
   if (status === 'error') return (
     <>
-      <Header brand="CONE" sub="Leaderboard" backHref="index.html" backTitle="Início" />
+      <Header brand="CONE" sub="Leaderboard" />
       <div className={s.errState}>
         <IconAlertCircle size={32} />
         <br /><br />
@@ -186,7 +186,7 @@ export default function Leaderboard() {
 
   return (
     <>
-      <Header brand="CONE" sub={gymName} backHref="index.html" backTitle="Início" />
+      <Header brand="CONE" sub={gymName} />
 
       <div className={s.controls}>
         <select className={s.sel} value={selWod} onChange={e => setSelWod(e.target.value)}>

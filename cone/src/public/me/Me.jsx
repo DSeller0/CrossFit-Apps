@@ -544,7 +544,6 @@ export default function Me() {
 
       {/* ── Header ── */}
       <header className={styles.hdr}>
-        <a className={styles.hdrBack} href="index.html">←</a>
         <div className={styles.hdrRule}>
           <div className={styles.hdrLine} />
           <div className={styles.hdrDiamond} />
