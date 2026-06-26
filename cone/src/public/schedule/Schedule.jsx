@@ -77,9 +77,16 @@ function autofillRm(sD,aths,athId,gdD) {
     })
   });return rm
 }
-
 function toTitleCase(s) {
   return (s||'').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())
+}
+function fmtDeskPerf(blk) {
+  if(!blk)return null
+  if(blk.perfTime)return blk.perfTime
+  const p=[]
+  if(blk.perfRounds)p.push(`${blk.perfRounds} Rds`)
+  if(blk.perfReps)p.push(`${blk.perfReps} Reps`)
+  return p.join(' + ')||null
 }
 
 const BLOCK_FAMILY={
@@ -166,7 +173,7 @@ function DemoPanel({target,demoMap,onClose}) {
   </>)
 }
 
-// ── Log Pane ──────────────────────────────────────────────────────────────────
+// ── Log Pane (mobile) ─────────────────────────────────────────────────────────
 function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,success,error,onSubmit,onClose,lockedAthName}) {
   const isOpen=!!pane
   function setRpe(i,n){onBlocks(prev=>prev.map((b,j)=>j===i?{...b,rpe:n}:b))}
@@ -242,6 +249,105 @@ function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,success,error,on
       )}
     </div>
   </>)
+}
+
+// ── Desktop Reg Pane ──────────────────────────────────────────────────────────
+function DeskRegPane({regBl,step,scale,rpe,perfTime,perfRounds,perfReps,athName,
+  onScale,onRpe,onPerfTime,onPerfRounds,onPerfReps,
+  onConfirm,onSubmit,onBack,onClose,submitting,error}) {
+  if(!regBl)return null
+  const{bl}=regBl
+  const isForTime=bl.type==='For Time'||bl.type==='Benchmark'
+  const label=blkLabel(bl)
+  const perfVal=fmtDeskPerf({perfTime,perfRounds,perfReps})
+  return(
+    <div className={styles.deskRegPane}>
+      <div className={styles.deskRegPaneHdr}>
+        <span className={styles.deskRegPaneLbl}>{step==='success'?'Registrado':athName||'Registro'}</span>
+        <span className={styles.deskRegPaneWod}>{label}</span>
+        <button className={styles.deskRegClose} onClick={onClose}>×</button>
+      </div>
+      <div className={styles.deskRegScroll}>
+        {step==='form'&&<>
+          <div className={styles.deskRegSec}>
+            <span className={styles.deskRegLbl}>Escala</span>
+            <div className={styles.deskRegScaleRow}>
+              {LOG_SCALES.map(s=>(
+                <button key={s} className={`${styles.deskRegScaleBtn}${scale===s?' '+styles.deskRegScaleBtnOn:''}`}
+                  onClick={()=>onScale(s)}>{s}</button>
+              ))}
+            </div>
+          </div>
+          <div className={styles.deskRegSec}>
+            <span className={styles.deskRegLbl}>RPE (1–10)</span>
+            <div className={styles.deskRegRpeRow}>
+              {[1,2,3,4,5,6,7,8,9,10].map(n=>(
+                <button key={n} className={`${styles.deskRegRpeBtn}${rpe===n?' '+styles.deskRegRpeBtnOn:''}`}
+                  onClick={()=>onRpe(n)}>{n}</button>
+              ))}
+            </div>
+          </div>
+          {isForTime?(
+            <div className={styles.deskRegSec}>
+              <span className={styles.deskRegLbl}>Tempo (MM:SS)</span>
+              <input className={styles.deskRegInput} type="text" placeholder="ex: 12:34"
+                value={perfTime} onChange={e=>onPerfTime(e.target.value)} inputMode="numeric"/>
+            </div>
+          ):(
+            <div className={styles.deskRegSec}>
+              <span className={styles.deskRegLbl}>Resultado</span>
+              <div style={{display:'flex',gap:6}}>
+                <div style={{flex:1}}>
+                  <span className={styles.deskRegLbl}>Rounds</span>
+                  <input className={styles.deskRegInput} type="number" placeholder="0" min="0" inputMode="numeric"
+                    value={perfRounds} onChange={e=>onPerfRounds(e.target.value)}/>
+                </div>
+                <div style={{flex:1}}>
+                  <span className={styles.deskRegLbl}>Reps</span>
+                  <input className={styles.deskRegInput} type="number" placeholder="0" min="0" inputMode="numeric"
+                    value={perfReps} onChange={e=>onPerfReps(e.target.value)}/>
+                </div>
+              </div>
+              {bl.type==='AMRAP'&&<div className={styles.deskRegHint}>Rounds completos + reps extras</div>}
+            </div>
+          )}
+          <button className={styles.deskRegSubmitBtn} onClick={onConfirm}>Confirmar →</button>
+          {error&&<div className={styles.deskRegErr}>{error}</div>}
+        </>}
+
+        {step==='confirm'&&<>
+          <div className={styles.deskConfirmBox}>
+            <div className={styles.deskConfirmTitle}>Revisar registro</div>
+            <div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>Bloco</span><span className={styles.deskConfirmRowVal}>{label}</span></div>
+            <div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>Escala</span><span className={styles.deskConfirmRowVal}>{scale}</span></div>
+            {perfVal&&<div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>Resultado</span><span className={styles.deskConfirmRowVal}>{perfVal}</span></div>}
+            {rpe&&<div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>RPE</span><span className={styles.deskConfirmRowVal}>{rpe} / 10</span></div>}
+          </div>
+          <div className={styles.deskConfirmBtns}>
+            <button className={styles.deskCancelBtn} onClick={onBack}>← Editar</button>
+            <button className={styles.deskConfirmBtn} disabled={submitting||undefined} onClick={onSubmit}>
+              {submitting?'Enviando...':'Registrar ✓'}
+            </button>
+          </div>
+          {error&&<div className={styles.deskRegErr}>{error}</div>}
+        </>}
+
+        {step==='success'&&(
+          <div className={styles.deskSuccessBox}>
+            <div className={styles.deskSuccessIcon}>✓</div>
+            <div className={styles.deskSuccessTitle}>Resultado registrado</div>
+            <div className={styles.deskSuccessSub}>{athName&&`${athName} · `}{label}</div>
+            <div className={styles.deskSuccessDetail}>
+              <div className={styles.deskSuccessRow}><span className={styles.deskSuccessRowLbl}>Escala</span><span className={styles.deskSuccessRowVal}>{scale}</span></div>
+              {perfVal&&<div className={styles.deskSuccessRow}><span className={styles.deskSuccessRowLbl}>Resultado</span><span className={styles.deskSuccessRowVal}>{perfVal}</span></div>}
+              {rpe&&<div className={styles.deskSuccessRow}><span className={styles.deskSuccessRowLbl}>RPE</span><span className={styles.deskSuccessRowVal}>{rpe} / 10</span></div>}
+            </div>
+            <button className={styles.deskDismissBtn} onClick={onClose}>Fechar ×</button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 // ── Session Detail ────────────────────────────────────────────────────────────
@@ -356,7 +462,6 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
     })}</>)
   }
 
-  // Regular exercise
   return(
     <div className={styles.detailEx} onClick={e=>e.stopPropagation()}>
       {!isWod&&(isRd
@@ -377,12 +482,32 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
   )
 }
 
-function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditKey,demoMap,isWodLogged,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo,onTimer}) {
+function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditKey,demoMap,isWodLogged,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo,onTimer,onLogBlock=null,athResult=null,athName=''}) {
   const label=blkLabel(bl),col=blkColor(bl)
   const isWod=isWodBlock(bl),isRd=isRoundBlock(bl)
   const wodDone=isWodLogged(bl)
 
   const sharedExProps={bl,checked,roundState,rmValues,rmEditKey,demoMap,isWod,isRd,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo,accent}
+
+  const perfStr=fmtDeskPerf(athResult)
+
+  const athSection=onLogBlock&&isWod&&(
+    <>
+      <div className={`${styles.deskAthResultRow} ${athResult?styles.deskAthResultRowLogged:styles.deskAthResultRowEmpty}`}>
+        <span className={`${styles.deskAthResultName} ${athResult?styles.deskAthResultNameLogged:styles.deskAthResultNameEmpty}`}>
+          {athName||'Atleta'}
+        </span>
+        {athResult?<>
+          {perfStr&&<span className={styles.deskAthResultVal}>{perfStr}</span>}
+          <span className={styles.deskAthResultScale}>{athResult.scale}{athResult.rpe?` · RPE ${athResult.rpe}`:''}</span>
+        </>:<span className={styles.deskAthResultEmpty}>sem resultado</span>}
+      </div>
+      <button className={`${styles.deskRegBtn}${athResult?' '+styles.deskRegBtnEdit:''}`}
+        onClick={e=>{e.stopPropagation();onLogBlock()}}>
+        {athResult?'Editar resultado':'Registrar resultado →'}
+      </button>
+    </>
+  )
 
   if(bl.type==='Estações'){
     const stations=bl.stations||[],cycleCount=bl.stationRepeat||bl.rounds||1
@@ -413,6 +538,7 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
         {!stationHasEx&&(bl.exercises||[]).filter(e=>e.name||e.isComplex).map((ex,ei)=><ExRow key={ei} ex={ex} {...sharedExProps}/>)}
         {bl.restBetweenCycles&&<div className={styles.detailBlockNotes}>Descanso entre ciclos: {bl.restBetweenCycles}</div>}
         {bl.notes&&<div className={styles.detailBlockNotes}>{bl.notes}</div>}
+        {athSection}
       </div>
     )
   }
@@ -420,7 +546,6 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
   const exs=(bl.exercises||[]).filter(e=>e.name||e.isComplex)
   const meta=[bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ')
 
-  // Round badge for round blocks
   let rdBadgeEl=null
   if(isRd){
     const keys=[]
@@ -439,8 +564,6 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
     else rdBadgeEl=<span className={`${styles.rdProg} ${styles.rdProgIdle}`}>{bl.rounds} RDS</span>
   }
 
-  const blDone=isWod?wodDone:false
-
   return(
     <div className={styles.detailBlock} style={{borderLeftColor:col}}>
       <div className={styles.detailBlockHdr}>
@@ -448,7 +571,7 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
         <div style={{display:'flex',alignItems:'center',gap:6}}>
           {isWod&&<button className={styles.timerBtn} onClick={e=>{e.stopPropagation();onTimer(bl)}}><i className="ti ti-player-play"/> Timer</button>}
           {isRd?rdBadgeEl:(meta?<span className={styles.detailBlockMeta} style={{background:col,color:'#fff'}}>{meta}</span>:null)}
-          {!isRd&&blDone&&<span className={styles.detailBlockDone}>✓ Completo</span>}
+          {!isRd&&wodDone&&<span className={styles.detailBlockDone}>✓ Completo</span>}
         </div>
       </div>
       {exs.map((ex,ei)=><ExRow key={ei} ex={ex} {...sharedExProps}/>)}
@@ -456,6 +579,7 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
       {isWod&&<a className={styles.lbLink} href={`leaderboard.html?wod=${bl.id}&session=${sess.id}&date=${dateKey}`} target="_blank" onClick={e=>e.stopPropagation()}>
         <i className="ti ti-trophy"/> Ver Leaderboard
       </a>}
+      {athSection}
     </div>
   )
 }
@@ -503,6 +627,19 @@ export default function Schedule() {
   const [logSuccess,setLogSuccess]=useState(false)
   const [logError,setLogError]=useState('')
 
+  // Desktop state
+  const [selSess,setSelSess]=useState(null) // {dateKey, sessId}
+  const [deskAthSearch,setDeskAthSearch]=useState('')
+  const [deskRegBl,setDeskRegBl]=useState(null) // {bl, sess, dateKey}
+  const [deskRegStep,setDeskRegStep]=useState('form') // 'form'|'confirm'|'success'
+  const [deskRegScale,setDeskRegScale]=useState('RX')
+  const [deskRegRpe,setDeskRegRpe]=useState(null)
+  const [deskRegPerfTime,setDeskRegPerfTime]=useState('')
+  const [deskRegPerfRounds,setDeskRegPerfRounds]=useState('')
+  const [deskRegPerfReps,setDeskRegPerfReps]=useState('')
+  const [deskRegSubmitting,setDeskRegSubmitting]=useState(false)
+  const [deskRegError,setDeskRegError]=useState('')
+
   const [lockedId]=useState(()=>new URLSearchParams(location.search).get('id')||'')
 
   const demoMapRef=useRef({})
@@ -516,6 +653,15 @@ export default function Schedule() {
     window.addEventListener('pageshow',onShow)
     return()=>window.removeEventListener('pageshow',onShow)
   },[])
+
+  // Auto-select today's session on first load
+  useEffect(()=>{
+    if(status==='ok'&&!selSess&&weekOffset===0){
+      const t=toISO(new Date())
+      const todaySess=(sessions[t]||[]).filter(s=>s.blocks&&s.blocks.length)
+      if(todaySess.length>0)setSelSess({dateKey:t,sessId:todaySess[0].id})
+    }
+  },[status])
 
   async function load(attempt=0){
     if(attempt===0)setStatus('loading')
@@ -557,7 +703,6 @@ export default function Schedule() {
       demoMapRef.current=buildDemoMap(erD)
       goalsRef.current=gdD
 
-      // Resolve final athlete before auto-fill so URL param ?athlete= wins over localStorage
       const sp=new URLSearchParams(location.search)
       const pDate=sp.get('date'),pOpenLog=sp.get('openLog'),pBlockId=sp.get('blockId')
       const pAthlete=sp.get('athlete'),pPrefill=sp.get('prefill'),pPrefillRounds=sp.get('prefillRounds')
@@ -608,6 +753,11 @@ export default function Schedule() {
   function isWodLogged(sess,bl){
     if(!selAth)return false
     return results.some(r=>r.sessionId===sess.id&&r.athleteId===selAth&&(r.blocks||[]).some(b=>b.blockId===bl.id))
+  }
+
+  function athHasLoggedInSess(athId,sess){
+    if(!sess)return false
+    return results.some(r=>r.sessionId===sess.id&&r.athleteId===athId)
   }
 
   function getRd(blId,exId){return roundState[`${blId}|${exId}`]||0}
@@ -667,7 +817,7 @@ export default function Schedule() {
   function changeAth(val){
     setSelAth(val)
     try{localStorage.setItem('cone_athlete_filter',val)}catch(e){}
-    setExpanded(new Set());setRmEditKey(null)
+    setExpanded(new Set());setRmEditKey(null);setDeskRegBl(null)
     const newAuto=autofillRm(sessions,athletes,val,goalsRef.current)
     setRmValues(prev=>{
       const manual=Object.fromEntries(Object.entries(prev).filter(([,v])=>v.source==='manual'))
@@ -677,7 +827,7 @@ export default function Schedule() {
 
   function changeWeek(dir){
     setWeekOffset(w=>w+dir);setExpanded(new Set());setChecked(new Set())
-    setRoundState({});setRmEditKey(null)
+    setRoundState({});setRmEditKey(null);setSelSess(null);setDeskRegBl(null)
     try{localStorage.removeItem('sched_rounds')}catch(e){}
   }
 
@@ -721,9 +871,49 @@ export default function Schedule() {
     setResults(next);setLogSubmitting(false);setLogSuccess(true)
   }
 
+  function deskOpenReg(bl,sess,dateKey){
+    const existing=results.find(r=>r.sessionId===sess.id&&r.athleteId===selAth)
+    const existingBlock=existing?.blocks?.find(b=>b.blockId===bl.id)
+    setDeskRegBl({bl,sess,dateKey})
+    setDeskRegStep('form')
+    setDeskRegScale(existingBlock?.scale||'RX')
+    setDeskRegRpe(existingBlock?.rpe||null)
+    setDeskRegPerfTime(existingBlock?.perfTime||'')
+    setDeskRegPerfRounds(existingBlock?.perfRounds||'')
+    setDeskRegPerfReps(existingBlock?.perfReps||'')
+    setDeskRegError('')
+  }
+
+  function deskCloseReg(){
+    setDeskRegBl(null);setDeskRegStep('form');setDeskRegError('')
+  }
+
+  async function submitDeskReg(){
+    if(!selAth||!deskRegBl){setDeskRegError('Selecione um atleta primeiro.');return}
+    setDeskRegSubmitting(true);setDeskRegError('')
+    const{bl,sess,dateKey}=deskRegBl
+    const existing=results.find(r=>r.sessionId===sess.id&&r.athleteId===selAth)
+    const blockResult={blockId:bl.id,blockType:bl.type,blockLabel:blkLabel(bl),rpe:deskRegRpe,scale:deskRegScale,perfTime:deskRegPerfTime,perfRounds:deskRegPerfRounds,perfReps:deskRegPerfReps}
+    const mergedBlocks=existing?[...(existing.blocks||[]).filter(b=>b.blockId!==bl.id),blockResult]:[blockResult]
+    const result={id:existing?.id||uid(),date:dateKey,athleteId:selAth,sessionId:sess.id,presence:'Presente',energyLevel:existing?.energyLevel??3,blocks:mergedBlocks,coachNote:existing?.coachNote||'',flagForReview:false,loggedByAthlete:true}
+    const{error}=await sb.from('results_v2').upsert({id:String(result.id),date:result.date,athlete_id:result.athleteId,session_id:result.sessionId?String(result.sessionId):null,presence:result.presence,energy_level:result.energyLevel??null,blocks:result.blocks,coach_note:result.coachNote||'',flag_for_review:!!result.flagForReview,logged_by_athlete:!!result.loggedByAthlete,updated_at:new Date().toISOString()},{onConflict:'id'})
+    if(error){setDeskRegSubmitting(false);setDeskRegError('Erro ao enviar. Tente novamente.');return}
+    setResults(prev=>[...prev.filter(r=>!(r.athleteId===selAth&&r.sessionId===sess.id)),result])
+    setDeskRegSubmitting(false);setDeskRegStep('success')
+  }
+
   const week=getWeek(weekOffset),today=toISO(new Date())
   const wkStart=week[0],wkEnd=week[6]
   const weekLabel=`${wkStart.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${wkEnd.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} · ${MONTH_PT[wkStart.getMonth()]} ${wkStart.getFullYear()}`
+
+  // Derive selected session object
+  const selSessObj=selSess
+    ?sessionsForDay(selSess.dateKey).find(s=>s.id===selSess.sessId)||null
+    :null
+  const selSessDateStr=selSess
+    ?new Date(selSess.dateKey+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})
+    :''
+  const selAthObj=athletes.find(a=>String(a.id)===String(selAth||lockedId))||null
 
   return(<>
     <DemoPanel target={demoTarget} demoMap={demoMapRef.current} onClose={()=>setDemoTarget(null)}/>
@@ -740,14 +930,15 @@ export default function Schedule() {
       <div className={styles.gym}>{gymName}</div>
     </div>
 
+    {/* Mobile bars */}
     {status!=='loading'&&<>
-      {!lockedId&&<div className={styles.selBar}>
+      {!lockedId&&<div className={`${styles.selBar} ${styles.mobileOnly}`}>
         <select className={styles.athleteSel} value={selAth} onChange={e=>changeAth(e.target.value)}>
           <option value="">— Todos —</option>
           {athletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
       </div>}
-      <div className={styles.weekNav}>
+      <div className={`${styles.weekNav} ${styles.mobileOnly}`}>
         <button className={styles.navBtn} onClick={()=>changeWeek(-1)}><i className="ti ti-chevron-left"/></button>
         <span className={styles.weekLabel}>{weekLabel}</span>
         <button className={styles.navBtn} onClick={()=>changeWeek(1)}><i className="ti ti-chevron-right"/></button>
@@ -757,7 +948,8 @@ export default function Schedule() {
     {status==='loading'&&<div className={styles.loading}><i className={`ti ti-loader ${styles.spin}`}/> Carregando...</div>}
     {status==='error'&&<div className={styles.error}><i className="ti ti-alert-circle" style={{fontSize:32}}/><br/><br/>Não foi possível carregar os treinos.<br/><small>{errMsg}</small><br/><button className={styles.retryBtn} onClick={()=>load()}>Tentar novamente</button></div>}
 
-    {status==='ok'&&(
+    {/* ── MOBILE VIEW ── */}
+    {status==='ok'&&<div className={styles.mobileView}>
       <div className={styles.weekGrid}>
         {week.map(date=>{
           const dk=toISO(date),isPast=dk<today,isToday=dk===today
@@ -818,7 +1010,155 @@ export default function Schedule() {
           )
         })}
       </div>
-    )}
+    </div>}
+
+    {/* ── DESKTOP VIEW ── */}
+    {status==='ok'&&<div className={styles.desktopView}>
+
+      {/* Desktop page header */}
+      <div className={styles.deskPageHdr}>
+        <span className={styles.deskPageTitle}>Agenda</span>
+        <div className={styles.deskWeekNav}>
+          <button className={styles.navBtn} onClick={()=>changeWeek(-1)}><i className="ti ti-chevron-left"/></button>
+          <span className={styles.weekLabel}>{weekLabel}</span>
+          <button className={styles.navBtn} onClick={()=>changeWeek(1)}><i className="ti ti-chevron-right"/></button>
+        </div>
+      </div>
+
+      {/* Week strip */}
+      <div className={styles.deskStrip}>
+        {week.map(date=>{
+          const dk=toISO(date),isPast=dk<today,isToday=dk===today
+          const daySess=(sessions[dk]||[]).filter(s=>s.blocks&&s.blocks.length)
+          return(
+            <div key={dk} className={styles.deskDayCol}>
+              <div className={`${styles.deskDayHdr}${isToday?' '+styles.deskDayHdrToday:''}`}>
+                <span className={styles.deskDow}>{DAY_PT[date.getDay()]}</span>
+                <span className={`${styles.deskDnum}${isPast?' '+styles.deskDnumPast:''}`}>{date.getDate()}</span>
+              </div>
+              {daySess.length===0
+                ?<div className={styles.deskRestCell}>—</div>
+                :daySess.map(sess=>{
+                  const isSel=selSess?.sessId===sess.id
+                  const logCount=results.filter(r=>r.sessionId===sess.id).length
+                  return(
+                    <div key={sess.id}
+                      className={`${styles.deskSCard}${isSel?' '+styles.deskSCardSel:''}`}
+                      onClick={()=>{setSelSess(isSel?null:{dateKey:dk,sessId:sess.id});setDeskRegBl(null)}}>
+                      <div className={styles.deskSCardName}>{sess.sessionName||'–'}</div>
+                      <div className={styles.deskSCardFoot}>
+                        <span className={styles.deskSCardLogLbl}>{logCount} logs</span>
+                        <span className={`${styles.deskSCardDot}${logCount>0?' '+styles.deskSCardDotFilled:''}`}/>
+                      </div>
+                    </div>
+                  )
+                })
+              }
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Three panes */}
+      <div className={styles.deskBody}>
+
+        {/* Athlete pane */}
+        <div className={styles.deskAthPane}>
+          <div className={styles.deskPaneHdr}>Atletas</div>
+          {lockedId?(
+            <div className={styles.deskAthList}>
+              <div className={`${styles.deskAthRow} ${styles.deskAthRowSel}`}>
+                <span className={`${styles.deskAthDot} ${styles.deskAthDotFilled}`}/>
+                {athletes.find(a=>String(a.id)===String(lockedId))?.name||'—'}
+              </div>
+            </div>
+          ):<>
+            <div className={styles.deskAthSearchWrap}>
+              <span className={styles.deskAthSearchIc}>⌕</span>
+              <input className={styles.deskAthSearchInput} type="text" placeholder="Buscar…"
+                value={deskAthSearch} onChange={e=>setDeskAthSearch(e.target.value)}/>
+            </div>
+            <div className={styles.deskAthList}>
+              {athletes
+                .filter(a=>!deskAthSearch||a.name.toLowerCase().includes(deskAthSearch.toLowerCase()))
+                .sort((a,b)=>a.name.localeCompare(b.name,'pt'))
+                .map(ath=>{
+                  const isSel=String(selAth)===String(ath.id)
+                  const hasLogged=athHasLoggedInSess(ath.id,selSessObj)
+                  return(
+                    <div key={ath.id}
+                      className={`${styles.deskAthRow}${isSel?' '+styles.deskAthRowSel:''}`}
+                      onClick={()=>changeAth(isSel?'':String(ath.id))}>
+                      <span className={`${styles.deskAthDot}${hasLogged?' '+styles.deskAthDotFilled:''}`}/>
+                      {ath.name}
+                    </div>
+                  )
+                })
+              }
+            </div>
+          </>}
+        </div>
+
+        {/* Session pane */}
+        <div className={styles.deskSessPane}>
+          {selSessObj?<>
+            <div className={styles.deskSessPaneHdr}>
+              <div className={styles.deskSessDot}/>
+              <span className={styles.deskSessNameHdr}>{selSessObj.sessionName||'–'}</span>
+              <span className={styles.deskSessDateHdr}>{selSessDateStr}</span>
+            </div>
+            <div className={styles.deskSessScroll}>
+              {(selSessObj.blocks||[]).map(bl=>{
+                const isWod=isWodBlock(bl)
+                const existingResult=selAth
+                  ?results.find(r=>r.sessionId===selSessObj.id&&r.athleteId===selAth)?.blocks?.find(b=>b.blockId===bl.id)||null
+                  :null
+                return(
+                  <BlockDetail key={bl.id} bl={bl} sess={selSessObj} dateKey={selSess.dateKey}
+                    accent={blockAccent}
+                    checked={checked} roundState={roundState}
+                    rmValues={rmValues} rmEditKey={rmEditKey}
+                    demoMap={demoMapRef.current}
+                    isWodLogged={b=>isWodLogged(selSessObj,b)}
+                    onCheck={(blId,exId)=>setChecked(prev=>{const n=new Set(prev);const k=`${blId}|${exId}`;n.has(k)?n.delete(k):n.add(k);return n})}
+                    onAdvance={advanceRound} onReset={resetRound}
+                    onRmToggle={key=>setRmEditKey(k=>k===key?null:key)}
+                    onRmConfirm={(exId,rm,unit)=>{setRmValues(prev=>({...prev,[exId]:{rm,unit,source:'manual'}}));setRmEditKey(null)}}
+                    onDemo={mvs=>setDemoTarget(mvs)}
+                    onTimer={b=>openTimer(b,selSessObj,selSess.dateKey)}
+                    onLogBlock={isWod&&selAth?()=>deskOpenReg(bl,selSessObj,selSess.dateKey):null}
+                    athResult={existingResult}
+                    athName={selAthObj?.name||''}
+                  />
+                )
+              })}
+            </div>
+          </>:<div className={styles.deskPaneEmpty}>
+            <div className={styles.deskPaneEmptyIcon}>⊡</div>
+            selecione uma sessão<br/>na linha da semana
+          </div>}
+        </div>
+
+        {/* Registration pane */}
+        {deskRegBl&&<DeskRegPane
+          regBl={deskRegBl}
+          step={deskRegStep}
+          scale={deskRegScale} rpe={deskRegRpe}
+          perfTime={deskRegPerfTime} perfRounds={deskRegPerfRounds} perfReps={deskRegPerfReps}
+          athName={selAthObj?.name||''}
+          onScale={setDeskRegScale} onRpe={setDeskRegRpe}
+          onPerfTime={setDeskRegPerfTime} onPerfRounds={setDeskRegPerfRounds} onPerfReps={setDeskRegPerfReps}
+          onConfirm={()=>setDeskRegStep('confirm')}
+          onSubmit={submitDeskReg}
+          onBack={()=>setDeskRegStep('form')}
+          onClose={deskCloseReg}
+          submitting={deskRegSubmitting}
+          error={deskRegError}
+        />}
+
+      </div>
+    </div>}
+
     </div></div>
     <Nav active="schedule" lockedId={lockedId}/>
   </>)

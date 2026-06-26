@@ -1,13 +1,22 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin .9s linear infinite; display: inline-block; }
 
-/* ── Desktop layout ── */
+/* ── Base layout ── */
 .pageRoot { padding-bottom: 70px; }
 .inner { }
 @media(min-width:768px) {
-  .pageRoot { margin-left:220px; display:flex; justify-content:center; min-height:100vh; padding-bottom:0; }
-  .inner { width:80%; max-width:1400px; border-left:1px solid var(--divider); border-right:1px solid var(--divider); min-height:100vh; }
-  .weekGrid { padding-bottom:40px; }
+  .pageRoot { display:flex; flex-direction:column; height:100vh; overflow:hidden; padding-bottom:0; margin:0; }
+  .inner { max-width:none; flex:1; display:flex; flex-direction:column; overflow:hidden; }
+}
+
+/* ── Mobile / desktop visibility toggles ── */
+.mobileOnly { display:block; }
+.mobileView { display:block; }
+.desktopView { display:none; }
+@media(min-width:768px) {
+  .mobileOnly { display:none !important; }
+  .mobileView { display:none !important; }
+  .desktopView { display:flex; flex-direction:column; flex:1; overflow:hidden; }
 }
 
 /* ── Header ── */
@@ -191,3 +200,123 @@
 .error { text-align:center; padding:40px 20px; color:var(--err); font-size:13px; line-height:1.8; }
 .retryBtn { margin-top:12px; background:transparent; border:1px solid var(--divider); color:var(--muted); font-size:13px; padding:7px 16px; border-radius:5px; cursor:pointer; font-family:inherit; }
 @media(min-width:768px){ .loading{font-size:16px} .error{font-size:16px} }
+
+/* ── Desktop page header ── */
+.deskPageHdr { display:flex; align-items:center; gap:12px; padding:8px 20px; border-bottom:1px solid var(--divider); flex-shrink:0; }
+.deskPageTitle { font-size:10px; font-weight:900; letter-spacing:.18em; color:var(--muted); text-transform:uppercase; }
+.deskWeekNav { display:flex; align-items:center; gap:8px; }
+.deskWeekNav .weekLabel { font-size:12px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:.06em; }
+
+/* ── Desktop week strip ── */
+.deskStrip { display:grid; grid-template-columns:repeat(7,1fr); border-bottom:2px solid var(--divider); flex-shrink:0; }
+.deskDayCol { border-right:1px solid var(--divider); min-height:68px; }
+.deskDayCol:last-child { border-right:none; }
+.deskDayHdr { display:flex; align-items:baseline; gap:5px; padding:5px 8px 4px; border-bottom:1px solid var(--divider); }
+.deskDayHdrToday { background:color-mix(in srgb,var(--teal) 8%,transparent); }
+.deskDow { font-size:9px; font-weight:900; letter-spacing:.1em; color:var(--muted); text-transform:uppercase; }
+.deskDnum { font-size:15px; font-weight:900; color:var(--sub); }
+.deskDnumPast { color:var(--dim); }
+.deskRestCell { padding:8px; font-size:14px; color:var(--divider); text-align:center; line-height:2; }
+.deskSCard { margin:4px 4px 0; padding:5px 7px; border-radius:4px; background:var(--stone2); border:1px solid var(--divider); cursor:pointer; transition:border-color .12s; }
+.deskSCard:hover { border-color:color-mix(in srgb,var(--teal) 40%,transparent); }
+.deskSCardSel { border-color:var(--teal); background:color-mix(in srgb,var(--teal) 8%,var(--stone2)); }
+.deskSCardName { font-size:11px; font-weight:700; color:var(--sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px; }
+.deskSCardFoot { display:flex; align-items:center; justify-content:space-between; }
+.deskSCardLogLbl { font-size:9px; color:var(--dim); }
+.deskSCardDot { width:5px; height:5px; border-radius:50%; background:var(--divider); }
+.deskSCardDotFilled { background:var(--teal); }
+
+/* ── Desktop body (three panes) ── */
+.deskBody { display:flex; flex:1; overflow:hidden; }
+
+/* Athlete pane */
+.deskAthPane { width:160px; flex-shrink:0; border-right:1px solid var(--divider); display:flex; flex-direction:column; overflow:hidden; }
+.deskPaneHdr { padding:7px 10px 5px; font-size:9px; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); border-bottom:1px solid var(--divider); flex-shrink:0; }
+.deskAthSearchWrap { display:flex; align-items:center; gap:5px; padding:5px 8px; border-bottom:1px solid var(--divider); flex-shrink:0; }
+.deskAthSearchIc { font-size:13px; color:var(--dim); flex-shrink:0; }
+.deskAthSearchInput { flex:1; min-width:0; background:none; border:none; color:var(--sub); font-family:inherit; font-size:12px; outline:none; padding:0; }
+.deskAthSearchInput::placeholder { color:var(--dim); }
+.deskAthList { flex:1; overflow-y:auto; padding:3px 0; }
+.deskAthList::-webkit-scrollbar { width:3px; }
+.deskAthList::-webkit-scrollbar-thumb { background:var(--divider); }
+.deskAthRow { display:flex; align-items:center; gap:7px; padding:5px 10px; font-size:12px; color:var(--sub); cursor:pointer; transition:background .1s; }
+.deskAthRow:hover { background:var(--stone2); }
+.deskAthRowSel { background:color-mix(in srgb,var(--teal) 8%,transparent); color:var(--cream); }
+.deskAthDot { width:6px; height:6px; border-radius:50%; background:var(--divider); flex-shrink:0; }
+.deskAthDotFilled { background:var(--teal); }
+
+/* Session pane */
+.deskSessPane { flex:1; display:flex; flex-direction:column; overflow:hidden; border-right:1px solid var(--divider); }
+.deskSessPaneHdr { display:flex; align-items:center; gap:8px; padding:7px 16px; border-bottom:1px solid var(--divider); flex-shrink:0; }
+.deskSessDot { width:7px; height:7px; border-radius:50%; background:var(--teal); flex-shrink:0; }
+.deskSessNameHdr { font-size:13px; font-weight:900; color:var(--cream); letter-spacing:.05em; }
+.deskSessDateHdr { font-size:11px; color:var(--dim); margin-left:auto; letter-spacing:.04em; }
+.deskSessScroll { flex:1; overflow-y:auto; padding:12px 16px; }
+.deskSessScroll::-webkit-scrollbar { width:4px; }
+.deskSessScroll::-webkit-scrollbar-thumb { background:var(--divider); border-radius:2px; }
+.deskPaneEmpty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--dim); font-size:12px; text-align:center; line-height:1.9; gap:4px; }
+.deskPaneEmptyIcon { font-size:26px; color:var(--divider); margin-bottom:4px; }
+
+/* Athlete result row inside block (desktop) */
+.deskAthResultRow { display:flex; align-items:center; gap:8px; padding:6px 0; margin-top:8px; border-top:1px solid var(--divider); flex-wrap:wrap; }
+.deskAthResultRowLogged { border-top-color:color-mix(in srgb,var(--teal) 30%,transparent); }
+.deskAthResultName { font-size:12px; font-weight:700; }
+.deskAthResultNameLogged { color:var(--cream); }
+.deskAthResultNameEmpty { color:var(--dim); }
+.deskAthResultVal { font-size:12px; font-weight:900; color:var(--teal); }
+.deskAthResultScale { font-size:10px; color:var(--muted); margin-left:auto; }
+.deskAthResultEmpty { font-size:11px; color:var(--dim); font-style:italic; }
+.deskRegBtn { display:block; margin-top:6px; background:none; border:1px solid color-mix(in srgb,var(--teal) 40%,transparent); color:var(--teal); font-family:inherit; font-size:11px; font-weight:700; letter-spacing:.05em; padding:5px 10px; border-radius:4px; cursor:pointer; width:100%; text-align:center; }
+.deskRegBtn:hover { background:color-mix(in srgb,var(--teal) 8%,transparent); }
+.deskRegBtnEdit { border-color:color-mix(in srgb,var(--gold) 40%,transparent); color:var(--gold); }
+.deskRegBtnEdit:hover { background:color-mix(in srgb,var(--gold) 8%,transparent); }
+
+/* ── Desktop registration pane ── */
+.deskRegPane { width:280px; flex-shrink:0; display:flex; flex-direction:column; border-left:1px solid var(--divider); background:var(--bg); overflow:hidden; }
+.deskRegPaneHdr { display:flex; align-items:center; gap:6px; padding:7px 12px; border-bottom:1px solid var(--divider); flex-shrink:0; }
+.deskRegPaneLbl { font-size:10px; font-weight:900; letter-spacing:.12em; color:var(--teal); text-transform:uppercase; }
+.deskRegPaneWod { font-size:10px; color:var(--dim); letter-spacing:.05em; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.deskRegClose { background:none; border:none; color:var(--dim); font-size:15px; cursor:pointer; padding:0; line-height:1; flex-shrink:0; }
+.deskRegClose:hover { color:var(--sub); }
+.deskRegScroll { flex:1; overflow-y:auto; padding:12px; }
+.deskRegScroll::-webkit-scrollbar { width:3px; }
+.deskRegScroll::-webkit-scrollbar-thumb { background:var(--divider); }
+.deskRegSec { margin-bottom:12px; }
+.deskRegLbl { display:block; font-size:9px; font-weight:900; letter-spacing:.1em; color:var(--muted); text-transform:uppercase; margin-bottom:5px; }
+.deskRegScaleRow { display:flex; gap:4px; flex-wrap:wrap; }
+.deskRegScaleBtn { font-family:inherit; font-size:11px; font-weight:700; background:var(--stone2); border:1px solid var(--divider); color:var(--muted); border-radius:4px; padding:4px 6px; cursor:pointer; flex:1; text-align:center; }
+.deskRegScaleBtnOn { background:color-mix(in srgb,var(--gold) 15%,var(--stone2)); border-color:var(--gold); color:var(--gold); }
+.deskRegRpeRow { display:flex; gap:3px; flex-wrap:wrap; }
+.deskRegRpeBtn { font-family:inherit; font-size:11px; font-weight:700; background:var(--stone2); border:1px solid var(--divider); color:var(--muted); border-radius:4px; padding:4px 0; width:22px; cursor:pointer; text-align:center; }
+.deskRegRpeBtnOn { background:color-mix(in srgb,var(--teal) 15%,var(--stone2)); border-color:var(--teal); color:var(--teal); }
+.deskRegInput { width:100%; box-sizing:border-box; background:var(--stone2); border:1px solid var(--divider); color:var(--cream); font-family:inherit; font-size:14px; padding:7px 9px; border-radius:4px; }
+.deskRegInput:focus { outline:none; border-color:var(--teal); }
+.deskRegHint { font-size:9px; color:var(--dim); margin-top:3px; }
+.deskRegSubmitBtn { display:block; width:100%; background:color-mix(in srgb,var(--teal) 15%,transparent); border:1px solid color-mix(in srgb,var(--teal) 50%,transparent); color:var(--teal); font-family:inherit; font-size:13px; font-weight:900; letter-spacing:.08em; padding:8px; border-radius:5px; cursor:pointer; margin-top:4px; text-align:center; }
+.deskRegSubmitBtn:hover { background:color-mix(in srgb,var(--teal) 22%,transparent); }
+.deskRegErr { font-size:11px; color:var(--err); margin-top:5px; text-align:center; }
+
+/* Confirm step */
+.deskConfirmBox { background:var(--stone2); border:1px solid var(--divider); border-radius:5px; padding:10px; margin-bottom:10px; }
+.deskConfirmTitle { font-size:9px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:8px; }
+.deskConfirmRow { display:flex; align-items:baseline; justify-content:space-between; padding:3px 0; border-bottom:1px solid var(--divider); }
+.deskConfirmRow:last-child { border-bottom:none; }
+.deskConfirmRowLbl { font-size:11px; color:var(--muted); }
+.deskConfirmRowVal { font-size:12px; font-weight:700; color:var(--cream); }
+.deskConfirmBtns { display:flex; gap:6px; }
+.deskCancelBtn { flex:1; background:none; border:1px solid var(--divider); color:var(--muted); font-family:inherit; font-size:12px; font-weight:700; padding:7px; border-radius:4px; cursor:pointer; }
+.deskCancelBtn:hover { color:var(--sub); border-color:var(--muted); }
+.deskConfirmBtn { flex:2; background:var(--teal); border:none; color:var(--bg); font-family:inherit; font-size:13px; font-weight:900; letter-spacing:.06em; padding:7px; border-radius:4px; cursor:pointer; }
+.deskConfirmBtn:disabled { opacity:.6; cursor:not-allowed; }
+
+/* Success step */
+.deskSuccessBox { display:flex; flex-direction:column; align-items:center; text-align:center; padding:20px 8px; gap:4px; }
+.deskSuccessIcon { width:38px; height:38px; border-radius:50%; background:var(--teal); color:var(--bg); font-size:18px; font-weight:900; display:flex; align-items:center; justify-content:center; margin-bottom:6px; }
+.deskSuccessTitle { font-size:15px; font-weight:900; color:var(--cream); }
+.deskSuccessSub { font-size:11px; color:var(--muted); margin-bottom:8px; }
+.deskSuccessDetail { width:100%; background:var(--stone2); border:1px solid var(--divider); border-radius:5px; padding:8px 10px; margin-bottom:10px; }
+.deskSuccessRow { display:flex; align-items:baseline; justify-content:space-between; padding:2px 0; }
+.deskSuccessRowLbl { font-size:10px; color:var(--dim); }
+.deskSuccessRowVal { font-size:12px; font-weight:700; color:var(--teal); }
+.deskDismissBtn { background:none; border:1px solid var(--divider); color:var(--muted); font-family:inherit; font-size:12px; font-weight:700; padding:5px 14px; border-radius:4px; cursor:pointer; }
+.deskDismissBtn:hover { color:var(--sub); border-color:var(--muted); }
