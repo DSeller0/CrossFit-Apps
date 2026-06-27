@@ -198,13 +198,14 @@ export default function TvController({ sessions: propSessions }) {
 
   useEffect(() => { loadResults() }, [loadResults])
 
-  // push tv_state — safe when tv is null
+  // push tv_state — upserts only the patch fields so unknown/future fields
+  // don't poison the DB payload and freeze subsequent updates
   const push = useCallback(async (patch) => {
     const base = tvRef.current ?? { slide: 'blank', timer_type: 'For Time', timer_cap_secs: 1200, timer_paused_elapsed: 0 }
     const next = { ...base, ...patch, updated_at: Date.now() }
     setTv(next)
     setSaving(true)
-    await supabase.from('tv_state').upsert({ id: 1, ...next })
+    await supabase.from('tv_state').upsert({ id: 1, ...patch, updated_at: Date.now() })
     setSaving(false)
   }, [])
 
@@ -704,21 +705,21 @@ export default function TvController({ sessions: propSessions }) {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
               <span style={{ fontSize: 11, color: '#554a3a' }}>QR Code:</span>
-              {[{ label: 'Ativo', val: true }, { label: 'Oculto', val: false }].map(({ label, val }) => {
-                const active = val ? tv?.show_qr !== false : tv?.show_qr === false
+              {(() => {
+                const qrOn = tv?.show_qr !== false
                 return (
-                  <button key={label} onClick={() => push({ show_qr: val })}
+                  <button onClick={() => push({ show_qr: !qrOn })}
                     style={{
-                      padding: '3px 10px', fontSize: 11, fontWeight: 700, borderRadius: 4, fontFamily: 'inherit',
-                      border: `1px solid ${active ? (val ? '#4ac8c0' : '#806850') : '#2a231c'}`,
-                      background: active ? (val ? 'rgba(74,200,192,.1)' : 'rgba(128,104,80,.12)') : 'transparent',
-                      color: active ? (val ? '#4ac8c0' : '#806850') : '#554a3a',
+                      padding: '3px 12px', fontSize: 11, fontWeight: 700, borderRadius: 4, fontFamily: 'inherit',
+                      border: `1px solid ${qrOn ? '#4ac8c0' : '#806850'}`,
+                      background: qrOn ? 'rgba(74,200,192,.1)' : 'rgba(128,104,80,.12)',
+                      color: qrOn ? '#4ac8c0' : '#806850',
                       cursor: 'pointer',
                     }}>
-                    {label}
+                    {qrOn ? 'Ativo' : 'Oculto'}
                   </button>
                 )
-              })}
+              })()}
             </div>
           </div>
 
