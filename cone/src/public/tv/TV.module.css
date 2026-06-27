@@ -71,6 +71,8 @@
   text-transform: uppercase; letter-spacing: .05em;
 }
 .exVol  { font-size: 22px; font-weight: 700; color: #c8b090; flex-shrink: 0; }
+.exIns  { font-size: 18px; font-weight: 700; color: #806850; flex-shrink: 0; margin-left: 4px; }
+.exNote { font-size: 16px; color: #806850; padding-left: 20px; margin-top: 1px; font-style: italic; }
 
 /* ── Complex exercise sub-movements ── */
 .complexBlock { display: flex; flex-direction: column; gap: 4px; }
@@ -133,6 +135,8 @@
 }
 .timerExVol { font-size: 30px; font-weight: 700; color: #c8b090; }
 .timerNoEx  { font-size: 22px; color: #554a3a; text-transform: uppercase; }
+.timerExIns  { font-size: 26px; font-weight: 700; color: #806850; }
+.timerExNote { font-size: 22px; color: #806850; font-style: italic; }
 .timerComplexMvs   { padding-left: 42px; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
 .timerComplexMvRow { display: flex; align-items: center; gap: 14px; }
 .timerComplexMvReps { font-size: 26px; font-weight: 700; color: #c8b090; flex-shrink: 0; }

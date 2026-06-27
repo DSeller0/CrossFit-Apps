@@ -51,6 +51,26 @@ function fmtDate(iso) {
   return `${DAY_PT[d.getDay()]}, ${d.getDate()} ${MON_PT[d.getMonth()]}`
 }
 
+function fmtIntensity(ins) {
+  if (!ins?.mode) return null
+  if (ins.mode === 'progression') {
+    const steps = ins.steps || [], loads = steps.map(s => s.load).filter(Boolean)
+    const unit = (steps[0]?.unit || '% RM').replace('% do RM', '% RM')
+    return loads.length ? loads.join('/') + ' ' + unit : null
+  }
+  if (ins.mode === 'pct') return ins.pct ? ins.pct + '% RM' : null
+  if (ins.mode === 'gender') {
+    const p = []
+    ;['Masculino', 'Feminino'].forEach(g => {
+      const unit = ins[`${g}_unit`] || 'kg'
+      const vals = ['RX', 'Inter', 'SC'].map(k => ins[`${g}_${k}`]).filter(Boolean)
+      if (vals.length) p.push(`${g === 'Masculino' ? 'M' : 'F'}: ${vals.join('/')} ${unit}`)
+    })
+    return p.join(' | ') || null
+  }
+  return null
+}
+
 // ── Shared: mini QR footer for WOD + Timer slides ─────────────────────────────
 function QrFooter({ dateKey, sessId, classId }) {
   const [qrUrl, setQrUrl] = useState('')
@@ -142,6 +162,7 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
       </div>
       <div className={s.exList}>
         {exes.map((ex, i) => {
+          const ins = fmtIntensity(ex.intensity)
           if (ex.isComplex) {
             const mvs = (ex.complexMovements || []).filter(m => m.name)
             const notation = mvs.map(m => m.reps || '?').join('+')
@@ -154,6 +175,7 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
                   <span className={s.exDot} style={{ background: color }} />
                   {volStr && <span className={s.exVol}>{volStr}</span>}
                   <span className={s.exName}>{displayName}</span>
+                  {ins && <span className={s.exIns}>{ins}</span>}
                 </div>
                 {mvs.length > 0 && (
                   <div className={s.complexMvs}>
@@ -165,15 +187,20 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
                     ))}
                   </div>
                 )}
+                {ex.note && <div className={s.exNote}>{ex.note}</div>}
               </div>
             )
           }
           const vol = exVolStr(ex)
           return (
-            <div key={ex.id || i} className={s.exRow}>
-              <span className={s.exDot} style={{ background: color }} />
-              {vol && <span className={s.exVol}>{vol}</span>}
-              <span className={s.exName}>{ex.name}</span>
+            <div key={ex.id || i}>
+              <div className={s.exRow}>
+                <span className={s.exDot} style={{ background: color }} />
+                {vol && <span className={s.exVol}>{vol}</span>}
+                <span className={s.exName}>{ex.name}</span>
+                {ins && <span className={s.exIns}>{ins}</span>}
+              </div>
+              {ex.note && <div className={s.exNote}>{ex.note}</div>}
             </div>
           )
         })}
@@ -291,6 +318,7 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
           </div>
           <div className={s.timerExList}>
             {exes.map((ex, i) => {
+              const ins = fmtIntensity(ex.intensity)
               if (ex.isComplex) {
                 const mvs = (ex.complexMovements || []).filter(m => m.name)
                 const notation = mvs.map(m => m.reps || '?').join('+')
@@ -304,6 +332,7 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
                       <div className={s.timerExBody}>
                         {volStr && <span className={s.timerExVol}>{volStr}</span>}
                         <span className={s.timerExName}>{displayName}</span>
+                        {ins && <span className={s.timerExIns}>{ins}</span>}
                       </div>
                     </div>
                     {mvs.length > 0 && (
@@ -316,6 +345,7 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
                         ))}
                       </div>
                     )}
+                    {ex.note && <div className={s.timerExNote}>{ex.note}</div>}
                   </div>
                 )
               }
@@ -326,6 +356,8 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
                   <div className={s.timerExBody}>
                     {vol && <span className={s.timerExVol}>{vol}</span>}
                     <span className={s.timerExName}>{ex.name}</span>
+                    {ins && <span className={s.timerExIns}>{ins}</span>}
+                    {ex.note && <span className={s.timerExNote}>{ex.note}</span>}
                   </div>
                 </div>
               )
