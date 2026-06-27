@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { WodSlide } from '../../public/tv/TV.jsx';
 import {
   uid, toISO, todayISO,
   loadAthletes, loadRegistry,
@@ -1194,6 +1195,20 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const [showUpdateTemplateModal, setShowUpdateTemplateModal] = useState(false);
   const [highlightedSessionId, setHighlightedSessionId] = useState(null);
   const [pendingDelete, setPendingDelete]           = useState(null);
+  const [tvPreviewOpen, setTvPreviewOpen]           = useState(false);
+  const isMobile        = useIsMobile();
+  const previewPaneRef  = useRef(null);
+  const [prevScale, setPrevScale] = useState(1);
+
+  // Scale preview pane to fit container width
+  useEffect(() => {
+    const el = previewPaneRef.current;
+    if (!el || !tvPreviewOpen) return;
+    const obs = new ResizeObserver(() => setPrevScale(el.clientWidth / 1920));
+    obs.observe(el);
+    setPrevScale(el.clientWidth / 1920);
+    return () => obs.disconnect();
+  }, [tvPreviewOpen]);
 
   const trackSessionField = field =>
     setChangedSessionFields(prev => { const n = new Set(prev); n.add(field); return n; });
@@ -1262,6 +1277,12 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     const updated = templates.filter(t => t.id !== id);
     setTemplates(updated); saveTemplates(updated);
   };
+
+  // TV Preview (Phase 4) — built from local form+blocks state, no Supabase round-trip
+  const gymName        = loadSettings()?.gymName || '';
+  const tvPreviewSess  = useMemo(() => ({ ...form, blocks }), [form, blocks]);
+  const tvPreviewSessions = useMemo(() => ({ [form.date || todayISO()]: [tvPreviewSess] }), [form.date, tvPreviewSess]);
+  const tvPreviewTv    = useMemo(() => ({ session_id: form.id, date_key: form.date || todayISO() }), [form.id, form.date]);
 
   // Recurring
   const recurPreviewDates = useMemo(() => {
@@ -1651,6 +1672,10 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
         <BlockTypePicker blockNames={blockNames} onSelect={addBlock} onClose={() => setShowBlockPicker(false)} />
       )}
 
+      {/* ── Content area: flex when TV preview is open (desktop only) ── */}
+      <div style={tvPreviewOpen && !isMobile ? { display: 'flex', gap: 24, alignItems: 'flex-start' } : {}}>
+      <div style={tvPreviewOpen && !isMobile ? { flex: 1, minWidth: 0 } : {}}>
+
       {/* ── Session form ── */}
       <div className="sc-card" ref={formRef}>
         {/* Header */}
@@ -1673,6 +1698,14 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
               <i className="ti ti-template" /> Templates
             </button>
             {editing && <button type="button" className="b bsm" onClick={cancel}>Cancelar</button>}
+            {!isMobile && (
+              <button type="button" className="b bsm"
+                title="Preview TV"
+                style={{ borderColor: tvPreviewOpen ? '#4ac8c0' : undefined, color: tvPreviewOpen ? '#4ac8c0' : undefined }}
+                onClick={() => setTvPreviewOpen(v => !v)}>
+                <i className="ti ti-device-tv" /> TV
+              </button>
+            )}
           </div>
         </div>
 
@@ -1927,6 +1960,24 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           )}
         </div>
       )}
+      </div> {/* end left pane */}
+
+      {/* ── TV Preview pane (desktop only, when toggled) ── */}
+      {tvPreviewOpen && !isMobile && (
+        <div style={{ flex: '0 0 38%', position: 'sticky', top: 20 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#806850', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <i className="ti ti-device-tv" style={{ color: '#4ac8c0' }} /> Preview TV
+            <span style={{ fontSize: 9, color: '#554a3a', fontWeight: 400 }}>· atualiza em tempo real</span>
+          </div>
+          <div ref={previewPaneRef} style={{ width: '100%', aspectRatio: '16/9', position: 'relative', overflow: 'hidden', background: '#0d0b09', border: '1px solid #2a231c', borderRadius: 6 }}>
+            <div style={{ width: 1920, height: 1080, transform: `scale(${prevScale})`, transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
+              <WodSlide sessions={tvPreviewSessions} tv={tvPreviewTv} gymName={gymName} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      </div> {/* end content flex container */}
     </div>
   );
 }
