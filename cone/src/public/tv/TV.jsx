@@ -359,7 +359,7 @@ export default function TV() {
         {slide === 'timer'   && <TimerSlide   tv={tv} sessions={sessions} />}
         {slide === 'results' && <ResultsSlide tv={tv} sessions={sessions} athletes={athletes} results={results} />}
         {slide === 'qr'      && <QrSlide      tv={tv} />}
-        {!tv && <div className={s.loading}><i className="ti ti-loader-2 spin" /> Conectando...</div>}
+        {!tv && <div className={s.loading}><i className={`ti ti-loader-2 ${s.spin}`} /> Conectando...</div>}
       </div>
     </div>
   )
