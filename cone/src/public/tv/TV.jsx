@@ -291,6 +291,34 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
           </div>
           <div className={s.timerExList}>
             {exes.map((ex, i) => {
+              if (ex.isComplex) {
+                const mvs = (ex.complexMovements || []).filter(m => m.name)
+                const notation = mvs.map(m => m.reps || '?').join('+')
+                const displayName = ex.name || mvs.map(m => m.name).join(' + ') || 'Complexo'
+                const setsStr = ex.sets ? `${ex.sets}×` : ''
+                const volStr = notation ? `${setsStr}(${notation})` : setsStr || ''
+                return (
+                  <div key={ex.id || i}>
+                    <div className={s.timerExRow}>
+                      <span className={s.timerExDot} style={{ background: bColor }} />
+                      <div className={s.timerExBody}>
+                        {volStr && <span className={s.timerExVol}>{volStr}</span>}
+                        <span className={s.timerExName}>{displayName}</span>
+                      </div>
+                    </div>
+                    {mvs.length > 0 && (
+                      <div className={s.timerComplexMvs}>
+                        {mvs.map((mv, mi) => (
+                          <div key={mv.id || mi} className={s.timerComplexMvRow}>
+                            {mv.reps && <span className={s.timerComplexMvReps}>{mv.reps}</span>}
+                            <span className={s.timerComplexMvName}>{mv.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              }
               const vol = exVolStr(ex)
               return (
                 <div key={ex.id || i} className={s.timerExRow}>

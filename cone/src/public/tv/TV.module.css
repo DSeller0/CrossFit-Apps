@@ -133,6 +133,10 @@
 }
 .timerExVol { font-size: 30px; font-weight: 700; color: #c8b090; }
 .timerNoEx  { font-size: 22px; color: #554a3a; text-transform: uppercase; }
+.timerComplexMvs   { padding-left: 42px; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.timerComplexMvRow { display: flex; align-items: center; gap: 14px; }
+.timerComplexMvReps { font-size: 26px; font-weight: 700; color: #c8b090; flex-shrink: 0; }
+.timerComplexMvName { font-size: 30px; font-weight: 700; color: #c8b090; text-transform: uppercase; letter-spacing: .04em; }
 
 /* ── Results Slide ── */
 .resultsSlide {
