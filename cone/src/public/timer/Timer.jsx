@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import s from './Timer.module.css'
+import Nav from '../Nav.jsx'
+import { sb } from '../supabaseClient.js'
+import { BENCHMARK_GIRLS, BENCHMARK_HEROES, benchmarkToTimerExes } from '../lib/benchmarks.js'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const DAY_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
@@ -31,7 +34,12 @@ function dropHist(i) {
   try { localStorage.setItem(K_HIST, JSON.stringify(h)) } catch {}
 }
 
-const DEFAULT_CFG = { blockType: 'For Time', blockLabel: '', timeCap: 20, rounds: null, exercises: [], stationTime: 45, transitionTime: 15, sessionId: null, sessionDate: null, athleteId: null, blockId: null }
+const DEFAULT_CFG = {
+  blockType: 'For Time', blockLabel: '', timeCap: 20, rounds: null,
+  exercises: [], stationTime: 45, transitionTime: 15,
+  sessionId: null, sessionDate: null, athleteId: null, blockId: null,
+  goal: '', countdown: true,
+}
 
 function loadSaved() {
   try {
@@ -50,20 +58,26 @@ export default function Timer() {
   const initCfg    = initSaved?.cfg ?? loadSavedCfg() ?? DEFAULT_CFG
   const initStatus = initSaved ? initSaved.status : (fromSched && loadSavedCfg() ? 'ready' : 'cfg')
 
-  const [status,      setStatus]      = useState(initStatus)
-  const [cfg,         setCfg]         = useState(initCfg)
-  const [splits,      setSplits]      = useState(() => initSaved?.splits ?? [])
-  const [finalSecs,   setFinalSecs]   = useState(() => initSaved?.finalSecs ?? 0)
-  const [hist,        setHist]        = useState(() => loadHist())
-  const [,            forceUpdate]    = useState(0)
-  const [form,        setForm]        = useState(() => ({
-    type:   initCfg.blockType || 'For Time',
-    cap:    initCfg.timeCap ?? 20,
-    rounds: initCfg.rounds ?? '',
-    label:  initCfg.blockLabel || '',
-    exes:   (initCfg.exercises || []).map(exLabel).join('\n'),
-    st:     initCfg.stationTime ?? 45,
-    tt:     initCfg.transitionTime ?? 15,
+  const [gymName,      setGymName]      = useState('Cone')
+  const [status,       setStatus]       = useState(initStatus)
+  const [cfg,          setCfg]          = useState(initCfg)
+  const [splits,       setSplits]       = useState(() => initSaved?.splits ?? [])
+  const [finalSecs,    setFinalSecs]    = useState(() => initSaved?.finalSecs ?? 0)
+  const [hist,         setHist]         = useState(() => loadHist())
+  const [,             forceUpdate]     = useState(0)
+  const [getreadySecs, setGetreadySecs] = useState(10)
+  const [bmCat,        setBmCat]        = useState(null) // 'Girls' | 'Heroes' | null
+
+  const [form, setForm] = useState(() => ({
+    type:      initCfg.blockType || 'For Time',
+    cap:       initCfg.timeCap ?? 20,
+    rounds:    initCfg.rounds ?? '',
+    label:     initCfg.blockLabel || '',
+    exes:      (initCfg.exercises || []).map(exLabel).join('\n'),
+    st:        initCfg.stationTime ?? 45,
+    tt:        initCfg.transitionTime ?? 15,
+    goal:      initCfg.goal ?? '',
+    countdown: initCfg.countdown ?? true,
   }))
 
   // Timing refs
@@ -74,11 +88,13 @@ export default function Timer() {
   const wakeLockRef = useRef(null)
   const lastEmomMin = useRef(-1)
   const lastStKey   = useRef(null)
+  const getreadyRef = useRef(null)
+  const grSecsRef   = useRef(10)
 
   // Mirror state to refs so tick (setInterval callback) always sees current values
-  const statusRef = useRef(status)
-  const cfgRef    = useRef(cfg)
-  const splitsRef = useRef(splits)
+  const statusRef  = useRef(status)
+  const cfgRef     = useRef(cfg)
+  const splitsRef  = useRef(splits)
   const finSecsRef = useRef(finalSecs)
   statusRef.current  = status
   cfgRef.current     = cfg
@@ -88,19 +104,27 @@ export default function Timer() {
   // "Latest ref" pattern: tick function always reads newest version
   const tickFnRef = useRef(null)
 
+  // ── Gym name ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    sb.from('settings').select('value').eq('id', 1).maybeSingle()
+      .then(({ data }) => { if (data?.value?.gymName) setGymName(data.value.gymName) })
+      .catch(() => {})
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Computed helpers ─────────────────────────────────────────────────────
   function capSecs(c) { return ((c ?? cfgRef.current)?.timeCap ?? 0) * 60 }
 
   function elapsedRaw() {
     const st = statusRef.current
-    if (st === 'ready' || st === 'cfg') return 0
+    if (st === 'ready' || st === 'cfg' || st === 'getready') return 0
     if (st === 'finished') return finSecsRef.current
     const now = st === 'paused' ? pauseStart.current : Date.now()
     return Math.max(0, (now - startEpoch.current - pausedMs.current) / 1000)
   }
 
   function stCycleRaw(e, c) {
-    const st = c.stationTime ?? 45, tt = c.transitionTime ?? 15, cycle = st + tt
+    const st = c.stationTime ?? 45, tt = c.transitionTime ?? 15
+    const cycle = Math.max(st + tt, 1) // guard divide-by-zero when both are 0
     return { st, tt, cycle, pos: e % cycle, totalCycles: Math.floor(e / cycle) }
   }
   function stInfoRaw(e, c) {
@@ -113,7 +137,9 @@ export default function Timer() {
     const cap = capSecs(c), bt = c.blockType
     if (bt === 'Estações') {
       const exes = c.exercises || [], r = c.rounds ?? 1, { st, tt } = stCycleRaw(e, c)
-      return e >= exes.length * r * (st + tt)
+      const cycleDur = st + tt
+      if (cycleDur <= 0) return false // can't determine end with 0-duration cycles
+      return e >= exes.length * r * cycleDur
     }
     if (!cap) return false
     return e >= cap
@@ -127,6 +153,7 @@ export default function Timer() {
       const { pos, st, tt } = stCycleRaw(e, c), phase = stPhaseRaw(e, c)
       const phaseLen = phase === 'work' ? st : tt
       const phasePos = phase === 'work' ? pos : pos - st
+      if (phaseLen <= 0) return 1
       return Math.max(0, (phaseLen - phasePos) / phaseLen)
     }
     return cap ? Math.min(1, e / cap) : Math.min(1, e / 1800)
@@ -170,25 +197,21 @@ export default function Timer() {
     if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null }
   }
 
-  // Assign latest tick logic after every render (avoids stale closures)
   tickFnRef.current = () => {
     if (statusRef.current !== 'running') return
     const c = cfgRef.current, e = elapsedRaw()
     if (Math.floor(e) % 5 === 0) saveStateRaw()
-    // EMOM: vibrate on minute boundary
     if (c.blockType === 'EMOM') {
       const min = Math.floor(e / 60)
       if (lastEmomMin.current >= 0 && min !== lastEmomMin.current) navigator.vibrate?.([300,100,300])
       lastEmomMin.current = min
     }
-    // Estações: vibrate on phase/station change
     if (c.blockType === 'Estações') {
       const { idx } = stInfoRaw(e, c), phase = stPhaseRaw(e, c), key = `${idx}-${phase}`
       if (lastStKey.current !== null && key !== lastStKey.current)
         navigator.vibrate?.(phase === 'work' ? [400,100,400] : [200])
       lastStKey.current = key
     }
-    // Auto-finish when time is up
     if (isTimeUpRaw(e, c)) {
       navigator.vibrate?.([500,200,500,200,500])
       doFinishRaw()
@@ -225,6 +248,37 @@ export default function Timer() {
     setSplits([]); setFinalSecs(0); setStatus('running')
     acquireWL(); startTick()
   }
+
+  function enterGetReady() {
+    grSecsRef.current = 10
+    setGetreadySecs(10)
+    statusRef.current = 'getready'
+    setStatus('getready')
+    navigator.vibrate?.([80])
+    getreadyRef.current = setInterval(() => {
+      grSecsRef.current -= 1
+      if (grSecsRef.current <= 0) {
+        clearInterval(getreadyRef.current)
+        getreadyRef.current = null
+        startTimer()
+      } else {
+        navigator.vibrate?.([40])
+        setGetreadySecs(grSecsRef.current)
+      }
+    }, 1000)
+  }
+
+  function handleStart() {
+    if (cfg.countdown) enterGetReady()
+    else startTimer()
+  }
+
+  function cancelGetReady() {
+    if (getreadyRef.current) { clearInterval(getreadyRef.current); getreadyRef.current = null }
+    statusRef.current = 'ready'
+    setStatus('ready')
+  }
+
   function pauseTimer() {
     if (statusRef.current !== 'running') return
     pauseStart.current = Date.now()
@@ -256,6 +310,7 @@ export default function Timer() {
   function doDiscard() { dropHist(0); window.history.back() }
   function goBack() {
     if (statusRef.current === 'running') { if (!confirm('Pausar e sair?')) return; pauseTimer() }
+    if (statusRef.current === 'getready') cancelGetReady()
     window.history.back()
   }
 
@@ -278,13 +333,32 @@ export default function Timer() {
     location.href = buildScheduleUrl(e.sessionId, e.sessionDate, e.blockId, e.athleteId, e.totalTime, e.splits?.length || '')
   }
 
+  function selectBenchmark(bm, category) {
+    const exes = benchmarkToTimerExes(bm)
+    setForm(f => ({
+      ...f,
+      type:   bm.type || 'For Time',
+      cap:    bm.duration || 20,
+      rounds: bm.rounds ?? '',
+      label:  bm.name,
+      exes,
+      goal:   '',
+    }))
+    setBmCat(null)
+  }
+
   function applyCfg() {
+    const stVal = form.st === '' ? 45 : Number(form.st)
+    const ttVal = form.tt === '' ? 15 : Number(form.tt)
     const newCfg = {
       blockType: form.type, blockLabel: form.label.trim(), timeCap: parseInt(form.cap) || 20,
       rounds: parseInt(form.rounds) || null,
       exercises: String(form.exes).split('\n').map(l => l.trim()).filter(Boolean),
-      stationTime: parseInt(form.st) || 45, transitionTime: parseInt(form.tt) || 15,
+      stationTime:  isNaN(stVal) ? 45 : stVal,
+      transitionTime: isNaN(ttVal) ? 15 : ttVal,
       sessionId: null, sessionDate: null, athleteId: null, blockId: null,
+      goal: form.goal?.trim() || '',
+      countdown: form.countdown ?? true,
     }
     try { localStorage.setItem(K_CFG, JSON.stringify(newCfg)) } catch {}
     cfgRef.current = newCfg
@@ -294,20 +368,18 @@ export default function Timer() {
 
   // ── Mount effects ────────────────────────────────────────────────────────
   useEffect(() => {
-    // Restore running timer after page reload
     const sv = loadSaved()
     if (sv?.status === 'running') startTick()
-    // iOS viewport height fix
     function fixVh() { const r = document.getElementById('root'); if (r) r.style.height = window.innerHeight + 'px' }
     fixVh()
     window.addEventListener('resize', fixVh)
-    // Re-acquire wake lock after tab becomes visible
     function onVisibility() { if (document.visibilityState === 'visible' && statusRef.current === 'running') acquireWL() }
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
       window.removeEventListener('resize', fixVh)
       document.removeEventListener('visibilitychange', onVisibility)
       stopTick(); releaseWL()
+      if (getreadyRef.current) { clearInterval(getreadyRef.current); getreadyRef.current = null }
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -329,13 +401,11 @@ export default function Timer() {
   }
   const disp = getDisplay()
 
-  // Ring props
   const progress  = ringProgressRaw(e, cfg)
   const rOffset   = +(RING_C * (1 - progress)).toFixed(1)
   const rColor    = isPaused ? 'var(--dim)' : ringColor_s()
   function ringColor_s() { return ringColorRaw(e, cfg) }
 
-  // Clock class
   let clockCls = s.clock
   if (isPaused) clockCls += ' ' + s.paused
   else if (bt === 'AMRAP' && disp <= 30) clockCls += ' ' + s.warn
@@ -391,6 +461,7 @@ export default function Timer() {
           <div className={s.label}>{cfg.blockLabel || 'Timer'}</div>
         </div>
         {showCap && capStr && <div className={s.capTag}>CAP {capStr}</div>}
+        {cfg.goal && <div className={s.goalTag}>↗ {cfg.goal}</div>}
       </div>
     )
   }
@@ -417,11 +488,72 @@ export default function Timer() {
   }
 
   // ── Screens ──────────────────────────────────────────────────────────────
-  if (status === 'cfg') {
-    const showEst = form.type === 'Estações'
-    const showRounds = form.type !== 'EMOM' && form.type !== 'AMRAP'
+
+  // Get-ready countdown screen
+  if (status === 'getready') {
     return (
-      <>
+      <div className={s.wrap}>
+        <div className={s.hdr}>
+          <button className={s.back} onClick={cancelGetReady}>✕</button>
+          <div className={s.hdrMid}><div className={s.label}>{cfg.blockLabel || 'Timer'}</div></div>
+        </div>
+        <div className={s.getreadyBody}>
+          <div className={s.getreadyLbl}>Preparar</div>
+          <div className={s.getreadyNum}>{getreadySecs}</div>
+        </div>
+        <Nav active="timer" gymName={gymName} />
+      </div>
+    )
+  }
+
+  if (status === 'cfg') {
+    const showEst  = form.type === 'Estações'
+    const isBench  = form.type === 'Benchmark'
+    const isAmrap  = form.type === 'AMRAP'
+    const isEmom   = form.type === 'EMOM'
+    const isForTime = form.type === 'For Time'
+    const showRounds = !isEmom && !isAmrap && !isBench
+
+    // Cap label per type
+    const capLabel = isAmrap ? 'Duração (min)' : isEmom ? 'Duração total (min)' : 'Cap (min)'
+
+    // Benchmark picker
+    const renderBenchmarkPicker = () => {
+      if (!bmCat) {
+        return (
+          <div className={s.bmPickerBg}>
+            <div className={s.cfgLbl}>Selecionar Benchmark</div>
+            <div className={s.bmCatGrid}>
+              <div className={s.bmCatCard} onClick={() => setBmCat('Girls')}>
+                <span className={s.bmCatIc}>🎀</span>
+                <span className={s.bmCatLbl}>Girls</span>
+                <span className={s.bmCatDesc}>{BENCHMARK_GIRLS.length} WODs clássicos</span>
+              </div>
+              <div className={s.bmCatCard} onClick={() => setBmCat('Heroes')}>
+                <span className={s.bmCatIc}>🏅</span>
+                <span className={s.bmCatLbl}>Heroes</span>
+                <span className={s.bmCatDesc}>{BENCHMARK_HEROES.length} WODs heróis</span>
+              </div>
+            </div>
+          </div>
+        )
+      }
+      const list = bmCat === 'Girls' ? BENCHMARK_GIRLS : BENCHMARK_HEROES
+      return (
+        <div className={s.bmList}>
+          <button className={s.bmListBack} onClick={() => setBmCat(null)}>← {bmCat}</button>
+          {list.map(bm => (
+            <div key={bm.name} className={s.bmItem} onClick={() => selectBenchmark(bm, bmCat)}>
+              <div className={s.bmItemName}>{bm.name}</div>
+              <div className={s.bmItemDesc}>{bm.desc}</div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    return (
+      <div className={s.wrap}>
         <div className={s.hdr}>
           <button className={s.back} onClick={goBack}>←</button>
           <div className={s.hdrMid}><div className={s.label}>Configurar Timer</div></div>
@@ -429,52 +561,97 @@ export default function Timer() {
         <div className={s.cfg}>
           <div>
             <div className={s.cfgLbl}>Tipo de WOD</div>
-            <select className={s.cfgSel} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+            <select className={s.cfgSel} value={form.type}
+              onChange={e => { setForm(f => ({ ...f, type: e.target.value })); setBmCat(null) }}>
               <option>For Time</option><option>AMRAP</option><option>EMOM</option>
               <option>Benchmark</option><option>Estações</option>
             </select>
           </div>
-          <div className={s.cfgRow}>
-            <div className={s.cfgHalf}>
-              <div className={s.cfgLbl}>Duração (min)</div>
-              <input className={s.cfgInp} type="number" min="1" max="90" value={form.cap} onChange={e => setForm(f => ({ ...f, cap: e.target.value }))} />
-            </div>
-            {showRounds && (
-              <div className={s.cfgHalf}>
-                <div className={s.cfgLbl}>Rondas</div>
-                <input className={s.cfgInp} type="number" min="1" max="50" placeholder="—" value={form.rounds} onChange={e => setForm(f => ({ ...f, rounds: e.target.value }))} />
-              </div>
-            )}
-          </div>
-          {showEst && (
-            <div>
-              <div className={s.cfgLbl}>Estações</div>
-              <div className={s.estOpts}>
+
+          {isBench ? renderBenchmarkPicker() : (
+            <>
+              <div className={s.cfgRow}>
                 <div className={s.cfgHalf}>
-                  <input className={s.cfgInp} type="number" value={form.st} onChange={e => setForm(f => ({ ...f, st: e.target.value }))} />
-                  <div className={s.cfgLbl} style={{ marginTop: 3 }}>Trabalho (seg)</div>
+                  <div className={s.cfgLbl}>{capLabel}</div>
+                  <input className={s.cfgInp} type="number" min="1" max="90" value={form.cap}
+                    onChange={e => setForm(f => ({ ...f, cap: e.target.value }))} />
                 </div>
-                <div className={s.cfgHalf}>
-                  <input className={s.cfgInp} type="number" value={form.tt} onChange={e => setForm(f => ({ ...f, tt: e.target.value }))} />
-                  <div className={s.cfgLbl} style={{ marginTop: 3 }}>Transição (seg)</div>
+                {showRounds && (
+                  <div className={s.cfgHalf}>
+                    <div className={s.cfgLbl}>{showEst ? 'Rounds por estação' : 'Rounds (opcional)'}</div>
+                    <input className={s.cfgInp} type="number" min="1" max="50" placeholder="—" value={form.rounds}
+                      onChange={e => setForm(f => ({ ...f, rounds: e.target.value }))} />
+                  </div>
+                )}
+                {isAmrap && (
+                  <div className={s.cfgHalf}>
+                    <div className={s.cfgLbl}>Meta (opcional)</div>
+                    <input className={s.cfgInp} type="text" placeholder="ex: 20 rounds" value={form.goal}
+                      onChange={e => setForm(f => ({ ...f, goal: e.target.value }))} />
+                  </div>
+                )}
+              </div>
+
+              {isForTime && (
+                <div>
+                  <div className={s.cfgLbl}>Meta de Tempo (opcional)</div>
+                  <input className={s.cfgInp} type="text" placeholder="ex: 08:30" value={form.goal}
+                    onChange={e => setForm(f => ({ ...f, goal: e.target.value }))} />
+                </div>
+              )}
+
+              {showEst && (
+                <div>
+                  <div className={s.cfgLbl}>Estações</div>
+                  <div className={s.estOpts}>
+                    <div className={s.cfgHalf}>
+                      <input className={s.cfgInp} type="number" min="0" value={form.st}
+                        onChange={e => setForm(f => ({ ...f, st: e.target.value }))} />
+                      <div className={s.cfgLbl} style={{ marginTop: 3 }}>Trabalho (seg)</div>
+                    </div>
+                    <div className={s.cfgHalf}>
+                      <input className={s.cfgInp} type="number" min="0" value={form.tt}
+                        onChange={e => setForm(f => ({ ...f, tt: e.target.value }))} />
+                      <div className={s.cfgLbl} style={{ marginTop: 3 }}>Transição (seg)</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <div className={s.cfgLbl}>Nome (opcional)</div>
+                <input className={s.cfgInp} type="text" placeholder="ex: Cindy, Murph..." value={form.label}
+                  onChange={e => setForm(f => ({ ...f, label: e.target.value }))} />
+              </div>
+
+              <div>
+                <div className={s.cfgLbl}>Exercícios (um por linha)</div>
+                <textarea className={s.cfgTa}
+                  placeholder={isEmom ? '1 exercício por minuto\nCicla se houver menos exercícios que minutos' : '21 Pull-ups\n21 KB Swings 24kg\n400m Run'}
+                  value={form.exes} onChange={e => setForm(f => ({ ...f, exes: e.target.value }))} />
+                {isEmom && <div className={s.cfgHint}>1 exercício por minuto — cicla se houver menos exercícios que minutos.</div>}
+              </div>
+
+              <div className={s.cfgToggleRow}>
+                <span className={s.cfgToggleLbl}>Contagem regressiva (10s)</span>
+                <div
+                  className={`${s.cfgToggle}${form.countdown ? ' ' + s.cfgToggleOn : ''}`}
+                  onClick={() => setForm(f => ({ ...f, countdown: !f.countdown }))}>
+                  <div className={`${s.cfgToggleThumb}${form.countdown ? ' ' + s.cfgToggleOnThumb : ''}`} />
                 </div>
               </div>
-            </div>
+
+              {renderRecentes(false)}
+            </>
           )}
-          <div>
-            <div className={s.cfgLbl}>Nome (opcional)</div>
-            <input className={s.cfgInp} type="text" placeholder="ex: Cindy, Murph..." value={form.label} onChange={e => setForm(f => ({ ...f, label: e.target.value }))} />
-          </div>
-          <div>
-            <div className={s.cfgLbl}>Exercícios (um por linha)</div>
-            <textarea className={s.cfgTa} placeholder={"21 Pull-ups\n21 KB Swings 24kg\n400m Run"} value={form.exes} onChange={e => setForm(f => ({ ...f, exes: e.target.value }))} />
-          </div>
-          {renderRecentes(false)}
         </div>
-        <div className={s.ctrl}>
-          <button className={`${s.btn} ${s.btnStart}`} onClick={applyCfg}>▶ INICIAR</button>
-        </div>
-      </>
+        {!isBench && (
+          <div className={s.ctrl}>
+            <button className={`${s.btn} ${s.btnStart}`} onClick={applyCfg}>▶ INICIAR</button>
+          </div>
+        )}
+        <Nav active="timer" gymName={gymName} />
+      </div>
     )
   }
 
@@ -482,10 +659,11 @@ export default function Timer() {
     const metaParts = [
       cfg.timeCap ? `${cfg.timeCap} min` : '',
       cfg.rounds  ? `${cfg.rounds} rounds` : '',
+      cfg.goal    ? `Meta: ${cfg.goal}` : '',
       bt === 'Estações' ? `${cfg.stationTime ?? 45}s / ${cfg.transitionTime ?? 15}s transição` : '',
     ].filter(Boolean)
     return (
-      <>
+      <div className={s.wrap}>
         {renderHdr()}
         <div className={s.readyBody}>
           <div>
@@ -511,9 +689,10 @@ export default function Timer() {
           {renderRecentes(false)}
         </div>
         <div className={s.ctrl}>
-          <button className={`${s.btn} ${s.btnStart}`} onClick={startTimer}>▶ INICIAR</button>
+          <button className={`${s.btn} ${s.btnStart}`} onClick={handleStart}>▶ INICIAR</button>
         </div>
-      </>
+        <Nav active="timer" gymName={gymName} />
+      </div>
     )
   }
 
@@ -521,7 +700,7 @@ export default function Timer() {
     const rounds = splits.length
     const canReg = !!(cfg.sessionId)
     return (
-      <>
+      <div className={s.wrap}>
         {renderHdr(false)}
         <div className={s.finBody}>
           <div className={s.finTtl}>FINALIZADO</div>
@@ -552,17 +731,28 @@ export default function Timer() {
             : <button className={`${s.btn} ${s.btnClose}`} onClick={goBack}>FECHAR</button>
           }
         </div>
-      </>
+        <Nav active="timer" gymName={gymName} />
+      </div>
     )
   }
 
   // Running / Paused screen
   const showLap = bt !== 'EMOM' && bt !== 'Estações'
   return (
-    <>
+    <div className={s.wrap}>
       {renderHdr()}
-      <div className={s.body}>
-        {renderRing(renderClock())}
+      <div className={`${s.body} ${s.runLayout}`}>
+        <div className={s.runLeft}>
+          {renderRing(renderClock())}
+          <div className={s.ctrl}>
+            {showLap && <button className={`${s.btn} ${s.btnLap}`} onClick={doLap}>LAP</button>}
+            {isPaused
+              ? <button className={`${s.btn} ${s.btnResume}`} onClick={resumeTimer}>▶ RETOMAR</button>
+              : <button className={`${s.btn} ${s.btnPause}`} onClick={pauseTimer}>❚❚</button>
+            }
+            <button className={`${s.btn} ${s.btnDone}`} onClick={() => doFinishRaw()}>✓ FIM</button>
+          </div>
+        </div>
         <div className={s.scroll}>
           {splits.length > 0 && (
             <div className={s.splits}>
@@ -597,14 +787,7 @@ export default function Timer() {
           })}
         </div>
       </div>
-      <div className={s.ctrl}>
-        {showLap && <button className={`${s.btn} ${s.btnLap}`} onClick={doLap}>LAP</button>}
-        {isPaused
-          ? <button className={`${s.btn} ${s.btnResume}`} onClick={resumeTimer}>▶ RETOMAR</button>
-          : <button className={`${s.btn} ${s.btnPause}`} onClick={pauseTimer}>❚❚</button>
-        }
-        <button className={`${s.btn} ${s.btnDone}`} onClick={() => doFinishRaw()}>✓ FIM</button>
-      </div>
-    </>
+      <Nav active="timer" gymName={gymName} />
+    </div>
   )
 }
