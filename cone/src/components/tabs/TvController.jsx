@@ -113,9 +113,11 @@ export default function TvController({ sessions: propSessions }) {
   const [liveScales,  setLiveScales]  = useState({}) // { [athleteId]: 'Rx'|'Sc'|'Adp' }
   // Groups
   const [autoAdvance, setAutoAdvance] = useState(false)
-  const hasAutoAdvRef  = useRef(false)
-  const selSessObjRef  = useRef(null)
-  const activeClassRef = useRef(null)
+  const hasAutoAdvRef    = useRef(false)
+  const autoAdvanceRef   = useRef(false)
+  const rotationCountRef = useRef(0)
+  const selSessObjRef    = useRef(null)
+  const activeClassRef   = useRef(null)
   const previewRef  = useRef(null)
   const [prevScale, setPrevScale]     = useState(1)
   const tvRef = useRef(tv)
@@ -202,8 +204,14 @@ export default function TvController({ sessions: propSessions }) {
     setSaving(false)
   }, [])
 
-  // Auto-advance: reset flag when a new timer run starts
-  useEffect(() => { hasAutoAdvRef.current = false }, [tv?.timer_started_at])
+  // Keep autoAdvanceRef in sync for use inside ref-based functions
+  useEffect(() => { autoAdvanceRef.current = autoAdvance }, [autoAdvance])
+
+  // Auto-advance: reset flag (and rotation count) when a new timer run starts
+  useEffect(() => {
+    hasAutoAdvRef.current    = false
+    rotationCountRef.current = 0
+  }, [tv?.timer_started_at])
 
   // Auto-advance: advance groups when timer cap is reached (respects rest)
   useEffect(() => {
@@ -225,7 +233,27 @@ export default function TvController({ sessions: propSessions }) {
     return () => clearInterval(id)
   }, [autoAdvance, tv?.timer_started_at, push])
 
-  // Rest expiry: advance groups when rest countdown ends
+  // No-groups sequential advance: auto-advance block when timer cap is reached
+  useEffect(() => {
+    if (groups.length > 0 || !tv?.timer_started_at || !tv?.timer_block_id) return
+    const id = setInterval(() => {
+      const t = tvRef.current
+      if (!t?.timer_started_at || !t?.timer_cap_secs || !t?.timer_block_id) return
+      const elapsed = Math.floor((Date.now() - t.timer_started_at) / 1000 + (t.timer_paused_elapsed ?? 0))
+      if (elapsed >= t.timer_cap_secs && !hasAutoAdvRef.current) {
+        hasAutoAdvRef.current = true
+        const rSecs = t.rotation_rest_secs || 0
+        if (rSecs > 0) {
+          push({ rotation_rest_until: Date.now() + rSecs * 1000 })
+        } else {
+          advanceFromRefs()
+        }
+      }
+    }, 500)
+    return () => clearInterval(id)
+  }, [groups.length, tv?.timer_started_at, tv?.timer_block_id, push])
+
+  // Rest expiry: fires for both groups and no-groups
   useEffect(() => {
     const until = tv?.rotation_rest_until
     if (!until) return
@@ -311,6 +339,7 @@ export default function TvController({ sessions: propSessions }) {
   }
 
   async function startTimer() {
+    rotationCountRef.current = 0
     await push({ slide: 'timer', timer_type: timerType, timer_cap_secs: timerCap * 60,
       timer_block_id: timerBlkId, timer_started_at: Date.now(),
       timer_paused_elapsed: tv?.timer_paused_elapsed ?? 0 })
@@ -377,20 +406,78 @@ export default function TvController({ sessions: propSessions }) {
     loadResults()
   }
 
-  // Advance groups using refs (safe to call from effects — always reads latest values)
+  // Advance timer state — handles both group rotation and no-group sequential advance.
+  // Reads from refs so it's safe to call from effects without stale closure issues.
   function advanceFromRefs() {
     const wods    = (selSessObjRef.current?.blocks || []).filter(isWodBlock)
     const rotIds  = tvRef.current?.rotation_block_ids || []
     const rotBlks = rotIds.length > 0 ? wods.filter(b => rotIds.includes(b.id)) : wods
     const grps    = activeClassRef.current?.groups || []
-    if (rotBlks.length === 0 || grps.length === 0) { push({ rotation_rest_until: null }); return }
-    const curPos  = tvRef.current?.group_positions || {}
-    const newPos  = {}
-    for (const g of grps) {
-      const idx   = rotBlks.findIndex(b => b.id === curPos[g.id])
-      newPos[g.id] = rotBlks[(idx + 1) % rotBlks.length].id
+
+    if (grps.length > 0) {
+      // ── Groups: rotate positions, check cycle cap, transition to finisher ──
+      if (rotBlks.length === 0) { push({ rotation_rest_until: null }); return }
+      const curPos = tvRef.current?.group_positions || {}
+      const newPos = {}
+      for (const g of grps) {
+        const idx   = rotBlks.findIndex(b => b.id === curPos[g.id])
+        newPos[g.id] = rotBlks[(idx + 1) % rotBlks.length].id
+      }
+      rotationCountRef.current += 1
+      const cycleComplete = rotationCountRef.current >= rotBlks.length
+
+      if (cycleComplete) {
+        rotationCountRef.current = 0
+        // Finisher = WOD blocks outside the rotation selection
+        const finishers = rotIds.length > 0 ? wods.filter(b => !rotIds.includes(b.id)) : []
+        if (finishers.length > 0) {
+          const first = finishers[0]
+          push({
+            group_positions: newPos,
+            rotation_rest_until: null,
+            timer_block_id: first.id,
+            timer_type: first.type || 'For Time',
+            timer_cap_secs: (parseInt(first.duration) || 20) * 60,
+            ...(autoAdvanceRef.current ? { timer_started_at: Date.now(), timer_paused_elapsed: 0 } : {}),
+          })
+          setTimerBlkId(first.id)
+          setTimerType(first.type || 'For Time')
+          setTimerCap(parseInt(first.duration) || 20)
+          setAutoAdvance(false) // finisher is manual — coach controls from here
+        } else {
+          // Cycle done, no finisher — stop
+          push({ group_positions: newPos, rotation_rest_until: null })
+        }
+      } else {
+        // Mid-cycle: rotate and restart timer (only if autoAdvance is on)
+        push({
+          group_positions: newPos,
+          rotation_rest_until: null,
+          ...(autoAdvanceRef.current ? { timer_started_at: Date.now(), timer_paused_elapsed: 0 } : {}),
+        })
+      }
+    } else {
+      // ── No groups: sequential block advance ──
+      const curId   = tvRef.current?.timer_block_id
+      const idx     = rotBlks.findIndex(b => b.id === curId)
+      const next    = idx >= 0 ? rotBlks[idx + 1] : null
+      if (next) {
+        push({
+          timer_block_id: next.id,
+          timer_type: next.type || 'For Time',
+          timer_cap_secs: (parseInt(next.duration) || 20) * 60,
+          timer_started_at: Date.now(),
+          timer_paused_elapsed: 0,
+          rotation_rest_until: null,
+        })
+        setTimerBlkId(next.id)
+        setTimerType(next.type || 'For Time')
+        setTimerCap(parseInt(next.duration) || 20)
+      } else {
+        // Last block done — stop
+        push({ rotation_rest_until: null })
+      }
     }
-    push({ group_positions: newPos, rotation_rest_until: null })
   }
 
   // Groups
@@ -618,46 +705,89 @@ export default function TvController({ sessions: propSessions }) {
           {/* Timer */}
           <div style={card}>
             <div style={cardTitle}>Timer</div>
-            <div style={{ marginBottom: 12 }}>
-              <label style={lblSt}>Bloco WOD</label>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                <div onClick={() => selectBlock(null)} style={{
-                  background: !timerBlkId ? '#1a120a' : '#161210',
-                  border: `1px solid ${!timerBlkId ? '#d8a840' : '#2a231c'}`,
-                  boxShadow: !timerBlkId ? '0 0 0 1px #d8a840' : 'none',
-                  borderRadius: 4, padding: '6px 12px', cursor: 'pointer', textAlign: 'center',
-                }}>
-                  <div style={{ fontSize: 11, fontWeight: 900, color: !timerBlkId ? '#d8a840' : '#806850', textTransform: 'uppercase', letterSpacing: '.06em' }}>Personalizado</div>
-                </div>
-                {wodBlocks.map(bl => {
-                  const col = blkColor(bl), sel = timerBlkId === bl.id
-                  return (
-                    <div key={bl.id} onClick={() => selectBlock(bl.id)} style={{
-                      background: sel ? col+'18' : '#161210', border: `1px solid ${sel ? col : '#2a231c'}`,
-                      boxShadow: sel ? `0 0 0 1px ${col}` : 'none',
-                      borderRadius: 4, padding: '6px 12px', cursor: 'pointer', textAlign: 'center', minWidth: 80,
-                    }}>
-                      <div style={{ fontSize: 11, fontWeight: 900, color: sel ? col : '#c8b090', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>{blkLabel(bl)}</div>
-                      <div style={{ fontSize: 9, color: sel ? col+'cc' : '#554a3a', fontWeight: 700, textTransform: 'uppercase' }}>{bl.type || bl.label}</div>
+
+            {groups.length > 0 ? (() => {
+              // Groups mode: show rotation summary, hide block selector
+              const rotCap      = parseInt(rotationBlocks[0]?.duration) || timerCap
+              const finishers   = rotationBlockIds.length > 0 ? wodBlocks.filter(b => !rotationBlockIds.includes(b.id)) : []
+              const totalSecs   = rotationBlocks.length * (rotCap * 60 + restSecs)
+              const totalMin    = Math.ceil(totalSecs / 60)
+              return (
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 11, color: '#806850', marginBottom: 6 }}>
+                    {rotationBlocks.length} blocos × {rotCap} min
+                    {restSecs > 0 ? ` + ${restSecs}s descanso` : ''}
+                    {' '}= <strong style={{ color: '#c8b090' }}>{totalMin} min total</strong>
+                    {finishers.length > 0 && (
+                      <span style={{ color: '#554a3a' }}> → {finishers.map(b => b.label || b.type).join(' + ')} (finisher)</span>
+                    )}
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    <div>
+                      <label style={lblSt}>Tipo <span style={{ color: '#4ac8c0', fontSize: 9 }}>(do bloco)</span></label>
+                      <div style={roInputSt}>{timerType}</div>
                     </div>
-                  )
-                })}
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
-              <div>
-                <label style={lblSt}>Tipo {timerBlkId && <span style={{ color: '#4ac8c0', fontSize: 9 }}>(do bloco)</span>}</label>
-                {timerBlkId
-                  ? <div style={roInputSt}>{timerType}</div>
-                  : <select value={timerType} onChange={e => setTimerType(e.target.value)} style={inputSt}>
-                      {TIMER_TYPES.map(t => <option key={t}>{t}</option>)}
-                    </select>}
-              </div>
-              <div>
-                <label style={lblSt}>Cap (min)</label>
-                <input type="number" min={1} max={120} value={timerCap} onChange={e => setTimerCap(Number(e.target.value))} style={inputSt} />
-              </div>
-            </div>
+                    <div>
+                      <label style={lblSt}>Cap (min)</label>
+                      <div style={roInputSt}>{rotCap}</div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })() : (
+              // No-groups mode: block selector + optional descanso
+              <>
+                <div style={{ marginBottom: 12 }}>
+                  <label style={lblSt}>Bloco WOD</label>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <div onClick={() => selectBlock(null)} style={{
+                      background: !timerBlkId ? '#1a120a' : '#161210',
+                      border: `1px solid ${!timerBlkId ? '#d8a840' : '#2a231c'}`,
+                      boxShadow: !timerBlkId ? '0 0 0 1px #d8a840' : 'none',
+                      borderRadius: 4, padding: '6px 12px', cursor: 'pointer', textAlign: 'center',
+                    }}>
+                      <div style={{ fontSize: 11, fontWeight: 900, color: !timerBlkId ? '#d8a840' : '#806850', textTransform: 'uppercase', letterSpacing: '.06em' }}>Personalizado</div>
+                    </div>
+                    {wodBlocks.map(bl => {
+                      const col = blkColor(bl), sel = timerBlkId === bl.id
+                      return (
+                        <div key={bl.id} onClick={() => selectBlock(bl.id)} style={{
+                          background: sel ? col+'18' : '#161210', border: `1px solid ${sel ? col : '#2a231c'}`,
+                          boxShadow: sel ? `0 0 0 1px ${col}` : 'none',
+                          borderRadius: 4, padding: '6px 12px', cursor: 'pointer', textAlign: 'center', minWidth: 80,
+                        }}>
+                          <div style={{ fontSize: 11, fontWeight: 900, color: sel ? col : '#c8b090', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>{blkLabel(bl)}</div>
+                          <div style={{ fontSize: 9, color: sel ? col+'cc' : '#554a3a', fontWeight: 700, textTransform: 'uppercase' }}>{bl.type || bl.label}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: timerBlkId && wodBlocks.length > 1 ? '1fr 1fr 1fr' : '1fr 1fr', gap: 10, marginBottom: 14 }}>
+                  <div>
+                    <label style={lblSt}>Tipo {timerBlkId && <span style={{ color: '#4ac8c0', fontSize: 9 }}>(do bloco)</span>}</label>
+                    {timerBlkId
+                      ? <div style={roInputSt}>{timerType}</div>
+                      : <select value={timerType} onChange={e => setTimerType(e.target.value)} style={inputSt}>
+                          {TIMER_TYPES.map(t => <option key={t}>{t}</option>)}
+                        </select>}
+                  </div>
+                  <div>
+                    <label style={lblSt}>Cap (min)</label>
+                    <input type="number" min={1} max={120} value={timerCap} onChange={e => setTimerCap(Number(e.target.value))} style={inputSt} />
+                  </div>
+                  {timerBlkId && wodBlocks.length > 1 && (
+                    <div>
+                      <label style={lblSt}>Descanso (seg)</label>
+                      <input type="number" min={0} max={600} value={restSecs}
+                        onChange={e => push({ rotation_rest_secs: Math.max(0, parseInt(e.target.value) || 0) })}
+                        style={inputSt} />
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               {!timerRun
                 ? <button onClick={startTimer} style={{ ...btnBase, background: '#48b860', borderColor: '#48b860', color: '#0d0b09' }}><i className="ti ti-player-play" /> Iniciar</button>
