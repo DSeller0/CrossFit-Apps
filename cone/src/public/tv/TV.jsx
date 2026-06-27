@@ -205,6 +205,7 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
           )
         })}
       </div>
+      {bl.notes && <div className={s.blockNote}>{bl.notes}</div>}
       {groupsHere.length > 0 && (
         <div className={s.blockGroups}>
           {groupsHere.map(g => {
@@ -364,6 +365,7 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
             })}
             {exes.length === 0 && <div className={s.timerNoEx}>Nenhum exercício</div>}
           </div>
+          {block?.notes && <div className={s.timerBlockNote}>{block.notes}</div>}
         </div>
       )}
     </div>
