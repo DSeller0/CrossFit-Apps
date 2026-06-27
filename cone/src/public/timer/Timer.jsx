@@ -455,7 +455,6 @@ export default function Timer() {
     const capStr = cfg.timeCap ? `${cfg.timeCap}:00` : ''
     return (
       <div className={s.hdr}>
-        <button className={s.back} onClick={goBack}>←</button>
         <div className={s.hdrMid}>
           <div className={s.type}>{MODE_LBL[bt] ?? bt}</div>
           <div className={s.label}>{cfg.blockLabel || 'Timer'}</div>
@@ -518,32 +517,38 @@ export default function Timer() {
     const capLabel = isAmrap ? 'Duração (min)' : isEmom ? 'Duração total (min)' : 'Cap (min)'
 
     // Benchmark picker
+    const BM_CATS = [
+      { key: 'Girls',  ic: '🎀', color: '#d05878', desc: `${BENCHMARK_GIRLS.length} WODs clássicos` },
+      { key: 'Heroes', ic: '🏅', color: '#d8a840', desc: `${BENCHMARK_HEROES.length} WODs heróis` },
+    ]
     const renderBenchmarkPicker = () => {
       if (!bmCat) {
         return (
           <div className={s.bmPickerBg}>
             <div className={s.cfgLbl}>Selecionar Benchmark</div>
             <div className={s.bmCatGrid}>
-              <div className={s.bmCatCard} onClick={() => setBmCat('Girls')}>
-                <span className={s.bmCatIc}>🎀</span>
-                <span className={s.bmCatLbl}>Girls</span>
-                <span className={s.bmCatDesc}>{BENCHMARK_GIRLS.length} WODs clássicos</span>
-              </div>
-              <div className={s.bmCatCard} onClick={() => setBmCat('Heroes')}>
-                <span className={s.bmCatIc}>🏅</span>
-                <span className={s.bmCatLbl}>Heroes</span>
-                <span className={s.bmCatDesc}>{BENCHMARK_HEROES.length} WODs heróis</span>
-              </div>
+              {BM_CATS.map(cat => (
+                <div key={cat.key} className={s.bmCatCard}
+                  style={{ borderLeftColor: cat.color }}
+                  onClick={() => setBmCat(cat.key)}>
+                  <span className={s.bmCatIc} style={{ color: cat.color }}>{cat.ic}</span>
+                  <span className={s.bmCatLbl}>{cat.key}</span>
+                  <span className={s.bmCatDesc}>{cat.desc}</span>
+                </div>
+              ))}
             </div>
           </div>
         )
       }
       const list = bmCat === 'Girls' ? BENCHMARK_GIRLS : BENCHMARK_HEROES
+      const catColor = BM_CATS.find(c => c.key === bmCat)?.color || 'var(--teal)'
       return (
         <div className={s.bmList}>
           <button className={s.bmListBack} onClick={() => setBmCat(null)}>← {bmCat}</button>
           {list.map(bm => (
-            <div key={bm.name} className={s.bmItem} onClick={() => selectBenchmark(bm, bmCat)}>
+            <div key={bm.name} className={s.bmItem}
+              style={{ borderLeftColor: catColor }}
+              onClick={() => selectBenchmark(bm, bmCat)}>
               <div className={s.bmItemName}>{bm.name}</div>
               <div className={s.bmItemDesc}>{bm.desc}</div>
             </div>
@@ -555,7 +560,6 @@ export default function Timer() {
     return (
       <div className={s.wrap}>
         <div className={s.hdr}>
-          <button className={s.back} onClick={goBack}>←</button>
           <div className={s.hdrMid}><div className={s.label}>Configurar Timer</div></div>
         </div>
         <div className={s.cfg}>
@@ -632,12 +636,14 @@ export default function Timer() {
                 {isEmom && <div className={s.cfgHint}>1 exercício por minuto — cicla se houver menos exercícios que minutos.</div>}
               </div>
 
-              <div className={s.cfgToggleRow}>
-                <span className={s.cfgToggleLbl}>Contagem regressiva (10s)</span>
-                <div
-                  className={`${s.cfgToggle}${form.countdown ? ' ' + s.cfgToggleOn : ''}`}
-                  onClick={() => setForm(f => ({ ...f, countdown: !f.countdown }))}>
-                  <div className={`${s.cfgToggleThumb}${form.countdown ? ' ' + s.cfgToggleOnThumb : ''}`} />
+              <div>
+                <div className={s.cfgLbl}>Opções</div>
+                <div className={s.pillRow}>
+                  <div
+                    className={`${s.pillOpt}${form.countdown ? ' ' + s.pillOptActive : ''}`}
+                    onClick={() => setForm(f => ({ ...f, countdown: !f.countdown }))}>
+                    ⏱ Contagem regressiva 10s
+                  </div>
                 </div>
               </div>
 

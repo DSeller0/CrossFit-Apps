@@ -121,26 +121,42 @@
 .cfgHalf { flex: 1; }
 .estOpts { display: flex; gap: 8px; }
 .cfgHint { font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
-.cfgToggleRow { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
-.cfgToggleLbl { font-size: 11px; color: var(--sub); font-weight: 600; flex: 1; }
-.cfgToggle { width: 36px; height: 20px; border-radius: 10px; background: var(--stone2); border: 1px solid var(--div); position: relative; cursor: pointer; flex-shrink: 0; transition: background .2s; -webkit-tap-highlight-color: transparent; }
-.cfgToggleOn { background: var(--teal); border-color: var(--teal); }
-.cfgToggleThumb { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--cream); transition: transform .2s; pointer-events: none; }
-.cfgToggleOnThumb { transform: translateX(16px); }
+
+/* ── Option pills (countdown toggle, etc.) ── */
+.pillRow { display: flex; flex-wrap: wrap; gap: 8px; }
+.pillOpt { padding: 9px 16px; border: 1px solid var(--div); border-radius: 2px; font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer; letter-spacing: .06em; -webkit-tap-highlight-color: transparent; transition: border-color .15s, color .15s, background .15s; }
+.pillOpt:active { opacity: .7; }
+.pillOptActive { border-color: var(--teal); color: var(--teal); background: rgba(74,200,192,.08); }
 
 /* ── Benchmark picker ── */
 .bmPickerBg { display: flex; flex-direction: column; gap: 12px; }
 .bmCatGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.bmCatCard { background: var(--stone2); border: 1px solid var(--div); padding: 18px 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; border-radius: 4px; -webkit-tap-highlight-color: transparent; }
-.bmCatCard:hover, .bmCatCard:active { border-color: var(--teal); }
-.bmCatIc { font-size: 22px; }
-.bmCatLbl { font-size: 11px; font-weight: 800; letter-spacing: .08em; color: var(--cream); text-transform: uppercase; }
-.bmCatDesc { font-size: 9px; color: var(--muted); text-align: center; }
-.bmList { display: flex; flex-direction: column; gap: 3px; }
-.bmListBack { background: none; border: none; color: var(--teal); font-family: var(--font); font-size: 11px; font-weight: 700; cursor: pointer; padding: 0 0 8px; letter-spacing: .06em; text-align: left; -webkit-tap-highlight-color: transparent; }
-.bmItem { background: var(--stone2); border: 1px solid var(--div); padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; border-radius: 4px; -webkit-tap-highlight-color: transparent; }
-.bmItem:hover, .bmItem:active { border-color: var(--teal); }
-.bmItemName { font-size: 13px; font-weight: 800; color: var(--cream); }
+.bmCatCard {
+  background: var(--stone2);
+  border: 1px solid var(--div);
+  border-left: 5px solid transparent;
+  padding: 18px 14px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  cursor: pointer; border-radius: 2px; -webkit-tap-highlight-color: transparent;
+  transition: opacity .12s;
+}
+.bmCatCard:active { opacity: .7; }
+.bmCatIc { font-size: 26px; line-height: 1; }
+.bmCatLbl { font-size: 12px; font-weight: 900; letter-spacing: .1em; color: var(--cream); text-transform: uppercase; margin-top: 2px; }
+.bmCatDesc { font-size: 9px; color: var(--muted); text-align: center; letter-spacing: .04em; }
+.bmList { display: flex; flex-direction: column; gap: 5px; }
+.bmListBack { background: none; border: none; color: var(--teal); font-family: var(--font); font-size: 11px; font-weight: 700; cursor: pointer; padding: 0 0 6px; letter-spacing: .06em; text-align: left; -webkit-tap-highlight-color: transparent; }
+.bmItem {
+  background: var(--stone2);
+  border: 1px solid var(--div);
+  border-left: 4px solid transparent;
+  padding: 10px 12px;
+  cursor: pointer; display: flex; flex-direction: column; gap: 2px;
+  border-radius: 2px; -webkit-tap-highlight-color: transparent;
+  transition: opacity .12s;
+}
+.bmItem:active { opacity: .7; }
+.bmItemName { font-size: 13px; font-weight: 900; color: var(--cream); letter-spacing: .04em; text-transform: uppercase; }
 .bmItemDesc { font-size: 10px; color: var(--muted); }
 
 /* ── Responsive: small phones ── */
