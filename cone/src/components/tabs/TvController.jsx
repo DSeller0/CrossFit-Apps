@@ -205,7 +205,7 @@ export default function TvController({ sessions: propSessions }) {
   // Auto-advance: reset flag when a new timer run starts
   useEffect(() => { hasAutoAdvRef.current = false }, [tv?.timer_started_at])
 
-  // Auto-advance: advance groups when timer cap is reached
+  // Auto-advance: advance groups when timer cap is reached (respects rest)
   useEffect(() => {
     if (!autoAdvance || !tv?.timer_started_at) return
     const id = setInterval(() => {
@@ -214,20 +214,26 @@ export default function TvController({ sessions: propSessions }) {
       const elapsed = Math.floor((Date.now() - t.timer_started_at) / 1000 + (t.timer_paused_elapsed ?? 0))
       if (elapsed >= t.timer_cap_secs && !hasAutoAdvRef.current) {
         hasAutoAdvRef.current = true
-        const wods = (selSessObjRef.current?.blocks || []).filter(isWodBlock)
-        const grps = activeClassRef.current?.groups || []
-        if (wods.length === 0 || grps.length === 0) return
-        const curPos = tvRef.current?.group_positions || {}
-        const newPos = {}
-        for (const g of grps) {
-          const idx = wods.findIndex(b => b.id === curPos[g.id])
-          newPos[g.id] = wods[(idx + 1) % wods.length].id
+        const rSecs = t.rotation_rest_secs || 0
+        if (rSecs > 0) {
+          push({ rotation_rest_until: Date.now() + rSecs * 1000 })
+        } else {
+          advanceFromRefs()
         }
-        push({ group_positions: newPos })
       }
     }, 500)
     return () => clearInterval(id)
   }, [autoAdvance, tv?.timer_started_at, push])
+
+  // Rest expiry: advance groups when rest countdown ends
+  useEffect(() => {
+    const until = tv?.rotation_rest_until
+    if (!until) return
+    const delay = until - Date.now()
+    if (delay <= 0) { advanceFromRefs(); return }
+    const id = setTimeout(advanceFromRefs, delay + 300)
+    return () => clearTimeout(id)
+  }, [tv?.rotation_rest_until, push])
 
   // Class tracking
   async function startClass() {
@@ -263,8 +269,13 @@ export default function TvController({ sessions: propSessions }) {
   const timerRun    = !!tv?.timer_started_at
   const activeClass = todayClasses.find(c => c.id === tv?.class_id && !c.reset_at) || null
   const pastClasses = todayClasses.filter(c => c.reset_at)
-  const groups         = activeClass?.groups || []
-  const groupPositions = tv?.group_positions || {}
+  const groups            = activeClass?.groups || []
+  const groupPositions    = tv?.group_positions || {}
+  const rotationBlockIds  = tv?.rotation_block_ids || []
+  const rotationBlocks    = rotationBlockIds.length > 0
+    ? wodBlocks.filter(b => rotationBlockIds.includes(b.id))
+    : wodBlocks
+  const restSecs          = tv?.rotation_rest_secs || 0
   selSessObjRef.current  = selSessObj
   activeClassRef.current = activeClass
   const checkinUrl  = (id) => `${window.location.origin}/CrossFit-Apps/schedule.html?date=${selDate}&session=${selSessId}&checkin=${id}`
@@ -366,6 +377,22 @@ export default function TvController({ sessions: propSessions }) {
     loadResults()
   }
 
+  // Advance groups using refs (safe to call from effects — always reads latest values)
+  function advanceFromRefs() {
+    const wods    = (selSessObjRef.current?.blocks || []).filter(isWodBlock)
+    const rotIds  = tvRef.current?.rotation_block_ids || []
+    const rotBlks = rotIds.length > 0 ? wods.filter(b => rotIds.includes(b.id)) : wods
+    const grps    = activeClassRef.current?.groups || []
+    if (rotBlks.length === 0 || grps.length === 0) { push({ rotation_rest_until: null }); return }
+    const curPos  = tvRef.current?.group_positions || {}
+    const newPos  = {}
+    for (const g of grps) {
+      const idx   = rotBlks.findIndex(b => b.id === curPos[g.id])
+      newPos[g.id] = rotBlks[(idx + 1) % rotBlks.length].id
+    }
+    push({ group_positions: newPos, rotation_rest_until: null })
+  }
+
   // Groups
   async function createGroups(n) {
     if (!activeClass) return
@@ -387,7 +414,7 @@ export default function TvController({ sessions: propSessions }) {
   async function dissolveGroups() {
     if (!activeClass) return
     await supabase.from('class_executions').update({ groups: [] }).eq('id', activeClass.id)
-    await push({ group_positions: {} })
+    await push({ group_positions: {}, rotation_block_ids: [], rotation_rest_secs: 0, rotation_rest_until: null })
   }
 
   async function setGroupBlock(groupId, blockId) {
@@ -411,13 +438,22 @@ export default function TvController({ sessions: propSessions }) {
   }
 
   async function advanceAll() {
-    if (wodBlocks.length === 0 || groups.length === 0) return
+    if (rotationBlocks.length === 0 || groups.length === 0) return
     const newPos = {}
     for (const g of groups) {
-      const idx = wodBlocks.findIndex(b => b.id === groupPositions[g.id])
-      newPos[g.id] = wodBlocks[(idx + 1) % wodBlocks.length].id
+      const idx = rotationBlocks.findIndex(b => b.id === groupPositions[g.id])
+      newPos[g.id] = rotationBlocks[(idx + 1) % rotationBlocks.length].id
     }
-    await push({ group_positions: newPos })
+    await push({ group_positions: newPos, rotation_rest_until: null })
+  }
+
+  async function toggleRotationBlock(blId) {
+    const cur = tv?.rotation_block_ids || []
+    const isAll = cur.length === 0
+    const base  = isAll ? wodBlocks.map(b => b.id) : cur
+    const next  = base.includes(blId) ? base.filter(id => id !== blId) : [...base, blId]
+    const normalized = next.length === wodBlocks.length ? [] : next
+    await push({ rotation_block_ids: normalized })
   }
 
   // Styles
@@ -803,6 +839,34 @@ export default function TvController({ sessions: propSessions }) {
                           </div>
                         )
                       })}
+                    </div>
+                  )}
+
+                  {/* Rotation block selection */}
+                  {wodBlocks.length > 0 && (
+                    <div style={{ borderTop: '1px solid #2a231c', paddingTop: 12, marginTop: 4 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: '#806850', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 8 }}>Rotação</div>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+                        {wodBlocks.map(bl => {
+                          const inRot = rotationBlockIds.length === 0 || rotationBlockIds.includes(bl.id)
+                          return (
+                            <button key={bl.id} onClick={() => toggleRotationBlock(bl.id)}
+                              style={{ ...btnBase, fontSize: 10, padding: '4px 10px',
+                                background: inRot ? '#0d1a10' : '#111',
+                                borderColor: inRot ? '#4ac8c0' : '#2a231c',
+                                color: inRot ? '#4ac8c0' : '#554a3a' }}>
+                              {inRot ? '✓' : '○'} {bl.label || bl.type}
+                            </button>
+                          )
+                        })}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: '#806850', textTransform: 'uppercase', letterSpacing: '.1em', flexShrink: 0 }}>Descanso</span>
+                        <input type="number" min="0" max="600" value={restSecs}
+                          onChange={e => push({ rotation_rest_secs: Math.max(0, parseInt(e.target.value) || 0) })}
+                          style={{ ...inputSt, width: 64, textAlign: 'center' }} />
+                        <span style={{ fontSize: 10, color: '#554a3a' }}>seg</span>
+                      </div>
                     </div>
                   )}
 

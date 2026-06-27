@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import QRCode from 'qrcode'
 import { sb } from '../supabaseClient.js'
-import { blkLabel, blkColor, isWodBlock, rankResults, perfStr } from '../lib/wod.js'
+import { blkLabel, blkColor, isWodBlock, rankResults, perfStr, exVolStr } from '../lib/wod.js'
 import s from './TV.module.css'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -72,17 +72,35 @@ function QrFooter({ dateKey, sessId, classId }) {
 
 // ── Slide: WOD ────────────────────────────────────────────────────────────────
 export function WodSlide({ sessions, tv, gymName, classExecs, athletes }) {
+  const gridRef = useRef(null)
+
   const dayS = sessions?.[tv?.date_key] || []
   const sess = dayS.find(x => x.id === tv?.session_id)
-  if (!sess) return <div className={s.empty}><i className="ti ti-calendar-off" /> Nenhuma sessão selecionada</div>
 
-  const blocks  = (sess.blocks || []).filter(bl => (bl.exercises?.length || bl.stations?.length))
+  const blocks  = sess ? (sess.blocks || []).filter(bl => (bl.exercises?.length || bl.stations?.length)) : []
   const cols    = blocks.length > 3 ? 2 : 1
   const ordered = columnMajor(blocks, cols)
 
   const activeClass    = (classExecs || []).find(c => c.id === tv?.class_id && !c.reset_at)
   const groups         = activeClass?.groups || []
   const groupPositions = tv?.group_positions || {}
+
+  // Auto-scale grid to fit available height (prevents overflow when groups add chips)
+  useLayoutEffect(() => {
+    const el = gridRef.current
+    if (!el) return
+    el.style.transform = ''
+    const parent = el.parentElement
+    if (!parent) return
+    const avail = parent.clientHeight
+    const needed = el.scrollHeight
+    if (needed > avail) {
+      el.style.transformOrigin = 'top center'
+      el.style.transform = `scale(${(avail / needed) * 0.98})`
+    }
+  })
+
+  if (!sess) return <div className={s.empty}><i className="ti ti-calendar-off" /> Nenhuma sessão selecionada</div>
 
   return (
     <div className={s.wodSlide}>
@@ -94,8 +112,10 @@ export function WodSlide({ sessions, tv, gymName, classExecs, athletes }) {
         <div className={s.wodDate}>{fmtDate(tv.date_key)}</div>
       </div>
 
-      <div className={s.wodBlocks} style={{ gridTemplateColumns: `repeat(${cols},1fr)` }}>
-        {ordered.map(bl => <BlockCard key={bl.id} bl={bl} groups={groups} groupPositions={groupPositions} athletes={athletes} />)}
+      <div className={s.wodBlocksOuter}>
+        <div ref={gridRef} className={s.wodBlocks} style={{ gridTemplateColumns: `repeat(${cols},1fr)` }}>
+          {ordered.map(bl => <BlockCard key={bl.id} bl={bl} groups={groups} groupPositions={groupPositions} athletes={athletes} />)}
+        </div>
       </div>
 
       <QrFooter dateKey={tv.date_key} sessId={tv.session_id} classId={tv?.class_id} />
@@ -104,13 +124,14 @@ export function WodSlide({ sessions, tv, gymName, classExecs, athletes }) {
 }
 
 export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
-  const color = isActive ? '#4ac8c0' : blkColor(bl)
+  const groupsHere = (groups || []).filter(g => (groupPositions || {})[g.id] === bl.id)
+  // Group color takes priority over block-type color when a group is assigned here
+  const color = groupsHere.length > 0 ? groupsHere[0].color : blkColor(bl)
   const label = blkLabel(bl)
   const exes = bl.type === 'Estações'
     ? (bl.stations || []).flatMap(st => (st.exercises || []).map(e => ({ ...e, _station: st.name })))
     : (bl.exercises || [])
   const meta = [bl.duration && `${bl.duration}'`, bl.rounds && `${bl.rounds} rds`].filter(Boolean).join(' · ')
-  const groupsHere = (groups || []).filter(g => (groupPositions || {})[g.id] === bl.id)
 
   return (
     <div className={s.blockCard} style={{ borderLeftColor: color }}>
@@ -120,15 +141,16 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
         {meta && <span className={s.blockMeta}>{meta}</span>}
       </div>
       <div className={s.exList}>
-        {exes.map((ex, i) => (
-          <div key={ex.id || i} className={s.exRow}>
-            <span className={s.exDot} style={{ background: color }} />
-            <span className={s.exName}>{ex.name}</span>
-            {(ex.reps || ex.sets) && (
-              <span className={s.exVol}>{ex.sets ? `${ex.sets}×${ex.reps||''}` : ex.reps}</span>
-            )}
-          </div>
-        ))}
+        {exes.map((ex, i) => {
+          const vol = exVolStr(ex)
+          return (
+            <div key={ex.id || i} className={s.exRow}>
+              <span className={s.exDot} style={{ background: color }} />
+              {vol && <span className={s.exVol}>{vol}</span>}
+              <span className={s.exName}>{ex.name}</span>
+            </div>
+          )
+        })}
       </div>
       {groupsHere.length > 0 && (
         <div className={s.blockGroups}>
@@ -160,11 +182,13 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
   useEffect(() => {
     clearInterval(tickRef.current)
     setElapsed(elapsedSecs(tv))
-    if (tv?.timer_started_at) {
+    const restUntilVal = tv?.rotation_rest_until || 0
+    const isResting = restUntilVal > Date.now()
+    if (tv?.timer_started_at || isResting) {
       tickRef.current = setInterval(() => setElapsed(elapsedSecs(tvRef.current)), 250)
     }
     return () => clearInterval(tickRef.current)
-  }, [tv?.timer_started_at, tv?.timer_paused_elapsed])
+  }, [tv?.timer_started_at, tv?.timer_paused_elapsed, tv?.rotation_rest_until])
 
   const dayS  = sessions?.[tv?.date_key] || []
   const sess  = dayS.find(x => x.id === tv?.session_id)
@@ -180,22 +204,31 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
   const groupPositions = tv?.group_positions || {}
   const hasGroups      = groups.length > 0
 
-  const allWodBlocks   = hasGroups ? (sess?.blocks || []).filter(bl => bl.exercises?.length || bl.stations?.length) : []
-  const mapCols        = allWodBlocks.length > 3 ? 2 : 1
-  const orderedMap     = hasGroups ? columnMajor(allWodBlocks, mapCols) : []
+  const allWodBlocks = hasGroups ? (sess?.blocks || []).filter(isWodBlock) : []
+  const mapCols      = allWodBlocks.length > 3 ? 2 : 1
+  const orderedMap   = hasGroups ? columnMajor(allWodBlocks, mapCols) : []
+
+  // Rest between blocks
+  const restUntil    = tv?.rotation_rest_until || 0
+  const restTotal    = tv?.rotation_rest_secs  || 0
+  const restRemaining = restUntil > Date.now() ? Math.max(0, (restUntil - Date.now()) / 1000) : 0
+  const isResting    = restRemaining > 0
+  const restProg     = restTotal > 0 ? restRemaining / restTotal : 1
 
   const e    = elapsed
-  const prog = ringProg(e, cap, bt)
-  const col  = ringCol(e, cap, bt)
-  const dashOff = RING_C * (1 - prog)
-  const isFinished = bt !== 'EMOM' && e >= cap
+  const prog = isResting ? restProg : ringProg(e, cap, bt)
+  const col  = isResting ? '#4878d8' : ringCol(e, cap, bt)
+  const dashOff    = RING_C * (1 - prog)
+  const isFinished = !isResting && bt !== 'EMOM' && e >= cap
 
-  const displaySecs = bt === 'AMRAP' ? Math.max(0, cap - e) : bt === 'EMOM' ? Math.max(0, 60 - (e % 60)) : Math.min(e, cap)
+  const displaySecs = isResting
+    ? restRemaining
+    : bt === 'AMRAP' ? Math.max(0, cap - e) : bt === 'EMOM' ? Math.max(0, 60 - (e % 60)) : Math.min(e, cap)
 
   return (
     <div className={s.timerSlide}>
       <div className={s.timerLeft}>
-        <div className={s.timerMode}>{MODE_LBL[bt] || bt.toUpperCase()}</div>
+        <div className={s.timerMode}>{isResting ? 'DESCANSO' : MODE_LBL[bt] || bt.toUpperCase()}</div>
         <div className={s.ringWrap}>
           <svg className={s.ring} viewBox="0 0 260 260">
             <circle cx={130} cy={130} r={RING_R} fill="none" stroke="#1e1a16" strokeWidth={12} />
@@ -212,7 +245,9 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
           </div>
         </div>
         <div className={s.timerCap}>
-          {bt === 'AMRAP' ? `${Math.round(cap/60)}' AMRAP` : bt === 'EMOM' ? `EMOM ${Math.round(cap/60)}'` : `Cap ${Math.round(cap/60)}'`}
+          {isResting
+            ? 'Troca de bloco'
+            : bt === 'AMRAP' ? `${Math.round(cap/60)}' AMRAP` : bt === 'EMOM' ? `EMOM ${Math.round(cap/60)}'` : `Cap ${Math.round(cap/60)}'`}
         </div>
       </div>
 
@@ -229,17 +264,18 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
             <span style={{ color: bColor }}>{bLabel}</span>
           </div>
           <div className={s.timerExList}>
-            {exes.map((ex, i) => (
-              <div key={ex.id || i} className={s.timerExRow}>
-                <span className={s.timerExDot} style={{ background: bColor }} />
-                <div className={s.timerExBody}>
-                  <span className={s.timerExName}>{ex.name}</span>
-                  {(ex.reps || ex.sets) && (
-                    <span className={s.timerExVol}>{ex.sets ? `${ex.sets}×${ex.reps||''}` : ex.reps}</span>
-                  )}
+            {exes.map((ex, i) => {
+              const vol = exVolStr(ex)
+              return (
+                <div key={ex.id || i} className={s.timerExRow}>
+                  <span className={s.timerExDot} style={{ background: bColor }} />
+                  <div className={s.timerExBody}>
+                    {vol && <span className={s.timerExVol}>{vol}</span>}
+                    <span className={s.timerExName}>{ex.name}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
             {exes.length === 0 && <div className={s.timerNoEx}>Nenhum exercício</div>}
           </div>
         </div>

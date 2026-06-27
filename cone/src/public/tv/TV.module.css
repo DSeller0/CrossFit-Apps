@@ -45,9 +45,10 @@
   font-size: 22px; font-weight: 700; color: #c8b090;
   letter-spacing: .12em; text-transform: uppercase;
 }
+.wodBlocksOuter { flex: 1; overflow: hidden; }
 .wodBlocks {
-  flex: 1; display: grid; gap: 24px;
-  padding: 36px 80px; overflow: hidden;
+  display: grid; gap: 24px;
+  padding: 36px 80px; align-items: start;
 }
 
 /* ── Block card ── */
@@ -69,7 +70,7 @@
   font-size: 26px; font-weight: 800; color: #f0e8d0;
   text-transform: uppercase; letter-spacing: .05em;
 }
-.exVol  { font-size: 22px; font-weight: 700; color: #c8b090; margin-left: 4px; }
+.exVol  { font-size: 22px; font-weight: 700; color: #c8b090; flex-shrink: 0; }
 
 /* ── QR footer ── */
 .qrFooter {
