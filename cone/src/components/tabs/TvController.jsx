@@ -23,6 +23,10 @@ function fmtDate(iso) {
 function sessLabel(s) {
   return s.sessionName || (Array.isArray(s.mainTraining) ? s.mainTraining[0] : s.mainTraining) || 'Sessão'
 }
+function fmtSecs(s) {
+  const m = Math.floor(s / 60), sec = s % 60
+  return `${m}:${String(sec).padStart(2, '0')}`
+}
 
 // ── Weekly calendar strip ─────────────────────────────────────────────────────
 function WeekStrip({ selDate, sessions, onChange }) {
@@ -102,6 +106,9 @@ export default function TvController({ sessions: propSessions }) {
   // Phase 3 — class tracking
   const [classLabel,  setClassLabel]  = useState('Turma')
   const [todayClasses, setTodayClasses] = useState([])
+  // Live registration
+  const [liveRegs,    setLiveRegs]    = useState({}) // { [athleteId]: { perfTime, scale } }
+  const [liveScales,  setLiveScales]  = useState({}) // { [athleteId]: 'Rx'|'Sc'|'Adp' }
   const previewRef  = useRef(null)
   const [prevScale, setPrevScale]     = useState(1)
   const tvRef = useRef(tv)
@@ -265,7 +272,61 @@ export default function TvController({ sessions: propSessions }) {
       : (tv?.timer_paused_elapsed ?? 0)
     await push({ timer_started_at: null, timer_paused_elapsed: Math.floor(elapsed) })
   }
-  async function resetTimer() { await push({ timer_started_at: null, timer_paused_elapsed: 0 }) }
+  async function resetTimer() {
+    await push({ timer_started_at: null, timer_paused_elapsed: 0 })
+    setLiveRegs({})
+  }
+
+  // Live registration helpers
+  function elapsedSecs() {
+    const t = tvRef.current
+    if (!t) return 0
+    if (t.timer_started_at) return Math.floor((Date.now() - t.timer_started_at) / 1000 + (t.timer_paused_elapsed ?? 0))
+    return t.timer_paused_elapsed ?? 0
+  }
+  function currentTimerBlock() {
+    const bid = tvRef.current?.timer_block_id || timerBlkId
+    if (!bid || !selSessObj) return null
+    return (selSessObj.blocks || []).find(b => b.id === bid) || null
+  }
+
+  async function registerLive(athleteId, scale) {
+    const secs = elapsedSecs()
+    const block = currentTimerBlock()
+    const { data: existing } = await supabase.from('results_v2')
+      .select('id,blocks').eq('athlete_id', athleteId)
+      .eq('session_id', selSessId).eq('date', selDate)
+      .maybeSingle()
+    const newBlk = {
+      blockId: block?.id || 'live', blockType: 'For Time',
+      blockLabel: block?.label || block?.type || 'For Time',
+      perfTime: secs, scale, rpe: null,
+    }
+    const merged = existing
+      ? [...(existing.blocks || []).filter(b => b.blockId !== newBlk.blockId), newBlk]
+      : [newBlk]
+    await supabase.from('results_v2').upsert({
+      ...(existing ? { id: existing.id } : {}),
+      date: selDate, athlete_id: athleteId, session_id: selSessId,
+      blocks: merged, logged_by_athlete: false,
+    })
+    setLiveRegs(r => ({ ...r, [athleteId]: { perfTime: secs, scale } }))
+    loadResults()
+  }
+
+  async function undoLive(athleteId) {
+    const block = currentTimerBlock()
+    const bid = block?.id || 'live'
+    const { data: existing } = await supabase.from('results_v2')
+      .select('id,blocks').eq('athlete_id', athleteId)
+      .eq('session_id', selSessId).eq('date', selDate)
+      .maybeSingle()
+    if (!existing) return
+    const trimmed = (existing.blocks || []).filter(b => b.blockId !== bid)
+    await supabase.from('results_v2').update({ blocks: trimmed }).eq('id', existing.id)
+    setLiveRegs(r => { const n = { ...r }; delete n[athleteId]; return n })
+    loadResults()
+  }
 
   // Styles
   const card      = { background: '#111', border: '1px solid #2a231c', borderRadius: 6, padding: '16px 18px' }
@@ -506,6 +567,77 @@ export default function TvController({ sessions: propSessions }) {
                   ))}
                 </div>}
           </div>
+
+          {/* ── Registro ao Vivo (For Time only) ── */}
+          {timerType === 'For Time' && activeClass &&
+           ((activeClass.athlete_ids?.length || 0) + (activeClass.anon_names?.length || 0)) > 0 &&
+           (timerRun || (tv?.timer_paused_elapsed > 0)) && (
+            <div style={card}>
+              <div style={{ ...cardTitle, color: '#4ac8c0' }}>
+                <i className="ti ti-flag-check" style={{ marginRight: 6 }} />Registro ao Vivo
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {(activeClass.athlete_ids || []).map(aid => {
+                  const ath = athletes.find(a => a.id === aid)
+                  if (!ath) return null
+                  const reg = liveRegs[aid]
+                  const scale = liveScales[aid] ?? 'Rx'
+                  const scaleStyle = (s) => ({
+                    padding: '3px 8px', fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                    border: `1px solid ${scale === s ? '#4ac8c0' : '#2a231c'}`,
+                    background: scale === s ? '#0d1a1a' : 'transparent',
+                    color: scale === s ? '#4ac8c0' : '#806850',
+                    borderRadius: 3,
+                  })
+                  return (
+                    <div key={aid} style={{
+                      display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px',
+                      background: reg ? '#0d1a0a' : '#161210',
+                      border: `1px solid ${reg ? '#48b86044' : '#2a231c'}`,
+                      borderRadius: 4, opacity: reg ? 0.7 : 1,
+                    }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: reg ? '#48b860' : '#f0e8d0', flex: 1 }}>{ath.name}</span>
+                      {!reg ? (
+                        <>
+                          <div style={{ display: 'flex', gap: 3 }}>
+                            {['Rx','Sc','Adp'].map(s => (
+                              <button key={s} style={scaleStyle(s)}
+                                onClick={() => setLiveScales(ls => ({ ...ls, [aid]: s }))}>
+                                {s}
+                              </button>
+                            ))}
+                          </div>
+                          <button onClick={() => registerLive(aid, scale)}
+                            style={{ ...btnBase, background: '#4ac8c0', borderColor: '#4ac8c0', color: '#0d0b09', padding: '5px 12px', fontSize: 12 }}>
+                            ✓ Registrar
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <span style={{ fontSize: 12, color: '#48b860', fontFamily: 'monospace', fontWeight: 700 }}>{fmtSecs(reg.perfTime)}</span>
+                          <span style={{ fontSize: 10, color: '#806850' }}>{reg.scale}</span>
+                          <button onClick={() => undoLive(aid)}
+                            style={{ ...btnBase, background: 'transparent', borderColor: '#c84038', color: '#c84038', padding: '4px 10px', fontSize: 11 }}>
+                            ✕ Desfazer
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )
+                })}
+                {/* Anon athletes — display only (no results_v2 registration) */}
+                {(activeClass.anon_names || []).map((name, i) => (
+                  <div key={`anon-${i}`} style={{
+                    display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px',
+                    background: '#161210', border: '1px dashed #2a231c', borderRadius: 4, opacity: 0.5,
+                  }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#806850', flex: 1 }}>{name}</span>
+                    <span style={{ fontSize: 10, color: '#554a3a' }}>visitante</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Right: preview ── */}
