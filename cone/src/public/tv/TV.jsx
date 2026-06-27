@@ -138,7 +138,7 @@ export function WodSlide({ sessions, tv, gymName, classExecs, athletes }) {
         </div>
       </div>
 
-      <QrFooter dateKey={tv.date_key} sessId={tv.session_id} classId={tv?.class_id} />
+      {tv?.show_qr !== false && <QrFooter dateKey={tv.date_key} sessId={tv.session_id} classId={tv?.class_id} />}
     </div>
   )
 }

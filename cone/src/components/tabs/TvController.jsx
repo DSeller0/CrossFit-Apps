@@ -702,6 +702,24 @@ export default function TvController({ sessions: propSessions }) {
                 </button>
               ))}
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+              <span style={{ fontSize: 11, color: '#554a3a' }}>QR Code:</span>
+              {[{ label: 'Ativo', val: true }, { label: 'Oculto', val: false }].map(({ label, val }) => {
+                const active = val ? tv?.show_qr !== false : tv?.show_qr === false
+                return (
+                  <button key={label} onClick={() => push({ show_qr: val })}
+                    style={{
+                      padding: '3px 10px', fontSize: 11, fontWeight: 700, borderRadius: 4, fontFamily: 'inherit',
+                      border: `1px solid ${active ? (val ? '#4ac8c0' : '#806850') : '#2a231c'}`,
+                      background: active ? (val ? 'rgba(74,200,192,.1)' : 'rgba(128,104,80,.12)') : 'transparent',
+                      color: active ? (val ? '#4ac8c0' : '#806850') : '#554a3a',
+                      cursor: 'pointer',
+                    }}>
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           {/* Timer */}
