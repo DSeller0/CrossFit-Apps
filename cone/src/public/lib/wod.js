@@ -55,3 +55,23 @@ export function perfStr(r, blType) {
   if(r.perfReps)   p.push(`${r.perfReps} reps`)
   return p.join(' + ')||'—'
 }
+
+export function fmtIntensity(ins) {
+  if(!ins?.mode) return null
+  if(ins.mode==='progression'){
+    const steps=ins.steps||[],loads=steps.map(st=>st.load).filter(Boolean)
+    const unit=(steps[0]?.unit||'% RM').replace('% do RM','% RM')
+    return loads.length?loads.join('/')+' '+unit:null
+  }
+  if(ins.mode==='pct') return ins.pct?ins.pct+'% RM':null
+  if(ins.mode==='gender'){
+    const p=[]
+    ;['Masculino','Feminino'].forEach(g=>{
+      const unit=ins[`${g}_unit`]||'kg'
+      const vals=['RX','Inter','SC'].map(k=>ins[`${g}_${k}`]).filter(Boolean)
+      if(vals.length) p.push(`${g==='Masculino'?'M':'F'}: ${vals.join('/')} ${unit}`)
+    })
+    return p.join(' | ')||null
+  }
+  return null
+}

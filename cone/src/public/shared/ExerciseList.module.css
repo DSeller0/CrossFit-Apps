@@ -1,0 +1,43 @@
+/* ── List container ── */
+.list  { display: flex; flex-direction: column; gap: 9px; }
+.large { gap: 18px; }
+
+/* ── Exercise wrappers ── */
+.exBlock      { display: flex; flex-direction: column; gap: 3px; }
+.complexBlock { display: flex; flex-direction: column; gap: 4px; }
+
+/* ── Row: dot + body ── */
+.row { display: flex; align-items: center; gap: 12px; }
+.large .row { gap: 18px; align-items: flex-start; }
+
+/* ── Dot ── */
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.large .dot { width: 12px; height: 12px; margin-top: 10px; }
+
+/* ── Body: holds vol + name + ins ── */
+.body { display: flex; align-items: center; gap: 12px; flex: 1; }
+.large .body { flex-direction: column; align-items: flex-start; gap: 4px; }
+
+/* ── Text — compact defaults ── */
+.vol  { font-size: 22px; font-weight: 700; color: #c8b090; flex-shrink: 0; }
+.name { font-size: 26px; font-weight: 800; color: #f0e8d0; text-transform: uppercase; letter-spacing: .05em; }
+.ins  { font-size: 18px; font-weight: 700; color: #806850; flex-shrink: 0; }
+.note { font-size: 16px; color: #806850; font-style: italic; padding-left: 20px; margin-top: 1px; }
+
+/* ── Text — large overrides ── */
+.large .vol  { font-size: 30px; }
+.large .name { font-size: 42px; font-weight: 900; }
+.large .ins  { font-size: 26px; }
+.large .note { font-size: 22px; padding-left: 42px; margin-top: 4px; }
+
+/* ── Complex sub-movements — compact ── */
+.mvs  { display: flex; flex-direction: column; gap: 4px; padding-left: 20px; }
+.mvRow { display: flex; align-items: center; gap: 10px; }
+.mvReps { font-size: 18px; font-weight: 700; color: #c8b090; flex-shrink: 0; }
+.mvName { font-size: 20px; font-weight: 700; color: #c8b090; text-transform: uppercase; letter-spacing: .04em; }
+
+/* ── Complex sub-movements — large ── */
+.large .mvs  { padding-left: 42px; gap: 6px; margin-top: 6px; }
+.large .mvRow { gap: 14px; }
+.large .mvReps { font-size: 26px; }
+.large .mvName { font-size: 30px; }
