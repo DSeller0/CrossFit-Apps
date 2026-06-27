@@ -1,5 +1,17 @@
 export function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2) }
 
+export const WOD_TYPES=['For Time','AMRAP','EMOM','MetCon','HIIT','WOD','Benchmark','Estações']
+export function isWodBlock(bl){ return WOD_TYPES.includes(bl.type)||WOD_TYPES.includes(bl.label) }
+
+const BLOCK_FAMILY={
+  'WOD':'red','HIIT':'red','MetCon':'red',
+  'For Time':'amber','AMRAP':'amber','EMOM':'amber','Benchmark':'amber','Estações':'amber',
+  'Força':'blue','LPO':'blue','Core':'blue','Acessórios':'blue',
+  'Aquecimento':'green','Skill':'green','Cardio':'green','Mobilidade':'green',
+}
+const FAMILY_COLOR={red:'#c84038',amber:'#d8a840',blue:'#4878d8',green:'#48b860'}
+export function blkColor(bl){return FAMILY_COLOR[BLOCK_FAMILY[bl.type]||BLOCK_FAMILY[bl.label]]||'#d8a840'}
+
 export function blkLabel(bl) {
   const l=bl.label&&bl.label!=='-'?bl.label:null,t=bl.type&&bl.type!=='-'?bl.type:null
   return l&&t&&l!==t?`${l} · ${t}`:l||t||''

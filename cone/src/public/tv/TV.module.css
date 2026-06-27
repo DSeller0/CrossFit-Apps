@@ -1,0 +1,210 @@
+/* ── Root & canvas ── */
+.root {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; background: #0d0b09;
+}
+.canvas {
+  flex-shrink: 0; position: relative; overflow: hidden;
+  background: #0d0b09; font-family: var(--font, 'Arial Black', Arial, sans-serif);
+}
+
+/* ── Blank ── */
+.blank { width: 100%; height: 100%; background: #000; }
+
+/* ── Shared loading / empty ── */
+.loading, .empty {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; gap: 18px; font-size: 28px; font-weight: 700;
+  color: #554a3a; text-transform: uppercase; letter-spacing: .2em;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin .9s linear infinite; display: inline-block; }
+
+/* ── WOD Slide ── */
+.wodSlide {
+  display: flex; flex-direction: column; height: 100%;
+  background: #0d0b09;
+}
+.wodHdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 40px 80px 28px;
+  border-bottom: 2px solid #2a231c;
+  flex-shrink: 0;
+}
+.wodHdrLeft { display: flex; flex-direction: column; gap: 6px; }
+.wodGym {
+  font-size: 16px; font-weight: 700; letter-spacing: .35em;
+  color: #d8a840; text-transform: uppercase;
+}
+.wodSessName {
+  font-size: 38px; font-weight: 900; color: #f0e8d0;
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.wodDate {
+  font-size: 22px; font-weight: 700; color: #c8b090;
+  letter-spacing: .12em; text-transform: uppercase;
+}
+.wodBlocks {
+  flex: 1; display: grid; gap: 24px;
+  padding: 36px 80px; overflow: hidden;
+}
+
+/* ── Block card ── */
+.blockCard {
+  background: #161210; border: 1px solid #2a231c; border-left: 6px solid #d8a840;
+  border-radius: 6px; padding: 26px 30px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.blockCardHdr { display: flex; align-items: center; gap: 14px; }
+.blockBadge {
+  font-size: 18px; font-weight: 900; letter-spacing: .12em;
+  text-transform: uppercase; padding: 4px 14px; border-radius: 4px;
+}
+.blockMeta { font-size: 17px; color: #806850; font-weight: 600; letter-spacing: .06em; }
+.exList { display: flex; flex-direction: column; gap: 9px; }
+.exRow  { display: flex; align-items: center; gap: 12px; }
+.exDot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.exName {
+  font-size: 26px; font-weight: 800; color: #f0e8d0;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.exVol  { font-size: 22px; font-weight: 700; color: #c8b090; margin-left: 4px; }
+
+/* ── QR footer ── */
+.qrFooter {
+  padding: 18px 80px; border-top: 1px solid #2a231c;
+  display: flex; align-items: center; gap: 18px;
+  flex-shrink: 0;
+}
+.qrFooterImg { width: 76px; height: 76px; }
+.qrFooterText {
+  font-size: 17px; color: #806850; text-transform: uppercase;
+  letter-spacing: .12em; font-weight: 700;
+}
+
+/* ── Timer Slide ── */
+.timerSlide { display: flex; height: 100%; background: #0d0b09; }
+.timerLeft {
+  width: 42%; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 40px;
+  border-right: 1px solid #2a231c; gap: 18px;
+}
+.timerMode {
+  font-size: 22px; font-weight: 900; letter-spacing: .22em;
+  color: #806850; text-transform: uppercase;
+}
+.ringWrap { position: relative; display: flex; align-items: center; justify-content: center; }
+.ring { width: 290px; height: 290px; }
+.ringClock {
+  position: absolute;
+  font-size: 72px; font-weight: 900; font-family: 'Courier New', monospace;
+  letter-spacing: .04em; transition: color .3s; user-select: none;
+  text-align: center;
+}
+.timerCap {
+  font-size: 18px; color: #554a3a; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase;
+}
+.timerRight {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 60px 60px 40px; gap: 28px; overflow: hidden;
+}
+.timerBlockHdr {
+  font-size: 26px; font-weight: 900; letter-spacing: .1em;
+  text-transform: uppercase; border-left: 5px solid #d8a840;
+  padding: 4px 0 4px 20px;
+}
+.timerExList { display: flex; flex-direction: column; gap: 18px; }
+.timerExRow  { display: flex; align-items: flex-start; gap: 18px; }
+.timerExDot  { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 10px; }
+.timerExBody { display: flex; flex-direction: column; gap: 4px; }
+.timerExName {
+  font-size: 42px; font-weight: 900; color: #f0e8d0;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.timerExVol { font-size: 30px; font-weight: 700; color: #c8b090; }
+.timerNoEx  { font-size: 22px; color: #554a3a; text-transform: uppercase; }
+
+/* ── Results Slide ── */
+.resultsSlide {
+  display: flex; flex-direction: column; height: 100%;
+  background: #0d0b09; padding: 40px 80px; gap: 28px;
+}
+.resultsHdr {
+  display: flex; align-items: center; gap: 28px;
+  border-bottom: 2px solid #2a231c; padding-bottom: 22px;
+  flex-shrink: 0;
+}
+.resultsTitle {
+  font-size: 34px; font-weight: 900; letter-spacing: .22em;
+  color: #4ac8c0; text-transform: uppercase;
+}
+.resultsBlock {
+  font-size: 22px; font-weight: 700; color: #c8b090;
+  text-transform: uppercase; letter-spacing: .1em;
+}
+.resultsDate { font-size: 17px; color: #554a3a; font-weight: 600; margin-left: auto; text-transform: uppercase; }
+
+.podium {
+  display: flex; gap: 28px; justify-content: center; align-items: flex-end;
+  flex-shrink: 0;
+}
+.podiumEmpty { min-width: 240px; }
+.podiumCard {
+  background: #161210; border: 1px solid #2a231c; border-radius: 10px;
+  padding: 28px 36px; display: flex; flex-direction: column;
+  align-items: center; gap: 8px; min-width: 240px;
+}
+.podiumFirst {
+  border-color: #d8a840; background: #1a1508;
+  transform: scale(1.07); box-shadow: 0 0 40px rgba(216,168,64,.18);
+}
+.podiumMedal { font-size: 32px; }
+.podiumName {
+  font-size: 26px; font-weight: 900; color: #f0e8d0;
+  text-transform: uppercase; letter-spacing: .05em; text-align: center;
+}
+.podiumPerf {
+  font-size: 30px; font-weight: 900; color: #4ac8c0;
+  font-family: 'Courier New', monospace;
+}
+.podiumScale {
+  font-size: 13px; font-weight: 700; color: #554a3a;
+  text-transform: uppercase; letter-spacing: .15em;
+}
+
+.restList { display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+.restRow {
+  display: flex; align-items: center; gap: 18px;
+  padding: 8px 18px; background: #161210;
+  border: 1px solid #1e1a16; border-radius: 4px;
+}
+.restRank  { font-size: 15px; font-weight: 700; color: #554a3a; width: 38px; }
+.restName  { font-size: 20px; font-weight: 700; color: #f0e8d0; text-transform: uppercase; flex: 1; }
+.restScale { font-size: 13px; color: #806850; font-weight: 600; letter-spacing: .1em; }
+.restPerf  { font-size: 20px; font-weight: 700; color: #4ac8c0; font-family: 'Courier New', monospace; width: 90px; text-align: right; }
+
+.noResults {
+  font-size: 26px; color: #554a3a; text-align: center;
+  margin-top: 60px; text-transform: uppercase; letter-spacing: .2em;
+}
+
+/* ── QR Slide ── */
+.qrSlide {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100%; background: #0d0b09; gap: 36px;
+}
+.qrTitle {
+  font-size: 40px; font-weight: 900; letter-spacing: .28em;
+  color: #f0e8d0; text-transform: uppercase;
+}
+.qrBig {
+  width: 500px; height: 500px; padding: 16px;
+  background: #161210; border: 2px solid #2a231c; border-radius: 10px;
+}
+.qrLoading { font-size: 22px; color: #554a3a; }
+.qrUrl {
+  font-size: 20px; color: #554a3a; letter-spacing: .05em;
+  font-family: 'Courier New', monospace;
+}

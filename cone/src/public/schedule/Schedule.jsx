@@ -4,14 +4,12 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import styles from './Schedule.module.css'
 import { MONTH_PT, DAY_PT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
-import { uid, blkLabel, exVolStr } from '../lib/wod.js'
+import { uid, blkLabel, exVolStr, isWodBlock, blkColor } from '../lib/wod.js'
 
-const WOD_TYPES     = ['For Time','AMRAP','EMOM','MetCon','HIIT','WOD','Benchmark','Estações']
 const WOD_LOG_TYPES = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT','Benchmark']
 const LOG_SCALES    = ['RX','Inter','SC','Adaptado']
 
 // ── Pure helpers ──────────────────────────────────────────────────────────────
-function isWodBlock(bl) { return WOD_TYPES.includes(bl.type)||WOD_TYPES.includes(bl.label) }
 function isRoundBlock(bl) { return !isWodBlock(bl)&&Number(bl.rounds)>0 }
 function fmtIntensity(ins) {
   if(!ins?.mode)return null
@@ -88,15 +86,6 @@ function fmtDeskPerf(blk) {
   if(blk.perfReps)p.push(`${blk.perfReps} Reps`)
   return p.join(' + ')||null
 }
-
-const BLOCK_FAMILY={
-  'WOD':'red','HIIT':'red','MetCon':'red',
-  'For Time':'amber','AMRAP':'amber','EMOM':'amber','Benchmark':'amber','Estações':'amber',
-  'Força':'blue','LPO':'blue','Core':'blue','Acessórios':'blue',
-  'Aquecimento':'green','Skill':'green','Cardio':'green','Mobilidade':'green',
-}
-const FAMILY_COLOR={red:'#c84038',amber:'#d8a840',blue:'#4878d8',green:'#48b860'}
-function blkColor(bl){return FAMILY_COLOR[BLOCK_FAMILY[bl.type]||BLOCK_FAMILY[bl.label]]||'#d8a840'}
 
 // ── Round Counter ─────────────────────────────────────────────────────────────
 function RdCounter({blId,exId,total,cur,onAdvance,onReset}) {

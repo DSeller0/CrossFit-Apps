@@ -26,6 +26,7 @@ const ResultadosTab = lazy(() => import('./components/tabs/Resultados'));
 const ConfigTab     = lazy(() => import('./components/tabs/Config'));
 const PublicadorTab = lazy(() => import('./components/tabs/Publicador'));
 const AgendaView    = lazy(() => import('./components/tabs/Publicador').then(m => ({ default: m.AgendaView })));
+const TvControllerTab = lazy(() => import('./components/tabs/TvController'));
 
 
 const TABS = [
@@ -36,6 +37,7 @@ const TABS = [
   ['results',   'ti-chart-bar',  'Resultados'],
   ['agenda',    'ti-calendar',   'Agenda'],
   ['publisher', 'ti-layout-grid','Publicador de Grade'],
+  ['tv',        'ti-device-tv',  'Quadro ao Vivo'],
   ['config',    'ti-settings',   'Configurações'],
 ];
 
@@ -388,6 +390,7 @@ export default function App() {
           {tab === 'results'   && <div className="res-pane"><ResultadosTab sessions={sessions} preload={resultsPreload} onPreloadConsumed={() => setResultsPreload(null)} /></div>}
           {tab === 'agenda'    && <div className="pub-pane"><AgendaView sessions={sessions} events={events} setEvents={setEvents} athletes={loadAthletes()} onEditSession={s => { setCreatorPreload(s); setTab('creator'); }} onLogResult={({athleteId, date}) => { setResultsPreload({athleteId, date}); setTab('results'); }} /></div>}
           {tab === 'publisher' && <div className="pub-pane"><PublicadorTab sessions={sessions} /></div>}
+          {tab === 'tv'        && <TvControllerTab sessions={sessions} />}
           {tab === 'config'    && <ConfigTab />}
         </Suspense>
       </div>

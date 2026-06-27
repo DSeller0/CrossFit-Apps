@@ -27,6 +27,7 @@ export default defineConfig({
         athletes:    resolve(root, 'athletes.html'),
         timer:       resolve(root, 'timer.html'),
         recover:     resolve(root, 'recover.html'),
+        tv:          resolve(root, 'tv.html'),
       }
     }
   }
