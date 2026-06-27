@@ -11,6 +11,19 @@ const DAY_PT  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
 const MON_PT  = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 const MODE_LBL = { 'For Time':'FOR TIME', AMRAP:'AMRAP', EMOM:'EMOM', Benchmark:'BENCHMARK', 'Estações':'ESTAÇÕES' }
 
+// column-major reorder: fills top→bottom first, then left→right
+function columnMajor(items, cols) {
+  const rows = Math.ceil(items.length / cols)
+  const out = []
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const idx = c * rows + r
+      if (idx < items.length) out.push(items[idx])
+    }
+  }
+  return out
+}
+
 // ── Timer helpers ─────────────────────────────────────────────────────────────
 function elapsedSecs(tv) {
   if (!tv?.timer_started_at) return tv?.timer_paused_elapsed ?? 0
@@ -58,13 +71,18 @@ function QrFooter({ dateKey, sessId, classId }) {
 }
 
 // ── Slide: WOD ────────────────────────────────────────────────────────────────
-export function WodSlide({ sessions, tv, gymName }) {
+export function WodSlide({ sessions, tv, gymName, classExecs, athletes }) {
   const dayS = sessions?.[tv?.date_key] || []
   const sess = dayS.find(x => x.id === tv?.session_id)
   if (!sess) return <div className={s.empty}><i className="ti ti-calendar-off" /> Nenhuma sessão selecionada</div>
 
-  const blocks = (sess.blocks || []).filter(bl => (bl.exercises?.length || bl.stations?.length))
-  const cols = blocks.length > 3 ? 2 : 1
+  const blocks  = (sess.blocks || []).filter(bl => (bl.exercises?.length || bl.stations?.length))
+  const cols    = blocks.length > 3 ? 2 : 1
+  const ordered = columnMajor(blocks, cols)
+
+  const activeClass    = (classExecs || []).find(c => c.id === tv?.class_id && !c.reset_at)
+  const groups         = activeClass?.groups || []
+  const groupPositions = tv?.group_positions || {}
 
   return (
     <div className={s.wodSlide}>
@@ -77,7 +95,7 @@ export function WodSlide({ sessions, tv, gymName }) {
       </div>
 
       <div className={s.wodBlocks} style={{ gridTemplateColumns: `repeat(${cols},1fr)` }}>
-        {blocks.map(bl => <BlockCard key={bl.id} bl={bl} />)}
+        {ordered.map(bl => <BlockCard key={bl.id} bl={bl} groups={groups} groupPositions={groupPositions} athletes={athletes} />)}
       </div>
 
       <QrFooter dateKey={tv.date_key} sessId={tv.session_id} classId={tv?.class_id} />
@@ -85,18 +103,20 @@ export function WodSlide({ sessions, tv, gymName }) {
   )
 }
 
-export function BlockCard({ bl }) {
-  const color = blkColor(bl)
+export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
+  const color = isActive ? '#4ac8c0' : blkColor(bl)
   const label = blkLabel(bl)
   const exes = bl.type === 'Estações'
     ? (bl.stations || []).flatMap(st => (st.exercises || []).map(e => ({ ...e, _station: st.name })))
     : (bl.exercises || [])
   const meta = [bl.duration && `${bl.duration}'`, bl.rounds && `${bl.rounds} rds`].filter(Boolean).join(' · ')
+  const groupsHere = (groups || []).filter(g => (groupPositions || {})[g.id] === bl.id)
 
   return (
     <div className={s.blockCard} style={{ borderLeftColor: color }}>
       <div className={s.blockCardHdr}>
         <span className={s.blockBadge} style={{ background: color + '22', color }}>{label}</span>
+        {isActive && <span className={s.timerBlockLiveBadge}>AO VIVO</span>}
         {meta && <span className={s.blockMeta}>{meta}</span>}
       </div>
       <div className={s.exList}>
@@ -110,12 +130,28 @@ export function BlockCard({ bl }) {
           </div>
         ))}
       </div>
+      {groupsHere.length > 0 && (
+        <div className={s.blockGroups}>
+          {groupsHere.map(g => {
+            const names = [
+              ...(g.athleteIds || []).map(id => (athletes || []).find(a => a.id === id)?.name).filter(Boolean),
+              ...(g.anonNames || []),
+            ]
+            return (
+              <div key={g.id} className={s.blockGroupChip} style={{ borderLeftColor: g.color, color: g.color }}>
+                <span className={s.blockGroupName}>{g.name}</span>
+                {names.length > 0 && <span className={s.blockGroupAthletes}>{names.join(' · ')}</span>}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
 
 // ── Slide: Timer (WOD + countdown ring) ──────────────────────────────────────
-export function TimerSlide({ tv, sessions }) {
+export function TimerSlide({ tv, sessions, classExecs, athletes }) {
   const [elapsed, setElapsed] = useState(() => elapsedSecs(tv))
   const tickRef = useRef(null)
   const tvRef = useRef(tv)
@@ -130,7 +166,7 @@ export function TimerSlide({ tv, sessions }) {
     return () => clearInterval(tickRef.current)
   }, [tv?.timer_started_at, tv?.timer_paused_elapsed])
 
-  const dayS = sessions?.[tv?.date_key] || []
+  const dayS  = sessions?.[tv?.date_key] || []
   const sess  = dayS.find(x => x.id === tv?.session_id)
   const block = sess?.blocks?.find(b => b.id === tv?.timer_block_id) || (sess?.blocks || []).find(isWodBlock) || sess?.blocks?.[0]
   const bt    = tv?.timer_type || 'For Time'
@@ -138,6 +174,15 @@ export function TimerSlide({ tv, sessions }) {
   const exes  = block ? (block.type === 'Estações' ? (block.stations||[]).flatMap(st=>st.exercises||[]) : (block.exercises||[])) : []
   const bColor = block ? blkColor(block) : '#d8a840'
   const bLabel = block ? blkLabel(block) : bt
+
+  const activeClass    = (classExecs || []).find(c => c.id === tv?.class_id && !c.reset_at)
+  const groups         = activeClass?.groups || []
+  const groupPositions = tv?.group_positions || {}
+  const hasGroups      = groups.length > 0
+
+  const allWodBlocks   = hasGroups ? (sess?.blocks || []).filter(bl => bl.exercises?.length || bl.stations?.length) : []
+  const mapCols        = allWodBlocks.length > 3 ? 2 : 1
+  const orderedMap     = hasGroups ? columnMajor(allWodBlocks, mapCols) : []
 
   const e    = elapsed
   const prog = ringProg(e, cap, bt)
@@ -171,25 +216,34 @@ export function TimerSlide({ tv, sessions }) {
         </div>
       </div>
 
-      <div className={s.timerRight}>
-        <div className={s.timerBlockHdr} style={{ borderLeftColor: bColor }}>
-          <span style={{ color: bColor }}>{bLabel}</span>
-        </div>
-        <div className={s.timerExList}>
-          {exes.map((ex, i) => (
-            <div key={ex.id || i} className={s.timerExRow}>
-              <span className={s.timerExDot} style={{ background: bColor }} />
-              <div className={s.timerExBody}>
-                <span className={s.timerExName}>{ex.name}</span>
-                {(ex.reps || ex.sets) && (
-                  <span className={s.timerExVol}>{ex.sets ? `${ex.sets}×${ex.reps||''}` : ex.reps}</span>
-                )}
-              </div>
-            </div>
+      {hasGroups ? (
+        <div className={s.timerGroupMap} style={{ gridTemplateColumns: `repeat(${mapCols},1fr)` }}>
+          {orderedMap.map(bl => (
+            <BlockCard key={bl.id} bl={bl} groups={groups} groupPositions={groupPositions}
+              athletes={athletes} isActive={bl.id === tv?.timer_block_id} />
           ))}
-          {exes.length === 0 && <div className={s.timerNoEx}>Nenhum exercício</div>}
         </div>
-      </div>
+      ) : (
+        <div className={s.timerRight}>
+          <div className={s.timerBlockHdr} style={{ borderLeftColor: bColor }}>
+            <span style={{ color: bColor }}>{bLabel}</span>
+          </div>
+          <div className={s.timerExList}>
+            {exes.map((ex, i) => (
+              <div key={ex.id || i} className={s.timerExRow}>
+                <span className={s.timerExDot} style={{ background: bColor }} />
+                <div className={s.timerExBody}>
+                  <span className={s.timerExName}>{ex.name}</span>
+                  {(ex.reps || ex.sets) && (
+                    <span className={s.timerExVol}>{ex.sets ? `${ex.sets}×${ex.reps||''}` : ex.reps}</span>
+                  )}
+                </div>
+              </div>
+            ))}
+            {exes.length === 0 && <div className={s.timerNoEx}>Nenhum exercício</div>}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -455,8 +509,8 @@ export default function TV() {
     <div className={s.root}>
       <div className={s.canvas} style={{ width: DV_W, height: DV_H, transform: `scale(${scale})`, transformOrigin: 'center center' }}>
         {slide === 'blank'   && <div className={s.blank} />}
-        {slide === 'wod'     && <WodSlide     sessions={sessions} tv={tv} gymName={gymName} />}
-        {slide === 'timer'   && <TimerSlide   tv={tv} sessions={sessions} />}
+        {slide === 'wod'     && <WodSlide     sessions={sessions} tv={tv} gymName={gymName} classExecs={classExecs} athletes={athletes} />}
+        {slide === 'timer'   && <TimerSlide   tv={tv} sessions={sessions} classExecs={classExecs} athletes={athletes} />}
         {slide === 'results' && <ResultsSlide tv={tv} sessions={sessions} athletes={athletes} results={results} classExecs={classExecs} />}
         {slide === 'qr'      && <QrSlide      tv={tv} />}
         {!tv && <div className={s.loading}><i className={`ti ti-loader-2 ${s.spin}`} /> Conectando...</div>}

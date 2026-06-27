@@ -12,8 +12,10 @@ const SLIDES = [
   { id: 'qr',      icon: 'ti-qrcode',     lbl: 'QR Code' },
 ]
 const TIMER_TYPES = ['For Time', 'AMRAP', 'EMOM', 'Benchmark']
-const DAY_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
-const MON_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+const DAY_PT      = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+const MON_PT      = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+const GROUP_COLORS = ['#4ac8c0','#d8a840','#d05878','#6a88d0','#70b070','#c880c0']
+const GROUP_NAMES  = ['Grupo A','Grupo B','Grupo C','Grupo D','Grupo E','Grupo F']
 
 function fmtDate(iso) {
   if (!iso) return ''
@@ -109,6 +111,11 @@ export default function TvController({ sessions: propSessions }) {
   // Live registration
   const [liveRegs,    setLiveRegs]    = useState({}) // { [athleteId]: { perfTime, scale } }
   const [liveScales,  setLiveScales]  = useState({}) // { [athleteId]: 'Rx'|'Sc'|'Adp' }
+  // Groups
+  const [autoAdvance, setAutoAdvance] = useState(false)
+  const hasAutoAdvRef  = useRef(false)
+  const selSessObjRef  = useRef(null)
+  const activeClassRef = useRef(null)
   const previewRef  = useRef(null)
   const [prevScale, setPrevScale]     = useState(1)
   const tvRef = useRef(tv)
@@ -195,6 +202,33 @@ export default function TvController({ sessions: propSessions }) {
     setSaving(false)
   }, [])
 
+  // Auto-advance: reset flag when a new timer run starts
+  useEffect(() => { hasAutoAdvRef.current = false }, [tv?.timer_started_at])
+
+  // Auto-advance: advance groups when timer cap is reached
+  useEffect(() => {
+    if (!autoAdvance || !tv?.timer_started_at) return
+    const id = setInterval(() => {
+      const t = tvRef.current
+      if (!t?.timer_started_at || !t?.timer_cap_secs) return
+      const elapsed = Math.floor((Date.now() - t.timer_started_at) / 1000 + (t.timer_paused_elapsed ?? 0))
+      if (elapsed >= t.timer_cap_secs && !hasAutoAdvRef.current) {
+        hasAutoAdvRef.current = true
+        const wods = (selSessObjRef.current?.blocks || []).filter(isWodBlock)
+        const grps = activeClassRef.current?.groups || []
+        if (wods.length === 0 || grps.length === 0) return
+        const curPos = tvRef.current?.group_positions || {}
+        const newPos = {}
+        for (const g of grps) {
+          const idx = wods.findIndex(b => b.id === curPos[g.id])
+          newPos[g.id] = wods[(idx + 1) % wods.length].id
+        }
+        push({ group_positions: newPos })
+      }
+    }, 500)
+    return () => clearInterval(id)
+  }, [autoAdvance, tv?.timer_started_at, push])
+
   // Class tracking
   async function startClass() {
     if (!selSessId) return
@@ -229,6 +263,10 @@ export default function TvController({ sessions: propSessions }) {
   const timerRun    = !!tv?.timer_started_at
   const activeClass = todayClasses.find(c => c.id === tv?.class_id && !c.reset_at) || null
   const pastClasses = todayClasses.filter(c => c.reset_at)
+  const groups         = activeClass?.groups || []
+  const groupPositions = tv?.group_positions || {}
+  selSessObjRef.current  = selSessObj
+  activeClassRef.current = activeClass
   const checkinUrl  = (id) => `${window.location.origin}/CrossFit-Apps/schedule.html?date=${selDate}&session=${selSessId}&checkin=${id}`
 
   const previewTv = useMemo(() => ({
@@ -326,6 +364,60 @@ export default function TvController({ sessions: propSessions }) {
     await supabase.from('results_v2').update({ blocks: trimmed }).eq('id', existing.id)
     setLiveRegs(r => { const n = { ...r }; delete n[athleteId]; return n })
     loadResults()
+  }
+
+  // Groups
+  async function createGroups(n) {
+    if (!activeClass) return
+    const allAthIds = activeClass.athlete_ids || []
+    const allAnons  = activeClass.anon_names  || []
+    const newGroups = Array.from({ length: n }, (_, i) => ({
+      id: uid(), name: GROUP_NAMES[i], color: GROUP_COLORS[i], athleteIds: [], anonNames: [],
+    }))
+    allAthIds.forEach((id, i) => newGroups[i % n].athleteIds.push(id))
+    allAnons.forEach((name, i) => newGroups[i % n].anonNames.push(name))
+    await supabase.from('class_executions').update({ groups: newGroups }).eq('id', activeClass.id)
+    if (wodBlocks.length > 0) {
+      const newPos = {}
+      newGroups.forEach((g, i) => { newPos[g.id] = wodBlocks[i % wodBlocks.length].id })
+      await push({ group_positions: newPos })
+    }
+  }
+
+  async function dissolveGroups() {
+    if (!activeClass) return
+    await supabase.from('class_executions').update({ groups: [] }).eq('id', activeClass.id)
+    await push({ group_positions: {} })
+  }
+
+  async function setGroupBlock(groupId, blockId) {
+    await push({ group_positions: { ...groupPositions, [groupId]: blockId } })
+  }
+
+  async function reassignMember(m, targetGroupId) {
+    if (!activeClass) return
+    const newGroups = groups.map(g => {
+      const ng = { ...g, athleteIds: [...(g.athleteIds || [])], anonNames: [...(g.anonNames || [])] }
+      if (m.type === 'real') {
+        ng.athleteIds = ng.athleteIds.filter(id => id !== m.id)
+        if (g.id === targetGroupId) ng.athleteIds.push(m.id)
+      } else {
+        ng.anonNames = ng.anonNames.filter(n => n !== m.name)
+        if (g.id === targetGroupId) ng.anonNames.push(m.name)
+      }
+      return ng
+    })
+    await supabase.from('class_executions').update({ groups: newGroups }).eq('id', activeClass.id)
+  }
+
+  async function advanceAll() {
+    if (wodBlocks.length === 0 || groups.length === 0) return
+    const newPos = {}
+    for (const g of groups) {
+      const idx = wodBlocks.findIndex(b => b.id === groupPositions[g.id])
+      newPos[g.id] = wodBlocks[(idx + 1) % wodBlocks.length].id
+    }
+    await push({ group_positions: newPos })
   }
 
   // Styles
@@ -638,6 +730,101 @@ export default function TvController({ sessions: propSessions }) {
               </div>
             </div>
           )}
+
+          {/* ── Grupos (rotation system) ── */}
+          {activeClass && (
+            <div style={card}>
+              <div style={cardTitle}>Grupos</div>
+
+              {groups.length === 0 ? (
+                <div>
+                  <div style={{ fontSize: 12, color: '#806850', marginBottom: 12 }}>
+                    Divida a turma em grupos para rotação de blocos
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {[2, 3, 4].map(n => (
+                      <button key={n} onClick={() => createGroups(n)}
+                        style={{ ...btnBase, background: '#1a1a1a', color: '#c8b090', fontSize: 13, padding: '8px 18px' }}>
+                        {n} grupos
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  {/* Group cards */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
+                    {groups.map(grp => (
+                      <div key={grp.id} style={{ border: `1px solid ${grp.color}44`, borderLeft: `4px solid ${grp.color}`, borderRadius: 4, padding: '10px 12px', background: '#161210' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                          <span style={{ color: grp.color, fontWeight: 900, fontSize: 13, minWidth: 72 }}>{grp.name}</span>
+                          <select value={groupPositions[grp.id] || ''} onChange={e => setGroupBlock(grp.id, e.target.value)}
+                            style={{ ...inputSt, flex: 1, fontSize: 11 }}>
+                            <option value="">— bloco —</option>
+                            {wodBlocks.map(bl => (
+                              <option key={bl.id} value={bl.id}>{blkLabel(bl)}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div style={{ fontSize: 11, color: '#806850' }}>
+                          {[...(grp.athleteIds || []).map(id => athletes.find(a => a.id === id)?.name).filter(Boolean),
+                            ...(grp.anonNames || [])].join(' · ') || <em style={{ color: '#554a3a' }}>Sem atletas</em>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Athlete assignment */}
+                  {((activeClass.athlete_ids?.length || 0) + (activeClass.anon_names?.length || 0)) > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 10, color: '#554a3a', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 8 }}>Atribuir atletas</div>
+                      {[
+                        ...(activeClass.athlete_ids || []).map(id => ({ type: 'real', id, name: athletes.find(a => a.id === id)?.name || '?' })),
+                        ...(activeClass.anon_names  || []).map(name => ({ type: 'anon', id: null, name })),
+                      ].map(m => {
+                        const inGroup = groups.find(g =>
+                          m.type === 'real' ? (g.athleteIds || []).includes(m.id) : (g.anonNames || []).includes(m.name)
+                        )
+                        return (
+                          <div key={m.type === 'real' ? m.id : `anon-${m.name}`}
+                            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 0', borderBottom: '1px solid #1a1a1a' }}>
+                            <span style={{ flex: 1, fontSize: 12, color: '#f0e8d0' }}>{m.name}</span>
+                            {groups.map(g => (
+                              <button key={g.id} onClick={() => reassignMember(m, g.id)} style={{
+                                width: 34, height: 28,
+                                border: `2px solid ${inGroup?.id === g.id ? g.color : '#2a231c'}`,
+                                background: inGroup?.id === g.id ? g.color + '22' : 'transparent',
+                                color: inGroup?.id === g.id ? g.color : '#554a3a',
+                                borderRadius: 3, cursor: 'pointer', fontSize: 10, fontWeight: 800,
+                              }}>
+                                {g.name.replace('Grupo ', '')}
+                              </button>
+                            ))}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Rotation controls */}
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <button onClick={advanceAll}
+                      style={{ ...btnBase, background: '#4ac8c0', borderColor: '#4ac8c0', color: '#0d0b09' }}>
+                      Avançar todos →
+                    </button>
+                    <button onClick={() => setAutoAdvance(a => !a)}
+                      style={{ ...btnBase, borderColor: autoAdvance ? '#d8a840' : '#2a231c', background: autoAdvance ? '#1a120a' : '#1a1a1a', color: autoAdvance ? '#d8a840' : '#806850' }}>
+                      ⏩ Auto: {autoAdvance ? 'ON' : 'OFF'}
+                    </button>
+                    <button onClick={dissolveGroups}
+                      style={{ ...btnBase, background: 'transparent', borderColor: '#c84038', color: '#c84038' }}>
+                      Dissolve ×
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── Right: preview ── */}
@@ -646,8 +833,8 @@ export default function TvController({ sessions: propSessions }) {
           <div ref={previewRef} style={{ width: '100%', aspectRatio: '16/9', position: 'relative', overflow: 'hidden', background: '#0d0b09', border: '1px solid #2a231c', borderRadius: 6 }}>
             <div style={{ width: 1920, height: 1080, transform: `scale(${prevScale})`, transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               {slide === 'blank'   && <div style={{ width: '100%', height: '100%', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 28, color: '#222', textTransform: 'uppercase', letterSpacing: '.2em' }}>Apagado</span></div>}
-              {slide === 'wod'     && <WodSlide     sessions={sessions} tv={previewTv} gymName={gymName} />}
-              {slide === 'timer'   && <TimerSlide   tv={previewTv}      sessions={sessions} />}
+              {slide === 'wod'     && <WodSlide     sessions={sessions} tv={previewTv} gymName={gymName} classExecs={todayClasses} athletes={athletes} />}
+              {slide === 'timer'   && <TimerSlide   tv={previewTv}      sessions={sessions} classExecs={todayClasses} athletes={athletes} />}
               {slide === 'results' && <ResultsSlide tv={previewTv}      sessions={sessions} athletes={athletes} results={results} classExecs={todayClasses} />}
               {slide === 'qr'      && <QrSlide      tv={previewTv} />}
             </div>
