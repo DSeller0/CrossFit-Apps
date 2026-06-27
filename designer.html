@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Design System — Cone</title>
+<script>!function(){var t=localStorage.getItem('cone_theme')||'totk-dark';document.documentElement.classList.add('theme-'+t)}();</script>
+<link rel="stylesheet" href="themes.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100%}
+body{padding-top:56px}
+
+/* ── Topbar ── */
+.d-topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:var(--stone);border-bottom:1px solid var(--div);
+  display:flex;align-items:center;gap:14px;padding:0 20px;
+  height:56px;flex-wrap:wrap;overflow:hidden;
+}
+.d-brand{font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--cream);flex-shrink:0;white-space:nowrap}
+.d-theme-row{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+.d-th-pill{
+  padding:5px 11px;border:1px solid var(--div);background:none;
+  color:var(--muted);font-family:var(--font);font-size:10px;font-weight:700;
+  cursor:pointer;letter-spacing:.06em;border-radius:2px;
+  transition:border-color .15s,color .15s,background .15s;white-space:nowrap;
+}
+.d-th-pill.d-active{border-color:var(--teal);color:var(--teal);background:rgba(74,200,192,.08)}
+.d-anchor-pill{
+  padding:5px 11px;border:1px dashed var(--div);background:none;
+  color:var(--dim);font-family:var(--font);font-size:10px;font-weight:700;
+  cursor:pointer;letter-spacing:.06em;border-radius:2px;text-decoration:none;white-space:nowrap;
+}
+.d-anchor-pill:hover{color:var(--muted)}
+
+/* ── Content ── */
+.d-content{max-width:900px;margin:0 auto;padding:36px 20px 100px}
+
+/* ── Section ── */
+.d-section{margin-bottom:52px}
+.d-section-title{
+  font-size:9px;font-weight:700;letter-spacing:.18em;color:var(--muted);
+  text-transform:uppercase;padding-bottom:10px;
+  border-bottom:1px solid var(--div);margin-bottom:22px;
+}
+.d-subsection{margin-bottom:22px}
+.d-sub-title{font-size:8px;font-weight:700;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;margin-bottom:10px}
+
+/* ── 1. Color Tokens ── */
+.d-swatch-grid{display:flex;flex-wrap:wrap;gap:10px}
+.d-swatch{display:flex;flex-direction:column;align-items:center;gap:4px;width:64px}
+.d-swatch-box{width:54px;height:54px;border-radius:3px;border:1px solid rgba(128,128,128,.15)}
+.d-swatch-name{font-size:8px;color:var(--muted);font-weight:700;letter-spacing:.02em;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.d-swatch-hex{font-size:7px;color:var(--dim);font-family:monospace;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── 2. Typography ── */
+.d-type-scale{display:flex;flex-direction:column;gap:5px;margin-bottom:20px}
+.d-type-row{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid rgba(128,128,128,.08);padding:4px 0}
+.d-type-size-lbl{font-size:8px;color:var(--dim);font-weight:700;width:32px;flex-shrink:0;font-family:monospace}
+.d-type-samples{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+.d-weight-grid{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;margin-bottom:20px}
+.d-weight-col{display:flex;flex-direction:column;gap:3px}
+.d-weight-lbl{font-size:8px;color:var(--dim);font-family:monospace}
+.d-weight-sample{font-size:16px;color:var(--cream)}
+.d-font-specimens{display:flex;flex-direction:column;gap:12px}
+.d-font-spec-lbl{font-size:8px;color:var(--dim);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;font-family:monospace}
+.d-font-spec-sample{font-size:26px;font-weight:700;line-height:1.15;color:var(--cream)}
+.d-font-spec-body{font-size:14px;line-height:1.6;color:var(--sub)}
+
+/* ── 3. Buttons ── */
+.d-btn-showcase{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.d-btn-col{display:flex;flex-direction:column;gap:6px;align-items:center}
+.d-btn-col-lbl{font-size:8px;color:var(--dim);font-weight:700;letter-spacing:.08em;text-align:center;font-family:monospace}
+.d-btn{
+  padding:18px 20px;border:none;border-radius:4px;font-family:var(--font);
+  font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.04em;
+  -webkit-tap-highlight-color:transparent;transition:opacity .12s;line-height:1;
+  white-space:nowrap;
+}
+.d-btn:active{opacity:.65}
+.d-btn-sm{padding:10px 14px;font-size:11px}
+.d-btn-lg{padding:22px 24px;font-size:16px}
+.d-b-start  {background:var(--teal);color:#000;font-size:15px}
+.d-b-resume {background:var(--gold);color:#000;font-size:15px}
+.d-b-reg    {background:var(--gold);color:#000;min-width:100px}
+.d-b-pause  {background:var(--stone2);border:1px solid var(--div);color:var(--cream);font-size:16px}
+.d-b-close  {background:var(--stone2);border:1px solid var(--div);color:var(--sub)}
+.d-b-disc   {background:transparent;border:1px solid var(--div);color:var(--muted)}
+.d-b-done   {background:transparent;border:1px solid var(--teal);color:var(--teal)}
+.d-b-lap    {background:var(--stone2);border:1px solid var(--div);color:var(--sub)}
+.d-b-danger {background:transparent;border:1px solid var(--red);color:var(--err)}
+
+/* ── 4. Inputs ── */
+.d-inputs-grid{display:flex;flex-direction:column;gap:14px;max-width:480px}
+.d-cfg-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.d-inp,.d-sel,.d-ta{
+  background:var(--stone2);border:1px solid var(--div);color:var(--cream);
+  font-family:var(--font);font-size:13px;padding:9px 10px;outline:none;
+  width:100%;-webkit-appearance:none;
+}
+.d-inp:focus,.d-sel:focus,.d-ta:focus{border-color:var(--teal)}
+.d-inp-focused{border-color:var(--teal)!important}
+.d-ta{resize:none;height:72px;font-size:12px}
+.d-hint{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4}
+.d-inp-row{display:flex;gap:8px}
+.d-inp-row .d-inp{flex:1}
+
+/* ── 5. Pills & Chips ── */
+.d-pills-block{display:flex;flex-direction:column;gap:14px}
+.d-pill-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.d-pill{
+  padding:9px 16px;border:1px solid var(--div);border-radius:2px;
+  font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;
+  letter-spacing:.06em;font-family:var(--font);transition:all .15s;
+}
+.d-pill-active{border-color:var(--teal)!important;color:var(--teal)!important;background:rgba(74,200,192,.08)!important}
+.d-badge{
+  display:inline-block;padding:3px 10px;font-size:9px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--teal);color:var(--teal);
+}
+.d-blk-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 8px;
+  background:var(--stone2);border:1px solid var(--div);
+  font-size:10px;font-weight:700;color:var(--sub);
+}
+.d-blk-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.d-scale{
+  display:inline-block;padding:2px 7px;font-size:8px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--div);color:var(--sub);
+}
+.d-scale-rx{border-color:var(--teal);color:var(--teal)}
+.d-scale-sc{border-color:var(--gold);color:var(--gold)}
+.d-rpe-row{display:flex;gap:4px;flex-wrap:wrap}
+.d-rpe{
+  padding:7px 10px;border:1px solid var(--div);background:none;
+  color:var(--muted);font-family:var(--font);font-size:11px;font-weight:700;
+  cursor:pointer;min-width:34px;text-align:center;
+}
+.d-rpe-on{background:var(--teal);border-color:var(--teal);color:#000}
+
+/* ── 6. Cards ── */
+.d-cards-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.d-cards-1{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+/* category card */
+.d-cat-card{
+  background:var(--stone2);border:1px solid var(--div);border-left:5px solid;
+  padding:18px 14px 16px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  cursor:pointer;border-radius:2px;transition:opacity .12s;
+}
+.d-cat-card:active{opacity:.7}
+.d-cat-ic{font-size:26px;line-height:1}
+.d-cat-lbl{font-size:12px;font-weight:900;letter-spacing:.1em;color:var(--cream);text-transform:uppercase;margin-top:2px}
+.d-cat-desc{font-size:9px;color:var(--muted);text-align:center;letter-spacing:.04em}
+/* list item */
+.d-list-item{
+  background:var(--stone2);border:1px solid var(--div);border-left:4px solid;
+  padding:10px 12px;cursor:pointer;border-radius:2px;transition:opacity .12s;
+}
+.d-list-item:active{opacity:.7}
+.d-li-name{font-size:13px;font-weight:900;color:var(--cream);letter-spacing:.04em;text-transform:uppercase}
+.d-li-desc{font-size:10px;color:var(--muted);margin-top:2px}
+/* session card */
+.d-sess-card{background:var(--stone2);border:1px solid var(--div);border-radius:2px;overflow:hidden}
+.d-sess-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--div)}
+.d-sess-tag{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);border:1px solid var(--teal);padding:2px 6px}
+.d-sess-chevron{font-size:11px;color:var(--dim)}
+.d-sess-name{font-size:13px;font-weight:800;color:var(--cream);padding:8px 12px 4px}
+.d-sess-blocks{display:flex;flex-wrap:wrap;gap:6px;padding:4px 12px 8px}
+.d-sess-block{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--sub)}
+.d-sess-bdot{width:5px;height:5px;border-radius:50%}
+.d-sess-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-top:1px solid var(--div)}
+.d-sess-count{font-size:10px;color:var(--muted)}
+.d-sess-reg{padding:5px 10px;background:var(--teal);color:#000;border:none;font-family:var(--font);font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.06em}
+/* result card */
+.d-rec-card{background:var(--stone2);border:1px solid var(--div);padding:10px 12px;display:flex;align-items:center;gap:12px;border-radius:2px}
+.d-rec-info{flex:1;min-width:0}
+.d-rec-name{font-size:10px;font-weight:700;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-rec-date{font-size:9px;color:var(--muted);margin-top:1px}
+.d-rec-time{font-size:20px;font-weight:900;color:var(--cream);font-variant-numeric:tabular-nums;flex-shrink:0}
+.d-rec-btn{padding:5px 10px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:var(--font);font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.06em;flex-shrink:0}
+
+/* ── 7. Navigation ── */
+.d-nav-demos{display:flex;flex-direction:column;gap:16px}
+/* desktop sidebar frame */
+.d-nav-desktop{
+  border:1px solid var(--div);border-radius:2px;overflow:hidden;
+  display:flex;height:300px;background:var(--bg);
+}
+.d-sidebar{
+  width:220px;flex-shrink:0;background:var(--stone);border-right:1px solid var(--div);
+  display:flex;flex-direction:column;
+}
+.d-sidebar-brand{padding:16px 16px 12px;border-bottom:1px solid var(--div)}
+.d-sidebar-name{font-size:15px;font-weight:900;color:var(--cream);letter-spacing:.05em}
+.d-sidebar-gym{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:.06em;margin-top:2px}
+.d-sidebar-nav{padding:8px 0}
+.d-sidebar-item{
+  display:flex;align-items:center;gap:10px;padding:10px 16px;
+  font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.04em;cursor:pointer;
+  border-left:3px solid transparent;transition:all .12s;
+}
+.d-sidebar-item.d-nav-active{color:var(--teal);border-left-color:var(--teal);background:rgba(74,200,192,.07)}
+.d-sidebar-item:not(.d-nav-active):hover{background:var(--stone2);color:var(--cream)}
+.d-sidebar-ic{font-size:16px;width:20px;text-align:center;line-height:1}
+.d-sidebar-sep{height:1px;background:var(--div);margin:6px 16px}
+.d-nav-main-content{flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--dim)}
+/* mobile bottom bar frame */
+.d-nav-mobile{
+  border:1px solid var(--div);border-radius:2px;overflow:hidden;
+  background:var(--bg);
+}
+.d-mobile-content{height:60px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--dim)}
+.d-mobile-bar{
+  display:flex;background:var(--stone);border-top:1px solid var(--div);padding:8px 0 10px;
+}
+.d-mobile-tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:9px;font-weight:700;color:var(--muted);cursor:pointer;letter-spacing:.04em;
+}
+.d-mobile-tab.d-nav-active{color:var(--teal)}
+.d-mobile-ic{font-size:20px;line-height:1}
+
+/* ── 8. Overlays & Modals ── */
+.d-overlay-demos{display:flex;flex-direction:column;gap:16px}
+.d-sheet-frame{
+  position:relative;height:220px;border:1px solid var(--div);border-radius:2px;overflow:hidden;background:var(--bg);
+}
+.d-scrim{position:absolute;inset:0;background:rgba(0,0,0,.55);pointer-events:none}
+.d-sheet{
+  position:absolute;bottom:0;left:0;right:0;background:var(--stone);
+  border-top:1px solid var(--div);padding-bottom:16px;
+}
+.d-sheet-handle{width:36px;height:3px;background:var(--div);border-radius:2px;margin:10px auto 12px}
+.d-sheet-title{font-size:12px;font-weight:900;color:var(--cream);padding:0 16px;margin-bottom:6px}
+.d-sheet-body{padding:0 16px;font-size:11px;color:var(--muted);line-height:1.5}
+.d-modal-frame{
+  position:relative;height:240px;border:1px solid var(--div);border-radius:2px;overflow:hidden;
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+}
+.d-modal{background:var(--stone);border:1px solid var(--div);padding:22px;width:280px;border-radius:2px}
+.d-modal-title{font-size:14px;font-weight:900;color:var(--cream);margin-bottom:6px}
+.d-modal-detail{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:18px}
+.d-modal-row{display:flex;justify-content:space-between;margin-bottom:5px;padding:3px 0;border-bottom:1px solid rgba(128,128,128,.1)}
+.d-modal-row-lbl{font-size:10px;color:var(--muted)}
+.d-modal-row-val{font-size:10px;color:var(--cream);font-weight:700}
+.d-modal-btns{display:flex;gap:8px;margin-top:14px}
+.d-modal-cancel{flex:1;padding:12px;background:transparent;border:1px solid var(--div);color:var(--muted);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer}
+.d-modal-confirm{flex:1;padding:12px;background:var(--teal);border:none;color:#000;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer}
+
+/* ── 9. States ── */
+.d-states-row{display:flex;flex-wrap:wrap;gap:12px}
+.d-state-box{
+  flex:1;min-width:130px;background:var(--stone2);border:1px solid var(--div);border-radius:2px;
+  padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.d-state-lbl{font-size:8px;color:var(--dim);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+@keyframes d-spin{to{transform:rotate(360deg)}}
+.d-spinner{width:28px;height:28px;border-radius:50%;border:3px solid var(--div);border-top-color:var(--teal);animation:d-spin .8s linear infinite}
+.d-spinner-sm{width:16px;height:16px;border-width:2px}
+.d-empty-ic{font-size:28px;line-height:1;color:var(--dim)}
+.d-empty-msg{font-size:13px;font-weight:700;color:var(--sub);text-align:center}
+.d-empty-sub{font-size:10px;color:var(--muted);text-align:center;margin-top:2px}
+.d-err-msg{font-size:13px;font-weight:700;color:var(--err);text-align:center}
+.d-retry{padding:7px 14px;background:transparent;border:1px solid var(--div);color:var(--muted);font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.06em}
+.d-dot-demo{display:flex;gap:16px;align-items:center}
+.d-dot-row{display:flex;align-items:center;gap:6px}
+.d-dot{width:8px;height:8px;border-radius:50%}
+.d-dot-lbl{font-size:10px;color:var(--muted)}
+
+/* ── 10. Timer Ring ── */
+.d-ring-row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end}
+.d-ring-box{display:flex;flex-direction:column;align-items:center;gap:8px}
+.d-ring-lbl{font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;text-align:center}
+.d-ring-wrap{position:relative;width:130px;height:130px}
+.d-ring-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.d-ring-track{fill:none;stroke:var(--stone2);stroke-width:11}
+.d-ring-fill{fill:none;stroke-width:11;stroke-linecap:round}
+.d-ring-inner{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;
+}
+.d-clock{font-size:28px;font-weight:900;color:var(--cream);font-variant-numeric:tabular-nums;line-height:1}
+.d-clock-lbl{font-size:7px;color:var(--muted);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.d-hdr-tags{display:flex;gap:6px;margin-top:6px}
+.d-cap-tag{font-size:9px;color:var(--muted);font-weight:700;white-space:nowrap}
+.d-goal-tag{font-size:9px;color:var(--gold);font-weight:700;white-space:nowrap;letter-spacing:.04em}
+
+/* ── 11. Leaderboard ── */
+.d-lb-list{border:1px solid var(--div);border-radius:2px;overflow:hidden}
+.d-lb-row{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-bottom:1px solid var(--div);background:var(--stone2);
+}
+.d-lb-row:last-child{border-bottom:none}
+.d-lb-hl{background:rgba(74,200,192,.06)}
+.d-lb-rank{font-size:12px;font-weight:900;color:var(--muted);width:20px;flex-shrink:0;text-align:center}
+.d-lb-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0}
+.d-lb-name{flex:1;font-size:12px;font-weight:700;color:var(--cream)}
+.d-lb-scale{display:inline-block;padding:2px 6px;font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--teal);color:var(--teal)}
+.d-lb-perf{font-size:14px;font-weight:900;color:var(--cream);font-variant-numeric:tabular-nums;flex-shrink:0}
+.d-podium-row{display:flex;gap:8px;margin-top:14px}
+.d-podium-card{
+  flex:1;background:var(--stone2);border:1px solid var(--div);border-top:3px solid var(--div);
+  padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;border-radius:2px;
+}
+.d-podium-1st{border-top-color:var(--gold)}
+.d-podium-2nd{border-top-color:var(--muted)}
+.d-podium-3rd{border-top-color:var(--gold2,#a0784c)}
+.d-podium-medal{font-size:20px;line-height:1;margin-bottom:2px}
+.d-podium-name{font-size:11px;font-weight:800;color:var(--cream);text-align:center}
+.d-podium-perf{font-size:14px;font-weight:900;color:var(--teal);font-variant-numeric:tabular-nums}
+.d-podium-rank{font-size:9px;color:var(--muted)}
+
+/* ── 12. New Theme Guide ── */
+.d-theme-guide{background:var(--stone);border:1px solid var(--div);border-radius:2px;overflow:hidden}
+.d-theme-guide summary{
+  padding:14px 16px;font-size:11px;font-weight:700;color:var(--teal);
+  letter-spacing:.06em;cursor:pointer;list-style:none;
+  display:flex;align-items:center;gap:8px;
+}
+.d-theme-guide summary::-webkit-details-marker{display:none}
+.d-theme-guide[open] summary{border-bottom:1px solid var(--div)}
+.d-tg-body{padding:20px}
+.d-tg-step{margin-bottom:28px}
+.d-tg-step:last-child{margin-bottom:0}
+.d-tg-step-title{font-size:10px;font-weight:900;color:var(--cream);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--div)}
+.d-tg-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px}
+.d-tg-table th{font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;padding:5px 8px;text-align:left;border-bottom:1px solid var(--div)}
+.d-tg-table td{padding:6px 8px;color:var(--sub);border-bottom:1px solid rgba(128,128,128,.07);vertical-align:top;line-height:1.5}
+.d-tg-table td:first-child{font-weight:700;color:var(--cream);white-space:nowrap;font-family:monospace;font-size:10px}
+.d-tg-table td:last-child{color:var(--muted);font-size:10px}
+.d-code{
+  background:var(--bg);border:1px solid var(--div);padding:14px 16px;
+  font-size:11px;color:var(--sub);font-family:monospace;line-height:1.8;
+  overflow-x:auto;white-space:pre;border-radius:2px;margin:10px 0;
+}
+.d-tg-checklist{list-style:none;display:flex;flex-direction:column;gap:7px}
+.d-tg-check-item{display:flex;align-items:flex-start;gap:10px;font-size:11px;color:var(--sub);line-height:1.5}
+.d-tg-checkbox{width:14px;height:14px;border:1px solid var(--div);flex-shrink:0;margin-top:1px}
+.d-contrast-note{font-size:10px;color:var(--muted);background:var(--bg);border:1px solid var(--div);padding:10px 12px;border-radius:2px;line-height:1.6;margin-top:10px}
+.d-contrast-note strong{color:var(--cream)}
+
+/* ── Utilities ── */
+.d-divider{height:1px;background:var(--div);margin:0 0 20px}
+.d-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.d-text-cream{color:var(--cream)}.d-text-sub{color:var(--sub)}.d-text-muted{color:var(--muted)}.d-text-dim{color:var(--dim)}
+
+/* ── Responsive ── */
+@media(max-width:600px){
+  .d-topbar{height:auto;padding:10px 14px;gap:8px}
+  body{padding-top:100px}
+  .d-cards-2{grid-template-columns:1fr}
+  .d-ring-row{gap:16px}
+  .d-ring-wrap{width:110px;height:110px}
+  .d-clock{font-size:24px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══════════════════════════════════════════════════════ -->
+<div class="d-topbar">
+  <span class="d-brand">Cone — Design System</span>
+  <div class="d-theme-row">
+    <button class="d-th-pill" data-theme="totk-dark"            onclick="setTheme('totk-dark')">TotK Dark</button>
+    <button class="d-th-pill" data-theme="totk-light"           onclick="setTheme('totk-light')">TotK Light</button>
+    <button class="d-th-pill" data-theme="spirit-blossom"       onclick="setTheme('spirit-blossom')">Spirit Blossom</button>
+    <button class="d-th-pill" data-theme="spirit-blossom-light" onclick="setTheme('spirit-blossom-light')">Spirit Blossom Light</button>
+    <a class="d-anchor-pill" href="#new-theme">+ Novo Tema</a>
+  </div>
+</div>
+
+<div class="d-content">
+
+  <!-- ══ 1. COLOR TOKENS ══════════════════════════════════════════ -->
+  <section class="d-section">
+    <div class="d-section-title">1 — Color Tokens</div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">Backgrounds</div>
+      <div class="d-swatch-grid">
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--bg)"></div><div class="d-swatch-name">--bg</div><div class="d-swatch-hex" data-token="--bg"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--bg2)"></div><div class="d-swatch-name">--bg2</div><div class="d-swatch-hex" data-token="--bg2"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--bg3)"></div><div class="d-swatch-name">--bg3</div><div class="d-swatch-hex" data-token="--bg3"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--stone)"></div><div class="d-swatch-name">--stone</div><div class="d-swatch-hex" data-token="--stone"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--stone2)"></div><div class="d-swatch-name">--stone2</div><div class="d-swatch-hex" data-token="--stone2"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--div)"></div><div class="d-swatch-name">--div</div><div class="d-swatch-hex" data-token="--div"></div></div>
+      </div>
+    </div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">Accents</div>
+      <div class="d-swatch-grid">
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--teal)"></div><div class="d-swatch-name">--teal</div><div class="d-swatch-hex" data-token="--teal"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--cyan)"></div><div class="d-swatch-name">--cyan</div><div class="d-swatch-hex" data-token="--cyan"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--gold)"></div><div class="d-swatch-name">--gold</div><div class="d-swatch-hex" data-token="--gold"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--gold2)"></div><div class="d-swatch-name">--gold2</div><div class="d-swatch-hex" data-token="--gold2"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--green)"></div><div class="d-swatch-name">--green</div><div class="d-swatch-hex" data-token="--green"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--red)"></div><div class="d-swatch-name">--red</div><div class="d-swatch-hex" data-token="--red"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--err)"></div><div class="d-swatch-name">--err</div><div class="d-swatch-hex" data-token="--err"></div></div>
+      </div>
+    </div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">Text Hierarchy</div>
+      <div class="d-swatch-grid">
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--cream)"></div><div class="d-swatch-name">--cream</div><div class="d-swatch-hex" data-token="--cream"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--sub)"></div><div class="d-swatch-name">--sub</div><div class="d-swatch-hex" data-token="--sub"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--muted)"></div><div class="d-swatch-name">--muted</div><div class="d-swatch-hex" data-token="--muted"></div></div>
+        <div class="d-swatch"><div class="d-swatch-box" style="background:var(--dim)"></div><div class="d-swatch-name">--dim</div><div class="d-swatch-hex" data-token="--dim"></div></div>
+      </div>
+    </div>
+
+    <!-- Text colors on background to show readability -->
+    <div class="d-subsection">
+      <div class="d-sub-title">Text on Background</div>
+      <div style="background:var(--bg);padding:16px;border:1px solid var(--div);border-radius:2px;display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:14px;color:var(--cream);font-weight:700">--cream — Primary text, headings, values</span>
+        <span style="font-size:14px;color:var(--sub)">--sub — Secondary text, exercise names, labels</span>
+        <span style="font-size:14px;color:var(--muted)">--muted — Tertiary text, hints, section labels</span>
+        <span style="font-size:14px;color:var(--dim)">--dim — Quaternary text, placeholders, inactive</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 2. TYPOGRAPHY ══════════════════════════════════════════ -->
+  <section class="d-section">
+    <div class="d-section-title">2 — Typography</div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">Font Families</div>
+      <div class="d-font-specimens">
+        <div>
+          <div class="d-font-spec-lbl">--font (headings, labels, UI)</div>
+          <div class="d-font-spec-sample" style="font-family:var(--font)">ABCDEFGHIJKLM · 0123456789</div>
+        </div>
+        <div>
+          <div class="d-font-spec-lbl">--font-body</div>
+          <div class="d-font-spec-body" style="font-family:var(--font-body)">"The strength of a warrior is measured not by how much they lift, but by how many times they return."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">Type Scale</div>
+      <div class="d-type-scale">
+        <div class="d-type-row"><span class="d-type-size-lbl">8px</span><div class="d-type-samples"><span class="d-text-cream" style="font-size:8px;font-weight:700">Cream</span><span class="d-text-sub" style="font-size:8px">Sub</span><span class="d-text-muted" style="font-size:8px">Muted</span><span class="d-text-dim" style="font-size:8px">Dim · split label, swatch hex</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">9px</span><div class="d-type-samples"><span class="d-text-cream" style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">SECTION LABEL</span><span class="d-text-muted" style="font-size:9px">Tags, caps</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">10px</span><div class="d-type-samples"><span class="d-text-cream" style="font-size:10px;font-weight:700">Cream 700</span><span class="d-text-sub" style="font-size:10px">Sub · block pills, clock label</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">11px</span><div class="d-type-samples"><span class="d-text-cream" style="font-size:11px;font-weight:700">Cream 700</span><span class="d-text-muted" style="font-size:11px">Sub-exercise, hint text, modal body</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">12px</span><div class="d-type-samples"><span class="d-text-cream" style="font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase">CAT CARD LABEL</span><span class="d-text-sub" style="font-size:12px;font-weight:700">Nav item, athlete row</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">13px</span><div class="d-type-samples"><span class="d-text-cream" style="font-size:13px;font-weight:900;text-transform:uppercase">LIST ITEM NAME</span><span class="d-text-sub" style="font-size:13px;font-weight:600">Input text, exercise row</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">14px</span><div class="d-type-samples"><span class="d-text-cream" style="font-size:14px;font-weight:800">Button / body text 800</span><span class="d-text-sub" style="font-size:14px;font-weight:600">Ready screen exercise</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">16px</span><div class="d-type-samples"><span class="d-text-cream" style="font-size:16px;font-weight:800">Large button, pause icon</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">22px</span><div class="d-type-samples"><span class="d-text-cream" style="font-size:22px;font-weight:900">Ready screen label</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">26px</span><div class="d-type-samples"><span style="font-size:26px;color:var(--teal)">🎀</span><span class="d-text-muted" style="font-size:11px">Category card icon size</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">62px</span><div class="d-type-samples"><span class="d-text-cream" style="font-size:62px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1">14:32</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">74px</span><div class="d-type-samples"><span style="font-size:74px;font-weight:900;color:var(--teal);font-variant-numeric:tabular-nums;line-height:1">8:45</span></div></div>
+        <div class="d-type-row"><span class="d-type-size-lbl">96px</span><div class="d-type-samples"><span style="font-size:96px;font-weight:900;color:var(--teal);font-variant-numeric:tabular-nums;line-height:1">3:12</span></div></div>
+      </div>
+    </div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">Font Weights</div>
+      <div class="d-weight-grid">
+        <div class="d-weight-col"><div class="d-weight-lbl">400</div><div class="d-weight-sample" style="font-weight:400">Regular</div></div>
+        <div class="d-weight-col"><div class="d-weight-lbl">600</div><div class="d-weight-sample" style="font-weight:600">SemiBold</div></div>
+        <div class="d-weight-col"><div class="d-weight-lbl">700</div><div class="d-weight-sample" style="font-weight:700">Bold</div></div>
+        <div class="d-weight-col"><div class="d-weight-lbl">800</div><div class="d-weight-sample" style="font-weight:800">ExtraBold</div></div>
+        <div class="d-weight-col"><div class="d-weight-lbl">900</div><div class="d-weight-sample" style="font-weight:900">Black</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 3. BUTTONS ════════════════════════════════════════════ -->
+  <section class="d-section">
+    <div class="d-section-title">3 — Buttons</div>
+    <div class="d-btn-showcase">
+      <div class="d-btn-col">
+        <div class="d-btn-col-lbl">btnStart<br>Primary action</div>
+        <button class="d-btn d-b-start">Iniciar</button>
+      </div>
+      <div class="d-btn-col">
+        <div class="d-btn-col-lbl">btnResume<br>Resume / positive</div>
+        <button class="d-btn d-b-resume">Continuar</button>
+      </div>
+      <div class="d-btn-col">
+        <div class="d-btn-col-lbl">btnReg<br>Submit / register</div>
+        <button class="d-btn d-b-reg">Registrar</button>
+      </div>
+      <div class="d-btn-col">
+        <div class="d-btn-col-lbl">btnPause<br>Neutral / pause</div>
+        <button class="d-btn d-b-pause">⏸</button>
+      </div>
+      <div class="d-btn-col">
+        <div class="d-btn-col-lbl">btnClose<br>Close / secondary</div>
+        <button class="d-btn d-b-close">Fechar</button>
+      </div>
+      <div class="d-btn-col">
+        <div class="d-btn-col-lbl">btnDisc<br>Discard / ghost</div>
+        <button class="d-btn d-b-disc">Descartar</button>
+      </div>
+      <div class="d-btn-col">
+        <div class="d-btn-col-lbl">btnDone<br>Confirm alternate</div>
+        <button class="d-btn d-b-done">Concluir</button>
+      </div>
+      <div class="d-btn-col">
+        <div class="d-btn-col-lbl">btnLap<br>Lap / minor</div>
+        <button class="d-btn d-b-lap">Lap</button>
+      </div>
+      <div class="d-btn-col">
+        <div class="d-btn-col-lbl">Destructive<br>Delete actions</div>
+        <button class="d-btn d-b-danger">Excluir</button>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <div class="d-sub-title" style="margin-bottom:10px">Size Variants</div>
+      <div class="d-row">
+        <button class="d-btn d-b-start d-btn-lg">Large (22px pad)</button>
+        <button class="d-btn d-b-start">Normal (18px pad)</button>
+        <button class="d-btn d-b-start d-btn-sm">Small (10px pad)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 4. INPUTS ══════════════════════════════════════════════ -->
+  <section class="d-section">
+    <div class="d-section-title">4 — Inputs & Form Controls</div>
+    <div class="d-inputs-grid">
+      <div>
+        <div class="d-cfg-lbl">Text Input — Normal</div>
+        <input class="d-inp" type="text" placeholder="Placeholder text…" value=""/>
+      </div>
+      <div>
+        <div class="d-cfg-lbl">Text Input — Focused (teal border)</div>
+        <input class="d-inp d-inp-focused" type="text" value="Focused value"/>
+      </div>
+      <div>
+        <div class="d-cfg-lbl">Two-column Row</div>
+        <div class="d-inp-row">
+          <input class="d-inp" type="text" placeholder="Campo 1"/>
+          <input class="d-inp" type="text" placeholder="Campo 2"/>
+        </div>
+      </div>
+      <div>
+        <div class="d-cfg-lbl">Select / Dropdown</div>
+        <select class="d-sel">
+          <option value="">Selecionar tipo…</option>
+          <option selected>For Time</option>
+          <option>AMRAP</option>
+          <option>EMOM</option>
+          <option>Estações</option>
+          <option>Benchmark</option>
+        </select>
+      </div>
+      <div>
+        <div class="d-cfg-lbl">Textarea</div>
+        <textarea class="d-ta" placeholder="1 linha por exercício&#10;Ex: 21 Thruster (43/30kg)&#10;21 Pull-up"></textarea>
+        <div class="d-hint">1 exercício por linha · reps Nome (carga opcional)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 5. PILLS & CHIPS ═══════════════════════════════════════ -->
+  <section class="d-section">
+    <div class="d-section-title">5 — Pills & Chips</div>
+    <div class="d-pills-block">
+      <div>
+        <div class="d-sub-title">Option Pills (toggle)</div>
+        <div class="d-pill-row">
+          <div class="d-pill d-pill-active">⏱ Contagem regressiva 10s</div>
+          <div class="d-pill">🎯 Meta de tempo</div>
+          <div class="d-pill">📊 Splits automáticos</div>
+        </div>
+      </div>
+      <div>
+        <div class="d-sub-title">Badges & Tags</div>
+        <div class="d-pill-row">
+          <span class="d-badge">AMRAP</span>
+          <span class="d-badge">For Time</span>
+          <span class="d-badge">EMOM</span>
+          <span class="d-scale d-scale-rx">Rx</span>
+          <span class="d-scale d-scale-sc">Scaled</span>
+          <span class="d-scale">Adapted</span>
+        </div>
+      </div>
+      <div>
+        <div class="d-sub-title">Block Type Pills (schedule)</div>
+        <div class="d-pill-row">
+          <span class="d-blk-pill"><span class="d-blk-dot" style="background:#4ac8c0"></span>For Time</span>
+          <span class="d-blk-pill"><span class="d-blk-dot" style="background:#d8a840"></span>AMRAP</span>
+          <span class="d-blk-pill"><span class="d-blk-dot" style="background:#6a88d0"></span>EMOM</span>
+          <span class="d-blk-pill"><span class="d-blk-dot" style="background:#d05878"></span>Benchmark</span>
+          <span class="d-blk-pill"><span class="d-blk-dot" style="background:#70b070"></span>Strength</span>
+        </div>
+      </div>
+      <div>
+        <div class="d-sub-title">RPE Buttons (1–10)</div>
+        <div class="d-rpe-row">
+          <button class="d-rpe">1</button>
+          <button class="d-rpe">2</button>
+          <button class="d-rpe">3</button>
+          <button class="d-rpe">4</button>
+          <button class="d-rpe">5</button>
+          <button class="d-rpe">6</button>
+          <button class="d-rpe d-rpe-on">7</button>
+          <button class="d-rpe">8</button>
+          <button class="d-rpe">9</button>
+          <button class="d-rpe">10</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 6. CARDS ═══════════════════════════════════════════════ -->
+  <section class="d-section">
+    <div class="d-section-title">6 — Cards</div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">Category Card (block-type picker, benchmark categories)</div>
+      <div class="d-cards-2" style="max-width:400px">
+        <div class="d-cat-card" style="border-left-color:#d05878">
+          <div class="d-cat-ic" style="color:#d05878">🎀</div>
+          <div class="d-cat-lbl">Girls</div>
+          <div class="d-cat-desc">10 WODs clássicos</div>
+        </div>
+        <div class="d-cat-card" style="border-left-color:#d8a840">
+          <div class="d-cat-ic" style="color:#d8a840">🏅</div>
+          <div class="d-cat-lbl">Heroes</div>
+          <div class="d-cat-desc">6 WODs heróis</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">List Item (WOD list, block list)</div>
+      <div class="d-cards-1" style="max-width:480px">
+        <div class="d-list-item" style="border-left-color:#d05878">
+          <div class="d-li-name">Fran</div>
+          <div class="d-li-desc">21-15-9 · Thrusters + Pull-ups · Cap 10min</div>
+        </div>
+        <div class="d-list-item" style="border-left-color:#d05878">
+          <div class="d-li-name">Cindy</div>
+          <div class="d-li-desc">20 min AMRAP · 5 Pull-ups + 10 Push-ups + 15 Air Squats</div>
+        </div>
+        <div class="d-list-item" style="border-left-color:#d8a840">
+          <div class="d-li-name">Murph</div>
+          <div class="d-li-desc">1mi Run + 100 Pull-ups + 200 Push-ups + 300 Squats + 1mi Run · Cap 60min</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">Session Card (Index / Schedule)</div>
+      <div style="max-width:420px">
+        <div class="d-sess-card">
+          <div class="d-sess-hdr">
+            <span class="d-sess-tag">Hoje</span>
+            <span class="d-sess-chevron">›</span>
+          </div>
+          <div class="d-sess-name">Treino de Força + WOD</div>
+          <div class="d-sess-blocks">
+            <span class="d-sess-block"><span class="d-sess-bdot" style="background:#6a88d0"></span>Back Squat</span>
+            <span class="d-sess-block"><span class="d-sess-bdot" style="background:#4ac8c0"></span>Fran</span>
+            <span class="d-sess-block"><span class="d-sess-bdot" style="background:#70b070"></span>Metcon</span>
+          </div>
+          <div class="d-sess-footer">
+            <span class="d-sess-count">12 atletas registrados</span>
+            <button class="d-sess-reg">Registrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">Result Card (Timer — recentes)</div>
+      <div style="max-width:420px;display:flex;flex-direction:column;gap:6px">
+        <div class="d-rec-card">
+          <div class="d-rec-info">
+            <div class="d-rec-name">Fran · Rx · 21-15-9</div>
+            <div class="d-rec-date">27/06/2026</div>
+          </div>
+          <div class="d-rec-time">3:48</div>
+          <button class="d-rec-btn">Registrar</button>
+        </div>
+        <div class="d-rec-card">
+          <div class="d-rec-info">
+            <div class="d-rec-name">Cindy · 20min AMRAP</div>
+            <div class="d-rec-date">25/06/2026</div>
+          </div>
+          <div class="d-rec-time">18 rds</div>
+          <button class="d-rec-btn">Registrar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 7. NAVIGATION ══════════════════════════════════════════ -->
+  <section class="d-section">
+    <div class="d-section-title">7 — Navigation</div>
+    <div class="d-nav-demos">
+
+      <div>
+        <div class="d-sub-title">Desktop Sidebar (220px)</div>
+        <div class="d-nav-desktop">
+          <nav class="d-sidebar">
+            <div class="d-sidebar-brand">
+              <div class="d-sidebar-name">Cone</div>
+              <div class="d-sidebar-gym">CrossFit Academia</div>
+            </div>
+            <div class="d-sidebar-nav">
+              <div class="d-sidebar-item">
+                <span class="d-sidebar-ic">🏠</span><span>Início</span>
+              </div>
+              <div class="d-sidebar-item d-nav-active">
+                <span class="d-sidebar-ic">📋</span><span>Quadro</span>
+              </div>
+              <div class="d-sidebar-item">
+                <span class="d-sidebar-ic">📊</span><span>Resultado</span>
+              </div>
+              <div class="d-sidebar-item">
+                <span class="d-sidebar-ic">🏆</span><span>Líderes</span>
+              </div>
+              <div class="d-sidebar-sep"></div>
+              <div class="d-sidebar-item">
+                <span class="d-sidebar-ic">👤</span><span>Eu</span>
+              </div>
+              <div class="d-sidebar-item">
+                <span class="d-sidebar-ic">⏱</span><span>Timer</span>
+              </div>
+            </div>
+          </nav>
+          <div class="d-nav-main-content">← Conteúdo da página (margin-left: 220px)</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="d-sub-title">Mobile Bottom Bar</div>
+        <div class="d-nav-mobile">
+          <div class="d-mobile-content">Conteúdo + padding-bottom: ~70px</div>
+          <div class="d-mobile-bar">
+            <div class="d-mobile-tab">
+              <span class="d-mobile-ic">🏠</span><span>Início</span>
+            </div>
+            <div class="d-mobile-tab d-nav-active">
+              <span class="d-mobile-ic">📋</span><span>Quadro</span>
+            </div>
+            <div class="d-mobile-tab">
+              <span class="d-mobile-ic">📊</span><span>Resultado</span>
+            </div>
+            <div class="d-mobile-tab">
+              <span class="d-mobile-ic">🏆</span><span>Líderes</span>
+            </div>
+            <div class="d-mobile-tab">
+              <span class="d-mobile-ic">👤</span><span>Eu</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ 8. OVERLAYS & MODALS ═══════════════════════════════════ -->
+  <section class="d-section">
+    <div class="d-section-title">8 — Overlays & Modals</div>
+    <div class="d-overlay-demos">
+
+      <div>
+        <div class="d-sub-title">Sheet (slide-up overlay)</div>
+        <div class="d-sheet-frame">
+          <div class="d-scrim"></div>
+          <div class="d-sheet">
+            <div class="d-sheet-handle"></div>
+            <div class="d-sheet-title">Registrar Resultado</div>
+            <div class="d-sheet-body">Insira sua performance para este WOD. Os dados serão salvos no histórico.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="d-sub-title">Confirm Modal</div>
+        <div class="d-modal-frame">
+          <div class="d-modal">
+            <div class="d-modal-title">Confirmar Registro</div>
+            <div class="d-modal-detail">Verifique seus dados antes de confirmar.</div>
+            <div class="d-modal-row"><span class="d-modal-row-lbl">WOD</span><span class="d-modal-row-val">Fran</span></div>
+            <div class="d-modal-row"><span class="d-modal-row-lbl">Tempo</span><span class="d-modal-row-val">3:48</span></div>
+            <div class="d-modal-row"><span class="d-modal-row-lbl">Scale</span><span class="d-modal-row-val">Rx</span></div>
+            <div class="d-modal-btns">
+              <button class="d-modal-cancel">Cancelar</button>
+              <button class="d-modal-confirm">Confirmar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ 9. STATES ══════════════════════════════════════════════ -->
+  <section class="d-section">
+    <div class="d-section-title">9 — States</div>
+    <div class="d-states-row">
+
+      <div class="d-state-box">
+        <div class="d-state-lbl">Loading</div>
+        <div class="d-spinner"></div>
+        <div class="d-spinner d-spinner-sm"></div>
+      </div>
+
+      <div class="d-state-box">
+        <div class="d-state-lbl">Empty</div>
+        <div class="d-empty-ic">📭</div>
+        <div class="d-empty-msg">Nenhum resultado</div>
+        <div class="d-empty-sub">Registre seu primeiro WOD</div>
+      </div>
+
+      <div class="d-state-box">
+        <div class="d-state-lbl">Error</div>
+        <div class="d-err-msg">Erro ao carregar</div>
+        <button class="d-retry">Tentar novamente</button>
+      </div>
+
+      <div class="d-state-box">
+        <div class="d-state-lbl">Indicators</div>
+        <div class="d-dot-demo">
+          <div class="d-dot-row"><div class="d-dot" style="background:var(--teal)"></div><span class="d-dot-lbl">Ativo</span></div>
+          <div class="d-dot-row"><div class="d-dot" style="background:var(--div)"></div><span class="d-dot-lbl">Inativo</span></div>
+          <div class="d-dot-row"><div class="d-dot" style="background:var(--gold)"></div><span class="d-dot-lbl">Aviso</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ 10. TIMER RING ══════════════════════════════════════════ -->
+  <section class="d-section">
+    <div class="d-section-title">10 — Timer Ring</div>
+    <!-- SVG: viewBox 0 0 130 130, cx=65 cy=65 r=54 -->
+    <!-- circumference = 2*π*54 ≈ 339.29 -->
+    <!-- 75% fill: dashoffset = 339.29 * 0.25 ≈ 84.82 -->
+    <!-- 20% fill: dashoffset = 339.29 * 0.80 ≈ 271.43 -->
+    <div class="d-ring-row">
+
+      <div class="d-ring-box">
+        <div class="d-ring-lbl">Running<br>Normal</div>
+        <div class="d-ring-wrap">
+          <svg class="d-ring-svg" viewBox="0 0 130 130">
+            <circle class="d-ring-track" cx="65" cy="65" r="54"/>
+            <circle class="d-ring-fill" cx="65" cy="65" r="54"
+              stroke="var(--teal)"
+              stroke-dasharray="339.29"
+              stroke-dashoffset="84.82"
+              transform="rotate(-90 65 65)"/>
+          </svg>
+          <div class="d-ring-inner">
+            <div class="d-clock">14:32</div>
+            <div class="d-clock-lbl">AMRAP</div>
+          </div>
+        </div>
+        <div class="d-hdr-tags">
+          <span class="d-goal-tag">↗ 20 rounds</span>
+        </div>
+      </div>
+
+      <div class="d-ring-box">
+        <div class="d-ring-lbl">Running<br>Warning (&lt;20%)</div>
+        <div class="d-ring-wrap">
+          <svg class="d-ring-svg" viewBox="0 0 130 130">
+            <circle class="d-ring-track" cx="65" cy="65" r="54"/>
+            <circle class="d-ring-fill" cx="65" cy="65" r="54"
+              stroke="var(--gold)"
+              stroke-dasharray="339.29"
+              stroke-dashoffset="271.43"
+              transform="rotate(-90 65 65)"/>
+          </svg>
+          <div class="d-ring-inner">
+            <div class="d-clock" style="color:var(--gold)">1:48</div>
+            <div class="d-clock-lbl">CAP 10min</div>
+          </div>
+        </div>
+        <div class="d-hdr-tags">
+          <span class="d-cap-tag">CAP 10:00</span>
+        </div>
+      </div>
+
+      <div class="d-ring-box">
+        <div class="d-ring-lbl">Idle<br>Not started</div>
+        <div class="d-ring-wrap">
+          <svg class="d-ring-svg" viewBox="0 0 130 130">
+            <circle class="d-ring-track" cx="65" cy="65" r="54"/>
+          </svg>
+          <div class="d-ring-inner">
+            <div class="d-clock" style="color:var(--dim)">20:00</div>
+            <div class="d-clock-lbl">FOR TIME</div>
+          </div>
+        </div>
+        <div class="d-hdr-tags">
+          <span class="d-cap-tag">CAP 20:00</span>
+        </div>
+      </div>
+
+      <div class="d-ring-box">
+        <div class="d-ring-lbl">Paused</div>
+        <div class="d-ring-wrap">
+          <svg class="d-ring-svg" viewBox="0 0 130 130">
+            <circle class="d-ring-track" cx="65" cy="65" r="54"/>
+            <circle class="d-ring-fill" cx="65" cy="65" r="54"
+              stroke="var(--teal)"
+              stroke-dasharray="339.29"
+              stroke-dashoffset="169.65"
+              transform="rotate(-90 65 65)"
+              opacity="0.4"/>
+          </svg>
+          <div class="d-ring-inner">
+            <div class="d-clock" style="color:var(--dim)">7:16</div>
+            <div class="d-clock-lbl">PAUSADO</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ 11. LEADERBOARD ════════════════════════════════════════ -->
+  <section class="d-section">
+    <div class="d-section-title">11 — Leaderboard & List Rows</div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">Rank List</div>
+      <div class="d-lb-list" style="max-width:500px">
+        <div class="d-lb-row d-lb-hl">
+          <span class="d-lb-rank">1</span>
+          <span class="d-lb-dot"></span>
+          <span class="d-lb-name">Carlos Medrado</span>
+          <span class="d-lb-scale">Rx</span>
+          <span class="d-lb-perf">2:58</span>
+        </div>
+        <div class="d-lb-row">
+          <span class="d-lb-rank">2</span>
+          <span class="d-lb-dot"></span>
+          <span class="d-lb-name">Ana Silva</span>
+          <span class="d-lb-scale">Rx</span>
+          <span class="d-lb-perf">3:22</span>
+        </div>
+        <div class="d-lb-row">
+          <span class="d-lb-rank">3</span>
+          <span class="d-lb-dot" style="background:var(--div)"></span>
+          <span class="d-lb-name">João Pereira</span>
+          <span class="d-lb-scale" style="border-color:var(--gold);color:var(--gold)">Scaled</span>
+          <span class="d-lb-perf">4:05</span>
+        </div>
+        <div class="d-lb-row">
+          <span class="d-lb-rank">4</span>
+          <span class="d-lb-dot" style="background:var(--div)"></span>
+          <span class="d-lb-name">Maria Gomes</span>
+          <span class="d-lb-scale">Adapted</span>
+          <span class="d-lb-perf">4:41</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-subsection">
+      <div class="d-sub-title">Podium</div>
+      <div class="d-podium-row" style="max-width:400px">
+        <div class="d-podium-card d-podium-2nd">
+          <div class="d-podium-medal">🥈</div>
+          <div class="d-podium-name">Ana Silva</div>
+          <div class="d-podium-perf">3:22</div>
+          <div class="d-podium-rank">2º lugar</div>
+        </div>
+        <div class="d-podium-card d-podium-1st">
+          <div class="d-podium-medal">🥇</div>
+          <div class="d-podium-name">Carlos Medrado</div>
+          <div class="d-podium-perf">2:58</div>
+          <div class="d-podium-rank">1º lugar</div>
+        </div>
+        <div class="d-podium-card d-podium-3rd">
+          <div class="d-podium-medal">🥉</div>
+          <div class="d-podium-name">João Pereira</div>
+          <div class="d-podium-perf">4:05</div>
+          <div class="d-podium-rank">3º lugar</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 12. ADDING A NEW THEME ═════════════════════════════════ -->
+  <section class="d-section" id="new-theme">
+    <div class="d-section-title">12 — Adicionando um Novo Tema</div>
+
+    <details class="d-theme-guide" open>
+      <summary>▸ Processo passo a passo</summary>
+      <div class="d-tg-body">
+
+        <div class="d-tg-step">
+          <div class="d-tg-step-title">Passo 1 — Definir a Paleta (7 Decisões)</div>
+          <table class="d-tg-table">
+            <thead><tr><th>Variável</th><th>O que controla</th><th>Dica</th></tr></thead>
+            <tbody>
+              <tr><td>--bg / --bg2 / --bg3</td><td>Fundo principal, secundário, terciário</td><td>Escuro → texto claro. Claro → texto escuro. Gradação sutil entre os 3.</td></tr>
+              <tr><td>--stone / --stone2</td><td>Superfície de cards e inputs</td><td>Deve ser visivelmente diferente de --bg, mas não chamar atenção.</td></tr>
+              <tr><td>--div</td><td>Bordas e separadores</td><td>Mais sutil que --stone. Fronteira invisível mas presente.</td></tr>
+              <tr><td>--teal (accent primário)</td><td>Elementos interativos, anel do timer, estados ativos</td><td>Contraste mínimo 3:1 sobre --stone2. Deve "saltar" do fundo.</td></tr>
+              <tr><td>--gold (accent secundário)</td><td>Avisos, highlights, botão Resume/Registrar</td><td>Complementar ao --teal. Não use a mesma família de cor.</td></tr>
+              <tr><td>--cream / --sub / --muted / --dim</td><td>Hierarquia de texto (4 níveis)</td><td>4 passos distintos de contraste. Cream ≥ 7:1, Sub ≥ 4.5:1 sobre --bg.</td></tr>
+              <tr><td>--green / --red / --err</td><td>Sucesso, erro</td><td>Manter intuição cromática (verde = bom, vermelho = alerta).</td></tr>
+            </tbody>
+          </table>
+          <div class="d-contrast-note">
+            <strong>Verificar contraste:</strong> Use o DevTools → Inspector → computed value para checar a relação de contraste (ícone de olho). WCAG AA exige 4.5:1 para texto normal, 3:1 para texto grande e elementos UI.
+          </div>
+        </div>
+
+        <div class="d-tg-step">
+          <div class="d-tg-step-title">Passo 2 — Adicionar ao themes.css</div>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Arquivo: <code style="font-size:10px;color:var(--teal)">themes.css</code> (raiz do repositório). Adicionar bloco ao final:</p>
+          <div class="d-code">html.theme-meu-tema {
+  --bg:        #0a0808;   /* fundo mais escuro */
+  --bg2:       #110f0d;
+  --bg3:       #180f0c;
+  --stone:     #1e1510;   /* superfície de card */
+  --stone2:    #251a14;   /* superfície de input/card aninhado */
+  --div:       #3a2a20;   /* bordas, separadores */
+
+  --gold:      #d8a840;   /* accent secundário — warnings, highlights */
+  --gold2:     #8a6020;   /* variante de borda dourada */
+  --teal:      #4ac8c0;   /* accent primário — interações, anel */
+  --cyan:      #70e0d8;   /* variante mais clara do teal */
+
+  --green:     #18cc30;
+  --red:       #c83030;
+  --err:       #e05050;
+
+  --cream:     #f0e8d0;   /* texto primário */
+  --sub:       #b8a890;   /* texto secundário */
+  --muted:     #786858;   /* texto terciário */
+  --dim:       #4a3a2a;   /* texto mais fraco / placeholder */
+
+  --font:      'Cinzel', serif;        /* titular, labels, UI */
+  --font-body: 'Crimson Pro', serif;   /* corpo de texto */
+}</div>
+          <p style="font-size:10px;color:var(--muted);margin-top:6px">Nome do tema: <code style="font-size:10px;color:var(--teal)">kebab-case</code> — ex: <code style="font-size:10px">sheikah-slate</code>, <code style="font-size:10px">hylia-light</code>, <code style="font-size:10px">blossom-rose</code>.</p>
+          <p style="font-size:10px;color:var(--muted);margin-top:4px">Fonte nova no Google Fonts? Adicionar <code style="font-size:10px">@import url(...)</code> no topo do themes.css.</p>
+        </div>
+
+        <div class="d-tg-step">
+          <div class="d-tg-step-title">Passo 3 — Registrar no designer.html</div>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Adicionar um pill na barra de temas no topo desta página:</p>
+          <div class="d-code">&lt;button class="d-th-pill" data-theme="meu-tema"
+        onclick="setTheme('meu-tema')"&gt;Meu Tema&lt;/button&gt;</div>
+          <p style="font-size:10px;color:var(--muted);margin-top:6px">Trocar para o novo tema e percorrer todas as seções. Corrigir qualquer variável que pareça errada.</p>
+        </div>
+
+        <div class="d-tg-step">
+          <div class="d-tg-step-title">Passo 4 — Registrar no App</div>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Encontrar onde a lista de temas é gerenciada no app (Settings, Nav ou similar) e adicionar a mesma string de chave. O script de FOUC em cada página HTML aplica automaticamente — não é necessário alterar nenhum arquivo HTML.</p>
+          <div class="d-code">/* Script FOUC — já existe em todos os .html, não precisa mudar: */
+!function(){
+  var t = localStorage.getItem('cone_theme') || 'totk-dark';
+  document.documentElement.classList.add('theme-' + t);
+}();</div>
+        </div>
+
+        <div class="d-tg-step">
+          <div class="d-tg-step-title">Passo 5 — Checklist de Validação</div>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Percorra esta página no novo tema e marque cada item:</p>
+          <ul class="d-tg-checklist">
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>Todos os swatches de cor mostram as cores corretas (sem transparent / variável faltando)</li>
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>Hierarquia de texto legível nos 4 níveis: cream → sub → muted → dim</li>
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>--teal (accent primário) visível sobre fundo --stone2 dos cards</li>
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>--gold (accent secundário) lê-se bem ao lado de texto --cream</li>
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>Botão Start (fundo --teal) — texto preto legível sobre o fundo do botão</li>
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>Botão Resume (fundo --gold) — texto preto legível</li>
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>Borda de foco dos inputs (--teal) visível sobre --stone2</li>
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>Item ativo do nav distingue-se claramente do inativo</li>
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>Pill ativo (teal border + tint) distingue-se do pill inativo</li>
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>Anel do timer (stroke --teal) visível sobre fundo --bg</li>
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>Cards de categoria (border-left colorida) lê-se bem em ambas as variantes dark/light</li>
+            <li class="d-tg-check-item"><div class="d-tg-checkbox"></div>Estados: spinner, empty, error — todos visíveis e com contraste adequado</li>
+          </ul>
+        </div>
+
+      </div>
+    </details>
+  </section>
+
+</div>
+
+<script>
+// ── Theme switcher ──────────────────────────────────────────────
+function setTheme(name) {
+  localStorage.setItem('cone_theme', name);
+  document.documentElement.className = 'theme-' + name;
+  document.querySelectorAll('.d-th-pill').forEach(function(p) {
+    p.classList.toggle('d-active', p.dataset.theme === name);
+  });
+  setTimeout(renderHexValues, 30); // wait a tick for vars to cascade
+}
+
+// ── Render computed hex values under each swatch ────────────────
+function renderHexValues() {
+  var style = getComputedStyle(document.documentElement);
+  document.querySelectorAll('[data-token]').forEach(function(el) {
+    var val = style.getPropertyValue(el.dataset.token).trim();
+    el.textContent = val || '—';
+  });
+}
+
+// ── Init ────────────────────────────────────────────────────────
+(function init() {
+  var current = localStorage.getItem('cone_theme') || 'totk-dark';
+  document.querySelectorAll('.d-th-pill').forEach(function(p) {
+    if (p.dataset.theme === current) p.classList.add('d-active');
+  });
+  renderHexValues();
+})();
+</script>
+</body>
+</html>
