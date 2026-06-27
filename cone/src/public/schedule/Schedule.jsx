@@ -657,7 +657,7 @@ export default function Schedule() {
   useEffect(()=>{
     if(status==='ok'&&!selSess&&weekOffset===0){
       const t=toISO(new Date())
-      const todaySess=(sessions[t]||[]).filter(s=>s.blocks&&s.blocks.length)
+      const todaySess=(sessions[t]||[]).filter(s=>s.public!==false&&s.blocks&&s.blocks.length)
       if(todaySess.length>0)setSelSess({dateKey:t,sessId:todaySess[0].id})
     }
   },[status])
@@ -768,7 +768,7 @@ export default function Schedule() {
   }
 
   function sessionsForDay(dateKey){
-    const all=(sessions[dateKey]||[])
+    const all=(sessions[dateKey]||[]).filter(s=>s.public!==false)
     if(!selAth)return all.filter(s=>s.blocks&&s.blocks.length)
     const athName=athletes.find(a=>a.id===selAth)?.name
     return all.filter(s=>{const t=getTargets(s);return t.length===0||t.includes(athName)}).filter(s=>s.blocks&&s.blocks.length)
@@ -1053,7 +1053,7 @@ export default function Schedule() {
       <div className={styles.deskStrip}>
         {week.map(date=>{
           const dk=toISO(date),isPast=dk<today,isToday=dk===today
-          const daySess=(sessions[dk]||[]).filter(s=>s.blocks&&s.blocks.length)
+          const daySess=(sessions[dk]||[]).filter(s=>s.public!==false&&s.blocks&&s.blocks.length)
           return(
             <div key={dk} className={styles.deskDayCol}>
               <div className={`${styles.deskDayHdr}${isToday?' '+styles.deskDayHdrToday:''}`}>

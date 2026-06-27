@@ -419,7 +419,7 @@ export default function Athletes() {
     const future30 = new Date(); future30.setDate(future30.getDate()+30)
     const fut30ISO = toISO(future30)
     const all = Object.keys(sessions).sort().reduce((acc, date) => {
-      ;(sessions[date]||[]).filter(sess => getTargets(sess).includes(ath.name)).forEach(sess => acc.push({ date, session: sess }))
+      ;(sessions[date]||[]).filter(sess => sess.public!==false && getTargets(sess).includes(ath.name)).forEach(sess => acc.push({ date, session: sess }))
       return acc
     }, [])
     const past   = all.filter(x => x.date <= today).slice(-2)

@@ -155,7 +155,7 @@ export default function Index() {
       allResults.forEach(r => { if (r.sessionId) counts[r.sessionId] = (counts[r.sessionId] || 0) + 1 })
 
       // Expand today's first session by default
-      const todaySess = allSessions[TODAY_DK] || []
+      const todaySess = (allSessions[TODAY_DK] || []).filter(s => s.public !== false)
       if (todaySess.length) setExpandedSet(new Set([todaySess[0].id]))
 
       if (settings.gymName) setGymName(settings.gymName.toUpperCase())
@@ -242,9 +242,9 @@ export default function Index() {
   } else {
     sessionsPaneJsx = (
       <>
-        <DaySection dk={YESTER_DK} daySessions={sessions[YESTER_DK]||[]} countBySess={countBySess} offset={-1} expandedSet={expandedSet} onToggle={toggleCard} />
-        <DaySection dk={TODAY_DK}  daySessions={sessions[TODAY_DK] ||[]} countBySess={countBySess} offset={0}  expandedSet={expandedSet} onToggle={toggleCard} />
-        <DaySection dk={TOMOR_DK}  daySessions={sessions[TOMOR_DK] ||[]} countBySess={countBySess} offset={1}  expandedSet={expandedSet} onToggle={toggleCard} />
+        <DaySection dk={YESTER_DK} daySessions={(sessions[YESTER_DK]||[]).filter(s=>s.public!==false)} countBySess={countBySess} offset={-1} expandedSet={expandedSet} onToggle={toggleCard} />
+        <DaySection dk={TODAY_DK}  daySessions={(sessions[TODAY_DK] ||[]).filter(s=>s.public!==false)} countBySess={countBySess} offset={0}  expandedSet={expandedSet} onToggle={toggleCard} />
+        <DaySection dk={TOMOR_DK}  daySessions={(sessions[TOMOR_DK] ||[]).filter(s=>s.public!==false)} countBySess={countBySess} offset={1}  expandedSet={expandedSet} onToggle={toggleCard} />
       </>
     )
   }

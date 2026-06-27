@@ -1695,6 +1695,27 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           </button>
         </div>
 
+        {/* Visibility */}
+        <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="lbl" style={{ margin: 0 }}>Visibilidade</span>
+          {[{ label: 'Público', val: true }, { label: 'Oculto', val: false }].map(({ label, val }) => {
+            const active = val ? form.public !== false : form.public === false
+            return (
+              <button key={label} type="button"
+                onClick={() => { setForm(f => ({ ...f, public: val })); setIsDirty(true); trackSessionField('public') }}
+                style={{
+                  padding: '4px 12px', fontSize: 11, fontWeight: 700, borderRadius: 4, fontFamily: 'inherit',
+                  border: `1px solid ${active ? (val ? '#4ac8c0' : '#806850') : 'var(--div,#2a231c)'}`,
+                  background: active ? (val ? 'rgba(74,200,192,.1)' : 'rgba(128,104,80,.12)') : 'transparent',
+                  color: active ? (val ? '#4ac8c0' : '#806850') : '#554a3a',
+                  cursor: 'pointer',
+                }}>
+                {label}
+              </button>
+            )
+          })}
+        </div>
+
         {/* Session notes */}
         <div style={{ marginTop: 6 }}>
           <button type="button" className="blk-adv-toggle" onClick={() => setShowSessNotes(v => !v)}>

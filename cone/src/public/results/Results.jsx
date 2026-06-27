@@ -22,7 +22,7 @@ function blkMeta(bl) {
 }
 function wodBlocks(sess) { return (sess.blocks||[]).filter(b=>WOD_TYPES.includes(b.type)) }
 function sessionsForDay(sessions,dk,lockedAthName) {
-  const all=((sessions||{})[dk]||[]).filter(s=>s.blocks&&s.blocks.length)
+  const all=((sessions||{})[dk]||[]).filter(s=>s.public!==false&&s.blocks&&s.blocks.length)
   if(!lockedAthName) return all
   return all.filter(s=>{const t=Array.isArray(s.mainTraining)?s.mainTraining:(s.mainTraining?[s.mainTraining]:[]);return t.length===0||t.includes(lockedAthName)})
 }

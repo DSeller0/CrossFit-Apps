@@ -82,7 +82,7 @@ function calcBlockStats(sessions,present,name,types,start,end) {
   types.forEach(t=>{pl[t]=0;ex[t]=0})
   Object.keys(sessions).forEach(date=>{
     if(date<start||date>end)return
-    ;(sessions[date]||[]).forEach(s=>{
+    ;(sessions[date]||[]).filter(s=>s.public!==false).forEach(s=>{
       if(!matchesAthlete(s,name))return
       ;(s.blocks||[]).forEach(b=>{if(ts.has(b.type))pl[b.type]++})
     })
@@ -352,7 +352,7 @@ export default function Me() {
     const plannedDates = new Set()
     Object.keys(sessions).forEach(date=>{
       if(!date.startsWith(mPrefix))return
-      ;(sessions[date]||[]).forEach(s=>{if(matchesAthlete(s,selAthlete.name))plannedDates.add(date)})
+      ;(sessions[date]||[]).filter(s=>s.public!==false).forEach(s=>{if(matchesAthlete(s,selAthlete.name))plannedDates.add(date)})
     })
     const heartTotal = Math.min(Math.max(plannedDates.size,mResults.length,12),20)
     const hearts=[]

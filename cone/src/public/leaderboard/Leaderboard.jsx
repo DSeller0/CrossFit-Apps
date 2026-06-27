@@ -64,7 +64,7 @@ function buildWodList(sessions, results) {
   const list = []
   const sessObj = typeof sessions === 'object' && !Array.isArray(sessions) ? sessions : {}
   Object.entries(sessObj).sort(([a], [b]) => b.localeCompare(a)).forEach(([dateKey, daySessions]) => {
-    ;(daySessions || []).forEach(sess => {
+    ;(daySessions || []).filter(sess => sess.public !== false).forEach(sess => {
       ;(sess.blocks || []).filter(bl => WOD_TYPES.includes(bl.label) || WOD_TYPES.includes(bl.type)).forEach(bl => {
         const count = (results || []).filter(r =>
           r.date === dateKey && r.sessionId === sess.id && r.presence === 'Presente' &&
