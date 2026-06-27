@@ -142,6 +142,32 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
       </div>
       <div className={s.exList}>
         {exes.map((ex, i) => {
+          if (ex.isComplex) {
+            const mvs = (ex.complexMovements || []).filter(m => m.name)
+            const notation = mvs.map(m => m.reps || '?').join('+')
+            const displayName = ex.name || mvs.map(m => m.name).join(' + ') || 'Complexo'
+            const setsStr = ex.sets ? `${ex.sets}×` : ''
+            const volStr = notation ? `${setsStr}(${notation})` : setsStr || ''
+            return (
+              <div key={ex.id || i} className={s.complexBlock}>
+                <div className={s.exRow}>
+                  <span className={s.exDot} style={{ background: color }} />
+                  {volStr && <span className={s.exVol}>{volStr}</span>}
+                  <span className={s.exName}>{displayName}</span>
+                </div>
+                {mvs.length > 0 && (
+                  <div className={s.complexMvs}>
+                    {mvs.map((mv, mi) => (
+                      <div key={mv.id || mi} className={s.complexMvRow}>
+                        {mv.reps && <span className={s.complexMvReps}>{mv.reps}</span>}
+                        <span className={s.complexMvName}>{mv.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          }
           const vol = exVolStr(ex)
           return (
             <div key={ex.id || i} className={s.exRow}>

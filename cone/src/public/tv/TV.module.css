@@ -72,6 +72,13 @@
 }
 .exVol  { font-size: 22px; font-weight: 700; color: #c8b090; flex-shrink: 0; }
 
+/* ── Complex exercise sub-movements ── */
+.complexBlock { display: flex; flex-direction: column; gap: 4px; }
+.complexMvs   { padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.complexMvRow { display: flex; align-items: center; gap: 10px; }
+.complexMvReps { font-size: 18px; font-weight: 700; color: #c8b090; flex-shrink: 0; }
+.complexMvName { font-size: 20px; font-weight: 700; color: #c8b090; text-transform: uppercase; letter-spacing: .04em; }
+
 /* ── QR footer ── */
 .qrFooter {
   padding: 18px 80px; border-top: 1px solid #2a231c;

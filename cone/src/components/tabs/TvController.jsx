@@ -123,6 +123,10 @@ export default function TvController({ sessions: propSessions }) {
   const tvRef = useRef(tv)
   tvRef.current = tv
 
+  // Early derived — needed in useEffect dependency arrays before the later derived block
+  const activeClass = todayClasses.find(c => c.id === tv?.class_id && !c.reset_at) || null
+  const groups      = activeClass?.groups || []
+
   // Scale preview
   useEffect(() => {
     const el = previewRef.current
@@ -295,9 +299,7 @@ export default function TvController({ sessions: propSessions }) {
   const ranked      = selBl ? rankResults(blockRes, selBl.type) : []
   const slide       = tv?.slide || 'blank'
   const timerRun    = !!tv?.timer_started_at
-  const activeClass = todayClasses.find(c => c.id === tv?.class_id && !c.reset_at) || null
   const pastClasses = todayClasses.filter(c => c.reset_at)
-  const groups            = activeClass?.groups || []
   const groupPositions    = tv?.group_positions || {}
   const rotationBlockIds  = tv?.rotation_block_ids || []
   const rotationBlocks    = rotationBlockIds.length > 0
