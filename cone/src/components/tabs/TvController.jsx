@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../../utils/supabase'
 import { loadLS, loadAthletes, toISO } from '../../utils/storage'
 import { blkLabel, blkColor, isWodBlock, rankResults, perfStr } from '../../public/lib/wod.js'
+import { WodSlide, TimerSlide, ResultsSlide, QrSlide } from '../../public/tv/TV.jsx'
 
 const SLIDES = [
   { id: 'blank',   icon: 'ti-square-off', lbl: 'Apagado' },
@@ -14,10 +15,6 @@ const TIMER_TYPES = ['For Time', 'AMRAP', 'EMOM', 'Benchmark']
 const DAY_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
 const MON_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 
-function fmt(sec) {
-  sec = Math.max(0, Math.floor(sec))
-  return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`
-}
 function fmtDate(iso) {
   if (!iso) return ''
   const d = new Date(iso + 'T12:00:00')
@@ -27,98 +24,78 @@ function sessLabel(s) {
   return s.sessionName || (Array.isArray(s.mainTraining) ? s.mainTraining[0] : s.mainTraining) || 'Sessão'
 }
 
-// ── Shared style objects ──────────────────────────────────────────────────────
-const pSt = {
-  slide:    { width: '100%', height: '100%', background: '#0d0b09', display: 'flex', flexDirection: 'column', borderRadius: 4, overflow: 'hidden' },
-  sessName: { fontSize: 10, fontWeight: 900, color: '#f0e8d0', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 },
-  empty:    { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 9, color: '#554a3a', textTransform: 'uppercase' },
-}
+// ── Weekly calendar strip ─────────────────────────────────────────────────────
+function WeekStrip({ selDate, sessions, onChange }) {
+  function startOfWeek(iso) {
+    const d = new Date((iso || toISO(new Date())) + 'T12:00:00')
+    d.setDate(d.getDate() - d.getDay())
+    return toISO(d)
+  }
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(selDate))
 
-// ── Mini preview components ───────────────────────────────────────────────────
-function PreviewWod({ sess, dateKey }) {
-  if (!sess) return <div style={pSt.empty}>Nenhuma sessão</div>
-  const blocks = (sess.blocks || []).filter(bl => bl.exercises?.length || bl.stations?.length)
+  useEffect(() => {
+    const ws = startOfWeek(selDate)
+    if (ws !== weekStart) setWeekStart(ws)
+  }, [selDate])
+
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart + 'T12:00:00')
+    d.setDate(d.getDate() + i)
+    return { iso: toISO(d), d }
+  })
+  const today = toISO(new Date())
+
+  function prevWeek() {
+    const d = new Date(weekStart + 'T12:00:00')
+    d.setDate(d.getDate() - 7)
+    setWeekStart(toISO(d))
+  }
+  function nextWeek() {
+    const d = new Date(weekStart + 'T12:00:00')
+    d.setDate(d.getDate() + 7)
+    setWeekStart(toISO(d))
+  }
+
+  const navBtn = {
+    background: 'transparent', border: '1px solid #2a231c', borderRadius: 4,
+    color: '#806850', cursor: 'pointer', width: 28, height: 52,
+    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+    flexShrink: 0,
+  }
+
   return (
-    <div style={{ ...pSt.slide, padding: '8px 12px', gap: 6, display: 'flex', flexDirection: 'column' }}>
-      <div style={pSt.sessName}>{sessLabel(sess)}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, overflow: 'hidden' }}>
-        {blocks.slice(0, 4).map(bl => {
-          const col = blkColor(bl)
-          return (
-            <div key={bl.id} style={{ borderLeft: `3px solid ${col}`, paddingLeft: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <div style={{ fontSize: 9, fontWeight: 800, color: col, textTransform: 'uppercase', letterSpacing: '.06em' }}>{blkLabel(bl)}</div>
-              {(bl.exercises || []).slice(0, 2).map((ex, i) => (
-                <div key={i} style={{ fontSize: 8, color: '#c8b090' }}>{ex.name}</div>
-              ))}
+    <div style={{ display: 'flex', alignItems: 'stretch', gap: 4 }}>
+      <button style={navBtn} onClick={prevWeek}><i className="ti ti-chevron-left" /></button>
+      {days.map(({ iso, d }) => {
+        const isSel   = iso === selDate
+        const isToday = iso === today
+        const hasSess = (sessions[iso] || []).length > 0
+        return (
+          <div
+            key={iso}
+            onClick={() => onChange(iso)}
+            style={{
+              flex: 1, minWidth: 0, cursor: 'pointer', borderRadius: 4,
+              padding: '6px 2px', textAlign: 'center',
+              background: isSel ? '#0d1a1a' : '#161210',
+              border: `1px solid ${isSel ? '#4ac8c0' : isToday ? '#6a4a0a' : '#2a231c'}`,
+              boxShadow: isSel ? '0 0 0 1px #4ac8c0' : 'none',
+              transition: 'border-color .15s',
+            }}
+          >
+            <div style={{ fontSize: 9, fontWeight: 800, color: isSel ? '#4ac8c0' : '#806850', textTransform: 'uppercase', letterSpacing: '.07em', lineHeight: 1.2 }}>
+              {DAY_PT[d.getDay()]}
             </div>
-          )
-        })}
-        {blocks.length > 4 && <div style={{ fontSize: 8, color: '#554a3a' }}>+{blocks.length - 4} blocos</div>}
-      </div>
-      <div style={{ fontSize: 7, color: '#554a3a', textTransform: 'uppercase', letterSpacing: '.08em' }}>{fmtDate(dateKey)} · QR ▼</div>
-    </div>
-  )
-}
-
-// PreviewTimer uses LOCAL timerBlkId/timerType/timerCap so it updates instantly
-// on block selection, without waiting for the Supabase write to return
-function PreviewTimer({ sess, timerBlkId, timerType, timerCap, tv }) {
-  const block = timerBlkId
-    ? (sess?.blocks || []).find(b => b.id === timerBlkId)
-    : (sess?.blocks || []).find(isWodBlock)
-  const col = tv?.timer_started_at ? '#48b860' : '#d8a840'
-  const exes = block
-    ? (block.type === 'Estações' ? (block.stations||[]).flatMap(st=>st.exercises||[]) : (block.exercises||[]))
-    : []
-  return (
-    <div style={{ ...pSt.slide, flexDirection: 'row', alignItems: 'center', padding: '8px 12px', gap: 10 }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, width: '38%' }}>
-        <div style={{ fontSize: 7, color: '#806850', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em' }}>{timerType}</div>
-        <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${col}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 10, fontWeight: 900, color: col, fontFamily: 'monospace' }}>
-            {fmt(tv?.timer_paused_elapsed || 0)}
-          </span>
-        </div>
-        <div style={{ fontSize: 7, color: '#554a3a' }}>Cap {timerCap}'</div>
-      </div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, overflow: 'hidden' }}>
-        {exes.slice(0, 4).map((ex, i) => (
-          <div key={i} style={{ fontSize: 9, color: '#f0e8d0', fontWeight: 700, textTransform: 'uppercase', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-            {ex.name}
+            <div style={{ fontSize: 18, fontWeight: 900, color: isSel ? '#4ac8c0' : isToday ? '#d8a840' : '#c8b090', lineHeight: 1.15, marginTop: 1 }}>
+              {d.getDate()}
+            </div>
+            {hasSess && (
+              <div style={{ width: 4, height: 4, borderRadius: '50%', background: isSel ? '#4ac8c0' : '#d8a840', margin: '3px auto 0' }} />
+            )}
           </div>
-        ))}
-        {exes.length === 0 && block && <div style={{ fontSize: 8, color: '#554a3a' }}>Sem exercícios</div>}
-        {!block && <div style={{ fontSize: 8, color: '#554a3a' }}>Personalizado</div>}
-      </div>
-    </div>
-  )
-}
-
-function PreviewResults({ ranked, selBl }) {
-  return (
-    <div style={{ ...pSt.slide, padding: '8px 12px', gap: 4 }}>
-      <div style={{ fontSize: 9, fontWeight: 900, color: '#4ac8c0', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 4 }}>RESULTADOS</div>
-      {selBl && <div style={{ fontSize: 8, color: '#c8b090', marginBottom: 4 }}>{blkLabel(selBl)}</div>}
-      {ranked.slice(0, 5).map((r, i) => (
-        <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <span style={{ fontSize: 8, color: '#554a3a', width: 14 }}>#{i+1}</span>
-          <span style={{ fontSize: 9, color: '#f0e8d0', fontWeight: 700, flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{r.athleteName}</span>
-          <span style={{ fontSize: 9, color: '#4ac8c0', fontFamily: 'monospace' }}>{perfStr(r, selBl?.type)}</span>
-        </div>
-      ))}
-      {ranked.length === 0 && <div style={{ fontSize: 8, color: '#554a3a' }}>Aguardando resultados...</div>}
-    </div>
-  )
-}
-
-function PreviewQr() {
-  return (
-    <div style={{ ...pSt.slide, alignItems: 'center', justifyContent: 'center', gap: 6, flexDirection: 'column' }}>
-      <div style={{ fontSize: 9, fontWeight: 900, color: '#f0e8d0', letterSpacing: '.15em', textTransform: 'uppercase' }}>REGISTRE</div>
-      <div style={{ width: 60, height: 60, background: '#161210', border: '1px solid #2a231c', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <i className="ti ti-qrcode" style={{ fontSize: 32, color: '#806850' }} />
-      </div>
-      <div style={{ fontSize: 7, color: '#554a3a', textTransform: 'uppercase', letterSpacing: '.1em' }}>Escaneie para registrar</div>
+        )
+      })}
+      <button style={navBtn} onClick={nextWeek}><i className="ti ti-chevron-right" /></button>
     </div>
   )
 }
@@ -129,45 +106,57 @@ export default function TvController({ sessions: propSessions }) {
   const [saving,     setSaving]     = useState(false)
   const [results,    setResults]    = useState([])
   const [athletes,   setAthletes]   = useState([])
+  const [gymName,    setGymName]    = useState('')
   const [selDate,    setSelDate]    = useState(() => toISO(new Date()))
   const [selSessId,  setSelSessId]  = useState(null)
   const [timerType,  setTimerType]  = useState('For Time')
   const [timerCap,   setTimerCap]   = useState(20)
-  const [timerBlkId, setTimerBlkId] = useState(null)  // null = personalizado
+  const [timerBlkId, setTimerBlkId] = useState(null)
   const [resLoading, setResLoading] = useState(false)
-  const chanRef = useRef(null)
-  const tvRef   = useRef(tv)
-  tvRef.current = tv
+  const previewRef   = useRef(null)
+  const [prevScale,  setPrevScale]  = useState(1)
+  const tvRef        = useRef(tv)
+  tvRef.current      = tv
 
-  // Load initial data
+  // Scale preview to fit container
+  useEffect(() => {
+    const el = previewRef.current
+    if (!el) return
+    const obs = new ResizeObserver(() => setPrevScale(el.clientWidth / 1920))
+    obs.observe(el)
+    setPrevScale(el.clientWidth / 1920)
+    return () => obs.disconnect()
+  }, [])
+
+  // Initial data load
   useEffect(() => {
     async function init() {
-      const [tvR] = await Promise.all([
-        supabase.from('tv_state').select('*').eq('id', 1).maybeSingle(),
-      ])
       setAthletes(loadAthletes())
-      if (tvR.data) {
-        const t = tvR.data
-        setTv(t)
-        if (t.date_key)       setSelDate(t.date_key)
-        if (t.session_id)     setSelSessId(t.session_id)
-        if (t.timer_type)     setTimerType(t.timer_type)
-        if (t.timer_cap_secs) setTimerCap(Math.round(t.timer_cap_secs / 60))
-        if (t.timer_block_id !== undefined) setTimerBlkId(t.timer_block_id || null)
-      }
+      const [tvR, stR] = await Promise.all([
+        supabase.from('tv_state').select('*').eq('id', 1).maybeSingle(),
+        supabase.from('settings').select('value').eq('id', 1).maybeSingle(),
+      ])
+      if (stR.data?.value?.gymName) setGymName(stR.data.value.gymName)
+      if (!tvR.data) return
+      const t = tvR.data
+      setTv(t)
+      if (t.date_key)       setSelDate(t.date_key)
+      if (t.session_id)     setSelSessId(t.session_id)
+      if (t.timer_type)     setTimerType(t.timer_type)
+      if (t.timer_cap_secs) setTimerCap(Math.round(t.timer_cap_secs / 60))
+      setTimerBlkId(t.timer_block_id || null)
     }
     init()
   }, [])
 
   // Subscribe to tv_state for multi-device sync
   useEffect(() => {
-    chanRef.current = supabase.channel('tv-ctrl-coach')
+    const chan = supabase.channel('tv-ctrl-coach')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tv_state' }, p => setTv(p.new))
       .subscribe()
-    return () => { chanRef.current?.unsubscribe() }
+    return () => { chan.unsubscribe() }
   }, [])
 
-  // Load results for selected session
   const loadResults = useCallback(async () => {
     if (!selSessId) return
     setResLoading(true)
@@ -180,11 +169,11 @@ export default function TvController({ sessions: propSessions }) {
 
   useEffect(() => { loadResults() }, [loadResults])
 
-  // Push tv_state — safe defaults when tv is null (e.g. table just created)
+  // push: safe defaults when tv is null so preview always works
   const push = useCallback(async (patch) => {
     const base = tvRef.current ?? { slide: 'blank', timer_type: 'For Time', timer_cap_secs: 1200, timer_paused_elapsed: 0 }
     const next = { ...base, ...patch, updated_at: Date.now() }
-    setTv(next)  // optimistic update — preview refreshes immediately
+    setTv(next)
     setSaving(true)
     await supabase.from('tv_state').upsert({ id: 1, ...next })
     setSaving(false)
@@ -205,8 +194,18 @@ export default function TvController({ sessions: propSessions }) {
     : []
   const ranked   = selBl ? rankResults(blockRes, selBl.type) : []
   const slide    = tv?.slide || 'blank'
-  const isLive   = tv?.slide && tv?.slide !== 'blank'
   const timerRun = !!tv?.timer_started_at
+
+  // previewTv reflects local state immediately (before Supabase round-trip)
+  const previewTv = useMemo(() => ({
+    ...(tv ?? {}),
+    slide,
+    session_id: selSessId,
+    date_key: selDate,
+    timer_type: timerType,
+    timer_cap_secs: timerCap * 60,
+    timer_block_id: timerBlkId,
+  }), [tv, slide, selSessId, selDate, timerType, timerCap, timerBlkId])
 
   function selectSlide(id) {
     push({ slide: id, session_id: selSessId, date_key: selDate })
@@ -214,29 +213,28 @@ export default function TvController({ sessions: propSessions }) {
 
   function selectSession(id) {
     setSelSessId(id)
-    const sess = dayS.find(s => s.id === id)
-    const blks = (sess?.blocks || []).filter(isWodBlock)
+    const sess  = dayS.find(s => s.id === id)
+    const blks  = (sess?.blocks || []).filter(isWodBlock)
     const first = blks[0]
     if (first) {
       setTimerBlkId(first.id)
       if (first.type && TIMER_TYPES.includes(first.type)) setTimerType(first.type)
-      const mins = parseInt(first.duration) || 20
-      setTimerCap(mins)
+      setTimerCap(parseInt(first.duration) || 20)
     } else {
       setTimerBlkId(null)
     }
-    push({ session_id: id, date_key: selDate })
+    push({ session_id: id, date_key: selDate, timer_block_id: first?.id || null })
   }
 
-  // Block selection auto-fills type and cap from block data
+  // selectBlock pushes timer_block_id to DB immediately so TV.html updates via Realtime
   function selectBlock(id) {
     setTimerBlkId(id || null)
-    if (!id) return  // personalizado — leave type/cap as-is
-    const bl = (selSessObj?.blocks || []).find(b => b.id === id)
-    if (!bl) return
-    if (bl.type && TIMER_TYPES.includes(bl.type)) setTimerType(bl.type)
-    const mins = parseInt(bl.duration) || timerCap
-    setTimerCap(mins)
+    const bl = id ? (selSessObj?.blocks || []).find(b => b.id === id) : null
+    if (bl) {
+      if (bl.type && TIMER_TYPES.includes(bl.type)) setTimerType(bl.type)
+      setTimerCap(parseInt(bl.duration) || timerCap)
+    }
+    push({ timer_block_id: id || null })
   }
 
   async function startTimer() {
@@ -261,18 +259,13 @@ export default function TvController({ sessions: propSessions }) {
     await push({ timer_started_at: null, timer_paused_elapsed: 0 })
   }
 
-  // Week days for date picker (-6 to +7 from today)
-  const today = new Date()
-  const weekDays = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date(today); d.setDate(today.getDate() - 6 + i); return toISO(d)
-  })
-
-  const inputSt  = { fontSize: 12, padding: '5px 8px', background: '#111', border: '1px solid #2a231c', color: '#c8b090', borderRadius: 4, outline: 'none', width: '100%', fontFamily: 'inherit' }
-  const roInputSt = { ...inputSt, background: '#0d1a10', color: '#4ac8c0', borderColor: '#1a3a20', cursor: 'default' }
-  const lblSt    = { fontSize: 10, fontWeight: 700, color: '#806850', textTransform: 'uppercase', letterSpacing: '.1em', display: 'block', marginBottom: 4 }
-  const btnBase  = { padding: '6px 12px', fontSize: 12, fontWeight: 700, border: '1px solid #2a231c', borderRadius: 4, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }
-  const card     = { background: '#111', border: '1px solid #2a231c', borderRadius: 6, padding: '16px 18px' }
+  // Styles
+  const card      = { background: '#111', border: '1px solid #2a231c', borderRadius: 6, padding: '16px 18px' }
   const cardTitle = { fontSize: 11, fontWeight: 900, color: '#d8a840', letterSpacing: '.15em', textTransform: 'uppercase', marginBottom: 14 }
+  const inputSt   = { fontSize: 12, padding: '5px 8px', background: '#111', border: '1px solid #2a231c', color: '#c8b090', borderRadius: 4, outline: 'none', width: '100%', fontFamily: 'inherit' }
+  const roInputSt = { ...inputSt, background: '#0d1a10', color: '#4ac8c0', borderColor: '#1a3a20', cursor: 'default' }
+  const lblSt     = { fontSize: 10, fontWeight: 700, color: '#806850', textTransform: 'uppercase', letterSpacing: '.1em', display: 'block', marginBottom: 4 }
+  const btnBase   = { padding: '6px 12px', fontSize: 12, fontWeight: 700, border: '1px solid #2a231c', borderRadius: 4, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }
 
   return (
     <div style={{ padding: '20px 24px', maxWidth: 1100, margin: '0 auto', fontFamily: 'var(--font, inherit)' }}>
@@ -285,8 +278,8 @@ export default function TvController({ sessions: propSessions }) {
             Quadro ao Vivo
           </div>
           <div style={{ fontSize: 11, color: '#554a3a', marginTop: 3 }}>
-            {isLive
-              ? <span style={{ color: '#48b860' }}>● TV ativa · {SLIDES.find(s=>s.id===slide)?.lbl}</span>
+            {tv?.slide && tv.slide !== 'blank'
+              ? <span style={{ color: '#48b860' }}>● TV ativa · {SLIDES.find(s=>s.id===tv.slide)?.lbl}</span>
               : <span>● TV apagada</span>}
             {saving && <span style={{ color: '#806850', marginLeft: 10 }}>Salvando...</span>}
           </div>
@@ -297,30 +290,27 @@ export default function TvController({ sessions: propSessions }) {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 24, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24, alignItems: 'start' }}>
 
         {/* ── Left: controls ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-          {/* Session picker — date select + session cards */}
+          {/* Session picker — weekly strip + cards */}
           <div style={card}>
             <div style={cardTitle}>Sessão</div>
-
-            {/* Date row */}
             <div style={{ marginBottom: 14 }}>
-              <label style={lblSt}>Data</label>
-              <select value={selDate} onChange={e => { setSelDate(e.target.value); setSelSessId(null) }} style={{ ...inputSt, width: 200 }}>
-                {weekDays.map(d => <option key={d} value={d}>{fmtDate(d)}</option>)}
-              </select>
+              <WeekStrip
+                selDate={selDate}
+                sessions={sessions}
+                onChange={d => { setSelDate(d); setSelSessId(null) }}
+              />
             </div>
-
-            {/* Session cards */}
             {dayS.length === 0
-              ? <div style={{ fontSize: 12, color: '#554a3a', fontStyle: 'italic' }}>Nenhuma sessão neste dia</div>
+              ? <div style={{ fontSize: 12, color: '#554a3a', fontStyle: 'italic', marginTop: 4 }}>Nenhuma sessão neste dia</div>
               : (
                 <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
                   {dayS.map(sess => {
-                    const sel = selSessId === sess.id
+                    const sel    = selSessId === sess.id
                     const blocks = (sess.blocks || []).filter(bl => bl.exercises?.length || bl.stations?.length)
                     return (
                       <div
@@ -369,20 +359,56 @@ export default function TvController({ sessions: propSessions }) {
             </div>
           </div>
 
-          {/* Timer controls — block first, then type/cap auto-filled */}
+          {/* Timer controls */}
           <div style={card}>
             <div style={cardTitle}>Timer</div>
 
-            {/* 1. Block WOD picker */}
+            {/* Block picker — card aesthetic */}
             <div style={{ marginBottom: 12 }}>
               <label style={lblSt}>Bloco WOD</label>
-              <select value={timerBlkId || ''} onChange={e => selectBlock(e.target.value)} style={inputSt} disabled={!selSessObj}>
-                <option value="">— personalizado —</option>
-                {wodBlocks.map(b => <option key={b.id} value={b.id}>{blkLabel(b)}</option>)}
-              </select>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                <div
+                  onClick={() => selectBlock(null)}
+                  style={{
+                    background: !timerBlkId ? '#1a120a' : '#161210',
+                    border: `1px solid ${!timerBlkId ? '#d8a840' : '#2a231c'}`,
+                    boxShadow: !timerBlkId ? '0 0 0 1px #d8a840' : 'none',
+                    borderRadius: 4, padding: '6px 12px', cursor: 'pointer', textAlign: 'center',
+                    transition: 'border-color .15s',
+                  }}
+                >
+                  <div style={{ fontSize: 11, fontWeight: 900, color: !timerBlkId ? '#d8a840' : '#806850', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+                    Personalizado
+                  </div>
+                </div>
+                {wodBlocks.map(bl => {
+                  const col = blkColor(bl)
+                  const sel = timerBlkId === bl.id
+                  return (
+                    <div
+                      key={bl.id}
+                      onClick={() => selectBlock(bl.id)}
+                      style={{
+                        background: sel ? col + '18' : '#161210',
+                        border: `1px solid ${sel ? col : '#2a231c'}`,
+                        boxShadow: sel ? `0 0 0 1px ${col}` : 'none',
+                        borderRadius: 4, padding: '6px 12px', cursor: 'pointer', textAlign: 'center',
+                        minWidth: 80, transition: 'border-color .15s',
+                      }}
+                    >
+                      <div style={{ fontSize: 11, fontWeight: 900, color: sel ? col : '#c8b090', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>
+                        {blkLabel(bl)}
+                      </div>
+                      <div style={{ fontSize: 9, color: sel ? col + 'cc' : '#554a3a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em' }}>
+                        {bl.type || bl.label}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
 
-            {/* 2. Type + Cap */}
+            {/* Type + Cap */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
               <div>
                 <label style={lblSt}>
@@ -402,7 +428,7 @@ export default function TvController({ sessions: propSessions }) {
               </div>
             </div>
 
-            {/* 3. Controls */}
+            {/* Controls */}
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               {!timerRun
                 ? <button onClick={startTimer} style={{ ...btnBase, background: '#48b860', borderColor: '#48b860', color: '#0d0b09' }}><i className="ti ti-player-play" /> Iniciar</button>
@@ -413,7 +439,7 @@ export default function TvController({ sessions: propSessions }) {
               </button>
               {(tv?.timer_paused_elapsed > 0) && (
                 <span style={{ fontSize: 12, color: '#c8b090', fontFamily: 'monospace', marginLeft: 8 }}>
-                  {fmt(tv.timer_paused_elapsed)} acumulado
+                  {String(Math.floor(tv.timer_paused_elapsed/60)).padStart(2,'0')}:{String(tv.timer_paused_elapsed%60).padStart(2,'0')} acumulado
                 </span>
               )}
             </div>
@@ -430,7 +456,8 @@ export default function TvController({ sessions: propSessions }) {
             </div>
             {ranked.length === 0
               ? <div style={{ fontSize: 12, color: '#554a3a' }}>Nenhum resultado ainda.</div>
-              : <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   {ranked.slice(0, 10).map((r, i) => (
                     <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '4px 8px', background: '#161210', borderRadius: 3 }}>
                       <span style={{ fontSize: 11, color: '#554a3a', width: 22 }}>#{i+1}</span>
@@ -440,20 +467,26 @@ export default function TvController({ sessions: propSessions }) {
                     </div>
                   ))}
                 </div>
+              )
             }
           </div>
 
         </div>
 
-        {/* ── Right: preview ── */}
+        {/* ── Right: preview — actual TV slide components at 1920×1080 scale ── */}
         <div style={{ position: 'sticky', top: 20 }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#806850', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 8 }}>Preview</div>
-          <div style={{ width: '100%', aspectRatio: '16/9', background: '#0d0b09', border: '1px solid #2a231c', borderRadius: 6, overflow: 'hidden' }}>
-            {slide === 'blank'   && <div style={{ ...pSt.slide, background: '#000', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 9, color: '#333', textTransform: 'uppercase', letterSpacing: '.15em' }}>Apagado</span></div>}
-            {slide === 'wod'     && <PreviewWod sess={selSessObj} dateKey={selDate} />}
-            {slide === 'timer'   && <PreviewTimer sess={selSessObj} timerBlkId={timerBlkId} timerType={timerType} timerCap={timerCap} tv={tv} />}
-            {slide === 'results' && <PreviewResults ranked={ranked} selBl={selBl} />}
-            {slide === 'qr'      && <PreviewQr />}
+          <div
+            ref={previewRef}
+            style={{ width: '100%', aspectRatio: '16/9', position: 'relative', overflow: 'hidden', background: '#0d0b09', border: '1px solid #2a231c', borderRadius: 6 }}
+          >
+            <div style={{ width: 1920, height: 1080, transform: `scale(${prevScale})`, transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
+              {slide === 'blank'   && <div style={{ width: '100%', height: '100%', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 28, color: '#222', textTransform: 'uppercase', letterSpacing: '.2em' }}>Apagado</span></div>}
+              {slide === 'wod'     && <WodSlide     sessions={sessions} tv={previewTv} gymName={gymName} />}
+              {slide === 'timer'   && <TimerSlide   tv={previewTv}      sessions={sessions} />}
+              {slide === 'results' && <ResultsSlide tv={previewTv}      sessions={sessions} athletes={athletes} results={results} />}
+              {slide === 'qr'      && <QrSlide      tv={previewTv} />}
+            </div>
           </div>
           <div style={{ fontSize: 10, color: '#554a3a', marginTop: 6, textAlign: 'center' }}>
             Slide atual na TV: <strong style={{ color: '#c8b090' }}>{SLIDES.find(s=>s.id===slide)?.lbl || '—'}</strong>

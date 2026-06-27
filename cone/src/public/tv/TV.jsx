@@ -57,7 +57,7 @@ function QrFooter({ dateKey, sessId }) {
 }
 
 // ── Slide: WOD ────────────────────────────────────────────────────────────────
-function WodSlide({ sessions, tv, gymName }) {
+export function WodSlide({ sessions, tv, gymName }) {
   const dayS = sessions?.[tv?.date_key] || []
   const sess = dayS.find(x => x.id === tv?.session_id)
   if (!sess) return <div className={s.empty}><i className="ti ti-calendar-off" /> Nenhuma sessão selecionada</div>
@@ -84,7 +84,7 @@ function WodSlide({ sessions, tv, gymName }) {
   )
 }
 
-function BlockCard({ bl }) {
+export function BlockCard({ bl }) {
   const color = blkColor(bl)
   const label = blkLabel(bl)
   const exes = bl.type === 'Estações'
@@ -114,7 +114,7 @@ function BlockCard({ bl }) {
 }
 
 // ── Slide: Timer (WOD + countdown ring) ──────────────────────────────────────
-function TimerSlide({ tv, sessions }) {
+export function TimerSlide({ tv, sessions }) {
   const [elapsed, setElapsed] = useState(() => elapsedSecs(tv))
   const tickRef = useRef(null)
   const tvRef = useRef(tv)
@@ -194,7 +194,7 @@ function TimerSlide({ tv, sessions }) {
 }
 
 // ── Slide: Results (live leaderboard) ────────────────────────────────────────
-function ResultsSlide({ tv, sessions, athletes, results }) {
+export function ResultsSlide({ tv, sessions, athletes, results }) {
   const dayS  = sessions?.[tv?.date_key] || []
   const sess  = dayS.find(x => x.id === tv?.session_id)
   const blocks = (sess?.blocks || []).filter(isWodBlock)
@@ -261,7 +261,7 @@ function ResultsSlide({ tv, sessions, athletes, results }) {
 }
 
 // ── Slide: QR ─────────────────────────────────────────────────────────────────
-function QrSlide({ tv }) {
+export function QrSlide({ tv }) {
   const [qrUrl, setQrUrl] = useState('')
   const url = `${window.location.origin}/CrossFit-Apps/schedule.html?date=${tv?.date_key || ''}&session=${tv?.session_id || ''}`
   useEffect(() => {
