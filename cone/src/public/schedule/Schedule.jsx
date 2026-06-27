@@ -629,6 +629,16 @@ export default function Schedule() {
   const [deskRegSubmitting,setDeskRegSubmitting]=useState(false)
   const [deskRegError,setDeskRegError]=useState('')
 
+  // Check-in flow (from QR code: ?checkin=CLASS_EXEC_ID)
+  const [checkinId,setCheckinId]=useState(()=>new URLSearchParams(location.search).get('checkin')||'')
+  const [checkinExec,setCheckinExec]=useState(null)
+  const [checkinAthId,setCheckinAthId]=useState('')
+  const [checkinAnonName,setCheckinAnonName]=useState('')
+  const [checkinMode,setCheckinMode]=useState('athlete') // 'athlete'|'anon'
+  const [checkinSearch,setCheckinSearch]=useState('')
+  const [checkinDone,setCheckinDone]=useState(false)
+  const [checkinSubmitting,setCheckinSubmitting]=useState(false)
+
   const [lockedId]=useState(()=>new URLSearchParams(location.search).get('id')||'')
 
   const demoMapRef=useRef({})
@@ -651,6 +661,31 @@ export default function Schedule() {
       if(todaySess.length>0)setSelSess({dateKey:t,sessId:todaySess[0].id})
     }
   },[status])
+
+  // Load class_execution for check-in flow
+  useEffect(()=>{
+    if(!checkinId)return
+    sb.from('class_executions').select('*').eq('id',checkinId).maybeSingle().then(({data})=>{
+      if(data)setCheckinExec(data)
+    })
+  },[checkinId])
+
+  async function submitCheckin(){
+    if(checkinMode==='athlete'&&!checkinAthId)return
+    if(checkinMode==='anon'&&!checkinAnonName.trim())return
+    setCheckinSubmitting(true)
+    if(checkinMode==='athlete'){
+      const cur=checkinExec?.athlete_ids||[]
+      if(!cur.includes(checkinAthId)){
+        await sb.from('class_executions').update({athlete_ids:[...cur,checkinAthId]}).eq('id',checkinId)
+      }
+    }else{
+      const cur=checkinExec?.anon_names||[]
+      await sb.from('class_executions').update({anon_names:[...cur,checkinAnonName.trim()]}).eq('id',checkinId)
+    }
+    setCheckinSubmitting(false)
+    setCheckinDone(true)
+  }
 
   async function load(attempt=0){
     if(attempt===0)setStatus('loading')
@@ -1150,5 +1185,83 @@ export default function Schedule() {
 
     </div></div>
     <Nav active="schedule" lockedId={lockedId}/>
+
+    {/* ── Check-in bottom sheet ── */}
+    {checkinId&&(
+      <div style={{
+        position:'fixed',bottom:0,left:0,right:0,zIndex:999,
+        background:'#161210',borderTop:'2px solid #d8a840',
+        padding:'20px 18px 28px',boxShadow:'0 -4px 32px rgba(0,0,0,.7)',
+        fontFamily:'var(--font,inherit)',
+      }}>
+        {checkinDone?(
+          <div style={{textAlign:'center',padding:'12px 0'}}>
+            <div style={{fontSize:36,marginBottom:8}}>✅</div>
+            <div style={{fontSize:18,fontWeight:900,color:'#48b860',letterSpacing:'.06em',textTransform:'uppercase'}}>Check-in feito!</div>
+            <div style={{fontSize:13,color:'#806850',marginTop:6}}>{checkinExec?.class_label||'Aula'}</div>
+          </div>
+        ):(
+          <>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+              <div>
+                <div style={{fontSize:12,fontWeight:900,color:'#d8a840',letterSpacing:'.15em',textTransform:'uppercase'}}>Check-in</div>
+                {checkinExec?.class_label&&<div style={{fontSize:16,fontWeight:700,color:'#f0e8d0',marginTop:2}}>{checkinExec.class_label}</div>}
+              </div>
+              <button onClick={()=>setCheckinId('')} style={{background:'transparent',border:'none',color:'#554a3a',fontSize:22,cursor:'pointer',padding:4}}>✕</button>
+            </div>
+
+            <div style={{display:'flex',gap:8,marginBottom:14}}>
+              <button onClick={()=>setCheckinMode('athlete')}
+                style={{flex:1,padding:'8px 4px',fontSize:13,fontWeight:700,border:`1px solid ${checkinMode==='athlete'?'#4ac8c0':'#2a231c'}`,borderRadius:4,background:checkinMode==='athlete'?'#0d1a1a':'#111',color:checkinMode==='athlete'?'#4ac8c0':'#806850',cursor:'pointer',fontFamily:'inherit'}}>
+                Estou na lista
+              </button>
+              <button onClick={()=>setCheckinMode('anon')}
+                style={{flex:1,padding:'8px 4px',fontSize:13,fontWeight:700,border:`1px solid ${checkinMode==='anon'?'#d8a840':'#2a231c'}`,borderRadius:4,background:checkinMode==='anon'?'#1a120a':'#111',color:checkinMode==='anon'?'#d8a840':'#806850',cursor:'pointer',fontFamily:'inherit'}}>
+                Não estou na lista
+              </button>
+            </div>
+
+            {checkinMode==='athlete'?(
+              <>
+                <input
+                  placeholder="Buscar nome..."
+                  value={checkinSearch}
+                  onChange={e=>setCheckinSearch(e.target.value)}
+                  style={{width:'100%',padding:'8px 10px',fontSize:14,background:'#111',border:'1px solid #2a231c',color:'#c8b090',borderRadius:4,outline:'none',fontFamily:'inherit',marginBottom:10,boxSizing:'border-box'}}
+                />
+                <div style={{display:'flex',flexDirection:'column',gap:6,maxHeight:160,overflowY:'auto'}}>
+                  {athletes
+                    .filter(a=>!checkinSearch||a.name.toLowerCase().includes(checkinSearch.toLowerCase()))
+                    .map(a=>(
+                      <div key={a.id} onClick={()=>setCheckinAthId(String(a.id))}
+                        style={{padding:'8px 12px',borderRadius:4,cursor:'pointer',fontSize:14,fontWeight:700,
+                          background:checkinAthId===String(a.id)?'#0d1a1a':'#111',
+                          border:`1px solid ${checkinAthId===String(a.id)?'#4ac8c0':'#2a231c'}`,
+                          color:checkinAthId===String(a.id)?'#4ac8c0':'#c8b090'}}>
+                        {a.name}
+                      </div>
+                    ))}
+                </div>
+              </>
+            ):(
+              <input
+                placeholder="Seu nome (placeholder)..."
+                value={checkinAnonName}
+                onChange={e=>setCheckinAnonName(e.target.value)}
+                style={{width:'100%',padding:'8px 10px',fontSize:14,background:'#111',border:'1px solid #2a231c',color:'#c8b090',borderRadius:4,outline:'none',fontFamily:'inherit',boxSizing:'border-box'}}
+              />
+            )}
+
+            <button onClick={submitCheckin} disabled={checkinSubmitting||(checkinMode==='athlete'&&!checkinAthId)||(checkinMode==='anon'&&!checkinAnonName.trim())}
+              style={{width:'100%',marginTop:14,padding:'11px',fontSize:15,fontWeight:900,letterSpacing:'.08em',textTransform:'uppercase',
+                border:'none',borderRadius:5,cursor:'pointer',fontFamily:'inherit',
+                background:checkinSubmitting?'#1a3a1a':'#48b860',color:'#0d0b09',
+                opacity:(checkinSubmitting||(checkinMode==='athlete'&&!checkinAthId)||(checkinMode==='anon'&&!checkinAnonName.trim()))?0.5:1}}>
+              {checkinSubmitting?'Registrando...':'Fazer Check-in'}
+            </button>
+          </>
+        )}
+      </div>
+    )}
   </>)
 }

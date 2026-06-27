@@ -39,9 +39,10 @@ function fmtDate(iso) {
 }
 
 // ── Shared: mini QR footer for WOD + Timer slides ─────────────────────────────
-function QrFooter({ dateKey, sessId }) {
+function QrFooter({ dateKey, sessId, classId }) {
   const [qrUrl, setQrUrl] = useState('')
-  const url = `${window.location.origin}/CrossFit-Apps/schedule.html?date=${dateKey}&session=${sessId}`
+  const base = `${window.location.origin}/CrossFit-Apps/schedule.html?date=${dateKey}&session=${sessId}`
+  const url  = classId ? `${base}&checkin=${classId}` : base
   useEffect(() => {
     if (!dateKey || !sessId) return
     QRCode.toDataURL(url, { width: 160, margin: 1, color: { dark: '#f0e8d0', light: '#00000000' } })
@@ -51,7 +52,7 @@ function QrFooter({ dateKey, sessId }) {
   return (
     <div className={s.qrFooter}>
       {qrUrl && <img src={qrUrl} alt="QR" className={s.qrFooterImg} />}
-      <span className={s.qrFooterText}>Escaneie para registrar resultado</span>
+      <span className={s.qrFooterText}>{classId ? 'Escaneie para fazer check-in' : 'Escaneie para registrar resultado'}</span>
     </div>
   )
 }
@@ -79,7 +80,7 @@ export function WodSlide({ sessions, tv, gymName }) {
         {blocks.map(bl => <BlockCard key={bl.id} bl={bl} />)}
       </div>
 
-      <QrFooter dateKey={tv.date_key} sessId={tv.session_id} />
+      <QrFooter dateKey={tv.date_key} sessId={tv.session_id} classId={tv?.class_id} />
     </div>
   )
 }
@@ -193,26 +194,97 @@ export function TimerSlide({ tv, sessions }) {
   )
 }
 
-// ── Slide: Results (live leaderboard) ────────────────────────────────────────
-export function ResultsSlide({ tv, sessions, athletes, results }) {
-  const dayS  = sessions?.[tv?.date_key] || []
-  const sess  = dayS.find(x => x.id === tv?.session_id)
+// ── Slide: Results (live leaderboard, with optional banter mode) ──────────────
+export function ResultsSlide({ tv, sessions, athletes, results, classExecs }) {
+  const dayS   = sessions?.[tv?.date_key] || []
+  const sess   = dayS.find(x => x.id === tv?.session_id)
   const blocks = (sess?.blocks || []).filter(isWodBlock)
-  const selBl = blocks[0]
+  const selBl  = blocks[0]
 
   if (!selBl) return <div className={s.empty}><i className="ti ti-clipboard-off" /> Nenhum bloco WOD encontrado</div>
 
-  const blockRes = results
-    .filter(r => r.sessionId === tv?.session_id)
-    .flatMap(r => (r.blocks || [])
-      .filter(b => b.blockId === selBl.id)
-      .map(b => ({ ...b, athleteId: r.athleteId, athleteName: athletes.find(a => a.id === r.athleteId)?.name || '—' }))
+  // Active classes (not reset) — banter mode when ≥2
+  const activeClasses = (classExecs || []).filter(c => !c.reset_at)
+  const banter = activeClasses.length >= 2
+
+  const MEDALS = ['🥇','🥈','🥉']
+
+  function getBlockResults(filterAthleteIds) {
+    return results
+      .filter(r => r.sessionId === tv?.session_id)
+      .filter(r => !filterAthleteIds || filterAthleteIds.includes(r.athleteId))
+      .flatMap(r => (r.blocks || [])
+        .filter(b => b.blockId === selBl.id)
+        .map(b => ({ ...b, athleteId: r.athleteId, athleteName: athletes.find(a => a.id === r.athleteId)?.name || '—' }))
+      )
+  }
+
+  function ClassColumn({ cls }) {
+    const ids = cls.athlete_ids || []
+    const blockRes = getBlockResults(ids.length ? ids : null)
+    const ranked = rankResults(blockRes, selBl.type)
+    const top3 = ranked.slice(0, 3)
+    const rest  = ranked.slice(3)
+    return (
+      <div className={s.banterCol}>
+        <div className={s.banterColHdr}>{cls.class_label}</div>
+        {ranked.length === 0 ? (
+          <div className={s.noResults} style={{ fontSize: 28 }}>Aguardando...</div>
+        ) : (
+          <>
+            <div className={s.podium}>
+              {[1, 0, 2].map(idx => {
+                const r = top3[idx]
+                if (!r) return <div key={idx} className={s.podiumEmpty} />
+                const rank = idx === 0 ? 1 : idx === 1 ? 2 : 3
+                return (
+                  <div key={idx} className={`${s.podiumCard} ${rank === 1 ? s.podiumFirst : ''}`}>
+                    <div className={s.podiumMedal}>{MEDALS[rank-1]}</div>
+                    <div className={s.podiumName}>{r.athleteName}</div>
+                    <div className={s.podiumPerf}>{perfStr(r, selBl.type)}</div>
+                    <div className={s.podiumScale}>{r.scale || 'RX'}</div>
+                  </div>
+                )
+              })}
+            </div>
+            {rest.length > 0 && (
+              <div className={s.restList}>
+                {rest.map((r, i) => (
+                  <div key={i} className={s.restRow}>
+                    <span className={s.restRank}>#{i+4}</span>
+                    <span className={s.restName}>{r.athleteName}</span>
+                    <span className={s.restScale}>{r.scale || 'RX'}</span>
+                    <span className={s.restPerf}>{perfStr(r, selBl.type)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     )
+  }
+
+  if (banter) {
+    return (
+      <div className={s.resultsSlide}>
+        <div className={s.resultsHdr}>
+          <div className={s.resultsTitle}>BANTER MODE</div>
+          <div className={s.resultsBlock}>{blkLabel(selBl)}</div>
+          {tv?.date_key && <div className={s.resultsDate}>{fmtDate(tv.date_key)}</div>}
+        </div>
+        <div className={s.banterWrap}>
+          {activeClasses.map(cls => <ClassColumn key={cls.id} cls={cls} />)}
+        </div>
+      </div>
+    )
+  }
+
+  // Default single-class leaderboard
+  const blockRes = getBlockResults(null)
   const ranked = rankResults(blockRes, selBl.type)
   const top3 = ranked.slice(0, 3)
   const rest  = ranked.slice(3)
-
-  const MEDALS = ['🥇','🥈','🥉']
 
   return (
     <div className={s.resultsSlide}>
@@ -263,7 +335,9 @@ export function ResultsSlide({ tv, sessions, athletes, results }) {
 // ── Slide: QR ─────────────────────────────────────────────────────────────────
 export function QrSlide({ tv }) {
   const [qrUrl, setQrUrl] = useState('')
-  const url = `${window.location.origin}/CrossFit-Apps/schedule.html?date=${tv?.date_key || ''}&session=${tv?.session_id || ''}`
+  const base = `${window.location.origin}/CrossFit-Apps/schedule.html?date=${tv?.date_key || ''}&session=${tv?.session_id || ''}`
+  const url  = tv?.class_id ? `${base}&checkin=${tv.class_id}` : base
+  const title = tv?.class_id ? 'CHECK-IN DA AULA' : 'REGISTRE SEU RESULTADO'
   useEffect(() => {
     if (!tv?.date_key || !tv?.session_id) return
     QRCode.toDataURL(url, { width: 500, margin: 2, color: { dark: '#f0e8d0', light: '#0d0b0900' } })
@@ -271,7 +345,7 @@ export function QrSlide({ tv }) {
   }, [url])
   return (
     <div className={s.qrSlide}>
-      <div className={s.qrTitle}>REGISTRE SEU RESULTADO</div>
+      <div className={s.qrTitle}>{title}</div>
       {qrUrl
         ? <img src={qrUrl} alt="QR Code" className={s.qrBig} />
         : <div className={s.qrLoading}>Gerando QR...</div>
@@ -283,14 +357,16 @@ export function QrSlide({ tv }) {
 
 // ── Main TV ───────────────────────────────────────────────────────────────────
 export default function TV() {
-  const [scale,    setScale]    = useState(1)
-  const [tv,       setTv]       = useState(null)
-  const [sessions, setSessions] = useState({})
-  const [athletes, setAthletes] = useState([])
-  const [results,  setResults]  = useState([])
-  const [gymName,  setGymName]  = useState('')
+  const [scale,       setScale]       = useState(1)
+  const [tv,          setTv]          = useState(null)
+  const [sessions,    setSessions]    = useState({})
+  const [athletes,    setAthletes]    = useState([])
+  const [results,     setResults]     = useState([])
+  const [classExecs,  setClassExecs]  = useState([])
+  const [gymName,     setGymName]     = useState('')
   const chanRef    = useRef(null)
   const resChanRef = useRef(null)
+  const ceChanRef  = useRef(null)
   const prevSessId = useRef(null)
 
   // Scale canvas to fill screen
@@ -329,6 +405,7 @@ export default function TV() {
   // Subscribe to results when showing results/wod slides
   const slide   = tv?.slide || 'blank'
   const sessId  = tv?.session_id
+  const dateKey = tv?.date_key
   useEffect(() => {
     if (slide !== 'results' && slide !== 'wod') return
     if (!sessId || sessId === prevSessId.current) return
@@ -336,7 +413,6 @@ export default function TV() {
 
     resChanRef.current?.unsubscribe()
 
-    // Initial results load
     sb.from('results_v2').select('*').eq('session_id', sessId).then(({ data }) => {
       if (data) setResults(data.map(mapRow))
     })
@@ -351,13 +427,37 @@ export default function TV() {
     return () => { resChanRef.current?.unsubscribe() }
   }, [slide, sessId])
 
+  // Load + subscribe class_executions for current session
+  useEffect(() => {
+    if (!sessId || !dateKey) return
+
+    ceChanRef.current?.unsubscribe()
+
+    sb.from('class_executions').select('*')
+      .eq('session_id', sessId).eq('date_key', dateKey)
+      .order('created_at', { ascending: true })
+      .then(({ data }) => { if (data) setClassExecs(data) })
+
+    ceChanRef.current = sb.channel(`tv-ce-${sessId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'class_executions',
+        filter: `session_id=eq.${sessId}` }, () => {
+          sb.from('class_executions').select('*')
+            .eq('session_id', sessId).eq('date_key', dateKey)
+            .order('created_at', { ascending: true })
+            .then(({ data }) => { if (data) setClassExecs(data) })
+        })
+      .subscribe()
+
+    return () => { ceChanRef.current?.unsubscribe() }
+  }, [sessId, dateKey])
+
   return (
     <div className={s.root}>
       <div className={s.canvas} style={{ width: DV_W, height: DV_H, transform: `scale(${scale})`, transformOrigin: 'center center' }}>
         {slide === 'blank'   && <div className={s.blank} />}
         {slide === 'wod'     && <WodSlide     sessions={sessions} tv={tv} gymName={gymName} />}
         {slide === 'timer'   && <TimerSlide   tv={tv} sessions={sessions} />}
-        {slide === 'results' && <ResultsSlide tv={tv} sessions={sessions} athletes={athletes} results={results} />}
+        {slide === 'results' && <ResultsSlide tv={tv} sessions={sessions} athletes={athletes} results={results} classExecs={classExecs} />}
         {slide === 'qr'      && <QrSlide      tv={tv} />}
         {!tv && <div className={s.loading}><i className={`ti ti-loader-2 ${s.spin}`} /> Conectando...</div>}
       </div>
