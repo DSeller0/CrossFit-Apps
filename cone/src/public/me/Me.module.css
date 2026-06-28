@@ -31,7 +31,7 @@
 .hdrDiamond { width: 5px; height: 5px; border: 1px solid var(--gold); transform: rotate(45deg); flex-shrink: 0; }
 
 /* ── Page ── */
-.page { max-width: 640px; margin: 0 auto; padding: 12px 16px 0; }
+.page { margin: 0 auto; padding: 12px 16px 0; }
 .centerMsg { text-align: center; padding: 64px 14px; color: var(--muted); font-size: 13px; }
 .retryBtn { margin-top: 12px; background: transparent; border: 1px solid var(--divider); color: var(--muted); font-size: 13px; padding: 7px 16px; border-radius: 5px; cursor: pointer; font-family: var(--font); }
 
