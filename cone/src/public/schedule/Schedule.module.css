@@ -95,8 +95,8 @@
 .detailExVol { display:inline-block; font-size:10px; font-weight:700; color:var(--gold); background:color-mix(in srgb,var(--gold) 10%,transparent); border:1px solid color-mix(in srgb,var(--gold) 20%,transparent); border-radius:3px; padding:1px 6px; margin-top:2px; }
 .detailExNote { font-size:10px; color:var(--teal); font-style:italic; margin-top:1px; }
 .detailExMovement { font-size:11px; color:var(--sub); margin-top:2px; padding-left:2px; }
-.pillVol { display:inline-flex; align-items:center; font-size:10px; font-weight:700; color:#0d0b09; background:var(--teal); padding:1px 6px; flex-shrink:0; white-space:nowrap; line-height:1.5; }
-.pillWt  { display:inline-flex; align-items:center; font-size:10px; font-weight:700; color:#0d0b09; background:var(--gold); padding:1px 6px; flex-shrink:0; white-space:nowrap; line-height:1.5; }
+.pillVol { display:inline-flex; align-items:center; font-size:10px; font-weight:700; color:var(--bg); background:var(--teal); padding:1px 6px; flex-shrink:0; white-space:nowrap; line-height:1.5; }
+.pillWt  { display:inline-flex; align-items:center; font-size:10px; font-weight:700; color:var(--bg); background:var(--gold); padding:1px 6px; flex-shrink:0; white-space:nowrap; line-height:1.5; }
 @media(min-width:768px){ .detailExName{font-size:14px} .detailExVol{font-size:12px} .detailExNote{font-size:12px} .detailExMovement{font-size:13px} .pillVol,.pillWt{font-size:12px} }
 
 /* ── Estações ── */
