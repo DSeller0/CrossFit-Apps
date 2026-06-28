@@ -17,7 +17,7 @@
   .pickerWrap  { display:none; }
   .noSel       { display:block; text-align:center; padding:80px 20px; color:var(--dim); font-size:13px; }
   .profPane    { flex:1; overflow-y:auto; }
-  .page        { max-width:none; padding:0; }
+  .page        { max-width:none; margin:0; padding:0; }
   .heroSection { padding:24px 28px 0; }
   .contentGrid { display:flex; align-items:flex-start; }
   .colMain     { flex:0 0 40%; min-width:0; padding:20px 24px; }
