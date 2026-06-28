@@ -22,13 +22,14 @@ function applyTheme(id) {
 export default function ConfigTab() {
   const init = loadSettings();
   const [gymName, setGymName]   = useState(init.gymName || '');
+  const [gymSub,  setGymSub]   = useState(init.gymSub  || '');
   const [label,   setLabel]     = useState(init.label   || '');
   const [logo,    setLogo]      = useState(init.logo    || '');
   const [flash,   setFlash]     = useState(false);
   const [theme,   setTheme]     = useState(getTheme);
 
   const save = () => {
-    saveSettings({ ...loadSettings(), gymName: gymName.trim(), label: label.trim(), logo: logo.trim() });
+    saveSettings({ ...loadSettings(), gymName: gymName.trim(), gymSub: gymSub.trim(), label: label.trim(), logo: logo.trim() });
     setFlash(true);
     setTimeout(() => setFlash(false), 2000);
   };
@@ -50,6 +51,17 @@ export default function ConfigTab() {
             placeholder="Ex: Team Medrado"
           />
           <span className="cfg-hint">Aparece no hub público e no leaderboard.</span>
+        </label>
+
+        <label className="cfg-field">
+          <span className="cfg-label">Modalidade</span>
+          <input
+            className="cfg-input"
+            value={gymSub}
+            onChange={e => setGymSub(e.target.value)}
+            placeholder="Ex: Cross Training"
+          />
+          <span className="cfg-hint">Subtítulo exibido na página inicial (padrão: Cross Training).</span>
         </label>
 
         <label className="cfg-field">

@@ -122,7 +122,7 @@ export default function Index() {
   const [sessions,    setSessions]    = useState({})
   const [countBySess, setCountBySess] = useState({})
   const [gymName,     setGymName]     = useState('CONE')
-  const [gymSub,      setGymSub]      = useState('CrossFit')
+  const [gymSub,      setGymSub]      = useState('Cross Training')
   const [error,       setError]       = useState(null)
   const [expandedSet, setExpandedSet] = useState(new Set())
   const [pwaShow,     setPwaShow]     = useState(false)
@@ -159,6 +159,7 @@ export default function Index() {
       if (todaySess.length) setExpandedSet(new Set([todaySess[0].id]))
 
       if (settings.gymName) setGymName(settings.gymName.toUpperCase())
+      setGymSub(settings.gymSub || 'Cross Training')
       setSessions(allSessions)
       setCountBySess(counts)
       setStatus('ok')

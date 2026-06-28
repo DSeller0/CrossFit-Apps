@@ -190,7 +190,7 @@ export default function Leaderboard() {
     return rankResults(filtered, selObj.blType).map(r => ({ ...r, athlete: athletes.find(a => a.id === r.athleteId) }))
   }, [selObj, appState, scaleFilter])
 
-  const gymName = cfg.gymName || appState?.settings?.gymName || 'Cone'
+  const gymName = (appState?.settings?.gymName || 'Cone').toUpperCase()
 
   const weekWods = useMemo(() => {
     const [sun, sat] = weekBounds(weekOffset)
@@ -203,7 +203,7 @@ export default function Leaderboard() {
   if (status === 'loading') return (
     <>
       <div className={s.pageRoot}>
-        <Header brand="CONE" sub="Leaderboard" />
+        <Header brand={gymName} sub="RANKING" />
         <div className={s.loading}>Carregando resultados...</div>
       </div>
       <Nav active="leaderboard" gymName={gymName} />
@@ -213,7 +213,7 @@ export default function Leaderboard() {
   if (status === 'error') return (
     <>
       <div className={s.pageRoot}>
-        <Header brand="CONE" sub="Leaderboard" />
+        <Header brand={gymName} sub="RANKING" />
         <div className={s.errState}>
           <IconAlertCircle size={32} />
           <br /><br />
@@ -231,7 +231,7 @@ export default function Leaderboard() {
   return (
     <>
       <div className={s.pageRoot}>
-        <Header brand="CONE" sub={gymName} />
+        <Header brand={gymName} sub="RANKING" />
 
         {/* Mobile: sticky WOD select + scale filters */}
         <div className={s.controls}>

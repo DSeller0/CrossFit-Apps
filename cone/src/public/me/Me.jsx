@@ -125,6 +125,7 @@ function catToInputType(cats) {
 
 export default function Me() {
   const [status, setStatus] = useState('loading')
+  const [gymName, setGymName] = useState('Cone')
   const [athletes, setAthletes] = useState([])
   const [sessions, setSessions] = useState({})
   const [allResults, setAllResults] = useState([])
@@ -175,23 +176,26 @@ export default function Me() {
     setStatus('loading')
     const id = new URLSearchParams(location.search).get('id')
     try {
-      const [athRow,sessRow,resRaw,goalsRow,regRow] = await Promise.all([
+      const [athRow,sessRow,resRaw,goalsRow,regRow,settRow] = await Promise.all([
         sb.from('athletes').select('value').eq('id',1).maybeSingle(),
         sb.from('sessions').select('value').eq('id',1).maybeSingle(),
         sb.from('results_v2').select('*'),
         sb.from('goals_data').select('value').eq('id',1).maybeSingle(),
         sb.from('exercise_registry').select('value').eq('id',1).maybeSingle(),
+        sb.from('settings').select('value').eq('id',1).maybeSingle(),
       ])
       const athList = athRow.data?.value || []
       const sessData = sessRow.data?.value || {}
       const resData = (resRaw.data||[]).map(r=>({id:r.id,date:r.date,athleteId:r.athlete_id,sessionId:r.session_id,presence:r.presence,energyLevel:r.energy_level,blocks:r.blocks,coachNote:r.coach_note,flagForReview:r.flag_for_review,loggedByAthlete:r.logged_by_athlete}))
       const goalsD = goalsRow.data?.value || { athleteGoals:{}, prs:{} }
       const regData = regRow.data?.value || {}
+      const settD = settRow.data?.value || {}
       setAthletes(athList)
       setSessions(sessData)
       setAllResults(resData)
       setGoalsData(goalsD)
       setRegistry(regData)
+      if (settD.gymName) setGymName(settD.gymName)
       if(id) {
         const ath = athList.find(a=>String(a.id)===String(id))
         if(!ath){ setStatus('picker'); return }
@@ -550,8 +554,8 @@ export default function Me() {
           <div className={styles.hdrDiamond} />
           <div className={`${styles.hdrLine} ${styles.hdrLineR}`} />
         </div>
-        <div className={styles.brand}>CONE</div>
-        <div className={styles.gym}>Meu Perfil</div>
+        <div className={styles.brand}>{gymName.toUpperCase()}</div>
+        <div className={styles.gym}>MEU PERFIL</div>
       </header>
 
       {/* ── States ── */}

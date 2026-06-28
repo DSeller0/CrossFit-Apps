@@ -950,8 +950,8 @@ export default function Schedule() {
     <div className={styles.pageRoot}><div className={styles.inner}>
     <div className={styles.hdr}>
       <div className={styles.hdrRule}><div className={styles.hdrLine}/><div className={styles.hdrDiamond}/><div className={`${styles.hdrLine} ${styles.hdrLineR}`}/></div>
-      <div className={styles.brand}>CONE</div>
-      <div className={styles.gym}>{gymName}</div>
+      <div className={styles.brand}>{gymName.toUpperCase()}</div>
+      <div className={styles.gym}>AGENDA</div>
     </div>
 
     {/* Mobile bars */}
@@ -1041,7 +1041,6 @@ export default function Schedule() {
 
       {/* Desktop page header */}
       <div className={styles.deskPageHdr}>
-        <span className={styles.deskPageTitle}>Agenda</span>
         <div className={styles.deskWeekNav}>
           <button className={styles.navBtn} onClick={()=>changeWeek(-1)}><i className="ti ti-chevron-left"/></button>
           <span className={styles.weekLabel}>{weekLabel}</span>

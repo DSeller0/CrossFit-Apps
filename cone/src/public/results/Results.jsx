@@ -350,8 +350,8 @@ export default function Results() {
         {/* Header */}
         <div className={styles.hdr}>
           <div className={styles.hdrRule}><div className={styles.hdrLine}/><div className={styles.hdrDiamond}/><div className={`${styles.hdrLine} ${styles.hdrLineR}`}/></div>
-          <div className={styles.brand}>CONE</div>
-          <div className={styles.gym}>{gymName} · Resultados</div>
+          <div className={styles.brand}>{gymName.toUpperCase()}</div>
+          <div className={styles.gym}>RESULTADOS</div>
         </div>
 
         {status!=='loading'&&<>

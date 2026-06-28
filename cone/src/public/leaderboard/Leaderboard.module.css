@@ -50,7 +50,7 @@
 
 /* ── LEFT: WOD selector column (desktop only) ── */
 .wodCol { display: none; }
-@media(min-width:768px) { .wodCol { display:block; flex:0 0 320px; min-width:0; } }
+@media(min-width:768px) { .wodCol { display:block; flex:0 0 320px; min-width:0; background:var(--stone); padding:20px; } }
 
 .weekNav {
   display: flex;
@@ -121,7 +121,7 @@
 
 /* ── RIGHT: Rankings column ── */
 .rankCol { }
-@media(min-width:768px) { .rankCol { flex:1; min-width:0; } }
+@media(min-width:768px) { .rankCol { flex:1; min-width:0; background:var(--stone); } }
 
 /* Desktop scale filter pills (hidden on mobile) */
 .desktopScale { display: none; }

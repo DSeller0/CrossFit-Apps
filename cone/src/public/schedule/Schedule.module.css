@@ -204,7 +204,7 @@
 /* ── Desktop page header ── */
 .deskPageHdr { display:flex; align-items:center; gap:12px; padding:8px 20px; border-bottom:1px solid var(--divider); flex-shrink:0; background:var(--stone); }
 .deskPageTitle { font-size:10px; font-weight:900; letter-spacing:.18em; color:var(--muted); text-transform:uppercase; }
-.deskWeekNav { display:flex; align-items:center; gap:8px; }
+.deskWeekNav { display:flex; align-items:center; gap:8px; flex:1; justify-content:space-between; }
 .deskWeekNav .weekLabel { font-size:12px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:.06em; }
 
 /* ── Desktop week strip ── */
