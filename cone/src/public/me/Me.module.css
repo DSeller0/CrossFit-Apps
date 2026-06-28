@@ -24,15 +24,11 @@
   .colPrs      { width:320px; flex-shrink:0; padding:20px 24px; border-left:1px solid var(--divider); }
 }
 
-/* ── Header ── */
-.hdr { padding: 18px 20px 14px; border-bottom: 1px solid var(--divider); background: var(--stone); position: sticky; top: 0; z-index: 20; }
+/* ── Hero ornament rules (reused from shared header pattern) ── */
 .hdrRule { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .hdrLine { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold2)); }
 .hdrLineR { background: linear-gradient(270deg, transparent, var(--gold2)); }
 .hdrDiamond { width: 5px; height: 5px; border: 1px solid var(--gold); transform: rotate(45deg); flex-shrink: 0; }
-.brand { font-size: 22px; font-weight: 900; letter-spacing: 8px; color: var(--cream); text-align: center; }
-.gym { text-align: center; font-size: 9px; font-weight: 700; color: var(--gold); letter-spacing: .25em; text-transform: uppercase; margin-top: 1px; }
-.hdrBack { position: absolute; top: 50%; left: 14px; transform: translateY(-50%); color: var(--muted); font-size: 20px; text-decoration: none; padding: 4px; }
 
 /* ── Page ── */
 .page { max-width: 640px; margin: 0 auto; padding: 12px 16px 0; }
@@ -273,7 +269,6 @@
 
 /* ── Responsive ── */
 @media (min-width: 768px) {
-  .brand { font-size: 26px; } .gym { font-size: 11px; } .hdrBack { font-size: 24px; }
   .avLg  { width: 88px; height: 88px; font-size: 32px; }
   .pname { font-size: 34px; letter-spacing: 6px; } .ptier { font-size: 12px; } .psub { font-size: 13px; }
   .h { font-size: 18px; }

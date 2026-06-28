@@ -1,6 +1,6 @@
 .hdr {
   padding: 18px 20px 14px;
-  background: var(--bg);
+  background: var(--stone);
   position: sticky;
   top: 0;
   z-index: 20;

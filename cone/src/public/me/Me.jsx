@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import Nav from '../Nav.jsx'
+import Header from '../Header.jsx'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import { toISO, todayISO } from '../lib/week.js'
@@ -172,6 +173,21 @@ export default function Me() {
     return () => window.removeEventListener('pageshow', onShow)
   }, [])
 
+  useEffect(() => {
+    const onPop = () => {
+      const id = new URLSearchParams(location.search).get('id')
+      if(id) {
+        const ath = athletes.find(a => String(a.id) === String(id))
+        if(ath) { setSelAthlete(ath); setStatus('profile'); document.title = ath.name + ' · Cone' }
+        else { setSelAthlete(null); setStatus('picker') }
+      } else {
+        setSelAthlete(null); setStatus('picker'); document.title = 'Meu Perfil · Cone'
+      }
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [athletes])
+
   async function load(attempt = 0) {
     setStatus('loading')
     const id = new URLSearchParams(location.search).get('id')
@@ -275,6 +291,20 @@ export default function Me() {
   function closeLogSheet() {
     setLsOpen(false)
     setLsPending(null)
+  }
+
+  function selectAthlete(ath) {
+    setSelAthlete(ath)
+    setStatus('profile')
+    document.title = ath.name + ' · Cone'
+    history.pushState(null, '', 'me.html?id=' + ath.id)
+  }
+
+  function selectAll() {
+    setSelAthlete(null)
+    setStatus('picker')
+    document.title = 'Meu Perfil · Cone'
+    history.pushState(null, '', 'me.html')
   }
 
   async function savePr() {
@@ -547,16 +577,7 @@ export default function Me() {
       </div>
 
       <div className={styles.pageRoot}><div className={styles.inner}>
-      {/* ── Header ── */}
-      <header className={styles.hdr}>
-        <div className={styles.hdrRule}>
-          <div className={styles.hdrLine} />
-          <div className={styles.hdrDiamond} />
-          <div className={`${styles.hdrLine} ${styles.hdrLineR}`} />
-        </div>
-        <div className={styles.brand}>{gymName.toUpperCase()}</div>
-        <div className={styles.gym}>MEU PERFIL</div>
-      </header>
+      <Header brand={gymName.toUpperCase()} sub="MEU PERFIL" />
 
       <div className={styles.twoPaneBody}>
       {/* ── Selector pane (desktop only) ── */}
@@ -566,8 +587,9 @@ export default function Me() {
           <input className={styles.selInp} type="search" placeholder="Buscar..." value={query} onChange={e=>setQuery(e.target.value)} autoComplete="off" />
         </div>
         <div className={styles.selList}>
-          <a className={`${styles.selTodos} ${!selAthlete?styles.selTodosOn:''}`} href="me.html">
-            <span className={`${styles.selTodosDi} ${!selAthlete?styles.selDiOn:''}`}>{!selAthlete?'◈':'◇'}</span>
+          <a className={`${styles.selTodos} ${!selAthlete?styles.selTodosOn:''}`} href="me.html"
+            onClick={e=>{e.preventDefault();selectAll()}}>
+            <span className={`${styles.selTodosDi} ${!selAthlete?styles.selDiOn:''}`}>{!selAthlete?'◆':'◇'}</span>
             <span className={styles.selTodosLbl}>Todos</span>
           </a>
           {(()=>{
@@ -575,9 +597,10 @@ export default function Me() {
             const sorted=[...athletes].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'))
             const m=q2?sorted.filter(a=>a.name.toLowerCase().includes(q2)):sorted
             return m.map(a=>{
-              const on=selAthlete?.id===a.id
+              const on=String(selAthlete?.id)===String(a.id)
               return (
-                <a key={a.id} className={`${styles.selItem} ${on?styles.selItemOn:''}`} href={`me.html?id=${a.id}`}>
+                <a key={a.id} className={`${styles.selItem} ${on?styles.selItemOn:''}`} href={`me.html?id=${a.id}`}
+                  onClick={e=>{e.preventDefault();selectAthlete(a)}}>
                   <span className={`${styles.selDi} ${on?styles.selDiOn:''}`}>{on?'◆':'◇'}</span>
                   <div className={styles.selInfo}>
                     <div className={`${styles.selName} ${on?styles.selNameOn:''}`}>{a.name}</div>
@@ -613,7 +636,8 @@ export default function Me() {
               const m=q2?sorted.filter(a=>a.name.toLowerCase().includes(q2)):sorted
               if(!m.length) return <div className={styles.pickerEmpty}>Nenhum atleta encontrado.</div>
               return m.map(a=>(
-                <a key={a.id} className={styles.pickerItem} href={`me.html?id=${a.id}`}>
+                <a key={a.id} className={styles.pickerItem} href={`me.html?id=${a.id}`}
+                  onClick={e=>{e.preventDefault();selectAthlete(a)}}>
                   <span className={styles.athDot} style={{background:a.color||'#4ac8c0'}} />
                   <span className={styles.pickerName}>{a.name}</span>
                 </a>
