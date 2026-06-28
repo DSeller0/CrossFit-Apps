@@ -169,9 +169,30 @@
   .finTime  { font-size: 62px; }
 }
 
+/* ── Config screen brand header ── */
+.cfgHdr { padding: 18px 20px 14px; background: var(--stone); border-bottom: 1px solid var(--div); flex-shrink: 0; position: sticky; top: 0; z-index: 20; }
+.cfgRule { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.cfgLine { flex: 1; height: 1px; background: linear-gradient(90deg,transparent,var(--gold2)); }
+.cfgLineR { background: linear-gradient(270deg,transparent,var(--gold2)); }
+.cfgDiamond { width: 5px; height: 5px; border: 1px solid var(--gold); transform: rotate(45deg); flex-shrink: 0; }
+.cfgBrand { font-size: 22px; font-weight: 900; letter-spacing: 8px; color: var(--cream); text-align: center; font-family: var(--font); }
+.cfgFoot { display: flex; justify-content: center; margin-top: 2px; }
+.cfgSub { font-size: 9px; font-weight: 700; color: var(--gold); letter-spacing: .25em; text-transform: uppercase; }
+
+/* ── Type picker button ── */
+.typeBtn { width: 100%; background: var(--stone2); border: 1px solid var(--div); color: var(--cream); font-family: var(--font); font-size: 13px; font-weight: 700; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color .15s; }
+.typeBtn:focus, .typeBtn:hover { border-color: var(--teal); outline: none; }
+.typeBtnArrow { font-size: 20px; color: var(--muted); line-height: 1; }
+
+/* ── Benchmark prompt (when form.type=Benchmark but none selected) ── */
+.bmPrompt { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; padding: 8px 0; }
+.bmPromptHint { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.bmPromptBtn { background: transparent; border: 1px solid var(--teal); color: var(--teal); font-family: var(--font); font-size: 11px; font-weight: 900; padding: 9px 18px; cursor: pointer; letter-spacing: .06em; -webkit-tap-highlight-color: transparent; transition: opacity .12s; }
+.bmPromptBtn:active { opacity: .7; }
+
 /* ── Responsive: tablet/desktop ── */
 @media (min-width: 768px) {
-  .wrap { margin-left: 220px; }
+  .wrap { margin-left: 220px; background: var(--stone); }
 
   .ringWrap  { width: min(300px,38vh); height: min(300px,38vh); }
   .clock     { font-size: clamp(52px,5vh,80px); }
@@ -187,6 +208,8 @@
   .hdr       { padding: 14px 28px 12px; }
   .readyBody { padding: 22px 28px; }
   .cfg       { padding: 22px 28px; }
+  .cfgHdr    { padding: 22px 28px 18px; }
+  .cfgBrand  { font-size: 26px; }
   .finBody   { padding: 24px 28px; }
   .ringArea  { padding: 20px 28px 10px; }
 

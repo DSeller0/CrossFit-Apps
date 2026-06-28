@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import s from './Timer.module.css'
 import Nav from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
+import BlockTypePicker from './BlockTypePicker.jsx'
 import { BENCHMARK_GIRLS, BENCHMARK_HEROES, benchmarkToTimerExes } from '../lib/benchmarks.js'
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -66,7 +67,7 @@ export default function Timer() {
   const [hist,         setHist]         = useState(() => loadHist())
   const [,             forceUpdate]     = useState(0)
   const [getreadySecs, setGetreadySecs] = useState(10)
-  const [bmCat,        setBmCat]        = useState(null) // 'Girls' | 'Heroes' | null
+  const [showTypePicker, setShowTypePicker] = useState(false)
 
   const [form, setForm] = useState(() => ({
     type:      initCfg.blockType || 'For Time',
@@ -333,7 +334,7 @@ export default function Timer() {
     location.href = buildScheduleUrl(e.sessionId, e.sessionDate, e.blockId, e.athleteId, e.totalTime, e.splits?.length || '')
   }
 
-  function selectBenchmark(bm, category) {
+  function selectBenchmark(bm) {
     const exes = benchmarkToTimerExes(bm)
     setForm(f => ({
       ...f,
@@ -344,7 +345,6 @@ export default function Timer() {
       exes,
       goal:   '',
     }))
-    setBmCat(null)
   }
 
   function applyCfg() {
@@ -506,73 +506,41 @@ export default function Timer() {
   }
 
   if (status === 'cfg') {
-    const showEst  = form.type === 'Estações'
-    const isBench  = form.type === 'Benchmark'
-    const isAmrap  = form.type === 'AMRAP'
-    const isEmom   = form.type === 'EMOM'
-    const isForTime = form.type === 'For Time'
+    const showEst    = form.type === 'Estações'
+    const isBench    = form.type === 'Benchmark'
+    const isAmrap    = form.type === 'AMRAP'
+    const isEmom     = form.type === 'EMOM'
+    const isForTime  = form.type === 'For Time'
     const showRounds = !isEmom && !isAmrap && !isBench
-
-    // Cap label per type
-    const capLabel = isAmrap ? 'Duração (min)' : isEmom ? 'Duração total (min)' : 'Cap (min)'
-
-    // Benchmark picker
-    const BM_CATS = [
-      { key: 'Girls',  ic: '🎀', color: '#d05878', desc: `${BENCHMARK_GIRLS.length} WODs clássicos` },
-      { key: 'Heroes', ic: '🏅', color: '#d8a840', desc: `${BENCHMARK_HEROES.length} WODs heróis` },
-    ]
-    const renderBenchmarkPicker = () => {
-      if (!bmCat) {
-        return (
-          <div className={s.bmPickerBg}>
-            <div className={s.cfgLbl}>Selecionar Benchmark</div>
-            <div className={s.bmCatGrid}>
-              {BM_CATS.map(cat => (
-                <div key={cat.key} className={s.bmCatCard}
-                  style={{ borderLeftColor: cat.color }}
-                  onClick={() => setBmCat(cat.key)}>
-                  <span className={s.bmCatIc} style={{ color: cat.color }}>{cat.ic}</span>
-                  <span className={s.bmCatLbl}>{cat.key}</span>
-                  <span className={s.bmCatDesc}>{cat.desc}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )
-      }
-      const list = bmCat === 'Girls' ? BENCHMARK_GIRLS : BENCHMARK_HEROES
-      const catColor = BM_CATS.find(c => c.key === bmCat)?.color || 'var(--teal)'
-      return (
-        <div className={s.bmList}>
-          <button className={s.bmListBack} onClick={() => setBmCat(null)}>← {bmCat}</button>
-          {list.map(bm => (
-            <div key={bm.name} className={s.bmItem}
-              style={{ borderLeftColor: catColor }}
-              onClick={() => selectBenchmark(bm, bmCat)}>
-              <div className={s.bmItemName}>{bm.name}</div>
-              <div className={s.bmItemDesc}>{bm.desc}</div>
-            </div>
-          ))}
-        </div>
-      )
-    }
+    const capLabel   = isAmrap ? 'Duração (min)' : isEmom ? 'Duração total (min)' : 'Cap (min)'
 
     return (
       <div className={s.wrap}>
-        <div className={s.hdr}>
-          <div className={s.hdrMid}><div className={s.label}>Configurar Timer</div></div>
+        {/* ── Brand header ── */}
+        <div className={s.cfgHdr}>
+          <div className={s.cfgRule}>
+            <div className={s.cfgLine}/><div className={s.cfgDiamond}/><div className={`${s.cfgLine} ${s.cfgLineR}`}/>
+          </div>
+          <div className={s.cfgBrand}>{gymName.toUpperCase()}</div>
+          <div className={s.cfgFoot}><span className={s.cfgSub}>TIMER</span></div>
         </div>
+
         <div className={s.cfg}>
+          {/* Type selector button */}
           <div>
             <div className={s.cfgLbl}>Tipo de WOD</div>
-            <select className={s.cfgSel} value={form.type}
-              onChange={e => { setForm(f => ({ ...f, type: e.target.value })); setBmCat(null) }}>
-              <option>For Time</option><option>AMRAP</option><option>EMOM</option>
-              <option>Benchmark</option><option>Estações</option>
-            </select>
+            <button className={s.typeBtn} onClick={() => setShowTypePicker(true)}>
+              <span>{form.type}</span>
+              <span className={s.typeBtnArrow}>›</span>
+            </button>
           </div>
 
-          {isBench ? renderBenchmarkPicker() : (
+          {isBench ? (
+            <div className={s.bmPrompt}>
+              <div className={s.bmPromptHint}>Selecione um benchmark para preencher o timer automaticamente.</div>
+              <button className={s.bmPromptBtn} onClick={() => setShowTypePicker(true)}>SELECIONAR BENCHMARK</button>
+            </div>
+          ) : (
             <>
               <div className={s.cfgRow}>
                 <div className={s.cfgHalf}>
@@ -651,12 +619,22 @@ export default function Timer() {
             </>
           )}
         </div>
+
         {!isBench && (
           <div className={s.ctrl}>
             <button className={`${s.btn} ${s.btnStart}`} onClick={applyCfg}>▶ INICIAR</button>
           </div>
         )}
+
         <Nav active="timer" gymName={gymName} />
+
+        {showTypePicker && (
+          <BlockTypePicker
+            onSelect={type => setForm(f => ({ ...f, type }))}
+            onSelectBenchmark={bm => selectBenchmark(bm)}
+            onClose={() => setShowTypePicker(false)}
+          />
+        )}
       </div>
     )
   }
