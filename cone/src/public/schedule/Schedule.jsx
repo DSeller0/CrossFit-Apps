@@ -712,7 +712,6 @@ export default function Schedule() {
           if(cfg.scheduleTitle||cfg.appTitle)document.title=cfg.scheduleTitle||cfg.appTitle
           if(cfg.restDayLabel)restLbl=cfg.restDayLabel
           if(cfg.wkBlockType)accColor=cfg.wkBlockType
-          if(cfg.gymName)gName=cfg.gymName
           const r=document.documentElement.style
           if(cfg.themeAccent)r.setProperty('--accent',cfg.themeAccent)
           if(cfg.themeAccentText)r.setProperty('--accent-text',cfg.themeAccentText)
