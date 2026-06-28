@@ -243,8 +243,36 @@ export default function App() {
 
   if (!session) return <LoginScreen />;
 
+  const spaGymName = loadSettings().gymName || '';
+
   return (
     <div>
+      <div className="spa-sidebar">
+        <div className="spa-sb-brand">
+          <div className="spa-sb-logo">C O N E</div>
+          {spaGymName && <div className="spa-sb-gym">{spaGymName}</div>}
+        </div>
+        <nav className="spa-sb-nav">
+          {TABS.map(([id, icon, lbl]) => (
+            <button
+              key={id}
+              type="button"
+              className={`spa-sb-item${tab === id ? ' on' : ''}`}
+              onClick={() => setTab(id)}
+            >
+              <i className={`ti ${icon}`} aria-hidden="true" />
+              {lbl}
+            </button>
+          ))}
+        </nav>
+        <div className="spa-sb-extra">
+          <a href="../index.html" className="spa-sb-link">
+            <i className="ti ti-home" aria-hidden="true" />
+            Início
+          </a>
+        </div>
+      </div>
+
       <input
         type="file"
         id="state-file-input"
@@ -270,10 +298,10 @@ export default function App() {
       )}
 
       <div className="topbar">
-        <a href="../index.html" className="tb-btn" title="Ir para o início" style={{ textDecoration: 'none' }}>
+        <a href="../index.html" className="tb-btn tb-inicio" title="Ir para o início" style={{ textDecoration: 'none' }}>
           <i className="ti ti-home" aria-hidden="true" /> Início
         </a>
-        <span className="topbar-title">Criador de Treinos</span>
+        <span className="topbar-title">{TABS.find(([id]) => id === tab)?.[2] || 'Cone'}</span>
         <div className="topbar-right">
           <span className="saved-badge" style={{ color: 'var(--muted, #888)' }}>
             <i className="ti ti-user" aria-hidden="true" style={{ fontSize: 12 }} />
