@@ -591,6 +591,7 @@ export default function Me() {
 
       {status==='profile' && pd && (
         <div className={styles.page}>
+          <div className={styles.heroSection}>
           {/* Profile card */}
           <div className={styles.sh}><div className={styles.shInner}>
             <div className={styles.shTitle}>Atleta</div>
@@ -625,7 +626,9 @@ export default function Me() {
             <div className={styles.kpi}><div className={styles.kpiV} style={{color:'var(--teal)'}}>{pd.totalPrs}</div><div className={styles.kpiL}>PRs</div><div className={styles.kpiSub}>{pd.prsThisMon>0?pd.prsThisMon+' este mês':'nenhum este mês'}</div></div>
             <div className={styles.kpi}><div className={styles.kpiV} style={{color:'var(--sub)'}}>{pd.rxRate!==null?pd.rxRate+'%':'—'}</div><div className={styles.kpiL}>Taxa RX</div><div className={styles.kpiSub}>{pd.rxDelta!==null?(pd.rxDelta>=0?'↑':'↓')+' '+Math.abs(pd.rxDelta)+'% vs mês ant.':''}</div></div>
           </div>
-
+          </div>{/* heroSection */}
+          <div className={styles.contentGrid}>
+          <div className={styles.colMain}>
           {/* Recent sessions */}
           <div className={styles.sh}><div className={styles.shInner}>
             <div className={styles.shTitle}>Sessões Recentes <span className={styles.shTitleR}>últimas 5</span></div>
@@ -733,6 +736,8 @@ export default function Me() {
             </div></div>
           )}
 
+          </div>{/* colMain */}
+          <div className={styles.colPrs}>
           {/* PR section */}
           <PrSection
             prs={pd.prs}
@@ -744,6 +749,8 @@ export default function Me() {
             onOpen={(name,cats,pr)=>openLogSheet(name,cats,pr)}
             onClear={clearPr}
           />
+          </div>{/* colPrs */}
+          </div>{/* contentGrid */}
         </div>
       )}
 
