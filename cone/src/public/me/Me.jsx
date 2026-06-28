@@ -558,6 +558,40 @@ export default function Me() {
         <div className={styles.gym}>MEU PERFIL</div>
       </header>
 
+      <div className={styles.twoPaneBody}>
+      {/* ── Selector pane (desktop only) ── */}
+      <div className={styles.selPane}>
+        <div className={styles.selPhdr}>Atletas</div>
+        <div className={styles.selSearch}>
+          <input className={styles.selInp} type="search" placeholder="Buscar..." value={query} onChange={e=>setQuery(e.target.value)} autoComplete="off" />
+        </div>
+        <div className={styles.selList}>
+          <a className={`${styles.selTodos} ${!selAthlete?styles.selTodosOn:''}`} href="me.html">
+            <span className={`${styles.selTodosDi} ${!selAthlete?styles.selDiOn:''}`}>{!selAthlete?'◈':'◇'}</span>
+            <span className={styles.selTodosLbl}>Todos</span>
+          </a>
+          {(()=>{
+            const q2=query.trim().toLowerCase()
+            const sorted=[...athletes].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'))
+            const m=q2?sorted.filter(a=>a.name.toLowerCase().includes(q2)):sorted
+            return m.map(a=>{
+              const on=selAthlete?.id===a.id
+              return (
+                <a key={a.id} className={`${styles.selItem} ${on?styles.selItemOn:''}`} href={`me.html?id=${a.id}`}>
+                  <span className={`${styles.selDi} ${on?styles.selDiOn:''}`}>{on?'◆':'◇'}</span>
+                  <div className={styles.selInfo}>
+                    <div className={`${styles.selName} ${on?styles.selNameOn:''}`}>{a.name}</div>
+                    {a.level && <div className={`${styles.selLevel} ${on?styles.selLevelOn:''}`}>{a.level}</div>}
+                  </div>
+                </a>
+              )
+            })
+          })()}
+        </div>
+      </div>
+
+      {/* ── Profile pane ── */}
+      <div className={styles.profPane}>
       {/* ── States ── */}
       {status==='loading' && <div className={styles.centerMsg}>⏳ carregando...</div>}
       {status==='error' && (
@@ -589,35 +623,54 @@ export default function Me() {
         </div>
       )}
 
+      {status==='picker' && (
+        <div className={styles.noSel}>Selecione um atleta ao lado.</div>
+      )}
+
       {status==='profile' && pd && (
         <div className={styles.page}>
           <div className={styles.heroSection}>
-          {/* Profile card */}
-          <div className={styles.sh}><div className={styles.shInner}>
-            <div className={styles.shTitle}>Atleta</div>
-            <div className={styles.profRow}>
-              <div className={styles.av}
-                style={{background:`linear-gradient(145deg,${pd.color}22,${pd.color}08)`,borderColor:pd.color,cursor:'pointer'}}
-                onClick={()=>{setBmWeight('');setBmHeight('');setBmBf('');setBmNote('');setBmWarn(false);setBmOpen(true)}}>
-                <span style={{color:pd.color}}>{initials(selAthlete.name)}</span>
-              </div>
-              <div>
-                <div className={styles.pname}>{selAthlete.name}</div>
-                {selAthlete.level && <div className={styles.ptier} style={{color:pd.color}}>{selAthlete.level}</div>}
-                {pd.sinceStr && <div className={styles.psub}>desde {pd.sinceStr} · {pd.days} dias</div>}
-              </div>
+          {/* Gold ornamental rule */}
+          <div className={styles.hdrRule}>
+            <div className={styles.hdrLine} />
+            <div className={styles.hdrDiamond} />
+            <div className={`${styles.hdrLine} ${styles.hdrLineR}`} />
+          </div>
+          {/* ATLETA badge */}
+          <div className={styles.heroBadge}>
+            <span className={styles.heroBadgeInner}>ATLETA</span>
+          </div>
+          {/* Avatar + name row */}
+          <div className={styles.heroRow}>
+            <div className={`${styles.av} ${styles.avLg}`}
+              style={{background:`linear-gradient(145deg,${pd.color}22,${pd.color}08)`,borderColor:pd.color,cursor:'pointer'}}
+              onClick={()=>{setBmWeight('');setBmHeight('');setBmBf('');setBmNote('');setBmWarn(false);setBmOpen(true)}}>
+              <span style={{color:pd.color}}>{initials(selAthlete.name)}</span>
             </div>
-            <div className={styles.hearts}>
-              {pd.hearts.map((h,i)=>(
-                <span key={i} className={`${styles.h} ${h==='full'?styles.hf:h==='today'?styles.ht:styles.he}`}>
-                  {h==='empty'?'♡':'♥'}
-                </span>
-              ))}
+            <div className={styles.heroInfo}>
+              <div className={styles.pname}>{selAthlete.name}</div>
+              {selAthlete.level && <div className={styles.ptier} style={{color:pd.color}}>{selAthlete.level}</div>}
+              {pd.sinceStr && <div className={styles.psub}>desde {pd.sinceStr} · {pd.days} dias</div>}
             </div>
-            <div style={{fontSize:'9px',color:'var(--dim)',marginTop:'3px'}}>
-              {pd.thisMon} de {pd.heartTotal} sessões · {MON_PT[pd.nowM-1]} {pd.nowY}
-            </div>
-          </div></div>
+          </div>
+          {/* Hearts */}
+          <div className={styles.hearts}>
+            {pd.hearts.map((h,i)=>(
+              <span key={i} className={`${styles.h} ${h==='full'?styles.hf:h==='today'?styles.ht:styles.he}`}>
+                {h==='empty'?'♡':'♥'}
+              </span>
+            ))}
+          </div>
+          <div style={{fontSize:'9px',color:'var(--dim)',marginTop:'3px',marginBottom:'16px'}}>
+            {pd.thisMon} de {pd.heartTotal} sessões · {MON_PT[pd.nowM-1]} {pd.nowY}
+          </div>
+          {/* Dim closing divider */}
+          <div className={styles.heroDivider}>
+            <div className={styles.heroDivLine} />
+            <div className={styles.heroDivDiamond} />
+            <div className={`${styles.heroDivLine} ${styles.heroDivLineR}`} />
+          </div>
+          </div>{/* heroSection */}
 
           {/* KPI strip */}
           <div className={styles.kpiStrip}>
@@ -626,23 +679,32 @@ export default function Me() {
             <div className={styles.kpi}><div className={styles.kpiV} style={{color:'var(--teal)'}}>{pd.totalPrs}</div><div className={styles.kpiL}>PRs</div><div className={styles.kpiSub}>{pd.prsThisMon>0?pd.prsThisMon+' este mês':'nenhum este mês'}</div></div>
             <div className={styles.kpi}><div className={styles.kpiV} style={{color:'var(--sub)'}}>{pd.rxRate!==null?pd.rxRate+'%':'—'}</div><div className={styles.kpiL}>Taxa RX</div><div className={styles.kpiSub}>{pd.rxDelta!==null?(pd.rxDelta>=0?'↑':'↓')+' '+Math.abs(pd.rxDelta)+'% vs mês ant.':''}</div></div>
           </div>
-          </div>{/* heroSection */}
           <div className={styles.contentGrid}>
           <div className={styles.colMain}>
           {/* Recent sessions */}
           <div className={styles.sh}><div className={styles.shInner}>
             <div className={styles.shTitle}>Sessões Recentes <span className={styles.shTitleR}>últimas 5</span></div>
-            {pd.recSess.length ? pd.recSess.map((r,i)=>(
-              <div key={i} className={styles.sessItem}>
-                <span className={styles.di}>◈</span>
-                <div className={styles.sessInfo}><div className={styles.sessName}>{r.name}</div><div className={styles.sessDate}>{fmtDate(r.date)}</div></div>
-                <div className={styles.sessBadges}>
-                  {r.rpe && <span className={`${styles.bdg} ${styles.bRpe}`}>RPE {r.rpe}</span>}
-                  {r.scale && <span className={`${styles.bdg} ${styles[r.scaleCls]||styles.bSc}`}>{r.scale}</span>}
-                  {r.hasPr && <span className={`${styles.bdg} ${styles.bPr}`}>PR</span>}
+            {pd.recSess.length ? (
+              <>
+                <div className={styles.sessColHdr}>
+                  <span/><span>Sessão</span><span>Data</span><span>Scale</span><span>RPE</span>
                 </div>
-              </div>
-            )) : <div style={{fontSize:'12px',color:'var(--dim)',padding:'8px 0'}}>Nenhuma sessão registrada ainda.</div>}
+                {pd.recSess.map((r,i)=>(
+                  <div key={i} className={styles.sessRow}>
+                    <span className={styles.sdi}>◈</span>
+                    <span className={styles.sname}>
+                      {r.name}
+                      {r.hasPr && <span className={`${styles.bdg} ${styles.bPr}`}>PR</span>}
+                    </span>
+                    <span className={styles.sdate}>{fmtDate(r.date)}</span>
+                    <span className={styles.sscale}>
+                      {r.scale && <span className={`${styles.bdg} ${styles[r.scaleCls]||styles.bSc}`}>{r.scale}</span>}
+                    </span>
+                    <span className={styles.srpe}>{r.rpe||'—'}</span>
+                  </div>
+                ))}
+              </>
+            ) : <div style={{fontSize:'12px',color:'var(--dim)',padding:'8px 0'}}>Nenhuma sessão registrada ainda.</div>}
           </div></div>
 
           {/* Recent events */}
@@ -754,6 +816,8 @@ export default function Me() {
         </div>
       )}
 
+      </div>{/* profPane */}
+      </div>{/* twoPaneBody */}
       </div></div>
       <Nav active="me" gymName={gymName} />
     </>
