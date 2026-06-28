@@ -11,7 +11,7 @@
 .colPrs      { }
 @media(min-width:768px) {
   .pageRoot    { margin-left:220px; display:flex; justify-content:center; min-height:100vh; padding-bottom:0; background:var(--stone); }
-  .inner       { width:100%; max-width:1400px; border-left:1px solid var(--divider); border-right:1px solid var(--divider); display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+  .inner       { width:100%; border-left:1px solid var(--divider); border-right:1px solid var(--divider); display:flex; flex-direction:column; height:100vh; overflow:hidden; }
   .twoPaneBody { flex:1; display:flex; align-items:stretch; overflow:hidden; }
   .selPane     { display:flex; flex-direction:column; width:272px; flex-shrink:0; border-right:1px solid var(--divider); overflow:hidden; }
   .pickerWrap  { display:none; }
@@ -20,8 +20,8 @@
   .page        { max-width:none; padding:0; }
   .heroSection { padding:24px 28px 0; }
   .contentGrid { display:flex; align-items:flex-start; }
-  .colMain     { flex:1; min-width:0; padding:20px 24px; }
-  .colPrs      { width:320px; flex-shrink:0; padding:20px 24px; border-left:1px solid var(--divider); }
+  .colMain     { flex:0 0 40%; min-width:0; padding:20px 24px; }
+  .colPrs      { flex:0 0 60%; min-width:0; padding:20px 24px; border-left:1px solid var(--divider); }
 }
 
 /* ── Hero ornament rules (reused from shared header pattern) ── */
