@@ -8,7 +8,7 @@
 }
 
 /* ── Header ── */
-.hdr { padding:18px 20px 14px; background:var(--bg); position:sticky; top:0; z-index:20; }
+.hdr { padding:18px 20px 14px; background:var(--stone); position:sticky; top:0; z-index:20; }
 .hdr::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(to right, transparent, var(--divider) 8%); }
 .hdrRule { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
 .hdrLine { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold2)); }
@@ -22,10 +22,10 @@
 .mobileOnly { }
 @media(min-width:768px) { .mobileOnly { display:none !important; } }
 
-.selBar { position:sticky; top:88px; z-index:18; background:var(--bg); padding:10px 16px; border-bottom:1px solid var(--divider); }
+.selBar { position:sticky; top:88px; z-index:18; background:var(--stone); padding:10px 16px; border-bottom:1px solid var(--divider); }
 .athleteSel { width:100%; max-width:400px; background:var(--stone2); border:1px solid var(--border); color:var(--cream); padding:8px 12px; font-size:13px; font-family:var(--font); cursor:pointer; outline:none; }
 
-.weekNav { position:sticky; top:136px; z-index:17; background:var(--bg); display:flex; align-items:center; justify-content:space-between; padding:8px 16px; border-bottom:1px solid var(--divider); }
+.weekNav { position:sticky; top:136px; z-index:17; background:var(--stone); display:flex; align-items:center; justify-content:space-between; padding:8px 16px; border-bottom:1px solid var(--divider); }
 @media(min-width:768px) { .weekNav { top:88px; } }
 .navBtn { background:none; border:1px solid var(--divider); color:var(--muted); font-size:16px; width:32px; height:32px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s; }
 .navBtn:hover { border-color:var(--teal); color:var(--teal); }
@@ -46,7 +46,7 @@
 .calStrip {
   display:grid; grid-template-columns:repeat(7,1fr); gap:4px;
   padding:8px 14px 10px; border-bottom:1px solid var(--divider);
-  background:var(--bg); flex-shrink:0;
+  background:var(--stone); flex-shrink:0;
 }
 .calDay { display:flex; flex-direction:column; gap:3px; }
 .calDayHdr {

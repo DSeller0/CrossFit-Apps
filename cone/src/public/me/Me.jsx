@@ -748,7 +748,7 @@ export default function Me() {
       )}
 
       </div></div>
-      <Nav active="me" />
+      <Nav active="me" gymName={gymName} />
     </>
   )
 }

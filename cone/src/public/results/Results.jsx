@@ -613,7 +613,7 @@ export default function Results() {
           </div>
         </>}
       </div>
-      <Nav active="results" lockedId={lockedId}/>
+      <Nav active="results" lockedId={lockedId} gymName={gymName}/>
     </>
   )
 }

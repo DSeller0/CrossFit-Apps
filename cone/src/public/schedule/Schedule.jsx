@@ -1183,7 +1183,7 @@ export default function Schedule() {
     </div>}
 
     </div></div>
-    <Nav active="schedule" lockedId={lockedId}/>
+    <Nav active="schedule" lockedId={lockedId} gymName={gymName}/>
 
     {/* ── Check-in bottom sheet ── */}
     {checkinId&&(

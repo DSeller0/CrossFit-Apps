@@ -112,7 +112,7 @@ export default function Leaderboard() {
     const lbColors = appState.lbColors || {}
     const accent   = (lbColors.lbColors && lbColors.lbColors.lbHdrBorder) || lbColors.lbHdrBorder || '#00b8d4'
     document.documentElement.style.setProperty('--accent', accent)
-    document.body.style.background = lbColors.lbBg || '#000000'
+    document.body.style.background = lbColors.lbBg || ''
     if (cfg.fontFamily)       document.documentElement.style.setProperty('--lb-font', cfg.fontFamily)
     if (cfg.themeAccentText)  document.documentElement.style.setProperty('--accent-text', cfg.themeAccentText)
   }, [cfg, appState])

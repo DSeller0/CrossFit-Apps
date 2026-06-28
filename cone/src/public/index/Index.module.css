@@ -1,5 +1,5 @@
 /* ── Header ── */
-.hdr { padding: 18px 20px 14px; background: var(--bg); position: sticky; top: 0; z-index: 20; }
+.hdr { padding: 18px 20px 14px; background: var(--stone); position: sticky; top: 0; z-index: 20; }
 .hdr::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(to right, transparent, var(--divider) 8%); }
 .hdrRule { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .hdrLine { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold2)); }
@@ -91,7 +91,7 @@
   .pwaTitle { font-size: 16px; } .pwaSub { font-size: 13px; }
 
   /* Desktop: sidebar offset + left-aligned feed column */
-  .layout { margin-left: 220px; min-height: 100vh; }
+  .layout { margin-left: 220px; min-height: 100vh; background: var(--stone); }
   .paneLeft { max-width: 560px; margin-left: 28px; min-height: 100vh; padding: 16px 16px 40px; }
   .hdr { position: sticky; top: 0; }
 
