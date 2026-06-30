@@ -74,47 +74,49 @@
 /* ── Detail ── */
 .dayDetail { background:var(--bg); border-top:1px solid var(--border); padding:12px 10px; }
 .detailSessTitle { font-size:11px; font-weight:700; color:var(--sub); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
-.detailBlock { margin-bottom:10px; padding:8px 10px; background:var(--stone2); border-radius:6px; border-left:2px solid var(--accent); }
+.detailBlock { margin-bottom:10px; padding:10px 12px; background:var(--stone2); border-radius:6px; border-left:3px solid var(--accent); }
 .detailBlock:last-of-type { margin-bottom:0; }
-.detailBlockHdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:4px; }
-.detailBlockTitle { font-size:12px; font-weight:900; color:var(--accent); text-transform:uppercase; letter-spacing:.07em; }
-.detailBlockMeta { font-size:10px; color:var(--accent-text); background:var(--accent); padding:1px 6px; border-radius:2px; font-weight:700; }
-.detailBlockDone { font-size:11px; color:var(--green); font-weight:700; }
-.detailBlockNotes { font-size:10px; color:var(--muted); font-style:italic; margin-top:6px; padding-top:6px; border-top:1px solid var(--divider); }
-.detailBlockNotesTop { font-size:10px; color:var(--muted); font-style:italic; margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid var(--divider); }
-@media(min-width:768px){ .detailSessTitle{font-size:13px} .detailBlockTitle{font-size:14px} .detailBlockNotes{font-size:11px} .detailBlockNotesTop{font-size:11px} }
+.detailBlockHdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; flex-wrap:wrap; gap:5px; }
+.detailBlockTitle { font-size:14px; font-weight:900; color:var(--accent); text-transform:uppercase; letter-spacing:.07em; }
+.detailBlockMeta { font-size:12px; color:var(--accent-text); background:var(--accent); padding:1px 7px; border-radius:2px; font-weight:700; }
+.detailBlockDone { font-size:13px; color:var(--green); font-weight:700; }
+.detailBlockNotes { font-size:12px; color:var(--muted); font-style:italic; margin-top:6px; padding-top:6px; border-top:1px solid var(--divider); }
+.detailBlockNotesTop { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:7px; padding-bottom:7px; border-bottom:1px solid var(--divider); }
+@media(min-width:768px){ .detailSessTitle{font-size:13px} .detailBlockNotes{font-size:12px} }
 
 /* ── 65/35 card layout ── */
 .cardBody { display:flex; align-items:flex-start; }
-.cardInfo { flex:0 0 65%; min-width:0; padding-right:12px; border-right:1px solid var(--divider); }
-.cardActions { flex:0 0 35%; min-width:0; padding-left:12px; display:flex; flex-direction:column; gap:6px; align-items:stretch; }
+.cardInfo { flex:0 0 65%; min-width:0; padding-right:14px; border-right:1px solid var(--divider); }
+.cardActions { flex:0 0 35%; min-width:0; padding-left:14px; display:flex; flex-direction:column; gap:7px; align-items:stretch; }
 .cardActions .timerBtn { display:flex; width:100%; }
-.cardActions .lbLink { width:100%; }
+.cardActions .lbLink { width:100%; margin-top:0; }
 .btnLabel { }
 @media(max-width:767px) {
   .cardBody { flex-wrap:wrap; }
   .cardInfo { flex:1 1 100%; padding-right:0; border-right:none; padding-bottom:10px; margin-bottom:8px; border-bottom:1px solid var(--divider); }
   .cardActions { flex:1 1 100%; padding-left:0; flex-direction:row; flex-wrap:wrap; gap:6px; }
-  .cardActions > button, .cardActions > a { flex:1 1 0; min-width:0; justify-content:center; }
+  .cardActions > button, .cardActions > a { flex:1 1 0; min-width:0; justify-content:center; height:58px; font-size:26px; padding:0; border-radius:0; margin-top:0; }
+  .cardActions .timerBtn { order:1; }
+  .cardActions .deskRegBtn { order:2; margin-top:0; }
+  .cardActions .lbLink { order:3; }
   .btnLabel { display:none; }
   .deskAthResultRow { display:none !important; }
 }
 
 /* ── Exercise rows ── */
-.detailEx { display:flex; align-items:flex-start; gap:8px; padding:5px 0; border-bottom:1px solid var(--divider); }
+.detailEx { display:flex; align-items:flex-start; gap:10px; padding:6px 0; border-bottom:1px solid var(--divider); }
 .detailEx:last-of-type { border-bottom:none; }
-.detailExCheck { width:18px; height:18px; border-radius:4px; border:1px solid var(--divider); background:transparent; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .12s; margin-top:1px; }
+.detailExCheck { width:22px; height:22px; border-radius:4px; border:1px solid var(--divider); background:transparent; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .12s; margin-top:1px; }
 .detailExCheckDone { background:color-mix(in srgb,var(--green) 10%,var(--stone)); border-color:color-mix(in srgb,var(--green) 50%,transparent); }
-.detailExCheckDone::after { content:'✓'; font-size:11px; color:var(--green); font-weight:900; }
+.detailExCheckDone::after { content:'✓'; font-size:13px; color:var(--green); font-weight:900; }
 .detailExBody { flex:1; min-width:0; }
-.detailExName { font-size:12px; font-weight:700; color:var(--text); line-height:1.3; }
+.detailExName { font-size:14px; font-weight:700; color:var(--text); line-height:1.3; }
 .detailExNameDone { color:var(--dim); text-decoration:line-through; }
-.detailExVol { display:inline-block; font-size:10px; font-weight:700; color:var(--gold); background:color-mix(in srgb,var(--gold) 10%,transparent); border:1px solid color-mix(in srgb,var(--gold) 20%,transparent); border-radius:3px; padding:1px 6px; margin-top:2px; }
-.detailExNote { font-size:10px; color:var(--teal); font-style:italic; margin-top:1px; }
-.detailExMovement { font-size:11px; color:var(--sub); margin-top:2px; padding-left:2px; }
-.pillVol { display:inline-flex; align-items:center; font-size:10px; font-weight:700; color:var(--bg); background:var(--teal); padding:1px 6px; flex-shrink:0; white-space:nowrap; line-height:1.5; }
-.pillWt  { display:inline-flex; align-items:center; font-size:10px; font-weight:700; color:var(--bg); background:var(--gold); padding:1px 6px; flex-shrink:0; white-space:nowrap; line-height:1.5; }
-@media(min-width:768px){ .detailExName{font-size:14px} .detailExVol{font-size:12px} .detailExNote{font-size:12px} .detailExMovement{font-size:13px} .pillVol,.pillWt{font-size:12px} }
+.detailExVol { display:inline-block; font-size:12px; font-weight:700; color:var(--gold); background:color-mix(in srgb,var(--gold) 10%,transparent); border:1px solid color-mix(in srgb,var(--gold) 20%,transparent); border-radius:3px; padding:1px 7px; margin-top:2px; }
+.detailExNote { font-size:12px; color:var(--teal); font-style:italic; margin-top:1px; }
+.detailExMovement { font-size:13px; color:var(--sub); margin-top:2px; padding-left:2px; }
+.pillVol { display:inline-flex; align-items:center; font-size:12px; font-weight:700; color:var(--bg); background:var(--teal); padding:1px 7px; flex-shrink:0; white-space:nowrap; line-height:1.5; }
+.pillWt  { display:inline-flex; align-items:center; font-size:12px; font-weight:700; color:var(--bg); background:var(--gold); padding:1px 7px; flex-shrink:0; white-space:nowrap; line-height:1.5; }
 
 /* ── Estações ── */
 .detailStation { margin:4px 0; padding:6px 8px; background:var(--bg); border-radius:4px; border-left:2px solid var(--gold2); }
@@ -125,15 +127,15 @@
 @media(min-width:768px){ .detailStationName{font-size:13px} .detailStationDur{font-size:12px} }
 
 /* ── Buttons ── */
-.timerBtn { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; background:transparent; border:1px solid var(--gold2); color:var(--gold); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; cursor:pointer; font-family:inherit; transition:background .12s; }
+.timerBtn { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:transparent; border:1px solid var(--gold2); color:var(--gold); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; cursor:pointer; font-family:inherit; transition:background .12s; }
 .timerBtn:hover { background:color-mix(in srgb,var(--gold) 15%,transparent); }
-.lbLink { display:flex; align-items:center; gap:6px; margin-top:8px; padding:7px 10px; background:color-mix(in srgb,var(--cyan) 8%,var(--bg)); border:1px solid var(--cyan); border-radius:5px; color:var(--cyan); font-size:11px; font-weight:700; text-decoration:none; text-transform:uppercase; letter-spacing:.06em; transition:background .12s; }
+.lbLink { display:flex; align-items:center; gap:6px; margin-top:0; padding:5px 12px; background:color-mix(in srgb,var(--cyan) 8%,var(--bg)); border:1px solid var(--cyan); color:var(--cyan); font-size:12px; font-weight:700; text-decoration:none; text-transform:uppercase; letter-spacing:.06em; transition:background .12s; }
 .lbLink:hover { background:color-mix(in srgb,var(--cyan) 15%,var(--bg)); }
 .logBtn { display:flex; align-items:center; gap:6px; width:100%; margin-top:10px; padding:8px 10px; background:transparent; border:1px solid var(--dim); border-radius:5px; color:var(--gold); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; cursor:pointer; font-family:inherit; transition:background .12s; }
 .logBtn:hover { background:color-mix(in srgb,var(--gold) 8%,var(--bg)); border-color:var(--gold); }
 
 /* ── RM ── */
-.rmChip { font-size:9px; font-weight:900; padding:2px 8px; border:1px solid var(--gold2); background:transparent; color:var(--gold2); cursor:pointer; letter-spacing:.06em; text-transform:uppercase; font-family:inherit; transition:all .12s; flex-shrink:0; line-height:1.4; }
+.rmChip { font-size:11px; font-weight:900; padding:2px 10px; border:1px solid var(--gold2); background:transparent; color:var(--gold2); cursor:pointer; letter-spacing:.06em; text-transform:uppercase; font-family:inherit; transition:all .12s; flex-shrink:0; line-height:1.4; }
 .rmChip:hover { background:color-mix(in srgb,var(--gold) 15%,transparent); }
 .rmChipHasRm { border-color:var(--gold); color:var(--gold); background:color-mix(in srgb,var(--gold) 10%,transparent); }
 .rmInputWrap { display:flex; align-items:center; gap:6px; margin:6px 0 4px; flex-wrap:wrap; }
@@ -144,11 +146,11 @@
 .rmConfirmBtn:hover,.rmConfirmBtn:active { background:var(--teal); color:var(--accent-text); }
 .rmCalcBadge { display:block; font-size:10px; font-weight:700; color:var(--gold); background:color-mix(in srgb,var(--gold) 10%,transparent); border:1px solid color-mix(in srgb,var(--gold) 28%,transparent); padding:1px 6px; margin-top:3px; width:fit-content; }
 .rmCalcBadgeAuto { color:var(--teal); background:color-mix(in srgb,var(--teal) 10%,transparent); border-color:color-mix(in srgb,var(--teal) 28%,transparent); }
-.rmVolRow { display:flex; flex-direction:column; align-items:flex-start; gap:3px; margin-top:3px; }
+.rmVolRow { display:flex; flex-direction:column; align-items:flex-start; gap:5px; margin-top:6px; }
 @media(min-width:768px){ .rmInput{font-size:16px} .rmUnitSel{font-size:13px} .rmCalcBadge{font-size:12px} }
 
 /* ── Demo button ── */
-.demoBtn { font-size:9px; font-weight:900; padding:2px 7px; border:1px solid var(--divider); background:transparent; color:var(--muted); cursor:pointer; letter-spacing:.05em; text-transform:uppercase; font-family:inherit; transition:all .12s; flex-shrink:0; line-height:1.4; }
+.demoBtn { font-size:11px; font-weight:900; padding:2px 8px; border:1px solid var(--divider); background:transparent; color:var(--muted); cursor:pointer; letter-spacing:.05em; text-transform:uppercase; font-family:inherit; transition:all .12s; flex-shrink:0; line-height:1.4; }
 .demoBtn:hover:not(:disabled) { border-color:var(--teal); color:var(--teal); }
 .demoBtnNoDemo { opacity:.3; cursor:not-allowed; pointer-events:none; }
 
@@ -203,11 +205,11 @@
 @media(min-width:768px){ .lpTitle{font-size:17px} .lpSubmit{font-size:17px} .lpSelect,.lpInput{font-size:16px} .lpRpeBtn,.lpScaleBtn{font-size:13px} }
 
 /* ── Round counter ── */
-.bCounter { width:20px; height:20px; border-radius:4px; border:1px solid var(--divider); background:transparent; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; font-family:inherit; transition:all .12s; margin-top:1px; user-select:none; line-height:1; }
+.bCounter { width:30px; height:30px; border-radius:4px; border:1px solid var(--divider); background:transparent; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900; font-family:inherit; transition:all .12s; margin-top:1px; user-select:none; line-height:1; }
 .bCounterIdle { color:var(--dim); }
 .bCounterActive { color:var(--gold); border-color:var(--gold2); background:color-mix(in srgb,var(--gold) 10%,transparent); }
 .bCounterDone { color:var(--teal); border-color:var(--teal); background:color-mix(in srgb,var(--teal) 10%,transparent); }
-.rdProg { font-size:10px; font-weight:700; padding:1px 7px; border-radius:2px; letter-spacing:.04em; white-space:nowrap; border:1px solid transparent; }
+.rdProg { font-size:12px; font-weight:700; padding:1px 8px; border-radius:2px; letter-spacing:.04em; white-space:nowrap; border:1px solid transparent; }
 .rdProgIdle { color:var(--muted); background:var(--stone2); border-color:var(--divider); }
 .rdProgPartial { color:var(--gold); background:color-mix(in srgb,var(--gold) 12%,transparent); border-color:color-mix(in srgb,var(--gold) 30%,transparent); }
 .rdProgComplete { color:var(--teal); background:color-mix(in srgb,var(--teal) 12%,transparent); border-color:color-mix(in srgb,var(--teal) 30%,transparent); }
@@ -275,15 +277,15 @@
 .deskPaneEmptyIcon { font-size:26px; color:var(--divider); margin-bottom:4px; }
 
 /* Athlete result row inside block (desktop) */
-.deskAthResultRow { display:flex; align-items:center; gap:8px; padding:6px 0; margin-top:8px; border-top:1px solid var(--divider); flex-wrap:wrap; }
+.deskAthResultRow { display:flex; align-items:center; gap:8px; padding:7px 0; margin-top:10px; border-top:1px solid var(--divider); flex-wrap:wrap; }
 .deskAthResultRowLogged { border-top-color:color-mix(in srgb,var(--teal) 30%,transparent); }
-.deskAthResultName { font-size:12px; font-weight:700; }
+.deskAthResultName { font-size:14px; font-weight:700; }
 .deskAthResultNameLogged { color:var(--cream); }
 .deskAthResultNameEmpty { color:var(--dim); }
-.deskAthResultVal { font-size:12px; font-weight:900; color:var(--teal); }
-.deskAthResultScale { font-size:10px; color:var(--muted); margin-left:auto; }
-.deskAthResultEmpty { font-size:11px; color:var(--dim); font-style:italic; }
-.deskRegBtn { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:6px; background:none; border:1px solid color-mix(in srgb,var(--teal) 40%,transparent); color:var(--teal); font-family:inherit; font-size:11px; font-weight:700; letter-spacing:.05em; padding:5px 10px; border-radius:4px; cursor:pointer; width:100%; }
+.deskAthResultVal { font-size:14px; font-weight:900; color:var(--teal); }
+.deskAthResultScale { font-size:12px; color:var(--muted); margin-left:auto; }
+.deskAthResultEmpty { font-size:13px; color:var(--dim); font-style:italic; }
+.deskRegBtn { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:6px; background:none; border:1px solid color-mix(in srgb,var(--teal) 40%,transparent); color:var(--teal); font-family:inherit; font-size:12px; font-weight:700; letter-spacing:.05em; padding:5px 12px; cursor:pointer; width:100%; }
 .deskRegBtn:hover { background:color-mix(in srgb,var(--teal) 8%,transparent); }
 .deskRegBtnEdit { border-color:color-mix(in srgb,var(--gold) 40%,transparent); color:var(--gold); }
 .deskRegBtnEdit:hover { background:color-mix(in srgb,var(--gold) 8%,transparent); }
