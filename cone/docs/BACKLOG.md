@@ -7,7 +7,6 @@ Status columns: **Icebox → Ready → In Progress → Done**. Only items with a
 
 ## 🟢 Ready (planned — pick from the top)
 
-- **#1 Schedule block-card redesign** · M · Sonnet · 65/35 info|actions split, notes→top, RM value below pill — [plans/01-schedule-block-card.md](./plans/01-schedule-block-card.md)
 - **#2 Quadro ao Vivo — desktop refinement + design pass** · M · Sonnet · kill empty side margins, fill width, no-scroll @1080p, CSS-vars/inline-style cleanup — [plans/02-tv-desktop-refinement.md](./plans/02-tv-desktop-refinement.md)
 - **#3 timer.html — desktop running layout** · M · Sonnet · sidebar offset + `vh`-scaled ring on running/paused screens — [plans/03-timer-desktop-running.md](./plans/03-timer-desktop-running.md)
 
@@ -36,7 +35,7 @@ _(none)_
 
 ## ✅ Done (recent)
 
-timer.html config header + BlockTypePicker · me.html desktop layout · TvController hook refactor (5 hooks, 472 lines) · Benchmark block type in Criador · SPA desktop sidebar nav · desktop overhaul (Index/Leaderboard/Results) · theme system · Quadro ao Vivo rotation system
+**#1 Schedule block-card redesign** · 65/35 two-column WOD cards, notes→top, Sets×Reps, RM calc below pill, icon-only mobile actions · timer.html config header + BlockTypePicker · me.html desktop layout · TvController hook refactor (5 hooks, 472 lines) · Benchmark block type in Criador · SPA desktop sidebar nav · desktop overhaul (Index/Leaderboard/Results) · theme system · Quadro ao Vivo rotation system
 
 ---
 

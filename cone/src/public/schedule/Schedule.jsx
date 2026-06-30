@@ -493,7 +493,8 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
       </div>
       <button className={`${styles.deskRegBtn}${athResult?' '+styles.deskRegBtnEdit:''}`}
         onClick={e=>{e.stopPropagation();onLogBlock()}}>
-        {athResult?'Editar resultado':'Registrar resultado →'}
+        <i className="ti ti-pencil"/>
+        <span className={styles.btnLabel}>{athResult?' Editar resultado':' Registrar resultado →'}</span>
       </button>
     </>
   )
@@ -553,22 +554,42 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
     else rdBadgeEl=<span className={`${styles.rdProg} ${styles.rdProgIdle}`}>{bl.rounds} RDS</span>
   }
 
-  return(
-    <div className={styles.detailBlock} style={{borderLeftColor:col}}>
+  const infoCol=(
+    <>
       <div className={styles.detailBlockHdr}>
         <span className={styles.detailBlockTitle} style={{color:col}}>{label}</span>
         <div style={{display:'flex',alignItems:'center',gap:6}}>
-          {isWod&&<button className={styles.timerBtn} onClick={e=>{e.stopPropagation();onTimer(bl)}}><i className="ti ti-player-play"/> Timer</button>}
           {isRd?rdBadgeEl:(meta?<span className={styles.detailBlockMeta} style={{background:col,color:'#fff'}}>{meta}</span>:null)}
           {!isRd&&wodDone&&<span className={styles.detailBlockDone}>✓ Completo</span>}
         </div>
       </div>
+      {bl.notes&&<div className={styles.detailBlockNotesTop}>{bl.notes}</div>}
       {exs.map((ex,ei)=><ExRow key={ei} ex={ex} {...sharedExProps}/>)}
-      {bl.notes&&<div className={styles.detailBlockNotes}>{bl.notes}</div>}
-      {isWod&&<a className={styles.lbLink} href={`leaderboard.html?wod=${bl.id}&session=${sess.id}&date=${dateKey}`} target="_blank" onClick={e=>e.stopPropagation()}>
-        <i className="ti ti-trophy"/> Ver Leaderboard
-      </a>}
-      {athSection}
+    </>
+  )
+
+  if(isWod) return(
+    <div className={styles.detailBlock} style={{borderLeftColor:col}}>
+      <div className={styles.cardBody}>
+        <div className={styles.cardInfo}>{infoCol}</div>
+        <div className={styles.cardActions}>
+          <button className={styles.timerBtn} onClick={e=>{e.stopPropagation();onTimer(bl)}}>
+            <i className="ti ti-player-play"/>
+            <span className={styles.btnLabel}> Timer</span>
+          </button>
+          <a className={styles.lbLink} href={`leaderboard.html?wod=${bl.id}&session=${sess.id}&date=${dateKey}`} target="_blank" onClick={e=>e.stopPropagation()}>
+            <i className="ti ti-trophy"/>
+            <span className={styles.btnLabel}> Ver Leaderboard</span>
+          </a>
+          {athSection}
+        </div>
+      </div>
+    </div>
+  )
+
+  return(
+    <div className={styles.detailBlock} style={{borderLeftColor:col}}>
+      {infoCol}
     </div>
   )
 }
