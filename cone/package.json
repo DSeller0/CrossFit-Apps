@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:public": "vite --config vite.public.config.js",
     "build": "vite build",
     "build:public": "vite build --config vite.public.config.js",
     "build:all": "npm run build && npm run build:public",
