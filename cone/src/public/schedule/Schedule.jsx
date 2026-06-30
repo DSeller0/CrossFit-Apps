@@ -383,9 +383,11 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
           :<div className={`${styles.detailExCheck}${done?' '+styles.detailExCheckDone:''}`} onClick={()=>onCheck(bl.id,ex.id)}/>)}
         <div className={styles.detailExBody}>
           <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
-            <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{toTitleCase(displayName)}</div>
-            <div style={{display:'flex',alignItems:'center',gap:4,flexShrink:0}}>
+            <div style={{display:'flex',alignItems:'baseline',gap:6,flex:1,minWidth:0}}>
               {volStr&&<span className={styles.pillVol}>{volStr}</span>}
+              <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{toTitleCase(displayName)}</div>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:4,flexShrink:0}}>
               {cxIsProg&&<button className={`${styles.rmChip}${exRm?' '+styles.rmChipHasRm:''}`} onClick={e=>{e.stopPropagation();onRmToggle(ex.id)}}>{exRm?exRm.rm+' '+(exRm.unit||'kg'):'RM'}</button>}
               <button className={`${styles.demoBtn}${hasDemoCx?'':' '+styles.demoBtnNoDemo}`} onClick={e=>{e.stopPropagation();onDemo(mvNames.map(n=>({name:n})))}} disabled={!hasDemoCx}>Demo</button>
             </div>
@@ -426,9 +428,11 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
             :<div className={`${styles.detailExCheck}${lineDone?' '+styles.detailExCheckDone:''}`} onClick={()=>onCheck(bl.id,`${ex.id}-${gi}`)}/>)}
           <div className={styles.detailExBody}>
             <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
-              <div className={`${styles.detailExName}${!isWod&&lineDone?' '+styles.detailExNameDone:''}`}>{toTitleCase(ex.name)}</div>
-              <div style={{display:'flex',alignItems:'center',gap:3,flexShrink:0}}>
+              <div style={{display:'flex',alignItems:'baseline',gap:6,flex:1,minWidth:0}}>
                 {repsPrefix&&<span className={styles.pillVol}>{repsPrefix}</span>}
+                <div className={`${styles.detailExName}${!isWod&&lineDone?' '+styles.detailExNameDone:''}`}>{toTitleCase(ex.name)}</div>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:3,flexShrink:0}}>
                 {gi===0&&<button className={`${styles.rmChip}${exRm?' '+styles.rmChipHasRm:''}`} onClick={e=>{e.stopPropagation();onRmToggle(ex.id)}}>{exRm?exRm.rm+' '+(exRm.unit||'kg'):'RM'}</button>}
                 {gi===0&&<button className={`${styles.demoBtn}${hasDemoPg?'':' '+styles.demoBtnNoDemo}`} onClick={e=>{e.stopPropagation();onDemo([{name:ex.name}])}} disabled={!hasDemoPg}>Demo</button>}
               </div>
@@ -458,9 +462,11 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
         :<div className={`${styles.detailExCheck}${done?' '+styles.detailExCheckDone:''}`} onClick={()=>onCheck(bl.id,ex.id)}/>)}
       <div className={styles.detailExBody}>
         <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
-          <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{toTitleCase(ex.name)}</div>
-          <div style={{display:'flex',alignItems:'center',gap:3,flexShrink:0}}>
+          <div style={{display:'flex',alignItems:'baseline',gap:6,flex:1,minWidth:0}}>
             {vol&&<span className={styles.pillVol}>{vol}</span>}
+            <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{toTitleCase(ex.name)}</div>
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:3,flexShrink:0}}>
             {ins&&<span className={ins.includes('%')?styles.pillVol:styles.pillWt}>{ins}</span>}
             <button className={`${styles.demoBtn}${hasDemo?'':' '+styles.demoBtnNoDemo}`} onClick={e=>{e.stopPropagation();onDemo([{name:ex.name}])}} disabled={!hasDemo}>Demo</button>
           </div>
@@ -480,7 +486,7 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
 
   const perfStr=fmtDeskPerf(athResult)
 
-  const athSection=onLogBlock&&isWod&&(
+  const athSection=onLogBlock&&(isWod||isRd)&&(
     <>
       <div className={`${styles.deskAthResultRow} ${athResult?styles.deskAthResultRowLogged:styles.deskAthResultRowEmpty}`}>
         <span className={`${styles.deskAthResultName} ${athResult?styles.deskAthResultNameLogged:styles.deskAthResultNameEmpty}`}>
@@ -568,28 +574,22 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
     </>
   )
 
-  if(isWod) return(
+  return(
     <div className={styles.detailBlock} style={{borderLeftColor:col}}>
       <div className={styles.cardBody}>
         <div className={styles.cardInfo}>{infoCol}</div>
         <div className={styles.cardActions}>
-          <button className={styles.timerBtn} onClick={e=>{e.stopPropagation();onTimer(bl)}}>
+          {isWod&&<button className={styles.timerBtn} onClick={e=>{e.stopPropagation();onTimer(bl)}}>
             <i className="ti ti-player-play"/>
             <span className={styles.btnLabel}> Timer</span>
-          </button>
-          <a className={styles.lbLink} href={`leaderboard.html?wod=${bl.id}&session=${sess.id}&date=${dateKey}`} target="_blank" onClick={e=>e.stopPropagation()}>
+          </button>}
+          {isWod&&<a className={styles.lbLink} href={`leaderboard.html?wod=${bl.id}&session=${sess.id}&date=${dateKey}`} target="_blank" onClick={e=>e.stopPropagation()}>
             <i className="ti ti-trophy"/>
             <span className={styles.btnLabel}> Ver Leaderboard</span>
-          </a>
+          </a>}
           {athSection}
         </div>
       </div>
-    </div>
-  )
-
-  return(
-    <div className={styles.detailBlock} style={{borderLeftColor:col}}>
-      {infoCol}
     </div>
   )
 }
@@ -1169,7 +1169,7 @@ export default function Schedule() {
                     onRmConfirm={(exId,rm,unit)=>{setRmValues(prev=>({...prev,[exId]:{rm,unit,source:'manual'}}));setRmEditKey(null)}}
                     onDemo={mvs=>setDemoTarget(mvs)}
                     onTimer={b=>openTimer(b,selSessObj,selSess.dateKey)}
-                    onLogBlock={isWod&&selAth?()=>deskOpenReg(bl,selSessObj,selSess.dateKey):null}
+                    onLogBlock={(isWod||isRoundBlock(bl))&&selAth?()=>deskOpenReg(bl,selSessObj,selSess.dateKey):null}
                     athResult={existingResult}
                     athName={selAthObj?.name||''}
                   />
