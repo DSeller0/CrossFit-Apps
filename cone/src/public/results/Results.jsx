@@ -4,9 +4,8 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import styles from './Results.module.css'
 import { MONTH_PT, DAY_PT, toISO, todayISO, getWeek } from '../lib/week.js'
-import { uid, blkLabel, exVolStr, toSecs, fmtSecs } from '../lib/wod.js'
+import { uid, blkLabel, exVolStr, toSecs, fmtSecs, WOD_TYPES } from '../lib/wod.js'
 
-const WOD_TYPES = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT']
 const SCALES    = ['RX','Inter','SC','Adaptado']
 const SCALE_COL = {RX:'#4ac8c0',Inter:'#e87820',SC:'#9070d8',Adaptado:'#c05050'}
 const DEF_INP   = () => ({rpe:7,scale:'RX',perfTime:'',perfRounds:'',perfReps:''})

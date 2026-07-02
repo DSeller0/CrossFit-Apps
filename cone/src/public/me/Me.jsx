@@ -4,6 +4,7 @@ import Header from '../Header.jsx'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import { toISO, todayISO } from '../lib/week.js'
+import { WOD_TYPES as CANON_WOD_TYPES } from '../lib/wod.js'
 import styles from './Me.module.css'
 
 const DAY_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
@@ -15,9 +16,9 @@ const ECOL = {
   'For Time':'#c86828','AMRAP':'#e09830','Estações':'#c8a030',
   'Benchmark':'#d8a840',
 }
-const WOD_TYPES  = ['MetCon','AMRAP','EMOM','For Time','HIIT','Estações']
+const WOD_TYPES  = CANON_WOD_TYPES
 const DIST_TYPES = ['Força','LPO','Acessórios','Skill','Core','Cardio','Mobilidade']
-const PR_SKIP    = new Set(['-','Aquecimento','Descanso','HIIT','MetCon','EMOM','For Time','AMRAP','Estações'])
+const PR_SKIP    = new Set(['-','Aquecimento','Descanso',...CANON_WOD_TYPES])
 const SCLS = { RX:'bRx', SC:'bSc', Inter:'bInter', Adaptado:'bAdp' }
 
 function initials(n) { return n.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase() }

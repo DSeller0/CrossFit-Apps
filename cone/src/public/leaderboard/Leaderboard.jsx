@@ -4,9 +4,8 @@ import { sb } from '../supabaseClient.js'
 import Header from '../Header.jsx'
 import Nav from '../Nav.jsx'
 import s from './Leaderboard.module.css'
-import { rankResults, perfStr } from '../lib/wod.js'
+import { rankResults, perfStr, WOD_TYPES } from '../lib/wod.js'
 
-const WOD_TYPES    = ['WOD', 'For Time', 'AMRAP', 'EMOM', 'MetCon', 'HIIT']
 const SCALES       = ['Todos', 'RX', 'Inter', 'SC', 'Adaptado']
 const SCALE_RANK   = { RX: 4, Inter: 3, SC: 2, Adaptado: 1, '-': 0 }
 const SCALE_NAMES  = { 4: 'RX', 3: 'Inter', 2: 'SC', 1: 'Adaptado', 0: '-' }

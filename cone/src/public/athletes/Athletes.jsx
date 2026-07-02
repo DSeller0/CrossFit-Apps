@@ -3,13 +3,12 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import s from './Athletes.module.css'
 import { toISO } from '../lib/week.js'
-import { toSecs } from '../lib/wod.js'
+import { toSecs, WOD_TYPES } from '../lib/wod.js'
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const SCALE_RANK   = { RX: 4, Inter: 3, SC: 2, Adaptado: 1 }
 const SCALE_NAMES  = { 4: 'RX', 3: 'Inter', 2: 'SC', 1: 'Adaptado' }
 const SCALE_COLORS = { RX: '#4ac8c0', Inter: '#d8a840', SC: '#e87820', Adaptado: '#a89880' }
-const WOD_TYPES    = ['WOD', 'For Time', 'AMRAP', 'EMOM', 'MetCon', 'HIIT']
 const DAY_PT       = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
 
 // ── Pure helpers ──────────────────────────────────────────────────────────

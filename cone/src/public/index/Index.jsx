@@ -3,9 +3,10 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import Nav from '../Nav.jsx'
 import s from './Index.module.css'
+import { WOD_TYPES as WOD_TYPES_ARR } from '../lib/wod.js'
 
 // ── Constants ─────────────────────────────────────────────────────────────
-const WOD_TYPES  = new Set(['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'])
+const WOD_TYPES  = new Set(WOD_TYPES_ARR)
 const STRENGTH_T = new Set(['Força','Weightlifting','Gymnastics'])
 const WARM_T     = new Set(['Aquecimento','Warm-up'])
 const CORE_T     = new Set(['Core','Abdômen'])

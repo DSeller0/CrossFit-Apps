@@ -881,40 +881,19 @@ function ReportModal({ events, sessions, onClose }) {
     return { total, currency: loc.currency || 'R$' };
   }
 
-  function loadScript(src) {
-    return new Promise((res, rej) => {
-      if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
-      const s = document.createElement('script'); s.src = src;
-      s.onload = res; s.onerror = rej; document.head.appendChild(s);
-    });
-  }
-
-  function qrToBase64(text, size = 200) {
-    return new Promise(res => {
-      try {
-        const div = document.createElement('div'); div.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
-        document.body.appendChild(div);
-        new window.QRCode(div, { text, width: size, height: size, correctLevel: window.QRCode.CorrectLevel.M });
-        setTimeout(() => {
-          const img = div.querySelector('img') || div.querySelector('canvas');
-          let b64 = null;
-          if (img instanceof HTMLCanvasElement) b64 = img.toDataURL('image/png');
-          else if (img instanceof HTMLImageElement) b64 = img.src;
-          document.body.removeChild(div);
-          res(b64);
-        }, 120);
-      } catch (e) { res(null); }
-    });
+  async function qrToBase64(text, size = 200) {
+    try {
+      const QRCode = (await import('qrcode')).default;
+      return await QRCode.toDataURL(text, { width: size, margin: 1, errorCorrectionLevel: 'M' });
+    } catch (e) { return null; }
   }
 
   async function generatePDF() {
     setGenerating(true);
     try {
-      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
-      if (showPix && coach.pixKey) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js');
+      const { jsPDF } = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
       try {
-        const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         const evs = filteredEvents();
         const groups = groupByLocation(evs);
@@ -946,7 +925,7 @@ function ReportModal({ events, sessions, onClose }) {
           if (t) { grandTotal += t.total; grandCurrency = t.currency; }
           summaryRows.push([name, loc?.type === 'box' ? 'Box' : 'Personal', String(levs.length), fmtDur(totalMin), t ? t.currency + ' ' + t.total.toLocaleString('pt-BR') : '-']);
         });
-        doc.autoTable({ startY: y, head: [['Local', 'Tipo', 'Sessões', 'Tempo Total', 'Valor']], body: summaryRows, foot: showRate && grandTotal > 0 ? [['', '', '', 'Total', grandCurrency + ' ' + grandTotal.toLocaleString('pt-BR')]] : [], styles: { fontSize: 9, cellPadding: 3 }, headStyles: { fillColor: [30, 30, 30], textColor: 255, fontStyle: 'bold' }, footStyles: { fillColor: [245, 245, 245], fontStyle: 'bold' }, columnStyles: { 0: { cellWidth: 60 }, 1: { cellWidth: 25 }, 2: { cellWidth: 22 }, 3: { cellWidth: 28 }, 4: { cellWidth: 35 } }, margin: { left: 14, right: 14 } });
+        autoTable(doc, { startY: y, head: [['Local', 'Tipo', 'Sessões', 'Tempo Total', 'Valor']], body: summaryRows, foot: showRate && grandTotal > 0 ? [['', '', '', 'Total', grandCurrency + ' ' + grandTotal.toLocaleString('pt-BR')]] : [], styles: { fontSize: 9, cellPadding: 3 }, headStyles: { fillColor: [30, 30, 30], textColor: 255, fontStyle: 'bold' }, footStyles: { fillColor: [245, 245, 245], fontStyle: 'bold' }, columnStyles: { 0: { cellWidth: 60 }, 1: { cellWidth: 25 }, 2: { cellWidth: 22 }, 3: { cellWidth: 28 }, 4: { cellWidth: 35 } }, margin: { left: 14, right: 14 } });
         y = doc.lastAutoTable.finalY + 14;
         for (const [locId, levs] of Object.entries(groups)) {
           const loc = locations.find(l => l.id === locId);
@@ -968,7 +947,7 @@ function ReportModal({ events, sessions, onClose }) {
           const head = [['Data', 'Hora', 'Duração', 'Sessão']];
           if (showDetails) head[0].push('Detalhes');
           if (showRate && loc?.rate) head[0].push('Valor');
-          doc.autoTable({ startY: y, head, body: rows, styles: { fontSize: 8, cellPadding: 2 }, headStyles: { fillColor: [50, 50, 50], textColor: 255, fontStyle: 'bold' }, margin: { left: 14, right: 14 } });
+          autoTable(doc, { startY: y, head, body: rows, styles: { fontSize: 8, cellPadding: 2 }, headStyles: { fillColor: [50, 50, 50], textColor: 255, fontStyle: 'bold' }, margin: { left: 14, right: 14 } });
           y = doc.lastAutoTable.finalY + 4;
           const locForCalc = athGroup2 ? locations.find(l => l.type === 'personal' && (l.athleteIds || []).includes(athGroup2.id)) : loc;
           const t = calcTotal(levs, locForCalc);

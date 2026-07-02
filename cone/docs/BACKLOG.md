@@ -18,10 +18,7 @@ _(none)_
 
 ## 🧊 Icebox (captured + prioritized — no plan yet)
 
-- **#5 CI gate — run test + lint before deploy** · S · Sonnet · deploy.yml runs build only; add `npm test` + `npm run lint` steps so failures block publish
-- **#6 WOD-type check consolidation (Benchmark bug)** · S · Sonnet · 5 public pages hand-roll WOD-type lists that omit `Benchmark` → Benchmark blocks invisible to results/leaderboard logic; adopt `isWodBlock`/`WOD_TYPES` from wod.js everywhere
 - **#7 class_executions anon-write review** · S · Sonnet · public check-in UPDATEs `class_executions` (Schedule.jsx:701,705) — undocumented write surface; verify RLS scope on dev env (needs #4), then document the rule
-- **#8 Bundle jsPDF, drop CDN load** · S · Sonnet · Publicador loads jsPDF from cdnjs at runtime while npm deps sit unused; dynamic-import the npm package like html2canvas
 - **#9 Tap-flash fix (rest of FOUC audit done)** · S · Sonnet · round counter flashes blue on tap; theme-init verified on all pages except tv.html (→ #2)
 - **#10 Goals for WOD-type blocks** · M · Sonnet · builder sets a goal/target on WOD blocks; shown wherever WODs render (schedule card slot reserved, TV)
 - **#11 Reposition Sets/Reps inputs in builder** · S · Sonnet · in Criador, Sets+Reps inputs precede the exercise-name text field
@@ -45,8 +42,11 @@ _(none)_
 - **#29 Vercel migration** · L · Sonnet · fixes chunk-hash 404 + preview deploys; cost = base-path rework + porting dual-build assembly; natural moment to consolidate root-level loose files (themes.css, cone-client.js, config.json)
 - **#30 Per-athlete RLS / access** · L · Opus · `me.html?id=<athleteId>`, `isPublic` on result rows, QR codes in Atletas tab
 - **#31 Email-gated athlete access** · L · Opus · Supabase OTP + email allowlist; depends on #30
+- **#32 Fix pre-existing lint debt, then enable lint CI gate** · M · Sonnet · `npm run lint` currently fails with 155 problems across 26 files: ~87 mechanical (44 no-unused-vars, 30 no-empty, 10 no-useless-escape, 3 no-useless-assignment) + ~87 real react-hooks correctness findings (22 set-state-in-effect, 21 exhaustive-deps, 18 refs, 14 immutability, 8 purity, 4 static-components) from the upgraded `eslint-plugin-react-hooks` v7 ruleset; deploy.yml's CI gate (#5) only runs `npm test` for now — add `npm run lint` once this is clean
 
 ## ✅ Done (recent)
+
+**2026-07-02 — Quick-wins batch (#5, #6, #8)** · CI gate: `npm test` now runs before build in deploy.yml (lint deferred — see #32, pre-existing 155 problems) · Benchmark-bug fix: Index/Me/Results/Athletes/Leaderboard.jsx no longer hand-roll local WOD-type lists that omitted `Benchmark` (and in some cases `WOD`/`Estações`) — all now import canonical `WOD_TYPES` from `lib/wod.js` · Publicador.jsx PDF export: dropped CDN `<script>` loading of jsPDF/jspdf-autotable/qrcodejs, now dynamic-imports the npm packages (`jspdf-autotable` v5's `autoTable(doc, opts)` call form; `qrcode` npm package's `toDataURL()` replaces the old DOM-canvas qrcodejs hack) — build confirms separate lazy chunks; runtime PDF export not yet click-verified (blocked on no browser-automation tool + real Supabase OTP login, no dev-env yet — user to verify manually)
 
 **2026-07-02 — Review process + first full review** · /app-review skill (9 dimensions) · WORKFLOW v2 (review cadence, Claude Design mockup flow, skills in ritual, docs-are-Done) · Cone Design System project seeded on claude.ai/design (5 cards from `cone/design/`) · first review report (reviews/2026-07-02.md) · dev-env architecture planned (#4) · CLAUDE.md drift fixed (tv_state `timer_block_id`, lib paths, whitelist location)
 
