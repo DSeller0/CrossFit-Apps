@@ -49,12 +49,14 @@ Importing both in the same bundle causes a GoTrueClient warning (non-fatal but v
 
 ## TV system
 
-**Files:** `src/components/tabs/TvController.jsx` (SPA controller) + `src/public/tv/TV.jsx` (display) + `src/public/tv/TV.module.css`
+**Files:** `src/components/tabs/TvController.jsx` (SPA controller, desktop layout: full-width Sessão date-picker + two-pane grid — see `src/components/tabs/tv/tvController.module.css`) + `src/public/tv/TV.jsx` (display) + `src/public/tv/TV.module.css`
 
 **Data flow:**
 1. TvController calls `push(patch)` → upserts `{ id: 1, ...patch, updated_at: Date.now() }` to `tv_state`.
 2. TV.html subscribes to `postgres_changes` on `tv_state` → receives delta → re-renders.
 3. `push()` is **patch-only**. Never include local-only fields that are not DB columns — they poison the upsert and freeze all subsequent updates.
+
+**Controller class roster (`tv/ClassPanel.jsx`):** every class started today renders as an accordion card (active one auto-expanded, live-updated via `class_executions` realtime subscription already in `useClassTracking`); ended classes render the same roster read-only. Roster rows merge ranking + live registration + editing (`useLiveRegistration.js`) for both real athletes (`results_v2`, keyed by `athlete_id`) and guests (`class_executions.anon_results`, keyed by name — day-scoped only, deliberately not in `results_v2` since guests don't need durable cross-day tracking). "Registrar" captures the live timer elapsed as `perfTime` (mm:ss string, `For Time` blocks only); "Editar" reveals scale + a manual mm:ss field to overwrite (covers both corrections and misclicks).
 
 **tv_state columns (as of 2026-07-02; source of truth becomes `supabase/migrations/` once plans/04 lands):**
 ```

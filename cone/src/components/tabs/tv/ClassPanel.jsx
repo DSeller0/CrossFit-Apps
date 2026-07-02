@@ -1,71 +1,184 @@
-export default function ClassPanel({
-  tv, selSessId, activeClass, pastClasses, athletes,
-  classLabel, setClassLabel, startClass, endClass, loadClasses,
-  s, // style constants
-}) {
-  return (
-    <div style={s.card}>
-      <div style={s.cardTitle}>Aula</div>
+import { useState } from 'react'
+import { rankResults, perfStr } from '../../../public/lib/wod.js'
+import st from './tvController.module.css'
 
-      {!tv?.class_id ? (
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 120 }}>
-            <label style={s.lbl}>Turma</label>
-            <input value={classLabel} onChange={e => setClassLabel(e.target.value)}
-              placeholder="ex: 7h, 9h, Turma A" style={s.input} />
-          </div>
-          <button onClick={startClass} disabled={!selSessId}
-            style={{ ...s.btn, background: selSessId ? '#48b860' : '#1a1a1a', borderColor: selSessId ? '#48b860' : '#2a231c', color: selSessId ? '#0d0b09' : '#554a3a', flexShrink: 0 }}>
-            <i className="ti ti-whistle" /> Iniciar Aula
-          </button>
-        </div>
-      ) : (
-        <>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#48b860', display: 'inline-block', boxShadow: '0 0 6px #48b860' }} />
-              <span style={{ fontSize: 16, fontWeight: 900, color: '#4ac8c0' }}>{activeClass?.class_label || 'Aula ativa'}</span>
-            </div>
-            <button onClick={endClass} style={{ ...s.btn, fontSize: 11, borderColor: '#c84038', color: '#c84038', background: 'transparent' }}>
-              <i className="ti ti-square-off" /> Encerrar
-            </button>
-          </div>
+function buildMembers(cls, athletes) {
+  return [
+    ...(cls.athlete_ids || []).map(id => ({
+      type: 'real', id, key: `real:${id}`, name: athletes.find(a => a.id === id)?.name || '?',
+    })),
+    ...(cls.anon_names || []).map(name => ({ type: 'anon', name, key: `anon:${name}` })),
+  ]
+}
 
-          <div style={{ fontSize: 13, color: '#c8b090', marginBottom: 10 }}>
-            {((activeClass?.athlete_ids?.length || 0) + (activeClass?.anon_names?.length || 0))} atletas presentes
-            <button onClick={loadClasses} style={{ ...s.btn, fontSize: 10, padding: '2px 6px', marginLeft: 8, background: 'transparent', color: '#806850' }}>
-              <i className="ti ti-refresh" />
-            </button>
-          </div>
+function scoreMembers(members, cls, results, activeBlockId, liveOverride) {
+  return members.map(m => {
+    let entry = null
+    if (m.type === 'real') {
+      const row = results.find(r => r.athleteId === m.id)
+      const blk = row?.blocks?.find(b => b.blockId === activeBlockId)
+      if (blk) entry = { perfTime: blk.perfTime, perfRounds: blk.perfRounds, perfReps: blk.perfReps, scale: blk.scale }
+    } else {
+      const ar = cls.anon_results?.[m.name]
+      if (ar && ar.blockId === activeBlockId) entry = { perfTime: ar.perfTime, scale: ar.scale }
+    }
+    if (!entry && liveOverride[m.key]) entry = liveOverride[m.key]
+    return { ...m, entry }
+  })
+}
 
-          {((activeClass?.athlete_ids?.length || 0) + (activeClass?.anon_names?.length || 0)) > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
-              {(activeClass?.athlete_ids || []).map(id => {
-                const a = athletes.find(x => x.id === id)
-                return a ? <span key={id} style={{ ...s.pill, borderColor: '#1a3a1a', color: '#48b860', background: '#0a1a0a' }}>{a.name}</span> : null
-              })}
-              {(activeClass?.anon_names || []).map((name, i) => (
-                <span key={i} style={{ ...s.pill, borderStyle: 'dashed' }}>{name}</span>
-              ))}
-            </div>
-          )}
+function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
+  const [editing, setEditing] = useState(false)
+  const [draft,   setDraft]   = useState(null)
+  const scale = liveReg.liveScales[m.key] ?? 'Rx'
 
-          <div style={{ fontSize: 11, color: '#554a3a', background: '#161210', border: '1px solid #2a231c', borderRadius: 4, padding: '6px 10px' }}>
-            <i className="ti ti-qrcode" style={{ marginRight: 4 }} />
-            QR no slide <strong style={{ color: '#c8b090' }}>QR Code</strong> leva ao check-in
-          </div>
-        </>
-      )}
+  function startEdit() {
+    setDraft({ perfTime: m.entry.perfTime || '', scale: m.entry.scale || 'Rx' })
+    setEditing(true)
+  }
+  async function saveEdit() {
+    await liveReg.editLive(m, draft)
+    setEditing(false)
+  }
+  async function remove() {
+    await liveReg.removeLive(m)
+    setEditing(false)
+  }
 
-      {pastClasses.length > 0 && (
-        <div style={{ marginTop: 14, borderTop: '1px solid #2a231c', paddingTop: 12 }}>
-          <div style={{ fontSize: 10, color: '#554a3a', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 8 }}>Aulas anteriores hoje</div>
-          {pastClasses.map(c => (
-            <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', fontSize: 12 }}>
-              <span style={{ color: '#806850', fontWeight: 700 }}>{c.class_label}</span>
-              <span style={{ color: '#554a3a' }}>{(c.athlete_ids?.length || 0) + (c.anon_names?.length || 0)} atletas</span>
-            </div>
+  if (editing) {
+    return (
+      <div className={st.rosterRow}>
+        <span className={st.rank}>{rank ?? '—'}</span>
+        <span className={st.athName}>{m.name}</span>
+        <div className={st.scalePills}>
+          {['Rx','Sc','Adp'].map(sc => (
+            <button key={sc} className={`${st.scalePill} ${draft.scale === sc ? st.sel : ''}`}
+              onClick={() => setDraft(d => ({ ...d, scale: sc }))}>{sc}</button>
           ))}
+        </div>
+        <input className={`${st.input} ${st.editTimeInput}`} value={draft.perfTime} placeholder="mm:ss"
+          onChange={e => setDraft(d => ({ ...d, perfTime: e.target.value }))} />
+        <button className={`${st.btn} ${st.rowBtn} ${st.reg}`} onClick={saveEdit}>Salvar</button>
+        <button className={`${st.btn} ${st.rowBtn} ${st.remove}`} onClick={remove}><i className="ti ti-trash" /></button>
+        <button className={`${st.btn} ${st.rowBtn} ${st.edit}`} onClick={() => setEditing(false)}>Cancelar</button>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`${st.rosterRow} ${m.entry ? st.registered : ''}`}>
+      <span className={st.rank}>{m.entry ? rank : '—'}</span>
+      <span className={st.athName}>
+        {m.name}{m.type === 'anon' && <span className={st.guestBadge}>visitante</span>}
+      </span>
+      {m.entry ? (
+        <>
+          <span className={st.pill}>{m.entry.scale || 'RX'}</span>
+          <span className={`${st.perf} ${!m.entry.perfTime && !m.entry.perfRounds ? st.empty : ''}`}>
+            {perfStr(m.entry, timerType)}
+          </span>
+          {isActive && (
+            <button className={`${st.btn} ${st.rowBtn} ${st.edit}`} onClick={startEdit}>
+              <i className="ti ti-pencil" /> Editar
+            </button>
+          )}
+        </>
+      ) : canRegister ? (
+        <>
+          <div className={st.scalePills}>
+            {['Rx','Sc','Adp'].map(sc => (
+              <button key={sc} className={`${st.scalePill} ${scale === sc ? st.sel : ''}`}
+                onClick={() => liveReg.setLiveScales(s => ({ ...s, [m.key]: sc }))}>{sc}</button>
+            ))}
+          </div>
+          <button className={`${st.btn} ${st.rowBtn} ${st.reg}`} onClick={() => liveReg.registerLive(m, scale)}>
+            <i className="ti ti-check" /> Registrar
+          </button>
+        </>
+      ) : (
+        <span className={`${st.perf} ${st.empty}`}>—</span>
+      )}
+    </div>
+  )
+}
+
+function ClassAccordion({ cls, isActive, expanded, onToggle, athletes, results, activeBlockId, timerType, canRegister, liveReg, endClass }) {
+  const members = buildMembers(cls, athletes)
+  const scored  = scoreMembers(members, cls, results, activeBlockId, liveReg.liveOverride)
+  const registered = scored.filter(m => m.entry)
+  const pending    = scored.filter(m => !m.entry)
+  const ranked     = rankResults(registered.map(m => m.entry), timerType)
+    .map(e => registered.find(m => m.entry === e))
+
+  return (
+    <div className={`${st.classCard} ${isActive ? st.active : ''} ${expanded ? st.expanded : ''}`}>
+      <div className={st.classHead} onClick={onToggle}>
+        <div className={st.classHeadInfo}>
+          <div className={st.cName}>
+            {isActive && <span className={st.liveDot} />}
+            {cls.class_label || 'Turma'}
+          </div>
+          <div className={st.cMeta}>{members.length} atletas · {registered.length} registrados</div>
+        </div>
+        {isActive && (
+          <button className={`${st.btn} ${st.endBtn}`} onClick={e => { e.stopPropagation(); endClass() }}>
+            <i className="ti ti-square-off" /> Encerrar
+          </button>
+        )}
+        <span className={st.chev}>{expanded ? '▾' : '▸'}</span>
+      </div>
+      {expanded && (
+        <div className={st.rosterList}>
+          {ranked.map((m, i) => (
+            <RosterRow key={m.key} m={m} rank={i + 1} timerType={timerType}
+              isActive={isActive} canRegister={false} liveReg={liveReg} />
+          ))}
+          {pending.map(m => (
+            <RosterRow key={m.key} m={m} rank={null} timerType={timerType}
+              isActive={isActive} canRegister={isActive && canRegister} liveReg={liveReg} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function ClassPanel({
+  tv, selSessId, todayClasses, activeClass, athletes, results, activeBlockId, timerType, timerRun,
+  classLabel, setClassLabel, startClass, endClass, liveReg,
+}) {
+  const [manualToggle, setManualToggle] = useState({})
+  const canRegister = timerType === 'For Time' && (timerRun || (tv?.timer_paused_elapsed > 0))
+
+  return (
+    <div className={st.card}>
+      <div className={st.cardTitle}>Aula</div>
+      <div className={st.classForm}>
+        <div className={st.classFormField}>
+          <label className={st.lbl}>Turma</label>
+          <input className={st.input} value={classLabel} onChange={e => setClassLabel(e.target.value)}
+            placeholder="ex: 7h, 9h, Turma A" disabled={!!activeClass} />
+        </div>
+        <button className={`${st.btn} ${st.classFormBtn}`} onClick={startClass} disabled={!selSessId || !!activeClass}>
+          <i className="ti ti-whistle" /> Iniciar
+        </button>
+      </div>
+      {activeClass && <div className={st.classHint}>Encerre a aula ativa para iniciar outra.</div>}
+
+      {todayClasses.length === 0 ? (
+        <div className={st.emptyNote}>Nenhuma aula hoje ainda</div>
+      ) : (
+        <div className={st.classList}>
+          {todayClasses.map(cls => {
+            const isActive = cls.id === activeClass?.id
+            const expanded = manualToggle[cls.id] ?? isActive
+            return (
+              <ClassAccordion key={cls.id} cls={cls} isActive={isActive} expanded={expanded}
+                onToggle={() => setManualToggle(t => ({ ...t, [cls.id]: !expanded }))}
+                athletes={athletes} results={results} activeBlockId={activeBlockId}
+                timerType={timerType} canRegister={canRegister} liveReg={liveReg} endClass={endClass} />
+            )
+          })}
         </div>
       )}
     </div>

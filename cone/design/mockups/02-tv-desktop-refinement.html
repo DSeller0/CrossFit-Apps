@@ -1,0 +1,174 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — TV controller desktop layout (backlog #2)</title>
+<style>
+  :root{--bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--divider:#2a231c;--gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;--green:#48b860;--red:#c84038}
+  body{margin:0;padding:24px;background:var(--bg);color:var(--cream);font-family:'Cinzel',Georgia,serif}
+  h1{font-size:16px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 4px}
+  p.note{font-size:12px;color:var(--muted);margin:0 0 20px;font-family:Georgia,serif;max-width:900px;line-height:1.5}
+  p.note b{color:var(--sub)}
+
+  /* ── page shell (no maxWidth cap — fills viewport) ── */
+  .page{padding:20px 24px;font-family:inherit}
+  .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid var(--divider);padding-bottom:14px}
+  .hdrTitle{font-size:16px;font-weight:900;color:var(--cream);letter-spacing:.1em;text-transform:uppercase}
+  .hdrSub{font-size:10px;color:var(--dim);margin-top:3px}
+  .hdrSub .on{color:var(--green)}
+  .openBtn{padding:7px 16px;font-size:12px;font-weight:700;border-radius:4px;background:var(--teal);color:#0d0b09;border:1px solid var(--teal)}
+
+  .layout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+  .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .full{grid-column:1/-1}
+  .span2{grid-column:span 2}
+
+  .card{background:var(--stone);border:1px solid var(--divider);border-radius:6px;padding:14px 16px}
+  .cardTitle{font-size:10px;font-weight:900;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+
+  /* session */
+  .week{display:flex;gap:3px;margin-bottom:10px}
+  .day{flex:1;text-align:center;padding:5px 2px;border:1px solid var(--divider);border-radius:4px;font-size:9px;color:var(--muted)}
+  .day.sel{border-color:var(--teal);color:var(--teal)}
+  .sessChips{display:flex;gap:8px;overflow:hidden}
+  .sessChip{min-width:120px;padding:8px 10px;border:1px solid var(--divider);border-radius:4px;font-size:11px;color:var(--sub);background:var(--stone2)}
+  .sessChip.sel{border-color:var(--teal);color:var(--teal)}
+
+  /* class */
+  .inlineForm{display:flex;gap:6px}
+  .fakeInput{flex:1;padding:6px 8px;border:1px solid var(--divider);border-radius:4px;font-size:11px;color:var(--dim);background:var(--bg)}
+  .fakeBtn{padding:6px 12px;font-size:11px;font-weight:700;border-radius:4px;background:var(--green);color:#0d0b09}
+
+  /* slide */
+  .slideRow{display:flex;flex-wrap:wrap;gap:6px}
+  .slideBtn{padding:5px 9px;font-size:10px;font-weight:700;border:1px solid var(--divider);border-radius:4px;color:var(--sub)}
+  .slideBtn.sel{background:var(--teal);border-color:var(--teal);color:#0d0b09}
+  .qrRow{margin-top:10px;font-size:10px;color:var(--dim)}
+
+  /* timer */
+  .blkChips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+  .blkChip{padding:5px 10px;border:1px solid var(--divider);border-radius:4px;font-size:10px;color:var(--sub);text-align:center;min-width:60px}
+  .blkChip.sel{border-color:var(--gold);color:var(--gold)}
+  .timerGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+  .lbl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:3px}
+  .timerBtns{display:flex;gap:6px}
+  .timerBtns .fakeBtn.play{background:var(--green)}
+  .timerBtns .fakeBtn.stop{background:transparent;border:1px solid var(--dim);color:var(--muted)}
+
+  /* results / live reg rows */
+  .resRow,.regRow{display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--stone2);border-radius:3px;margin-bottom:4px;font-size:11px}
+  .resRow .rank{color:var(--dim);width:20px}
+  .resRow .name,.regRow .name{flex:1;color:var(--cream);font-weight:700}
+  .resRow .perf{color:var(--teal);font-family:monospace}
+  .regRow .scalePill{padding:2px 6px;font-size:9px;border:1px solid var(--divider);border-radius:3px;color:var(--muted)}
+  .regRow .regBtn{padding:3px 8px;font-size:10px;font-weight:700;background:var(--teal);color:#0d0b09;border-radius:3px}
+
+  /* groups */
+  .groupCards{display:flex;gap:10px;flex-wrap:wrap}
+  .groupCard{flex:1;min-width:220px;border:1px solid var(--divider);border-left:4px solid var(--teal);border-radius:4px;padding:8px 10px;background:var(--stone2)}
+  .groupCard .gName{font-size:12px;font-weight:900;color:var(--teal)}
+  .groupCard .gMembers{font-size:10px;color:var(--muted);margin-top:4px}
+
+  /* preview */
+  .previewLbl{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+  .previewBox{width:100%;aspect-ratio:16/9;background:#000;border:1px solid var(--divider);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+
+  .annot{font-size:10px;color:var(--dim);font-family:Georgia,serif;font-style:italic;margin-top:3px}
+</style>
+<body>
+<h1>TV controller — desktop layout (backlog #2)</h1>
+<p class="note">Fixes: outer <b>maxWidth:1100 → fluid</b> (no dead side margins on wide screens); left column replaced with a <b>4-col grid</b> — Session and Grupos span full width, Aula/Slide are 1 col, Timer/Resultados/Registro are 2 col. Gets Session→Timer→Resultados into view at 1080p without scrolling; Grupos (only shown mid-aula, variable-height roster) may still scroll — acceptable since it's secondary/conditional. Preview stays sticky on the right, unchanged.</p>
+
+<div class="page">
+  <div class="hdr">
+    <div>
+      <div class="hdrTitle">📺 Quadro ao Vivo</div>
+      <div class="hdrSub"><span class="on">● TV ativa</span> · WOD</div>
+    </div>
+    <div class="openBtn">Abrir TV</div>
+  </div>
+
+  <div class="layout">
+    <div class="controls">
+
+      <div class="card full">
+        <div class="cardTitle">Sessão</div>
+        <div class="week">
+          <div class="day">Dom</div><div class="day sel">Seg</div><div class="day">Ter</div>
+          <div class="day">Qua</div><div class="day">Qui</div><div class="day">Sex</div><div class="day">Sáb</div>
+        </div>
+        <div class="sessChips">
+          <div class="sessChip sel">WOD Manhã</div>
+          <div class="sessChip">CrossFit 18h</div>
+          <div class="sessChip">Fundamentos</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardTitle">Aula</div>
+        <div class="inlineForm">
+          <div class="fakeInput">Turma</div>
+          <div class="fakeBtn">Iniciar</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardTitle">Slide</div>
+        <div class="slideRow">
+          <div class="slideBtn">Apagado</div>
+          <div class="slideBtn sel">WOD</div>
+          <div class="slideBtn">Timer</div>
+          <div class="slideBtn">Result.</div>
+          <div class="slideBtn">QR</div>
+        </div>
+        <div class="qrRow">QR Code: <b style="color:var(--teal)">Ativo</b></div>
+      </div>
+
+      <div class="card span2">
+        <div class="cardTitle">Timer</div>
+        <div class="blkChips">
+          <div class="blkChip">Pers.</div>
+          <div class="blkChip sel">WOD A</div>
+          <div class="blkChip">WOD B</div>
+        </div>
+        <div class="timerGrid">
+          <div><span class="lbl">Tipo</span><div class="fakeInput">For Time</div></div>
+          <div><span class="lbl">Cap (min)</span><div class="fakeInput">12</div></div>
+          <div><span class="lbl">Descanso</span><div class="fakeInput">60s</div></div>
+        </div>
+        <div class="timerBtns">
+          <div class="fakeBtn play">▸ Iniciar</div>
+          <div class="fakeBtn stop">■ Resetar</div>
+        </div>
+      </div>
+
+      <div class="card span2">
+        <div class="cardTitle">Resultados ao vivo</div>
+        <div class="resRow"><span class="rank">#1</span><span class="name">João Silva</span><span>Rx</span><span class="perf">3:45</span></div>
+        <div class="resRow"><span class="rank">#2</span><span class="name">Maria Souza</span><span>Rx</span><span class="perf">4:02</span></div>
+        <div class="resRow"><span class="rank">#3</span><span class="name">Pedro Alves</span><span>Sc</span><span class="perf">4:20</span></div>
+      </div>
+
+      <div class="card span2">
+        <div class="cardTitle" style="color:var(--teal)">Registro ao Vivo</div>
+        <div class="regRow"><span class="name">Ana Lima</span><span class="scalePill">Rx</span><span class="scalePill">Sc</span><span class="scalePill">Adp</span><span class="regBtn">✓ Registrar</span></div>
+        <div class="regRow"><span class="name">Carlos Dias</span><span class="scalePill">Rx</span><span class="scalePill">Sc</span><span class="scalePill">Adp</span><span class="regBtn">✓ Registrar</span></div>
+      </div>
+
+      <div class="card full">
+        <div class="cardTitle">Grupos</div>
+        <div class="groupCards">
+          <div class="groupCard"><div class="gName">Grupo A</div><div class="gMembers">João, Maria, Pedro</div></div>
+          <div class="groupCard" style="border-left-color:var(--gold)"><div class="gName" style="color:var(--gold)">Grupo B</div><div class="gMembers">Ana, Carlos</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div>
+      <div class="previewLbl">Preview</div>
+      <div class="previewBox">16:9 · sticky</div>
+      <div class="annot">Slide atual: WOD</div>
+    </div>
+  </div>
+</div>
+
+</body>

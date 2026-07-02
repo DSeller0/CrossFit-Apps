@@ -10,6 +10,7 @@
 }
 
 /* ── Blank ── */
+/* Deliberately pure black (not var(--bg)) — reads as "screen off" on every theme, including light ones. */
 .blank { width: 100%; height: 100%; background: #000; }
 
 /* ── Shared loading / empty ── */
@@ -175,7 +176,7 @@
   align-items: center; gap: 8px; min-width: 240px;
 }
 .podiumFirst {
-  border-color: var(--gold); background: #1a1508;
+  border-color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--bg));
   transform: scale(1.07); box-shadow: 0 0 40px rgba(216,168,64,.18);
 }
 .podiumMedal { font-size: 32px; }

@@ -8,13 +8,12 @@ Review findings feeding this board: [reviews/2026-07-02.md](./reviews/2026-07-02
 
 ## 🟢 Ready (planned — pick from the top)
 
-- **#2 Quadro ao Vivo — desktop refinement + design pass** · M · Sonnet · kill empty side margins, fill width, no-scroll @1080p, CSS-vars/inline-style cleanup, tv.html theme-init — [plans/02-tv-desktop-refinement.md](./plans/02-tv-desktop-refinement.md)
 - **#3 timer.html — desktop running layout** · M · Sonnet · sidebar offset + `vh`-scaled ring on running/paused screens — [plans/03-timer-desktop-running.md](./plans/03-timer-desktop-running.md)
 - **#4 Dev environment — local Supabase (Docker)** · L · Sonnet · Supabase CLI stack, env-var clients, schema as migrations, seed script; unblocks the RLS probes — [plans/04-dev-environment.md](./plans/04-dev-environment.md)
 
 ## 🔵 In Progress
 
-_(none)_
+- **#2 Quadro ao Vivo — desktop refinement + design pass** · implementation complete, pending user click-through — coach-side TvController is behind real Supabase OTP auth with no dev bypass, so the merged-roster/register-edit-guest flow couldn't be automated-tested this session (public tv.html side was: theme-init + real-data render confirmed via headless screenshot, no console errors). User to manually verify the roster flow, then move to Done.
 
 ## 🧊 Icebox (captured + prioritized — no plan yet)
 
@@ -43,6 +42,7 @@ _(none)_
 - **#30 Per-athlete RLS / access** · L · Opus · `me.html?id=<athleteId>`, `isPublic` on result rows, QR codes in Atletas tab
 - **#31 Email-gated athlete access** · L · Opus · Supabase OTP + email allowlist; depends on #30
 - **#32 Fix pre-existing lint debt, then enable lint CI gate** · M · Sonnet · `npm run lint` currently fails with 155 problems across 26 files: ~87 mechanical (44 no-unused-vars, 30 no-empty, 10 no-useless-escape, 3 no-useless-assignment) + ~87 real react-hooks correctness findings (22 set-state-in-effect, 21 exhaustive-deps, 18 refs, 14 immutability, 8 purity, 4 static-components) from the upgraded `eslint-plugin-react-hooks` v7 ruleset; deploy.yml's CI gate (#5) only runs `npm test` for now — add `npm run lint` once this is clean
+- **#33 Turma default-name auto-fill** · S · Sonnet · `classLabel` in `useClassTracking.js:6` defaults to plain `'Turma'`; round current clock to nearest full hour and default to `Turma_HH:MM` (e.g. 10:05 → `Turma_10:00`)
 
 ## ✅ Done (recent)
 
