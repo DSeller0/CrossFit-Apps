@@ -1,0 +1,52 @@
+<!-- @dsCard group="Tokens" -->
+<meta charset="utf-8">
+<title>Cone — Palette</title>
+<style>
+  body{margin:0;padding:24px;background:#0d0b09;color:#f0e8d0;font-family:Georgia,'Times New Roman',serif}
+  h1{font-size:16px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 4px}
+  p.note{font-size:12px;color:#806850;margin:0 0 20px}
+  .theme{margin-bottom:28px;padding:16px;border:1px solid #2a231c}
+  .theme h2{font-size:13px;letter-spacing:.15em;text-transform:uppercase;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+  .sw{border:1px solid rgba(128,128,128,.25)}
+  .sw .chip{height:44px}
+  .sw .lbl{font-size:10px;padding:5px 7px;display:flex;justify-content:space-between;gap:6px;font-family:Consolas,monospace}
+</style>
+<body>
+<h1>Cone — Palette</h1>
+<p class="note">Source of truth: <code>themes.css</code> (repo). Applied as <code>html.theme-*</code>. No border-radius on public pages.</p>
+<div id="themes"></div>
+<script>
+const THEMES = {
+  'TotK Dark (default)': {panel:'#0d0b09', ink:'#f0e8d0', vars:{
+    '--bg':'#0d0b09','--stone':'#161210','--stone2':'#1e1a16','--divider':'#2a231c',
+    '--gold':'#d8a840','--gold2':'#b88820','--teal':'#4ac8c0','--green':'#18cc30','--red':'#c83030',
+    '--cream':'#f0e8d0','--sub':'#c8b090','--muted':'#806850','--dim':'#554a3a'}},
+  'TotK Light': {panel:'#ede8dc', ink:'#1c1508', vars:{
+    '--bg':'#ede8dc','--stone':'#f5f1e8','--stone2':'#e8e2d4','--divider':'#d4cab8',
+    '--gold':'#9a6c14','--gold2':'#7a5008','--teal':'#1c6860','--green':'#1a6830','--red':'#b83020',
+    '--cream':'#1c1508','--sub':'#503828','--muted':'#7a6448','--dim':'#a89070'}},
+  'Spirit Blossom Dark': {panel:'#09070f', ink:'#ede4f8', vars:{
+    '--bg':'#09070f','--stone':'#100d1c','--stone2':'#17122a','--divider':'#221638',
+    '--gold':'#e05490','--gold2':'#b83872','--teal':'#38c4d0','--green':'#50d890','--red':'#c82850',
+    '--cream':'#ede4f8','--sub':'#c4a0d0','--muted':'#7d5090','--dim':'#4a2d60'}},
+  'Spirit Blossom Light': {panel:'#f4eefb', ink:'#1a0828', vars:{
+    '--bg':'#f4eefb','--stone':'#ffffff','--stone2':'#f0e8f8','--divider':'#e2d4f0',
+    '--gold':'#c83070','--gold2':'#a02258','--teal':'#1490a0','--green':'#28a064','--red':'#c02040',
+    '--cream':'#1a0828','--sub':'#4a2460','--muted':'#7840a0','--dim':'#9070b0'}},
+};
+const root = document.getElementById('themes');
+for (const [name, t] of Object.entries(THEMES)) {
+  const sec = document.createElement('div');
+  sec.className = 'theme';
+  sec.style.background = t.panel;
+  sec.style.color = t.ink;
+  sec.innerHTML = `<h2>${name}</h2><div class="grid">` +
+    Object.entries(t.vars).map(([k,v]) =>
+      `<div class="sw"><div class="chip" style="background:${v}"></div>
+       <div class="lbl"><span>${k}</span><span>${v}</span></div></div>`).join('') +
+    '</div>';
+  root.appendChild(sec);
+}
+</script>
+</body>

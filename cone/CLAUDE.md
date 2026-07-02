@@ -24,7 +24,7 @@ Each page is a self-contained HTML file. Most use a React component mounted at `
 | `tv.html` | TV display for gym wall (no nav) |
 | `athletes.html` | athlete lookup (public) |
 
-**deploy.yml whitelist** — `.github/workflows/deploy.yml` line 35 has an explicit list of HTML files to copy to gh-pages. Every new HTML file must be added here or it 404s on the live site.
+**Page whitelist** — the HTML entry list lives in `cone/vite.public.config.js` (`rollupOptions.input`, 9 pages). Every new public HTML page must be added there or it isn't built and 404s live. (`deploy.yml` at the repo root copies `public-dist/` wholesale — no whitelist there anymore.) The HTML entry files and `themes.css` live at the **repo root** (`CrossFit-Apps/`), not inside `cone/` — the public Vite config sets `root: '..'`.
 
 ### SPA (React — `src/`)
 Entry: `src/App.jsx`. All tabs lazy-loaded with `React.lazy()`:  
@@ -43,7 +43,7 @@ Importing both in the same bundle causes a GoTrueClient warning (non-fatal but v
 
 **Supabase project URL:** `https://crsalcpvsedmiabkeibp.supabase.co`  
 **Schema:** 11 single-row JSONB blobs (id=1, value=JSONB), plus `results_v2` normalized table, `templates` table.  
-**RLS:** anon read-all; write restricted to `is_allowed_user()`; `results_v2` allows anon INSERT/UPDATE.
+**RLS:** anon read-all; write restricted to `is_allowed_user()`; `results_v2` allows anon INSERT/UPDATE. Public check-in also UPDATEs `class_executions` (Schedule.jsx) — policy scope under review (backlog #7).
 
 ---
 
@@ -56,19 +56,19 @@ Importing both in the same bundle causes a GoTrueClient warning (non-fatal but v
 2. TV.html subscribes to `postgres_changes` on `tv_state` → receives delta → re-renders.
 3. `push()` is **patch-only**. Never include local-only fields that are not DB columns — they poison the upsert and freeze all subsequent updates.
 
-**tv_state columns (as of 2026-06-27):**
+**tv_state columns (as of 2026-07-02; source of truth becomes `supabase/migrations/` once plans/04 lands):**
 ```
 id                   INTEGER   PRIMARY KEY (always 1)
 slide                TEXT      'blank'|'wod'|'timer'|'results'|'qr'
 class_id             TEXT
 session_id           TEXT
 date_key             TEXT
-block_id             TEXT
+timer_block_id       TEXT      (code reads/writes timer_block_id — NOT block_id)
 timer_type           TEXT      'For Time'|'AMRAP'|'EMOM'|'TABATA'|...
 timer_cap_secs       INTEGER
 timer_paused_elapsed INTEGER
 timer_started_at     BIGINT
-timer_paused         BOOLEAN
+timer_paused         BOOLEAN   (unused by code — confirm on schema dump, plans/04)
 group_positions      JSONB     { [groupId]: blockId }
 rotation_block_ids   JSONB     DEFAULT '[]'   (empty = all WOD blocks)
 rotation_rest_secs   INTEGER   DEFAULT 0
@@ -82,22 +82,22 @@ updated_at           BIGINT
 2. `TV.jsx` → `TimerSlide` right panel
 3. `src/public/schedule/Schedule.jsx` → exercise rows
 
-**fmtIntensity** is currently duplicated in `Schedule.jsx` and `TV.jsx`. Canonical home should be `src/lib/wod.js`.
+**Shared rendering:** `src/public/shared/ExerciseList.jsx` is the shared exercise-row component — TV uses it for both paths; Schedule.jsx still renders its own markup (adoption = backlog #17). `fmtIntensity` canonical lives in `src/public/lib/wod.js`; local copies remain in `Schedule.jsx` (identical) and `Publicador.jsx` (diverged: adds cardio branch) — reconcile before consolidating.
 
 ---
 
-## Shared utilities (`src/lib/`)
+## Shared utilities (`src/public/lib/`)
 
-- `wod.js` — `uid`, `blkLabel`, `exVolStr`, `toSecs`, `fmtSecs`, `rankResults`, `perfStr`, `isWodBlock`, `loadRegistry`
+- `wod.js` — `uid`, `WOD_TYPES`, `isWodBlock`, `blkColor`, `blkLabel`, `exVolStr`, `toSecs`, `fmtSecs`, `rankResults`, `perfStr`, `fmtIntensity`, `loadRegistry`
 - `week.js` — `MONTH_PT`, `DAY_PT`, `toISO`, `todayISO`, `getWeek`, `dateToWeekOffset`
 
-Always check these before reimplementing a formatting or date utility.
+Always check these before reimplementing a formatting or date utility. Beware: `src/utils/storage.js` also exports `uid`/`toISO`/`todayISO` (SPA side) — dual-canonical debt tracked as backlog #16.
 
 ---
 
 ## Design system
 
-**TotK CSS variables (all public pages + `themes.css`):**
+**TotK CSS variables (`themes.css` at the repo root — 4 themes as `html.theme-*` classes):**
 ```
 --bg:#0d0b09  --stone:#161210  --stone2:#1e1a16  --divider:#2a231c
 --gold:#d8a840  --gold2:#b88820  --teal:#4ac8c0  --cream:#f0e8d0
@@ -108,6 +108,7 @@ Always check these before reimplementing a formatting or date utility.
 - No `border-radius` on public pages. Minimal radius on SPA components.
 - Font: `var(--font)` → Cinzel (TotK themes) or Amarante (Spirit Blossom themes).
 - All UI strings: pt-BR.
+- Canonical design cards (tokens, components, mockups): `cone/design/` → synced to the "Cone Design System" project on claude.ai/design (see WORKFLOW.md mockup-first).
 
 **Block color families:**
 - RED: WOD / HIIT / MetCon
@@ -134,7 +135,7 @@ Always check these before reimplementing a formatting or date utility.
 
 - Dev: `npm run dev` inside `cone/`
 - Build: `npm run build` → `dist/`
-- Tests: `npm test` (3 test files: wod.test.js, pix.test.js, resultMappers.test.js)
+- Tests: `npm test` (4 test files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js)
 - CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder)
 
 **Chunk hash 404 (GitHub Pages limitation):** After every CI deploy, lazy-loaded chunk filenames change. Old hashes 404 until users hard-refresh (Ctrl+Shift+R). GitHub Pages cannot set `Cache-Control: no-cache`. This is structural — do not re-diagnose, just document and tell the user to hard-refresh.

@@ -37,15 +37,33 @@ One item per session for size **S/M**. Large items (e.g. SPA standardization) ge
 
 New bug or feature → add a row to **Icebox**. Batch trivial ones; don't spin a session per typo.
 
+**Built-in skills in the ritual:**
+- `/verify` before committing any nontrivial change — drive the affected flow, don't just build.
+- `/code-review` before pushing M/L items.
+- `/security-review` for anything touching RLS, auth, or user-input rendering.
+
+**Docs are part of Done.** Shipping an item includes correcting any `CLAUDE.md` note or `BACKLOG.md` row the change invalidated. Stale docs cost every future session.
+
+## Review cadence
+
+The backlog gets *refilled* by running **`/app-review`** (portable skill in `~/.claude/skills/app-review/`) — a 9-dimension audit (UX walk, design consistency, code quality, architecture/contracts, security, performance, accessibility, testing/gates, docs hygiene) whose output is a dated report in `docs/reviews/` plus triaged Icebox rows. The review never changes code.
+
+- **Full pass:** when Ready empties, after any L item ships, or ~quarterly.
+- **Targeted pass:** one dimension anytime it feels off.
+
+This closes the loop: plan → execute → **review** → replan.
+
 ## Design / layout items — mockup first (mandatory)
 
 Before any implementation on a visual change:
 1. **ASCII** sketch for quick calibration.
-2. **Standalone HTML mockup** (per the existing `design-b.html` / `design-c.html` convention).
-3. User reviews and adjusts the mockup.
-4. Implementation follows the *approved* mockup.
+2. **Preview card in `cone/design/`** — a self-contained HTML file (inline CSS, first line `<!-- @dsCard group="…" -->`), synced to the **"Cone Design System"** project on claude.ai/design via DesignSync.
+3. User reviews the card in the Design System pane (or the local file) and adjusts.
+4. Implementation follows the *approved* card.
 
 This is required for design work — it's the cheapest place to change your mind.
+
+The design project also holds the canon: token swatches, type scale, block color families, and shared components. New mockups build on those cards. The old loose `design-*.html` files at the repo root are **frozen legacy** — never add new ones.
 
 ## Model guidance (per-item, not per-tier)
 

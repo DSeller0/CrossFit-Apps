@@ -1,0 +1,28 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Cone — Block color families</title>
+<style>
+  :root{--bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--divider:#2a231c;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850}
+  body{margin:0;padding:24px;background:var(--bg);color:var(--cream);font-family:'Cinzel',Georgia,serif}
+  h1{font-size:16px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 4px}
+  p.note{font-size:12px;color:var(--muted);margin:0 0 20px;font-family:Georgia,serif}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .card{background:var(--stone);border:1px solid var(--divider);border-left:3px solid var(--fam)}
+  .card h2{margin:0;padding:10px 14px;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--fam);border-bottom:1px solid var(--divider)}
+  .card .types{padding:12px 14px;font-size:12px;color:var(--sub);line-height:2}
+  .card .hex{padding:0 14px 12px;font-size:10px;color:var(--muted);font-family:Consolas,monospace}
+</style>
+<body>
+<h1>Block color families</h1>
+<p class="note">Source of truth: <code>blkColor()</code> in <code>src/public/lib/wod.js</code>. Family color renders as the block-card accent (left border + type label) on Schedule, TV and Timer.</p>
+<div class="grid">
+  <div class="card" style="--fam:#c84038"><h2>RED</h2>
+    <div class="types">WOD · HIIT · MetCon</div><div class="hex">#c84038</div></div>
+  <div class="card" style="--fam:#d8a840"><h2>AMBER</h2>
+    <div class="types">EMOM · For Time · AMRAP · Benchmark · Estações</div><div class="hex">#d8a840</div></div>
+  <div class="card" style="--fam:#4878d8"><h2>BLUE</h2>
+    <div class="types">Força · LPO · Core · Acessórios</div><div class="hex">#4878d8</div></div>
+  <div class="card" style="--fam:#48b860"><h2>GREEN</h2>
+    <div class="types">Aquecimento · Skill · Cardio · Mobilidade</div><div class="hex">#48b860</div></div>
+</div>
+</body>

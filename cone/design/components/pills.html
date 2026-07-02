@@ -1,0 +1,33 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Cone — Buttons, pills & chips</title>
+<style>
+  :root{--bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--divider:#2a231c;--gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;--accent:#4ac8c0;--accent-text:#000}
+  body{margin:0;padding:24px;background:var(--bg);color:var(--cream);font-family:'Cinzel',Georgia,serif;max-width:720px}
+  h1{font-size:16px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 4px}
+  p.note{font-size:12px;color:var(--muted);margin:0 0 20px;font-family:Georgia,serif}
+  .row{display:flex;align-items:center;gap:16px;padding:12px 14px;background:var(--stone);border:1px solid var(--divider);margin-bottom:10px}
+  .meta{font-size:10px;color:var(--muted);font-family:Consolas,monospace;min-width:190px}
+  button{font-family:inherit;cursor:pointer}
+  .timerBtn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:transparent;border:1px solid var(--gold2);color:var(--gold);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  .rmChip{font-size:11px;font-weight:900;padding:2px 10px;border:1px solid var(--gold2);background:transparent;color:var(--gold2);letter-spacing:.06em;text-transform:uppercase}
+  .rmChip.on{background:var(--gold2);color:var(--bg)}
+  .demoBtn{font-size:11px;font-weight:900;padding:2px 8px;border:1px solid var(--divider);background:transparent;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+  .lpSubmit{font-size:14px;font-weight:900;padding:11px 26px;border:none;background:var(--accent);color:var(--accent-text);letter-spacing:.04em;border-radius:7px}
+  .ghostTeal{background:none;border:1px solid color-mix(in srgb,var(--teal) 40%,transparent);color:var(--teal);font-size:12px;font-weight:700;letter-spacing:.05em;padding:5px 12px}
+  .resTab{font-size:12px;padding:5px 12px;border:1px solid var(--divider);background:transparent;color:var(--sub)}
+  .resTab.on{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700}
+  .chip{font-size:10px;color:var(--dim);background:var(--bg);border:1px solid var(--divider);padding:2px 7px;display:inline-flex;gap:4px}
+</style>
+<body>
+<h1>Buttons, pills &amp; chips</h1>
+<p class="note">Extracted from <code>Schedule.module.css</code> / <code>index.css</code>. Public pages: square corners. SPA-only controls (submit) may carry minimal radius. Gold = primary action family, teal = confirm/accent, muted = tertiary.</p>
+
+<div class="row"><span class="meta">.timerBtn — gold outline</span><button class="timerBtn">▸ Timer</button></div>
+<div class="row"><span class="meta">.rmChip — default / active</span><button class="rmChip">RM</button><button class="rmChip on">RM</button></div>
+<div class="row"><span class="meta">.demoBtn — tertiary</span><button class="demoBtn">Demo</button></div>
+<div class="row"><span class="meta">.resTab — tab off / on</span><button class="resTab">Semana</button><button class="resTab on">Geral</button></div>
+<div class="row"><span class="meta">teal ghost — register/confirm</span><button class="ghostTeal">Registrar presença</button></div>
+<div class="row"><span class="meta">.lpSubmit — primary submit (SPA radius ok)</span><button class="lpSubmit">Enviar resultado</button></div>
+<div class="row"><span class="meta">.blk-ex-chip — meta chip</span><span class="chip">3 blocos</span><span class="chip">12 min</span></div>
+</body>

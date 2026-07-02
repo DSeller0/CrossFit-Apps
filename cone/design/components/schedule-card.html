@@ -1,0 +1,57 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Cone — Schedule block card (65/35)</title>
+<style>
+  :root{--bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--divider:#2a231c;--gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a}
+  body{margin:0;padding:24px;background:var(--bg);color:var(--cream);font-family:'Cinzel',Georgia,serif;max-width:760px}
+  h1{font-size:16px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 4px}
+  p.note{font-size:12px;color:var(--muted);margin:0 0 20px;font-family:Georgia,serif}
+  .blk{background:var(--stone);border:1px solid var(--divider);border-left:3px solid var(--fam);margin-bottom:16px}
+  .blkHead{display:flex;justify-content:space-between;align-items:baseline;padding:10px 14px;border-bottom:1px solid var(--divider)}
+  .blkType{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--fam)}
+  .blkCap{font-size:11px;color:var(--muted);letter-spacing:.06em}
+  .blkBody{display:grid;grid-template-columns:65fr 35fr}
+  .exCol{padding:10px 14px;border-right:1px solid var(--divider)}
+  .exRow{display:flex;align-items:baseline;gap:10px;padding:6px 0}
+  .exRow+.exRow{border-top:1px solid var(--divider)}
+  .vol{font-size:11px;font-weight:900;color:var(--fam);white-space:nowrap;min-width:52px}
+  .exName{font-size:14px}
+  .exInt{font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
+  .sideCol{padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+  .noteBox{font-size:12.5px;color:var(--sub);font-family:'Crimson Pro',Georgia,serif;line-height:1.45}
+  .rmChip{font-size:11px;font-weight:900;padding:2px 10px;border:1px solid var(--gold2);background:transparent;color:var(--gold2);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;align-self:flex-start;font-family:inherit}
+  .timerBtn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:transparent;border:1px solid var(--gold2);color:var(--gold);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;align-self:flex-start;font-family:inherit}
+</style>
+<body>
+<h1>Schedule block card — 65/35</h1>
+<p class="note">Canon from design-d (backlog #1, shipped). Rules: volume pill sits <b>left</b> of the exercise name; every block uses the 65/35 two-column body; notes live at the <b>top</b> of the right column; RM calculator chip below the pill; no border-radius.</p>
+
+<div class="blk" style="--fam:#d8a840">
+  <div class="blkHead"><span class="blkType">For Time</span><span class="blkCap">CAP 12:00</span></div>
+  <div class="blkBody">
+    <div class="exCol">
+      <div class="exRow"><span class="vol">21-15-9</span><span class="exName">Thruster</span><span class="exInt">42,5/30 kg</span></div>
+      <div class="exRow"><span class="vol">21-15-9</span><span class="exName">Pull-up</span><span class="exInt">RX</span></div>
+    </div>
+    <div class="sideCol">
+      <div class="noteBox">Fran. Quebrar cedo nos thrusters; kipping eficiente nas barras.</div>
+      <button class="rmChip">RM</button>
+      <button class="timerBtn">▸ Timer</button>
+    </div>
+  </div>
+</div>
+
+<div class="blk" style="--fam:#4878d8">
+  <div class="blkHead"><span class="blkType">Força</span><span class="blkCap">~15 min</span></div>
+  <div class="blkBody">
+    <div class="exCol">
+      <div class="exRow"><span class="vol">5 × 3</span><span class="exName">Back Squat</span><span class="exInt">@ 82%</span></div>
+      <div class="exRow"><span class="vol">3 × 8</span><span class="exName">Good Morning</span><span class="exInt">leve</span></div>
+    </div>
+    <div class="sideCol">
+      <div class="noteBox">Subir carga apenas com barra estável no fundo.</div>
+      <button class="rmChip">RM</button>
+    </div>
+  </div>
+</div>
+</body>
