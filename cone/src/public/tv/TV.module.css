@@ -98,24 +98,24 @@
 /* ── Timer Slide ── */
 .timerSlide { display: flex; height: 100%; background: var(--bg); }
 .timerLeft {
-  width: 42%; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 60px 40px;
-  border-right: 1px solid var(--divider); gap: 18px;
+  width: 63%; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 90px 60px;
+  border-right: 1px solid var(--divider); gap: 27px;
 }
 .timerMode {
-  font-size: 22px; font-weight: 900; letter-spacing: .22em;
+  font-size: 33px; font-weight: 900; letter-spacing: .22em;
   color: var(--muted); text-transform: uppercase;
 }
 .ringWrap { position: relative; display: flex; align-items: center; justify-content: center; }
-.ring { width: 290px; height: 290px; }
+.ring { width: 435px; height: 435px; }
 .ringClock {
   position: absolute;
-  font-size: 72px; font-weight: 900; font-family: 'Courier New', monospace;
+  font-size: 108px; font-weight: 900; font-family: 'Courier New', monospace;
   letter-spacing: .04em; transition: color .3s; user-select: none;
   text-align: center;
 }
 .timerCap {
-  font-size: 18px; color: var(--dim); font-weight: 700;
+  font-size: 27px; color: var(--dim); font-weight: 700;
   letter-spacing: .18em; text-transform: uppercase;
 }
 .timerRight {

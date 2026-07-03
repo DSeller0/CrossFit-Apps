@@ -166,6 +166,17 @@ export default function TvController({ sessions: propSessions }) {
     : wodBlocks
   const restSecs = tv?.rotation_rest_secs || 0
 
+  // Rotation mode: the Timer card's Tipo/Cap track whichever block currently leads the
+  // rotation, not whatever "Personalizado" config was set before groups existed.
+  const rotFirst = rotationBlocks[0]
+  useEffect(() => {
+    if (groups.length === 0 || !rotFirst) return
+    if (timer.timerBlkId !== rotFirst.id) timer.setTimerBlkId(rotFirst.id)
+    if (rotFirst.type && timer.timerType !== rotFirst.type) timer.setTimerType(rotFirst.type)
+    const cap = parseInt(rotFirst.duration) || timer.timerCap
+    if (timer.timerCap !== cap) timer.setTimerCap(cap)
+  }, [groups.length, rotFirst?.id, rotFirst?.type, rotFirst?.duration]) // eslint-disable-line react-hooks/exhaustive-deps
+
   function selectSlide(id) { push({ slide: id, session_id: selSessId, date_key: selDate }) }
 
   function selectSession(id) {
@@ -288,6 +299,7 @@ export default function TvController({ sessions: propSessions }) {
 
               {groups.length > 0 ? (() => {
                 const rotCap    = parseInt(rotationBlocks[0]?.duration) || timer.timerCap
+                const rotType   = rotationBlocks[0]?.type || timer.timerType
                 const finishers = rotationBlockIds.length > 0 ? wodBlocks.filter(b => !rotationBlockIds.includes(b.id)) : []
                 const totalSecs = rotationBlocks.length * (rotCap * 60 + restSecs)
                 return (
@@ -299,7 +311,7 @@ export default function TvController({ sessions: propSessions }) {
                       {finishers.length > 0 && <span className={st.timerHintDim}> → {finishers.map(b => b.label || b.type).join(' + ')} (finisher)</span>}
                     </div>
                     <div className={st.timerGrid} style={{ gridTemplateColumns: '1fr 1fr' }}>
-                      <div><label className={st.lbl}>Tipo <span className={st.timerGridBadge}>(do bloco)</span></label><div className={st.roInput}>{timer.timerType}</div></div>
+                      <div><label className={st.lbl}>Tipo <span className={st.timerGridBadge}>(do bloco)</span></label><div className={st.roInput}>{rotType}</div></div>
                       <div><label className={st.lbl}>Cap (min)</label><div className={st.roInput}>{rotCap}</div></div>
                     </div>
                   </div>

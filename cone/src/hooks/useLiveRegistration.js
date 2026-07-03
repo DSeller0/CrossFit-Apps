@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../utils/supabase'
-import { fmtSecs } from '../public/lib/wod.js'
+import { fmtSecs, uid } from '../public/lib/wod.js'
 
 // member shape: { type:'real', id, name, key } | { type:'anon', name, key }
 // key is `real:<athleteId>` or `anon:<name>` — unified identity across results_v2 (real) and
@@ -33,7 +33,7 @@ export function useLiveRegistration({
         ? [...(existing.blocks || []).filter(b => b.blockId !== blockId), newBlk]
         : [newBlk]
       await supabase.from('results_v2').upsert({
-        ...(existing ? { id: existing.id } : {}),
+        id: existing?.id || uid(),
         date: selDate, athlete_id: member.id, session_id: selSessId,
         blocks: merged, logged_by_athlete: false,
       })

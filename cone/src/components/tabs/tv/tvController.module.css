@@ -6,6 +6,9 @@
 .card      { background: #111; border: 1px solid var(--divider); border-radius: 6px; padding: 16px 18px; }
 .cardTitle { font-size: 11px; font-weight: 900; color: var(--gold); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 14px; }
 .input     { font-size: 12px; padding: 5px 8px; background: #111; border: 1px solid var(--divider); color: var(--sub); border-radius: 4px; outline: none; width: 100%; font-family: inherit; }
+.input[type="number"] { -moz-appearance: textfield; }
+.input[type="number"]::-webkit-outer-spin-button,
+.input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .roInput   { font-size: 12px; padding: 5px 8px; background: #0d1a10; border: 1px solid #1a3a20; color: var(--teal); border-radius: 4px; outline: none; width: 100%; font-family: inherit; cursor: default; }
 .lbl       { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; display: block; margin-bottom: 4px; }
 .btn       { padding: 6px 12px; font-size: 12px; font-weight: 700; border: 1px solid var(--divider); border-radius: 4px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; background: transparent; color: var(--sub); }
@@ -79,6 +82,8 @@
 .blkChipCustom .blkChipName { font-size: 11px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
 .blkChipCustom.sel .blkChipName { color: var(--gold); }
 .timerGrid   { display: grid; gap: 10px; margin-bottom: 14px; }
+.timerGrid > div { display: flex; flex-direction: column; }
+.timerGrid .lbl { min-height: 26px; display: flex; align-items: flex-end; }
 .timerGridBadge { color: var(--teal); font-size: 9px; }
 .timerBtns   { display: flex; gap: 8px; align-items: center; }
 .timerBtnPlay  { background: #48b860; border-color: #48b860; color: #0d0b09; }
@@ -141,7 +146,7 @@
 .groupHead    { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .groupName    { font-weight: 900; font-size: 13px; min-width: 72px; }
 .groupBlockSelect { flex: 1; font-size: 11px; }
-.groupMembers { font-size: 11px; color: var(--muted); }
+.groupMembers { font-size: 14px; color: var(--muted); }
 .groupMembersEmpty { color: var(--dim); font-style: italic; }
 
 .assignSection { margin-bottom: 14px; }
