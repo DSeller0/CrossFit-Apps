@@ -8,7 +8,7 @@ Review findings feeding this board: [reviews/2026-07-02.md](./reviews/2026-07-02
 
 ## 🟢 Ready (planned — pick from the top)
 
-_(none — pick the next item from Icebox and plan it)_
+- **Quick-wins batch (#33 · #11 · #13 · #9 · #12)** · M (5×S) · Sonnet · [plans/07](./plans/07-quick-wins-batch.md) · Turma default-name auto-fill · Criador Sets/Reps before name · tv.html outbound links hide nav · round-counter tap-flash fix · TV final-10s countdown pill (⚠️ #12 is design-gated — mockup-first; the other four ship independently)
 
 ## 🔵 In Progress
 
@@ -16,11 +16,7 @@ _(none)_
 
 ## 🧊 Icebox (captured + prioritized — no plan yet)
 
-- **#9 Tap-flash fix** · S · Sonnet · round counter flashes blue on tap (FOUC audit itself is done — tv.html theme-init shipped via #2)
 - **#10 Goals for WOD-type blocks** · M · Sonnet · builder sets a goal/target on WOD blocks; shown wherever WODs render (schedule card slot reserved, TV)
-- **#11 Reposition Sets/Reps inputs in builder** · S · Sonnet · in Criador, Sets+Reps inputs precede the exercise-name text field
-- **#12 TV slide — 10s countdown pill** · S · Sonnet · when `cap − elapsed ≤ 10s`, show a counting-down pill on the TV timer slide; not during AMRAP
-- **#13 tv.html outbound links — hide nav** · S · Sonnet · pages opened via QR/link from tv.html (e.g. `?from=tv`) hide the nav component
 - **#14 Accessibility pass** · M · Sonnet · ~32 icon-only buttons need aria-label; add aria-live to timer/leaderboard; `<main>` landmarks; document contrast roles (`--muted` 4.0:1 fails body text)
 - **#15 Design-token sweep** · M · Sonnet · 93 hardcoded hex in src/public (Leaderboard `#00b8d4`→`--teal` worst); refine border-radius rule (circles exempt?) then sweep 103 violations; fix font-weights 500/800 (used but not loaded); decide `--font-mono`
 - **#16 Util/formatter consolidation** · M · Sonnet · storage.js dual `toISO`/`todayISO`/`uid`; `fmtSecs` ×5, `toSecs` ×2 (NaN guard), `fmtDate` ×5, `DAY_PT`/`MON_PT` ×6 → canonical homes in lib; unify `useIsMobile` (2 divergent inline copies); rename duplicate `BlockTypePicker`
@@ -40,7 +36,6 @@ _(none)_
 - **#30 Per-athlete RLS / access** · L · Opus · `me.html?id=<athleteId>`, `isPublic` on result rows, QR codes in Atletas tab
 - **#31 Email-gated athlete access** · L · Opus · Supabase OTP + email allowlist; depends on #30
 - **#32 Fix pre-existing lint debt, then enable lint CI gate** · M · Sonnet · `npm run lint` currently fails with 155 problems across 26 files: ~87 mechanical (44 no-unused-vars, 30 no-empty, 10 no-useless-escape, 3 no-useless-assignment) + ~87 real react-hooks correctness findings (22 set-state-in-effect, 21 exhaustive-deps, 18 refs, 14 immutability, 8 purity, 4 static-components) from the upgraded `eslint-plugin-react-hooks` v7 ruleset; deploy.yml's CI gate (#5) only runs `npm test` for now — add `npm run lint` once this is clean
-- **#33 Turma default-name auto-fill** · S · Sonnet · `classLabel` in `useClassTracking.js:6` defaults to plain `'Turma'`; round current clock to nearest full hour and default to `Turma_HH:MM` (e.g. 10:05 → `Turma_10:00`)
 ## ✅ Done (recent)
 
 **2026-07-03 — #34 class_executions authenticated INSERT/DELETE hardening** · `supabase/migrations/0004_class_exec_auth_hardening.sql` — a live `supabase db dump --linked` revealed prod's real `class_executions` policies were exactly `ce_select_anon` (SELECT), `ce_insert_auth`/`ce_delete_auth` (INSERT/DELETE scoped to `auth.role()='authenticated'`) and — after #7's `0003` dropped `ce_update_anon` — **no UPDATE policy and no `is_allowed_user()` policy at all** (the diff engine's earlier "no schema changes" was untrustworthy for RLS policies; the pg_dump was authoritative). Two problems closed at once: (1) **#34** — open OTP signup meant any self-served `authenticated` (non-coach) session could forge new class rows or delete real ones via the two role-only policies; (2) an **active regression `0003` introduced on prod only** — coach end-class/live-registration/group-rotation are all UPDATEs, left with no permissive policy since `bc2e98a` (local never surfaced it because 0001's reconstruction carries `"auth write"`). Fix: `CREATE POLICY "auth write" FOR ALL USING(is_allowed_user())` (restores coach INSERT/UPDATE/DELETE) + `DROP ce_insert_auth`/`ce_delete_auth`; idempotent across both histories via DROP-IF-EXISTS-then-CREATE for `"auth write"` (prod lacked it, local has it) and IF EXISTS on the two role-only drops (prod had them, local never did). Verified on the local stack by reproducing prod's exact policy set and minting authenticated JWTs against PostgREST — **11/11 checks**: pre-fix an `attacker@example.com` session INSERTed a forged row + DELETEd a real one and the coach UPDATE was blocked (regression reproduced); post-fix attacker INSERT→403 and DELETE→row-survives, coach INSERT/UPDATE/DELETE all work, anon `class_checkin` RPC still appends to the roster, anon direct INSERT/UPDATE→401. `supabase db reset` confirmed `0004` applies cleanly in the 0001→0004 chain; `npm test` green (72). **Shipped to prod** (`supabase db push` — only `0004` applied; `0001`/`0002` repair-marked, `0003` already applied): re-dumped prod post-push → `class_executions` now `auth write` (is_allowed_user, ALL) + `ce_select_anon` (SELECT), `ce_*_auth` gone; migration history 0001–0004 all present. Prod behavioral coach-write check left to a manual app smoke (create + end a class) — no coach session drivable from here and no test writes to prod — but the fix *restores* a path that was broken, so any failure is immediately visible.
