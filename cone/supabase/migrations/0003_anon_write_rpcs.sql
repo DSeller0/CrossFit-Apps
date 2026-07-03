@@ -52,13 +52,18 @@ GRANT EXECUTE ON FUNCTION class_checkin TO anon, authenticated;
 
 REVOKE UPDATE ON public.class_executions FROM anon;
 
--- The old "public update" policy had no TO clause, so it applied to every role,
+-- The old permissive update policy had no TO clause, so it applied to every role,
 -- not just anon — an attacker could self-serve an `authenticated` session (email
 -- OTP signup is open; is_allowed_user() is checked by "auth write" below, not by
 -- this policy) and bypass the RPC above entirely via a direct PATCH. Dropping it
--- leaves "auth write" (is_allowed_user()) as the only INSERT/UPDATE/DELETE path,
--- which SECURITY DEFINER functions bypass anyway (their owner has BYPASSRLS).
-DROP POLICY "public update" ON public.class_executions;
+-- leaves "auth write" (is_allowed_user()) as the only UPDATE path, which SECURITY
+-- DEFINER functions bypass anyway (their owner has BYPASSRLS). Named both ways —
+-- prod's actual dashboard-built policy is "ce_update_anon"; a fresh stack built
+-- purely from 0001_init.sql (which hand-reconstructed the policy as "public update"
+-- since prod's real DDL was never captured in SQL before this migration) has the
+-- other name. IF EXISTS makes this migration idempotent across both histories.
+DROP POLICY IF EXISTS "public update" ON public.class_executions;
+DROP POLICY IF EXISTS "ce_update_anon" ON public.class_executions;
 
 -- ── log_result — athlete self-log for results_v2 ────────────────────────────────
 -- Used by Schedule.jsx (submitLog ~906, submitDeskReg ~935) and Results.jsx (doSubmit ~187).
@@ -101,5 +106,7 @@ REVOKE INSERT, UPDATE ON public.results_v2 FROM anon;
 -- (applies to every role) and let a self-serve `authenticated` session bypass the
 -- RPC via a direct PATCH/POST. "auth write" (is_allowed_user()) remains as the only
 -- direct-table write path; SECURITY DEFINER functions bypass RLS regardless.
-DROP POLICY "public result insert" ON public.results_v2;
-DROP POLICY "public result update" ON public.results_v2;
+-- IF EXISTS for the same cross-history idempotency reason as class_executions above
+-- (these two happen to be named identically in prod's real DDL and in 0001_init.sql).
+DROP POLICY IF EXISTS "public result insert" ON public.results_v2;
+DROP POLICY IF EXISTS "public result update" ON public.results_v2;
