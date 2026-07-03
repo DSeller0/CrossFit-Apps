@@ -1,5 +1,7 @@
 # 05 — Anon write hardening (results_v2 + class_executions)
 
+> ✅ Done: bc2e98a · 2026-07-03 — see BACKLOG.md "Done (recent)" for the shipped summary.
+
 ## Context
 The RLS probe on 2026-07-03 ([reviews/2026-07-03-rls-probe.md](../reviews/2026-07-03-rls-probe.md), backlog **#7**) confirmed empirically against the local stack: the public anon key — which ships in the client bundle — can UPDATE **any** row of `results_v2` and `class_executions`, not just the athlete's own. Concretely, a visitor with dev tools open can overwrite any athlete's logged result (including coach-only `coach_note`/`flag_for_review`), reassign a result's `athlete_id`, and wipe or forge any class's roster/guest-results/rotation-groups. DELETE and forged-INSERT are already blocked; the exposure is **overwrite/append tampering**. Root cause: the `using(true) with check(true)` policies can't scope to the acting athlete because public pages have no athlete login (deliberate — see the auth decision in CLAUDE.md).
 
