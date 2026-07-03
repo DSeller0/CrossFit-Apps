@@ -105,6 +105,7 @@
 .timerMode {
   font-size: 33px; font-weight: 900; letter-spacing: .22em;
   color: var(--muted); text-transform: uppercase;
+  margin-right: -.22em; /* trailing letter-spacing isn't matched on the left — re-center the block */
 }
 .ringWrap { position: relative; display: flex; align-items: center; justify-content: center; }
 .ring { width: 435px; height: 435px; }
@@ -117,6 +118,7 @@
 .timerCap {
   font-size: 27px; color: var(--dim); font-weight: 700;
   letter-spacing: .18em; text-transform: uppercase;
+  margin-right: -.18em;
 }
 .timerRight {
   flex: 1; display: flex; flex-direction: column;
