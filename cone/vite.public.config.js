@@ -11,6 +11,10 @@ const root = resolve(__dirname, '..')
 // so a separate config is needed. log.html is retired and excluded.
 export default defineConfig({
   root,
+  // .env.* files live in cone/ (__dirname), not repo root (root) — envDir
+  // defaults to `root`, so without this the public build silently gets
+  // undefined Supabase creds.
+  envDir: __dirname,
   base: '/CrossFit-Apps/',
   publicDir: false,
   plugins: [react()],

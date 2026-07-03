@@ -41,9 +41,14 @@ Providers: `AuthContext` (session), `SyncContext` (sessions + events + Supabase 
 
 Importing both in the same bundle causes a GoTrueClient warning (non-fatal but visible in console).
 
-**Supabase project URL:** `https://crsalcpvsedmiabkeibp.supabase.co`  
-**Schema:** 11 single-row JSONB blobs (id=1, value=JSONB), plus `results_v2` normalized table, `templates` table.  
-**RLS:** anon read-all; write restricted to `is_allowed_user()`; `results_v2` allows anon INSERT/UPDATE. Public check-in also UPDATEs `class_executions` (Schedule.jsx) — policy scope under review (backlog #7).
+Both clients read `import.meta.env.VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` — never hardcode a URL/key in `src/`. Vite picks the file by mode: `npm run dev` / `dev:public` → `.env.development` (local stack); `npm run build` / CI → `.env.production` (prod, `https://crsalcpvsedmiabkeibp.supabase.co`, committed — anon key is public by design). `vite.public.config.js` needs `envDir` set explicitly (its `root` is the repo root, but the env files live in `cone/`).
+
+**Local dev environment:** `supabase start` (Docker required) boots a local stack on ports shifted +10 from the CLI default (API `54331`, DB `54332`, Studio `54333`, Inbucket/mail `54334`) — the default ports collide with another local Supabase project already running on this machine. `node scripts/seed-dev.mjs` snapshots prod's blob tables + `results_v2` into it (reads `.env.production` for source, `.env.development`'s `SUPABASE_SERVICE_ROLE_KEY` for target — that key is local-only and must never carry a `VITE_` prefix). `supabase db reset` wipes and reapplies migrations from scratch.
+
+**Schema source of truth: `supabase/migrations/`** (`0001_init.sql` — tables, RLS, grants; `0002_rpcs.sql` — `submit_pr`/`clear_pr` used by `me.html`'s PR log sheet). The root-level `supabase-schema.sql` / `supabase-schema-v2.sql` / `supabase-auth-policies.sql` / `supabase-rpcs.sql` (the last one lives one level above `cone/`, not inside it) are historical (how the schema was built up via dashboard SQL) and no longer authoritative.
+
+**Schema:** 11 single-row JSONB blobs (id=1, value=JSONB: `sessions, athletes, results, events, locations, coach_profile, settings, exercise_registry, goals_data, lb_colors, templates`), plus `results_v2` (normalized), `tv_state` and `class_executions` (both hand-reconstructed into the migration from code + docs — see TV system section below).  
+**RLS:** anon read-all; write restricted to `is_allowed_user()`; `results_v2` and `class_executions` both allow unscoped anon INSERT/UPDATE. Public check-in UPDATEs `class_executions` (Schedule.jsx) — policy scope under review (backlog #7); local stack reproduces this gap faithfully rather than fixing it, so #7 can be probed safely.
 
 ---
 
@@ -135,7 +140,7 @@ Always check these before reimplementing a formatting or date utility. Beware: `
 
 ## Build + deploy
 
-- Dev: `npm run dev` inside `cone/`
+- Dev: `supabase start` (once per Docker session) then `npm run dev` inside `cone/` — talks to the local stack, never prod
 - Build: `npm run build` → `dist/`
 - Tests: `npm test` (4 test files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js)
 - CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder)

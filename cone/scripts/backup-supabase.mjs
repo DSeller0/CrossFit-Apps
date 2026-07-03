@@ -11,8 +11,8 @@ import { fileURLToPath } from 'url';
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function readEnv() {
-  const file = path.join(ROOT, '.env.local');
-  if (!fs.existsSync(file)) throw new Error('.env.local not found at ' + file);
+  const file = path.join(ROOT, '.env.production');
+  if (!fs.existsSync(file)) throw new Error('.env.production not found at ' + file);
   return Object.fromEntries(
     fs.readFileSync(file, 'utf8')
       .split('\n')

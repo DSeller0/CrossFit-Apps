@@ -18,7 +18,7 @@ import { fileURLToPath } from 'url';
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function readEnv() {
-  const file = path.join(ROOT, '.env.local');
+  const file = path.join(ROOT, '.env.production');
   return Object.fromEntries(
     fs.readFileSync(file, 'utf8').split('\n')
       .filter(l => l.includes('='))
