@@ -201,7 +201,7 @@ export default function Results() {
       :{id:uid(),date:dk,athleteId:selAth,sessionId:sid,presence:'Presente',
         energyLevel:3,blocks:[blockEntry],coachNote:'',flagForReview:false,loggedByAthlete:true}
     const next=[...existing.filter(r=>!(r.sessionId===sid&&r.athleteId===selAth)),newResult]
-    const {error:e}=await sb.from('results_v2').upsert({id:String(newResult.id),date:newResult.date,athlete_id:newResult.athleteId,session_id:newResult.sessionId?String(newResult.sessionId):null,presence:newResult.presence,energy_level:newResult.energyLevel??null,blocks:newResult.blocks,coach_note:newResult.coachNote||'',flag_for_review:!!newResult.flagForReview,logged_by_athlete:!!newResult.loggedByAthlete,updated_at:new Date().toISOString()},{onConflict:'id'})
+    const {error:e}=await sb.rpc('log_result',{p_id:String(newResult.id),p_date:newResult.date,p_athlete_id:newResult.athleteId,p_session_id:newResult.sessionId?String(newResult.sessionId):null,p_presence:newResult.presence,p_energy_level:newResult.energyLevel??null,p_blocks:newResult.blocks})
     setSubmittingKey(null)
     if(e){alert('Erro ao salvar. Verifique sua conexão e tente novamente.');return}
     setResults(next)

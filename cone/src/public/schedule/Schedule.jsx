@@ -696,13 +696,9 @@ export default function Schedule() {
     if(checkinMode==='anon'&&!checkinAnonName.trim())return
     setCheckinSubmitting(true)
     if(checkinMode==='athlete'){
-      const cur=checkinExec?.athlete_ids||[]
-      if(!cur.includes(checkinAthId)){
-        await sb.from('class_executions').update({athlete_ids:[...cur,checkinAthId]}).eq('id',checkinId)
-      }
+      await sb.rpc('class_checkin',{p_class_id:checkinId,p_athlete_id:checkinAthId})
     }else{
-      const cur=checkinExec?.anon_names||[]
-      await sb.from('class_executions').update({anon_names:[...cur,checkinAnonName.trim()]}).eq('id',checkinId)
+      await sb.rpc('class_checkin',{p_class_id:checkinId,p_guest_name:checkinAnonName.trim()})
     }
     setCheckinSubmitting(false)
     setCheckinDone(true)
@@ -910,7 +906,7 @@ export default function Schedule() {
     const result={id:uid(),date:dateKey,athleteId:logAthId,sessionId:sess.id,presence:'Presente',energyLevel:3,blocks:logBlocks,coachNote:'',flagForReview:false,loggedByAthlete:true}
     const existing=Array.isArray(results)?results:[]
     const next=[...existing.filter(r=>!(r.athleteId===logAthId&&r.sessionId===sess.id)),result]
-    const{error}=await sb.from('results_v2').upsert({id:String(result.id),date:result.date,athlete_id:result.athleteId,session_id:result.sessionId?String(result.sessionId):null,presence:result.presence,energy_level:result.energyLevel??null,blocks:result.blocks,coach_note:result.coachNote||'',flag_for_review:!!result.flagForReview,logged_by_athlete:!!result.loggedByAthlete,updated_at:new Date().toISOString()},{onConflict:'id'})
+    const{error}=await sb.rpc('log_result',{p_id:String(result.id),p_date:result.date,p_athlete_id:result.athleteId,p_session_id:result.sessionId?String(result.sessionId):null,p_presence:result.presence,p_energy_level:result.energyLevel??null,p_blocks:result.blocks})
     if(error){setLogSubmitting(false);setLogError('Erro ao enviar. Tente novamente.');return}
     setResults(next);setLogSubmitting(false);setLogSuccess(true)
   }
@@ -940,7 +936,7 @@ export default function Schedule() {
     const blockResult={blockId:bl.id,blockType:bl.type,blockLabel:blkLabel(bl),rpe:deskRegRpe,scale:deskRegScale,perfTime:deskRegPerfTime,perfRounds:deskRegPerfRounds,perfReps:deskRegPerfReps}
     const mergedBlocks=existing?[...(existing.blocks||[]).filter(b=>b.blockId!==bl.id),blockResult]:[blockResult]
     const result={id:existing?.id||uid(),date:dateKey,athleteId:selAth,sessionId:sess.id,presence:'Presente',energyLevel:existing?.energyLevel??3,blocks:mergedBlocks,coachNote:existing?.coachNote||'',flagForReview:false,loggedByAthlete:true}
-    const{error}=await sb.from('results_v2').upsert({id:String(result.id),date:result.date,athlete_id:result.athleteId,session_id:result.sessionId?String(result.sessionId):null,presence:result.presence,energy_level:result.energyLevel??null,blocks:result.blocks,coach_note:result.coachNote||'',flag_for_review:!!result.flagForReview,logged_by_athlete:!!result.loggedByAthlete,updated_at:new Date().toISOString()},{onConflict:'id'})
+    const{error}=await sb.rpc('log_result',{p_id:String(result.id),p_date:result.date,p_athlete_id:result.athleteId,p_session_id:result.sessionId?String(result.sessionId):null,p_presence:result.presence,p_energy_level:result.energyLevel??null,p_blocks:result.blocks})
     if(error){setDeskRegSubmitting(false);setDeskRegError('Erro ao enviar. Tente novamente.');return}
     setResults(prev=>[...prev.filter(r=>!(r.athleteId===selAth&&r.sessionId===sess.id)),result])
     setDeskRegSubmitting(false);setDeskRegStep('success')
