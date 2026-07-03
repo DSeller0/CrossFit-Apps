@@ -13,12 +13,12 @@ Review findings feeding this board: [reviews/2026-07-02.md](./reviews/2026-07-02
 
 ## 🔵 In Progress
 
-- **#2 Quadro ao Vivo — desktop refinement + design pass** · implementation complete, pending user click-through — coach-side TvController is behind real Supabase OTP auth with no dev bypass, so the merged-roster/register-edit-guest flow couldn't be automated-tested this session (public tv.html side was: theme-init + real-data render confirmed via headless screenshot, no console errors). User to manually verify the roster flow, then move to Done.
+_(none)_
 
 ## 🧊 Icebox (captured + prioritized — no plan yet)
 
 - **#7 class_executions anon-write review** · S · Sonnet · public check-in UPDATEs `class_executions` (Schedule.jsx:701,705) — undocumented write surface; verify RLS scope on dev env (needs #4), then document the rule
-- **#9 Tap-flash fix (rest of FOUC audit done)** · S · Sonnet · round counter flashes blue on tap; theme-init verified on all pages except tv.html (→ #2)
+- **#9 Tap-flash fix** · S · Sonnet · round counter flashes blue on tap (FOUC audit itself is done — tv.html theme-init shipped via #2)
 - **#10 Goals for WOD-type blocks** · M · Sonnet · builder sets a goal/target on WOD blocks; shown wherever WODs render (schedule card slot reserved, TV)
 - **#11 Reposition Sets/Reps inputs in builder** · S · Sonnet · in Criador, Sets+Reps inputs precede the exercise-name text field
 - **#12 TV slide — 10s countdown pill** · S · Sonnet · when `cap − elapsed ≤ 10s`, show a counting-down pill on the TV timer slide; not during AMRAP
@@ -45,6 +45,8 @@ Review findings feeding this board: [reviews/2026-07-02.md](./reviews/2026-07-02
 - **#33 Turma default-name auto-fill** · S · Sonnet · `classLabel` in `useClassTracking.js:6` defaults to plain `'Turma'`; round current clock to nearest full hour and default to `Turma_HH:MM` (e.g. 10:05 → `Turma_10:00`)
 
 ## ✅ Done (recent)
+
+**2026-07-03 — #2 Quadro ao Vivo — desktop refinement + design pass** · Full-width Sessão date-picker + two-pane grid (roster left, Slide/Timer/Grupos stack + Preview right) — no dead side margins, no vertical scroll for primary content @1080p · `ClassPanel.jsx` merges old separate "Resultados ao vivo"/"Registro ao Vivo" cards into one per-class accordion roster (every class today, active auto-expanded, past ones read-only) with rank + register/edit for both real athletes (`results_v2`) and guests (new `class_executions.anon_results` column, day-scoped) · `useLiveRegistration.js` rewritten around a unified real/guest member model with a manual mm:ss edit path · styling debt: controller/panels off inline styles onto `tv/tvController.module.css`, `TV.module.css` hex swept to vars, tv.html theme-init script (FOUC fix) · test-pass fixes: Timer card label/input alignment, group-member font size, rotation-mode timer type/cap now tracks the actual first rotation block instead of stale pre-group config, number-input spinner styling, `results_v2` 400 on first-time registration (missing client-generated `id` on insert), tv.html timer ring scaled 50% + letter-spacing centering fix
 
 **2026-07-02 — Quick-wins batch (#5, #6, #8)** · CI gate: `npm test` now runs before build in deploy.yml (lint deferred — see #32, pre-existing 155 problems) · Benchmark-bug fix: Index/Me/Results/Athletes/Leaderboard.jsx no longer hand-roll local WOD-type lists that omitted `Benchmark` (and in some cases `WOD`/`Estações`) — all now import canonical `WOD_TYPES` from `lib/wod.js` · Publicador.jsx PDF export: dropped CDN `<script>` loading of jsPDF/jspdf-autotable/qrcodejs, now dynamic-imports the npm packages (`jspdf-autotable` v5's `autoTable(doc, opts)` call form; `qrcode` npm package's `toDataURL()` replaces the old DOM-canvas qrcodejs hack) — build confirms separate lazy chunks; runtime PDF export not yet click-verified (blocked on no browser-automation tool + real Supabase OTP login, no dev-env yet — user to verify manually)
 
