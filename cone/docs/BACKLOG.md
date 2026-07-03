@@ -1,14 +1,14 @@
 # Cone — Backlog Board
 
 Process: see [WORKFLOW.md](./WORKFLOW.md). Row format: `#Priority Title · size · model · context`.
-Status columns: **Icebox → Ready → In Progress → Done**. Only items with a `plans/NN-*.md` are Ready.
-Review findings feeding this board: [reviews/2026-07-02.md](./reviews/2026-07-02.md).
+Status columns: **Icebox → Ready → In Progress → Done**. Only items with a `plans/NN-*.md` are Ready. A shipped plan keeps a `> ✅ Done: <commit>` marker under its title and stays in `plans/` (see WORKFLOW.md "Plan lifecycle").
+Review findings feeding this board: [reviews/2026-07-02.md](./reviews/2026-07-02.md), [reviews/2026-07-03-rls-probe.md](./reviews/2026-07-03-rls-probe.md).
 
 ---
 
 ## 🟢 Ready (planned — pick from the top)
 
-_(none — pick from Icebox and write a plan)_
+- **#7 Anon write hardening (results_v2 + class_executions)** · M · Sonnet · probe confirmed anon can overwrite any athlete's result + any class's roster ([reviews/2026-07-03-rls-probe.md](./reviews/2026-07-03-rls-probe.md)); fix = move the two legit anon writes behind SECURITY DEFINER RPCs + revoke direct anon write — [plans/05-anon-write-hardening.md](./plans/05-anon-write-hardening.md)
 
 ## 🔵 In Progress
 
@@ -16,7 +16,6 @@ _(none)_
 
 ## 🧊 Icebox (captured + prioritized — no plan yet)
 
-- **#7 class_executions anon-write review** · S · Sonnet · public check-in UPDATEs `class_executions` (Schedule.jsx:701,705) — undocumented write surface; verify RLS scope on dev env (needs #4), then document the rule
 - **#9 Tap-flash fix** · S · Sonnet · round counter flashes blue on tap (FOUC audit itself is done — tv.html theme-init shipped via #2)
 - **#10 Goals for WOD-type blocks** · M · Sonnet · builder sets a goal/target on WOD blocks; shown wherever WODs render (schedule card slot reserved, TV)
 - **#11 Reposition Sets/Reps inputs in builder** · S · Sonnet · in Criador, Sets+Reps inputs precede the exercise-name text field

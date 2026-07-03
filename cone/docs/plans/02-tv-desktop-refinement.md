@@ -1,5 +1,7 @@
 # 02 — Quadro ao Vivo: desktop refinement + design pass
 
+> ✅ Done: 4880674 · 2026-07-03 — see BACKLOG.md "Done (recent)" for the shipped summary.
+
 ## Context
 Two problems on the TV controller (TvController) and the tv.html display:
 - **(a) Layout:** on desktop there's empty horizontal space — cards don't use full width, excessive left/right margins, and content that should fit on screen requires scrolling.

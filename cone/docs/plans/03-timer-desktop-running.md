@@ -1,5 +1,7 @@
 # 03 — timer.html: desktop running layout
 
+> ✅ Done: adc0d2b · 2026-07-03 — see BACKLOG.md "Done (recent)" for the shipped summary.
+
 ## Context
 The timer.html **config** screen is done (header + BlockTypePicker, Phase 2). What remains: the **running / paused / finished** screens don't use desktop real estate — the ring and controls don't scale to a wide viewport, and the sidebar nav offset (`margin-left: 220px`) isn't applied on the running screen.
 

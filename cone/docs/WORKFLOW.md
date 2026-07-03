@@ -32,8 +32,11 @@ An item enters **Ready** only when its plan file exists. Keep **only 2-3 items i
 2. Claude reads `CLAUDE.md` (auto) + that one plan + the relevant code.
 3. Execute → commit + push.
 4. Move the row to **Done** in `BACKLOG.md`.
+5. Mark the plan file done: prepend `> ✅ Done: <commit> · <date> — see BACKLOG.md` under its title (see "Plan lifecycle" below).
 
 One item per session for size **S/M**. Large items (e.g. SPA standardization) get a dedicated *planning* session first, then *execution* session(s).
+
+**Plan lifecycle.** Shipped plans stay in `plans/` with a `> ✅ Done: <commit>` marker under the title, rather than being moved or deleted — the plan's rationale lives next to its outcome, and the marker is the one-glance signal that separates live plans from history. So `plans/` without a Done marker = actionable (Ready or In Progress); with one = archived-in-place. The BACKLOG `Done (recent)` entry holds the shipped *summary*; the plan file holds the original *intent* — keep both. Revisit archiving into a `plans/done/` subdir only if the unmarked-vs-marked ratio ever makes the directory hard to scan.
 
 New bug or feature → add a row to **Icebox**. Batch trivial ones; don't spin a session per typo.
 

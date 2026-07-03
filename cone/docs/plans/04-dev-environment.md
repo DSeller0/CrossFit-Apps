@@ -1,5 +1,7 @@
 # 04 — Dev environment (local Supabase, prod isolation)
 
+> ✅ Done: db7d38b · 2026-07-03 — see BACKLOG.md "Done (recent)" for the shipped summary.
+
 ## Context
 `npm run dev` currently talks to the **production** Supabase project — every local experiment reads and writes live gym data, and schema exists only as prose in CLAUDE.md plus hand-run SQL in the dashboard. Architecture chosen (2026-07-02 review session): **local Supabase in Docker via the Supabase CLI**, matching the pattern already used in the user's other project — one workflow across projects, fully offline, resets cleanly.
 
