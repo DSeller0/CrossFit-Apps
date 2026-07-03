@@ -8,19 +8,19 @@ Model: Sonnet · Size: S each (batch ≈ M). Order below is low-risk → design-
 ---
 
 ## #33 — Turma default-name auto-fill
-**What:** `useClassTracking.js:6` defaults `classLabel` to plain `'Turma'`; default instead to `Turma_HH:MM` at the nearest full hour (10:05 → `Turma_10:00`, 10:35 → `Turma_11:00`).
+**What:** `useClassTracking.js:6` defaults `classLabel` to plain `'Turma'`; default instead to `Turma_HH:MM` rounded **down to the nearest half-hour** — minutes 00–30 → `:00`, minutes 31–59 → `:30`, hour never changes (09:25 → `Turma_09:00`; 19:32 → `Turma_19:30`; 10:05 → `Turma_10:00`).
 **Files:** [src/hooks/useClassTracking.js](../../src/hooks/useClassTracking.js)
 **Approach:** add a small helper and use it as the `useState` initializer:
 ```js
 function defaultTurmaLabel(d = new Date()) {
-  const h = (d.getHours() + (d.getMinutes() >= 30 ? 1 : 0)) % 24
-  return `Turma_${String(h).padStart(2, '0')}:00`
+  const mm = d.getMinutes() <= 30 ? '00' : '30'
+  return `Turma_${String(d.getHours()).padStart(2, '0')}:${mm}`
 }
 // ...
 const [classLabel, setClassLabel] = useState(defaultTurmaLabel)
 ```
-Computed at mount (controller is opened near class time; field stays editable). Keep the `classLabel.trim() || 'Turma'` fallback at `startClass` (line 32).
-**Verify:** open TvController → the Sessão/turma name field pre-fills `Turma_HH:00` for the current hour. Optional: add a unit test for `defaultTurmaLabel` (pairs with backlog #23) — feed fixed `Date`s for :05, :30, :45, and 23:45 (→ `00:00`).
+Computed at mount (controller is opened near class time; field stays editable). Hour is never bumped, so there's no midnight-wrap edge case. Keep the `classLabel.trim() || 'Turma'` fallback at `startClass` (line 32).
+**Verify:** open TvController → the turma name field pre-fills `Turma_HH:00` (minute ≤ 30) or `Turma_HH:30` (minute ≥ 31). Optional: add a unit test for `defaultTurmaLabel` (pairs with backlog #23) — fixed `Date`s for :00→`:00`, :25→`:00`, :30→`:00`, :31→`:30`, :59→`:30`.
 
 ## #9 — Round-counter tap-flash fix
 **What:** on mobile, tapping LAP repeatedly selects/flashes the adjacent "RD N" text blue (native text-selection / tap highlight). Round/clock text has no `user-select` guard.
