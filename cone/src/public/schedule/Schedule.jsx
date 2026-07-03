@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import Nav from '../Nav.jsx'
+import Nav, { isNavHidden } from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import styles from './Schedule.module.css'
@@ -963,7 +963,7 @@ export default function Schedule() {
       onSubmit={submitLog} onClose={()=>{setLogPane(null);setLogSuccess(false);setLogError('')}}
       lockedAthName={lockedId?athletes.find(a=>String(a.id)===String(lockedId))?.name||'':''}/>
 
-    <div className={styles.pageRoot}><div className={styles.inner}>
+    <div className={styles.pageRoot} style={isNavHidden() ? { paddingBottom: 0 } : undefined}><div className={styles.inner}>
     <div className={styles.hdr}>
       <div className={styles.hdrRule}><div className={styles.hdrLine}/><div className={styles.hdrDiamond}/><div className={`${styles.hdrLine} ${styles.hdrLineR}`}/></div>
       <div className={styles.brand}>{gymName.toUpperCase()}</div>

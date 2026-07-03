@@ -541,22 +541,6 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
           onDragEnd={() => { dragIdx.current = null; setDragOverIdx(null); }}
         />
 
-        {isComplex ? (
-          <input
-            className="ex-complex-name"
-            placeholder="Nome do complexo (opcional)"
-            value={ex.name}
-            onChange={e => upd('name', e.target.value)}
-          />
-        ) : (
-          <ExerciseCombobox
-            value={ex.name}
-            onChange={v => upd('name', v)}
-            blockLabel={blockType}
-            placeholder="Nome do exercício"
-          />
-        )}
-
         {/* Qty — desktop only; on mobile it moves to the bottom sheet */}
         {!isMobile && (isComplex ? (
           <span className="ex-complex-badge" title="Séries × notação do complexo">
@@ -584,6 +568,22 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
             />
           </div>
         ))}
+
+        {isComplex ? (
+          <input
+            className="ex-complex-name"
+            placeholder="Nome do complexo (opcional)"
+            value={ex.name}
+            onChange={e => upd('name', e.target.value)}
+          />
+        ) : (
+          <ExerciseCombobox
+            value={ex.name}
+            onChange={v => upd('name', v)}
+            blockLabel={blockType}
+            placeholder="Nome do exercício"
+          />
+        )}
 
         {(() => { const b = loadBadgeStr(ex); return b && !showDetail ? <span className="ex-load-badge">{b}</span> : null; })()}
 

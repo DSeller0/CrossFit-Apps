@@ -120,6 +120,20 @@
   letter-spacing: .18em; text-transform: uppercase;
   margin-right: -.18em;
 }
+.countdownPill {
+  position: absolute; left: 50%; bottom: 8%; transform: translateX(-50%);
+  display: flex; align-items: center; justify-content: center;
+  min-width: 84px; height: 84px; padding: 0 18px;
+  background: #c84038; color: var(--cream); border: 2px solid var(--cream);
+  font-family: 'Courier New', monospace;
+  font-size: 48px; font-weight: 900; line-height: 1;
+  animation: countdownPulse 1s ease-in-out infinite;
+}
+@keyframes countdownPulse {
+  0%   { transform: translateX(-50%) scale(1);    box-shadow: 0 0 0 0 rgba(200,64,56,.55); }
+  50%  { transform: translateX(-50%) scale(1.12); box-shadow: 0 0 0 18px rgba(200,64,56,0); }
+  100% { transform: translateX(-50%) scale(1);    box-shadow: 0 0 0 0 rgba(200,64,56,0); }
+}
 .timerRight {
   flex: 1; display: flex; flex-direction: column;
   padding: 60px 60px 40px; gap: 28px; overflow: hidden;

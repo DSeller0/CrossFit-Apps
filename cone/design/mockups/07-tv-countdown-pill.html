@@ -1,0 +1,126 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — TV timer final-10s countdown pill (backlog #12)</title>
+<style>
+  :root{--bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--divider:#2a231c;--gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;--red:#c84038}
+  body{margin:0;padding:24px;background:var(--bg);color:var(--cream);font-family:'Cinzel',Georgia,serif}
+  h1{font-size:16px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 4px}
+  p.note{font-size:12px;color:var(--muted);margin:0 0 20px;font-family:Georgia,serif;max-width:900px;line-height:1.5}
+  p.note b{color:var(--sub)}
+
+  .states{display:flex;gap:28px;flex-wrap:wrap}
+  .stateCard{background:var(--stone);border:1px solid var(--divider);border-radius:6px;padding:24px 24px 18px;width:340px}
+  .stateLbl{font-size:10px;font-weight:900;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px}
+
+  /* ── Mirrors TV.module.css .timerLeft / .ringWrap / .ringClock / .timerMode / .timerCap, scaled to fit the card ── */
+  .timerLeft{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+  .timerMode{font-size:16px;font-weight:900;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-right:-.22em}
+  .ringWrap{position:relative;width:230px;height:230px;display:flex;align-items:center;justify-content:center}
+  .ringWrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .ringTrack{fill:none;stroke:#1e1a16;stroke-width:12}
+  .ringFill{fill:none;stroke-width:12;stroke-linecap:round;transition:stroke .3s}
+  .ringClock{position:absolute;font-size:52px;font-weight:900;font-family:'Courier New',monospace;letter-spacing:.04em;transition:color .3s;text-align:center}
+  .timerCap{font-size:13px;color:var(--dim);font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-right:-.18em}
+
+  /* ── New: countdown badge — square corners (public pages carry no border-radius) ── */
+  .countdownPill{
+    position:absolute; left:50%; bottom:8%; transform:translateX(-50%);
+    display:flex; align-items:center; justify-content:center;
+    min-width:44px; height:44px; padding:0 10px;
+    background:var(--red); color:var(--cream); border:2px solid var(--cream);
+    font-family:'Courier New',monospace;
+    font-size:26px; font-weight:900; line-height:1;
+    box-shadow:0 0 0 0 rgba(200,64,56,.6);
+    animation:pillPulse 1s ease-in-out infinite;
+  }
+  @keyframes pillPulse{
+    0%{transform:translateX(-50%) scale(1); box-shadow:0 0 0 0 rgba(200,64,56,.55)}
+    50%{transform:translateX(-50%) scale(1.12); box-shadow:0 0 0 10px rgba(200,64,56,0)}
+    100%{transform:translateX(-50%) scale(1); box-shadow:0 0 0 0 rgba(200,64,56,0)}
+  }
+
+  .capNote{font-size:10px;color:var(--dim);margin-top:8px;text-align:center;line-height:1.5}
+  .capNote b{color:var(--sub)}
+</style>
+<body>
+<h1>TV timer — final-10s countdown pill</h1>
+<p class="note">
+  Backlog <b>#12</b>. When a capped block (<b>For Time / Benchmark / Estações</b>) enters its last 10 seconds
+  (<code>cap − elapsed ≤ 10</code>), the ring + clock digits shift to the same red already used for the
+  <code>TIME!</code> state, and a small pulsing badge appears at the bottom of the ring counting <b>10 → 1</b>.
+  Reuses <code>TV.module.css</code>'s existing red (<code>#c84038</code>) rather than introducing a new color.
+  <b>Square corners, no <code>border-radius</code></b> — TV.jsx is a public page and CLAUDE.md's design-system
+  rule (<code>No border-radius on public pages</code>) applies; a cream border gives the badge shape without one.
+  <b>Not shown for AMRAP</b> (its ring already counts remaining time down) or <b>EMOM</b> (already shows
+  seconds-to-next-minute via <code>MIN n/total</code>). Layout-safe: the pill is absolutely positioned inside
+  the existing <code>.ringWrap</code>, so <code>.timerMode</code>/<code>.timerCap</code> never shift.
+</p>
+
+<div class="states">
+
+  <div class="stateCard">
+    <div class="stateLbl">Normal — 47s left</div>
+    <div class="timerLeft">
+      <div class="timerMode">FOR TIME</div>
+      <div class="ringWrap">
+        <svg viewBox="0 0 200 200">
+          <circle class="ringTrack" cx="100" cy="100" r="88"/>
+          <circle class="ringFill" cx="100" cy="100" r="88" stroke="#4ac8c0" stroke-dasharray="553" stroke-dashoffset="120"/>
+        </svg>
+        <div class="ringClock" style="color:#4ac8c0">4:13</div>
+      </div>
+      <div class="timerCap">Cap 5'</div>
+    </div>
+  </div>
+
+  <div class="stateCard">
+    <div class="stateLbl">Final 10s — pill counts down</div>
+    <div class="timerLeft">
+      <div class="timerMode">FOR TIME</div>
+      <div class="ringWrap">
+        <svg viewBox="0 0 200 200">
+          <circle class="ringTrack" cx="100" cy="100" r="88"/>
+          <circle class="ringFill" cx="100" cy="100" r="88" stroke="#c84038" stroke-dasharray="553" stroke-dashoffset="15"/>
+        </svg>
+        <div class="ringClock" style="color:#c84038">4:53</div>
+        <div class="countdownPill">7</div>
+      </div>
+      <div class="timerCap">Cap 5'</div>
+    </div>
+    <div class="capNote">Ring + digits turn <b>red</b> at the same instant the pill appears — one consistent urgency signal, not two competing ones.</div>
+  </div>
+
+  <div class="stateCard">
+    <div class="stateLbl">Cap reached — existing TIME! state (unchanged)</div>
+    <div class="timerLeft">
+      <div class="timerMode">FOR TIME</div>
+      <div class="ringWrap">
+        <svg viewBox="0 0 200 200">
+          <circle class="ringTrack" cx="100" cy="100" r="88"/>
+          <circle class="ringFill" cx="100" cy="100" r="88" stroke="#c84038" stroke-dasharray="553" stroke-dashoffset="0"/>
+        </svg>
+        <div class="ringClock" style="color:#c84038;font-size:36px">TIME!</div>
+      </div>
+      <div class="timerCap">Cap 5'</div>
+    </div>
+    <div class="capNote">Pill disappears the instant <code>isFinished</code> flips — no overlap with the existing "TIME!" label.</div>
+  </div>
+
+  <div class="stateCard">
+    <div class="stateLbl">AMRAP — pill never shows</div>
+    <div class="timerLeft">
+      <div class="timerMode">AMRAP</div>
+      <div class="ringWrap">
+        <svg viewBox="0 0 200 200">
+          <circle class="ringTrack" cx="100" cy="100" r="88"/>
+          <circle class="ringFill" cx="100" cy="100" r="88" stroke="#d8a840" stroke-dasharray="553" stroke-dashoffset="520"/>
+        </svg>
+        <div class="ringClock" style="color:#d8a840">0:07</div>
+      </div>
+      <div class="timerCap">20' AMRAP</div>
+    </div>
+    <div class="capNote">AMRAP's ring/clock already count the remaining time down — a duplicate pill would be redundant.</div>
+  </div>
+
+</div>
+</body>

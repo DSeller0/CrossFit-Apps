@@ -55,7 +55,7 @@ function fmtDate(iso) {
 // ── Shared: mini QR footer for WOD + Timer slides ─────────────────────────────
 function QrFooter({ dateKey, sessId, classId }) {
   const [qrUrl, setQrUrl] = useState('')
-  const base = `${window.location.origin}/CrossFit-Apps/schedule.html?date=${dateKey}&session=${sessId}`
+  const base = `${window.location.origin}/CrossFit-Apps/schedule.html?date=${dateKey}&session=${sessId}&from=tv`
   const url  = classId ? `${base}&checkin=${classId}` : base
   useEffect(() => {
     if (!dateKey || !sessId) return
@@ -211,6 +211,9 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
   const col  = isResting ? '#4878d8' : ringCol(e, cap, bt)
   const dashOff    = RING_C * (1 - prog)
   const isFinished = !isResting && bt !== 'EMOM' && e >= cap
+  const remaining  = cap - e
+  const showCountdown = !isResting && !isFinished && bt !== 'AMRAP' && bt !== 'EMOM'
+    && cap > 0 && remaining > 0 && remaining <= 10
 
   const displaySecs = isResting
     ? restRemaining
@@ -234,6 +237,7 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
           <div className={s.ringClock} style={{ color: isFinished ? '#c84038' : col }}>
             {isFinished ? 'TIME!' : fmt(displaySecs)}
           </div>
+          {showCountdown && <div className={s.countdownPill}>{Math.ceil(remaining)}</div>}
         </div>
         <div className={s.timerCap}>
           {isResting
@@ -404,7 +408,7 @@ export function ResultsSlide({ tv, sessions, athletes, results, classExecs }) {
 // ── Slide: QR ─────────────────────────────────────────────────────────────────
 export function QrSlide({ tv }) {
   const [qrUrl, setQrUrl] = useState('')
-  const base = `${window.location.origin}/CrossFit-Apps/schedule.html?date=${tv?.date_key || ''}&session=${tv?.session_id || ''}`
+  const base = `${window.location.origin}/CrossFit-Apps/schedule.html?date=${tv?.date_key || ''}&session=${tv?.session_id || ''}&from=tv`
   const url  = tv?.class_id ? `${base}&checkin=${tv.class_id}` : base
   const title = tv?.class_id ? 'CHECK-IN DA AULA' : 'REGISTRE SEU RESULTADO'
   useEffect(() => {

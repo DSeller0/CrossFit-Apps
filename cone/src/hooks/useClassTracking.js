@@ -2,8 +2,13 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../utils/supabase'
 import { uid } from '../public/lib/wod.js'
 
+export function defaultTurmaLabel(d = new Date()) {
+  const mm = d.getMinutes() <= 30 ? '00' : '30'
+  return `Turma_${String(d.getHours()).padStart(2, '0')}:${mm}`
+}
+
 export function useClassTracking({ selSessId, selDate, push, classId }) {
-  const [classLabel,   setClassLabel]   = useState('Turma')
+  const [classLabel,   setClassLabel]   = useState(defaultTurmaLabel)
   const [todayClasses, setTodayClasses] = useState([])
 
   const loadClasses = useCallback(async () => {
@@ -32,6 +37,9 @@ export function useClassTracking({ selSessId, selDate, push, classId }) {
       class_label: classLabel.trim() || 'Turma', athlete_ids: [], anon_names: [], created_at: Date.now() }
     await supabase.from('class_executions').insert(row)
     await push({ class_id: id })
+    // Refresh the suggested name so a controller left open across multiple
+    // classes offers a fresh time slot for the next one, not the one just used.
+    setClassLabel(defaultTurmaLabel())
   }
 
   async function endClass() {

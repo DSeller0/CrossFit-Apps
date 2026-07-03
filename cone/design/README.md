@@ -25,3 +25,5 @@ Source for the **"Cone Design System"** project on claude.ai/design. Replaces th
 | `components/block-cards.html` | Components — RED/AMBER/BLUE/GREEN families |
 | `components/schedule-card.html` | Components — 65/35 block card canon (design-d) |
 | `components/pills.html` | Components — buttons, chips, tabs |
+| `mockups/02-tv-desktop-refinement.html` | Mockups — TV controller desktop layout (#2) |
+| `mockups/07-tv-countdown-pill.html` | Mockups — TV timer final-10s countdown pill (#12) |

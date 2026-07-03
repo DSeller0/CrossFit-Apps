@@ -1,6 +1,10 @@
 import { useState, Fragment } from 'react'
 import s from './Nav.module.css'
 
+export function isNavHidden() {
+  return new URLSearchParams(window.location.search).get('from') === 'tv'
+}
+
 const TABS = [
   { key: 'index',       href: 'index.html',      icon: '🏠', label: 'Início',     lockable: false, desktopOnly: false },
   { key: 'leaderboard', href: 'leaderboard.html', icon: '🏆', label: 'Ranking',    lockable: false, desktopOnly: false },
@@ -12,6 +16,8 @@ const TABS = [
 
 export default function Nav({ active, lockedId, gymName = '' }) {
   const [ovOpen, setOvOpen] = useState(false)
+
+  if (isNavHidden()) return null
 
   return (
     <>
