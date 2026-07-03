@@ -1,6 +1,6 @@
 # 06 — class_executions authenticated INSERT/DELETE hardening (#34)
 
-> ✅ Done: <pending-commit> · 2026-07-03 — see BACKLOG.md "Done (recent)" for the shipped summary. `supabase db dump --linked` confirmed prod's real policy set (`ce_select_anon`/`ce_insert_auth`/`ce_delete_auth`, no `is_allowed_user()` policy, no UPDATE policy) — so #34 came bundled with an **active** coach-UPDATE regression `0003` had introduced on prod only; `0004` fixes both. 11/11 local reproduce→fix checks passed; shipped to prod and re-dumped to confirm.
+> ✅ Done: 31b4f39 · 2026-07-03 — see BACKLOG.md "Done (recent)" for the shipped summary. `supabase db dump --linked` confirmed prod's real policy set (`ce_select_anon`/`ce_insert_auth`/`ce_delete_auth`, no `is_allowed_user()` policy, no UPDATE policy) — so #34 came bundled with an **active** coach-UPDATE regression `0003` had introduced on prod only; `0004` fixes both. 11/11 local reproduce→fix checks passed; shipped to prod and re-dumped to confirm.
 
 ## Context
 #7 ([plans/05](./05-anon-write-hardening.md), `0003_anon_write_rpcs.sql`) closed anon UPDATE-tampering on `results_v2` + `class_executions` but deliberately left the **authenticated-role** hole on `class_executions`. Prod's real (dashboard-built) policies — names confirmed via `supabase db diff --linked` during #7 — include:
