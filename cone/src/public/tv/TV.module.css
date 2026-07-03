@@ -98,9 +98,9 @@
 /* ── Timer Slide ── */
 .timerSlide { display: flex; height: 100%; background: var(--bg); }
 .timerLeft {
-  width: 63%; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 90px 60px;
-  border-right: 1px solid var(--divider); gap: 27px;
+  width: 42%; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 40px;
+  border-right: 1px solid var(--divider); gap: 18px;
 }
 .timerMode {
   font-size: 33px; font-weight: 900; letter-spacing: .22em;
