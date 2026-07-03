@@ -32,7 +32,7 @@ _(none)_
 - **#24 Prettier + format gate** · S · Sonnet · add Prettier config + check script; wire into #5's CI gate
 - **#25 Publicador decomposition (2197 lines)** · M · Sonnet · split along seams: export views / mobile export views / agenda+events / shell
 - **#26 Criador decomposition (1952 lines)** · M · Sonnet · split along seams: block model+summaries / field editors / block+station editors / container
-- **#27 UX walk + mobile pass** · L · Opus · interactive session: every page @1280px+@390px, 3 journeys (coach publish, athlete log, TV cycle); each page updated or explicitly deferred
+- **#27 UX walk + mobile pass** · L · Opus · interactive session: every page @1280px+@390px, 3 journeys (coach publish, athlete log, TV cycle); each page updated or explicitly deferred · the athlete-log journey should also do the manual click-through #7 skipped (no browser-automation tool in that session, verified only via direct RPC calls mirroring the client payloads) — check in as a real athlete + a guest from schedule.html, self-log a result from both schedule.html (athlete self-log + desktop-reg) and results.html, confirm all three land correctly and coach_note/flag_for_review stay untouched
 - **#28 Cone SPA UI/UX standardization** · L · Opus · shared card/button/input/spacing standard, then audit every builder tab (planning session first; builds on #25/#26)
 - **#29 Vercel migration** · L · Sonnet · fixes chunk-hash 404 + preview deploys; cost = base-path rework + porting dual-build assembly; natural moment to consolidate root-level loose files (themes.css, cone-client.js, config.json)
 - **#30 Per-athlete RLS / access** · L · Opus · `me.html?id=<athleteId>`, `isPublic` on result rows, QR codes in Atletas tab
