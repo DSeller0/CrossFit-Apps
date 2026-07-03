@@ -8,7 +8,6 @@ Review findings feeding this board: [reviews/2026-07-02.md](./reviews/2026-07-02
 
 ## 🟢 Ready (planned — pick from the top)
 
-- **#3 timer.html — desktop running layout** · M · Sonnet · sidebar offset + `vh`-scaled ring on running/paused screens — [plans/03-timer-desktop-running.md](./plans/03-timer-desktop-running.md)
 - **#4 Dev environment — local Supabase (Docker)** · L · Sonnet · Supabase CLI stack, env-var clients, schema as migrations, seed script; unblocks the RLS probes — [plans/04-dev-environment.md](./plans/04-dev-environment.md)
 
 ## 🔵 In Progress
@@ -45,6 +44,8 @@ _(none)_
 - **#33 Turma default-name auto-fill** · S · Sonnet · `classLabel` in `useClassTracking.js:6` defaults to plain `'Turma'`; round current clock to nearest full hour and default to `Turma_HH:MM` (e.g. 10:05 → `Turma_10:00`)
 
 ## ✅ Done (recent)
+
+**2026-07-03 — #3 timer.html — desktop running layout** · Sidebar offset, `vh`-scaled ring, and side-by-side exercise list on the running/paused screens were already built (commit f645054) — the actual gap was `.wrap` never getting a base `display:flex;flex-direction:column;height:100%` rule, so it never stretched to fill `#root`'s `100dvh` flex column. Every screen (cfg/ready/running/paused/finished) fell back to content-height, leaving a large blank void below the content on tall/desktop viewports (visible on mobile too, just less obviously). One-line fix in `Timer.module.css`; no mockup needed since the already-approved desktop design just wasn't rendering — confirmed via Playwright screenshots at 1280×800 and 390×844 across all screens.
 
 **2026-07-03 — #2 Quadro ao Vivo — desktop refinement + design pass** · Full-width Sessão date-picker + two-pane grid (roster left, Slide/Timer/Grupos stack + Preview right) — no dead side margins, no vertical scroll for primary content @1080p · `ClassPanel.jsx` merges old separate "Resultados ao vivo"/"Registro ao Vivo" cards into one per-class accordion roster (every class today, active auto-expanded, past ones read-only) with rank + register/edit for both real athletes (`results_v2`) and guests (new `class_executions.anon_results` column, day-scoped) · `useLiveRegistration.js` rewritten around a unified real/guest member model with a manual mm:ss edit path · styling debt: controller/panels off inline styles onto `tv/tvController.module.css`, `TV.module.css` hex swept to vars, tv.html theme-init script (FOUC fix) · test-pass fixes: Timer card label/input alignment, group-member font size, rotation-mode timer type/cap now tracks the actual first rotation block instead of stale pre-group config, number-input spinner styling, `results_v2` 400 on first-time registration (missing client-generated `id` on insert), tv.html timer ring scaled 50% + letter-spacing centering fix
 

@@ -1,3 +1,8 @@
+/* ── Root wrap: fills #root (100dvh flex column, see timer.html) so inner
+   flex:1 sections (.body/.cfg/.readyBody/.finBody/.getreadyBody) can size
+   against it and scroll internally instead of leaving a blank gap below. ── */
+.wrap { display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
+
 /* ── Header ── */
 .hdr {
   display: flex;
