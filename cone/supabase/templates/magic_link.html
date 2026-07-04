@@ -1,0 +1,19 @@
+<!--
+  Local dev-only OTP email template. LoginScreen.jsx never passes emailRedirectTo
+  and only ever calls verifyOtp() with a typed-in 8-digit code (never clicks a
+  link) — see CLAUDE.md: "8-digit OTP codes, not magic links (Outlook Safe
+  Links breaks magic links)". GoTrue's built-in default magic-link template only
+  renders {{ .ConfirmationURL }}, never {{ .Token }}, so without this override
+  the local stack sends an email with a dead link and no visible code. Prod
+  almost certainly has an equivalent custom template configured via the
+  dashboard (never captured into supabase/migrations or config before this).
+-->
+<div style="font-family:Georgia,serif;background:#0d0b09;color:#f0e8d0;padding:32px;max-width:420px;margin:0 auto">
+  <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#806850;margin-bottom:18px">Cone</div>
+  <div style="font-size:14px;color:#c8b090;margin-bottom:18px">Seu código de acesso:</div>
+  <div style="font-size:40px;font-weight:900;letter-spacing:.12em;color:#d8a840;margin-bottom:18px">{{ .Token }}</div>
+  <div style="font-size:12px;color:#806850;line-height:1.6">
+    Digite este código de 8 dígitos na tela de login. O código expira em 1 hora.
+    Se você não solicitou este acesso, ignore este e-mail.
+  </div>
+</div>

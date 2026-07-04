@@ -253,6 +253,15 @@ otp_expiry = 3600
 # subject = "You have been invited"
 # content_path = "./supabase/templates/invite.html"
 
+# signInWithOtp() always sends under the "magic_link" mail type regardless of
+# whether the app uses the link or the code. The built-in default template only
+# shows {{ .ConfirmationURL }}, not {{ .Token }} — LoginScreen.jsx only ever
+# reads the typed-in code (see CLAUDE.md's OTP-not-magic-link decision), so
+# without this override the local stack sends an unusable link-only email.
+[auth.email.template.magic_link]
+subject = "Seu código de acesso — Cone"
+content_path = "./supabase/templates/magic_link.html"
+
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
 # enabled = true
