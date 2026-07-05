@@ -1,5 +1,7 @@
 # 11 — Load × distance exercises (dist as volume) (#37)
 
+> ✅ Done: `07687f0` · 2026-07-05 — see BACKLOG.md
+
 ## Context
 A loaded carry ("Farmer's Carry 2×100m @ M/F 20/12 kg") is currently unrepresentable. Distance only exists via the `cardio` intensity **mode**, and that mode *hijacks the volume slot*: `exVolStr` (`wod.js:20-28`) returns the distance and ignores sets/reps, while the real load modes (pct/progression/gender) carry no distance at all. Today coaches stuff half the prescription into the note. Analysis: [reviews/2026-07-04-feature-ideas.md](../reviews/2026-07-04-feature-ideas.md) (#37). Gate #36 (remove "—" intensity tab) shipped `3bd11e4`, so this chain (#37 → #38) can proceed.
 
