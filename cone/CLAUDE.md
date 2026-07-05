@@ -92,7 +92,7 @@ updated_at           BIGINT
 2. `TV.jsx` → `TimerSlide` right panel
 3. `src/public/schedule/Schedule.jsx` → exercise rows
 
-**Shared rendering:** `src/public/shared/ExerciseList.jsx` is the shared exercise-row component — TV uses it for both paths; Schedule.jsx still renders its own markup (adoption = backlog #17). `fmtIntensity` canonical lives in `src/public/lib/wod.js`; local copies remain in `Schedule.jsx` (identical) and `Publicador.jsx` (diverged: adds cardio branch) — reconcile before consolidating.
+**Shared rendering:** `src/public/shared/ExerciseList.jsx` is the shared (read-only, compact) exercise-row component — TV uses it for both paths; Schedule.jsx still renders its own *interactive* markup (`ExRow`: check-off/rounds, RM chip+calc, Demo, progression-step expansion) so adoption isn't a drop-in (backlog #17, re-sized S→M). `exVolStr`/`fmtIntensity` are now **canonical-only** in `src/public/lib/wod.js` — #37 deleted the diverged local copies in `Schedule.jsx`/`Publicador.jsx`/`Resultados.jsx`; all re-import from `wod.js`. (One bespoke dist formatter still lingers at `Schedule.jsx:401`, byte-identical to `exVolStr`'s dist branch — folded into #17.)
 
 ---
 
@@ -128,15 +128,18 @@ Always check these before reimplementing a formatting or date utility. Beware: `
 
 **Exercise data shapes:**
 ```js
-// Standard exercise
-{ id, name, sets, reps, intensity: { mode, ... }, note }
+// Standard exercise (dist/distUnit are siblings of sets/reps — #37; exVolStr renders dist first)
+{ id, name, sets, reps, dist?, distUnit?: 'm'|'cal', intensity: { mode, ... }, note }
 
 // Complex exercise
 { id, name?, isComplex: true, sets, complexMovements: [{ id, name, reps }], intensity, note }
 
-// intensity modes: 'progression' | 'pct' | 'gender' | 'cardio'
-// cardio: { mode:'cardio', cardioVal, cardioUnit }
+// intensity modes: 'progression' | 'pct' | 'gender'   (+ legacy 'cardio')
+// cardio: LEGACY — the Cardio intensity tab was removed in #37; distance now lives in
+//         dist/distUnit. Old { mode:'cardio', cardioVal, cardioUnit } data still renders
+//         (exVolStr fallback) and lazy-normalizes to dist/distUnit on edit/save.
 // gender: { mode:'gender', Masculino_RX, Masculino_Inter, Masculino_SC, Feminino_*, *_unit }
+// Registry entries may carry defaults{sets?,reps?,dist?,distUnit?,intensity?} (#38 ghost loads).
 ```
 
 ---
