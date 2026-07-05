@@ -1,5 +1,7 @@
 # 09 — TvController ↔ public-client decoupling (#41)
 
+> ✅ Done: eba9b4a · 2026-07-04 — see BACKLOG.md
+
 ## Context
 Found in the [2026-07-04 full pass](../reviews/2026-07-04-full-pass.md) (dim 4). The SPA's `TvController.jsx:2` imports the **SPA** Supabase client (`../../utils/supabase`); it then static-imports the slide components at `TvController.jsx:5` from `src/public/tv/TV.jsx`, whose module top-level runs `import { sb } from '../supabaseClient.js'` — and `supabaseClient.js:6` calls `createClient` at module eval. So loading TvController pulls the **public** client into the same bundle, instantiating a second GoTrueClient — exactly the "never import both clients in the same bundle" hazard CLAUDE.md documents (the "Multiple GoTrueClient instances" console warning). The 4 slides TvController uses (`WodSlide/TimerSlide/ResultsSlide/QrSlide`) don't reference `sb` at all — only `TV.jsx`'s default `TV()` export (the public tv.html page) does — so this coupling is needless and cleanly separable.
 
