@@ -1,5 +1,7 @@
 # 14 — Util / formatter consolidation (#16)
 
+> ✅ Done: 993cb79
+
 ## Context
 The same small helpers are reimplemented across the app instead of importing the canonical copies in `src/public/lib/` (`wod.js`, `week.js`). The census re-run in [reviews/2026-07-05-full-pass.md](../reviews/2026-07-05-full-pass.md) dim 3 gives current counts and line refs. This debt keeps growing (every TV/feature addition adds another inline copy), and one instance is a **latent bug** (missing NaN guard). Consolidating shrinks the surface every future review re-counts and removes the bug.
 
