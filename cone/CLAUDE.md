@@ -23,6 +23,7 @@ Each page is a self-contained HTML file. Most use a React component mounted at `
 | `timer.html` | standalone WOD timer (launched from schedule.html) |
 | `tv.html` | TV display for gym wall (no nav) |
 | `athletes.html` | athlete lookup (public) |
+| `recover.html` | data recovery ("Recuperar dados") |
 
 **Page whitelist** — the HTML entry list lives in `cone/vite.public.config.js` (`rollupOptions.input`, 9 pages). Every new public HTML page must be added there or it isn't built and 404s live. (`deploy.yml` at the repo root copies `public-dist/` wholesale — no whitelist there anymore.) The HTML entry files and `themes.css` live at the **repo root** (`CrossFit-Apps/`), not inside `cone/` — the public Vite config sets `root: '..'`.
 
@@ -65,7 +66,7 @@ Both clients read `import.meta.env.VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
 
 **Controller class roster (`tv/ClassPanel.jsx`):** every class started today renders as an accordion card (active one auto-expanded, live-updated via `class_executions` realtime subscription already in `useClassTracking`); ended classes render the same roster read-only. Roster rows merge ranking + live registration + editing (`useLiveRegistration.js`) for both real athletes (`results_v2`, keyed by `athlete_id`) and guests (`class_executions.anon_results`, keyed by name — day-scoped only, deliberately not in `results_v2` since guests don't need durable cross-day tracking). "Registrar" captures the live timer elapsed as `perfTime` (mm:ss string, `For Time` blocks only); "Editar" reveals scale + a manual mm:ss field to overwrite (covers both corrections and misclicks).
 
-**tv_state columns (as of 2026-07-02; source of truth becomes `supabase/migrations/` once plans/04 lands):**
+**tv_state columns (source of truth: `supabase/migrations/0001_init.sql:177-195` — plans/04 landed; the list below matches it):**
 ```
 id                   INTEGER   PRIMARY KEY (always 1)
 slide                TEXT      'blank'|'wod'|'timer'|'results'|'qr'
@@ -144,7 +145,7 @@ Always check these before reimplementing a formatting or date utility. Beware: `
 
 - Dev: `supabase start` (once per Docker session) then `npm run dev` inside `cone/` — talks to the local stack, never prod
 - Build: `npm run build` → `dist/`
-- Tests: `npm test` (4 test files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js)
+- Tests: `npm test` (5 test files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js, useClassTracking.test.js)
 - CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder)
 
 **Chunk hash 404 (GitHub Pages limitation):** After every CI deploy, lazy-loaded chunk filenames change. Old hashes 404 until users hard-refresh (Ctrl+Shift+R). GitHub Pages cannot set `Cache-Control: no-cache`. This is structural — do not re-diagnose, just document and tell the user to hard-refresh.
