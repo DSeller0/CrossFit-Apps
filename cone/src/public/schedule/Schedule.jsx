@@ -4,30 +4,13 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import styles from './Schedule.module.css'
 import { MONTH_PT, DAY_PT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
-import { uid, blkLabel, exVolStr, isWodBlock, blkColor } from '../lib/wod.js'
+import { uid, blkLabel, exVolStr, fmtIntensity, isWodBlock, blkColor } from '../lib/wod.js'
 
 const WOD_LOG_TYPES = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT','Benchmark']
 const LOG_SCALES    = ['RX','Inter','SC','Adaptado']
 
 // ── Pure helpers ──────────────────────────────────────────────────────────────
 function isRoundBlock(bl) { return !isWodBlock(bl)&&Number(bl.rounds)>0 }
-function fmtIntensity(ins) {
-  if(!ins?.mode)return null
-  if(ins.mode==='progression'){
-    const steps=ins.steps||[],loads=steps.map(s=>s.load).filter(Boolean)
-    const unit=(steps[0]?.unit||'% RM').replace('% do RM','% RM')
-    return loads.length?loads.join('/')+' '+unit:null
-  }
-  if(ins.mode==='pct')return ins.pct?ins.pct+'% RM':null
-  if(ins.mode==='gender'){
-    const p=[];['Masculino','Feminino'].forEach(g=>{
-      const unit=ins[`${g}_unit`]||'kg'
-      const vals=['RX','Inter','SC'].map(k=>ins[`${g}_${k}`]).filter(Boolean)
-      if(vals.length)p.push(`${g==='Masculino'?'M':'F'}: ${vals.join('/')} ${unit}`)
-    });return p.join(' | ')||null
-  }
-  return null
-}
 function parseDurMins(d) {
   if(!d)return 0;const p=String(d).trim()
   if(p.includes(':')){const[m,s]=p.split(':').map(n=>parseInt(n)||0);return m+s/60}
@@ -415,7 +398,7 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
     steps.forEach(s=>{const reps=s.reps||ex.reps||'';const g=groups.find(g=>g.reps===reps);if(g){if(s.load)g.loads.push(s.load)}else groups.push({reps,loads:s.load?[s.load]:[]})})
     const exRm=rmValues[ex.id]
     return(<>{groups.map((g,gi)=>{
-      const repsPrefix=ex.sets&&g.reps?`${g.sets||ex.sets}×${g.reps}`:g.reps
+      const repsPrefix=ex.dist?(ex.sets?`${ex.sets}×${ex.dist}${ex.distUnit||'m'}`:`${ex.dist}${ex.distUnit||'m'}`):(ex.sets&&g.reps?`${g.sets||ex.sets}×${g.reps}`:g.reps)
       const pctNums=g.loads.map(l=>parseFloat(l)).filter(n=>!isNaN(n))
       const pctStr=pctNums.length?pctNums.join('/')+'% RM':''
       const calcStr=exRm?.rm&&pctNums.length?pctNums.map(p=>Math.ceil(exRm.rm*p/100)).join('/')+' '+(exRm.unit||'kg'):''

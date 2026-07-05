@@ -50,6 +50,7 @@ export function buildBenchmarkBlock(bm, category, locked = true) {
     ladderMode: false,
     exercises: (bm.exercises || []).map(ex => ({
       id: uid(), name: ex.name || '', sets: ex.sets || '', reps: ex.reps || '',
+      dist: ex.dist || '', distUnit: ex.distUnit || 'm',
       intensity: ex.intensity || null, note: '', isComplex: false, complexMovements: [],
     })),
     ...(locked ? { benchmarkRef: bm.name, benchmarkCategory: category } : {}),

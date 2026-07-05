@@ -18,6 +18,11 @@ export function blkLabel(bl) {
 }
 
 export function exVolStr(ex) {
+  if(ex.dist){
+    const unit=ex.distUnit||'m'
+    if((ex.name||'').toLowerCase().includes(String(ex.dist).toLowerCase()))return ''
+    return ex.sets?`${ex.sets}×${ex.dist}${unit}`:`${ex.dist}${unit}`
+  }
   if(ex.intensity?.mode==='cardio'){
     const val=ex.intensity?.cardioVal,unit=ex.intensity?.cardioUnit||'m'
     if(!val)return ''

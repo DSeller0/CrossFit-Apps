@@ -44,6 +44,18 @@ describe('exVolStr', () => {
   test('no reps, no sets, no cardio → empty string', () => {
     expect(exVolStr({})).toBe('')
   })
+  test('dist only → dist+unit', () => {
+    expect(exVolStr({ dist: '500', distUnit: 'm' })).toBe('500m')
+  })
+  test('sets + dist → sets×dist+unit', () => {
+    expect(exVolStr({ sets: 2, dist: '100', distUnit: 'm' })).toBe('2×100m')
+  })
+  test('dist in calories', () => {
+    expect(exVolStr({ dist: '20', distUnit: 'cal' })).toBe('20cal')
+  })
+  test('dist takes precedence over legacy cardio intensity', () => {
+    expect(exVolStr({ dist: '100', distUnit: 'm', intensity: { mode: 'cardio', cardioVal: '400', cardioUnit: 'm' } })).toBe('100m')
+  })
 })
 
 describe('toSecs', () => {

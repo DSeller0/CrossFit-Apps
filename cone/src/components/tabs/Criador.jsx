@@ -13,7 +13,7 @@ import { BENCHMARK_GIRLS, BENCHMARK_HEROES, buildBenchmarkBlock } from '../../pu
 
 
 // ── Factories ─────────────────────────────────────────────────────────────────
-const emptyEx = () => ({ id: uid(), name: '', sets: '', reps: '', intensity: null, note: '' });
+const emptyEx = () => ({ id: uid(), name: '', sets: '', reps: '', dist: '', distUnit: 'm', intensity: null, note: '' });
 const emptyMovement = () => ({ id: uid(), name: '', reps: '' });
 const emptyStation = (name = 'Grupo', isRest = false) => ({
   id: uid(), name, duration: '', isRest, exercises: isRest ? [] : [emptyEx()],
@@ -31,6 +31,15 @@ const emptyBlock = (type = 'For Time') => {
   };
 };
 const emptyS = () => ({ id: uid(), date: todayISO(), mainTraining: [], sessionName: '', blocks: [] });
+
+// Legacy `intensity.mode==='cardio'` exercises carried distance in the load slot (#37).
+// Lazily convert them to the `dist`/`distUnit` siblings on next edit/save — no bulk migration.
+const normalizeCardioEx = ex => ex.intensity?.mode === 'cardio'
+  ? { ...ex, dist: ex.intensity.cardioVal || ex.dist || '', distUnit: ex.intensity.cardioUnit || 'm', intensity: null }
+  : ex;
+const normalizeLegacyCardio = blocks => (blocks || []).map(bl => bl.type === 'Estações'
+  ? { ...bl, stations: (bl.stations || []).map(st => ({ ...st, exercises: (st.exercises || []).map(normalizeCardioEx) })) }
+  : { ...bl, exercises: (bl.exercises || []).map(normalizeCardioEx) });
 
 // ── Type metadata ─────────────────────────────────────────────────────────────
 const TYPE_CONFIG = {
@@ -124,7 +133,7 @@ function IntensityInput({ value, onChange, defaultReps, defaultSets }) {
     <div className="int-block">
       <span className="lbl" style={{ marginBottom: 6 }}>Intensidade / Carga</span>
       <div className="int-tabs">
-        {[['pct','% RM'],['progression','Progressão'],['gender','M/F'],['cardio','Cardio']].map(([m,l]) =>
+        {[['pct','% RM'],['progression','Progressão'],['gender','M/F']].map(([m,l]) =>
           <button key={m} type="button" className={`itb${mode===m?' iact':''}`} onClick={() => setM(m)}>{l}{mode===m ? ' ✕' : ''}</button>
         )}
       </div>
@@ -179,20 +188,6 @@ function IntensityInput({ value, onChange, defaultReps, defaultSets }) {
               ))}
             </div>
           ))}
-        </div>
-      )}
-      {mode === 'cardio' && (
-        <div className="unit-row">
-          <div className="fg">
-            <span className="lbl">Quantidade</span>
-            <input type="number" placeholder="400" value={v.cardioVal||''} onChange={e => upd({ cardioVal: e.target.value })} />
-          </div>
-          <div className="fg" style={{ width: 110 }}>
-            <span className="lbl">Unidade</span>
-            <select style={{ ...inlineSelStyle, width: 110 }} value={v.cardioUnit||'m'} onChange={e => upd({ cardioUnit: e.target.value })}>
-              <option value="m">metros</option><option value="cal">calorias</option>
-            </select>
-          </div>
         </div>
       )}
     </div>
@@ -397,11 +392,17 @@ function BlockTypePicker({ blockNames, onSelect, onClose }) {
 }
 
 // ── ExerciseRow ───────────────────────────────────────────────────────────────
+function isCardioRegistered(name) {
+  if (!name) return false;
+  const reg = loadRegistry() || {};
+  const names = (reg['Cardio'] || []).map(e => typeof e === 'string' ? e : (e?.name || ''));
+  return names.some(n => n.toLowerCase() === name.trim().toLowerCase());
+}
+
 function loadBadgeStr(ex) {
   const ins = ex.intensity;
   if (!ins || !ins.mode || ins.mode === 'none') return null;
   if (ins.mode === 'pct') return ins.pct ? `${ins.pct}%` : null;
-  if (ins.mode === 'cardio') return ins.cardioVal ? `${ins.cardioVal}${ins.cardioUnit || 'm'}` : null;
   if (ins.mode === 'gender') {
     const scales = ['RX','Inter','SC'];
     const hasAny = scales.some(k => ins[`Masculino_${k}`] || ins[`Feminino_${k}`]);
@@ -433,6 +434,14 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
   const isComplex  = !!ex.isComplex;
   const movements  = ex.complexMovements || [];
   const notation   = movements.map(m => m.reps || '?').join('+');
+
+  const registryCardio = useMemo(() => isCardioRegistered(ex.name), [ex.name]);
+  const [manualDist, setManualDist] = useState(() => !!ex.dist);
+  const isDistMode = registryCardio || manualDist;
+  const toggleDistMode = () => {
+    if (manualDist) { setManualDist(false); onUpdate({ ...ex, dist: '', distUnit: 'm' }); }
+    else setManualDist(true);
+  };
 
   const toggleComplex = () => {
     if (!isComplex) {
@@ -561,11 +570,31 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
               onChange={e => upd('sets', e.target.value)}
             />
             <span className="ex-qty-sep">×</span>
-            <input
-              type="text" className="ex-qty-input"
-              value={ex.reps} placeholder={ladderMode ? '15,12,9' : '—'} title="Reps"
-              onChange={e => upd('reps', e.target.value)}
-            />
+            {isDistMode ? (
+              <>
+                <input
+                  type="text" className="ex-qty-input"
+                  value={ex.dist} placeholder="100" title="Distância/Calorias"
+                  onChange={e => upd('dist', e.target.value)}
+                />
+                <select className="ex-unit-sel" value={ex.distUnit || 'm'} title="Unidade"
+                  onChange={e => upd('distUnit', e.target.value)}>
+                  <option value="m">m</option><option value="cal">cal</option>
+                </select>
+              </>
+            ) : (
+              <input
+                type="text" className="ex-qty-input"
+                value={ex.reps} placeholder={ladderMode ? '15,12,9' : '—'} title="Reps"
+                onChange={e => upd('reps', e.target.value)}
+              />
+            )}
+            {!registryCardio && (
+              <button type="button" className={`ex-dist-toggle${manualDist ? ' on' : ''}`} onClick={toggleDistMode}
+                title={manualDist ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}>
+                <i className={`ti ${manualDist ? 'ti-repeat' : 'ti-ruler-2'}`} />
+              </button>
+            )}
           </div>
         ))}
 
@@ -648,14 +677,35 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
                       <span className="sheet-qty-lbl">Séries</span>
                     </div>
                     <span className="ex-qty-sep sheet-qty-sep-lg">×</span>
-                    <div className="sheet-qty-field">
-                      <input
-                        type="text" className="sheet-qty-input"
-                        value={ex.reps} placeholder={ladderMode ? '15,12,9' : '—'} title="Reps"
-                        onChange={e => upd('reps', e.target.value)}
-                      />
-                      <span className="sheet-qty-lbl">Reps</span>
-                    </div>
+                    {isDistMode ? (
+                      <div className="sheet-qty-field">
+                        <input
+                          type="text" className="sheet-qty-input" style={{ width: 90 }}
+                          value={ex.dist} placeholder="100" title="Distância/Calorias"
+                          onChange={e => upd('dist', e.target.value)}
+                        />
+                        <select className="ex-unit-sel" value={ex.distUnit || 'm'} title="Unidade"
+                          onChange={e => upd('distUnit', e.target.value)}>
+                          <option value="m">m</option><option value="cal">cal</option>
+                        </select>
+                        <span className="sheet-qty-lbl">Distância</span>
+                      </div>
+                    ) : (
+                      <div className="sheet-qty-field">
+                        <input
+                          type="text" className="sheet-qty-input"
+                          value={ex.reps} placeholder={ladderMode ? '15,12,9' : '—'} title="Reps"
+                          onChange={e => upd('reps', e.target.value)}
+                        />
+                        <span className="sheet-qty-lbl">Reps</span>
+                      </div>
+                    )}
+                    {!registryCardio && (
+                      <button type="button" className={`ex-dist-toggle${manualDist ? ' on' : ''}`} onClick={toggleDistMode}
+                        title={manualDist ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}>
+                        <i className={`ti ${manualDist ? 'ti-repeat' : 'ti-ruler-2'}`} />
+                      </button>
+                    )}
                   </>
                 )}
               </div>
@@ -859,7 +909,7 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
       desc: block.notes || (block.exercises||[]).filter(e=>e.name).map(e=>e.name).join(' + '),
       duration: block.duration || '',
       rounds: block.rounds || '',
-      exercises: (block.exercises||[]).map(e => ({ name:e.name, sets:e.sets, reps:e.reps, intensity:e.intensity })),
+      exercises: (block.exercises||[]).map(e => ({ name:e.name, sets:e.sets, reps:e.reps, dist:e.dist, distUnit:e.distUnit, intensity:e.intensity })),
       benchmarkCategory: 'custom',
     };
     const settings = loadSettings();
@@ -1180,7 +1230,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     const targets = getTargets(s);
     const sName = typeof s.mainTraining === 'string' ? s.mainTraining : (s.sessionName || '');
     setForm({ ...s, date: dateKey, mainTraining: targets, sessionName: sName });
-    setBlocks(s.blocks?.length ? s.blocks : []);
+    setBlocks(s.blocks?.length ? normalizeLegacyCardio(s.blocks) : []);
     setEditing({ dateKey, id: s.id });
     setIsDirty(false); setChangedBlockFields({}); setChangedSessionFields(new Set()); setActiveTemplateId(null);
     setShowSessNotes(!!(s.notes));
@@ -1211,7 +1261,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setTemplateFlash(name); setTimeout(() => setTemplateFlash(null), 2000);
   };
   const applyTemplate = tpl => {
-    setBlocks(cloneBlocks(tpl.blocks));
+    setBlocks(normalizeLegacyCardio(cloneBlocks(tpl.blocks)));
     setForm(f => ({ ...f, sessionName: f.sessionName || tpl.name }));
     setShowTemplateModal(false);
     setActiveTemplateId(tpl.id);
@@ -1267,7 +1317,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     }
     const dateKey = form.date || todayISO();
     const savedId = editing?.id || form.id || uid();
-    const session = { ...form, date: dateKey, blocks, id: savedId };
+    const session = { ...form, date: dateKey, blocks: normalizeLegacyCardio(blocks), id: savedId };
 
     const targetDate = new Date(dateKey + 'T12:00:00');
     const today = new Date();
@@ -1330,7 +1380,9 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   // Block management
   const [insertAtIdx, setInsertAtIdx] = useState(null);
   const addBlock = typeOrBlock => {
-    const newBlk = typeof typeOrBlock === 'string' ? emptyBlock(typeOrBlock) : { ...typeOrBlock, id: uid() };
+    const rawBlk = typeof typeOrBlock === 'string' ? emptyBlock(typeOrBlock) : { ...typeOrBlock, id: uid() };
+    // Benchmark blocks (buildBenchmarkBlock) can still carry legacy cardio-mode Run legs (Helen, Murph...) — normalize on insert.
+    const newBlk = normalizeLegacyCardio([rawBlk])[0];
     setBlocks(b => {
       if (insertAtIdx === null) return [...b, newBlk];
       const next = [...b]; next.splice(insertAtIdx + 1, 0, newBlk); return next;

@@ -7,37 +7,16 @@ import {
 import { APP_CONFIG, ZONES, ECOL, DSHORT, PLC, GF } from '../../utils/config';
 import { buildPixPayload } from '../../utils/pix';
 import PresenterView from '../PresenterView';
+import { exVolStr, fmtIntensity } from '../../public/lib/wod.js';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 const pixClean = s => (s || '').normalize('NFD').replace(/[\u0300-\u036F]/g, '').replace(/[^a-zA-Z0-9 @._\-+\/]/g, '').trim();
-
-function fmtIntensity(ins) {
-  if (!ins?.mode) return null;
-  if (ins.mode === 'progression') {
-    if (!ins.steps?.length) return null;
-    const loads = ins.steps.map(s => s.load).filter(Boolean);
-    const rawUnit = ins.steps[0]?.unit || '% RM';
-    const unit = rawUnit === '%' || rawUnit === '% do RM' ? '% RM' : rawUnit;
-    return loads.length ? loads.join('/') + ' ' + unit : null;
-  }
-  if (ins.mode === 'pct') return ins.pct ? `${ins.pct}% RM` : null;
-  if (ins.mode === 'gender') {
-    const p = [];
-    ['Masculino', 'Feminino'].forEach(g => {
-      const unit = ins[`${g}_unit`] || 'kg';
-      const vals = ['RX', 'Inter', 'SC'].map(k => ins[`${g}_${k}`]).filter(Boolean);
-      if (vals.length) p.push(`${g === 'Masculino' ? 'M' : 'F'}: ${vals.join('/')} ${unit}`);
-    });
-    return p.join(' | ') || null;
-  }
-  if (ins.mode === 'cardio') return ins.cardioVal ? (ins.cardioVal + (ins.cardioUnit || 'm')) : null;
-  return null;
-}
 
 function buildProgressionLines(ex) {
   const steps = ex.intensity?.steps || [];
   if (!steps.length) return null;
   const name = ex.name.toUpperCase();
+  const distPrefix = ex.dist ? (ex.sets ? `${ex.sets}×${ex.dist}${ex.distUnit || 'm'}` : `${ex.dist}${ex.distUnit || 'm'}`) : null;
   const groups = [];
   steps.forEach(s => {
     const reps = s.reps || ex.reps || '';
@@ -48,7 +27,7 @@ function buildProgressionLines(ex) {
     else groups.push({ reps, unit, loads: s.load ? [s.load] : [], count: 1 });
   });
   return groups.map(g => {
-    const repsPrefix = g.count && g.reps ? `${g.count}×${g.reps}` : g.reps;
+    const repsPrefix = distPrefix || (g.count && g.reps ? `${g.count}×${g.reps}` : g.reps);
     const nameLine = [repsPrefix, name].filter(Boolean).join(' ');
     const loadStr = g.loads.length ? `${g.loads.join('/')} ${g.unit}` : '';
     return { nameLine, loadStr };
@@ -56,10 +35,7 @@ function buildProgressionLines(ex) {
 }
 
 function exLine(ex) {
-  const reps = ex.reps ? (ex.reps.includes(',') ? ex.reps.split(',').map(r => r.trim()).join('-') : ex.reps) : '';
-  const vol = ex.sets && reps ? `${ex.sets}×${reps}` : reps;
-  const cardio = ex.intensity?.mode === 'cardio' ? (fmtIntensity(ex.intensity) || '') : '';
-  return [vol, cardio, ex.name.toUpperCase()].filter(Boolean).join(' ');
+  return [exVolStr(ex), ex.name.toUpperCase()].filter(Boolean).join(' ');
 }
 
 function complexLine(ex) {

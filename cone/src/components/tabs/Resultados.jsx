@@ -6,6 +6,7 @@ import {
   uid,
 } from '../../utils/storage';
 import { APP_CONFIG, GF } from '../../utils/config';
+import { exVolStr } from '../../public/lib/wod.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const SCALES          = ['RX', 'Inter', 'SC', 'Adaptado'];
@@ -19,17 +20,6 @@ const DAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 // ── Module-level helpers ──────────────────────────────────────────────────────
 const dateToDK = d => [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
 const sessTitle = s => s.sessionName || s.name || (typeof s.mainTraining === 'string' ? s.mainTraining : '') || 'Treino';
-
-function exVolStr(ex) {
-  if (ex.intensity?.mode === 'cardio') {
-    const val = ex.intensity?.cardioVal;
-    if (!val) return '';
-    return (ex.name||'').toLowerCase().includes(String(val).toLowerCase()) ? '' : `${val}${ex.intensity?.cardioUnit||'m'}`;
-  }
-  const rr = ex.reps || '';
-  const rd = rr.includes(',') ? rr.split(',').map(r=>r.trim()).join('-') : rr;
-  return ex.sets && rd ? `${ex.sets}×${rd}` : rd;
-}
 
 function getWeeksInMonth(year, month) {
   const weeks = [];
