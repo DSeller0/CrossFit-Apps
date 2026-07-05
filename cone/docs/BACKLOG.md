@@ -8,7 +8,7 @@ Review findings feeding this board: [reviews/2026-07-02.md](./reviews/2026-07-02
 
 ## 🟢 Ready (planned — pick from the top)
 
-- **#42 TV `loadResults` missing date filter** · S · Sonnet · [plans/10](./plans/10-tv-loadresults-date-filter.md) · add `.eq('date', selDate)` (TvController.jsx:100) + day-scope `scoreMembers` (ClassPanel.jsx:18); latent cross-date result collision · from [reviews/2026-07-04-full-pass.md](./reviews/2026-07-04-full-pass.md)
+_(none)_
 
 ## 🔵 In Progress
 
@@ -44,6 +44,8 @@ _(none)_
 - **#43 Two new themes — Halo Reach + "Common"** · L · Opus · **low priority — last to tackle** · design a Halo Reach–inspired theme + a "Common"/neutral theme (palette + details TBD via iteration), each with **dark + light** = 4 new `html.theme-*` classes in `themes.css` (joins the current 4: totk-dark/light, spirit-blossom/light); **mockup-first mandatory** (WORKFLOW.md) — palette-swatch + in-context cards in `cone/design/`, synced to the Cone Design System, approved before implementation; add both to the theme selector (Configurações). **Completion criteria: both designs mockup-approved AND published/selectable in the app.**
 
 ## ✅ Done (recent)
+
+**2026-07-04 — #42 TV `loadResults` missing date filter** · [plans/10](./plans/10-tv-loadresults-date-filter.md) · `746b77e` · added `.eq('date', selDate)` to TvController.jsx's `loadResults` query, matching the filter `useLiveRegistration.js`'s write path already used; `scoreMembers` needed no change once the fetch was day-scoped. Verified against the local stack: seeded a `results_v2` row dated 2026-01-01 under a session id, then simulated viewing 2026-01-02 under that same (recurring) session id — unfiltered query wrongly surfaced the old date's score, filtered query correctly returned none. Also surfaced a deeper limit while verifying: `results_v2` has `unique (athlete_id, session_id)` (`0001_init.sql:162`), so an athlete can only ever hold one row per session id regardless of date — a genuinely recurring session id can't accumulate two dated rows for the same athlete at all; a second date's write would need to reuse/overwrite the first (or fail the unique constraint on insert). That's a schema-level gap this S-sized fix doesn't touch — worth a future item if recurring session ids ever become real (they're per-creation uids today, per the plan's own framing).
 
 **2026-07-04 — #41 TvController ↔ public-client decoupling** · [plans/09](./plans/09-tvcontroller-dual-client-decouple.md) · `eba9b4a` · moved the client-free `WodSlide/TimerSlide/ResultsSlide/QrSlide` (+ shared helpers) out of the client-owning `TV.jsx` into a new `slides.jsx`; `TvController.jsx` and Criador's WOD preview (a second importer found during the fix, not named in the original plan) now both import from there instead, so the SPA TvController chunk no longer pulls in the public Supabase client. Verified in a running local-stack session: opening "Quadro ao Vivo" and cycling all 4 slides produced zero console errors and no "Multiple GoTrueClient instances" warning; pushing WOD from the coach app updated `tv.html` live via realtime, confirming the public display path still works.
 

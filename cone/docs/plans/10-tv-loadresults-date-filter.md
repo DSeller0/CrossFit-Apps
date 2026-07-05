@@ -1,5 +1,7 @@
 # 10 — TV loadResults missing date filter (#42)
 
+> ✅ Done: 746b77e · 2026-07-04 — see BACKLOG.md
+
 ## Context
 Found in the [2026-07-04 full pass](../reviews/2026-07-04-full-pass.md) (dim 4). `TvController.jsx:100` (`loadResults`) queries `results_v2` with `.eq('session_id', selSessId)` but **no** `.eq('date', selDate)`; `ClassPanel.jsx:18` (`scoreMembers`) then `results.find(r => r.athleteId === m.id)` — the *first* match, date-agnostic. Session ids are per-creation uids today, so this is benign in practice, but if a `session_id` ever recurs across dates (e.g. a duplicated/templated session), the roster would surface the wrong day's score. Cheap latent-bug guard on freshly-shipped code.
 
