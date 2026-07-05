@@ -4,7 +4,7 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import styles from './Schedule.module.css'
 import { MONTH_PT, DAY_PT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
-import { uid, blkLabel, exVolStr, fmtIntensity, isWodBlock, blkColor } from '../lib/wod.js'
+import { uid, blkLabel, exVolStr, fmtIntensity, isWodBlock, blkColor, groupProgressionSteps } from '../lib/wod.js'
 
 const WOD_LOG_TYPES = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT','Benchmark']
 const LOG_SCALES    = ['RX','Inter','SC','Adaptado']
@@ -394,11 +394,10 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
   }
 
   if(isProg){
-    const steps=ex.intensity?.steps||[],groups=[]
-    steps.forEach(s=>{const reps=s.reps||ex.reps||'';const g=groups.find(g=>g.reps===reps);if(g){if(s.load)g.loads.push(s.load)}else groups.push({reps,loads:s.load?[s.load]:[]})})
+    const groups=groupProgressionSteps(ex)
     const exRm=rmValues[ex.id]
     return(<>{groups.map((g,gi)=>{
-      const repsPrefix=ex.dist?(ex.sets?`${ex.sets}×${ex.dist}${ex.distUnit||'m'}`:`${ex.dist}${ex.distUnit||'m'}`):(ex.sets&&g.reps?`${g.sets||ex.sets}×${g.reps}`:g.reps)
+      const repsPrefix=ex.dist?exVolStr(ex):(ex.sets&&g.reps?`${g.sets||ex.sets}×${g.reps}`:g.reps)
       const pctNums=g.loads.map(l=>parseFloat(l)).filter(n=>!isNaN(n))
       const pctStr=pctNums.length?pctNums.join('/')+'% RM':''
       const calcStr=exRm?.rm&&pctNums.length?pctNums.map(p=>Math.ceil(exRm.rm*p/100)).join('/')+' '+(exRm.unit||'kg'):''
@@ -530,9 +529,9 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
     const keys=[]
     exs.forEach(ex=>{
       if(!ex.isComplex&&ex.intensity?.mode==='progression'){
-        const steps=ex.intensity?.steps||[],groups=[]
-        steps.forEach(s=>{const r=s.reps||ex.reps||'';if(!groups.find(g=>g===r))groups.push(r)})
-        if(!groups.length)groups.push('');groups.forEach((_,gi)=>keys.push(`${ex.id}-${gi}`))
+        const groups=groupProgressionSteps(ex)
+        if(!groups.length)groups.push({reps:''})
+        groups.forEach((_,gi)=>keys.push(`${ex.id}-${gi}`))
       }else{keys.push(ex.id)}
     })
     const dones=keys.map(k=>roundState[`${bl.id}|${k}`]||0)
@@ -813,9 +812,8 @@ export default function Schedule() {
     if(isRoundBlock(bl)){
       exs.forEach(ex=>{
         if(!ex.isComplex&&ex.intensity?.mode==='progression'){
-          const steps=ex.intensity?.steps||[],groups=[]
-          steps.forEach(s=>{const r=s.reps||ex.reps||'';if(!groups.find(g=>g===r))groups.push(r)})
-          if(!groups.length)groups.push('')
+          const groups=groupProgressionSteps(ex)
+          if(!groups.length)groups.push({reps:''})
           if(groups.every((_,gi)=>getRd(bl.id,`${ex.id}-${gi}`)>=Number(bl.rounds)))done++
         }else{if(getRd(bl.id,ex.id)>=Number(bl.rounds))done++}
       })
@@ -823,8 +821,7 @@ export default function Schedule() {
     }
     exs.forEach(ex=>{
       if(!ex.isComplex&&ex.intensity?.mode==='progression'){
-        const steps=ex.intensity?.steps||[],groups=[]
-        steps.forEach(s=>{const reps=s.reps||ex.reps||'';if(!groups.find(g=>g.reps===reps))groups.push({reps})})
+        const groups=groupProgressionSteps(ex)
         if(groups.length===0||groups.every((_,gi)=>checked.has(`${bl.id}|${ex.id}-${gi}`)))done++
       }else{if(checked.has(`${bl.id}|${ex.id}`))done++}
     })

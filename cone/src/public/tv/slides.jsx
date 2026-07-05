@@ -127,6 +127,8 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
   // Group color takes priority over block-type color when a group is assigned here
   const color = groupsHere.length > 0 ? groupsHere[0].color : blkColor(bl)
   const label = blkLabel(bl)
+  // Estações intentionally flattens stations into one list — glanceable wall display.
+  // Schedule.jsx keeps station structure as the canonical detailed view (#17, decision recorded in BACKLOG.md).
   const exes = bl.type === 'Estações'
     ? (bl.stations || []).flatMap(st => (st.exercises || []).map(e => ({ ...e, _station: st.name })))
     : (bl.exercises || [])

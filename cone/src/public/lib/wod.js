@@ -32,6 +32,20 @@ export function exVolStr(ex) {
   return ex.sets&&rd?`${ex.sets}×${rd}`:rd
 }
 
+// Returns [] when ex has no steps — callers that need a countable placeholder
+// (round/checkbox key generation) pad it themselves; ExRow's render path relies
+// on the unpadded [] to render zero rows for a stepless progression exercise.
+export function groupProgressionSteps(ex) {
+  const steps=ex.intensity?.steps||[],groups=[]
+  steps.forEach(s=>{
+    const reps=s.reps||ex.reps||''
+    const g=groups.find(g=>g.reps===reps)
+    if(g){if(s.load)g.loads.push(s.load)}
+    else groups.push({reps,loads:s.load?[s.load]:[]})
+  })
+  return groups
+}
+
 export function toSecs(t) {
   if(!t) return Infinity
   const p=String(t).split(':')

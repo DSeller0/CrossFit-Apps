@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { blkLabel, exVolStr, toSecs, fmtSecs, rankResults, perfStr } from './wod.js'
+import { blkLabel, exVolStr, toSecs, fmtSecs, rankResults, perfStr, groupProgressionSteps } from './wod.js'
 
 describe('blkLabel', () => {
   test('label and type differ → label · type', () => {
@@ -55,6 +55,36 @@ describe('exVolStr', () => {
   })
   test('dist takes precedence over legacy cardio intensity', () => {
     expect(exVolStr({ dist: '100', distUnit: 'm', intensity: { mode: 'cardio', cardioVal: '400', cardioUnit: 'm' } })).toBe('100m')
+  })
+})
+
+describe('groupProgressionSteps', () => {
+  test('no steps → empty array', () => {
+    expect(groupProgressionSteps({ intensity: {} })).toEqual([])
+    expect(groupProgressionSteps({})).toEqual([])
+  })
+  test('distinct reps per step → one group per reps value, in first-seen order', () => {
+    const ex = { intensity: { steps: [
+      { reps: '4', load: '50' }, { reps: '2', load: '80' },
+    ] } }
+    expect(groupProgressionSteps(ex)).toEqual([
+      { reps: '4', loads: ['50'] },
+      { reps: '2', loads: ['80'] },
+    ])
+  })
+  test('shared reps across steps → loads accumulate onto one group', () => {
+    const ex = { intensity: { steps: [
+      { reps: '2', load: '60' }, { reps: '2', load: '70' }, { reps: '2', load: '80' },
+    ] } }
+    expect(groupProgressionSteps(ex)).toEqual([{ reps: '2', loads: ['60', '70', '80'] }])
+  })
+  test('step with no reps falls back to ex.reps', () => {
+    const ex = { reps: '3', intensity: { steps: [{ load: '50' }] } }
+    expect(groupProgressionSteps(ex)).toEqual([{ reps: '3', loads: ['50'] }])
+  })
+  test('step with no load → group has empty loads array', () => {
+    const ex = { intensity: { steps: [{ reps: '2' }] } }
+    expect(groupProgressionSteps(ex)).toEqual([{ reps: '2', loads: [] }])
   })
 })
 

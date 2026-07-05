@@ -92,13 +92,13 @@ updated_at           BIGINT
 2. `TV.jsx` → `TimerSlide` right panel
 3. `src/public/schedule/Schedule.jsx` → exercise rows
 
-**Shared rendering:** `src/public/shared/ExerciseList.jsx` is the shared (read-only, compact) exercise-row component — TV uses it for both paths; Schedule.jsx still renders its own *interactive* markup (`ExRow`: check-off/rounds, RM chip+calc, Demo, progression-step expansion) so adoption isn't a drop-in (backlog #17, re-sized S→M). `exVolStr`/`fmtIntensity` are now **canonical-only** in `src/public/lib/wod.js` — #37 deleted the diverged local copies in `Schedule.jsx`/`Publicador.jsx`/`Resultados.jsx`; all re-import from `wod.js`. (One bespoke dist formatter still lingers at `Schedule.jsx:401`, byte-identical to `exVolStr`'s dist branch — folded into #17.)
+**Shared rendering:** `src/public/shared/ExerciseList.jsx` is the shared (read-only, compact) exercise-row component — TV uses it for both paths. Schedule.jsx still renders its own *interactive* markup (`ExRow`: check-off/rounds, RM chip+calc, Demo, progression-step expansion) — full markup adoption stays open under #17, deprioritized 2026-07-05: TV's big-font wall-display CSS and Schedule's dense pill/checkbox interaction model diverge enough that unifying markup would mean a new CSS variant for no visible change, on a page used live at the gym. `exVolStr`/`fmtIntensity` are **canonical-only** in `src/public/lib/wod.js` — #37 deleted the diverged local copies in `Schedule.jsx`/`Publicador.jsx`/`Resultados.jsx`; all re-import from `wod.js`. Progression-step grouping (`steps → {reps,loads}[]`) is canonical for `Schedule.jsx`'s own 4 call sites via `groupProgressionSteps()` in `wod.js` (2026-07-05) — **not yet cross-file canonical**: `Publicador.jsx`'s `buildProgressionLines()` still hand-rolls the same grouping independently (keyed on `reps`+`unit`, not just `reps`), so a grouping-semantics fix applied only to `wod.js` won't reach the printed/exported WOD view (tracked under #16). Estações: TV intentionally flattens stations into one exercise list (glanceable wall display) while Schedule renders full station structure (canonical detailed view) — a recorded decision, not drift (see BACKLOG.md "Decisions recorded").
 
 ---
 
 ## Shared utilities (`src/public/lib/`)
 
-- `wod.js` — `uid`, `WOD_TYPES`, `isWodBlock`, `blkColor`, `blkLabel`, `exVolStr`, `toSecs`, `fmtSecs`, `rankResults`, `perfStr`, `fmtIntensity`, `loadRegistry`
+- `wod.js` — `uid`, `WOD_TYPES`, `isWodBlock`, `blkColor`, `blkLabel`, `exVolStr`, `groupProgressionSteps`, `toSecs`, `fmtSecs`, `rankResults`, `perfStr`, `fmtIntensity`, `loadRegistry`
 - `week.js` — `MONTH_PT`, `DAY_PT`, `toISO`, `todayISO`, `getWeek`, `dateToWeekOffset`
 
 Always check these before reimplementing a formatting or date utility. Beware: `src/utils/storage.js` also exports `uid`/`toISO`/`todayISO` (SPA side) — dual-canonical debt tracked as backlog #16.
