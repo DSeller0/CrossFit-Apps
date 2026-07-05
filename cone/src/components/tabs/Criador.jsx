@@ -102,9 +102,9 @@ function IntensityInput({ value, onChange, defaultReps, defaultSets }) {
   const v = value || {};
   const upd = p => onChange({ ...v, mode, ...p });
   const setM = m => {
+    if (m === mode) { setMode('none'); onChange(null); return; }
     setMode(m);
-    if (m === 'none') onChange(null);
-    else if (m === 'progression') {
+    if (m === 'progression') {
       let steps;
       if (v.steps?.length) { steps = v.steps; }
       else {
@@ -124,8 +124,8 @@ function IntensityInput({ value, onChange, defaultReps, defaultSets }) {
     <div className="int-block">
       <span className="lbl" style={{ marginBottom: 6 }}>Intensidade / Carga</span>
       <div className="int-tabs">
-        {[['none','—'],['pct','% RM'],['progression','Progressão'],['gender','M/F'],['cardio','Cardio']].map(([m,l]) =>
-          <button key={m} type="button" className={`itb${mode===m?' iact':''}`} onClick={() => setM(m)}>{l}</button>
+        {[['pct','% RM'],['progression','Progressão'],['gender','M/F'],['cardio','Cardio']].map(([m,l]) =>
+          <button key={m} type="button" className={`itb${mode===m?' iact':''}`} onClick={() => setM(m)}>{l}{mode===m ? ' ✕' : ''}</button>
         )}
       </div>
       {mode === 'none' && <div style={{ fontSize: 12, color: '#444', padding: '2px 0' }}>Sem intensidade definida.</div>}
