@@ -8,6 +8,8 @@ import { APP_CONFIG, ZONES, ECOL, DSHORT, PLC, GF } from '../../utils/config';
 import { buildPixPayload } from '../../utils/pix';
 import PresenterView from '../PresenterView';
 import { exVolStr, fmtIntensity } from '../../public/lib/wod.js';
+import { MONTH_PT, DAY_PT_TITLE } from '../../public/lib/week.js';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 const pixClean = s => (s || '').normalize('NFD').replace(/[\u0300-\u036F]/g, '').replace(/[^a-zA-Z0-9 @._\-+\/]/g, '').trim();
@@ -811,7 +813,7 @@ function ReportModal({ events, sessions, onClose }) {
   const [showHeader, setShowHeader] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [showPix, setShowPix] = useState(false);
-  const MONTHS_PT = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const MONTHS_PT = MONTH_PT;
 
   function filteredEvents() {
     const from = useRange ? rangeFrom : `${yr}-${String(mo + 1).padStart(2, '0')}-01`;
@@ -1086,16 +1088,6 @@ function ReportModal({ events, sessions, onClose }) {
 }
 
 // ── AgendaView ────────────────────────────────────────────────────────────────
-function useIsMobile(bp) {
-  const [v, setV] = useState(() => window.innerWidth < (bp || 800));
-  useEffect(() => {
-    const fn = () => setV(window.innerWidth < (bp || 800));
-    window.addEventListener('resize', fn);
-    return () => window.removeEventListener('resize', fn);
-  }, []);
-  return v;
-}
-
 function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLogResult }) {
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth());
@@ -1105,11 +1097,11 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
   const [showForm, setShowForm] = useState(null);
   const [formData, setFormData] = useState({});
   const [viewWeekIdx, setViewWeekIdx] = useState(0);
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(800);
 
   const todayISO = toISO(new Date());
-  const MONTHS_PT = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-  const DAYS_PT_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const MONTHS_PT = MONTH_PT;
+  const DAYS_PT_SHORT = DAY_PT_TITLE;
   const BLOCK_C = { 'Força': '#d8a840', 'LPO': '#4ac8c0', 'For Time': '#e87820', 'Core': '#68d8a0', 'Acessórios': '#c884f0', 'AMRAP': '#e87820', 'Cardio': '#64b5f6', 'EMOM': '#ff8a65', 'WOD': '#e87820', 'HIIT': '#ff6d00' };
   const mobileWeeks = getWeeksOfMonth(year, month);
 

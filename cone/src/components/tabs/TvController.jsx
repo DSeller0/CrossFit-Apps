@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../../utils/supabase'
 import { loadLS, loadAthletes, toISO } from '../../utils/storage'
-import { blkLabel, blkColor, isWodBlock } from '../../public/lib/wod.js'
+import { blkLabel, blkColor, isWodBlock, fmtSecs } from '../../public/lib/wod.js'
+import { DAY_PT_TITLE } from '../../public/lib/week.js'
 import { WodSlide, TimerSlide, ResultsSlide, QrSlide } from '../../public/tv/slides.jsx'
 import { useTvSync }           from '../../hooks/useTvSync'
 import { useTimer }             from '../../hooks/useTimer'
@@ -20,8 +21,6 @@ const SLIDES     = [
   { id: 'qr',      icon: 'ti-qrcode',     lbl: 'QR Code' },
 ]
 const TIMER_TYPES = ['For Time', 'AMRAP', 'EMOM', 'Benchmark']
-const DAY_PT      = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
-const MON_PT      = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 
 function sessLabel(s) {
   return s.sessionName || (Array.isArray(s.mainTraining) ? s.mainTraining[0] : s.mainTraining) || 'Sessão'
@@ -58,7 +57,7 @@ function DatePicker({ selDate, sessions, onChange }) {
           return (
             <div key={iso} onClick={() => onChange(iso)}
               className={`${st.dpDay} ${isSel ? st.sel : ''} ${isToday ? st.today : ''}`}>
-              <span className={st.dpDow}>{DAY_PT[d.getDay()]}</span>
+              <span className={st.dpDow}>{DAY_PT_TITLE[d.getDay()]}</span>
               <span className={st.dpNum}>{d.getDate()}</span>
               {hasSess && <span className={st.dpDot} />}
             </div>
@@ -115,7 +114,7 @@ export default function TvController({ sessions: propSessions }) {
   const activeBlockId = tv?.timer_block_id || timer.timerBlkId || 'live'
 
   const liveReg = useLiveRegistration({
-    tvRef, selSessId, selDate, selSessObj, activeClassId: classes.activeClass?.id,
+    selSessId, selDate, selSessObj, activeClassId: classes.activeClass?.id,
     elapsedSecs: timer.elapsedSecs, currentTimerBlock: timer.currentTimerBlock, loadResults,
   })
 
@@ -372,7 +371,7 @@ export default function TvController({ sessions: propSessions }) {
                 </button>
                 {(tv?.timer_paused_elapsed > 0) && (
                   <span className={st.timerAccum}>
-                    {String(Math.floor(tv.timer_paused_elapsed/60)).padStart(2,'0')}:{String(tv.timer_paused_elapsed%60).padStart(2,'0')} acumulado
+                    {fmtSecs(tv.timer_paused_elapsed)} acumulado
                   </span>
                 )}
               </div>

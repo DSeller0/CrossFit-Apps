@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import QRCode from 'qrcode'
-import { blkLabel, blkColor, isWodBlock, rankResults, perfStr } from '../lib/wod.js'
+import { blkLabel, blkColor, isWodBlock, rankResults, perfStr, fmtSecs } from '../lib/wod.js'
+import { DAY_PT_TITLE, MONTH_PT_SHORT } from '../lib/week.js'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
 import s from './TV.module.css'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const RING_R = 115, RING_C = +(2 * Math.PI * RING_R).toFixed(1)
-const DAY_PT  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
-const MON_PT  = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 const MODE_LBL = { 'For Time':'FOR TIME', AMRAP:'AMRAP', EMOM:'EMOM', Benchmark:'BENCHMARK', 'Estações':'ESTAÇÕES' }
 
 // column-major reorder: fills top→bottom first, then left→right
@@ -40,14 +39,11 @@ function ringCol(e, cap, bt) {
   if (rem > 0.2) return '#d8a840'
   return '#c84038'
 }
-function fmt(sec) {
-  sec = Math.max(0, Math.floor(sec))
-  return `${String(Math.floor(sec / 60)).padStart(2,'0')}:${String(sec % 60).padStart(2,'0')}`
-}
+function fmt(sec) { return fmtSecs(Math.max(0, Math.floor(sec))) }
 function fmtDate(iso) {
   if (!iso) return ''
   const d = new Date(iso + 'T12:00:00')
-  return `${DAY_PT[d.getDay()]}, ${d.getDate()} ${MON_PT[d.getMonth()]}`
+  return `${DAY_PT_TITLE[d.getDay()]}, ${d.getDate()} ${MONTH_PT_SHORT[d.getMonth()]}`
 }
 
 // ── Shared: mini QR footer for WOD + Timer slides ─────────────────────────────

@@ -3,12 +3,10 @@ import Nav from '../Nav.jsx'
 import Header from '../Header.jsx'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
-import { toISO, todayISO } from '../lib/week.js'
-import { WOD_TYPES as CANON_WOD_TYPES } from '../lib/wod.js'
+import { toISO, todayISO, fmtDate, MONTH_PT_SHORT } from '../lib/week.js'
+import { WOD_TYPES as CANON_WOD_TYPES, toSecs, fmtSecs as fmtTime } from '../lib/wod.js'
 import styles from './Me.module.css'
 
-const DAY_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
-const MON_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 const ECOL = {
   'Força':'#5090e0','LPO':'#4070c0','Core':'#6090d8','Acessórios':'#4878b8',
   'Skill':'#4ac8c0','Cardio':'#40b878','Mobilidade':'#30a868',
@@ -24,11 +22,8 @@ const SCLS = { RX:'bRx', SC:'bSc', Inter:'bInter', Adaptado:'bAdp' }
 function initials(n) { return n.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase() }
 function getTargets(s) { if(!s?.mainTraining)return[]; return Array.isArray(s.mainTraining)?s.mainTraining:[s.mainTraining] }
 function matchesAthlete(s,name) { return getTargets(s).includes(name) }
-function fmtDate(iso) { const d=new Date(iso+'T12:00:00'); return`${DAY_PT[d.getDay()]} ${d.getDate()} ${MON_PT[d.getMonth()]}` }
-function fmtEvDate(iso) { const d=new Date(iso+'T12:00:00'); return`${MON_PT[d.getMonth()]} ${d.getDate()}` }
+function fmtEvDate(iso) { const d=new Date(iso+'T12:00:00'); return`${MONTH_PT_SHORT[d.getMonth()]} ${d.getDate()}` }
 
-function toSecs(t) { if(!t)return Infinity; const p=String(t).split(':'); return p.length===2?parseInt(p[0])*60+parseInt(p[1]):parseInt(t)||Infinity }
-function fmtTime(s) { const m=Math.floor(s/60),r=s%60; return`${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}` }
 function prBest(pr) {
   if(!pr?.results?.length) return null
   if(pr.type==='time') return pr.results.reduce((b,r)=>toSecs(r.value)<toSecs(b.value)?r:b)
@@ -555,7 +550,7 @@ export default function Me() {
         <div className={styles.lsHdr}>
           <div className={styles.lsExName}>Corpo</div>
           <span style={{fontSize:'11px',color:'var(--muted)',alignSelf:'center'}}>
-            {(()=>{const d=new Date();return d.getDate()+' '+MON_PT[d.getMonth()]+' '+d.getFullYear()})()}
+            {(()=>{const d=new Date();return d.getDate()+' '+MONTH_PT_SHORT[d.getMonth()]+' '+d.getFullYear()})()}
           </span>
         </div>
         <div className={styles.lsBody}>
@@ -687,7 +682,7 @@ export default function Me() {
             ))}
           </div>
           <div style={{fontSize:'9px',color:'var(--dim)',marginTop:'3px',marginBottom:'16px'}}>
-            {pd.thisMon} de {pd.heartTotal} sessões · {MON_PT[pd.nowM-1]} {pd.nowY}
+            {pd.thisMon} de {pd.heartTotal} sessões · {MONTH_PT_SHORT[pd.nowM-1]} {pd.nowY}
           </div>
           {/* Dim closing divider */}
           <div className={styles.heroDivider}>
@@ -798,7 +793,7 @@ export default function Me() {
           {/* WODs */}
           {pd.wodRows.length>0&&(
             <div className={styles.sh}><div className={styles.shInner}>
-              <div className={styles.shTitle}>WODs <span className={styles.shTitleR}>{MON_PT[pd.nowM-1]} {pd.nowY} · executados/planejados</span></div>
+              <div className={styles.shTitle}>WODs <span className={styles.shTitleR}>{MONTH_PT_SHORT[pd.nowM-1]} {pd.nowY} · executados/planejados</span></div>
               {pd.wodRows.map((r,i)=>(
                 <div key={i} className={styles.distRow}>
                   <span className={styles.distLbl}>{r.type}</span>

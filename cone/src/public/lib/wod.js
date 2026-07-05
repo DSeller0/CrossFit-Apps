@@ -49,7 +49,7 @@ export function groupProgressionSteps(ex) {
 export function toSecs(t) {
   if(!t) return Infinity
   const p=String(t).split(':')
-  return p.length===2?parseInt(p[0])*60+(parseInt(p[1])||0):parseInt(t)||Infinity
+  return p.length===2?(parseInt(p[0])||0)*60+(parseInt(p[1])||0):parseInt(t)||Infinity
 }
 
 export function fmtSecs(s) {

@@ -6,6 +6,8 @@ import {
 } from '../../utils/storage';
 import { APP_CONFIG, ECOL } from '../../utils/config';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { toSecs, fmtSecs as fmtTime } from '../../public/lib/wod.js';
+import { DAY_PT_TITLE } from '../../public/lib/week.js';
 
 const BG    = '#0d0b09';
 const STONE = '#161210';
@@ -19,15 +21,6 @@ const getLevels = () => APP_CONFIG.athleteLevels || ['Iniciante','Intermediário
 const getGoals  = () => APP_CONFIG.athleteGoals  || ['Saúde geral','Força','Condicionamento','Competição'];
 
 // ── PR helpers ────────────────────────────────────────────────────────────────
-function toSecs(t) {
-  if (!t) return Infinity;
-  const p = String(t).split(':');
-  return p.length === 2 ? parseInt(p[0])*60+parseInt(p[1]) : parseInt(t)||Infinity;
-}
-function fmtTime(secs) {
-  const m = Math.floor(secs/60), s = secs%60;
-  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
 function prBest(pr) {
   if (!pr.results?.length) return null;
   if (pr.type === 'time') return pr.results.reduce((b,r) => toSecs(r.value)<toSecs(b.value)?r:b);
@@ -557,7 +550,6 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
     return [...all.filter(x=>x.date<=todayKey).slice(-2), ...all.filter(x=>x.date>todayKey&&x.date<=f30).slice(0,1)];
   }, [selAthlete, ath, sessions]);
 
-  const DAY_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   const SecLabel = ({ children, actions }) => (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
       <div style={{ fontSize:9, fontWeight:700, color:DIM, textTransform:'uppercase', letterSpacing:'.07em' }}>{children}</div>
@@ -666,8 +658,8 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
                     <div key={date+'|'+session.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 0', borderBottom:`1px solid ${DIV}` }}>
                       <div style={{ width:3, alignSelf:'stretch', background:isToday?'var(--theme-accent)':isPast?DIM:DIV+'66', flexShrink:0 }} />
                       <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontSize:12, fontWeight:700, color:isToday?CREAM:SUB, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{session.sessionName||DAY_PT[d.getDay()]}</div>
-                        <div style={{ fontSize:10, color:MUTED }}>{DAY_PT[d.getDay()]} · {d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</div>
+                        <div style={{ fontSize:12, fontWeight:700, color:isToday?CREAM:SUB, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{session.sessionName||DAY_PT_TITLE[d.getDay()]}</div>
+                        <div style={{ fontSize:10, color:MUTED }}>{DAY_PT_TITLE[d.getDay()]} · {d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</div>
                       </div>
                       {isToday && <span style={{ fontSize:9, fontWeight:700, color:'var(--theme-accent)', background:'rgba(74,200,192,.1)', padding:'2px 5px', textTransform:'uppercase', flexShrink:0 }}>Hoje</span>}
                       {isPast && !isToday && perf && <span style={{ fontSize:11, fontWeight:700, color:CREAM, flexShrink:0 }}>{perf}</span>}

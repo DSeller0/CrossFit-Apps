@@ -6,7 +6,8 @@ import {
   uid,
 } from '../../utils/storage';
 import { APP_CONFIG, GF } from '../../utils/config';
-import { exVolStr } from '../../public/lib/wod.js';
+import { exVolStr, rankResults } from '../../public/lib/wod.js';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const SCALES          = ['RX', 'Inter', 'SC', 'Adaptado'];
@@ -40,16 +41,6 @@ function weekLabel(week, year, month) {
   const s = week.start.getMonth() === month ? week.start.getDate() : 1;
   const e = week.end.getMonth() === month ? week.end.getDate() : lastDay;
   return `${s}–${e}`;
-}
-
-function useIsMobile(bp = 800) {
-  const [v, setV] = useState(() => window.innerWidth < bp);
-  useEffect(() => {
-    const fn = () => setV(window.innerWidth < bp);
-    window.addEventListener('resize', fn);
-    return () => window.removeEventListener('resize', fn);
-  }, []);
-  return v;
 }
 
 // ── KPI helpers ───────────────────────────────────────────────────────────────
@@ -88,15 +79,6 @@ function calcSessionKPIs(dateKey, results) {
   return {avgRpe,rxPct,scaleDist,flags,count:sr.length};
 }
 
-function rankResults(results, blockType) {
-  const isForTime = blockType==='For Time';
-  return [...results].sort((a,b) => {
-    if (isForTime) { const toS=s=>{if(!s)return Infinity;const p=s.split(':');return p.length===2?parseInt(p[0])*60+parseInt(p[1]):parseInt(s)||Infinity}; return toS(a.perfTime)-toS(b.perfTime); }
-    const ra=parseInt(a.perfRounds)||0,rb=parseInt(b.perfRounds)||0;
-    if (ra!==rb) return rb-ra;
-    return (parseInt(b.perfReps)||0)-(parseInt(a.perfReps)||0);
-  });
-}
 
 function getPerformanceStr(r, blockType) {
   if (blockType==='For Time') return r.perfTime||'—';
@@ -153,7 +135,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
   const [delConfirm,  setDelConfirm]  = useState(false);
   const [saveFlash,   setSaveFlash]   = useState(false);
 
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(800);
   const WOD_SET  = new Set(WOD_BLOCK_TYPES);
 
   const weeks = useMemo(() => getWeeksInMonth(viewYear, viewMonth), [viewYear, viewMonth]);

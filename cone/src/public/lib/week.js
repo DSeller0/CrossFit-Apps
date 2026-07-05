@@ -1,5 +1,15 @@
-export const MONTH_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
-export const DAY_PT   = ['DOM','SEG','TER','QUA','QUI','SEX','SAB']
+export const MONTH_PT       = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+export const MONTH_PT_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+export const DAY_PT         = ['DOM','SEG','TER','QUA','QUI','SEX','SAB']
+export const DAY_PT_TITLE   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+
+// "Dom 5 Jul" — day-name + date + short month, the shared display format
+// (Me.jsx / Timer.jsx). Callers needing a different layout (e.g. TV's
+// comma-separated variant) keep their own wrapper around the arrays above.
+export function fmtDate(iso) {
+  const d = new Date(iso + 'T12:00:00')
+  return `${DAY_PT_TITLE[d.getDay()]} ${d.getDate()} ${MONTH_PT_SHORT[d.getMonth()]}`
+}
 
 export function toISO(d) {
   const p = n => String(n).padStart(2,'0')

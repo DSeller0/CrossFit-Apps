@@ -4,17 +4,16 @@ import Nav from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import BlockTypePicker from './BlockTypePicker.jsx'
 import { BENCHMARK_GIRLS, BENCHMARK_HEROES, benchmarkToTimerExes } from '../lib/benchmarks.js'
+import { fmtSecs } from '../lib/wod.js'
+import { fmtDate } from '../lib/week.js'
 
 // ── Constants ──────────────────────────────────────────────────────────────
-const DAY_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
-const MON_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 const MODE_LBL = { 'For Time':'FOR TIME', AMRAP:'AMRAP', EMOM:'EMOM', Benchmark:'BENCHMARK', 'Estações':'ESTAÇÕES' }
 const K_CFG = 'timer_config', K_STATE = 'timer_state', K_HIST = 'timer_history'
 const RING_R = 85, RING_C = +(2 * Math.PI * RING_R).toFixed(1)
 
 // ── Pure helpers ──────────────────────────────────────────────────────────
-function fmt(sec) { sec = Math.max(0, Math.floor(sec)); return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}` }
-function fmtDate(iso) { const d = new Date(iso + 'T12:00:00'); return `${DAY_PT[d.getDay()]} ${d.getDate()} ${MON_PT[d.getMonth()]}` }
+function fmt(sec) { return fmtSecs(Math.max(0, Math.floor(sec))) }
 function exLabel(ex) {
   if (typeof ex === 'string') return ex
   const v = []

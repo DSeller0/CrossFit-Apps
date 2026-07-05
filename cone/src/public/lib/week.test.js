@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'
-import { toISO, getWeek, dateToWeekOffset } from './week.js'
+import { toISO, getWeek, dateToWeekOffset, fmtDate, DAY_PT_TITLE, MONTH_PT_SHORT } from './week.js'
 
 // June 24, 2026 is a Wednesday. Week: Sun Jun 21 – Sat Jun 27.
 
@@ -80,5 +80,16 @@ describe('dateToWeekOffset', () => {
   })
   test('two weeks ahead returns 2', () => {
     expect(dateToWeekOffset('2026-07-05')).toBe(2)
+  })
+})
+
+describe('fmtDate', () => {
+  test('formats as "Dom D Mon" (Titlecase day + short month)', () => {
+    // June 21, 2026 is a Sunday.
+    expect(fmtDate('2026-06-21')).toBe('Dom 21 Jun')
+  })
+  test('uses DAY_PT_TITLE/MONTH_PT_SHORT arrays', () => {
+    const d = new Date('2026-06-24T12:00:00')
+    expect(fmtDate('2026-06-24')).toBe(`${DAY_PT_TITLE[d.getDay()]} ${d.getDate()} ${MONTH_PT_SHORT[d.getMonth()]}`)
   })
 })

@@ -95,6 +95,14 @@ describe('toSecs', () => {
   test('empty string → Infinity', () => expect(toSecs('')).toBe(Infinity))
   test('null → Infinity', () => expect(toSecs(null)).toBe(Infinity))
   test('undefined → Infinity', () => expect(toSecs(undefined)).toBe(Infinity))
+  test('malformed minutes part (non-numeric) → number, not NaN', () => {
+    expect(toSecs('ab:30')).toBe(30)
+    expect(Number.isNaN(toSecs('ab:30'))).toBe(false)
+  })
+  test('malformed seconds part (non-numeric) → number, not NaN', () => {
+    expect(toSecs('05:cd')).toBe(300)
+    expect(Number.isNaN(toSecs('05:cd'))).toBe(false)
+  })
 })
 
 describe('fmtSecs', () => {

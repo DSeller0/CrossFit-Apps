@@ -6,7 +6,7 @@ import { fmtSecs, uid } from '../public/lib/wod.js'
 // key is `real:<athleteId>` or `anon:<name>` — unified identity across results_v2 (real) and
 // class_executions.anon_results (guest, day-scoped only — see CLAUDE.md TV system notes).
 export function useLiveRegistration({
-  tvRef, selSessId, selDate, selSessObj, activeClassId,
+  selSessId, selDate, selSessObj, activeClassId,
   elapsedSecs, currentTimerBlock, loadResults,
 }) {
   const [liveScales,   setLiveScales]   = useState({}) // key -> 'Rx'|'Sc'|'Adp', pre-registration picker

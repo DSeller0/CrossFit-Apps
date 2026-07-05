@@ -2,14 +2,13 @@ import { useState, useEffect, useMemo } from 'react'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import s from './Athletes.module.css'
-import { toISO } from '../lib/week.js'
-import { toSecs, WOD_TYPES } from '../lib/wod.js'
+import { toISO, DAY_PT_TITLE } from '../lib/week.js'
+import { toSecs, fmtSecs, WOD_TYPES } from '../lib/wod.js'
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const SCALE_RANK   = { RX: 4, Inter: 3, SC: 2, Adaptado: 1 }
 const SCALE_NAMES  = { 4: 'RX', 3: 'Inter', 2: 'SC', 1: 'Adaptado' }
 const SCALE_COLORS = { RX: '#4ac8c0', Inter: '#d8a840', SC: '#e87820', Adaptado: '#a89880' }
-const DAY_PT       = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
 
 // ── Pure helpers ──────────────────────────────────────────────────────────
 function snapPct(p) { return Math.round(p/10)*10 }
@@ -112,7 +111,7 @@ function prDelta(pr) {
   if (!pr.results || pr.results.length < 2) return null
   const sorted = [...pr.results].sort((a,b) => new Date(a.date)-new Date(b.date))
   const last=sorted[sorted.length-1], prev=sorted[sorted.length-2]
-  if (pr.type === 'time') { const diff=toSecs(prev.value)-toSecs(last.value); if (diff===0) return{label:'=',good:null}; const abs=Math.abs(diff),m=Math.floor(abs/60),sec=abs%60; return{label:(diff>0?'-':'+')+`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`,good:diff>0} }
+  if (pr.type === 'time') { const diff=toSecs(prev.value)-toSecs(last.value); if (diff===0) return{label:'=',good:null}; return{label:(diff>0?'-':'+')+fmtSecs(Math.abs(diff)),good:diff>0} }
   const diff = Number(last.value)-Number(prev.value); if (diff===0) return{label:'=',good:null}
   return { label: (diff>0?'+':'')+diff+' '+(pr.type==='load'?(pr.unit||'kg'):'reps'), good: diff>0 }
 }
@@ -239,7 +238,7 @@ function SessionCard({ date, session, athResult, expanded, onToggle, selAthleteI
   const today = toISO(new Date())
   const isPast = date <= today, isToday = date === today
   const d = new Date(date+'T12:00:00')
-  const dow = DAY_PT[d.getDay()]
+  const dow = DAY_PT_TITLE[d.getDay()]
   const dateLabel = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})
 
   const blockBadges = (session.blocks||[]).map((bl,i) => {

@@ -1,4 +1,6 @@
 import { normaliseType, normaliseZone } from './config';
+import { uid } from '../public/lib/wod.js';
+import { toISO, todayISO } from '../public/lib/week.js';
 import {
   dbSaveSessions, dbSaveAthletes, dbSaveResults, dbSaveEvents,
   dbSaveLocations, dbSaveCoach, dbSaveSettings, dbSaveRegistry,
@@ -8,6 +10,8 @@ import {
   dbLoadGoalsData, dbLoadLBColors, dbLoadTemplates,
   dbGetUpdatedAt,
 } from './supabase';
+
+export { uid, toISO, todayISO };
 
 // Tracks the updated_at timestamp of the sessions row at last sync/save.
 // Used to detect when another device has written to Supabase since we loaded.
@@ -59,15 +63,8 @@ export const LS_TEMPLATES = 'cone_templates_v1';
 }());
 
 // ── Utility helpers ───────────────────────────────────────────────────────────
-export const uid = () => (Date.now().toString(36) + Math.random().toString(36).slice(2));
-
-export const toISO = d => {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-};
-export const todayISO = () => toISO(new Date());
+// uid/toISO/todayISO now live in ../public/lib/ (wod.js/week.js) — re-exported
+// above so existing SPA imports from './storage' keep working.
 
 export const getTargets = s => {
   if (!s || !s.mainTraining) return [];

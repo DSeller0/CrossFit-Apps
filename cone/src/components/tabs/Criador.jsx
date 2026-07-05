@@ -221,8 +221,8 @@ function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
   );
 }
 
-// ── BlockTypePicker ───────────────────────────────────────────────────────────
-function BlockTypePicker({ blockNames, onSelect, onClose }) {
+// ── CriadorTypePicker (SPA block-type/benchmark chooser — distinct from the public Timer's BlockTypePicker.jsx) ──
+function CriadorTypePicker({ blockNames, onSelect, onClose }) {
   const [level, setLevel] = useState(0);        // 0=type grid, 1=bm category, 2=bm list
   const [bmCategory, setBmCategory] = useState(null);
 
@@ -1101,7 +1101,7 @@ function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy
       )}
 
       {showTypePicker && (
-        <BlockTypePicker blockNames={blockNames} onSelect={changeType} onClose={() => setShowTypePicker(false)} />
+        <CriadorTypePicker blockNames={blockNames} onSelect={changeType} onClose={() => setShowTypePicker(false)} />
       )}
     </div>
   );
@@ -1614,7 +1614,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
 
       {/* ── Block type picker ── */}
       {showBlockPicker && (
-        <BlockTypePicker blockNames={blockNames} onSelect={addBlock} onClose={() => setShowBlockPicker(false)} />
+        <CriadorTypePicker blockNames={blockNames} onSelect={addBlock} onClose={() => setShowBlockPicker(false)} />
       )}
 
       {/* ── Content area: flex when TV preview is open (desktop only) ── */}
