@@ -97,11 +97,12 @@ export default function TvController({ sessions: propSessions }) {
 
   const loadResults = useCallback(async () => {
     if (!selSessId) return
-    const { data } = await supabase.from('results_v2').select('*').eq('session_id', selSessId)
+    const { data } = await supabase.from('results_v2').select('*')
+      .eq('session_id', selSessId).eq('date', selDate)
     if (data) setResults(data.map(r => ({
       id: r.id, date: r.date, athleteId: r.athlete_id, sessionId: r.session_id, blocks: r.blocks,
     })))
-  }, [selSessId])
+  }, [selSessId, selDate])
   useEffect(() => { loadResults() }, [loadResults])
   // Periodic refresh — results_v2 has no realtime subscription here (unlike class_executions),
   // so pick up results logged from other surfaces (e.g. athlete self-log) while the roster is open.
