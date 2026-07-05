@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { WodSlide } from '../../public/tv/TV.jsx';
+import { WodSlide } from '../../public/tv/slides.jsx';
 import {
   uid, toISO, todayISO,
   loadAthletes, loadRegistry,
