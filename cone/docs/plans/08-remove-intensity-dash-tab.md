@@ -1,5 +1,7 @@
 # 08 — Remove the "—" intensity tab (#36)
 
+> ✅ Done: 3bd11e4 · 2026-07-04 — see BACKLOG.md
+
 ## Context
 The `none` / "—" tab in `IntensityInput` (`Criador.jsx:99-200`) is dead weight: `emptyEx()` already defaults `intensity: null`, so the tab only exists as a *clear* affordance. Removing it declutters the intensity picker without losing the ability to clear — the clear action just moves onto the active tab. This is UX hygiene and the first link in the **#36 → #37 → #38** chain (each reshapes what the next builds on), so it should land before #37 (load × distance). Source analysis: [reviews/2026-07-04-feature-ideas.md](../reviews/2026-07-04-feature-ideas.md) §#36.
 
