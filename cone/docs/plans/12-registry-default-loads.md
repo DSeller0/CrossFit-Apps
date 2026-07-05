@@ -1,5 +1,7 @@
 # 12 — Registry default loads (ghost values) (#38)
 
+> ✅ Done: `0466dd6` · 2026-07-05 — see BACKLOG.md
+
 ## Context
 Picking an exercise in the builder fills only the **name** (`ExerciseCombobox`, `Criador.jsx:255` → `onChange(name)`); the coach then re-types the same box-standard loads every day. The registry entry (`{name, videoUrl?, videoPublished?, description?, muscles?, notes?}`) has no defaults concept. Analysis: [reviews/2026-07-04-feature-ideas.md](../reviews/2026-07-04-feature-ideas.md) (#38). **Requires #37** (plans/11) so defaults can carry `dist`.
 
