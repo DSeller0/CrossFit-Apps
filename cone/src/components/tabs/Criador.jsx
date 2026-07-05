@@ -10,6 +10,7 @@ import {
 } from '../../utils/storage';
 import { APP_CONFIG, ZONES, BTC, PLC, ECOL } from '../../utils/config';
 import { BENCHMARK_GIRLS, BENCHMARK_HEROES, buildBenchmarkBlock } from '../../public/lib/benchmarks.js';
+import IntensityInput from '../shared/IntensityInput';
 
 
 // ── Factories ─────────────────────────────────────────────────────────────────
@@ -40,6 +41,28 @@ const normalizeCardioEx = ex => ex.intensity?.mode === 'cardio'
 const normalizeLegacyCardio = blocks => (blocks || []).map(bl => bl.type === 'Estações'
   ? { ...bl, stations: (bl.stations || []).map(st => ({ ...st, exercises: (st.exercises || []).map(normalizeCardioEx) })) }
   : { ...bl, exercises: (bl.exercises || []).map(normalizeCardioEx) });
+
+// Registry ghost defaults (#38) — empty volume/intensity fields materialize into real
+// values on session save (not at render time, so editing a registry default later never
+// retroactively rewrites past WODs).
+const materializeEx = ex => {
+  const { intensityDefaultDismissed, ...rest } = ex;
+  const regDefaults = ex.isComplex ? null : getRegistryDefaults(ex.name);
+  if (!regDefaults) return rest;
+  const out = { ...rest };
+  if (!String(out.sets || '').trim() && regDefaults.sets) out.sets = regDefaults.sets;
+  if (regDefaults.dist) {
+    if (!String(out.dist || '').trim()) { out.dist = regDefaults.dist; out.distUnit = regDefaults.distUnit || out.distUnit || 'm'; }
+  } else if (regDefaults.reps && !String(out.reps || '').trim()) {
+    out.reps = regDefaults.reps;
+  }
+  const hasIntensity = out.intensity && out.intensity.mode && out.intensity.mode !== 'none';
+  if (regDefaults.intensity && !hasIntensity && !intensityDefaultDismissed) out.intensity = regDefaults.intensity;
+  return out;
+};
+const materializeBlocks = blocks => (blocks || []).map(bl => bl.type === 'Estações'
+  ? { ...bl, stations: (bl.stations || []).map(st => ({ ...st, exercises: (st.exercises || []).map(materializeEx) })) }
+  : { ...bl, exercises: (bl.exercises || []).map(materializeEx) });
 
 // ── Type metadata ─────────────────────────────────────────────────────────────
 const TYPE_CONFIG = {
@@ -103,96 +126,6 @@ const maskMMSS = raw => {
   const d = raw.replace(/\D/g, '').slice(0, 4);
   return d.length <= 2 ? d : d.slice(0, 2) + ':' + d.slice(2);
 };
-
-// ── IntensityInput ────────────────────────────────────────────────────────────
-function IntensityInput({ value, onChange, defaultReps, defaultSets }) {
-  const [mode, setMode] = useState(value?.mode || 'none');
-  useEffect(() => { setMode(value?.mode || 'none'); }, [value?.mode]);
-  const v = value || {};
-  const upd = p => onChange({ ...v, mode, ...p });
-  const setM = m => {
-    if (m === mode) { setMode('none'); onChange(null); return; }
-    setMode(m);
-    if (m === 'progression') {
-      let steps;
-      if (v.steps?.length) { steps = v.steps; }
-      else {
-        const numSets = parseInt(defaultSets) || 1;
-        steps = Array.from({ length: numSets }, () => ({ reps: defaultReps || '', load: '', unit: '% do RM' }));
-      }
-      onChange({ mode: 'progression', steps });
-    } else onChange({ ...v, mode: m });
-  };
-  const inlineSelStyle = { fontFamily: 'inherit', fontSize: '11px', border: '1px solid #2e2e2e', borderRadius: '4px', padding: '4px 6px', background: '#111', color: '#ccc', outline: 'none', WebkitAppearance: 'none', appearance: 'none', width: '66px' };
-  const steps = value?.steps || [];
-  const updStep = (i, field, val) => { const ns = [...steps]; ns[i] = { ...ns[i], [field]: val }; onChange({ mode: 'progression', steps: ns }); };
-  const addStep = () => onChange({ mode: 'progression', steps: [...steps, { reps: defaultReps || steps[steps.length-1]?.reps || '', load: '', unit: steps[steps.length-1]?.unit || '% do RM' }] });
-  const delStep = i => onChange({ mode: 'progression', steps: steps.filter((_, j) => j !== i) });
-
-  return (
-    <div className="int-block">
-      <span className="lbl" style={{ marginBottom: 6 }}>Intensidade / Carga</span>
-      <div className="int-tabs">
-        {[['pct','% RM'],['progression','Progressão'],['gender','M/F']].map(([m,l]) =>
-          <button key={m} type="button" className={`itb${mode===m?' iact':''}`} onClick={() => setM(m)}>{l}{mode===m ? ' ✕' : ''}</button>
-        )}
-      </div>
-      {mode === 'none' && <div style={{ fontSize: 12, color: '#444', padding: '2px 0' }}>Sem intensidade definida.</div>}
-      {mode === 'pct' && (
-        <div className="fg">
-          <span className="lbl">% do RM</span>
-          <input type="number" min={1} max={110} placeholder="ex: 80" value={v.pct || ''} onChange={e => upd({ pct: e.target.value })} />
-        </div>
-      )}
-      {mode === 'progression' && (
-        <div>
-          <table className="prog-table">
-            <thead><tr><th>#</th><th>Reps</th><th>Carga</th><th>Un.</th></tr></thead>
-            <tbody>
-              {steps.map((s, i) => (
-                <tr key={i}>
-                  <td style={{ color: '#555', fontSize: 11, textAlign: 'center' }}>{i+1}</td>
-                  <td><input type="text" placeholder={defaultReps||'—'} value={s.reps??''} onChange={e => updStep(i,'reps',e.target.value)} /></td>
-                  <td><input type="number" placeholder="—" value={s.load||''} onChange={e => updStep(i,'load',e.target.value)} /></td>
-                  <td>
-                    <select value={s.unit||'% do RM'} onChange={e => updStep(i,'unit',e.target.value)} style={inlineSelStyle}>
-                      <option>% do RM</option><option value="kg">kg</option><option value="lb">lb</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-            <button type="button" className="b bsm" onClick={addStep}><i className="ti ti-plus" /> Série</button>
-            {steps.length > 1 && <button type="button" className="b bd bsm" onClick={() => delStep(steps.length-1)}><i className="ti ti-minus" /></button>}
-          </div>
-        </div>
-      )}
-      {mode === 'gender' && (
-        <div className="gblock">
-          {['Masculino','Feminino'].map(g => (
-            <div key={g}>
-              <div className="gst">{g}</div>
-              <div className="fg" style={{ marginBottom: 6 }}>
-                <span className="lbl">Unidade</span>
-                <select style={{ ...inlineSelStyle, width: '100%' }} value={v[`${g}_unit`]||'kg'} onChange={e => upd({ [`${g}_unit`]: e.target.value })}>
-                  <option>kg</option><option value="lb">lb</option>
-                </select>
-              </div>
-              {['RX','Inter','SC'].map(cat => (
-                <div key={cat} className="fg" style={{ marginBottom: 6 }}>
-                  <span className="lbl">{cat}</span>
-                  <input type="number" placeholder="0" value={v[`${g}_${cat}`]||''} onChange={e => upd({ [`${g}_${cat}`]: e.target.value })} />
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ── ExerciseCombobox ──────────────────────────────────────────────────────────
 function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
@@ -399,6 +332,18 @@ function isCardioRegistered(name) {
   return names.some(n => n.toLowerCase() === name.trim().toLowerCase());
 }
 
+// One registry entry per exercise name (#38) — look it up across every block type.
+function getRegistryDefaults(name) {
+  if (!name?.trim()) return null;
+  const reg = loadRegistry() || {};
+  const target = name.trim().toLowerCase();
+  for (const list of Object.values(reg)) {
+    const match = (list || []).find(e => typeof e === 'object' && e?.name?.trim().toLowerCase() === target);
+    if (match?.defaults) return match.defaults;
+  }
+  return null;
+}
+
 function loadBadgeStr(ex) {
   const ins = ex.intensity;
   if (!ins || !ins.mode || ins.mode === 'none') return null;
@@ -436,6 +381,7 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
   const notation   = movements.map(m => m.reps || '?').join('+');
 
   const registryCardio = useMemo(() => isCardioRegistered(ex.name), [ex.name]);
+  const regDefaults = useMemo(() => getRegistryDefaults(ex.name), [ex.name]);
   const [manualDist, setManualDist] = useState(() => !!ex.dist);
   const isDistMode = registryCardio || manualDist;
   const toggleDistMode = () => {
@@ -519,6 +465,9 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
           onChange={ins => upd('intensity', ins)}
           defaultReps={isComplex ? notation : ex.reps}
           defaultSets={ex.sets}
+          ghostDefault={!isComplex ? regDefaults?.intensity : null}
+          ghostDismissed={!!ex.intensityDefaultDismissed}
+          onDismissGhost={() => upd('intensityDefaultDismissed', true)}
         />
       </div>
 
@@ -566,7 +515,7 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
           <div className="ex-qty">
             <input
               type="text" className="ex-qty-input"
-              value={ex.sets} placeholder="—" title="Séries"
+              value={ex.sets} placeholder={regDefaults?.sets || '—'} title="Séries"
               onChange={e => upd('sets', e.target.value)}
             />
             <span className="ex-qty-sep">×</span>
@@ -574,7 +523,7 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
               <>
                 <input
                   type="text" className="ex-qty-input"
-                  value={ex.dist} placeholder="100" title="Distância/Calorias"
+                  value={ex.dist} placeholder={regDefaults?.dist || '100'} title="Distância/Calorias"
                   onChange={e => upd('dist', e.target.value)}
                 />
                 <select className="ex-unit-sel" value={ex.distUnit || 'm'} title="Unidade"
@@ -585,7 +534,7 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
             ) : (
               <input
                 type="text" className="ex-qty-input"
-                value={ex.reps} placeholder={ladderMode ? '15,12,9' : '—'} title="Reps"
+                value={ex.reps} placeholder={ladderMode ? '15,12,9' : (regDefaults?.reps || '—')} title="Reps"
                 onChange={e => upd('reps', e.target.value)}
               />
             )}
@@ -671,7 +620,7 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
                     <div className="sheet-qty-field">
                       <input
                         type="text" className="sheet-qty-input"
-                        value={ex.sets} placeholder="—" title="Séries"
+                        value={ex.sets} placeholder={regDefaults?.sets || '—'} title="Séries"
                         onChange={e => upd('sets', e.target.value)}
                       />
                       <span className="sheet-qty-lbl">Séries</span>
@@ -681,7 +630,7 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
                       <div className="sheet-qty-field">
                         <input
                           type="text" className="sheet-qty-input" style={{ width: 90 }}
-                          value={ex.dist} placeholder="100" title="Distância/Calorias"
+                          value={ex.dist} placeholder={regDefaults?.dist || '100'} title="Distância/Calorias"
                           onChange={e => upd('dist', e.target.value)}
                         />
                         <select className="ex-unit-sel" value={ex.distUnit || 'm'} title="Unidade"
@@ -694,7 +643,7 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
                       <div className="sheet-qty-field">
                         <input
                           type="text" className="sheet-qty-input"
-                          value={ex.reps} placeholder={ladderMode ? '15,12,9' : '—'} title="Reps"
+                          value={ex.reps} placeholder={ladderMode ? '15,12,9' : (regDefaults?.reps || '—')} title="Reps"
                           onChange={e => upd('reps', e.target.value)}
                         />
                         <span className="sheet-qty-lbl">Reps</span>
@@ -1317,7 +1266,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     }
     const dateKey = form.date || todayISO();
     const savedId = editing?.id || form.id || uid();
-    const session = { ...form, date: dateKey, blocks: normalizeLegacyCardio(blocks), id: savedId };
+    const session = { ...form, date: dateKey, blocks: materializeBlocks(normalizeLegacyCardio(blocks)), id: savedId };
 
     const targetDate = new Date(dateKey + 'T12:00:00');
     const today = new Date();

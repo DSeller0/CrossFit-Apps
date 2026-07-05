@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { loadRegistry, saveRegistry, loadSettings } from '../../utils/storage';
 import { APP_CONFIG, ECOL } from '../../utils/config';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import IntensityInput from '../shared/IntensityInput';
 
 const BG    = '#0d0b09';
 const STONE = '#161210';
@@ -96,6 +97,14 @@ export default function ExerciciosTab() {
       description:    o.description    || '',
       muscles:        o.muscles        || '',
       notes:          o.notes          || '',
+      defaults: {
+        sets:      o.defaults?.sets      || '',
+        reps:      o.defaults?.reps      || '',
+        dist:      o.defaults?.dist      || '',
+        distUnit:  o.defaults?.distUnit  || 'm',
+        intensity: o.defaults?.intensity || null,
+      },
+      defaultsDistMode: !!o.defaults?.dist,
     });
     if (isMobile) setPane(2);
   };
@@ -120,7 +129,7 @@ export default function ExerciciosTab() {
 
   const saveDetail = () => {
     if (!detail) return;
-    const { origName, name: raw, videoUrl, videoPublished, description, muscles, notes, selectedBlocks } = detail;
+    const { origName, name: raw, videoUrl, videoPublished, description, muscles, notes, selectedBlocks, defaults } = detail;
     const name = raw.trim();
     if (!name) return;
     if (selectedBlocks.length === 0) {
@@ -132,6 +141,12 @@ export default function ExerciciosTab() {
     if (description?.trim()) newEx.description    = description.trim();
     if (muscles?.trim())     newEx.muscles        = muscles.trim();
     if (notes?.trim())       newEx.notes          = notes.trim();
+    const cleanDefaults = {};
+    if (defaults?.sets?.toString().trim())      cleanDefaults.sets      = defaults.sets;
+    if (defaults?.dist?.toString().trim())      { cleanDefaults.dist = defaults.dist; cleanDefaults.distUnit = defaults.distUnit || 'm'; }
+    else if (defaults?.reps?.toString().trim()) cleanDefaults.reps      = defaults.reps;
+    if (defaults?.intensity?.mode && defaults.intensity.mode !== 'none') cleanDefaults.intensity = defaults.intensity;
+    if (Object.keys(cleanDefaults).length) newEx.defaults = cleanDefaults;
     const reg = { ...registry };
     blocksOf(origName).forEach(b => { reg[b] = (reg[b] || []).filter(e => getExName(e) !== origName); });
     selectedBlocks.forEach(b => {
@@ -360,6 +375,40 @@ export default function ExerciciosTab() {
               })}
             </div>
             {detail.error && <div style={{ fontSize: 11, color: '#e05848', marginTop: 6 }}>{detail.error}</div>}
+          </div>
+
+          {/* Default loads — shown as ghost placeholders in the builder */}
+          <div>
+            <SLabel>Cargas padrão (Criador)</SLabel>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
+              <input className="ex-input" style={{ width: 64 }} placeholder="Séries" value={detail.defaults.sets}
+                onChange={e => setDetail(p => ({ ...p, defaults: { ...p.defaults, sets: e.target.value }, saved: false }))} />
+              <span style={{ color: MUTED, fontSize: 13 }}>×</span>
+              {detail.defaultsDistMode ? (
+                <>
+                  <input className="ex-input" style={{ width: 90 }} placeholder="Distância" value={detail.defaults.dist}
+                    onChange={e => setDetail(p => ({ ...p, defaults: { ...p.defaults, dist: e.target.value }, saved: false }))} />
+                  <select className="ex-input" style={{ width: 74 }} value={detail.defaults.distUnit}
+                    onChange={e => setDetail(p => ({ ...p, defaults: { ...p.defaults, distUnit: e.target.value }, saved: false }))}>
+                    <option value="m">m</option><option value="cal">cal</option>
+                  </select>
+                </>
+              ) : (
+                <input className="ex-input" style={{ width: 90 }} placeholder="Reps" value={detail.defaults.reps}
+                  onChange={e => setDetail(p => ({ ...p, defaults: { ...p.defaults, reps: e.target.value }, saved: false }))} />
+              )}
+              <button type="button" className={`ex-dist-toggle${detail.defaultsDistMode ? ' on' : ''}`}
+                onClick={() => setDetail(p => ({ ...p, defaultsDistMode: !p.defaultsDistMode, defaults: { ...p.defaults, ...(p.defaultsDistMode ? { dist: '' } : {}) }, saved: false }))}
+                title={detail.defaultsDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}>
+                <i className={`ti ${detail.defaultsDistMode ? 'ti-repeat' : 'ti-ruler-2'}`} />
+              </button>
+            </div>
+            <IntensityInput
+              value={detail.defaults.intensity}
+              onChange={ins => setDetail(p => ({ ...p, defaults: { ...p.defaults, intensity: ins }, saved: false }))}
+              defaultReps={detail.defaults.reps}
+              defaultSets={detail.defaults.sets}
+            />
           </div>
 
           {/* Video URL + published toggle */}
