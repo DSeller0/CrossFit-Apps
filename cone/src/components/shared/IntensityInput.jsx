@@ -46,7 +46,7 @@ export default function IntensityInput({ value, onChange, defaultReps, defaultSe
     const ns = [...steps]; ns[i] = { ...ns[i], [field]: val }; onChange({ mode: 'progression', steps: ns });
   };
   const addStep = () => onChange({ mode: 'progression', steps: [...steps, { reps: defaultReps || steps[steps.length-1]?.reps || '', load: '', unit: steps[steps.length-1]?.unit || '% do RM' }] });
-  const delStep = i => onChange({ mode: 'progression', steps: steps.filter((_, j) => j !== i) });
+  const delStep = i => { if (steps.length <= 1) return; onChange({ mode: 'progression', steps: steps.filter((_, j) => j !== i) }); };
 
   return (
     <div className="int-block">

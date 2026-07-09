@@ -11,6 +11,14 @@ const LOG_SCALES    = ['RX','Inter','SC','Adaptado']
 
 // ── Pure helpers ──────────────────────────────────────────────────────────────
 function isRoundBlock(bl) { return !isWodBlock(bl)&&Number(bl.rounds)>0 }
+// A progression exercise with zero intensity.steps still needs one countable
+// row/checkbox slot in the interactive schedule view (so it can be checked off
+// like any other exercise) — pad the canonical [] to one placeholder group here,
+// consistently, for every Schedule.jsx consumer.
+function progGroups(ex) {
+  const g=groupProgressionSteps(ex)
+  return g.length?g:[{reps:'',loads:[]}]
+}
 function parseDurMins(d) {
   if(!d)return 0;const p=String(d).trim()
   if(p.includes(':')){const[m,s]=p.split(':').map(n=>parseInt(n)||0);return m+s/60}
@@ -57,9 +65,6 @@ function autofillRm(sD,aths,athId,gdD) {
       })
     })
   });return rm
-}
-function toTitleCase(s) {
-  return (s||'').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())
 }
 function fmtDeskPerf(blk) {
   if(!blk)return null
@@ -368,14 +373,14 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
           <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
             <div style={{display:'flex',alignItems:'baseline',gap:6,flex:1,minWidth:0}}>
               {volStr&&<span className={styles.pillVol}>{volStr}</span>}
-              <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{toTitleCase(displayName)}</div>
+              <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{displayName}</div>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:4,flexShrink:0}}>
               {cxIsProg&&<button className={`${styles.rmChip}${exRm?' '+styles.rmChipHasRm:''}`} onClick={e=>{e.stopPropagation();onRmToggle(ex.id)}}>{exRm?exRm.rm+' '+(exRm.unit||'kg'):'RM'}</button>}
               <button className={`${styles.demoBtn}${hasDemoCx?'':' '+styles.demoBtnNoDemo}`} onClick={e=>{e.stopPropagation();onDemo(mvNames.map(n=>({name:n})))}} disabled={!hasDemoCx}>Demo</button>
             </div>
           </div>
-          {mvs.map((m,mi)=><div key={mi} className={styles.detailExMovement}>· {[m.reps?m.reps+'×':'',toTitleCase(m.name)].filter(Boolean).join(' ')}</div>)}
+          {mvs.map((m,mi)=><div key={mi} className={styles.detailExMovement}>· {[m.reps?m.reps+'×':'',m.name].filter(Boolean).join(' ')}</div>)}
           {cxIsProg&&rmEditKey===ex.id&&<div className={styles.rmInputWrap} onClick={e=>e.stopPropagation()}>
             <input ref={rmInputRef} type="number" className={styles.rmInput} placeholder="100" min="1" step="1" inputMode="numeric" defaultValue={exRm?.rm||''} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();confirmRm()}}}/>
             <select ref={unitSelRef} className={styles.rmUnitSel} defaultValue={exRm?.unit||'kg'} onClick={e=>e.stopPropagation()}>
@@ -394,7 +399,7 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
   }
 
   if(isProg){
-    const groups=groupProgressionSteps(ex)
+    const groups=progGroups(ex)
     const exRm=rmValues[ex.id]
     return(<>{groups.map((g,gi)=>{
       const repsPrefix=ex.dist?exVolStr(ex):(ex.sets&&g.reps?`${g.sets||ex.sets}×${g.reps}`:g.reps)
@@ -412,7 +417,7 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
             <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
               <div style={{display:'flex',alignItems:'baseline',gap:6,flex:1,minWidth:0}}>
                 {repsPrefix&&<span className={styles.pillVol}>{repsPrefix}</span>}
-                <div className={`${styles.detailExName}${!isWod&&lineDone?' '+styles.detailExNameDone:''}`}>{toTitleCase(ex.name)}</div>
+                <div className={`${styles.detailExName}${!isWod&&lineDone?' '+styles.detailExNameDone:''}`}>{ex.name}</div>
               </div>
               <div style={{display:'flex',alignItems:'center',gap:3,flexShrink:0}}>
                 {gi===0&&<button className={`${styles.rmChip}${exRm?' '+styles.rmChipHasRm:''}`} onClick={e=>{e.stopPropagation();onRmToggle(ex.id)}}>{exRm?exRm.rm+' '+(exRm.unit||'kg'):'RM'}</button>}
@@ -446,7 +451,7 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
         <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
           <div style={{display:'flex',alignItems:'baseline',gap:6,flex:1,minWidth:0}}>
             {vol&&<span className={styles.pillVol}>{vol}</span>}
-            <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{toTitleCase(ex.name)}</div>
+            <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{ex.name}</div>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:3,flexShrink:0}}>
             {ins&&<span className={ins.includes('%')?styles.pillVol:styles.pillWt}>{ins}</span>}
@@ -529,8 +534,7 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
     const keys=[]
     exs.forEach(ex=>{
       if(!ex.isComplex&&ex.intensity?.mode==='progression'){
-        const groups=groupProgressionSteps(ex)
-        if(!groups.length)groups.push({reps:''})
+        const groups=progGroups(ex)
         groups.forEach((_,gi)=>keys.push(`${ex.id}-${gi}`))
       }else{keys.push(ex.id)}
     })
@@ -812,8 +816,7 @@ export default function Schedule() {
     if(isRoundBlock(bl)){
       exs.forEach(ex=>{
         if(!ex.isComplex&&ex.intensity?.mode==='progression'){
-          const groups=groupProgressionSteps(ex)
-          if(!groups.length)groups.push({reps:''})
+          const groups=progGroups(ex)
           if(groups.every((_,gi)=>getRd(bl.id,`${ex.id}-${gi}`)>=Number(bl.rounds)))done++
         }else{if(getRd(bl.id,ex.id)>=Number(bl.rounds))done++}
       })
@@ -821,8 +824,8 @@ export default function Schedule() {
     }
     exs.forEach(ex=>{
       if(!ex.isComplex&&ex.intensity?.mode==='progression'){
-        const groups=groupProgressionSteps(ex)
-        if(groups.length===0||groups.every((_,gi)=>checked.has(`${bl.id}|${ex.id}-${gi}`)))done++
+        const groups=progGroups(ex)
+        if(groups.every((_,gi)=>checked.has(`${bl.id}|${ex.id}-${gi}`)))done++
       }else{if(checked.has(`${bl.id}|${ex.id}`))done++}
     })
     return{done,total:exs.length}
@@ -988,7 +991,7 @@ export default function Schedule() {
                 {hasSess?daySess.map((sess,si)=>{
                   const prog=sessionProgress(sess),isExp=expanded.has(`${dk}|${si}`)
                   const blocks=sess.blocks||[]
-                  const exNames=[...new Set(blocks.flatMap(bl=>(bl.exercises||[]).filter(e=>e.name).map(e=>toTitleCase(e.name))))].slice(0,3)
+                  const exNames=[...new Set(blocks.flatMap(bl=>(bl.exercises||[]).filter(e=>e.name).map(e=>e.name)))].slice(0,3)
                   const moreEx=blocks.flatMap(b=>(b.exercises||[])).filter(e=>e.name).length>3
                   return(
                     <div key={sess.id}>

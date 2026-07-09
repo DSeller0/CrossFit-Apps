@@ -5,7 +5,8 @@ import Header from '../Header.jsx'
 import Nav from '../Nav.jsx'
 import s from './Leaderboard.module.css'
 import { rankResults, perfStr, WOD_TYPES } from '../lib/wod.js'
-import { MONTH_PT_SHORT as MONTHS_PT } from '../lib/week.js'
+import { MONTH_PT_SHORT as MONTHS_PT, toISO } from '../lib/week.js'
+import { BLOB_TABLES } from '../lib/blobTables.js'
 
 const SCALES       = ['Todos', 'RX', 'Inter', 'SC', 'Adaptado']
 const SCALE_RANK   = { RX: 4, Inter: 3, SC: 2, Adaptado: 1, '-': 0 }
@@ -49,10 +50,6 @@ function weekBounds(offset) {
   return [sun, sat]
 }
 
-function toDateKey(d) {
-  return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-')
-}
-
 function weekLabelFor(offset) {
   const [sun, sat] = weekBounds(offset)
   const fmt = d => `${d.getDate()} ${MONTHS_PT[d.getMonth()]}`
@@ -83,9 +80,8 @@ function buildWodList(sessions, results) {
 }
 
 async function fetchState() {
-  const blobTables = ['sessions', 'athletes', 'events', 'locations', 'coach_profile', 'settings', 'goals_data', 'lb_colors']
   const [blobRows, resRaw] = await Promise.all([
-    Promise.all(blobTables.map(t => sb.from(t).select('value').eq('id', 1).maybeSingle())),
+    Promise.all(BLOB_TABLES.map(t => sb.from(t).select('value').eq('id', 1).maybeSingle())),
     sb.from('results_v2').select('*'),
   ])
   const [sessions, athletes, , , , settings, , lbColors] = blobRows.map(x => x.data?.value ?? null)
@@ -193,7 +189,7 @@ export default function Leaderboard() {
 
   const weekWods = useMemo(() => {
     const [sun, sat] = weekBounds(weekOffset)
-    const sunKey = toDateKey(sun), satKey = toDateKey(sat)
+    const sunKey = toISO(sun), satKey = toISO(sat)
     return wodList.filter(w => w.dateKey >= sunKey && w.dateKey <= satKey)
   }, [wodList, weekOffset])
 

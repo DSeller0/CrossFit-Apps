@@ -5,6 +5,7 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import { toISO, todayISO, fmtDate, MONTH_PT_SHORT } from '../lib/week.js'
 import { WOD_TYPES as CANON_WOD_TYPES, toSecs, fmtSecs as fmtTime } from '../lib/wod.js'
+import { prBest, prDelta, prPct } from '../lib/goals.js'
 import styles from './Me.module.css'
 
 const ECOL = {
@@ -24,31 +25,6 @@ function getTargets(s) { if(!s?.mainTraining)return[]; return Array.isArray(s.ma
 function matchesAthlete(s,name) { return getTargets(s).includes(name) }
 function fmtEvDate(iso) { const d=new Date(iso+'T12:00:00'); return`${MONTH_PT_SHORT[d.getMonth()]} ${d.getDate()}` }
 
-function prBest(pr) {
-  if(!pr?.results?.length) return null
-  if(pr.type==='time') return pr.results.reduce((b,r)=>toSecs(r.value)<toSecs(b.value)?r:b)
-  return pr.results.reduce((b,r)=>Number(r.value)>Number(b.value)?r:b)
-}
-function prPct(pr) {
-  const best=prBest(pr)
-  if(!best||!pr.target) return null
-  if(pr.type==='time'){
-    const tgt=toSecs(pr.target)
-    const first=pr.results.length>0?toSecs([...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date))[0].value):tgt*2
-    if(first<=tgt) return 100
-    return Math.min(100,Math.round((first-toSecs(best.value))/(first-tgt)*100))
-  }
-  const t=Number(pr.target)
-  return t?Math.min(100,Math.round(Number(best.value)/t*100)):null
-}
-function prDelta(pr) {
-  if(!pr?.results||pr.results.length<2) return null
-  const sorted=[...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date))
-  const last=sorted[sorted.length-1],prev=sorted[sorted.length-2]
-  if(pr.type==='time'){const d=toSecs(prev.value)-toSecs(last.value);if(!d)return{label:'=',good:null};return{label:(d>0?'-':'+')+fmtTime(Math.abs(d)),good:d>0}}
-  const d=Number(last.value)-Number(prev.value);if(!d)return{label:'=',good:null}
-  return{label:(d>0?'+':'')+d+' '+(pr.type==='load'?(pr.unit||'kg'):'reps'),good:d>0}
-}
 function prValLabel(val,pr) {
   if(pr.type==='load') return val+' '+(pr.unit||'kg')
   if(pr.type==='reps') return val+' reps'

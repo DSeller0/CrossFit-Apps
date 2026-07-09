@@ -100,6 +100,8 @@ updated_at           BIGINT
 
 - `wod.js` — `uid`, `WOD_TYPES`, `isWodBlock`, `blkColor`, `blkLabel`, `exVolStr`, `groupProgressionSteps`, `toSecs`, `fmtSecs`, `rankResults`, `perfStr`, `fmtIntensity`, `loadRegistry`
 - `week.js` — `MONTH_PT`, `MONTH_PT_SHORT`, `DAY_PT`, `DAY_PT_TITLE`, `fmtDate`, `toISO`, `todayISO`, `getWeek`, `dateToWeekOffset` (`DAY_PT`/`MONTH_PT` are UPPERCASE/full-name; `DAY_PT_TITLE`/`MONTH_PT_SHORT` are the Titlecase/abbreviated variants most display call sites actually want — not drop-in for each other, see #16's casing-hazard note)
+- `goals.js` — `prBest`, `prPct`, `prDelta` (PR-best-result / progress-% / delta-vs-previous; canonical since #48, 2026-07-05 — collapsed from 3 near-identical copies in `Atletas.jsx`/`Athletes.jsx`/`Me.jsx`)
+- `blobTables.js` — `BLOB_TABLES` (the 8-table fetch-order array shared by `Athletes.jsx`/`Leaderboard.jsx`'s `fetchState()`; positional, don't reorder without updating both files' destructuring)
 
 Always check these before reimplementing a formatting or date utility. `src/utils/storage.js` (SPA side) re-exports `uid`/`toISO`/`todayISO` from these modules rather than reimplementing them (#16, 2026-07-05) — one canonical implementation, imported via either path.
 

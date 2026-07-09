@@ -4,6 +4,7 @@ import { registerSW } from '../registerSW.js'
 import Nav from '../Nav.jsx'
 import s from './Index.module.css'
 import { WOD_TYPES as WOD_TYPES_ARR } from '../lib/wod.js'
+import { toISO } from '../lib/week.js'
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const WOD_TYPES  = new Set(WOD_TYPES_ARR)
@@ -26,7 +27,7 @@ function blockCls(type) {
 
 function dateKey(offset) {
   const d = new Date(); d.setDate(d.getDate() + offset)
-  return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-')
+  return toISO(d)
 }
 
 const TODAY_DK  = dateKey(0)

@@ -7,6 +7,7 @@ import {
 } from '../../utils/storage';
 import { APP_CONFIG, GF } from '../../utils/config';
 import { exVolStr, rankResults } from '../../public/lib/wod.js';
+import { toISO } from '../../public/lib/week.js';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -19,7 +20,6 @@ const PT_MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho'
 const DAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
 // ── Module-level helpers ──────────────────────────────────────────────────────
-const dateToDK = d => [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
 const sessTitle = s => s.sessionName || s.name || (typeof s.mainTraining === 'string' ? s.mainTraining : '') || 'Treino';
 
 function getWeeksInMonth(year, month) {
@@ -156,7 +156,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
     if (!selWeek) return [];
     return Array.from({length:7}, (_,i) => {
       const d = new Date(selWeek.start.getFullYear(), selWeek.start.getMonth(), selWeek.start.getDate()+i);
-      return { date:d, dk:dateToDK(d), daySessions:sessions[dateToDK(d)]||[] };
+      return { date:d, dk:toISO(d), daySessions:sessions[toISO(d)]||[] };
     });
   }, [selWeek, sessions]);
 

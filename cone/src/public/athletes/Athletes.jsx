@@ -3,7 +3,9 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import s from './Athletes.module.css'
 import { toISO, DAY_PT_TITLE } from '../lib/week.js'
-import { toSecs, fmtSecs, WOD_TYPES } from '../lib/wod.js'
+import { WOD_TYPES } from '../lib/wod.js'
+import { prBest, prDelta, prPct } from '../lib/goals.js'
+import { BLOB_TABLES } from '../lib/blobTables.js'
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const SCALE_RANK   = { RX: 4, Inter: 3, SC: 2, Adaptado: 1 }
@@ -16,9 +18,8 @@ function getTargets(sess) { if (!sess?.mainTraining) return []; return Array.isA
 
 // ── Supabase fetch ────────────────────────────────────────────────────────
 async function fetchState() {
-  const blobTables = ['sessions','athletes','events','locations','coach_profile','settings','goals_data','lb_colors']
   const [blobRows, resRaw] = await Promise.all([
-    Promise.all(blobTables.map(t => sb.from(t).select('value').eq('id',1).maybeSingle())),
+    Promise.all(BLOB_TABLES.map(t => sb.from(t).select('value').eq('id',1).maybeSingle())),
     sb.from('results_v2').select('*'),
   ])
   const [sessions, athletes, , , , settings, goalsData] = blobRows.map(x => x.data?.value ?? null)
@@ -78,7 +79,7 @@ function calcStats(athId, goalsData, results) {
   else if (msPct !== null) { hab = msPct; habSub = `Milestones atingidos: ${hitMs}/${allMs.length}` }
 
   // Progressão — PRs set last 60 days + RPE trend
-  const recentPRs = prs.filter(p => { if (!p.results?.length) return false; const best = p.type==='time' ? p.results.reduce((b,r) => toSecs(r.value)<toSecs(b.value)?r:b) : p.results.reduce((b,r) => Number(r.value)>Number(b.value)?r:b); return new Date(best.date) >= days60 }).length
+  const recentPRs = prs.filter(p => { const best = prBest(p); return best && new Date(best.date) >= days60 }).length
   const rpeAll = athResults.filter(r => r.blocks?.some(b => b.rpe)).map(r => r.blocks.find(b => b.rpe)?.rpe||7)
   const rpeHalf = rpeAll.length >= 6 ? [rpeAll.slice(0, Math.floor(rpeAll.length/2)), rpeAll.slice(Math.floor(rpeAll.length/2))] : null
   let rpeTrend = null
@@ -103,22 +104,6 @@ function calcStats(athId, goalsData, results) {
     { key: 'prog',   name: 'Progressão',       pct: prog,      sub: progSub,   color: '#c884f0'      },
     { key: 'consist',name: 'Consistência',     pct: streakPct, sub: consistSub,color: 'var(--gold)'  },
   ]
-}
-
-// ── PR helpers ────────────────────────────────────────────────────────────
-function prBest(pr) { if (!pr.results?.length) return null; return pr.type==='time' ? pr.results.reduce((b,r) => toSecs(r.value)<toSecs(b.value)?r:b) : pr.results.reduce((b,r) => Number(r.value)>Number(b.value)?r:b) }
-function prDelta(pr) {
-  if (!pr.results || pr.results.length < 2) return null
-  const sorted = [...pr.results].sort((a,b) => new Date(a.date)-new Date(b.date))
-  const last=sorted[sorted.length-1], prev=sorted[sorted.length-2]
-  if (pr.type === 'time') { const diff=toSecs(prev.value)-toSecs(last.value); if (diff===0) return{label:'=',good:null}; return{label:(diff>0?'-':'+')+fmtSecs(Math.abs(diff)),good:diff>0} }
-  const diff = Number(last.value)-Number(prev.value); if (diff===0) return{label:'=',good:null}
-  return { label: (diff>0?'+':'')+diff+' '+(pr.type==='load'?(pr.unit||'kg'):'reps'), good: diff>0 }
-}
-function prPct(pr) {
-  const best = prBest(pr); if (!best || !pr.target) return null
-  if (pr.type === 'time') { const ts=toSecs(pr.target),fs=pr.results.length>0?toSecs([...pr.results].sort((a,b)=>new Date(a.date)-new Date(b.date))[0].value):ts*2; if (fs<=ts) return 100; return Math.min(100,Math.round((fs-toSecs(best.value))/(fs-ts)*100)) }
-  const tn = Number(pr.target); if (!tn) return null; return Math.min(100, Math.round(Number(best.value)/tn*100))
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────
