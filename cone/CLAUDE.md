@@ -121,7 +121,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 - Font: `var(--font)` → Cinzel (TotK themes) or Amarante (Spirit Blossom themes). Loaded weights (`src/fonts.js`): Cinzel 400/600/700/900, Crimson Pro 400/600, Amarante 400 **only** — CSS weights 500/800 are browser-synthesized today. Policy: first design-program session touching one adds `@fontsource/cinzel/{500,800}.css`; Amarante ships no bold upstream, its synthesized bolds are by design.
 - All UI strings: pt-BR.
 - Canonical design cards (tokens, components, mockups): `cone/design/` → synced to the "Cone Design System" project on claude.ai/design (see WORKFLOW.md mockup-first).
-- Design-pass program (restructured #27/#28, sessions #49–#59): `docs/plans/16-design-pass-program.md`. Product docs: `docs/FEATURES.md` (feature catalog + gate candidates), `docs/PRODUCT.md` (personas/tiers), `docs/MOBILE.md` (Android/iOS assessment — do nothing until a trigger fires).
+- Design-pass program (restructured #27/#28, sessions #49–#59): `docs/plans/16-design-pass-program.md`. Product docs: `docs/FEATURES.md` (feature catalog + gate candidates), `docs/PRODUCT.md` (personas/tiers), `docs/MOBILE.md` (Android/iOS assessment — do nothing until a trigger fires). Consolidated interactive view: `docs/site/cone-docs.html` (open via `file://` — repo-only, NOT in the deploy whitelist by design; interactive tier board + coach-services worksheet for the tier meeting, full screenshot baseline in `docs/site/img/`; snapshot of the .md docs, regenerate on request).
 
 **Block color families:**
 - RED: WOD / HIIT / MetCon
