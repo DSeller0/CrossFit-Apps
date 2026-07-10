@@ -74,6 +74,10 @@ function fmtDeskPerf(blk) {
   if(blk.perfReps)p.push(`${blk.perfReps} Reps`)
   return p.join(' + ')||null
 }
+// Enter/Space keyboard activation for click-divs (#14)
+function onKey(fn) {
+  return e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();fn()}}
+}
 
 // ── Round Counter ─────────────────────────────────────────────────────────────
 function RdCounter({blId,exId,total,cur,onAdvance,onReset}) {
@@ -96,7 +100,8 @@ function RdCounter({blId,exId,total,cur,onAdvance,onReset}) {
   const cls=isDone?styles.bCounterDone:isActive?styles.bCounterActive:styles.bCounterIdle
   return(
     <div className={`${styles.bCounter} ${cls}`}
-      onClick={onClick} onContextMenu={onContextMenu}
+      role="button" tabIndex={0} aria-label={`Rodadas: ${cur} de ${total}`}
+      onClick={onClick} onContextMenu={onContextMenu} onKeyDown={onKey(onAdvance)}
       onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
       onTouchMove={()=>clearTimeout(pressRef.current)}>
       {isDone?<i className="ti ti-check" style={{fontSize:9}}/>
@@ -112,15 +117,15 @@ function DemoPanel({target,demoMap,onClose}) {
   const isOpen=!!target
   function handleClose(){if(iframeRef.current)iframeRef.current.src='';onClose()}
   if(!target)return(
-    <div className={`${styles.demoOverlay}`} onClick={handleClose}/>
+    <div className={`${styles.demoOverlay}`} onClick={handleClose} aria-hidden="true"/>
   )
   const multi=target.length>1,title=multi?'Demo':target[0].name
   return(<>
-    <div className={`${styles.demoOverlay}${isOpen?' '+styles.demoOverlayOpen:''}`} onClick={handleClose}/>
+    <div className={`${styles.demoOverlay}${isOpen?' '+styles.demoOverlayOpen:''}`} onClick={handleClose} aria-hidden="true"/>
     <div className={`${styles.demoPanel}${isOpen?' '+styles.demoPanelOpen:''}`}>
       <div className={styles.demoHdr}>
         <span className={styles.demoTitle}>{title}</span>
-        <button className={styles.demoClose} onClick={handleClose}><i className="ti ti-x"/></button>
+        <button className={styles.demoClose} onClick={handleClose} aria-label="Fechar"><i className="ti ti-x"/></button>
       </div>
       <div className={styles.demoBody}>
         {target.map((mv,i)=>{
@@ -138,10 +143,10 @@ function DemoPanel({target,demoMap,onClose}) {
             </div>}
             {desc&&<div className={styles.demoDesc}>{desc}</div>}
             {muscles&&<div className={styles.demoDesc}>
-              <span style={{fontSize:9,fontWeight:900,color:'#4ac8c0',textTransform:'uppercase',letterSpacing:'.07em',display:'block',marginBottom:3}}>Músculos</span>
+              <span className={styles.demoSubLbl}>Músculos</span>
               {muscles}
             </div>}
-            {notes&&<div className={styles.demoDesc} style={{color:'#806850',fontSize:12,marginTop:4}}>{notes}</div>}
+            {notes&&<div className={`${styles.demoDesc} ${styles.demoNotes}`}>{notes}</div>}
             {!hasAny&&<div className={styles.demoNoContent}>Sem conteúdo de demo disponível.</div>}
           </div>)
         })}
@@ -151,36 +156,64 @@ function DemoPanel({target,demoMap,onClose}) {
 }
 
 // ── Log Pane (mobile) ─────────────────────────────────────────────────────────
-function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,success,error,onSubmit,onClose,lockedAthName}) {
+function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,success,error,confirming,onConfirming,onSubmit,onClose,lockedAthName}) {
   const isOpen=!!pane
   function setRpe(i,n){onBlocks(prev=>prev.map((b,j)=>j===i?{...b,rpe:n}:b))}
   function setScale(i,s){onBlocks(prev=>prev.map((b,j)=>j===i?{...b,scale:s}:b))}
   function setField(i,f,v){onBlocks(prev=>prev.map((b,j)=>j===i?{...b,[f]:v}:b))}
   const dateStr=pane?new Date(pane.dateKey+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}):''
   return(<>
-    <div className={`${styles.lpOverlay}${isOpen?' '+styles.lpOverlayOpen:''}`} onClick={onClose}/>
+    <div className={`${styles.lpOverlay}${isOpen?' '+styles.lpOverlayOpen:''}`} onClick={onClose} aria-hidden="true"/>
     <div className={`${styles.logPane}${isOpen?' '+styles.logPaneOpen:''}`}>
       {!pane?null:success?(
         <div>
           <div className={styles.lpHeader}>
             <div className={styles.lpTitle}>Resultado registrado</div>
-            <button className={styles.lpClose} onClick={onClose}><i className="ti ti-x"/></button>
+            <button className={styles.lpClose} onClick={onClose} aria-label="Fechar"><i className="ti ti-x"/></button>
           </div>
           <div className={styles.lpSuccess}>
             <i className={`ti ti-circle-check ${styles.lpSuccessIcon}`}/>
-            <div style={{fontSize:18,fontWeight:900,color:'#f0e8d0'}}>Resultado registrado!</div>
-            <div style={{fontSize:13,color:'#888'}}>Salvo com sucesso.</div>
+            <div className={styles.lpSuccessTitle}>Resultado registrado!</div>
+            <div className={styles.lpSuccessSub}>Salvo com sucesso.</div>
             <a href="./leaderboard.html" className={styles.lbLink} style={{marginTop:8}}><i className="ti ti-trophy"/> Ver leaderboard</a>
+          </div>
+        </div>
+      ):confirming?(
+        <div>
+          <div className={styles.lpHeader}>
+            <div className={styles.lpTitle}><i className="ti ti-clipboard-check"/> Revisar registro</div>
+            <button className={styles.lpClose} onClick={onClose} aria-label="Fechar"><i className="ti ti-x"/></button>
+          </div>
+          <div className={styles.lpBody}>
+            <div className={styles.lpDate}>{lockedAthName||pane.assignedAth.find(a=>String(a.id)===String(athId))?.name||''}{pane.sess.sessionName?` · ${pane.sess.sessionName}`:''}</div>
+            {blocks.map(bl=>{
+              const perf=fmtDeskPerf(bl)
+              return(
+                <div key={bl.blockId} className={styles.deskConfirmBox}>
+                  <div className={styles.deskConfirmTitle}>{bl.blockLabel}</div>
+                  <div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>Escala</span><span className={styles.deskConfirmRowVal}>{bl.scale}</span></div>
+                  {bl.rpe&&<div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>RPE</span><span className={styles.deskConfirmRowVal}>{bl.rpe} / 10</span></div>}
+                  {perf&&<div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>Resultado</span><span className={styles.deskConfirmRowVal}>{perf}</span></div>}
+                </div>
+              )
+            })}
+            <div className={styles.deskConfirmBtns}>
+              <button className={styles.deskCancelBtn} onClick={()=>onConfirming(false)}>← Editar</button>
+              <button className={styles.deskConfirmBtn} disabled={submitting||undefined} onClick={onSubmit}>
+                {submitting?'Enviando...':'Confirmar ✓'}
+              </button>
+            </div>
+            {error&&<div className={styles.lpErr}>{error}</div>}
           </div>
         </div>
       ):(
         <div>
           <div className={styles.lpHeader}>
             <div className={styles.lpTitle}><i className="ti ti-pencil"/> Registrar Resultado</div>
-            <button className={styles.lpClose} onClick={onClose}><i className="ti ti-x"/></button>
+            <button className={styles.lpClose} onClick={onClose} aria-label="Fechar"><i className="ti ti-x"/></button>
           </div>
           <div className={styles.lpBody}>
-            <div style={{fontSize:12,color:'#888'}}>{dateStr}{pane.sess.sessionName?` · ${pane.sess.sessionName}`:''}</div>
+            <div className={styles.lpDate}>{dateStr}{pane.sess.sessionName?` · ${pane.sess.sessionName}`:''}</div>
             <div className={styles.lpSection}>
               <div className={styles.lpSectionTitle}>Atleta</div>
               {lockedAthName
@@ -217,8 +250,8 @@ function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,success,error,on
                 </div>
               ))}
             </div>}
-            <button className={styles.lpSubmit} disabled={submitting||undefined} onClick={onSubmit}>
-              {submitting?<><i className="ti ti-loader-2"/> Enviando...</>:<><i className="ti ti-check"/> Registrar</>}
+            <button className={styles.lpSubmit} disabled={submitting||undefined} onClick={()=>onConfirming(true)}>
+              <i className="ti ti-check"/> Registrar
             </button>
             {error&&<div className={styles.lpErr}>{error}</div>}
           </div>
@@ -242,7 +275,7 @@ function DeskRegPane({regBl,step,scale,rpe,perfTime,perfRounds,perfReps,athName,
       <div className={styles.deskRegPaneHdr}>
         <span className={styles.deskRegPaneLbl}>{step==='success'?'Registrado':athName||'Registro'}</span>
         <span className={styles.deskRegPaneWod}>{label}</span>
-        <button className={styles.deskRegClose} onClick={onClose}>×</button>
+        <button className={styles.deskRegClose} onClick={onClose} aria-label="Fechar">×</button>
       </div>
       <div className={styles.deskRegScroll}>
         {step==='form'&&<>
@@ -328,7 +361,7 @@ function DeskRegPane({regBl,step,scale,rpe,perfTime,perfRounds,perfReps,athName,
 }
 
 // ── Session Detail ────────────────────────────────────────────────────────────
-function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo,accent}) {
+function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo}) {
   const key=`${bl.id}|${ex.id}`,done=checked.has(key)
   const isProg=!ex.isComplex&&ex.intensity?.mode==='progression'
   const vol=exVolStr(ex),ins=fmtIntensity(ex.intensity)
@@ -368,7 +401,7 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
       <div className={styles.detailEx} onClick={e=>e.stopPropagation()}>
         {!isWod&&(isRd
           ?<RdCounter blId={bl.id} exId={ex.id} total={Number(bl.rounds)} cur={roundState[`${bl.id}|${ex.id}`]||0} onAdvance={()=>onAdvance(bl.id,ex.id,Number(bl.rounds))} onReset={()=>onReset(bl.id,ex.id)}/>
-          :<div className={`${styles.detailExCheck}${done?' '+styles.detailExCheckDone:''}`} onClick={()=>onCheck(bl.id,ex.id)}/>)}
+          :<div className={`${styles.detailExCheck}${done?' '+styles.detailExCheckDone:''}`} role="checkbox" aria-checked={done} tabIndex={0} aria-label={`Concluir ${displayName}`} onClick={()=>onCheck(bl.id,ex.id)} onKeyDown={onKey(()=>onCheck(bl.id,ex.id))}/>)}
         <div className={styles.detailExBody}>
           <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
             <div style={{display:'flex',alignItems:'baseline',gap:6,flex:1,minWidth:0}}>
@@ -386,7 +419,7 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
             <select ref={unitSelRef} className={styles.rmUnitSel} defaultValue={exRm?.unit||'kg'} onClick={e=>e.stopPropagation()}>
               <option value="kg">kg</option><option value="lbs">lbs</option>
             </select>
-            <button className={styles.rmConfirmBtn} onClick={confirmRm}>✓</button>
+            <button className={styles.rmConfirmBtn} onClick={confirmRm} aria-label="Confirmar RM">✓</button>
           </div>}
           {(loadStr||calcStr)&&<div className={styles.rmVolRow}>
             {loadStr&&<span className={loadStr.includes('%')?styles.pillVol:styles.pillWt}>{loadStr}</span>}
@@ -412,7 +445,7 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
         <div key={gi} className={styles.detailEx} onClick={e=>e.stopPropagation()}>
           {!isWod&&(isRd
             ?<RdCounter blId={bl.id} exId={`${ex.id}-${gi}`} total={Number(bl.rounds)} cur={roundState[`${bl.id}|${ex.id}-${gi}`]||0} onAdvance={()=>onAdvance(bl.id,`${ex.id}-${gi}`,Number(bl.rounds))} onReset={()=>onReset(bl.id,`${ex.id}-${gi}`)}/>
-            :<div className={`${styles.detailExCheck}${lineDone?' '+styles.detailExCheckDone:''}`} onClick={()=>onCheck(bl.id,`${ex.id}-${gi}`)}/>)}
+            :<div className={`${styles.detailExCheck}${lineDone?' '+styles.detailExCheckDone:''}`} role="checkbox" aria-checked={lineDone} tabIndex={0} aria-label={`Concluir ${ex.name}`} onClick={()=>onCheck(bl.id,`${ex.id}-${gi}`)} onKeyDown={onKey(()=>onCheck(bl.id,`${ex.id}-${gi}`))}/>)}
           <div className={styles.detailExBody}>
             <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
               <div style={{display:'flex',alignItems:'baseline',gap:6,flex:1,minWidth:0}}>
@@ -429,7 +462,7 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
               <select ref={unitSelRef} className={styles.rmUnitSel} defaultValue={exRm?.unit||'kg'} onClick={e=>e.stopPropagation()}>
                 <option value="kg">kg</option><option value="lbs">lbs</option>
               </select>
-              <button className={styles.rmConfirmBtn} onClick={confirmRm}>✓</button>
+              <button className={styles.rmConfirmBtn} onClick={confirmRm} aria-label="Confirmar RM">✓</button>
             </div>}
             {(pctStr||calcStr)&&<div className={styles.rmVolRow}>
               {pctStr&&<span className={styles.pillVol}>{pctStr}</span>}
@@ -446,7 +479,7 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
     <div className={styles.detailEx} onClick={e=>e.stopPropagation()}>
       {!isWod&&(isRd
         ?<RdCounter blId={bl.id} exId={ex.id} total={Number(bl.rounds)} cur={roundState[`${bl.id}|${ex.id}`]||0} onAdvance={()=>onAdvance(bl.id,ex.id,Number(bl.rounds))} onReset={()=>onReset(bl.id,ex.id)}/>
-        :<div className={`${styles.detailExCheck}${done?' '+styles.detailExCheckDone:''}`} onClick={()=>onCheck(bl.id,ex.id)}/>)}
+        :<div className={`${styles.detailExCheck}${done?' '+styles.detailExCheckDone:''}`} role="checkbox" aria-checked={done} tabIndex={0} aria-label={`Concluir ${ex.name}`} onClick={()=>onCheck(bl.id,ex.id)} onKeyDown={onKey(()=>onCheck(bl.id,ex.id))}/>)}
       <div className={styles.detailExBody}>
         <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:6}}>
           <div style={{display:'flex',alignItems:'baseline',gap:6,flex:1,minWidth:0}}>
@@ -464,12 +497,12 @@ function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEditKey,demoMap,o
   )
 }
 
-function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditKey,demoMap,isWodLogged,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo,onTimer,onLogBlock=null,athResult=null,athName=''}) {
+function BlockDetail({bl,sess,dateKey,checked,roundState,rmValues,rmEditKey,demoMap,isWodLogged,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo,onTimer,onLogBlock=null,athResult=null,athName='',deskIdleHint=false}) {
   const label=blkLabel(bl),col=blkColor(bl)
   const isWod=isWodBlock(bl),isRd=isRoundBlock(bl)
   const wodDone=isWodLogged(bl)
 
-  const sharedExProps={bl,checked,roundState,rmValues,rmEditKey,demoMap,isWod,isRd,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo,accent}
+  const sharedExProps={bl,checked,roundState,rmValues,rmEditKey,demoMap,isWod,isRd,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo}
 
   const perfStr=fmtDeskPerf(athResult)
 
@@ -503,8 +536,7 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
           <span className={styles.detailBlockTitle} style={{color:col}}>{label}</span>
           <div style={{display:'flex',alignItems:'center',gap:6}}>
             <button className={styles.timerBtn} onClick={e=>{e.stopPropagation();onTimer(bl)}}><i className="ti ti-player-play"/> Timer</button>
-            {repeat&&<span className={styles.detailBlockMeta} style={{background:col,color:'#fff'}}>{repeat}</span>}
-            {capMins>0&&<span className={styles.detailBlockMeta} style={{background:'#1e1e1e',color:'#aaa',border:'1px solid #333'}}>Cap {capMins}'</span>}
+            {(repeat||capMins>0)&&<span className={styles.detailBlockMeta}>{[repeat,capMins>0?`Cap ${capMins}'`:''].filter(Boolean).join(' · ')}</span>}
             {wodDone&&<span className={styles.detailBlockDone}>✓ Completo</span>}
           </div>
         </div>
@@ -551,7 +583,7 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
       <div className={styles.detailBlockHdr}>
         <span className={styles.detailBlockTitle} style={{color:col}}>{label}</span>
         <div style={{display:'flex',alignItems:'center',gap:6}}>
-          {isRd?rdBadgeEl:(meta?<span className={styles.detailBlockMeta} style={{background:col,color:'#fff'}}>{meta}</span>:null)}
+          {isRd?rdBadgeEl:(meta?<span className={styles.detailBlockMeta}>{meta}</span>:null)}
           {!isRd&&wodDone&&<span className={styles.detailBlockDone}>✓ Completo</span>}
         </div>
       </div>
@@ -560,11 +592,14 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
     </>
   )
 
+  const showIdleHint=deskIdleHint&&(isWod||isRd)&&!athSection
+  const actionsEmpty=!isWod&&!athSection&&!showIdleHint
+
   return(
     <div className={styles.detailBlock} style={{borderLeftColor:col}}>
       <div className={styles.cardBody}>
-        <div className={styles.cardInfo}>{infoCol}</div>
-        <div className={styles.cardActions}>
+        <div className={`${styles.cardInfo}${actionsEmpty?' '+styles.cardInfoFull:''}`}>{infoCol}</div>
+        {!actionsEmpty&&<div className={styles.cardActions}>
           {isWod&&<button className={styles.timerBtn} onClick={e=>{e.stopPropagation();onTimer(bl)}}>
             <i className="ti ti-player-play"/>
             <span className={styles.btnLabel}> Timer</span>
@@ -574,18 +609,19 @@ function BlockDetail({bl,sess,dateKey,accent,checked,roundState,rmValues,rmEditK
             <span className={styles.btnLabel}> Ver Leaderboard</span>
           </a>}
           {athSection}
-        </div>
+          {showIdleHint&&<div className={styles.deskIdleHint}>Selecione um atleta no painel ao lado para registrar resultados</div>}
+        </div>}
       </div>
     </div>
   )
 }
 
-function SessionDetail({sess,dateKey,accent,checked,roundState,rmValues,rmEditKey,demoMap,isWodLogged,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo,onTimer,onLog}) {
+function SessionDetail({sess,dateKey,checked,roundState,rmValues,rmEditKey,demoMap,isWodLogged,onCheck,onAdvance,onReset,onRmToggle,onRmConfirm,onDemo,onTimer,onLog}) {
   return(
     <div className={styles.dayDetail} onClick={e=>e.stopPropagation()}>
       {sess.sessionName&&<div className={styles.detailSessTitle}>{sess.sessionName}</div>}
       {(sess.blocks||[]).map(bl=>(
-        <BlockDetail key={bl.id} bl={bl} sess={sess} dateKey={dateKey} accent={accent}
+        <BlockDetail key={bl.id} bl={bl} sess={sess} dateKey={dateKey}
           checked={checked} roundState={roundState} rmValues={rmValues} rmEditKey={rmEditKey}
           demoMap={demoMap} isWodLogged={isWodLogged}
           onCheck={onCheck} onAdvance={onAdvance} onReset={onReset}
@@ -607,7 +643,6 @@ export default function Schedule() {
   const [results,setResults]=useState([])
   const [gymName,setGymName]=useState('Cone')
   const [restLabel,setRestLabel]=useState('Descanso')
-  const [blockAccent,setBlockAccent]=useState('#68d8a0')
   const [weekOffset,setWeekOffset]=useState(0)
   const [selAth,setSelAth]=useState(()=>localStorage.getItem('cone_athlete_filter')||'')
   const [expanded,setExpanded]=useState(new Set())
@@ -621,6 +656,7 @@ export default function Schedule() {
   const [logBlocks,setLogBlocks]=useState([])
   const [logSubmitting,setLogSubmitting]=useState(false)
   const [logSuccess,setLogSuccess]=useState(false)
+  const [logConfirming,setLogConfirming]=useState(false)
   const [logError,setLogError]=useState('')
 
   // Desktop state
@@ -707,22 +743,15 @@ export default function Schedule() {
       const stD=stR.data?.value||{},gdD=gdR.data?.value||{athleteGoals:{},prs:{}}
       const erD=erR.data?.value||{}
 
-      let accColor='#68d8a0',restLbl='Descanso',gName=stD.gymName||'Cone'
+      // config.json: functional keys only. Its wk*/theme* color overrides used to be
+      // written onto documentElement here — removed (#50): they fought themes.css and
+      // broke theme switching on this page. Colors come exclusively from theme tokens.
+      let restLbl='Descanso',gName=stD.gymName||'Cone'
       if(cfgRes?.ok){
         try{
-          let cfg=await cfgRes.json()
-          if(cfg.colors&&typeof cfg.colors==='object')cfg={...cfg,...cfg.colors}
+          const cfg=await cfgRes.json()
           if(cfg.scheduleTitle||cfg.appTitle)document.title=cfg.scheduleTitle||cfg.appTitle
           if(cfg.restDayLabel)restLbl=cfg.restDayLabel
-          if(cfg.wkBlockType)accColor=cfg.wkBlockType
-          const r=document.documentElement.style
-          if(cfg.themeAccent)r.setProperty('--accent',cfg.themeAccent)
-          if(cfg.themeAccentText)r.setProperty('--accent-text',cfg.themeAccentText)
-          if(cfg.wkBg){r.setProperty('--bg',cfg.wkBg);r.setProperty('--bg2',cfg.wkBg)}
-          if(cfg.wkDivider)r.setProperty('--border',cfg.wkDivider)
-          if(cfg.wkHeader)r.setProperty('--accent',cfg.wkHeader)
-          if(cfg.wkDateNum)r.setProperty('--sub',cfg.wkDateNum)
-          if(cfg.wkExName)r.setProperty('--text',cfg.wkExName)
         }catch(e){}
       }
 
@@ -742,7 +771,7 @@ export default function Schedule() {
       const newAuto=autofillRm(sD,aD,athId,gdD)
 
       setSessions(sD);setAthletes(aD);setResults(rD)
-      setGymName(gName);setRestLabel(restLbl);setBlockAccent(accColor)
+      setGymName(gName);setRestLabel(restLbl)
       setRmValues(prev=>{
         const manual=Object.fromEntries(Object.entries(prev).filter(([,v])=>v.source==='manual'))
         return{...newAuto,...manual}
@@ -881,10 +910,17 @@ export default function Schedule() {
     if(resolvedAthId&&!candidates.some(a=>String(a.id)===String(resolvedAthId)))resolvedAthId=''
     setLogPane({sess,dateKey,assignedAth:candidates})
     setLogAthId(resolvedAthId);setLogBlocks(blocks)
-    setLogSubmitting(false);setLogSuccess(false);setLogError('')
+    setLogSubmitting(false);setLogSuccess(false);setLogConfirming(false);setLogError('')
+  }
+
+  // Confirm step (policy: review before submit, same as results.html)
+  function setLogConfirmStep(on){
+    if(on&&!logAthId){setLogError('Selecione seu nome antes de enviar.');return}
+    setLogError('');setLogConfirming(on)
   }
 
   async function submitLog(){
+    if(logSubmitting)return
     if(!logAthId){setLogError('Selecione seu nome antes de enviar.');return}
     setLogSubmitting(true);setLogError('')
     const{dateKey,sess}=logPane
@@ -914,6 +950,7 @@ export default function Schedule() {
   }
 
   async function submitDeskReg(){
+    if(deskRegSubmitting)return
     if(!selAth||!deskRegBl){setDeskRegError('Selecione um atleta primeiro.');return}
     setDeskRegSubmitting(true);setDeskRegError('')
     const{bl,sess,dateKey}=deskRegBl
@@ -945,15 +982,17 @@ export default function Schedule() {
     <LogPane pane={logPane} athId={logAthId} onAthId={setLogAthId}
       blocks={logBlocks} onBlocks={setLogBlocks}
       submitting={logSubmitting} success={logSuccess} error={logError}
-      onSubmit={submitLog} onClose={()=>{setLogPane(null);setLogSuccess(false);setLogError('')}}
+      confirming={logConfirming} onConfirming={setLogConfirmStep}
+      onSubmit={submitLog} onClose={()=>{setLogPane(null);setLogSuccess(false);setLogConfirming(false);setLogError('')}}
       lockedAthName={lockedId?athletes.find(a=>String(a.id)===String(lockedId))?.name||'':''}/>
 
     <div className={styles.pageRoot} style={isNavHidden() ? { paddingBottom: 0 } : undefined}><div className={styles.inner}>
-    <div className={styles.hdr}>
+    <header className={styles.hdr}>
       <div className={styles.hdrRule}><div className={styles.hdrLine}/><div className={styles.hdrDiamond}/><div className={`${styles.hdrLine} ${styles.hdrLineR}`}/></div>
       <div className={styles.brand}>{gymName.toUpperCase()}</div>
-      <div className={styles.gym}>AGENDA</div>
-    </div>
+      <h1 className={styles.gym}>AGENDA</h1>
+    </header>
+    <main className={styles.main}>
 
     {/* Mobile bars */}
     {status!=='loading'&&<>
@@ -964,9 +1003,9 @@ export default function Schedule() {
         </select>
       </div>}
       <div className={`${styles.weekNav} ${styles.mobileOnly}`}>
-        <button className={styles.navBtn} onClick={()=>changeWeek(-1)}><i className="ti ti-chevron-left"/></button>
+        <button className={styles.navBtn} onClick={()=>changeWeek(-1)} aria-label="Semana anterior"><i className="ti ti-chevron-left"/></button>
         <span className={styles.weekLabel}>{weekLabel}</span>
-        <button className={styles.navBtn} onClick={()=>changeWeek(1)}><i className="ti ti-chevron-right"/></button>
+        <button className={styles.navBtn} onClick={()=>changeWeek(1)} aria-label="Próxima semana"><i className="ti ti-chevron-right"/></button>
       </div>
     </>}
 
@@ -997,7 +1036,9 @@ export default function Schedule() {
                   const moreEx=blocks.flatMap(b=>(b.exercises||[])).filter(e=>e.name).length>3
                   return(
                     <div key={sess.id}>
-                      <div className={styles.sessSummary} onClick={()=>setExpanded(prev=>{const n=new Set(prev);const k=`${dk}|${si}`;n.has(k)?n.delete(k):n.add(k);return n})}>
+                      <div className={styles.sessSummary} role="button" tabIndex={0} aria-expanded={isExp}
+                        onClick={()=>setExpanded(prev=>{const n=new Set(prev);const k=`${dk}|${si}`;n.has(k)?n.delete(k):n.add(k);return n})}
+                        onKeyDown={onKey(()=>setExpanded(prev=>{const n=new Set(prev);const k=`${dk}|${si}`;n.has(k)?n.delete(k):n.add(k);return n}))}>
                         {sess.sessionName&&<div className={styles.sessName}>{sess.sessionName}</div>}
                         {sess.mainTraining&&!lockedId&&<div className={styles.sessAlvo}>{Array.isArray(sess.mainTraining)?sess.mainTraining.join(', '):sess.mainTraining}</div>}
                         <div className={styles.blockBadges}>
@@ -1014,7 +1055,7 @@ export default function Schedule() {
                         <div className={styles.expandToggle}>{isExp?'▲ fechar':'▼ detalhes'}</div>
                       </div>
                       {isExp&&<SessionDetail
-                        sess={sess} dateKey={dk} accent={blockAccent}
+                        sess={sess} dateKey={dk}
                         checked={checked} roundState={roundState}
                         rmValues={rmValues} rmEditKey={rmEditKey}
                         demoMap={demoMapRef.current}
@@ -1043,9 +1084,9 @@ export default function Schedule() {
       {/* Desktop page header */}
       <div className={styles.deskPageHdr}>
         <div className={styles.deskWeekNav}>
-          <button className={styles.navBtn} onClick={()=>changeWeek(-1)}><i className="ti ti-chevron-left"/></button>
+          <button className={styles.navBtn} onClick={()=>changeWeek(-1)} aria-label="Semana anterior"><i className="ti ti-chevron-left"/></button>
           <span className={styles.weekLabel}>{weekLabel}</span>
-          <button className={styles.navBtn} onClick={()=>changeWeek(1)}><i className="ti ti-chevron-right"/></button>
+          <button className={styles.navBtn} onClick={()=>changeWeek(1)} aria-label="Próxima semana"><i className="ti ti-chevron-right"/></button>
         </div>
       </div>
 
@@ -1068,7 +1109,9 @@ export default function Schedule() {
                   return(
                     <div key={sess.id}
                       className={`${styles.deskSCard}${isSel?' '+styles.deskSCardSel:''}`}
-                      onClick={()=>{setSelSess(isSel?null:{dateKey:dk,sessId:sess.id});setDeskRegBl(null)}}>
+                      role="button" tabIndex={0} aria-pressed={isSel}
+                      onClick={()=>{setSelSess(isSel?null:{dateKey:dk,sessId:sess.id});setDeskRegBl(null)}}
+                      onKeyDown={onKey(()=>{setSelSess(isSel?null:{dateKey:dk,sessId:sess.id});setDeskRegBl(null)})}>
                       <div className={styles.deskSCardName}>{sess.sessionName||'–'}</div>
                       <div className={styles.deskSCardFoot}>
                         <span className={styles.deskSCardLogLbl}>{logCount} logs</span>
@@ -1112,7 +1155,9 @@ export default function Schedule() {
                   return(
                     <div key={ath.id}
                       className={`${styles.deskAthRow}${isSel?' '+styles.deskAthRowSel:''}`}
-                      onClick={()=>changeAth(isSel?'':String(ath.id))}>
+                      role="button" tabIndex={0} aria-pressed={isSel}
+                      onClick={()=>changeAth(isSel?'':String(ath.id))}
+                      onKeyDown={onKey(()=>changeAth(isSel?'':String(ath.id)))}>
                       <span className={`${styles.deskAthDot}${hasLogged?' '+styles.deskAthDotFilled:''}`}/>
                       {ath.name}
                     </div>
@@ -1139,7 +1184,7 @@ export default function Schedule() {
                   :null
                 return(
                   <BlockDetail key={bl.id} bl={bl} sess={selSessObj} dateKey={selSess.dateKey}
-                    accent={blockAccent}
+                    deskIdleHint={!selAth}
                     checked={checked} roundState={roundState}
                     rmValues={rmValues} rmEditKey={rmEditKey}
                     demoMap={demoMapRef.current}
@@ -1183,40 +1228,34 @@ export default function Schedule() {
       </div>
     </div>}
 
+    </main>
     </div></div>
     <Nav active="schedule" lockedId={lockedId} gymName={gymName}/>
 
     {/* ── Check-in bottom sheet ── */}
     {checkinId&&(
-      <div style={{
-        position:'fixed',bottom:0,left:0,right:0,zIndex:999,
-        background:'#161210',borderTop:'2px solid #d8a840',
-        padding:'20px 18px 28px',boxShadow:'0 -4px 32px rgba(0,0,0,.7)',
-        fontFamily:'var(--font,inherit)',
-      }}>
+      <div className={styles.ckSheet}>
         {checkinDone?(
-          <div style={{textAlign:'center',padding:'12px 0'}}>
-            <div style={{fontSize:36,marginBottom:8}}>✅</div>
-            <div style={{fontSize:18,fontWeight:900,color:'#48b860',letterSpacing:'.06em',textTransform:'uppercase'}}>Check-in feito!</div>
-            <div style={{fontSize:13,color:'#806850',marginTop:6}}>{checkinExec?.class_label||'Aula'}</div>
+          <div className={styles.ckDone}>
+            <i className={`ti ti-circle-check ${styles.ckDoneIcon}`}/>
+            <div className={styles.ckDoneTitle}>Check-in feito!</div>
+            <div className={styles.ckDoneSub}>{checkinExec?.class_label||'Aula'}</div>
           </div>
         ):(
           <>
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+            <div className={styles.ckHdr}>
               <div>
-                <div style={{fontSize:12,fontWeight:900,color:'#d8a840',letterSpacing:'.15em',textTransform:'uppercase'}}>Check-in</div>
-                {checkinExec?.class_label&&<div style={{fontSize:16,fontWeight:700,color:'#f0e8d0',marginTop:2}}>{checkinExec.class_label}</div>}
+                <div className={styles.ckKicker}>Check-in</div>
+                {checkinExec?.class_label&&<div className={styles.ckClass}>{checkinExec.class_label}</div>}
               </div>
-              <button onClick={()=>setCheckinId('')} style={{background:'transparent',border:'none',color:'#554a3a',fontSize:22,cursor:'pointer',padding:4}}>✕</button>
+              <button className={styles.ckClose} onClick={()=>setCheckinId('')} aria-label="Fechar">✕</button>
             </div>
 
-            <div style={{display:'flex',gap:8,marginBottom:14}}>
-              <button onClick={()=>setCheckinMode('athlete')}
-                style={{flex:1,padding:'8px 4px',fontSize:13,fontWeight:700,border:`1px solid ${checkinMode==='athlete'?'#4ac8c0':'#2a231c'}`,borderRadius:4,background:checkinMode==='athlete'?'#0d1a1a':'#111',color:checkinMode==='athlete'?'#4ac8c0':'#806850',cursor:'pointer',fontFamily:'inherit'}}>
+            <div className={styles.ckModes}>
+              <button className={`${styles.ckMode}${checkinMode==='athlete'?' '+styles.ckModeOn:''}`} onClick={()=>setCheckinMode('athlete')}>
                 Estou na lista
               </button>
-              <button onClick={()=>setCheckinMode('anon')}
-                style={{flex:1,padding:'8px 4px',fontSize:13,fontWeight:700,border:`1px solid ${checkinMode==='anon'?'#d8a840':'#2a231c'}`,borderRadius:4,background:checkinMode==='anon'?'#1a120a':'#111',color:checkinMode==='anon'?'#d8a840':'#806850',cursor:'pointer',fontFamily:'inherit'}}>
+              <button className={`${styles.ckMode}${checkinMode==='anon'?' '+styles.ckModeOn:''}`} onClick={()=>setCheckinMode('anon')}>
                 Não estou na lista
               </button>
             </div>
@@ -1224,39 +1263,34 @@ export default function Schedule() {
             {checkinMode==='athlete'?(
               <>
                 <input
+                  className={styles.ckInput}
                   placeholder="Buscar nome..."
                   value={checkinSearch}
                   onChange={e=>setCheckinSearch(e.target.value)}
-                  style={{width:'100%',padding:'8px 10px',fontSize:14,background:'#111',border:'1px solid #2a231c',color:'#c8b090',borderRadius:4,outline:'none',fontFamily:'inherit',marginBottom:10,boxSizing:'border-box'}}
                 />
-                <div style={{display:'flex',flexDirection:'column',gap:6,maxHeight:160,overflowY:'auto'}}>
+                <div className={styles.ckList}>
                   {athletes
                     .filter(a=>!checkinSearch||a.name.toLowerCase().includes(checkinSearch.toLowerCase()))
                     .map(a=>(
-                      <div key={a.id} onClick={()=>setCheckinAthId(String(a.id))}
-                        style={{padding:'8px 12px',borderRadius:4,cursor:'pointer',fontSize:14,fontWeight:700,
-                          background:checkinAthId===String(a.id)?'#0d1a1a':'#111',
-                          border:`1px solid ${checkinAthId===String(a.id)?'#4ac8c0':'#2a231c'}`,
-                          color:checkinAthId===String(a.id)?'#4ac8c0':'#c8b090'}}>
+                      <button key={a.id} type="button"
+                        className={`${styles.ckRow}${checkinAthId===String(a.id)?' '+styles.ckRowOn:''}`}
+                        onClick={()=>setCheckinAthId(String(a.id))}>
                         {a.name}
-                      </div>
+                      </button>
                     ))}
                 </div>
               </>
             ):(
               <input
+                className={styles.ckInput}
                 placeholder="Seu nome (placeholder)..."
                 value={checkinAnonName}
                 onChange={e=>setCheckinAnonName(e.target.value)}
-                style={{width:'100%',padding:'8px 10px',fontSize:14,background:'#111',border:'1px solid #2a231c',color:'#c8b090',borderRadius:4,outline:'none',fontFamily:'inherit',boxSizing:'border-box'}}
               />
             )}
 
-            <button onClick={submitCheckin} disabled={checkinSubmitting||(checkinMode==='athlete'&&!checkinAthId)||(checkinMode==='anon'&&!checkinAnonName.trim())}
-              style={{width:'100%',marginTop:14,padding:'11px',fontSize:15,fontWeight:900,letterSpacing:'.08em',textTransform:'uppercase',
-                border:'none',borderRadius:5,cursor:'pointer',fontFamily:'inherit',
-                background:checkinSubmitting?'#1a3a1a':'#48b860',color:'#0d0b09',
-                opacity:(checkinSubmitting||(checkinMode==='athlete'&&!checkinAthId)||(checkinMode==='anon'&&!checkinAnonName.trim()))?0.5:1}}>
+            <button className={styles.ckGo} onClick={submitCheckin}
+              disabled={checkinSubmitting||(checkinMode==='athlete'&&!checkinAthId)||(checkinMode==='anon'&&!checkinAnonName.trim())}>
               {checkinSubmitting?'Registrando...':'Fazer Check-in'}
             </button>
           </>
