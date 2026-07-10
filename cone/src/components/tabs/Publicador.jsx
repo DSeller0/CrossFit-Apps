@@ -7,7 +7,7 @@ import {
 import { APP_CONFIG, ZONES, ECOL, DSHORT, PLC, GF } from '../../utils/config';
 import { buildPixPayload } from '../../utils/pix';
 import PresenterView from '../PresenterView';
-import { exVolStr, fmtIntensity } from '../../public/lib/wod.js';
+import { exVolStr, fmtIntensity, groupProgressionSteps } from '../../public/lib/wod.js';
 import { MONTH_PT, DAY_PT_TITLE } from '../../public/lib/week.js';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
@@ -19,19 +19,18 @@ function buildProgressionLines(ex) {
   if (!steps.length) return null;
   const name = ex.name.toUpperCase();
   const distPrefix = ex.dist ? (ex.sets ? `${ex.sets}×${ex.dist}${ex.distUnit || 'm'}` : `${ex.dist}${ex.distUnit || 'm'}`) : null;
-  const groups = [];
-  steps.forEach(s => {
-    const reps = s.reps || ex.reps || '';
-    const rawUnit = s.unit || '% RM';
-    const unit = rawUnit === '%' || rawUnit === '% do RM' ? '% RM' : rawUnit;
-    const existing = groups.find(g => g.reps === reps && g.unit === unit);
-    if (existing) { existing.count++; if (s.load) existing.loads.push(s.load); }
-    else groups.push({ reps, unit, loads: s.load ? [s.load] : [], count: 1 });
-  });
+  const normUnit = u => (u === '%' || u === '% do RM' ? '% RM' : (u || '% RM'));
+  // Groups by reps only (same key as the canonical Schedule.jsx view) so the
+  // printed/exported WOD always shows the same number of lines as the in-app
+  // schedule — re-derive each group's unit from the raw steps (canonical
+  // groupProgressionSteps() doesn't carry unit) so kg/lb progressions keep
+  // their real unit instead of always being labeled "% RM".
+  const groups = groupProgressionSteps(ex);
   return groups.map(g => {
-    const repsPrefix = distPrefix || (g.count && g.reps ? `${g.count}×${g.reps}` : g.reps);
+    const repsPrefix = distPrefix || (ex.sets && g.reps ? `${ex.sets}×${g.reps}` : g.reps);
     const nameLine = [repsPrefix, name].filter(Boolean).join(' ');
-    const loadStr = g.loads.length ? `${g.loads.join('/')} ${g.unit}` : '';
+    const groupUnits = [...new Set(steps.filter(s => (s.reps || ex.reps || '') === g.reps && s.load).map(s => normUnit(s.unit)))];
+    const loadStr = g.loads.length ? `${g.loads.join('/')} ${groupUnits.length === 1 ? groupUnits[0] : '% RM'}` : '';
     return { nameLine, loadStr };
   });
 }
