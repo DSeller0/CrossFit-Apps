@@ -1,5 +1,7 @@
 # 17 — schedule.html log-sheet athlete select: empty options + invisible-athlete submit (#49)
 
+> ✅ Done: f242947 · 2026-07-10 — see BACKLOG.md
+
 ## Context
 Found live in the 2026-07-09 benchmark walk (see the report's schedule.html section). The "Registrar Resultado" sheet's Atleta `<select>` options come only from `sess.mainTraining` (`Schedule.jsx:874-875` in `doOpenLog`: `assignedAth = athletes.filter(a => targets.includes(a.name))`). Group sessions have empty `mainTraining`, so:
 1. **No page filter set:** the select contains only "— Selecione —" — a dead end; the athlete cannot pick themselves.
