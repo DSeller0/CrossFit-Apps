@@ -873,11 +873,13 @@ export default function Schedule() {
   function doOpenLog(sess,dateKey,aths,athId,prefill=null){
     const targets=Array.isArray(sess.mainTraining)?sess.mainTraining:(sess.mainTraining?[sess.mainTraining]:[])
     const assignedAth=(aths||athletes).filter(a=>targets.includes(a.name))
+    const candidates=assignedAth.length?assignedAth:(aths||athletes)
     const wodBls=(sess.blocks||[]).filter(b=>WOD_LOG_TYPES.includes(b.type)||WOD_LOG_TYPES.includes(b.label))
     const blocks=wodBls.map(b=>({blockId:b.id,blockType:b.type,blockLabel:b.label&&b.type&&b.label!==b.type?`${b.label} · ${b.type}`:b.label||b.type,rpe:7,scale:'RX',perfTime:'',perfRounds:'',perfReps:''}))
     if(prefill?.blockId){const bi=blocks.findIndex(b=>b.blockId===prefill.blockId);if(bi>=0){if(prefill.perfTime)blocks[bi].perfTime=prefill.perfTime;if(prefill.perfRounds)blocks[bi].perfRounds=prefill.perfRounds}}
-    const resolvedAthId=prefill?.athId||athId||''
-    setLogPane({sess,dateKey,assignedAth})
+    let resolvedAthId=prefill?.athId||athId||''
+    if(resolvedAthId&&!candidates.some(a=>String(a.id)===String(resolvedAthId)))resolvedAthId=''
+    setLogPane({sess,dateKey,assignedAth:candidates})
     setLogAthId(resolvedAthId);setLogBlocks(blocks)
     setLogSubmitting(false);setLogSuccess(false);setLogError('')
   }
