@@ -1,5 +1,7 @@
 # 15 — Icebox quick-wins batch #2 (#46 · #47 · #48 · #22 · #44 · #45) — #20 and #24 deferred
 
+> ✅ Done: d07cbd8 (commit 1/2: #46, #47, #48, #22, #44), d14a9e5 (commit 2/2: #45) · 2026-07-05 — see BACKLOG.md
+
 ## Context
 
 The Icebox held 8 S-sized items. Investigated whether they could all batch into one session (3 Explore agents + 1 Plan agent researched the actual code for each, not just the written backlog descriptions — two of which turned out stale or built on a premise that didn't hold). Verdict: **6 of 8** batch cleanly, following the project's own precedent ([plans/07-quick-wins-batch.md](./07-quick-wins-batch.md) — 5 independent S items in one session, one held back for a design gate). **2 of 8 deferred**, per explicit decision:
