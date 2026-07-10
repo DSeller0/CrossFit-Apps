@@ -1,6 +1,6 @@
 # 18 — Design pass B1: schedule.html (#50)
 
-> ✅ Done: `c29bf6a` · 2026-07-10 — see BACKLOG.md
+> ✅ Done: `c32f3bc` · 2026-07-10 — see BACKLOG.md
 
 ## Context
 First execution session of the design-pass program ([plans/16](./16-design-pass-program.md)); full findings in [reviews/2026-07-09-design-benchmark.md](../reviews/2026-07-09-design-benchmark.md) (schedule.html section). The flagship athlete page: mobile IA is strong; desktop has dead zones; heaviest fold-in load in the app. Run **after** #49 (plans/17) ships — this session re-drives the desktop-reg entry that sits in the same sheet.
