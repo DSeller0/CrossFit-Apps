@@ -1,6 +1,6 @@
 # 19 — Frontend design process: component-driven + in-app gallery
 
-> ✅ Done: `<pending-commit>` · 2026-07-10 — see BACKLOG.md
+> ✅ Done: `5dcd002` · 2026-07-10 — see BACKLOG.md
 
 ## Context
 
