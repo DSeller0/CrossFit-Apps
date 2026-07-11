@@ -33,9 +33,9 @@ export function exVolStr(ex) {
 }
 
 // Returns [] when ex has no steps. Callers that need a countable placeholder
-// (round/checkbox key generation) pad it themselves — Schedule.jsx's local
-// progGroups() does this consistently for all its interactive render paths
-// (ExRow, the round-badge calc, and blockProgress) so a stepless progression
+// (round/checkbox key generation) pad it themselves — schedule/scheduleHelpers.js's
+// progGroups() does this consistently for all of Schedule.jsx's interactive render
+// paths (ExRow, the round-badge calc, and blockProgress) so a stepless progression
 // exercise still gets one checkable row instead of silently vanishing (#44).
 export function groupProgressionSteps(ex) {
   const steps=ex.intensity?.steps||[],groups=[]
