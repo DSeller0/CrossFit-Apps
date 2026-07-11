@@ -1,43 +1,48 @@
-# 13 — ExerciseList adoption in Schedule + Estações reconciliation (#17)
+# 13 — Component extraction for the gallery + sidebar picker (#17)
 
-> **2026-07-05 session note:** shipped via **Path B**, not Path A. Reading `ExerciseList.jsx`/`.module.css` next to `Schedule.jsx`'s `ExRow`/`Schedule.module.css` confirmed a bigger structural mismatch than expected: TV's component is a read-only, big-font (22-42px) wall-display renderer (dot + plain-text vol/name/ins) while Schedule's row is a dense interactive control (checkbox/round-counter leading slot, small 11-14px pill badges, RM chip + inline editor, Demo button, space-between header) on a wholly separate CSS module. True slot-based adoption would mean building a parallel CSS variant inside `ExerciseList` for a *zero visible change* outcome, on a page used live at the gym — not worth the regression risk this session. Shipped the two concrete Path-B consolidations (dist formatter, progression-grouping) plus the Estações decision; see BACKLOG.md's Done entry. The markup-slot work in Approach/Path A below remains open under #17. Not marked `✅ Done` since the plan's core acceptance (actual `ExerciseList` adoption) isn't met.
+> **Rewritten 2026-07-11.** #17's scope changed twice; both prior decisions stay recorded below rather than erased, per WORKFLOW.md's plan-lifecycle intent (a plan's rationale should survive its own pivots).
+>
+> - **2026-07-05:** shipped via Path B, not Path A (see "History" below) — the two concrete consolidations landed, the markup-slot adoption (Path A) stayed open.
+> - **2026-07-10:** the design-process reform ([plans/19](./19-component-gallery-cdd.md)) redefined what "open" means. #17 is no longer about making `ExRow` render *through* `ExerciseList`'s markup (Path A) — that stays deliberately deferred, see CLAUDE.md "Shared rendering". #17 is now the **extraction vehicle for the component gallery**: pull `Schedule.jsx`'s inline interactive functions into standalone, importable components so they can enter `gallery.html` and be design-reviewed in every state. This is a mechanical refactor (move code, preserve behavior), not a markup-unification rewrite.
 
 ## Context
-`src/public/shared/ExerciseList.jsx` is the shared exercise-row component; TV uses it on both render paths (BlockCard + TimerSlide, via `slides.jsx`). `Schedule.jsx` still hand-rolls its own rows (`ExRow`, `Schedule.jsx:326+`) — the last documented half of #17 (the `fmtIntensity`/`exVolStr` formatter half already shipped in #37, so only the *markup* adoption remains). Surfaced again in [reviews/2026-07-05-full-pass.md](../reviews/2026-07-05-full-pass.md) dim 4.
 
-**Reality check the 2026-07-05 review found — #17 is not S.** `ExerciseList` is a **read-only, compact** renderer (dot · vol · name · intensity · note; handles complex + `exVolStr` dist). Schedule's `ExRow` is **interactive and much richer**: per-exercise check-off / `RdCounter` rounds, an RM chip + inline RM input + `Math.ceil` load calc, a Demo button, `toTitleCase` names, and **progression-step expansion** (one `progression` exercise fans out into grouped rows by reps, `Schedule.jsx:396-401`). A drop-in swap would silently delete all of that. So the row's **size is S → M** (recorded as a #17 correction).
+`gallery.html` ([plans/19](./19-component-gallery-cdd.md)) is the all-states source of truth for design review — but it can only show components that exist as standalone importable functions. Today it holds `ExerciseList` and `Nav`, both already exported from their own files. Everything interactive on the schedule page — `RdCounter`, `DemoPanel`, `LogPane`, `DeskRegPane`, `ExRow`, `BlockDetail`, `SessionDetail`, and the check-in bottom sheet — is defined as inline `function` declarations inside `Schedule.jsx` (current lines: `onKey` 78, `RdCounter` 83, `DemoPanel` 115, `LogPane` 159, `DeskRegPane` 265, `ExRow` 364, `BlockDetail` 500, `SessionDetail` 619, check-in sheet JSX inline at 1235+). Nothing outside that file can import them, so none of it can be gallery-reviewed — which is exactly the gap the user hit trying to compare the gallery against a live screenshot of the schedule page.
 
-Two concrete sub-findings from the review to fold in here:
-- ⚪ **Duplicated dist formatter** at `Schedule.jsx:401` — a bespoke `ex.dist?...` string that is byte-identical to `exVolStr`'s dist branch but won't track a future `exVolStr` change.
-- ⚪ **Estações render divergence** — Schedule preserves station structure (header + grouped exercises, `Schedule.jsx:507-516`) while TV flattens stations into a flat exercise list. Display-only; needs a *decision*, not necessarily a code change.
-
-Model: Sonnet · Size: M
+This plan also folds in a second, related decision from the same conversation: the gallery is currently one flat growing page. That's fine for 2 components; it will not be fine once this extraction lands ~7 more, each with several states, and it gets worse as #51–#59 add their own pages' components on top. Restructuring after the fact wastes the states already written, so the picker goes in **first**, as prep, before the schedule extraction populates it.
 
 ## Acceptance
-- Schedule's exercise rows render through the shared `ExerciseList` (or a shared row primitive it exposes) **without losing** any current affordance: check-off/rounds, RM chip + input + calc, Demo, progression-step expansion, `toTitleCase`.
-- The bespoke dist formatter at `Schedule.jsx:401` is gone — dist comes from `exVolStr` (single source).
-- The 3 render paths (TV BlockCard, TV TimerSlide, Schedule rows) stay visually consistent for standard, complex, and cardio-distance exercises — verified by eye, not just by tests.
-- Estações: either TV renders station structure too, **or** the flattening is recorded as an intentional decision (Decisions-recorded + a code comment at the flatten site) — not left as silent drift.
+
+1. **Gallery picker in place before extraction lands:** `Gallery.jsx` restructured from one flat scrolling page into a picker (left sidebar list, grouped by source page/file) + a main pane that renders only the selected entry's states. `ExerciseList` and `Nav`'s existing states move into the new structure with no loss of coverage.
+2. **Extracted, not rewritten:** `RdCounter`, `DemoPanel`, `LogPane`, `DeskRegPane`, `ExRow`, `BlockDetail`, `SessionDetail`, and the check-in sheet become their own files under `src/public/schedule/` (e.g. `RdCounter.jsx`, `LogPane.jsx`, …), each importing what it needs from `wod.js`/its own CSS module slice, exported for both `Schedule.jsx` and the gallery to import. `Schedule.jsx` imports them back — **zero behavior change**: every affordance (check-off, round counter, RM chip + calc, Demo, progression-step expansion, confirm steps, check-in modes) works identically to today.
+3. **Each extracted component gets a gallery entry** under the schedule group, covering the state-coverage standard's applicable axes (WORKFLOW.md "Design work"): e.g. `BlockDetail` — WOD-with-athlete / WOD-idle-hint / non-WOD-full-width / Estações; `ExRow` — standard / progression / complex; `RdCounter` — idle/active/done; `LogPane` — form/confirm/success; check-in sheet — athlete-mode/anon-mode/done.
+4. **CSS stays put.** `Schedule.module.css` is not split apart in this pass — extracted components keep importing from it (or from small new per-component `.module.css` files only where that's cheap) — splitting the stylesheet is a separate concern, not required for gallery entry.
+5. **The dist-formatter / Estações decisions already shipped** (2026-07-05, see History) are unaffected — not in scope to redo.
 
 ## Files
-- [src/public/shared/ExerciseList.jsx](../../src/public/shared/ExerciseList.jsx) — the shared component to extend (currently read-only; 60 lines).
-- [src/public/shared/ExerciseList.module.css](../../src/public/shared/ExerciseList.module.css) — shared row styles.
-- [src/public/schedule/Schedule.jsx](../../src/public/schedule/Schedule.jsx) — `ExRow` (`:326`), station rendering (`:507-517`), the dist dup (`:401`), progression grouping (`:396-401`).
-- [src/public/tv/slides.jsx](../../src/public/tv/slides.jsx) — the Estações flatten site (confirm exact line; the old `TV.jsx:132-133` ref moved here in the #41 slide extraction).
+
+- `cone/src/public/schedule/Schedule.jsx` — source of every extraction target (see line numbers above; re-check before starting, they will have shifted again).
+- New: `cone/src/public/schedule/RdCounter.jsx`, `DemoPanel.jsx`, `LogPane.jsx`, `DeskRegPane.jsx`, `ExRow.jsx`, `BlockDetail.jsx`, `SessionDetail.jsx`, and a check-in sheet component (name TBD at implementation time, e.g. `CheckinSheet.jsx`).
+- `cone/src/public/gallery/Gallery.jsx` + `Gallery.module.css` — restructure into picker + stage; new fixture data per extracted component.
+- `cone/src/public/lib/wod.js` — no changes expected; extracted components continue importing `exVolStr`/`fmtIntensity`/`groupProgressionSteps`/etc. from here (already canonical).
 
 ## Approach
-**Path A (recommended — true adoption).** Extend `ExerciseList` to accept **optional slots** for the interactive bits, so Schedule reuses the shared row markup instead of duplicating it:
-1. Add optional render-prop / children props to `ExerciseList`: a `leading` slot (check / `RdCounter`), a `trailing` slot (RM chip + Demo), an optional inline-RM-editor slot, and a `titleCase` flag. When no slots are passed (TV), it renders exactly as today.
-2. Move progression-step expansion into a shared helper (it's pure: `steps → groups by reps`) so both a future shared renderer and Schedule use one implementation; delete the bespoke dist formatter at `:401` in favour of `exVolStr`.
-3. Rewrite Schedule's `ExRow` as a thin wrapper that passes its interactive controls into the shared component's slots.
-4. Estações: decide TV-flatten vs structure. Recommendation — **keep TV flat** (glanceable wall display) and record it as an intentional decision + a one-line comment at the flatten site; make Schedule's station header the canonical structured view. (If instead we want parity, teach `ExerciseList`/its caller to group by station.)
 
-**Path B (fallback if Path A balloons).** Ship only the two concrete consolidations — kill the `:401` dist dup (use `exVolStr`) and settle the Estações decision — and leave `ExRow` interactive-but-unshared, keeping #17 open for the slot refactor. Smaller, but doesn't retire the markup duplication.
-
-Reuse: `exVolStr`/`fmtIntensity` (`wod.js`, already canonical), `ExerciseList` structure/CSS. Do **not** reintroduce a local formatter.
+1. **Picker first.** Change `Gallery.jsx`'s top-level structure: a `GROUPS` array (`{ group: 'Shared', items: [...] } / { group: 'Schedule', items: [...] }`), a left `<nav>` listing groups/items, `useState` for the selected item, main pane renders only that item's `<Case>` blocks. Keep the existing theme `<select>` + width toggle in the top bar (unchanged). Move `ExerciseList`'s and `Nav`'s existing fixtures into this structure verbatim — this step should be visually a no-op (same content, new navigation) and is the checkpoint to verify nothing regressed before touching `Schedule.jsx`.
+2. **Extract one component at a time**, simplest first: `RdCounter` → `DemoPanel` → `ExRow` → `BlockDetail` → `SessionDetail` → `LogPane` → `DeskRegPane` → check-in sheet. For each: move the `function` into its own file with an explicit export, import it back into `Schedule.jsx`, run `npm test` + a quick live click-through of that one affordance before moving to the next. Small commits over one big-bang rewrite — a mechanical move is exactly where introducing a subtle prop-drilling bug is easiest to catch early and hardest to catch in a 500-line diff.
+3. **Add the gallery entry** for each component immediately after extracting it (not batched at the end) — mock fixtures following the state-coverage standard, using `blkColor`/family colors like `Gallery.jsx` already does for `ExerciseList`.
+4. Leave `Schedule.module.css` as the shared stylesheet; extracted files import `styles` from it via a relative path, same as today's inline functions do.
 
 ## Verification
-- Local stack (`supabase start` + reseed): open **schedule.html** for a day with (a) a standard block, (b) a complex exercise, (c) a progression exercise with multiple rep-groups + an RM set, (d) a cardio/distance exercise, (e) an **Estações** block with a rest station. Confirm every affordance still works: check a row, advance a round, open the RM input and confirm the calc, open Demo, and that progression rows still fan out.
-- Cross-check the same exercises on the **TV WOD slide** and **TV timer panel** — identical vol/intensity strings, complex notation, and dist rendering.
-- `npm test` green (add a unit test for the extracted progression-grouping helper if one is created). `/code-review` before pushing (M item). No `/security-review` (pure client render, no RLS/auth/user-input surface).
-- `npm run build:all` both builds succeed.
+
+- After step 1 (picker): `npm run dev:public` → `/CrossFit-Apps/gallery.html`, confirm `ExerciseList` and `Nav` still show every prior state, now behind the picker, across all 4 themes + both widths, 0 console errors.
+- After each extraction in step 2: `npm test` green; live click-through on the local stack of that component's affordance on the real `schedule.html` (e.g. after extracting `LogPane`, actually open the log sheet, fill it, confirm, submit, and DB-check + revert the row — same rigor as #50's verification, not just a visual glance).
+- End state: full re-drive of `schedule.html` at 1280×800 + 390×844 across all 4 themes (repeat #50's verification pass) to confirm the extraction as a whole introduced no regression, plus the new gallery entries reviewed for coverage against the state-coverage standard.
+- `npm run build:all` succeeds; confirm `gallery.html` still does not appear in `public-dist/` (dev-only property preserved).
+- `/code-review` before pushing (M item, mechanical refactor — correctness risk is prop-drilling/behavior drift, not novel logic).
+
+## History (preserved from the original plan)
+
+**2026-07-05 session note:** the *first* version of this plan proposed Path A — extending `ExerciseList` with optional slots (`leading`/`trailing`/inline-RM-editor) so `Schedule.jsx`'s `ExRow` would render through the shared component instead of duplicating its markup. Investigating it found a bigger structural mismatch than expected: `ExerciseList` is a **read-only**, big-font (22–42px) wall-display renderer for TV; `ExRow` is a dense **interactive** control (checkbox/round-counter leading slot, small 11–14px pills, RM chip + inline editor, Demo button). True slot-based adoption meant building a parallel CSS variant inside `ExerciseList` for a *zero visible change* outcome, on a page used live at the gym — not worth the regression risk that session. Shipped instead via **Path B**: killed the duplicated dist formatter (now sourced from canonical `exVolStr`) and settled the Estações decision (TV stays flattened by design, Schedule keeps structured stations — recorded, not drift). The markup-slot idea (Path A) is **not** part of this plan anymore — CLAUDE.md's "Shared rendering" section records it as deliberately deferred, and the 2026-07-10 gallery decision replaced "unify the markup" with "make the existing markup importable" as #17's actual goal.
+
+Model: Sonnet · Size: M
