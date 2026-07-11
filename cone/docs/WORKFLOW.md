@@ -56,17 +56,35 @@ The backlog gets *refilled* by running **`/app-review`** (portable skill in `~/.
 
 This closes the loop: plan → execute → **review** → replan.
 
-## Design / layout items — mockup first (mandatory)
+## Design work — component-driven, two lanes (mandatory)
 
-Before any implementation on a visual change:
-1. **ASCII** sketch for quick calibration.
-2. **Preview card in `cone/design/`** — a self-contained HTML file (inline CSS, first line `<!-- @dsCard group="…" -->`), synced to the **"Cone Design System"** project on claude.ai/design via DesignSync.
-3. User reviews the card in the Design System pane (or the local file) and adjusts.
-4. Implementation follows the *approved* card.
+The **all-states source of truth is the in-app component gallery** (`gallery.html`, dev-only — see below), which renders the *real* components in every state so it cannot drift. Static mockups are only ever ideation for things that don't exist yet. **The rule that kills drift: the moment code exists, the gallery (real code) is the truth** — never maintain a hand-built mirror of shipped UI.
 
-This is required for design work — it's the cheapest place to change your mind.
+Which lane a change is in:
 
-The design project also holds the canon: token swatches, type scale, block color families, and shared components. New mockups build on those cards. The old loose `design-*.html` files at the repo root are **frozen legacy** — never add new ones.
+- **Lane A — changing an existing component:** work **gallery-first**. Adjust the real component → review every state in the gallery across **all 4 themes + both widths** → screenshots go into the Cone Design System (claude.ai/design) `uploads/` for the record. **No hand-built static mockup.**
+- **Lane B — net-new component/surface (no code yet):** ideation mockup first — an ASCII sketch, then a self-contained preview card in `cone/design/` (inline CSS, first line `<!-- @dsCard group="…" -->`) synced to the Design System via DesignSync. User reviews/adjusts → **approves** → build the real component → it enters the gallery → the static card is archived (never maintained as a mirror).
+
+### State-coverage standard (the acceptance bar for a Lane-B mockup *and* a component's gallery entry)
+
+Enumerate the axes that apply to the component and show one instance of each:
+- **Content:** empty · single · many · overflow/truncation (long names) · loading + error where they exist.
+- **Data variants:** the real shape variants — e.g. exercise = standard / progression / complex / gender-intensity / legacy-cardio; block = WOD / Força / Estações / rounds.
+- **Interaction:** default · hover · focus-visible · selected/active · disabled · done/checked.
+- **Responsive:** mobile 390 · desktop 1280.
+- **Theme:** all 4 (totk dark/light, spirit-blossom dark/light).
+
+Not every component has every axis; cover the ones that apply.
+
+### Approval gate
+
+The human review is a gate, not a formality. In **auto/non-interactive mode the run stops** at "states ready for your review" — Lane A: gallery states built/screenshotted; Lane B: mockup synced — and hands back. It does **not** continue into implementation, and never calls a card "approved" the user hasn't seen.
+
+### The component gallery
+
+`gallery.html` (repo root) + `cone/src/public/gallery/` mounts a `Gallery` component: a theme `<select>`, a stage-width toggle, and sections that import the **real** components (`ExerciseList`, `Nav` today) rendering each state from small hardcoded fixtures. **Dev-only:** it is deliberately *not* in `vite.public.config.js` `rollupOptions.input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built or deployed. It grows page-by-page: each design-program session that touches a page extracts that page's reusable pieces into components (this is #17) and adds their state entries. Full Storybook was deferred; the gallery is a strict subset of its groundwork.
+
+Claude Design's role is now: **token/palette canon, Lane-B ideation, and a screenshot archive of the real components** — not a mirror. The old loose `design-*.html` files at the repo root are **frozen legacy** — never add new ones.
 
 ## Model guidance (per-item, not per-tier)
 

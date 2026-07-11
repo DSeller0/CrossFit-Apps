@@ -1,0 +1,38 @@
+.root { min-height: 100vh; }
+
+/* ── Top bar ── */
+.bar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 20px;
+  background: var(--stone); border-bottom: 1px solid var(--divider);
+}
+.barTitle { font-size: 14px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--cream); font-family: var(--font); }
+.barDev { font-size: 9px; font-weight: 700; letter-spacing: .15em; color: var(--bg); background: var(--gold); padding: 1px 6px; vertical-align: middle; }
+.barCtrls { display: flex; align-items: center; gap: 14px; }
+.ctrl { display: flex; align-items: center; gap: 7px; }
+.ctrlLbl { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.select { font-family: inherit; font-size: 12px; padding: 5px 8px; background: var(--stone2); border: 1px solid var(--divider); color: var(--text); outline: none; cursor: pointer; }
+.select:focus { border-color: var(--teal); }
+.wToggle { display: flex; }
+.wBtn { font-family: inherit; font-size: 11px; font-weight: 700; padding: 5px 12px; background: var(--stone2); border: 1px solid var(--divider); color: var(--muted); cursor: pointer; }
+.wBtn + .wBtn { border-left: none; }
+.wBtnOn { background: color-mix(in srgb, var(--teal) 15%, var(--stone2)); border-color: var(--teal); color: var(--teal); }
+
+/* ── Stage ── */
+.stage { display: block; padding: 24px; margin: 0 auto; }
+.stageMobile { max-width: 438px; }
+
+/* ── Section ── */
+.section { margin-bottom: 40px; }
+.sectionHdr { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--gold2); }
+.sectionTitle { font-size: 16px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); font-family: var(--font); }
+.sectionSub { font-size: 11px; color: var(--muted); font-style: italic; }
+
+/* ── Case (one state) ── */
+.case { margin-bottom: 16px; }
+.caseLbl { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+.caseStage { padding: 14px; background: var(--stone); border: 1px solid var(--divider); }
+
+/* ── Nav demo frame — transform makes the fixed Nav position relative to here ── */
+.navFrame { position: relative; transform: translateZ(0); height: 300px; overflow: hidden; background: var(--bg); }

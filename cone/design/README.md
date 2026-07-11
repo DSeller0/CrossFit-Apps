@@ -2,6 +2,8 @@
 
 Source for the **"Cone Design System"** project on claude.ai/design. Replaces the loose `design-*.html` files at the repo root (those are frozen legacy — never add new ones).
 
+> **Role (2026-07-10):** Claude Design is **token/palette canon + Lane-B ideation + a screenshot archive of the real components** — NOT a hand-maintained mirror of shipped UI. The all-states source of truth for existing components is the **in-app component gallery** (`gallery.html`, dev-only) that renders the real code. Static cards here are only ever ideation for things that don't exist yet (Lane B); once a component is built, the gallery is the truth. See `docs/WORKFLOW.md` → "Design work" for the two-lane process + coverage standard.
+
 ## Rules
 
 - One self-contained HTML file per card: inline CSS, no external requests (CSP blocks them).
