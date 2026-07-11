@@ -9,6 +9,7 @@ import ExRow from '../schedule/ExRow.jsx'
 import BlockDetail from '../schedule/BlockDetail.jsx'
 import SessionDetail from '../schedule/SessionDetail.jsx'
 import CheckinSheet from '../schedule/CheckinSheet.jsx'
+import MobileFrame from './MobileFrame.jsx'
 import { blkColor } from '../lib/wod.js'
 import s from './Gallery.module.css'
 
@@ -91,6 +92,17 @@ function Case({ label, children }) {
   )
 }
 
+// Wraps position:fixed components in the transform-containment trick, so
+// each Case's fixed panel is isolated to its own box instead of all of them
+// stacking at the real viewport edge when several Cases render on one page
+// at once. Needed in both Full and MobileFrame's real-iframe mode — the
+// iframe fixes @media viewport correctness, not per-Case isolation. `.frameSide`
+// is sized wide enough (see Gallery.module.css) that LogPane's hardcoded
+// `width:400px` never clips against this box's own width.
+function FixedFrame({ variant, children }) {
+  return <div className={`${s.frame} ${s[variant]}`}>{children}</div>
+}
+
 function Section({ title, sub, children }) {
   return (
     <section className={s.section}>
@@ -157,18 +169,18 @@ const GROUPS = [
         id: 'demopanel',
         label: 'DemoPanel',
         render: () => (
-          <Section title="DemoPanel" sub="src/public/schedule/DemoPanel.jsx — overlay de vídeo/descrição (position: fixed — contido num quadro abaixo via transform)">
+          <Section title="DemoPanel" sub="src/public/schedule/DemoPanel.jsx — overlay de vídeo/descrição (position: fixed — contido num quadro abaixo via transform em Full; viewport real do MobileFrame em 390)">
             <Case label="Conteúdo completo (vídeo + descrição + músculos + notas)">
-              <div className={`${s.frame} ${s.frameBottom}`}><DemoPanel target={[{ name: 'Thruster' }]} demoMap={demoMapFull} onClose={NOOP} /></div>
+              <FixedFrame variant="frameBottom"><DemoPanel target={[{ name: 'Thruster' }]} demoMap={demoMapFull} onClose={NOOP} /></FixedFrame>
             </Case>
             <Case label="Somente texto (sem vídeo)">
-              <div className={`${s.frame} ${s.frameBottom}`}><DemoPanel target={[{ name: 'Wall Ball' }]} demoMap={demoMapTextOnly} onClose={NOOP} /></div>
+              <FixedFrame variant="frameBottom"><DemoPanel target={[{ name: 'Wall Ball' }]} demoMap={demoMapTextOnly} onClose={NOOP} /></FixedFrame>
             </Case>
             <Case label="Sem conteúdo disponível">
-              <div className={`${s.frame} ${s.frameBottom}`}><DemoPanel target={[{ name: 'Burpee' }]} demoMap={demoMapEmpty} onClose={NOOP} /></div>
+              <FixedFrame variant="frameBottom"><DemoPanel target={[{ name: 'Burpee' }]} demoMap={demoMapEmpty} onClose={NOOP} /></FixedFrame>
             </Case>
             <Case label="Complexo (múltiplos movimentos, conteúdo misto)">
-              <div className={`${s.frame} ${s.frameBottom}`}><DemoPanel target={[{ name: 'Clean Pull' }, { name: 'Power Clean' }]} demoMap={demoMapComplex} onClose={NOOP} /></div>
+              <FixedFrame variant="frameBottom"><DemoPanel target={[{ name: 'Clean Pull' }, { name: 'Power Clean' }]} demoMap={demoMapComplex} onClose={NOOP} /></FixedFrame>
             </Case>
           </Section>
         ),
@@ -304,38 +316,38 @@ const GROUPS = [
         id: 'logpane',
         label: 'LogPane',
         render: () => (
-          <Section title="LogPane" sub="src/public/schedule/LogPane.jsx — painel de registro mobile (position: fixed — contido num quadro via transform)">
+          <Section title="LogPane" sub="src/public/schedule/LogPane.jsx — painel de registro mobile (position: fixed — contido num quadro via transform em Full; viewport real do MobileFrame em 390)">
             <Case label="Formulário">
-              <div className={`${s.frame} ${s.frameSide}`}>
+              <FixedFrame variant="frameSide">
                 <LogPane pane={{ sess: logPaneSess, dateKey: '2026-07-11', assignedAth: logPaneAthletes }} athId="a1" onAthId={NOOP}
                   blocks={logPaneBlockForm} onBlocks={NOOP}
                   submitting={false} success={false} error="" confirming={false} onConfirming={NOOP}
                   onSubmit={NOOP} onClose={NOOP} lockedAthName="" />
-              </div>
+              </FixedFrame>
             </Case>
             <Case label="Revisão (confirmar)">
-              <div className={`${s.frame} ${s.frameSide}`}>
+              <FixedFrame variant="frameSide">
                 <LogPane pane={{ sess: logPaneSess, dateKey: '2026-07-11', assignedAth: logPaneAthletes }} athId="a1" onAthId={NOOP}
                   blocks={logPaneBlockDone} onBlocks={NOOP}
                   submitting={false} success={false} error="" confirming={true} onConfirming={NOOP}
                   onSubmit={NOOP} onClose={NOOP} lockedAthName="Bruna" />
-              </div>
+              </FixedFrame>
             </Case>
             <Case label="Sucesso">
-              <div className={`${s.frame} ${s.frameSide}`}>
+              <FixedFrame variant="frameSide">
                 <LogPane pane={{ sess: logPaneSess, dateKey: '2026-07-11', assignedAth: logPaneAthletes }} athId="a1" onAthId={NOOP}
                   blocks={logPaneBlockDone} onBlocks={NOOP}
                   submitting={false} success={true} error="" confirming={false} onConfirming={NOOP}
                   onSubmit={NOOP} onClose={NOOP} lockedAthName="" />
-              </div>
+              </FixedFrame>
             </Case>
             <Case label="Erro no envio (RPC falhou)">
-              <div className={`${s.frame} ${s.frameSide}`}>
+              <FixedFrame variant="frameSide">
                 <LogPane pane={{ sess: logPaneSess, dateKey: '2026-07-11', assignedAth: logPaneAthletes }} athId="a1" onAthId={NOOP}
                   blocks={logPaneBlockDone} onBlocks={NOOP}
                   submitting={false} success={false} error="Erro ao enviar. Tente novamente." confirming={true} onConfirming={NOOP}
                   onSubmit={NOOP} onClose={NOOP} lockedAthName="Bruna" />
-              </div>
+              </FixedFrame>
             </Case>
           </Section>
         ),
@@ -377,9 +389,9 @@ const GROUPS = [
         id: 'checkinsheet',
         label: 'CheckinSheet',
         render: () => (
-          <Section title="CheckinSheet" sub="src/public/schedule/CheckinSheet.jsx — bottom sheet de check-in via QR (position: fixed — contido num quadro via transform)">
+          <Section title="CheckinSheet" sub="src/public/schedule/CheckinSheet.jsx — bottom sheet de check-in via QR (position: fixed — contido num quadro via transform em Full; viewport real do MobileFrame em 390)">
             <Case label="Modo atleta (busca na lista)">
-              <div className={`${s.frame} ${s.frameBottom}`}>
+              <FixedFrame variant="frameBottom">
                 <CheckinSheet checkinExec={{ class_label: 'WOD 18h' }} checkinDone={false}
                   checkinMode="athlete" onCheckinMode={NOOP}
                   checkinSearch="" onCheckinSearch={NOOP}
@@ -387,10 +399,10 @@ const GROUPS = [
                   checkinAthId="a1" onCheckinAthId={NOOP}
                   checkinAnonName="" onCheckinAnonName={NOOP}
                   checkinSubmitting={false} onSubmit={NOOP} onClose={NOOP} />
-              </div>
+              </FixedFrame>
             </Case>
             <Case label="Modo visitante (não está na lista)">
-              <div className={`${s.frame} ${s.frameBottom}`}>
+              <FixedFrame variant="frameBottom">
                 <CheckinSheet checkinExec={{ class_label: 'WOD 18h' }} checkinDone={false}
                   checkinMode="anon" onCheckinMode={NOOP}
                   checkinSearch="" onCheckinSearch={NOOP}
@@ -398,10 +410,10 @@ const GROUPS = [
                   checkinAthId="" onCheckinAthId={NOOP}
                   checkinAnonName="Visitante" onCheckinAnonName={NOOP}
                   checkinSubmitting={false} onSubmit={NOOP} onClose={NOOP} />
-              </div>
+              </FixedFrame>
             </Case>
             <Case label="Concluído">
-              <div className={`${s.frame} ${s.frameBottom}`}>
+              <FixedFrame variant="frameBottom">
                 <CheckinSheet checkinExec={{ class_label: 'WOD 18h' }} checkinDone={true}
                   checkinMode="athlete" onCheckinMode={NOOP}
                   checkinSearch="" onCheckinSearch={NOOP}
@@ -409,7 +421,7 @@ const GROUPS = [
                   checkinAthId="" onCheckinAthId={NOOP}
                   checkinAnonName="" onCheckinAnonName={NOOP}
                   checkinSubmitting={false} onSubmit={NOOP} onClose={NOOP} />
-              </div>
+              </FixedFrame>
             </Case>
           </Section>
         ),
@@ -469,9 +481,15 @@ export default function Gallery() {
         </nav>
 
         <main className={s.main}>
-          <div className={`${s.stage}${w === 'mobile' ? ' ' + s.stageMobile : ''}`}>
-            {selected ? selected.render() : null}
-          </div>
+          {w === 'mobile' ? (
+            <MobileFrame theme={theme} width={390}>
+              <div className={s.stage}>{selected ? selected.render() : null}</div>
+            </MobileFrame>
+          ) : (
+            <div className={s.stage}>
+              {selected ? selected.render() : null}
+            </div>
+          )}
         </main>
       </div>
     </div>

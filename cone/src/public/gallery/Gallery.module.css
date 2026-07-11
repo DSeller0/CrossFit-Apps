@@ -36,7 +36,14 @@
 
 /* ── Stage ── */
 .stage { display: block; padding: 24px; margin: 0 auto; }
-.stageMobile { max-width: 438px; }
+/* Inside MobileFrame's real 390px iframe viewport: components using viewport
+   units (LogPane's `max-width:100vw`) resolve those against the TRUE 390px
+   viewport regardless of nested padding, but a `right:0`/`left:0` anchor
+   resolves against its own (padding-shrunk) containing block — two different
+   scopes for what should be the same box. Zeroing padding here makes `.frame`
+   (below) exactly as wide as the true viewport, so both scopes agree and nothing
+   clips. Bonus: edge-to-edge padding is also a more accurate phone-screen match. */
+@media (max-width: 480px) { .stage { padding: 0; } }
 
 /* ── Section ── */
 .section { margin-bottom: 40px; }
@@ -48,14 +55,30 @@
 .case { margin-bottom: 16px; }
 .caseLbl { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
 .caseStage { padding: 14px; background: var(--stone); border: 1px solid var(--divider); }
+@media (max-width: 480px) { .caseStage { padding: 0; border-width: 0 0 1px; } }
 
-/* ── Nav demo frame — transform makes the fixed Nav position relative to here ── */
-.navFrame { position: relative; transform: translateZ(0); height: 300px; overflow: hidden; background: var(--bg); }
+/* ── Nav demo frame — transform makes the fixed Nav position relative to here.
+   Nav's desktop sidebar CSS is `height: 100vh`, which sizes against the real
+   browser viewport (transform doesn't rescope vh units) — taller than this
+   frame on most screens. overflow-y: auto (not hidden) keeps every nav item
+   reachable via scroll instead of silently clipping the bottom of the list. ── */
+.navFrame { position: relative; transform: translateZ(0); height: 520px; overflow-y: auto; overflow-x: hidden; background: var(--bg); }
 
 /* ── Generic fixed-position containment frame — same trick, reused by any
    component whose CSS is `position: fixed` (DemoPanel, LogPane, CheckinSheet):
    an ancestor with `transform` makes descendant fixed elements position
-   relative to it instead of the viewport. ── */
+   relative to it instead of the viewport, so multiple Cases on one page each
+   get their own isolated box instead of all stacking at the real viewport
+   edge. Needed in both "Full" and MobileFrame's real-iframe mode — this
+   trick handles per-Case isolation; the iframe separately handles @media
+   viewport correctness. `.frameSide` gets an explicit width because LogPane's
+   own CSS is `width:400px; right:0` — a narrower frame would clip it. ── */
 .frame { position: relative; transform: translateZ(0); overflow: hidden; background: var(--bg); }
 .frameBottom { height: 420px; }
-.frameSide { height: 620px; }
+.frameSide { height: 620px; width: 420px; }
+/* At the iframe's real 390px viewport, 420px + .stage's own padding would
+   overflow horizontally, pushing LogPane's right-anchored content out of
+   view — let it fill the available width instead (matches .stage's 480px
+   breakpoint above; LogPane's own `width:400px` still slightly exceeds a
+   bare 390px viewport by design, same as it would on an actual phone). */
+@media (max-width: 480px) { .frameSide { width: 100%; } }
