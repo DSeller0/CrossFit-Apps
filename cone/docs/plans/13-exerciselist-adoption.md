@@ -1,5 +1,7 @@
 # 13 — Component extraction for the gallery + sidebar picker (#17)
 
+> ✅ Done: `2d41623` · 2026-07-11 — see BACKLOG.md
+
 > **Rewritten 2026-07-11.** #17's scope changed twice; both prior decisions stay recorded below rather than erased, per WORKFLOW.md's plan-lifecycle intent (a plan's rationale should survive its own pivots).
 >
 > - **2026-07-05:** shipped via Path B, not Path A (see "History" below) — the two concrete consolidations landed, the markup-slot adoption (Path A) stayed open.
