@@ -1,3 +1,4 @@
+import { IconTrophy } from '@tabler/icons-react'
 import s from './Leaderboard.module.css'
 import AccordionCard from '../shared/AccordionCard.jsx'
 
@@ -19,7 +20,8 @@ export default function WodCard({ w, summary, expanded, onToggle, children }) {
       <span className={s.cardCount}>{w.count} atleta{w.count !== 1 ? 's' : ''}</span>
       {leaderName && (
         <span className={s.cardLeader}>
-          <i className="ti ti-trophy" aria-hidden="true" />
+          {/* React icon, not the `ti` webfont — leaderboard.html doesn't load it. */}
+          <IconTrophy size={12} aria-hidden="true" />
           <span className={s.cardLeaderName}>{leaderName}</span>
           <span className={s.cardLeaderPerf}>{leaderPerf}</span>
         </span>

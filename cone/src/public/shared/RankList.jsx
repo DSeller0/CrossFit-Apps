@@ -1,4 +1,4 @@
-import { rankResults, perfStr, scaleColor } from '../lib/wod.js'
+import { rankResults, perfStr, scaleColor, scaleLabel } from '../lib/wod.js'
 import s from './RankList.module.css'
 
 // Shared ranking list — the one truth for "athletes, ordered by result" (#51).
@@ -48,7 +48,9 @@ export default function RankList({
                 unreadable at a glance. */}
             <span className={s.scaleCol}>
               {e.scale && e.scale !== '-' && (
-                <span className={s.scale} style={{ color: scaleColor(e.scale) }}>{e.scale}</span>
+                <span className={s.scale} style={{ color: scaleColor(e.scale) }} title={e.scale}>
+                  {scaleLabel(e.scale)}
+                </span>
               )}
             </span>
             <span className={s.perf}>{perfStr(e, blType)}</span>

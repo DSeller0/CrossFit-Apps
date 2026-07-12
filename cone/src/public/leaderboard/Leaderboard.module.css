@@ -1,51 +1,20 @@
 /* ── Page root ── */
 .pageRoot { padding-bottom: 70px; }
 @media(min-width:768px) {
-  .pageRoot { margin-left:220px; min-height:100vh; padding-bottom:0; }
+  .pageRoot { margin-left:220px; display:flex; flex-direction:column; min-height:100vh; padding-bottom:0; }
+}
+.main { }
+@media(min-width:768px) { .main { display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; } }
+
+/* Visible to screen readers only — the page had no heading tag at all (#14). */
+.srOnly {
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
 }
 
-/* ── Mobile controls (WOD select + scale pills) — hidden on desktop ── */
-.controls {
-  background: var(--bg);
-  border-bottom: 1px solid var(--divider);
-  padding: 12px 20px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-  position: sticky;
-  top: 90px;
-  z-index: 10;
-}
-@media(min-width:768px) { .controls { display: none; } }
-
-.sel {
-  font-family: var(--lb-font, var(--font));
-  font-size: 13px;
-  background: var(--stone);
-  border: 1px solid var(--divider);
-  color: var(--cream);
-  padding: 6px 10px;
-  outline: none;
-  flex: 1;
-  min-width: 160px;
-}
-.filterRow { display: flex; gap: 4px; flex-wrap: wrap; }
-.fb {
-  font-family: var(--lb-font, var(--font));
-  font-size: 11px;
-  font-weight: 700;
-  padding: 5px 10px;
-  border: 1px solid var(--divider);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all .12s;
-}
-.fb:hover:not(.fbOn) { border-color: var(--teal); color: var(--teal); }
-.fb:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
-/* Active pill: was a cyan fill from lb_colors (inline style), now a theme token. */
-.fbOn { background: var(--teal); border-color: var(--teal); color: var(--accent-text); }
+/* ── MOBILE: week picker + accordion cards (the <select> is retired, #51) ── */
+.mobileView { padding-bottom: 24px; }
+@media(min-width:768px) { .mobileView { display:none; } }
 
 /* ── WodCard — mobile accordion. Header CONTENTS only; the shell is
    shared/AccordionCard.module.css (same one results' SessionCard uses). ── */
@@ -54,31 +23,37 @@
 .cardCount::before { content:'·'; margin-right:8px; color:var(--dim); }
 .cardLeader { display:flex; align-items:center; gap:4px; min-width:0; color:var(--muted); }
 .cardLeader::before { content:'·'; margin-right:4px; color:var(--dim); }
-.cardLeader i { font-size:12px; color:var(--podium-1); }
+.cardLeader svg { flex-shrink:0; color:var(--podium-1); }
 .cardLeaderName { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:90px; }
 .cardLeaderPerf { font-weight:900; color:var(--podium-1); font-variant-numeric:tabular-nums; }
 
 /* Expanded body: scale filter, then the WOD, then the ranking. */
 .cardOpen { display:flex; flex-direction:column; gap:8px; padding:8px 10px 2px; border-top:1px solid var(--divider); }
 
-/* ── Two-pane content area ── */
-.contentArea { }
+/* ── Two-pane content area ──
+   #18: the page used to scroll as a whole, so the WOD list scrolled away with the
+   ranking. Each column scrolls in its own pane now. */
+.contentArea { display: none; }
 @media(min-width:768px) {
-  .contentArea { display:flex; gap:24px; padding:20px 28px 40px; align-items:flex-start; }
+  .contentArea { display:flex; flex:1; min-height:0; gap:24px; padding:20px 28px; overflow:hidden; }
 }
 
 /* ── LEFT: WOD selector column (desktop only) ── */
 .wodCol { display: none; }
-@media(min-width:768px) { .wodCol { display:block; flex:0 0 320px; min-width:0; background:var(--stone); padding:20px; } }
+@media(min-width:768px) {
+  .wodCol { display:flex; flex-direction:column; flex:0 0 320px; min-width:0; min-height:0; overflow-y:auto; background:var(--stone); padding:20px; }
+}
 
 .weekNav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 0 12px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--divider);
-  margin-bottom: 14px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
 }
+@media(min-width:768px) { .weekNav { padding: 0 0 12px; margin-bottom: 14px; } }
 .weekBtn {
   background: none;
   border: 1px solid var(--divider);
@@ -143,84 +118,25 @@
 .wodMeta { font-size:11px; color:var(--muted); padding:0 12px 9px 29px; display:flex; gap:10px; }
 .noWods { font-size:12px; color:var(--dim); padding:20px 0; font-style:italic; text-align:center; }
 
-/* ── RIGHT: Rankings column ── */
+/* ── RIGHT: Rankings column ──
+   The WOD header and the ranking rows used to live here as .lbHdr/.row/.rank/
+   .name/.scaleBadge/.perf, every color inline from lb_colors. They are now
+   shared/WodBlockCard + shared/RankList, so those classes are gone. */
 .rankCol { }
-@media(min-width:768px) { .rankCol { flex:1; min-width:0; background:var(--stone); } }
+@media(min-width:768px) {
+  .rankCol { display:flex; flex-direction:column; flex:1; min-width:0; min-height:0; overflow-y:auto; background:var(--stone); padding:16px; }
+}
 
-/* Desktop scale filter pills (hidden on mobile) */
+/* Desktop scale filter pills (hidden on mobile — the accordion carries its own) */
 .desktopScale { display: none; }
-@media(min-width:768px) { .desktopScale { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:14px; } }
+@media(min-width:768px) { .desktopScale { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:14px; flex-shrink:0; } }
 
-/* ── WOD header + results ──
-   Was a black bar with a 3px #00b8d4 border and white text, every color read
-   from the retired lb_colors blob — the reason this page ignored the theme
-   switcher. Now it is the app's standard section header: gold, uppercase, on
-   --stone, over a gold rule. */
-.lbHdr {
-  padding: 16px 20px 12px;
-  background: var(--stone);
-  border-bottom: 2px solid var(--gold2);
-}
-.lbTitle {
-  font-size: 16px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: var(--gold);
-  font-family: var(--lb-font, var(--font));
-}
-.lbMeta {
-  font-size: 12px;
-  margin-top: 3px;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  color: var(--muted);
-}
-.row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-  transition: background .1s;
-}
-.rank {
-  font-size: 16px;
-  font-weight: 900;
-  width: 30px;
-  text-align: center;
-  flex-shrink: 0;
-}
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.name {
-  flex: 1;
-  font-size: 15px;
-  font-weight: 700;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.scaleBadge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 7px;
-  flex-shrink: 0;
-}
-.perf {
-  font-size: 15px;
-  font-weight: 900;
-  flex-shrink: 0;
-}
 .empty {
   text-align: center;
   padding: 40px 20px;
   font-size: 13px;
+  font-style: italic;
+  color: var(--muted);
 }
 .loading {
   text-align: center;
@@ -248,15 +164,7 @@
 }
 
 @media (min-width: 768px) {
-  .lbTitle    { font-size: 19px; }
-  .lbMeta     { font-size: 14px; }
-  .rank       { font-size: 19px; }
-  .name       { font-size: 18px; }
-  .perf       { font-size: 18px; }
-  .scaleBadge { font-size: 12px; }
-  .sel        { font-size: 16px; }
-  .fb         { font-size: 13px; }
-  .loading    { font-size: 17px; }
-  .empty      { font-size: 16px; }
-  .errState   { font-size: 16px; }
+  .loading  { font-size: 17px; }
+  .empty    { font-size: 16px; }
+  .errState { font-size: 16px; }
 }

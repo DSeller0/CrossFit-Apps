@@ -5,7 +5,7 @@ import s from './Athletes.module.css'
 import { toISO, DAY_PT_TITLE } from '../lib/week.js'
 import { WOD_TYPES } from '../lib/wod.js'
 import { prBest, prDelta, prPct } from '../lib/goals.js'
-import { BLOB_TABLES } from '../lib/blobTables.js'
+import { BLOB_TABLES, mapResultRow } from '../lib/blobTables.js'
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const SCALE_RANK   = { RX: 4, Inter: 3, SC: 2, Adaptado: 1 }
@@ -23,11 +23,10 @@ async function fetchState() {
     sb.from('results_v2').select('*'),
   ])
   const [sessions, athletes, , , , settings, goalsData] = blobRows.map(x => x.data?.value ?? null)
-  const results = (resRaw.data||[]).map(r=>({id:r.id,date:r.date,athleteId:r.athlete_id,sessionId:r.session_id,presence:r.presence,energyLevel:r.energy_level,blocks:r.blocks,coachNote:r.coach_note,flagForReview:r.flag_for_review,loggedByAthlete:r.logged_by_athlete}))
   return {
     sessions:        sessions  ?? {},
     athletes:        athletes  ?? [],
-    results:         results,
+    results:         (resRaw.data || []).map(mapResultRow),
     settings:        settings  ?? {},
     athleteGoalsData: goalsData ?? { athleteGoals: {}, prs: {} },
   }

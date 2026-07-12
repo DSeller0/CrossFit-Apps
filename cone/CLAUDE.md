@@ -92,16 +92,26 @@ updated_at           BIGINT
 2. `TV.jsx` → `TimerSlide` right panel
 3. `src/public/schedule/Schedule.jsx` → exercise rows
 
+**Shared components (`src/public/shared/`)** — each renders in the gallery:
+- `ExerciseList.jsx` — read-only exercise rows. **Sizes: `tiny` (12–15px, phone/web — LogPane, WodBlockCard) · `compact` (22–26px, TV-wall scale) · `large` (30–42px, TV).** `compact` is *not* a web-page size; picking it for a phone card is the mistake #51 made and fixed.
+- `RankList.jsx` — the one ranking list (leaderboard + both results panes; 3 divergent copies collapsed in #51). Scale/perf are fixed **left-aligned** columns; rows go **two-line via a container query** (`@container (max-width:400px)`) because the list is narrow both on a phone and inside results' 300px desktop pane. Podium via `--podium-*`. TV's podium rows deliberately stay separate (wall-display CSS).
+- `AccordionCard.jsx` — the disclosure shell behind results' `SessionCard` and leaderboard's `WodCard`. One keyboard contract / `aria-expanded` / chevron; the two headers stay separate because they carry different data.
+- `WodBlockCard.jsx` — the WOD above a ranking (family rule + type badge + `ExerciseList`, then date · session footer). Same shape as TV's `BlockCard`.
+- `ScaleFilter.jsx` — the scale pills (leaderboard rendered them twice, results had a third copy).
+
+⚠️ **Shared components must not depend on the `ti` icon webfont.** `results.html`/`schedule.html`/`gallery.html` load it; **`leaderboard.html` does not** (it uses `@tabler/icons-react`). Icons in `shared/` come from `@tabler/icons-react` — a `ti` class there silently renders nothing on the leaderboard.
+
 **Shared rendering:** `src/public/shared/ExerciseList.jsx` is the shared (read-only, compact) exercise-row component — TV uses it for both paths. Schedule.jsx still renders its own *interactive* markup (`ExRow`: check-off/rounds, RM chip+calc, Demo, progression-step expansion) — full markup adoption stays open under #17, deprioritized 2026-07-05: TV's big-font wall-display CSS and Schedule's dense pill/checkbox interaction model diverge enough that unifying markup would mean a new CSS variant for no visible change, on a page used live at the gym. `exVolStr`/`fmtIntensity` are **canonical-only** in `src/public/lib/wod.js` — #37 deleted the diverged local copies in `Schedule.jsx`/`Publicador.jsx`/`Resultados.jsx`; all re-import from `wod.js`. Progression-step grouping (`steps → {reps,loads}[]`) is canonical for `Schedule.jsx`'s own 4 call sites via `groupProgressionSteps()` in `wod.js` (2026-07-05) — **not yet cross-file canonical**: `Publicador.jsx`'s `buildProgressionLines()` still hand-rolls the same grouping independently (keyed on `reps`+`unit`, not just `reps`), so a grouping-semantics fix applied only to `wod.js` won't reach the printed/exported WOD view (tracked under #45). Estações: TV intentionally flattens stations into one exercise list (glanceable wall display) while Schedule renders full station structure (canonical detailed view) — a recorded decision, not drift (see BACKLOG.md "Decisions recorded").
 
 ---
 
 ## Shared utilities (`src/public/lib/`)
 
-- `wod.js` — `uid`, `WOD_TYPES`, `isWodBlock`, `blkColor`, `blkLabel`, `exVolStr`, `groupProgressionSteps`, `toSecs`, `fmtSecs`, `rankResults`, `perfStr`, `fmtIntensity`, `loadRegistry`
+- `wod.js` — `uid`, `WOD_TYPES`, `isWodBlock`, `blkColor`, `blkLabel`, `exVolStr`, `groupProgressionSteps`, `toSecs`, `fmtSecs`, `rankResults`, `perfStr`, `fmtIntensity`, `loadRegistry`, `SCALES`/`SCALE_COL`/`scaleColor`/`scaleLabel`/`deriveScale` (#51). `perfStr` renders a capped For Time athlete as `"N rds (DNF)"`, not `—`.
 - `week.js` — `MONTH_PT`, `MONTH_PT_SHORT`, `DAY_PT`, `DAY_PT_TITLE`, `fmtDate`, `toISO`, `todayISO`, `getWeek`, `dateToWeekOffset` (`DAY_PT`/`MONTH_PT` are UPPERCASE/full-name; `DAY_PT_TITLE`/`MONTH_PT_SHORT` are the Titlecase/abbreviated variants most display call sites actually want — not drop-in for each other, see #16's casing-hazard note)
 - `goals.js` — `prBest`, `prPct`, `prDelta` (PR-best-result / progress-% / delta-vs-previous; canonical since #48, 2026-07-05 — collapsed from 3 near-identical copies in `Atletas.jsx`/`Athletes.jsx`/`Me.jsx`)
-- `blobTables.js` — `BLOB_TABLES` (the 8-table fetch-order array shared by `Athletes.jsx`/`Leaderboard.jsx`'s `fetchState()`; positional, don't reorder without updating both files' destructuring)
+- `blobTables.js` — `BLOB_TABLES` (the 8-table fetch-order array shared by `Athletes.jsx`/`Leaderboard.jsx`'s `fetchState()`; positional, don't reorder without updating both files' destructuring) + `mapResultRow` (the `results_v2` snake→camel mapper both pages used to hand-write, #51)
+- `results/resultsHelpers.js` — results.html's pure helpers (`calcKpis` one calculator/two variants, `blockEntries`, `cardSummary`, `sessName`, `blkMeta`), mirroring `schedule/scheduleHelpers.js`
 
 Always check these before reimplementing a formatting or date utility. `src/utils/storage.js` (SPA side) re-exports `uid`/`toISO`/`todayISO` from these modules rather than reimplementing them (#16, 2026-07-05) — one canonical implementation, imported via either path.
 
@@ -124,11 +134,17 @@ Always check these before reimplementing a formatting or date utility. `src/util
 - **Component gallery:** `gallery.html` (repo root) + `cone/src/public/gallery/` (`main.jsx`, `Gallery.jsx`) — theme switcher + width toggle rendering real components (`ExerciseList`, `Nav` today) in every state from mock fixtures. **Dev-only:** NOT in `vite.public.config.js` `input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built/deployed. Grows page-by-page as components are extracted (#17).
 - Design-pass program (restructured #27/#28, sessions #49–#59): `docs/plans/16-design-pass-program.md`. Product docs: `docs/FEATURES.md` (feature catalog + gate candidates), `docs/PRODUCT.md` (personas/tiers), `docs/MOBILE.md` (Android/iOS assessment — do nothing until a trigger fires). Consolidated interactive view: `docs/site/cone-docs.html` (open via `file://` — repo-only, NOT in the deploy whitelist by design; interactive tier board + coach-services worksheet for the tier meeting, full screenshot baseline in `docs/site/img/`; snapshot of the .md docs, regenerate on request).
 
-**Block color families:**
+**Data colors — exempt from tokenization (they identify a thing, so they must stay stable across all 4 themes):**
+
+*Block families* (`blkColor`, `lib/wod.js`):
 - RED: WOD / HIIT / MetCon
 - AMBER: EMOM / For Time / AMRAP / Estações
 - BLUE: Força / LPO / Core / Acessórios
 - GREEN: Aquecimento / Skill / Cardio / Mobilidade
+
+*Scales* (`SCALE_COL` / `scaleColor()`, `lib/wod.js` — canonical since #51): RX teal · Inter orange · SC violet · Adaptado warm-grey, plus one fallback grey. This reconciled two diverged copies (`Results.jsx` had Inter orange, `Athletes.jsx` had it gold; Results' red Adaptado collided with the RED block family and misread as an error). `Athletes.jsx` still has its own `SCALE_COLORS` — it adopts the canonical one in **#52**. `scaleLabel()`/`SCALE_SHORT` gives the short form ("Adaptado" → "Adap") for tight aligned columns.
+
+**`--podium-1/2/3`** (themes.css, all 4 themes): medal colors, tuned per palette. Row tints derive from them via `color-mix()` at the call site — 3 tokens, not 6.
 
 **Exercise data shapes:**
 ```js

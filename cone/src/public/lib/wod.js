@@ -25,6 +25,14 @@ export const SCALE_COL      = {RX:'#4ac8c0',Inter:'#e87820',SC:'#9070d8',Adaptad
 export const SCALE_FALLBACK = '#808080'
 export function scaleColor(sc){ return SCALE_COL[sc]||SCALE_FALLBACK }
 
+// Short form for tight, aligned columns (RankList's scale pill). "Adaptado" is
+// twice the width of the other three, which forced its column wider and knocked
+// that row's left edge out of line with the rest. The stored value is unchanged —
+// this is display only; anywhere with room (the scale filter, the log form)
+// still spells it out.
+export const SCALE_SHORT = {RX:'RX',Inter:'Inter',SC:'SC',Adaptado:'Adap'}
+export function scaleLabel(sc){ return SCALE_SHORT[sc]||sc }
+
 // A block's effective scale is its WEAKEST per-exercise scale: an athlete who
 // scaled one movement did not do the WOD RX. Blocks logged before per-exercise
 // scaling existed carry a flat blk.scale instead — fall back to it.

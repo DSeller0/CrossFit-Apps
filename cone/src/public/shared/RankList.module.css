@@ -44,7 +44,9 @@
 }
 /* Fixed, left-aligned columns — the pills and the times line up on their LEFT
    edges down the list. Sized off the widest content ("Adaptado", "4 rds (DNF)"). */
-.scaleCol { flex: 0 0 66px; display: flex; align-items: center; }
+/* min-width:0 defeats the flex `min-width:auto` default — without it a label wider
+   than the basis grows the column and drags that one row's left edge out of line. */
+.scaleCol { flex: 0 0 66px; min-width: 0; display: flex; align-items: center; }
 .scale {
   font-size: 10px;
   font-weight: 700;

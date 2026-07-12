@@ -1,5 +1,28 @@
 # 20 — Design pass B2: results.html + leaderboard.html (#51)
 
+> ✅ Done: `14fba36` + `76d1d71` + `d5a779a` + `1ffe087` + `<wire>` (2026-07-12)
+
+## What changed vs. this plan (read before trusting the sections below)
+
+**The mobile leaderboard was redesigned mid-session** from the user's Claude Design print (2026-07-12), which superseded parts of §2:
+- The mobile `<select>` WOD picker is **retired**, not restyled. The week is a list of accordion cards (`leaderboard/WodCard.jsx`) and the ranking lives **inside** the card you open — the same gesture as results' `SessionCard`. Both now run on a shared `shared/AccordionCard.jsx` (one disclosure/keyboard/aria implementation, two headers).
+- A **`shared/WodBlockCard.jsx`** renders the WOD above the ranking, reusing TV's shape (family rule + badge + the shared `ExerciseList`). It **absorbed the planned `LbHeader`**, which was built and then deleted — the badge is the label, the chips are rounds/CAP, the footer is date · session · scale.
+- `RankList`'s scale + perf sit in fixed **left-aligned** columns, and the row becomes **two lines** in a narrow container. That is a **container query**, not a viewport one: the list is narrow both on a phone *and* inside results' 300px desktop pane.
+- `ScaleFilter` ended up in `shared/` (not `leaderboard/`) — three copies existed, since leaderboard rendered it twice and results had its own.
+- "Adaptado" renders as **"Adap"** in RankList (`SCALE_SHORT`): at full length it outgrew its column and knocked that row's left edge out of line.
+
+**Already fixed before this session started:** the 🔴 schedule.html mobile `submitLog` data-loss bug landed in `b96d954` (merge + prefill + `existing?.id`). Verification step 3 was re-confirmed, not re-fixed.
+
+**Bugs found and fixed while building (none were in the plan):**
+- `perfStr()` returned `—` for a For Time athlete who capped, hiding the rounds they *did* complete → now `"N rds (DNF)"` everywhere (reaches TV + leaderboard).
+- Both KPI calculators averaged RPE over **all** entries, so one athlete with no RPE dragged the gym's average toward zero → now averages over those who logged one.
+- `WodSummary`/the old results copies filtered exercises on `e.name`, and a **complex exercise has no name of its own** → a WOD built from a complex rendered *no movements*. Now renders `4×(2+1+1) Clean Pull + Power Clean + Push Jerk`.
+- `ExerciseList`'s `tiny` size had no overrides for complex sub-movements or notes, so they fell back to `compact`'s TV-wall 20px/16px (reaches LogPane).
+- `.wodTypeTag` was `flex-shrink:0`, so a long block label ate the row and collapsed the session name to zero width.
+- Shared components used the `ti` icon **webfont**, which `leaderboard.html` does not load (results/schedule do) — chevrons and trophies silently rendered as nothing there. Shared components now use `@tabler/icons-react`.
+
+**Scope kept:** the SPA's `lb_colors` picker is gone, but its **image export** (html2canvas → shareable PNG) still needed colors — it now uses a fixed `LB_IMG` palette mirroring totk-dark + the podium tokens (concrete hex: html2canvas can't be trusted with `color-mix()`). The config load/save buttons the picker's modal hosted were preserved, moved into the card header.
+
 ## Context
 Second execution session of the design-pass program ([plans/16](./16-design-pass-program.md)), unblocked by #50 (B1 — schedule.html). Findings from [reviews/2026-07-09-design-benchmark.md](../reviews/2026-07-09-design-benchmark.md): both pages open **empty** until the user manually picks a WOD; results.html's collapsed day cards carry almost no information; the two pages disagree with schedule.html about whether an athlete may correct their own result; leaderboard.html is the app's worst token offender (off-palette cyan `#00b8d4`).
 

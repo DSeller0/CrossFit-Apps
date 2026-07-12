@@ -1,3 +1,4 @@
+import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import { onKey } from '../schedule/scheduleHelpers.js'
 import s from './AccordionCard.module.css'
 
@@ -8,6 +9,11 @@ import s from './AccordionCard.module.css'
 // one keyboard contract, one aria-expanded, one chevron, one focus ring.
 //
 // title/tag/meta are slots; the body is children and only mounts when expanded.
+//
+// Icons come from @tabler/icons-react, not the `ti` webfont: leaderboard.html
+// does not load that stylesheet (results.html and schedule.html do), and a shared
+// component cannot assume anything about the page hosting it — the chevron simply
+// rendered as nothing there.
 export default function AccordionCard({
   title,
   tag = null,
@@ -26,7 +32,9 @@ export default function AccordionCard({
           <span className={`${s.dot}${filled ? ' ' + s.dotFilled : ''}`} />
           <span className={s.title}>{title}</span>
           {tag && <span className={s.tag}>{tag}</span>}
-          <i className={`ti ${expanded ? 'ti-chevron-up' : 'ti-chevron-down'} ${s.chev}`} aria-hidden="true" />
+          {expanded
+            ? <IconChevronUp size={15} className={s.chev} aria-hidden="true" />
+            : <IconChevronDown size={15} className={s.chev} aria-hidden="true" />}
         </div>
         {meta && <div className={s.meta}>{meta}</div>}
       </div>

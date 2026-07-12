@@ -6,7 +6,7 @@ import {
   uid,
 } from '../../utils/storage';
 import { APP_CONFIG, GF } from '../../utils/config';
-import { exVolStr, rankResults } from '../../public/lib/wod.js';
+import { exVolStr, rankResults, scaleColor } from '../../public/lib/wod.js';
 import { toISO } from '../../public/lib/week.js';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
@@ -702,51 +702,28 @@ function HistoryView({ athletes, sessions, results }) {
   );
 }
 
+// Palette for the EXPORTED leaderboard image (#51). It replaces the 20-slot
+// lb_colors picker, which predated the 4-theme system and let the coach paint
+// this surface — and leaderboard.html — any colors at all, including the cyan
+// that made that page ignore the theme entirely.
+//
+// Concrete hex, not tokens: html2canvas rasterises the DOM and cannot be trusted
+// with color-mix(). The values mirror themes.css's totk-dark + --podium-1/2/3,
+// so the shared image looks like the app. Scale badges use the canonical
+// SCALE_COL data colors, same as RankList.
+const LB_IMG = {
+  bg: '#0d0b09', rowAlt: '#161210', divider: '#2a231c',
+  hdrBg: '#161210', hdrBorder: '#b88820', hdrTitle: '#d8a840', hdrSub: '#806850',
+  rank: '#806850', name: '#f0e8d0', perf: '#f0e8d0', emptyText: '#554a3a',
+  podium:   ['#d8a840', '#b8b8c4', '#c07840'],
+  podiumBg: ['rgba(216,168,64,.08)', 'rgba(184,184,196,.08)', 'rgba(192,120,64,.08)'],
+};
+
 // ── LeaderboardView ───────────────────────────────────────────────────────────
 function LeaderboardView({ athletes, sessions, results }) {
-  const [selWod,          setSelWod]          = useState('');
-  const [scaleFilter,     setScaleFilter]     = useState('Todos');
-  const [lbSettingsOpen,  setLbSettingsOpen]  = useState(false);
+  const [selWod,      setSelWod]      = useState('');
+  const [scaleFilter, setScaleFilter] = useState('Todos');
   const imgRef = useRef();
-
-  const _lbc = (() => { try { const d=localStorage.getItem('eagles_lb_colors_v1'); return d?JSON.parse(d):{} } catch { return {} } })();
-  const saveLBC = d => { try { localStorage.setItem('eagles_lb_colors_v1', JSON.stringify(d)); } catch {} };
-
-  const [lbBg,setLbBg]=useState(_lbc.lbBg||'#000000');
-  const [lbRowAlt,setLbRowAlt]=useState(_lbc.lbRowAlt||'#020809');
-  const [lbP1Bg,setLbP1Bg]=useState(_lbc.lbP1Bg||'rgba(255,215,0,0.06)');
-  const [lbP2Bg,setLbP2Bg]=useState(_lbc.lbP2Bg||'rgba(192,192,192,0.05)');
-  const [lbP3Bg,setLbP3Bg]=useState(_lbc.lbP3Bg||'rgba(205,127,50,0.05)');
-  const [lbDivider,setLbDivider]=useState(_lbc.lbDivider||'#0d1e1e');
-  const [lbHdrBg,setLbHdrBg]=useState(_lbc.lbHdrBg||'#000000');
-  const [lbHdrBorder,setLbHdrBorder]=useState(_lbc.lbHdrBorder||'#00b8d4');
-  const [lbHdrTitle,setLbHdrTitle]=useState(_lbc.lbHdrTitle||'#ffffff');
-  const [lbHdrSub,setLbHdrSub]=useState(_lbc.lbHdrSub||'#00b8d4');
-  const [lbRank,setLbRank]=useState(_lbc.lbRank||'#333333');
-  const [lbP1,setLbP1]=useState(_lbc.lbP1||'#ffd700');
-  const [lbP2,setLbP2]=useState(_lbc.lbP2||'#c0c0c0');
-  const [lbP3,setLbP3]=useState(_lbc.lbP3||'#cd7f32');
-  const [lbName,setLbName]=useState(_lbc.lbName||'#ffffff');
-  const [lbScaleText,setLbScaleText]=useState(_lbc.lbScaleText||'#00b8d4');
-  const [lbScaleBg,setLbScaleBg]=useState(_lbc.lbScaleBg||'rgba(0,184,212,0.1)');
-  const [lbScaleBorder,setLbScaleBorder]=useState(_lbc.lbScaleBorder||'#00b8d4');
-  const [lbPerf,setLbPerf]=useState(_lbc.lbPerf||'#ffffff');
-  const [lbFilterBg,setLbFilterBg]=useState(_lbc.lbFilterBg||APP_CONFIG.themeAccent||'#00b8d4');
-  const [lbFilterText,setLbFilterText]=useState(_lbc.lbFilterText||APP_CONFIG.themeAccentText||'#000000');
-
-  const lbc={lbBg,lbRowAlt,lbP1Bg,lbP2Bg,lbP3Bg,lbDivider,lbHdrBg,lbHdrBorder,lbHdrTitle,lbHdrSub,lbRank,lbP1,lbP2,lbP3,lbName,lbScaleText,lbScaleBg,lbScaleBorder,lbPerf,lbFilterBg,lbFilterText};
-  useEffect(()=>{ saveLBC(lbc); },[lbBg,lbRowAlt,lbP1Bg,lbP2Bg,lbP3Bg,lbDivider,lbHdrBg,lbHdrBorder,lbHdrTitle,lbHdrSub,lbRank,lbP1,lbP2,lbP3,lbName,lbScaleText,lbScaleBg,lbScaleBorder,lbPerf,lbFilterBg,lbFilterText]);
-
-  const colorRow=([lbl,val,setter,id])=>(
-    <div key={id} className="settings-row">
-      <span className="settings-lbl">{lbl}</span>
-      <div className="color-row">
-        <div className="color-swatch" style={{background:val}} onClick={()=>document.getElementById('lbp-'+id)?.click()}/>
-        <input type="color" id={'lbp-'+id} value={/^#[0-9a-fA-F]{6}$/.test(val)?val:'#888888'} onChange={e=>setter(e.target.value)} style={{opacity:0,position:'absolute',pointerEvents:'none'}}/>
-        <input type="text" className="color-input" value={val} onChange={e=>{ if(/^(#[0-9a-fA-F]{0,8}|rgba?.*)$/.test(e.target.value)) setter(e.target.value); }}/>
-      </div>
-    </div>
-  );
 
   const wodList = useMemo(()=>{
     const list=[];
@@ -786,12 +763,12 @@ function LeaderboardView({ athletes, sessions, results }) {
   const scales=['Todos','RX','Inter','SC','Adaptado'];
   const filtered=scaleFilter==='Todos'?wodResults:wodResults.filter(r=>r.scale===scaleFilter);
   const ranked=selObj?rankResults(filtered,selObj.blType):[];
-  const podColors=[lbP1,lbP2,lbP3],podBgs=[lbP1Bg,lbP2Bg,lbP3Bg],podLabels=['1º','2º','3º'];
+  const podLabels=['1º','2º','3º'];
 
   const doExport=async()=>{
     const el=imgRef.current; if(!el) return;
     const html2canvas=(await import('html2canvas')).default;
-    const cv=await html2canvas(el,{scale:APP_CONFIG.exportScale||2,backgroundColor:lbBg,useCORS:true,logging:false,width:1080,height:el.scrollHeight,windowWidth:1080});
+    const cv=await html2canvas(el,{scale:APP_CONFIG.exportScale||2,backgroundColor:LB_IMG.bg,useCORS:true,logging:false,width:1080,height:el.scrollHeight,windowWidth:1080});
     const a=document.createElement('a');
     const lbl=selObj?`${selObj.dt}-${selObj.blLabel}-${scaleFilter}`.replace(/[^a-zA-Z0-9\-]/g,'-').toLowerCase():'leaderboard';
     a.download=`eagles-leaderboard-${lbl}.png`; a.href=cv.toDataURL('image/png'); a.click();
@@ -805,13 +782,9 @@ function LeaderboardView({ athletes, sessions, results }) {
       reader.onload=ev=>{
         try {
           const cfg=JSON.parse(ev.target.result);
-          const lb=cfg.lbColors||cfg;
-          const set=(key,setter)=>{ if(lb[key]!==undefined) setter(lb[key]); };
-          set('lbBg',setLbBg);set('lbRowAlt',setLbRowAlt);set('lbP1Bg',setLbP1Bg);set('lbP2Bg',setLbP2Bg);set('lbP3Bg',setLbP3Bg);
-          set('lbDivider',setLbDivider);set('lbHdrBg',setLbHdrBg);set('lbHdrBorder',setLbHdrBorder);set('lbHdrTitle',setLbHdrTitle);
-          set('lbHdrSub',setLbHdrSub);set('lbRank',setLbRank);set('lbP1',setLbP1);set('lbP2',setLbP2);set('lbP3',setLbP3);
-          set('lbName',setLbName);set('lbScaleText',setLbScaleText);set('lbScaleBg',setLbScaleBg);set('lbScaleBorder',setLbScaleBorder);
-          set('lbPerf',setLbPerf);set('lbFilterBg',setLbFilterBg);set('lbFilterText',setLbFilterText);
+          // cfg.lbColors is ignored now (#51) — the leaderboard renders from theme
+          // tokens. An older config file carrying the key still loads fine; that
+          // leg is simply dropped.
           const existing=loadSettings();
           const src=cfg.colors?{...cfg,...cfg.colors}:cfg;
           const merged={...existing};
@@ -823,7 +796,6 @@ function LeaderboardView({ athletes, sessions, results }) {
           if(cfg.themeAccentText) APP_CONFIG.themeAccentText=cfg.themeAccentText;
           if(cfg.fontFamily)      APP_CONFIG.fontFamily=cfg.fontFamily;
           if(cfg.googleFontsUrl)  APP_CONFIG.googleFontsUrl=cfg.googleFontsUrl;
-          try { localStorage.setItem('eagles_lb_colors_v1',JSON.stringify(lbc)); } catch {}
           alert('Config carregada! A página irá recarregar.'); setTimeout(()=>window.location.reload(),300);
         } catch(err) { alert('Erro ao ler o arquivo: '+err.message); }
       };
@@ -834,7 +806,7 @@ function LeaderboardView({ athletes, sessions, results }) {
 
   const handleSaveConfig=()=>{
     const savedSettings=loadSettings();
-    const exportCfg={...savedSettings,appTitle:APP_CONFIG.appTitle,logo:APP_CONFIG.logo||'icon-192.png',themeAccent:APP_CONFIG.themeAccent,themeAccentText:APP_CONFIG.themeAccentText,gymName:APP_CONFIG.gymName,blockColors:APP_CONFIG.blockColors||{},blockNames:APP_CONFIG.blockNames,athleteLevels:APP_CONFIG.athleteLevels,athleteGoals:APP_CONFIG.athleteGoals,restDayLabel:APP_CONFIG.restDayLabel,mobileWeeklyLabels:APP_CONFIG.mobileWeeklyLabels,lbColors:lbc};
+    const exportCfg={...savedSettings,appTitle:APP_CONFIG.appTitle,logo:APP_CONFIG.logo||'icon-192.png',themeAccent:APP_CONFIG.themeAccent,themeAccentText:APP_CONFIG.themeAccentText,gymName:APP_CONFIG.gymName,blockColors:APP_CONFIG.blockColors||{},blockNames:APP_CONFIG.blockNames,athleteLevels:APP_CONFIG.athleteLevels,athleteGoals:APP_CONFIG.athleteGoals,restDayLabel:APP_CONFIG.restDayLabel,mobileWeeklyLabels:APP_CONFIG.mobileWeeklyLabels};
     const raw=window.prompt('Nome do arquivo (sem extensão):','config'); if(raw===null) return;
     const fname=(raw.trim().replace(/[^a-zA-Z0-9_-]/g,'-')||'config');
     const blob=new Blob([JSON.stringify(exportCfg,null,2)],{type:'application/json'});
@@ -843,39 +815,17 @@ function LeaderboardView({ athletes, sessions, results }) {
 
   return (
     <div>
-      {lbSettingsOpen&&(
-        <div className="settings-overlay" onClick={()=>setLbSettingsOpen(false)}>
-          <div className="settings-modal" onClick={e=>e.stopPropagation()}
-            ref={el=>{
-              if(!el) return;
-              const hdr=el.querySelector('.settings-drag-hdr');
-              if(!hdr||hdr._drag) return; hdr._drag=true;
-              let ox=0,oy=0,drag=false;
-              const dn=e=>{drag=true;const r=el.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;el.style.transform='none';document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up)};
-              const mv=e=>{if(!drag)return;el.style.left=(e.clientX-ox)+'px';el.style.top=(e.clientY-oy)+'px'};
-              const up=()=>{drag=false;document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up)};
-              hdr.addEventListener('mousedown',dn);
-            }}>
-            <div className="settings-drag-hdr">
-              <i className="ti ti-grip-horizontal" style={{color:'#555',fontSize:16}}/>
-              <span style={{fontSize:13,fontWeight:700,color:'#fff'}}>Cores do Leaderboard</span>
-              <button type="button" className="b bd bsm" style={{marginLeft:'auto',padding:'3px 8px',minHeight:24}} onClick={()=>setLbSettingsOpen(false)}><i className="ti ti-x"/></button>
-            </div>
-            <div style={{padding:'14px 16px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,maxHeight:'60vh',overflowY:'auto'}}>
-              {[['Fundo geral',lbBg,setLbBg,'bg'],['Linhas alternas',lbRowAlt,setLbRowAlt,'row'],['Fundo 1º lugar',lbP1Bg,setLbP1Bg,'p1bg'],['Fundo 2º lugar',lbP2Bg,setLbP2Bg,'p2bg'],['Fundo 3º lugar',lbP3Bg,setLbP3Bg,'p3bg'],['Divisor de linhas',lbDivider,setLbDivider,'div'],['Header — fundo',lbHdrBg,setLbHdrBg,'hbg'],['Header — borda',lbHdrBorder,setLbHdrBorder,'hbrd'],['Header — título',lbHdrTitle,setLbHdrTitle,'htit'],['Header — subtítulo',lbHdrSub,setLbHdrSub,'hsub'],['Rank (4º+)',lbRank,setLbRank,'rank'],['1º lugar — cor',lbP1,setLbP1,'p1'],['2º lugar — cor',lbP2,setLbP2,'p2'],['3º lugar — cor',lbP3,setLbP3,'p3'],['Nome do atleta',lbName,setLbName,'name'],['Escala — texto',lbScaleText,setLbScaleText,'sctxt'],['Escala — fundo',lbScaleBg,setLbScaleBg,'scbg'],['Escala — borda',lbScaleBorder,setLbScaleBorder,'scbrd'],['Performance',lbPerf,setLbPerf,'perf'],['Filtro ativo — fundo',lbFilterBg,setLbFilterBg,'fbg'],['Filtro ativo — texto',lbFilterText,setLbFilterText,'ftxt']].map(colorRow)}
-            </div>
-            <div style={{padding:'8px 16px',borderTop:'1px solid #252525',display:'flex',gap:8}}>
-              <button type="button" className="b bsm" style={{flex:1}} onClick={handleLoadConfig}><i className="ti ti-upload"/> Carregar config</button>
-              <button type="button" className="b bsm" style={{flex:1}} onClick={handleSaveConfig}><i className="ti ti-download"/> Salvar config.json</button>
-            </div>
-            <div style={{padding:'4px 16px 10px',fontSize:11,color:'#444'}}>Cores salvas automaticamente e incluídas no estado exportado.</div>
-          </div>
-        </div>
-      )}
+      {/* The 20-slot "Cores do Leaderboard" picker used to live here (#51). It is
+          gone: the leaderboard renders from theme tokens, so the picker was
+          editing colors nothing reads any more. The config load/save buttons it
+          hosted are kept — they carry the rest of the config. */}
       <div className="sc-card" style={{padding:12,marginBottom:10}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}>
           <span className="lbl" style={{margin:0}}>Leaderboard</span>
-          <button type="button" className="b bsm" onClick={()=>setLbSettingsOpen(true)}><i className="ti ti-settings"/></button>
+          <div style={{display:'flex',gap:6}}>
+            <button type="button" className="b bsm" onClick={handleLoadConfig}><i className="ti ti-upload"/> Carregar config</button>
+            <button type="button" className="b bsm" onClick={handleSaveConfig}><i className="ti ti-download"/> Salvar config.json</button>
+          </div>
         </div>
         <div className="g2">
           <div className="fg">
@@ -888,40 +838,45 @@ function LeaderboardView({ athletes, sessions, results }) {
           <div className="fg">
             <span className="lbl">Escala</span>
             <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
-              {scales.map(s=>(
-                <button key={s} type="button" className="b bsm"
-                  style={{background:scaleFilter===s?lbFilterBg:'transparent',color:scaleFilter===s?lbFilterText:'#888',borderColor:scaleFilter===s?lbFilterBg:'#2e2e2e',fontSize:11}}
-                  onClick={()=>setScaleFilter(s)}>{s}</button>
-              ))}
+              {scales.map(s=>{
+                const on=scaleFilter===s, accent=APP_CONFIG.themeAccent||'#4ac8c0';
+                return (
+                  <button key={s} type="button" className="b bsm" aria-pressed={on}
+                    style={{background:on?accent:'transparent',color:on?(APP_CONFIG.themeAccentText||'#000'):'#888',borderColor:on?accent:'#2e2e2e',fontSize:11}}
+                    onClick={()=>setScaleFilter(s)}>{s}</button>
+                );
+              })}
             </div>
           </div>
         </div>
       </div>
       {selObj ? (
         <div>
-          <div ref={imgRef} style={{background:lbBg,width:1080,transform:`scale(${Math.min(1,(window.innerWidth-28)/1080)})`,transformOrigin:'top left',marginBottom:`${-1080*(1-Math.min(1,(window.innerWidth-28)/1080))}px`}}>
-            <div style={{background:lbHdrBg,padding:'20px 28px 16px',borderBottom:`3px solid ${lbHdrBorder}`}}>
-              <div style={{fontFamily:GF(),fontSize:22,fontWeight:900,color:lbHdrTitle,textTransform:'uppercase',letterSpacing:'.1em'}}>Leaderboard</div>
-              <div style={{fontFamily:GF(),fontSize:14,color:lbHdrSub,marginTop:4,textTransform:'uppercase',letterSpacing:'.06em'}}>
+          <div ref={imgRef} style={{background:LB_IMG.bg,width:1080,transform:`scale(${Math.min(1,(window.innerWidth-28)/1080)})`,transformOrigin:'top left',marginBottom:`${-1080*(1-Math.min(1,(window.innerWidth-28)/1080))}px`}}>
+            <div style={{background:LB_IMG.hdrBg,padding:'20px 28px 16px',borderBottom:`3px solid ${LB_IMG.hdrBorder}`}}>
+              <div style={{fontFamily:GF(),fontSize:22,fontWeight:900,color:LB_IMG.hdrTitle,textTransform:'uppercase',letterSpacing:'.1em'}}>Leaderboard</div>
+              <div style={{fontFamily:GF(),fontSize:14,color:LB_IMG.hdrSub,marginTop:4,textTransform:'uppercase',letterSpacing:'.06em'}}>
                 {selObj.dt} · {selObj.blLabel}{selObj.meta?' · '+selObj.meta:''}{scaleFilter!=='Todos'?' · '+scaleFilter:''}
               </div>
             </div>
             <div style={{padding:'8px 0'}}>
               {ranked.length===0
-                ? <div style={{padding:'20px 28px',color:'#333',fontFamily:GF(),fontSize:13}}>Nenhum resultado.</div>
+                ? <div style={{padding:'20px 28px',color:LB_IMG.emptyText,fontFamily:GF(),fontSize:13}}>Nenhum resultado.</div>
                 : ranked.map((r,ri)=>{
                     const ath=athletes.find(a=>String(a.id)===String(r.athleteId));
                     const perf=getPerformanceStr(r,selObj.blType);
-                    const isPodium=ri<3,pColor=isPodium?podColors[ri]:null;
+                    const isPodium=ri<3,pColor=isPodium?LB_IMG.podium[ri]:null;
                     return (
-                      <div key={r.id||ri} style={{display:'flex',alignItems:'center',gap:16,padding:'12px 28px',borderBottom:`1px solid ${lbDivider}`,background:isPodium?podBgs[ri]:ri%2===0?lbRowAlt:lbBg}}>
-                        <div style={{fontFamily:GF(),fontSize:18,fontWeight:900,color:pColor||lbRank,width:32,flexShrink:0,textAlign:'center'}}>{isPodium?podLabels[ri]:`${ri+1}º`}</div>
+                      <div key={r.id||ri} style={{display:'flex',alignItems:'center',gap:16,padding:'12px 28px',borderBottom:`1px solid ${LB_IMG.divider}`,background:isPodium?LB_IMG.podiumBg[ri]:ri%2===0?LB_IMG.rowAlt:LB_IMG.bg}}>
+                        <div style={{fontFamily:GF(),fontSize:18,fontWeight:900,color:pColor||LB_IMG.rank,width:32,flexShrink:0,textAlign:'center'}}>{isPodium?podLabels[ri]:`${ri+1}º`}</div>
                         <div style={{display:'flex',alignItems:'center',gap:8,flex:1,minWidth:0}}>
-                          <div style={{width:10,height:10,borderRadius:'50%',background:ath?.color||'#555',flexShrink:0}}/>
-                          <span style={{fontFamily:GF(),fontSize:16,fontWeight:700,color:lbName,textTransform:'uppercase',letterSpacing:'.04em',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{ath?.name||'—'}</span>
+                          <div style={{width:10,height:10,borderRadius:'50%',background:ath?.color||LB_IMG.rank,flexShrink:0}}/>
+                          <span style={{fontFamily:GF(),fontSize:16,fontWeight:700,color:LB_IMG.name,textTransform:'uppercase',letterSpacing:'.04em',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{ath?.name||'—'}</span>
                         </div>
-                        {r.scale&&r.scale!=='-'&&<span style={{fontFamily:GF(),fontSize:11,fontWeight:700,color:lbScaleText,background:lbScaleBg,border:`1px solid ${lbScaleBorder}`,borderRadius:3,padding:'2px 8px',flexShrink:0}}>{r.scale}</span>}
-                        <div style={{fontFamily:GF(),fontSize:16,fontWeight:900,color:pColor||lbPerf,flexShrink:0,textAlign:'right'}}>{perf}</div>
+                        {r.scale&&r.scale!=='-'&&(
+                          <span style={{fontFamily:GF(),fontSize:11,fontWeight:700,color:scaleColor(r.scale),border:`1px solid ${scaleColor(r.scale)}`,padding:'2px 8px',flexShrink:0}}>{r.scale}</span>
+                        )}
+                        <div style={{fontFamily:GF(),fontSize:16,fontWeight:900,color:pColor||LB_IMG.perf,flexShrink:0,textAlign:'right'}}>{perf}</div>
                       </div>
                     );
                   })
