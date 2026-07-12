@@ -1,0 +1,98 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — Result card, real ExerciseList (no notes)</title>
+<style>
+  :root{--bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--divider:#2a231c;--gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a}
+  body{margin:0;padding:24px;background:var(--bg);color:var(--cream);font-family:'Cinzel',Georgia,serif}
+  h1{font-size:16px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 4px}
+  p.note{font-size:12px;color:var(--muted);margin:0 0 24px;font-family:Georgia,serif;max-width:760px;line-height:1.5}
+  p.note code{color:var(--sub);font-family:Consolas,monospace;font-size:11px}
+  .row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+  .col{width:340px}
+
+  /* ---- phone card shell (unchanged from #19) ---- */
+  .phone{background:var(--bg);border:1px solid var(--divider);padding:16px}
+  .top{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .field{margin-bottom:16px}
+  .fLbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+  .select{border:1px solid var(--divider);background:var(--stone);padding:10px 12px;font-size:14px;color:var(--cream);display:flex;justify-content:space-between;align-items:center}
+
+  /* single unified card background — no nested darker box (unchanged from #19) */
+  .card{background:var(--stone);border:1px solid var(--divider)}
+  .cardLbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);padding:12px 12px 0}
+  .resBody{padding:12px}
+
+  /* ---- block label: plain line, no border box (was #19's boxed .exHead) ---- */
+  .blockLbl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:10px 0 10px}
+
+  /* ---- real ExerciseList shape, sizes scaled down to match this card's type
+     scale (its shared defaults are TV-wall-display size: name 26px/vol 22px/
+     ins 18px — see src/public/shared/ExerciseList.module.css). Same DOM shape
+     (dot + vol/name/ins inline row), same color roles (dot = block family
+     color via `color` prop, vol=--sub, name=--cream, ins=--muted) — just a
+     smaller `size` variant for phone-form contexts. Notes intentionally
+     omitted here per direction, though the real component still supports one. ---- */
+  .exList{margin-bottom:16px}
+  .exRow{display:flex;align-items:center;gap:8px}
+  .exDot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+  .exBody{display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap}
+  .exVol{font-size:12px;font-weight:700;color:var(--sub);flex-shrink:0;white-space:nowrap}
+  .exName{font-size:15px;font-weight:800;color:var(--cream);text-transform:uppercase;letter-spacing:.03em}
+  .exIns{font-size:12px;font-weight:700;color:var(--muted);margin-left:auto;flex-shrink:0;white-space:nowrap}
+
+  .rpeLbl,.scLbl,.tLbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .rpeGrid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-bottom:16px}
+  .rpeBtn{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:1px solid var(--divider);background:var(--stone2);color:var(--sub);font-size:12px;font-family:'Cinzel',Georgia,serif}
+  .rpeBtn.on{background:var(--teal);color:#06201e;border-color:var(--teal);font-weight:700}
+  .scGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}
+  .scBtn{padding:9px 4px;text-align:center;border:1px solid var(--divider);background:var(--stone2);color:var(--sub);font-size:11px;font-weight:700;letter-spacing:.04em}
+  .scBtn.on{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+  .tInput{border:1px solid var(--divider);background:var(--stone2);padding:10px 12px;font-size:13px;color:var(--muted);font-family:'Cinzel',Georgia,serif}
+  .submit{margin-top:16px;width:100%;background:var(--teal);color:#06201e;border:none;padding:13px;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-family:'Cinzel',Georgia,serif}
+</style>
+<body>
+<h1>Result card — real ExerciseList, no notes</h1>
+<p class="note">Builds on <code>19-result-card-copy-variants</code>'s decision (single unified <code>--stone</code> card background, no nested box, no divider lines) — unchanged here. Swaps that card's hand-drawn "TV-style" bordered exercise header for the actual <code>ExerciseList</code> component's real shape (dot + vol/name/ins inline, no border box), matching what <code>src/public/schedule/LogPane.jsx</code> already renders in production — just with a smaller `size` variant so it doesn't dwarf the rest of the card's 10–14px text. Notes removed from this rendering per direction.</p>
+
+<div class="row">
+
+  <div class="col">
+    <div class="phone">
+      <div class="top">Sábado, 12 de Julho · Treino A</div>
+      <div class="field">
+        <div class="fLbl">Atleta</div>
+        <div class="select"><span>Bruna</span><span>▾</span></div>
+      </div>
+      <div class="card">
+        <div class="cardLbl">Resultados</div>
+        <div class="resBody">
+          <div class="blockLbl">For Time</div>
+          <div class="exList">
+            <div class="exRow">
+              <span class="exDot"></span>
+              <div class="exBody">
+                <span class="exVol">5×5</span>
+                <span class="exName">Thruster</span>
+                <span class="exIns">75% RM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="rpeLbl">RPE (1-10)</div>
+          <div class="rpeGrid">
+            <div class="rpeBtn">1</div><div class="rpeBtn">2</div><div class="rpeBtn">3</div><div class="rpeBtn">4</div><div class="rpeBtn">5</div><div class="rpeBtn">6</div><div class="rpeBtn on">7</div><div class="rpeBtn">8</div><div class="rpeBtn">9</div><div class="rpeBtn">10</div>
+          </div>
+          <div class="scLbl">Escala</div>
+          <div class="scGrid">
+            <div class="scBtn on">RX</div><div class="scBtn">Inter</div><div class="scBtn">SC</div><div class="scBtn">Adaptado</div>
+          </div>
+          <div class="tLbl">Tempo (mm:ss)</div>
+          <div class="tInput">Ex: 12:34</div>
+          <button class="submit">✓ Registrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>

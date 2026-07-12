@@ -30,3 +30,4 @@ Source for the **"Cone Design System"** project on claude.ai/design. Replaces th
 | `components/tv-block-card.html` | Components — screenshot archive: `BlockCard` (`src/public/tv/slides.jsx`), reference for the register redesign |
 | `mockups/02-tv-desktop-refinement.html` | Mockups — TV controller desktop layout (#2) |
 | `mockups/07-tv-countdown-pill.html` | Mockups — TV timer final-10s countdown pill (#12) |
+| `mockups/20-result-card-exerciselist.html` | Mockups — result card using real ExerciseList shape (builds on #19, notes removed) |
