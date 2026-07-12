@@ -1,6 +1,6 @@
 # 20 — Design pass B2: results.html + leaderboard.html (#51)
 
-> ✅ Done: `14fba36` + `76d1d71` + `d5a779a` + `1ffe087` + `<wire>` (2026-07-12)
+> ✅ Done: `14fba36` + `76d1d71` + `d5a779a` + `1ffe087` + `aba6328` (2026-07-12)
 
 ## What changed vs. this plan (read before trusting the sections below)
 
