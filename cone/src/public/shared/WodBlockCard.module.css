@@ -1,0 +1,49 @@
+/* The block's family color arrives inline (blkColor — a data color, exempt from
+   tokenization like the block families always have been). Everything else is a
+   token, so the card follows the theme. */
+
+.card {
+  background: var(--stone);
+  border: 1px solid var(--divider);
+  border-left-width: 3px;
+  border-left-style: solid;   /* color set inline, per block family */
+  padding: 10px 12px;
+}
+
+.hdr { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.badge {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+}
+.chip {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid var(--divider);
+  color: var(--muted);
+}
+/* Chips sit at the far end of the header row, away from the badge. */
+.chip:first-of-type { margin-left: auto; }
+
+.foot {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--divider);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* size="large" — desktop ranking column */
+.large { padding: 14px 16px; }
+.large .badge { font-size: 14px; }
+.large .chip  { font-size: 11px; }
+.large .foot  { font-size: 12px; }

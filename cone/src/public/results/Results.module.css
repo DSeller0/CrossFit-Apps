@@ -282,18 +282,9 @@
    inline copies and are deleted when Results.jsx adopts these.
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── SessionCard ── */
-.card { margin:0 8px 6px; background:var(--stone2); border:1px solid var(--divider); }
-.cardExpanded { border-color:var(--border); }
-.cardHdr { display:flex; flex-direction:column; gap:5px; padding:9px 10px; cursor:pointer; user-select:none; }
-.cardHdr:focus-visible { outline:2px solid var(--teal); outline-offset:-2px; }
-.cardTop { display:flex; align-items:center; gap:8px; }
-.cardDot { width:9px; height:9px; border-radius:50%; border:2px solid var(--muted); opacity:.6; flex-shrink:0; }
-.cardDotFilled { background:var(--teal); border-color:var(--teal); opacity:1; }
-.cardName { flex:1; min-width:0; font-size:13px; font-weight:700; color:var(--cream); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.cardChevron { font-size:13px; color:var(--muted); flex-shrink:0; }
-
-.cardMeta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding-left:17px; font-size:11px; }
+/* ── SessionCard — header CONTENTS only.
+   The card shell (border, header row, dot, title, chevron, meta layout, body)
+   is shared/AccordionCard.module.css, so results and leaderboard cannot drift. ── */
 .cardCount { color:var(--sub); font-weight:700; }
 .cardCountEmpty { color:var(--dim); font-style:italic; }
 .cardLeader { display:flex; align-items:center; gap:4px; min-width:0; color:var(--muted); }
@@ -304,7 +295,6 @@
 .cardOwn { margin-left:auto; flex-shrink:0; padding:2px 7px; border:1px solid color-mix(in srgb, var(--teal) 45%, transparent); background:color-mix(in srgb, var(--teal) 10%, transparent); color:var(--teal); font-weight:700; }
 .cardOwn b { font-weight:900; font-variant-numeric:tabular-nums; }
 .cardOwnCta { margin-left:auto; flex-shrink:0; padding:2px 7px; border:1px solid var(--gold2); color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
-.cardBody { padding:0 0 6px; }
 
 /* ── WodSummary ── */
 .wodSum { margin:4px 0 8px; }

@@ -1,0 +1,22 @@
+/* Disclosure shell shared by results' SessionCard and leaderboard's WodCard.
+   Only the shell lives here — the contents of the meta line are each page's own
+   (its classes come from that page's module and are passed in as a slot). */
+
+.card { margin: 0 8px 6px; background: var(--stone2); border: 1px solid var(--divider); }
+.expanded { border-color: var(--border); }
+
+.hdr { display: flex; flex-direction: column; gap: 5px; padding: 9px 10px; cursor: pointer; user-select: none; }
+.hdr:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
+
+.top { display: flex; align-items: center; gap: 8px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--muted); opacity: .6; flex-shrink: 0; }
+.dotFilled { background: var(--teal); border-color: var(--teal); opacity: 1; }
+.title { flex: 1; min-width: 0; font-size: 13px; font-weight: 700; color: var(--cream); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Capped + truncating: a long block label must not collapse the title to zero. */
+.tag { flex-shrink: 1; min-width: 0; max-width: 40%; font-size: 10px; font-weight: 900; color: var(--teal); letter-spacing: .08em; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chev { flex-shrink: 0; font-size: 13px; color: var(--muted); }
+
+/* Indented to sit under the title, past the dot. */
+.meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-left: 17px; font-size: 11px; }
+
+.body { padding: 0 0 6px; }

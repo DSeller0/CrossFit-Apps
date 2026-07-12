@@ -4,7 +4,11 @@
    an inline data-color (see SCALE_COL in lib/wod.js — a documented exemption,
    like the block families). */
 
-.list { list-style: none; margin: 0; padding: 0; }
+/* A container, not a viewport, decides whether a row is one line or two: this
+   list renders both full-width (leaderboard) and inside a 300px pane (results'
+   desktop leaderboard), and it is the width of THAT box — not the phone — that
+   says whether four columns fit. */
+.list { list-style: none; margin: 0; padding: 0; container-type: inline-size; }
 
 .row {
   display: flex;
@@ -38,8 +42,10 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* Fixed, left-aligned columns — the pills and the times line up on their LEFT
+   edges down the list. Sized off the widest content ("Adaptado", "4 rds (DNF)"). */
+.scaleCol { flex: 0 0 66px; display: flex; align-items: center; }
 .scale {
-  flex-shrink: 0;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .06em;
@@ -47,8 +53,11 @@
   padding: 2px 6px;
   border: 1px solid currentColor;
 }
+/* Wide enough for the longest perf string ("9 rds + 12 reps") on one line. */
 .perf {
-  flex-shrink: 0;
+  flex: 0 0 108px;
+  text-align: left;
+  white-space: nowrap;
   font-weight: 900;
   color: var(--cream);
   font-variant-numeric: tabular-nums;
@@ -78,13 +87,14 @@
 }
 
 /* ── size="large" — the leaderboard page's own wall-ish scale ── */
-.large .row   { gap: 12px; padding: 12px 20px; font-size: 15px; }
-.large .rank  { width: 32px; font-size: 16px; }
-.large .dot   { width: 10px; height: 10px; }
-.large .name  { font-size: 15px; }
-.large .perf  { font-size: 15px; }
-.large .scale { font-size: 11px; padding: 2px 7px; }
-.large .empty { padding: 40px 20px; font-size: 15px; }
+.large .row      { gap: 12px; padding: 12px 20px; font-size: 15px; }
+.large .rank     { width: 32px; font-size: 16px; }
+.large .dot      { width: 10px; height: 10px; }
+.large .name     { font-size: 15px; }
+.large .scaleCol { flex-basis: 76px; }
+.large .perf     { flex-basis: 128px; font-size: 15px; }
+.large .scale    { font-size: 11px; padding: 2px 7px; }
+.large .empty    { padding: 40px 20px; font-size: 15px; }
 
 @media (min-width: 768px) {
   .large .row   { font-size: 18px; }
@@ -93,4 +103,23 @@
   .large .perf  { font-size: 18px; }
   .large .scale { font-size: 12px; }
   .large .empty { font-size: 16px; }
+}
+
+/* ── Narrow container: two lines ──
+   Four columns can't fit ~400px without crushing the name, so the row wraps into
+   rank + name, then scale + perf indented beneath — a taller, thumb-sized row
+   that keeps the left-edge alignment. `.name` claiming the rest of the first line
+   is what forces the wrap.
+
+   Container-driven, so it stacks in BOTH places that are actually narrow: the
+   phone, and results' 300px desktop leaderboard pane. A viewport media query
+   would have missed the second. */
+@container (max-width: 400px) {
+  .row { flex-wrap: wrap; row-gap: 3px; padding: 10px 12px; }
+  .name { flex: 1 1 calc(100% - 40px); }
+  .scaleCol { flex: 0 0 auto; margin-left: 36px; }
+  .perf { flex: 0 0 auto; }
+  .large .row { padding: 12px 14px; }
+  .large .name { flex-basis: calc(100% - 46px); }
+  .large .scaleCol { margin-left: 44px; }
 }

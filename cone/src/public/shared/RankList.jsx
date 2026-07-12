@@ -42,9 +42,15 @@ export default function RankList({
             <span className={s.rank}>{i + 1}º</span>
             {showDots && <span className={s.dot} style={{ background: e.color || 'var(--dim)' }} />}
             <span className={s.name}>{e.name || '—'}</span>
-            {e.scale && e.scale !== '-' && (
-              <span className={s.scale} style={{ color: scaleColor(e.scale) }}>{e.scale}</span>
-            )}
+            {/* Scale and perf get their own fixed columns, left-aligned, so their
+                left edges line up down the list. Previously `name: flex 1` shoved
+                both to the right edge and the ragged left edges made the column
+                unreadable at a glance. */}
+            <span className={s.scaleCol}>
+              {e.scale && e.scale !== '-' && (
+                <span className={s.scale} style={{ color: scaleColor(e.scale) }}>{e.scale}</span>
+              )}
+            </span>
             <span className={s.perf}>{perfStr(e, blType)}</span>
           </li>
         )

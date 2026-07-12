@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
 import RankList from '../shared/RankList.jsx'
+import AccordionCard from '../shared/AccordionCard.jsx'
 import Nav from '../Nav.jsx'
 import RdCounter from '../schedule/RdCounter.jsx'
 import DemoPanel from '../schedule/DemoPanel.jsx'
@@ -15,9 +16,11 @@ import KpiGrid from '../results/KpiGrid.jsx'
 import LoggedResult from '../results/LoggedResult.jsx'
 import LogForm from '../results/LogForm.jsx'
 import WodSummary from '../results/WodSummary.jsx'
-import LbHeader from '../leaderboard/LbHeader.jsx'
+import WodBlockCard from '../shared/WodBlockCard.jsx'
 import ScaleFilter from '../leaderboard/ScaleFilter.jsx'
 import WodSelectCard from '../leaderboard/WodSelectCard.jsx'
+import WodCard from '../leaderboard/WodCard.jsx'
+import lb from '../leaderboard/Leaderboard.module.css'
 import { calcKpis, cardSummary } from '../results/resultsHelpers.js'
 import MobileFrame from './MobileFrame.jsx'
 import { blkColor } from '../lib/wod.js'
@@ -145,23 +148,77 @@ const rcBrAmrap = { blockId: 'rcb3', rpe: 7, scale: 'SC', perfRounds: '9', perfR
 
 // ── Mock fixtures — leaderboard/ chrome ──
 const lbWods = [
-  { key: 'w1', label: 'For Time',  sessName: 'Treino A',  dt: 'sex., 10/07', count: 12 },
-  { key: 'w2', label: 'AMRAP',     sessName: 'Treino B',  dt: 'qui., 09/07', count: 8 },
-  { key: 'w3', label: 'Fran',      sessName: '',          dt: 'qua., 08/07', count: 1 },
+  { key: 'w1', label: 'For Time',  sessName: 'Treino A',  dt: 'sex., 10/07', count: 6 },
+  { key: 'w2', label: 'MetCon',    sessName: 'Treino B',  dt: 'qui., 09/07', count: 4 },
+  { key: 'w3', label: 'Fran',      sessName: '',          dt: 'qua., 08/07', count: 3 },
   { key: 'w4', label: 'Benchmark de Resistência Muscular', sessName: 'Treino de Sábado — Turma da Manhã', dt: 'sáb., 11/07', count: 23 },
 ]
 
-// Stateful wrappers: selection and the active pill are real interactions, so the
-// gallery drives them rather than freezing one visual state.
+// The mockup's WOD, as real data: MetCon (red family), 4 rounds, CAP 40'.
+const kg = { Masculino_unit: 'kg', Feminino_unit: 'kg' }
+const lbBlMetcon = {
+  id: 'lbb1', type: 'MetCon', rounds: 4, duration: '40',
+  exercises: [
+    { id: 'x1', name: 'Wall Ball', reps: '15', intensity: { mode: 'gender', Masculino_RX: '9', Feminino_RX: '6', ...kg } },
+    { id: 'x2', name: 'Box Jump',  reps: '12', intensity: { mode: 'gender', Masculino_RX: '24', Feminino_RX: '20', Masculino_unit: '"', Feminino_unit: '"' } },
+    { id: 'x3', name: 'Burpee',    reps: '9' },
+  ],
+}
+const lbBlForTime = { id: 'lbb2', type: 'For Time', label: 'Fran', duration: '12', exercises: [exScheme, exDist] }
+const lbBlEstacoes = bdBlEstacoes // flattens into one list, like TV
+const lbBlBare     = { id: 'lbb4', type: 'AMRAP', duration: '20' } // sem exercícios
+
+// Stateful wrappers: selection, the active pill and the accordion are real
+// interactions, so the gallery drives them rather than freezing one visual state.
 function ScaleFilterDemo({ initial = 'Todos' }) {
   const [v, setV] = useState(initial)
   return <ScaleFilter value={v} onChange={setV} />
+}
+function AccordionCardDemo({ initial = false, title = 'Treino A', tag = null }) {
+  const [open, setOpen] = useState(initial)
+  return (
+    <AccordionCard title={title} tag={tag} filled={open} expanded={open} onToggle={() => setOpen(o => !o)}
+      meta={<span style={{ color: 'var(--muted)' }}>linha de meta — cada página passa a sua</span>}>
+      <div style={{ padding: '10px', color: 'var(--sub)', fontSize: 13 }}>corpo (children) — só monta quando aberto</div>
+    </AccordionCard>
+  )
 }
 function WodSelectColDemo() {
   const [sel, setSel] = useState('w2')
   return (
     <div className={s.lbCol}>
       {lbWods.map(w => <WodSelectCard key={w.key} w={w} selected={sel === w.key} onSelect={setSel} />)}
+    </div>
+  )
+}
+
+// The whole mobile leaderboard: week nav → WOD cards → the open one holds the
+// scale filter, the WOD, and the ranking. Replaces the <select> picker.
+const LB_MOBILE = [
+  { w: lbWods[0], bl: lbBlForTime, entries: rlFT,             blType: 'For Time' },
+  { w: lbWods[1], bl: lbBlMetcon,  entries: rlAmrap,          blType: 'AMRAP' },
+  { w: lbWods[2], bl: lbBlForTime, entries: rlFT.slice(0, 3), blType: 'For Time' },
+]
+function LbMobileDemo({ initialOpen = 'w2', highlightAthleteId = '' }) {
+  const [openKey, setOpenKey] = useState(initialOpen)
+  const [scale, setScale]     = useState('Todos')
+  return (
+    <div className={s.lbMobile}>
+      <div className={lb.weekNav}>
+        <button type="button" className={lb.weekBtn} aria-label="Semana anterior">‹</button>
+        <span className={lb.weekLabel}>5 – 11 Jul, 2026</span>
+        <button type="button" className={lb.weekBtn} aria-label="Próxima semana">›</button>
+      </div>
+      {LB_MOBILE.map(({ w, bl, entries, blType }) => (
+        <WodCard key={w.key} w={w} summary={cardSummary(entries, blType, '')}
+          expanded={openKey === w.key} onToggle={() => setOpenKey(k => (k === w.key ? '' : w.key))}>
+          <div className={lb.cardOpen}>
+            <ScaleFilter value={scale} onChange={setScale} />
+            <WodBlockCard bl={bl} dt={w.dt} sessName={w.sessName} scaleFilter={scale} />
+            <RankList entries={entries} blType={blType} scaleFilter={scale} highlightAthleteId={highlightAthleteId} />
+          </div>
+        </WodCard>
+      ))}
     </div>
   )
 }
@@ -239,6 +296,49 @@ const GROUPS = [
             <Case label="Sem pódio (podium=false)"><RankList entries={rlFT} blType="For Time" podium={false} /></Case>
             <Case label="size='large' + dots do atleta (página leaderboard)">
               <RankList entries={rlFT} blType="For Time" size="large" showDots highlightAthleteId="a2" />
+            </Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'wodblockcard',
+        label: 'WodBlockCard',
+        render: () => (
+          <Section title="WodBlockCard" sub="src/public/shared/WodBlockCard.jsx — o WOD acima de um ranking, com a mesma forma do BlockCard da TV (régua lateral da família + selo do tipo, depois a ExerciseList compartilhada). Absorve o antigo cabeçalho do leaderboard: o selo é o rótulo, as fichas são rounds/CAP, e o rodapé leva data · sessão · escala ativa.">
+            <Case label="MetCon (família vermelha) · 4 rounds · CAP 40'">
+              <WodBlockCard bl={lbBlMetcon} dt="qui., 25/06" sessName="Treino B" />
+            </Case>
+            <Case label="Com filtro de escala ativo (entra no rodapé)">
+              <WodBlockCard bl={lbBlMetcon} dt="qui., 25/06" sessName="Treino B" scaleFilter="RX" />
+            </Case>
+            <Case label="For Time (família âmbar) · só CAP, sem rounds">
+              <WodBlockCard bl={lbBlForTime} dt="qua., 08/07" sessName="Treino A" />
+            </Case>
+            <Case label="Estações — achatado numa lista só, como na TV">
+              <WodBlockCard bl={lbBlEstacoes} dt="ter., 07/07" sessName="Treino C" />
+            </Case>
+            <Case label="Sem exercícios (só selo + fichas + rodapé)">
+              <WodBlockCard bl={lbBlBare} dt="seg., 06/07" sessName="Treino D" />
+            </Case>
+            <Case label="size='large' (coluna de ranking do desktop)">
+              <WodBlockCard bl={lbBlMetcon} dt="qui., 25/06" sessName="Treino B" size="large" />
+            </Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'accordioncard',
+        label: 'AccordionCard',
+        render: () => (
+          <Section title="AccordionCard" sub="src/public/shared/AccordionCard.jsx — a casca de expansão por trás do SessionCard (results) e do WodCard (leaderboard). Os cabeçalhos levam dados diferentes, mas a interação é uma só: um contrato de teclado, um aria-expanded, um chevron. Tab + Enter/Espaço.">
+            <Case label="Colapsado">
+              <AccordionCardDemo />
+            </Case>
+            <Case label="Expandido (com tag)">
+              <AccordionCardDemo initial tag="AMRAP" />
+            </Case>
+            <Case label="Título + tag longos (ambos truncam)">
+              <AccordionCardDemo title="Treino de Sábado — Turma da Manhã" tag="Benchmark de Resistência Muscular" />
             </Case>
           </Section>
         ),
@@ -399,24 +499,18 @@ const GROUPS = [
     group: 'Leaderboard',
     items: [
       {
-        id: 'lbheader',
-        label: 'LbHeader',
+        id: 'wodcard',
+        label: 'WodCard (mobile)',
         render: () => (
-          <Section title="LbHeader" sub="src/public/leaderboard/LbHeader.jsx — cabeçalho do WOD selecionado. Era uma barra preta com borda #00b8d4 e texto branco, tudo vindo do lb_colors (aposentado) — por isso a página ignorava o tema. Agora é o cabeçalho padrão do app: dourado, maiúsculo, sobre --stone.">
-            <Case label="Completo (rótulo + meta + data + sessão)">
-              <LbHeader label="For Time" meta="5 rounds · CAP 20'" dt="sex., 10/07" sessName="Treino A" />
+          <Section title="WodCard + a leaderboard mobile inteira" sub="src/public/leaderboard/WodCard.jsx — o <select> de WOD foi aposentado: a semana vira uma lista de cartões e o ranking mora dentro do que você abre. Mesmo gesto do SessionCard (ambos rodam sobre AccordionCard). Clique nos cartões; o filtro de escala é escopado ao WOD aberto. O ranking vira duas linhas sozinho — é uma container query, então ele reage à largura do cartão, não à da janela.">
+            <Case label="Lista completa · interativa (abra/feche, filtre, veja o ranking dentro)">
+              <LbMobileDemo />
             </Case>
-            <Case label="Com filtro de escala ativo (entra no subtítulo)">
-              <LbHeader label="For Time" meta="5 rounds · CAP 20'" dt="sex., 10/07" sessName="Treino A" scaleFilter="RX" />
+            <Case label="Com o atleta em destaque (você é o 3º)">
+              <LbMobileDemo initialOpen="w1" highlightAthleteId="a3" />
             </Case>
-            <Case label="Sem meta do bloco">
-              <LbHeader label="Fran" dt="qua., 08/07" sessName="Treino B" />
-            </Case>
-            <Case label="Só o rótulo (sem subtítulo)">
-              <LbHeader label="AMRAP" />
-            </Case>
-            <Case label="Rótulo longo (quebra)">
-              <LbHeader label="Benchmark de Resistência Muscular" meta="CAP 30'" dt="sáb., 11/07" sessName="Treino de Sábado — Turma da Manhã" scaleFilter="Adaptado" />
+            <Case label="Tudo colapsado — a semana legível sem abrir nada (data · atletas · líder)">
+              <LbMobileDemo initialOpen="" />
             </Case>
           </Section>
         ),

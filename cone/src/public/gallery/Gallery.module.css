@@ -68,6 +68,11 @@
 .lbCol { max-width: 320px; background: var(--stone); padding: 16px; }
 @media (max-width: 480px) { .lbCol { max-width: none; } }
 
+/* The mobile leaderboard column — phone-width so the accordion is judged at its
+   real size even when the gallery stage is wide. */
+.lbMobile { max-width: 390px; background: var(--bg); padding: 8px 0; }
+@media (max-width: 480px) { .lbMobile { max-width: none; } }
+
 /* ── Nav demo frame — transform makes the fixed Nav position relative to here.
    Nav's desktop sidebar CSS is `height: 100vh`, which sizes against the real
    browser viewport (transform doesn't rescope vh units) — taller than this

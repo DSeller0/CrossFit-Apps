@@ -41,6 +41,14 @@
 .tiny .vol  { font-size: 12px; }
 .tiny .name { font-size: 15px; }
 .tiny .ins  { font-size: 12px; }
+/* The complex sub-movements and the note had no tiny overrides, so they fell back
+   to compact's TV-wall sizes (20px/16px) and towered over the 15px name they sit
+   under. Reaches every tiny consumer — LogPane too. */
+.tiny .note   { font-size: 11px; padding-left: 14px; }
+.tiny .mvs    { padding-left: 14px; gap: 2px; }
+.tiny .mvRow  { gap: 6px; }
+.tiny .mvReps { font-size: 11px; }
+.tiny .mvName { font-size: 13px; }
 
 /* ── Complex sub-movements — compact ── */
 .mvs  { display: flex; flex-direction: column; gap: 4px; padding-left: 20px; }

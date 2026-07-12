@@ -47,6 +47,20 @@
 /* Active pill: was a cyan fill from lb_colors (inline style), now a theme token. */
 .fbOn { background: var(--teal); border-color: var(--teal); color: var(--accent-text); }
 
+/* ── WodCard — mobile accordion. Header CONTENTS only; the shell is
+   shared/AccordionCard.module.css (same one results' SessionCard uses). ── */
+.cardDate { color:var(--sub); font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+.cardCount { color:var(--muted); }
+.cardCount::before { content:'·'; margin-right:8px; color:var(--dim); }
+.cardLeader { display:flex; align-items:center; gap:4px; min-width:0; color:var(--muted); }
+.cardLeader::before { content:'·'; margin-right:4px; color:var(--dim); }
+.cardLeader i { font-size:12px; color:var(--podium-1); }
+.cardLeaderName { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:90px; }
+.cardLeaderPerf { font-weight:900; color:var(--podium-1); font-variant-numeric:tabular-nums; }
+
+/* Expanded body: scale filter, then the WOD, then the ranking. */
+.cardOpen { display:flex; flex-direction:column; gap:8px; padding:8px 10px 2px; border-top:1px solid var(--divider); }
+
 /* ── Two-pane content area ── */
 .contentArea { }
 @media(min-width:768px) {
