@@ -216,9 +216,14 @@ const GROUPS = [
                 checked={new Set()} roundState={{}} rmValues={{}} rmEditKey={exProg.id} demoMap={{}}
                 onCheck={NOOP} onAdvance={NOOP} onReset={NOOP} onRmToggle={NOOP} onRmConfirm={NOOP} onDemo={NOOP} />
             </Case>
-            <Case label="Complexo">
+            <Case label="Complexo (% RM, sem RM definido)">
               <ExRow ex={exComplex} bl={schedBlPlain} isWod={false} isRd={false}
                 checked={new Set()} roundState={{}} rmValues={{}} rmEditKey={null} demoMap={{}}
+                onCheck={NOOP} onAdvance={NOOP} onReset={NOOP} onRmToggle={NOOP} onRmConfirm={NOOP} onDemo={NOOP} />
+            </Case>
+            <Case label="Complexo (% RM, RM definido · calculado)">
+              <ExRow ex={exComplex} bl={schedBlPlain} isWod={false} isRd={false}
+                checked={new Set()} roundState={{}} rmValues={{ [exComplex.id]: { rm: 100, unit: 'kg', source: 'manual' } }} rmEditKey={null} demoMap={{}}
                 onCheck={NOOP} onAdvance={NOOP} onReset={NOOP} onRmToggle={NOOP} onRmConfirm={NOOP} onDemo={NOOP} />
             </Case>
             <Case label="Em bloco de rodadas (RdCounter no lugar do checkbox)">

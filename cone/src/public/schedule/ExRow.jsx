@@ -30,6 +30,8 @@ export default function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEd
     const sets=ex.sets||''
     const volStr=[sets,notation?`(${notation})`:''].filter(Boolean).join('×')
     const cxIsProg=ex.intensity?.mode==='progression'
+    const cxIsPct=ex.intensity?.mode==='pct'
+    const cxHasRm=cxIsProg||cxIsPct
     const exRm=rmValues[ex.id]
     let loadStr='',calcStr=''
     if(cxIsProg){
@@ -38,6 +40,10 @@ export default function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEd
       if(loads.length)loadStr=loads.join(' / ')+' '+unit
       const pctNums=loads.map(l=>parseFloat(l)).filter(n=>!isNaN(n))
       if(exRm?.rm&&pctNums.length)calcStr=pctNums.map(p=>Math.ceil(exRm.rm*p/100)).join('/')+' '+(exRm.unit||'kg')
+    }else if(cxIsPct){
+      const pctNum=parseFloat(ex.intensity?.pct)
+      if(ex.intensity?.pct)loadStr=ex.intensity.pct+'% RM'
+      if(exRm?.rm&&!isNaN(pctNum))calcStr=Math.ceil(exRm.rm*pctNum/100)+' '+(exRm.unit||'kg')
     }else if(ins){loadStr=ins}
     const hasDemoCx=mvs.some(m=>{const d=demoMap[(m.name||'').toLowerCase()]||{};return!!(d.videoUrl||d.description||d.muscles)})
     const mvNames=mvs.map(m=>m.name)
@@ -53,12 +59,12 @@ export default function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEd
               <div className={`${styles.detailExName}${!isWod&&done?' '+styles.detailExNameDone:''}`}>{displayName}</div>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:4,flexShrink:0}}>
-              {cxIsProg&&<button className={`${styles.rmChip}${exRm?' '+styles.rmChipHasRm:''}`} onClick={e=>{e.stopPropagation();onRmToggle(ex.id)}}>{exRm?exRm.rm+' '+(exRm.unit||'kg'):'RM'}</button>}
+              {cxHasRm&&<button className={`${styles.rmChip}${exRm?' '+styles.rmChipHasRm:''}`} onClick={e=>{e.stopPropagation();onRmToggle(ex.id)}}>{exRm?exRm.rm+' '+(exRm.unit||'kg'):'RM'}</button>}
               <button className={`${styles.demoBtn}${hasDemoCx?'':' '+styles.demoBtnNoDemo}`} onClick={e=>{e.stopPropagation();onDemo(mvNames.map(n=>({name:n})))}} disabled={!hasDemoCx}>Demo</button>
             </div>
           </div>
           {mvs.map((m,mi)=><div key={mi} className={styles.detailExMovement}>· {[m.reps?m.reps+'×':'',m.name].filter(Boolean).join(' ')}</div>)}
-          {cxIsProg&&rmEditKey===ex.id&&<div className={styles.rmInputWrap} onClick={e=>e.stopPropagation()}>
+          {cxHasRm&&rmEditKey===ex.id&&<div className={styles.rmInputWrap} onClick={e=>e.stopPropagation()}>
             <input ref={rmInputRef} type="number" className={styles.rmInput} placeholder="100" min="1" step="1" inputMode="numeric" defaultValue={exRm?.rm||''} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();confirmRm()}}}/>
             <select ref={unitSelRef} className={styles.rmUnitSel} defaultValue={exRm?.unit||'kg'} onClick={e=>e.stopPropagation()}>
               <option value="kg">kg</option><option value="lbs">lbs</option>
