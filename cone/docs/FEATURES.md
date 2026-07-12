@@ -27,7 +27,7 @@ Living inventory of every user-facing capability: where it lives, who consumes i
 | Goals display + progress % | me.html | athlete | `goals_data` | — | Gate: Pro |
 | Body metrics UI (save is a no-op — #19) | me.html | athlete | — (pending table) | — | Gate: Pro |
 | All-time rankings + scale filters | leaderboard.html | all | `results_v2`, `lb_colors` | — | core |
-| Athlete goal lookup (legacy design) | athletes.html | all | `athletes`, `goals_data` | — | merge/retire candidate |
+| ~~Athlete goal lookup (legacy design)~~ | ~~athletes.html~~ | — | — | — | **RETIRED (#52)** — redirects to me.html; its one unique idea (character-stat bars) became [plans/22](./plans/22-athlete-character-stats.md) |
 | Standalone WOD timer (all types) | timer.html | all | localStorage | — | core |
 | TV wall display: WOD/timer/results/QR slides | tv.html | all (display) | `tv_state`, `class_executions`, `results_v2` realtime | — | Gate: Pro (TV system) |
 | localStorage data recovery | recover.html | all | localStorage | — | core |

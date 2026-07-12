@@ -19,6 +19,21 @@ export function fmtDate(iso) {
   return `${DAY_PT_TITLE[d.getDay()]} ${d.getDate()} ${MONTH_PT_SHORT[d.getMonth()]}`
 }
 
+// "5 Jul" — date + short month, no day name. For dense rows where the weekday
+// costs more than it tells you (me.html's event list).
+export function fmtDateShort(iso) {
+  const d = new Date(iso + 'T12:00:00')
+  return `${d.getDate()} ${MONTH_PT_SHORT[d.getMonth()]}`
+}
+
+// "5 Jul 2026" — the same, with the year. Replaces a toLocaleDateString('pt-BR')
+// call that rendered "05 de jul. de 2026"; keeping the format in our own hands
+// means it can't drift with the browser's locale data.
+export function fmtDateYear(iso) {
+  const d = new Date(iso + 'T12:00:00')
+  return `${d.getDate()} ${MONTH_PT_SHORT[d.getMonth()]} ${d.getFullYear()}`
+}
+
 export function toISO(d) {
   const p = n => String(n).padStart(2,'0')
   return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`

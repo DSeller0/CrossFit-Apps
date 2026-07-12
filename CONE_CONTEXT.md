@@ -17,7 +17,7 @@ Vite + React + Supabase. In active use by coaches (Rod / Team Medrado).
   log.html                  ← PUBLIC: athlete self-log (QR code target)
   leaderboard.html          ← PUBLIC: WOD results leaderboard
   schedule.html             ← PUBLIC/COACH: weekly training schedule
-  athletes.html             ← COACH: athlete profiles (legacy HTML, still in use)
+  athletes.html             ← RETIRED (#52): redirect stub → me.html?id=<athlete>. Kept only because sw.js precaches it.
   recover.html              ← UTILITY: mobile localStorage data export
   manifest.json             ← PWA manifest
   sw.js                     ← Service worker
@@ -182,7 +182,7 @@ Estações blocks: `exercises` key is absent; `stations` replaces it. Old blocks
 ```javascript
 {
   id, name, color,       // color is CSS hex, used as avatar accent
-  ...                    // contact, goals, PRs etc. (managed in athletes.html / Atletas tab)
+  ...                    // contact, goals, PRs etc. (managed in the Atletas tab; me.html logs PRs via submit_pr)
 }
 ```
 

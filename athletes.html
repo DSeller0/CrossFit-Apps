@@ -1,25 +1,23 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<meta name="description" content="Perfil e progresso dos atletas — Cone"/>
-<link rel="manifest" href="manifest.json"/>
-<title>Cone — Atletas</title>
-<script>!function(){var t=localStorage.getItem('cone_theme')||'totk-dark';document.documentElement.classList.add('theme-'+t)}();</script>
-<link rel="stylesheet" href="themes.css"/>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:#3a3028;border-radius:3px;border:1px solid var(--accent)}
-::-webkit-scrollbar-thumb:hover{background:var(--accent)}
-*{scrollbar-width:thin;scrollbar-color:#3a3028 var(--bg)}
-</style>
+<meta name="robots" content="noindex"/>
+<title>Cone</title>
+<!--
+  Retired in #52. athletes.html's picker, PRs and goals all live on me.html, which is
+  themed and reachable from the nav; this page never was. The file stays (instead of
+  being deleted) for two reasons: old bookmarks keep working, and sw.js precaches
+  './athletes.html' via cache.addAll(), which rejects ATOMICALLY on a 404 — removing
+  the file would stop the service worker from installing for every user, on every page.
+-->
+<script>
+(function () {
+  var id = new URLSearchParams(location.search).get('athlete');
+  location.replace('me.html' + (id ? '?id=' + encodeURIComponent(id) : ''));
+})();
+</script>
 </head>
-<body>
-<div id="root"></div>
-<script type="module" src="/cone/src/public/athletes/main.jsx"></script>
-</body>
+<body></body>
 </html>
