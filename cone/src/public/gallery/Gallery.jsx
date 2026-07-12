@@ -56,7 +56,8 @@ const demoMapTextOnly = { 'wall ball': { description: 'Agachamento completo com 
 const demoMapEmpty    = {}
 const demoMapComplex  = { 'clean pull': { description: 'Puxada de chão explosiva, sem receber a barra.' } }
 
-const logPaneSess       = { id: 'sess-lp', sessionName: 'Treino A' }
+const logPaneBlk        = { id: 'b1', type: 'For Time', exercises: [exStandard] }
+const logPaneSess       = { id: 'sess-lp', sessionName: 'Treino A', blocks: [logPaneBlk] }
 const logPaneAthletes   = [{ id: 'a1', name: 'Bruna' }, { id: 'a2', name: 'Arthur' }]
 const logPaneBlockForm  = [{ blockId: 'b1', blockLabel: 'For Time', blockType: 'For Time', rpe: 7, scale: 'RX', perfTime: '', perfRounds: '', perfReps: '' }]
 const logPaneBlockDone  = [{ blockId: 'b1', blockLabel: 'For Time', blockType: 'For Time', rpe: 8, scale: 'RX', perfTime: '12:34', perfRounds: '', perfReps: '' }]
@@ -237,7 +238,7 @@ const GROUPS = [
         id: 'blockdetail',
         label: 'BlockDetail',
         render: () => (
-          <Section title="BlockDetail" sub="src/public/schedule/BlockDetail.jsx — cartão de bloco (desktop: 2 colunas; WOD/rodadas ganham ações de registro)">
+          <Section title="BlockDetail" sub="src/public/schedule/BlockDetail.jsx — cartão de bloco (2 colunas; só blocos WOD ganham Timer/Leaderboard/registro — rodadas não-WOD são só check-off)">
             <Case label="WOD com atleta selecionado (resultado registrado)">
               <BlockDetail bl={bdBlWodWithAth} sess={bdSess} dateKey="2026-07-11"
                 checked={new Set()} roundState={{}} rmValues={{}} rmEditKey={null} demoMap={{}}
@@ -259,7 +260,7 @@ const GROUPS = [
                 isWodLogged={() => false}
                 onCheck={NOOP} onAdvance={NOOP} onReset={NOOP} onRmToggle={NOOP} onRmConfirm={NOOP} onDemo={NOOP} onTimer={NOOP} />
             </Case>
-            <Case label="Bloco de rodadas (idle)">
+            <Case label="Bloco de rodadas (idle · não-WOD — onLogBlock passado mas ignorado, prova de que só WOD registra)">
               <BlockDetail bl={bdBlRound} sess={bdSess} dateKey="2026-07-11"
                 checked={new Set()} roundState={{}} rmValues={{}} rmEditKey={null} demoMap={{}}
                 isWodLogged={() => false}
@@ -270,15 +271,13 @@ const GROUPS = [
               <BlockDetail bl={bdBlRound} sess={bdSess} dateKey="2026-07-11"
                 checked={new Set()} roundState={{ [`${bdBlRound.id}|${exStandard.id}`]: 2 }} rmValues={{}} rmEditKey={null} demoMap={{}}
                 isWodLogged={() => false}
-                onCheck={NOOP} onAdvance={NOOP} onReset={NOOP} onRmToggle={NOOP} onRmConfirm={NOOP} onDemo={NOOP} onTimer={NOOP}
-                onLogBlock={NOOP} athResult={null} athName="Bruna" />
+                onCheck={NOOP} onAdvance={NOOP} onReset={NOOP} onRmToggle={NOOP} onRmConfirm={NOOP} onDemo={NOOP} onTimer={NOOP} />
             </Case>
-            <Case label="Bloco de rodadas (completo · resultado registrado)">
+            <Case label="Bloco de rodadas (completo)">
               <BlockDetail bl={bdBlRound} sess={bdSess} dateKey="2026-07-11"
                 checked={new Set()} roundState={{ [`${bdBlRound.id}|${exStandard.id}`]: 4 }} rmValues={{}} rmEditKey={null} demoMap={{}}
                 isWodLogged={() => false}
-                onCheck={NOOP} onAdvance={NOOP} onReset={NOOP} onRmToggle={NOOP} onRmConfirm={NOOP} onDemo={NOOP} onTimer={NOOP}
-                onLogBlock={NOOP} athResult={{ scale: 'RX', rpe: 6, perfRounds: '4' }} athName="Bruna" />
+                onCheck={NOOP} onAdvance={NOOP} onReset={NOOP} onRmToggle={NOOP} onRmConfirm={NOOP} onDemo={NOOP} onTimer={NOOP} />
             </Case>
             <Case label="Estações">
               <BlockDetail bl={bdBlEstacoes} sess={bdSess} dateKey="2026-07-11"
@@ -294,20 +293,22 @@ const GROUPS = [
         id: 'sessiondetail',
         label: 'SessionDetail',
         render: () => (
-          <Section title="SessionDetail" sub="src/public/schedule/SessionDetail.jsx — expansão mobile de uma sessão (lista de blocos + botão de registro)">
-            <Case label="Com nome de sessão · múltiplos blocos">
+          <Section title="SessionDetail" sub="src/public/schedule/SessionDetail.jsx — expansão mobile de uma sessão (lista de blocos, cada um com seu próprio botão de registro quando é WOD, + botão de registro da sessão inteira)">
+            <Case label="Com nome de sessão · múltiplos blocos (1 WOD já registrado + 1 não-WOD)">
               <SessionDetail sess={sdSessNamed} dateKey="2026-07-11"
                 checked={new Set()} roundState={{}} rmValues={{}} rmEditKey={null} demoMap={{}}
-                isWodLogged={() => false}
+                isWodLogged={bl => bl.id === bdBlWodWithAth.id}
                 onCheck={NOOP} onAdvance={NOOP} onReset={NOOP} onRmToggle={NOOP} onRmConfirm={NOOP} onDemo={NOOP} onTimer={NOOP}
-                onLog={NOOP} />
+                onLog={NOOP}
+                onLogBlock={NOOP} getAthResult={bl => bl.id === bdBlWodWithAth.id ? { scale: 'RX', rpe: 7, perfTime: '12:34' } : null} athName="Bruna" />
             </Case>
-            <Case label="Sem nome de sessão · um bloco">
+            <Case label="Sem nome de sessão · um bloco (não-WOD, sem ações de registro)">
               <SessionDetail sess={sdSessUnnamed} dateKey="2026-07-11"
                 checked={new Set()} roundState={{}} rmValues={{}} rmEditKey={null} demoMap={{}}
                 isWodLogged={() => false}
                 onCheck={NOOP} onAdvance={NOOP} onReset={NOOP} onRmToggle={NOOP} onRmConfirm={NOOP} onDemo={NOOP} onTimer={NOOP}
-                onLog={NOOP} />
+                onLog={NOOP}
+                onLogBlock={NOOP} getAthResult={() => null} athName="Bruna" />
             </Case>
           </Section>
         ),

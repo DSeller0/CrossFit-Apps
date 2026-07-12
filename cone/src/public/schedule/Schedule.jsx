@@ -13,8 +13,6 @@ import SessionDetail from './SessionDetail.jsx'
 import BlockDetail from './BlockDetail.jsx'
 import CheckinSheet from './CheckinSheet.jsx'
 
-const WOD_LOG_TYPES = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT','Benchmark']
-
 // ── Pure helpers ──────────────────────────────────────────────────────────────
 function prBest(pr) {
   if(!pr?.results?.length)return null
@@ -312,18 +310,41 @@ export default function Schedule() {
     location.href='timer.html?src=sched'
   }
 
-  function doOpenLog(sess,dateKey,aths,athId,prefill=null){
+  function doOpenLog(sess,dateKey,aths,athId,prefill=null,onlyBlockId=null){
     const targets=Array.isArray(sess.mainTraining)?sess.mainTraining:(sess.mainTraining?[sess.mainTraining]:[])
     const assignedAth=(aths||athletes).filter(a=>targets.includes(a.name))
     const candidates=assignedAth.length?assignedAth:(aths||athletes)
-    const wodBls=(sess.blocks||[]).filter(b=>WOD_LOG_TYPES.includes(b.type)||WOD_LOG_TYPES.includes(b.label))
-    const blocks=wodBls.map(b=>({blockId:b.id,blockType:b.type,blockLabel:b.label&&b.type&&b.label!==b.type?`${b.label} · ${b.type}`:b.label||b.type,rpe:7,scale:'RX',perfTime:'',perfRounds:'',perfReps:''}))
-    if(prefill?.blockId){const bi=blocks.findIndex(b=>b.blockId===prefill.blockId);if(bi>=0){if(prefill.perfTime)blocks[bi].perfTime=prefill.perfTime;if(prefill.perfRounds)blocks[bi].perfRounds=prefill.perfRounds}}
+    let wodBls=(sess.blocks||[]).filter(isWodBlock)
+    if(onlyBlockId)wodBls=wodBls.filter(b=>b.id===onlyBlockId)
     let resolvedAthId=prefill?.athId||athId||''
     if(resolvedAthId&&!candidates.some(a=>String(a.id)===String(resolvedAthId)))resolvedAthId=''
+    // Pre-fill each block from any already-logged result (mirrors deskOpenReg) so
+    // reopening the sheet — e.g. via the per-block button after a prior partial
+    // submission — shows real values instead of blanking them on next submit.
+    const existing=resolvedAthId?results.find(r=>r.sessionId===sess.id&&r.athleteId===resolvedAthId):null
+    const blocks=wodBls.map(b=>{
+      const eb=existing?.blocks?.find(x=>x.blockId===b.id)
+      return{blockId:b.id,blockType:b.type,blockLabel:b.label&&b.type&&b.label!==b.type?`${b.label} · ${b.type}`:b.label||b.type,
+        rpe:eb?.rpe??7,scale:eb?.scale||'RX',perfTime:eb?.perfTime||'',perfRounds:eb?.perfRounds||'',perfReps:eb?.perfReps||''}
+    })
+    if(prefill?.blockId){const bi=blocks.findIndex(b=>b.blockId===prefill.blockId);if(bi>=0){if(prefill.perfTime)blocks[bi].perfTime=prefill.perfTime;if(prefill.perfRounds)blocks[bi].perfRounds=prefill.perfRounds}}
     setLogPane({sess,dateKey,assignedAth:candidates})
     setLogAthId(resolvedAthId);setLogBlocks(blocks)
     setLogSubmitting(false);setLogSuccess(false);setLogConfirming(false);setLogError('')
+  }
+
+  // Switching athlete inside an already-open LogPane must re-derive the
+  // prefilled fields for the newly picked athlete — otherwise the previous
+  // athlete's real rpe/scale/perfTime values silently ride along into the
+  // new athlete's submission (doOpenLog only prefills once, at open time).
+  function changeLogAthId(newAthId){
+    setLogAthId(newAthId)
+    if(!logPane)return
+    const existing=newAthId?results.find(r=>r.sessionId===logPane.sess.id&&r.athleteId===newAthId):null
+    setLogBlocks(prev=>prev.map(b=>{
+      const eb=existing?.blocks?.find(x=>x.blockId===b.blockId)
+      return{...b,rpe:eb?.rpe??7,scale:eb?.scale||'RX',perfTime:eb?.perfTime||'',perfRounds:eb?.perfRounds||'',perfReps:eb?.perfReps||''}
+    }))
   }
 
   // Confirm step (policy: review before submit, same as results.html)
@@ -337,9 +358,15 @@ export default function Schedule() {
     if(!logAthId){setLogError('Selecione seu nome antes de enviar.');return}
     setLogSubmitting(true);setLogError('')
     const{dateKey,sess}=logPane
-    const result={id:uid(),date:dateKey,athleteId:logAthId,sessionId:sess.id,presence:'Presente',energyLevel:3,blocks:logBlocks,coachNote:'',flagForReview:false,loggedByAthlete:true}
-    const existing=Array.isArray(results)?results:[]
-    const next=[...existing.filter(r=>!(r.athleteId===logAthId&&r.sessionId===sess.id)),result]
+    const existingArr=Array.isArray(results)?results:[]
+    const existing=existingArr.find(r=>r.sessionId===sess.id&&r.athleteId===logAthId)
+    // Merge rather than replace: doOpenLog's onlyBlockId scoping means logBlocks
+    // can hold just one block, and log_result's upsert overwrites the whole
+    // blocks column — replacing wholesale would silently drop any other
+    // already-logged block for this athlete+session (same fix as submitDeskReg).
+    const mergedBlocks=existing?[...(existing.blocks||[]).filter(b=>!logBlocks.some(lb=>lb.blockId===b.blockId)),...logBlocks]:logBlocks
+    const result={id:existing?.id||uid(),date:dateKey,athleteId:logAthId,sessionId:sess.id,presence:existing?.presence||'Presente',energyLevel:existing?.energyLevel??3,blocks:mergedBlocks,coachNote:existing?.coachNote||'',flagForReview:existing?.flagForReview||false,loggedByAthlete:true}
+    const next=[...existingArr.filter(r=>!(r.athleteId===logAthId&&r.sessionId===sess.id)),result]
     const{error}=await sb.rpc('log_result',{p_id:String(result.id),p_date:result.date,p_athlete_id:result.athleteId,p_session_id:result.sessionId?String(result.sessionId):null,p_presence:result.presence,p_energy_level:result.energyLevel??null,p_blocks:result.blocks})
     if(error){setLogSubmitting(false);setLogError('Erro ao enviar. Tente novamente.');return}
     setResults(next);setLogSubmitting(false);setLogSuccess(true)
@@ -392,7 +419,7 @@ export default function Schedule() {
 
   return(<>
     <DemoPanel target={demoTarget} demoMap={demoMapRef.current} onClose={()=>setDemoTarget(null)}/>
-    <LogPane pane={logPane} athId={logAthId} onAthId={setLogAthId}
+    <LogPane pane={logPane} athId={logAthId} onAthId={changeLogAthId}
       blocks={logBlocks} onBlocks={setLogBlocks}
       submitting={logSubmitting} success={logSuccess} error={logError}
       confirming={logConfirming} onConfirming={setLogConfirmStep}
@@ -447,6 +474,7 @@ export default function Schedule() {
                   const blocks=sess.blocks||[]
                   const exNames=[...new Set(blocks.flatMap(bl=>(bl.exercises||[]).filter(e=>e.name).map(e=>e.name)))].slice(0,3)
                   const moreEx=blocks.flatMap(b=>(b.exercises||[])).filter(e=>e.name).length>3
+                  const sessResult=isExp&&selAth?results.find(r=>r.sessionId===sess.id&&r.athleteId===selAth):null
                   return(
                     <div key={sess.id}>
                       <div className={styles.sessSummary} role="button" tabIndex={0} aria-expanded={isExp}
@@ -480,6 +508,9 @@ export default function Schedule() {
                         onDemo={mvs=>setDemoTarget(mvs)}
                         onTimer={bl=>openTimer(bl,sess,dk)}
                         onLog={()=>doOpenLog(sess,dk,athletes,selAth)}
+                        onLogBlock={selAth?bl=>doOpenLog(sess,dk,athletes,selAth,null,bl.id):null}
+                        getAthResult={bl=>sessResult?.blocks?.find(b=>b.blockId===bl.id)||null}
+                        athName={selAthObj?.name||''}
                       />}
                     </div>
                   )
@@ -608,7 +639,7 @@ export default function Schedule() {
                     onRmConfirm={(exId,rm,unit)=>{setRmValues(prev=>({...prev,[exId]:{rm,unit,source:'manual'}}));setRmEditKey(null)}}
                     onDemo={mvs=>setDemoTarget(mvs)}
                     onTimer={b=>openTimer(b,selSessObj,selSess.dateKey)}
-                    onLogBlock={(isWod||isRoundBlock(bl))&&selAth?()=>deskOpenReg(bl,selSessObj,selSess.dateKey):null}
+                    onLogBlock={isWod&&selAth?()=>deskOpenReg(bl,selSessObj,selSess.dateKey):null}
                     athResult={existingResult}
                     athName={selAthObj?.name||''}
                   />

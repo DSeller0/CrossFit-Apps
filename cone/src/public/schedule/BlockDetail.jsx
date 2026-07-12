@@ -13,7 +13,7 @@ export default function BlockDetail({bl,sess,dateKey,checked,roundState,rmValues
 
   const perfStr=fmtDeskPerf(athResult)
 
-  const athSection=onLogBlock&&(isWod||isRd)&&(
+  const athSection=onLogBlock&&isWod&&(
     <>
       <div className={`${styles.deskAthResultRow} ${athResult?styles.deskAthResultRowLogged:styles.deskAthResultRowEmpty}`}>
         <span className={`${styles.deskAthResultName} ${athResult?styles.deskAthResultNameLogged:styles.deskAthResultNameEmpty}`}>
@@ -99,8 +99,8 @@ export default function BlockDetail({bl,sess,dateKey,checked,roundState,rmValues
     </>
   )
 
-  const showIdleHint=deskIdleHint&&(isWod||isRd)&&!athSection
-  const actionsEmpty=!isWod&&!athSection&&!showIdleHint
+  const showIdleHint=deskIdleHint&&isWod&&!athSection
+  const actionsEmpty=!isWod
 
   return(
     <div className={styles.detailBlock} style={{borderLeftColor:col}}>

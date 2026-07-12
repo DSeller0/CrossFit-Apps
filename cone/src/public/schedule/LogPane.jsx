@@ -1,5 +1,16 @@
 import styles from './Schedule.module.css'
 import { LOG_SCALES, fmtDeskPerf } from './scheduleHelpers.js'
+import { blkColor } from '../lib/wod.js'
+import { ExerciseList } from '../shared/ExerciseList.jsx'
+
+// Estações nests its exercises under stations rather than bl.exercises directly
+// (see BlockDetail.jsx's Estações branch) — flatten them here so the review/edit
+// exercise list isn't silently empty for that block type.
+function blockExercises(bl) {
+  if(!bl)return[]
+  if(bl.type==='Estações')return(bl.stations||[]).filter(st=>!st.isRest).flatMap(st=>st.exercises||[])
+  return bl.exercises||[]
+}
 
 // ── Log Pane (mobile) ─────────────────────────────────────────────────────────
 export default function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,success,error,confirming,onConfirming,onSubmit,onClose,lockedAthName}) {
@@ -34,9 +45,12 @@ export default function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,s
             <div className={styles.lpDate}>{lockedAthName||pane.assignedAth.find(a=>String(a.id)===String(athId))?.name||''}{pane.sess.sessionName?` · ${pane.sess.sessionName}`:''}</div>
             {blocks.map(bl=>{
               const perf=fmtDeskPerf(bl)
+              const fullBl=pane.sess.blocks?.find(b=>b.id===bl.blockId)
+              const exs=blockExercises(fullBl)
               return(
                 <div key={bl.blockId} className={styles.deskConfirmBox}>
                   <div className={styles.deskConfirmTitle}>{bl.blockLabel}</div>
+                  {exs.length>0&&<ExerciseList exercises={exs} color={blkColor(fullBl)} size="compact"/>}
                   <div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>Escala</span><span className={styles.deskConfirmRowVal}>{bl.scale}</span></div>
                   {bl.rpe&&<div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>RPE</span><span className={styles.deskConfirmRowVal}>{bl.rpe} / 10</span></div>}
                   {perf&&<div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>Resultado</span><span className={styles.deskConfirmRowVal}>{perf}</span></div>}
@@ -71,9 +85,13 @@ export default function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,s
             </div>
             {blocks.length>0&&<div className={styles.lpSection}>
               <div className={styles.lpSectionTitle}>Resultados</div>
-              {blocks.map((bl,i)=>(
+              {blocks.map((bl,i)=>{
+                const fullBl=pane.sess.blocks?.find(b=>b.id===bl.blockId)
+                const exs=blockExercises(fullBl)
+                return(
                 <div key={bl.blockId} className={styles.lpBlock}>
                   <div className={styles.lpBlockTitle}>{bl.blockLabel}</div>
+                  {exs.length>0&&<ExerciseList exercises={exs} color={blkColor(fullBl)} size="compact"/>}
                   <span className={styles.lpLbl}>RPE (1–10)</span>
                   <div className={styles.lpRpeRow}>
                     {[1,2,3,4,5,6,7,8,9,10].map(n=>(
@@ -94,7 +112,7 @@ export default function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,s
                        <div><span className={styles.lpLbl}>Reps</span><input className={styles.lpInput} type="number" placeholder="0" min="0" inputMode="numeric" value={bl.perfReps||''} onChange={e=>setField(i,'perfReps',e.target.value)}/></div>
                      </div>}
                 </div>
-              ))}
+              )})}
             </div>}
             <button className={styles.lpSubmit} disabled={submitting||undefined} onClick={()=>onConfirming(true)}>
               <i className="ti ti-check"/> Registrar
