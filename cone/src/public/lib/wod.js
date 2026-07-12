@@ -12,6 +12,32 @@ const BLOCK_FAMILY={
 const FAMILY_COLOR={red:'#c84038',amber:'#d8a840',blue:'#4878d8',green:'#48b860'}
 export function blkColor(bl){return FAMILY_COLOR[BLOCK_FAMILY[bl.type]||BLOCK_FAMILY[bl.label]]||'#d8a840'}
 
+// ── Scales ────────────────────────────────────────────────────────────────────
+// SCALE_COL is a DATA-COLOR family, deliberately exempt from tokenization —
+// same precedent as the block families above: the color identifies the scale, so
+// it must stay stable across all 4 themes rather than re-tint with the palette.
+// Canonical since #51; it reconciles two diverged copies (Results.jsx assigned
+// Inter orange, Athletes.jsx assigned it gold; Results' Adaptado red collided
+// with the red block family and misread as an error state). One fallback grey
+// replaces the three that existed (#666/#666/#888).
+export const SCALES         = ['RX','Inter','SC','Adaptado']
+export const SCALE_COL      = {RX:'#4ac8c0',Inter:'#e87820',SC:'#9070d8',Adaptado:'#a89880'}
+export const SCALE_FALLBACK = '#808080'
+export function scaleColor(sc){ return SCALE_COL[sc]||SCALE_FALLBACK }
+
+// A block's effective scale is its WEAKEST per-exercise scale: an athlete who
+// scaled one movement did not do the WOD RX. Blocks logged before per-exercise
+// scaling existed carry a flat blk.scale instead — fall back to it.
+const SCALE_RANK  = {RX:4,Inter:3,SC:2,Adaptado:1,'-':0}
+const SCALE_NAMES = {4:'RX',3:'Inter',2:'SC',1:'Adaptado',0:'-'}
+export function deriveScale(blk) {
+  const rows=blk?.exerciseRows||[]
+  if(!rows.length) return blk?.scale||'-'
+  let min=4
+  rows.forEach(r=>{const n=SCALE_RANK[r.scale]??0;if(n<min)min=n})
+  return SCALE_NAMES[min]
+}
+
 export function blkLabel(bl) {
   const l=bl.label&&bl.label!=='-'?bl.label:null,t=bl.type&&bl.type!=='-'?bl.type:null
   return l&&t&&l!==t?`${l} · ${t}`:l||t||''
@@ -70,7 +96,15 @@ export function rankResults(results, blType) {
 }
 
 export function perfStr(r, blType) {
-  if(blType==='For Time') return r.perfTime||'—'
+  // For Time with no time but with rounds = capped before finishing. The three
+  // Results copies rendered that as "N rds (DNF)" while this canonical one
+  // returned '—', silently hiding the work a capped athlete actually did
+  // (rankResults already sorts them last — toSecs('') is Infinity). Absorbed
+  // here in #51 so every ranking surface agrees.
+  if(blType==='For Time'){
+    if(r.perfTime) return r.perfTime
+    return r.perfRounds?`${r.perfRounds} rds (DNF)`:'—'
+  }
   const p=[]
   if(r.perfRounds) p.push(`${r.perfRounds} rds`)
   if(r.perfReps)   p.push(`${r.perfReps} reps`)

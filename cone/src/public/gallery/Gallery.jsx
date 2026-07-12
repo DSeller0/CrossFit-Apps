@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
+import RankList from '../shared/RankList.jsx'
 import Nav from '../Nav.jsx'
 import RdCounter from '../schedule/RdCounter.jsx'
 import DemoPanel from '../schedule/DemoPanel.jsx'
@@ -9,6 +10,11 @@ import ExRow from '../schedule/ExRow.jsx'
 import BlockDetail from '../schedule/BlockDetail.jsx'
 import SessionDetail from '../schedule/SessionDetail.jsx'
 import CheckinSheet from '../schedule/CheckinSheet.jsx'
+import SessionCard from '../results/SessionCard.jsx'
+import KpiGrid from '../results/KpiGrid.jsx'
+import LoggedResult from '../results/LoggedResult.jsx'
+import LogForm from '../results/LogForm.jsx'
+import { calcKpis, cardSummary } from '../results/resultsHelpers.js'
 import MobileFrame from './MobileFrame.jsx'
 import { blkColor } from '../lib/wod.js'
 import s from './Gallery.module.css'
@@ -84,6 +90,53 @@ const bdBlEstacoes    = {
 const sdSessNamed   = { id: 'sds1', sessionName: 'Treino A', blocks: [bdBlWodWithAth, bdBlPlain] }
 const sdSessUnnamed = { id: 'sds2', blocks: [bdBlPlain] }
 
+// ── Mock fixtures — RankList + results/ components ──
+// Athlete-identity colors (rl*.color) are real per-athlete data, not tokens.
+const rlFT = [
+  { id: 'r1', athleteId: 'a1', name: 'Bruna Medrado',  scale: 'RX',       rpe: 9, perfTime: '08:12', color: '#c84038' },
+  { id: 'r2', athleteId: 'a2', name: 'Arthur Souza',   scale: 'RX',       rpe: 8, perfTime: '09:05', color: '#4878d8' },
+  { id: 'r3', athleteId: 'a3', name: 'Camila Rocha',   scale: 'Inter',    rpe: 8, perfTime: '10:47', color: '#48b860' },
+  { id: 'r4', athleteId: 'a4', name: 'Diego Lima',     scale: 'Inter',    rpe: 7, perfTime: '11:30', color: '#d8a840' },
+  { id: 'r5', athleteId: 'a5', name: 'Elisa Prado',    scale: 'SC',       rpe: 6, perfTime: '13:02' },
+  { id: 'r6', athleteId: 'a6', name: 'Fábio Neves',    scale: 'Adaptado',        perfTime: '15:20' }, // sem RPE
+]
+const rlDNF = [
+  ...rlFT.slice(0, 3),
+  { id: 'r7', athleteId: 'a7', name: 'Gabriel Antunes', scale: 'RX', perfRounds: '4' }, // capped — no time
+  { id: 'r8', athleteId: 'a8', name: 'Helena Dias',     scale: 'SC' },                  // nothing logged
+]
+const rlAmrap = [
+  { id: 'r1', athleteId: 'a1', name: 'Bruna Medrado', scale: 'RX',    perfRounds: '9', perfReps: '12' },
+  { id: 'r2', athleteId: 'a2', name: 'Arthur Souza',  scale: 'RX',    perfRounds: '9', perfReps: '4' },
+  { id: 'r3', athleteId: 'a3', name: 'Camila Rocha',  scale: 'Inter', perfRounds: '8' },
+  { id: 'r4', athleteId: 'a4', name: 'Diego Lima',    scale: 'SC',    perfRounds: '6', perfReps: '15' },
+]
+const rlLong = [
+  { id: 'r1', athleteId: 'a1', name: 'Maria Fernanda Albuquerque de Vasconcelos', scale: 'Adaptado', perfTime: '14:58' },
+  { id: 'r2', athleteId: 'a2', name: 'João', scale: 'RX', perfTime: '15:02' },
+]
+const rlMany = [
+  ...rlFT,
+  { id: 'r9',  athleteId: 'a9',  name: 'Igor Salles',    scale: 'RX',    perfTime: '16:04' },
+  { id: 'r10', athleteId: 'a10', name: 'Júlia Moraes',   scale: 'Inter', perfTime: '17:11' },
+  { id: 'r11', athleteId: 'a11', name: 'Karla Bastos',   scale: 'SC',    perfTime: '18:40' },
+  { id: 'r12', athleteId: 'a12', name: 'Lucas Ferreira', scale: 'RX',    perfTime: '19:25' },
+]
+
+const rcSess    = { id: 'rc1', sessionName: 'Treino A · 18h' }
+const rcSessDay = { id: 'rc2' } // no name → falls back to the day name
+const rcBlFT    = { id: 'rcb1', type: 'For Time' }
+const rcBlFTCap = { id: 'rcb2', type: 'For Time', rounds: 5 } // exposes the DNF rounds field
+const rcBlAmrap = { id: 'rcb3', type: 'AMRAP', duration: '20' }
+
+const rcInpEmpty = { rpe: 7, scale: 'RX', perfTime: '', perfRounds: '', perfReps: '' }
+const rcInpDone  = { rpe: 9, scale: 'Inter', perfTime: '11:24', perfRounds: '', perfReps: '' }
+const rcInpAmrap = { rpe: 8, scale: 'RX', perfTime: '', perfRounds: '9', perfReps: '12' }
+
+const rcBrFT    = { blockId: 'rcb1', rpe: 8, scale: 'RX', perfTime: '10:32' }
+const rcBrDNF   = { blockId: 'rcb2', rpe: 9, scale: 'Inter', perfRounds: '4' }
+const rcBrAmrap = { blockId: 'rcb3', rpe: 7, scale: 'SC', perfRounds: '9', perfReps: '12' }
+
 function Case({ label, children }) {
   return (
     <div className={s.case}>
@@ -140,6 +193,28 @@ const GROUPS = [
         ),
       },
       {
+        id: 'ranklist',
+        label: 'RankList',
+        render: () => (
+          <Section title="RankList" sub="src/public/shared/RankList.jsx — ranking compartilhado (leaderboard + painéis do results). Pódio via --podium-1/2/3; cores de escala são data-colors (SCALE_COL).">
+            <Case label="Pódio + demais · For Time"><RankList entries={rlFT} blType="For Time" /></Case>
+            <Case label="Atleta em destaque (você é o 3º)"><RankList entries={rlFT} blType="For Time" highlightAthleteId="a3" /></Case>
+            <Case label="Filtro de escala · RX"><RankList entries={rlFT} blType="For Time" scaleFilter="RX" /></Case>
+            <Case label="Filtro de escala · Adaptado (1 resultado)"><RankList entries={rlFT} blType="For Time" scaleFilter="Adaptado" /></Case>
+            <Case label="AMRAP (rounds + reps, desempate por reps)"><RankList entries={rlAmrap} blType="AMRAP" /></Case>
+            <Case label="DNF · capped (4 rds) e sem resultado ordenam por último"><RankList entries={rlDNF} blType="For Time" /></Case>
+            <Case label="Nome longo (overflow)"><RankList entries={rlLong} blType="For Time" /></Case>
+            <Case label="Muitos (zebra além do pódio)"><RankList entries={rlMany} blType="For Time" /></Case>
+            <Case label="Um só (pódio de 1)"><RankList entries={rlFT.slice(0, 1)} blType="For Time" /></Case>
+            <Case label="Vazio"><RankList entries={[]} blType="For Time" /></Case>
+            <Case label="Sem pódio (podium=false)"><RankList entries={rlFT} blType="For Time" podium={false} /></Case>
+            <Case label="size='large' + dots do atleta (página leaderboard)">
+              <RankList entries={rlFT} blType="For Time" size="large" showDots highlightAthleteId="a2" />
+            </Case>
+          </Section>
+        ),
+      },
+      {
         id: 'nav',
         label: 'Nav',
         render: () => (
@@ -147,6 +222,92 @@ const GROUPS = [
             <Case label="active='schedule' — contido num quadro (fixed→relativo via transform)">
               <div className={s.navFrame}><Nav active="schedule" gymName="Team Medrado" /></div>
             </Case>
+          </Section>
+        ),
+      },
+    ],
+  },
+  {
+    group: 'Results',
+    items: [
+      {
+        id: 'sessioncard',
+        label: 'SessionCard',
+        render: () => (
+          <Section title="SessionCard" sub="src/public/results/SessionCard.jsx — cartão de sessão (mobile). O cabeçalho colapsado agora responde às 3 perguntas que se abre o cartão para fazer: quantos registraram, quem lidera, e como você está.">
+            <Case label="Com resultados · você já registrou">
+              <SessionCard sess={rcSess} dk="2026-07-12" isExpanded={false} onToggle={NOOP} hasAthlete
+                summary={cardSummary(rlFT, 'For Time', 'a3')} />
+            </Case>
+            <Case label="Com resultados · você ainda não registrou (CTA)">
+              <SessionCard sess={rcSess} dk="2026-07-12" isExpanded={false} onToggle={NOOP} hasAthlete
+                summary={cardSummary(rlFT, 'For Time', 'a99')} />
+            </Case>
+            <Case label="Com resultados · nenhum atleta selecionado (sem coluna 'Você')">
+              <SessionCard sess={rcSess} dk="2026-07-12" isExpanded={false} onToggle={NOOP}
+                summary={cardSummary(rlFT, 'For Time', '')} />
+            </Case>
+            <Case label="Zero resultados · loggável">
+              <SessionCard sess={rcSess} dk="2026-07-12" isExpanded={false} onToggle={NOOP} hasAthlete
+                summary={cardSummary([], 'For Time', 'a1')} />
+            </Case>
+            <Case label="Sem nome de sessão → cai para o nome do dia">
+              <SessionCard sess={rcSessDay} dk="2026-07-12" isExpanded={false} onToggle={NOOP} hasAthlete
+                summary={cardSummary(rlAmrap, 'AMRAP', 'a2')} />
+            </Case>
+            <Case label="Líder com nome longo (overflow)">
+              <SessionCard sess={rcSess} dk="2026-07-12" isExpanded={false} onToggle={NOOP} hasAthlete
+                summary={cardSummary(rlLong, 'For Time', 'a2')} />
+            </Case>
+            <Case label="Expandido (corpo via children)">
+              <SessionCard sess={rcSess} dk="2026-07-12" isExpanded onToggle={NOOP} hasAthlete
+                summary={cardSummary(rlFT, 'For Time', 'a3')}>
+                <div style={{ padding: '8px 10px', borderTop: '1px solid var(--divider)' }}>
+                  <KpiGrid kpis={calcKpis(rlFT, 'For Time')} btype="For Time" />
+                  <LoggedResult br={rcBrFT} btype="For Time" onEdit={NOOP} />
+                </div>
+              </SessionCard>
+            </Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'kpigrid',
+        label: 'KpiGrid',
+        render: () => (
+          <Section title="KpiGrid" sub="src/public/results/KpiGrid.jsx — uma grade, duas densidades (compact = cartão mobile; extended = painel desktop, com a divisão por escala)">
+            <Case label="compact · For Time"><KpiGrid kpis={calcKpis(rlFT, 'For Time')} btype="For Time" /></Case>
+            <Case label="compact · AMRAP"><KpiGrid kpis={calcKpis(rlAmrap, 'AMRAP')} btype="AMRAP" /></Case>
+            <Case label="compact · zero resultados"><KpiGrid kpis={calcKpis([], 'For Time')} btype="For Time" /></Case>
+            <Case label="extended · For Time"><KpiGrid kpis={calcKpis(rlFT, 'For Time', 'extended')} btype="For Time" variant="extended" /></Case>
+            <Case label="extended · AMRAP"><KpiGrid kpis={calcKpis(rlAmrap, 'AMRAP', 'extended')} btype="AMRAP" variant="extended" /></Case>
+            <Case label="extended · zero resultados"><KpiGrid kpis={calcKpis([], 'For Time', 'extended')} btype="For Time" variant="extended" /></Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'loggedresult',
+        label: 'LoggedResult',
+        render: () => (
+          <Section title="LoggedResult" sub="src/public/results/LoggedResult.jsx — resultado já registrado. O botão Editar é a autocorreção (#51, decisão 2): o caminho de submit já mesclava certo, era só este bloqueio visual que tornava o resultado final.">
+            <Case label="For Time · com Editar"><LoggedResult br={rcBrFT} btype="For Time" onEdit={NOOP} /></Case>
+            <Case label="For Time · somente leitura (sem onEdit)"><LoggedResult br={rcBrFT} btype="For Time" /></Case>
+            <Case label="For Time · DNF (capped em 4 rds)"><LoggedResult br={rcBrDNF} btype="For Time" onEdit={NOOP} /></Case>
+            <Case label="AMRAP"><LoggedResult br={rcBrAmrap} btype="AMRAP" onEdit={NOOP} /></Case>
+            <Case label="Sem escala / sem RPE (dados antigos)"><LoggedResult br={{ blockId: 'x' }} btype="For Time" onEdit={NOOP} /></Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'logform',
+        label: 'LogForm',
+        render: () => (
+          <Section title="LogForm" sub="src/public/results/LogForm.jsx — formulário de registro/edição de um bloco (mesmos campos, mesma etapa de confirmação; muda só a afordância)">
+            <Case label="Criar · For Time"><LogForm bl={rcBlFT} inp={rcInpEmpty} isSubmitting={false} onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></Case>
+            <Case label="Criar · For Time com CAP (campo de rounds DNF)"><LogForm bl={rcBlFTCap} inp={rcInpEmpty} isSubmitting={false} onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></Case>
+            <Case label="Criar · AMRAP (rounds + reps)"><LogForm bl={rcBlAmrap} inp={rcInpAmrap} isSubmitting={false} onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></Case>
+            <Case label="Editar · preenchido + Cancelar"><LogForm bl={rcBlFT} inp={rcInpDone} isSubmitting={false} mode="edit" onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} onCancel={NOOP} /></Case>
+            <Case label="Enviando"><LogForm bl={rcBlFT} inp={rcInpDone} isSubmitting onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></Case>
           </Section>
         ),
       },

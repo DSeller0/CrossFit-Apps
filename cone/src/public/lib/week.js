@@ -2,6 +2,14 @@ export const MONTH_PT       = ['Janeiro','Fevereiro','Março','Abril','Maio','Ju
 export const MONTH_PT_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 export const DAY_PT         = ['DOM','SEG','TER','QUA','QUI','SEX','SAB']
 export const DAY_PT_TITLE   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+export const DAY_PT_FULL    = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado']
+
+// Day name for a YYYY-MM-DD key. Noon-anchored so a UTC-negative offset can't
+// roll the date back a day. Used where a session has no name of its own.
+export function dayNameFull(dateKey) {
+  const [y,m,d] = dateKey.split('-').map(Number)
+  return DAY_PT_FULL[new Date(y,m-1,d).getDay()]
+}
 
 // "Dom 5 Jul" — day-name + date + short month, the shared display format
 // (Me.jsx / Timer.jsx). Callers needing a different layout (e.g. TV's

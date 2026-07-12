@@ -1,0 +1,96 @@
+/* Shared ranking list (#51). Zero hardcoded color: medal colors come from the
+   --podium-* tokens, row tints are derived from them with color-mix() so three
+   tokens cover both the text and the background. Scale colors are passed in as
+   an inline data-color (see SCALE_COL in lib/wod.js — a documented exemption,
+   like the block families). */
+
+.list { list-style: none; margin: 0; padding: 0; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--divider);
+  font-size: 14px;
+  transition: background .1s;
+}
+/* Zebra on the non-podium rows — token-based, so it survives the light themes
+   (the old rgba(255,255,255,.04) overlay washed out on anything but dark). */
+.row:nth-child(even) { background: var(--stone2); }
+
+.rank {
+  width: 26px;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+  color: var(--cream);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scale {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+}
+.perf {
+  flex-shrink: 0;
+  font-weight: 900;
+  color: var(--cream);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Podium ── */
+.pod1, .pod1:nth-child(even) { background: color-mix(in srgb, var(--podium-1) 8%, transparent); }
+.pod2, .pod2:nth-child(even) { background: color-mix(in srgb, var(--podium-2) 8%, transparent); }
+.pod3, .pod3:nth-child(even) { background: color-mix(in srgb, var(--podium-3) 8%, transparent); }
+.pod1 .rank, .pod1 .perf { color: var(--podium-1); }
+.pod2 .rank, .pod2 .perf { color: var(--podium-2); }
+.pod3 .rank, .pod3 .perf { color: var(--podium-3); }
+
+/* ── Viewing athlete's own row — wins over podium + zebra ── */
+.self, .self:nth-child(even) {
+  background: color-mix(in srgb, var(--teal) 12%, transparent);
+  box-shadow: inset 2px 0 0 var(--teal);
+}
+.self .name { color: var(--teal); }
+
+.empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* ── size="large" — the leaderboard page's own wall-ish scale ── */
+.large .row   { gap: 12px; padding: 12px 20px; font-size: 15px; }
+.large .rank  { width: 32px; font-size: 16px; }
+.large .dot   { width: 10px; height: 10px; }
+.large .name  { font-size: 15px; }
+.large .perf  { font-size: 15px; }
+.large .scale { font-size: 11px; padding: 2px 7px; }
+.large .empty { padding: 40px 20px; font-size: 15px; }
+
+@media (min-width: 768px) {
+  .large .row   { font-size: 18px; }
+  .large .rank  { font-size: 19px; }
+  .large .name  { font-size: 18px; }
+  .large .perf  { font-size: 18px; }
+  .large .scale { font-size: 12px; }
+  .large .empty { font-size: 16px; }
+}

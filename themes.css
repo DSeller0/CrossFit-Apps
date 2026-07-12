@@ -11,6 +11,11 @@
  * Fonts loaded by each page:
  *   Cinzel + Crimson Pro  → TotK themes
  *   Amarante              → Spirit Blossom themes
+ *
+ * --podium-1/2/3 are the medal colors (RankList). They keep gold/silver/bronze
+ * semantics in every theme but are tuned per palette for contrast on that
+ * theme's background. Row tints are derived with color-mix() at the call site,
+ * so there are 3 tokens here, not 6.
  */
 
 /* ── Fallback (totk-dark, no class) ─────────────────────────────────────── */
@@ -22,6 +27,7 @@
   --divider:#2a231c;--border:#2a231c;--accent:#4ac8c0;--accent-text:#000;
   --text:#f0e8d0;--cyan:#4ac8c0;--sc-font:'Cinzel',serif;--lb-font:'Cinzel',serif;
   --bg2:#161210;--bg3:#1e1a16;--err:#c83030;
+  --podium-1:#d8a840;--podium-2:#b8b8c4;--podium-3:#c07840;
 }
 
 /* ── TotK Dark ───────────────────────────────────────────────────────────── */
@@ -33,6 +39,7 @@ html.theme-totk-dark{
   --divider:#2a231c;--border:#2a231c;--accent:#4ac8c0;--accent-text:#000;
   --text:#f0e8d0;--cyan:#4ac8c0;--sc-font:'Cinzel',serif;--lb-font:'Cinzel',serif;
   --bg2:#161210;--bg3:#1e1a16;--err:#c83030;
+  --podium-1:#d8a840;--podium-2:#b8b8c4;--podium-3:#c07840;
 }
 
 /* ── TotK Light ──────────────────────────────────────────────────────────── */
@@ -44,6 +51,7 @@ html.theme-totk-light{
   --divider:#d4cab8;--border:#d4cab8;--accent:#1c6860;--accent-text:#fff;
   --text:#1c1508;--cyan:#1c6860;--sc-font:'Cinzel',serif;--lb-font:'Cinzel',serif;
   --bg2:#f5f1e8;--bg3:#e8e2d4;--err:#b83020;
+  --podium-1:#8a6010;--podium-2:#5c5c68;--podium-3:#8a5220;
 }
 
 /* ── Spirit Blossom Dark ─────────────────────────────────────────────────── */
@@ -55,6 +63,7 @@ html.theme-spirit-blossom{
   --divider:#221638;--border:#221638;--accent:#38c4d0;--accent-text:#09070f;
   --text:#ede4f8;--cyan:#38c4d0;--sc-font:'Amarante',serif;--lb-font:'Amarante',serif;
   --bg2:#100d1c;--bg3:#17122a;--err:#c82850;
+  --podium-1:#e8c060;--podium-2:#c0b8d8;--podium-3:#d08858;
 }
 
 /* ── Spirit Blossom Light ────────────────────────────────────────────────── */
@@ -66,6 +75,7 @@ html.theme-spirit-blossom-light{
   --divider:#e2d4f0;--border:#e2d4f0;--accent:#1490a0;--accent-text:#fff;
   --text:#1a0828;--cyan:#1490a0;--sc-font:'Amarante',serif;--lb-font:'Amarante',serif;
   --bg2:#ffffff;--bg3:#f0e8f8;--err:#c02040;
+  --podium-1:#8a6414;--podium-2:#61596e;--podium-3:#95502a;
 }
 
 /* ── Scrollbar (all themes) ── */
