@@ -5,11 +5,13 @@ import { ExerciseList } from '../shared/ExerciseList.jsx'
 
 // Estações nests its exercises under stations rather than bl.exercises directly
 // (see BlockDetail.jsx's Estações branch) — flatten them here so the review/edit
-// exercise list isn't silently empty for that block type.
+// exercise list isn't silently empty for that block type. Notes are stripped —
+// approved design (mockups/20-result-card-exerciselist.html) shows the
+// prescription only, no coaching notes, in this compact register-form context.
 function blockExercises(bl) {
   if(!bl)return[]
-  if(bl.type==='Estações')return(bl.stations||[]).filter(st=>!st.isRest).flatMap(st=>st.exercises||[])
-  return bl.exercises||[]
+  const exs=bl.type==='Estações'?(bl.stations||[]).filter(st=>!st.isRest).flatMap(st=>st.exercises||[]):(bl.exercises||[])
+  return exs.map(ex=>({...ex,note:undefined}))
 }
 
 // ── Log Pane (mobile) ─────────────────────────────────────────────────────────
@@ -50,7 +52,7 @@ export default function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,s
               return(
                 <div key={bl.blockId} className={styles.deskConfirmBox}>
                   <div className={styles.deskConfirmTitle}>{bl.blockLabel}</div>
-                  {exs.length>0&&<ExerciseList exercises={exs} color={blkColor(fullBl)} size="compact"/>}
+                  {exs.length>0&&<ExerciseList exercises={exs} color={blkColor(fullBl)} size="tiny"/>}
                   <div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>Escala</span><span className={styles.deskConfirmRowVal}>{bl.scale}</span></div>
                   {bl.rpe&&<div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>RPE</span><span className={styles.deskConfirmRowVal}>{bl.rpe} / 10</span></div>}
                   {perf&&<div className={styles.deskConfirmRow}><span className={styles.deskConfirmRowLbl}>Resultado</span><span className={styles.deskConfirmRowVal}>{perf}</span></div>}
@@ -91,7 +93,7 @@ export default function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,s
                 return(
                 <div key={bl.blockId} className={styles.lpBlock}>
                   <div className={styles.lpBlockTitle}>{bl.blockLabel}</div>
-                  {exs.length>0&&<ExerciseList exercises={exs} color={blkColor(fullBl)} size="compact"/>}
+                  {exs.length>0&&<ExerciseList exercises={exs} color={blkColor(fullBl)} size="tiny"/>}
                   <span className={styles.lpLbl}>RPE (1–10)</span>
                   <div className={styles.lpRpeRow}>
                     {[1,2,3,4,5,6,7,8,9,10].map(n=>(

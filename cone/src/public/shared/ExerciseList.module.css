@@ -30,6 +30,18 @@
 .large .ins  { font-size: 26px; }
 .large .note { font-size: 22px; padding-left: 42px; margin-top: 4px; }
 
+/* ── tiny: phone register-form context (LogPane) — approved design
+   mockups/20-result-card-exerciselist.html. compact's sizes (name 26px/
+   vol 22px/ins 18px) are TV-wall-display scale; this matches the 10-14px
+   type scale of the rest of that form instead. ── */
+.tiny { gap: 6px; }
+.tiny .row  { gap: 8px; }
+.tiny .dot  { width: 6px; height: 6px; }
+.tiny .body { gap: 8px; }
+.tiny .vol  { font-size: 12px; }
+.tiny .name { font-size: 15px; }
+.tiny .ins  { font-size: 12px; }
+
 /* ── Complex sub-movements — compact ── */
 .mvs  { display: flex; flex-direction: column; gap: 4px; padding-left: 20px; }
 .mvRow { display: flex; align-items: center; gap: 10px; }
