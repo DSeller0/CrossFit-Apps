@@ -57,6 +57,12 @@
 .caseStage { padding: 14px; background: var(--stone); border: 1px solid var(--divider); }
 @media (max-width: 480px) { .caseStage { padding: 0; border-width: 0 0 1px; } }
 
+/* ── results/ composed body — the real page nests these under a session card,
+   so compose them the same way here rather than showing each in isolation. ── */
+/* Matches the real page's per-WOD section inside a card (border-top + padding),
+   so the composed cases read the same nested or standalone. */
+.rcBody { padding: 8px 10px; background: var(--stone2); border-top: 1px solid var(--divider); }
+
 /* ── Nav demo frame — transform makes the fixed Nav position relative to here.
    Nav's desktop sidebar CSS is `height: 100vh`, which sizes against the real
    browser viewport (transform doesn't rescope vh units) — taller than this

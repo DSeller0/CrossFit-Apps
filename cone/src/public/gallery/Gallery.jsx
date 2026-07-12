@@ -14,6 +14,7 @@ import SessionCard from '../results/SessionCard.jsx'
 import KpiGrid from '../results/KpiGrid.jsx'
 import LoggedResult from '../results/LoggedResult.jsx'
 import LogForm from '../results/LogForm.jsx'
+import WodSummary from '../results/WodSummary.jsx'
 import { calcKpis, cardSummary } from '../results/resultsHelpers.js'
 import MobileFrame from './MobileFrame.jsx'
 import { blkColor } from '../lib/wod.js'
@@ -125,9 +126,11 @@ const rlMany = [
 
 const rcSess    = { id: 'rc1', sessionName: 'Treino A · 18h' }
 const rcSessDay = { id: 'rc2' } // no name → falls back to the day name
-const rcBlFT    = { id: 'rcb1', type: 'For Time' }
-const rcBlFTCap = { id: 'rcb2', type: 'For Time', rounds: 5 } // exposes the DNF rounds field
-const rcBlAmrap = { id: 'rcb3', type: 'AMRAP', duration: '20' }
+const rcBlFT    = { id: 'rcb1', type: 'For Time', duration: '12', exercises: [exScheme, exDist] }
+const rcBlFTCap = { id: 'rcb2', type: 'For Time', rounds: 5, duration: '20', exercises: [exStandard, exCal] } // rounds → DNF field
+const rcBlAmrap = { id: 'rcb3', type: 'AMRAP', duration: '20', exercises: [exStandard, exScheme, exDist] }
+const rcBlComplex = { id: 'rcb4', type: 'For Time', label: 'Barra', duration: '15', exercises: [exComplex, exProg] } // complexo: sem `name` próprio
+const rcBlBare  = { id: 'rcb5', type: 'AMRAP' } // sem meta e sem exercícios → não renderiza nada
 
 const rcInpEmpty = { rpe: 7, scale: 'RX', perfTime: '', perfRounds: '', perfReps: '' }
 const rcInpDone  = { rpe: 9, scale: 'Inter', perfTime: '11:24', perfRounds: '', perfReps: '' }
@@ -259,12 +262,22 @@ const GROUPS = [
               <SessionCard sess={rcSess} dk="2026-07-12" isExpanded={false} onToggle={NOOP} hasAthlete
                 summary={cardSummary(rlLong, 'For Time', 'a2')} />
             </Case>
-            <Case label="Expandido (corpo via children)">
+            <Case label="Expandido · você já registrou (WOD + KPIs + resultado)">
               <SessionCard sess={rcSess} dk="2026-07-12" isExpanded onToggle={NOOP} hasAthlete
                 summary={cardSummary(rlFT, 'For Time', 'a3')}>
-                <div style={{ padding: '8px 10px', borderTop: '1px solid var(--divider)' }}>
+                <div className={s.rcBody}>
+                  <WodSummary bl={rcBlFT} showTitle />
                   <KpiGrid kpis={calcKpis(rlFT, 'For Time')} btype="For Time" />
                   <LoggedResult br={rcBrFT} btype="For Time" onEdit={NOOP} />
+                </div>
+              </SessionCard>
+            </Case>
+            <Case label="Expandido · você ainda não registrou (WOD + formulário)">
+              <SessionCard sess={rcSess} dk="2026-07-12" isExpanded onToggle={NOOP} hasAthlete
+                summary={cardSummary(rlFT, 'For Time', 'a99')}>
+                <div className={s.rcBody}>
+                  <WodSummary bl={rcBlFTCap} showTitle />
+                  <LogForm bl={rcBlFTCap} inp={rcInpEmpty} isSubmitting={false} onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} />
                 </div>
               </SessionCard>
             </Case>
@@ -272,16 +285,46 @@ const GROUPS = [
         ),
       },
       {
+        id: 'wodsummary',
+        label: 'WodSummary',
+        render: () => (
+          <Section title="WodSummary" sub="src/public/results/WodSummary.jsx — o WOD em si (meta + exercícios), o que o atleta lê enquanto registra. compact = cartão mobile; extended = painel desktop.">
+            <Case label="compact · For Time (CAP + esquema 21-15-9 + distância)"><WodSummary bl={rcBlFT} /></Case>
+            <Case label="compact · com título do bloco"><WodSummary bl={rcBlFT} showTitle /></Case>
+            <Case label="compact · rounds + CAP"><WodSummary bl={rcBlFTCap} /></Case>
+            <Case label="compact · complexo (sem nome próprio — os movimentos carregam)"><WodSummary bl={rcBlComplex} showTitle /></Case>
+            <Case label="compact · sem meta e sem exercícios → não renderiza nada"><WodSummary bl={rcBlBare} /></Case>
+            <Case label="extended · For Time"><WodSummary bl={rcBlFT} variant="extended" /></Case>
+            <Case label="extended · com título do bloco"><WodSummary bl={rcBlFT} variant="extended" showTitle /></Case>
+            <Case label="extended · rounds + CAP"><WodSummary bl={rcBlFTCap} variant="extended" /></Case>
+            <Case label="extended · complexo"><WodSummary bl={rcBlComplex} variant="extended" showTitle /></Case>
+            <Case label="extended · AMRAP (3 exercícios)"><WodSummary bl={rcBlAmrap} variant="extended" /></Case>
+          </Section>
+        ),
+      },
+      {
         id: 'kpigrid',
         label: 'KpiGrid',
         render: () => (
-          <Section title="KpiGrid" sub="src/public/results/KpiGrid.jsx — uma grade, duas densidades (compact = cartão mobile; extended = painel desktop, com a divisão por escala)">
-            <Case label="compact · For Time"><KpiGrid kpis={calcKpis(rlFT, 'For Time')} btype="For Time" /></Case>
-            <Case label="compact · AMRAP"><KpiGrid kpis={calcKpis(rlAmrap, 'AMRAP')} btype="AMRAP" /></Case>
-            <Case label="compact · zero resultados"><KpiGrid kpis={calcKpis([], 'For Time')} btype="For Time" /></Case>
-            <Case label="extended · For Time"><KpiGrid kpis={calcKpis(rlFT, 'For Time', 'extended')} btype="For Time" variant="extended" /></Case>
-            <Case label="extended · AMRAP"><KpiGrid kpis={calcKpis(rlAmrap, 'AMRAP', 'extended')} btype="AMRAP" variant="extended" /></Case>
-            <Case label="extended · zero resultados"><KpiGrid kpis={calcKpis([], 'For Time', 'extended')} btype="For Time" variant="extended" /></Case>
+          <Section title="KpiGrid" sub="src/public/results/KpiGrid.jsx — uma grade, duas densidades (compact = cartão mobile; extended = painel desktop, com a divisão por escala). Mostrado sob o WOD, como aparece na página.">
+            <Case label="compact · For Time (sob o WOD)">
+              <div className={s.rcBody}><WodSummary bl={rcBlFT} showTitle /><KpiGrid kpis={calcKpis(rlFT, 'For Time')} btype="For Time" /></div>
+            </Case>
+            <Case label="compact · AMRAP (sob o WOD)">
+              <div className={s.rcBody}><WodSummary bl={rcBlAmrap} showTitle /><KpiGrid kpis={calcKpis(rlAmrap, 'AMRAP')} btype="AMRAP" /></div>
+            </Case>
+            <Case label="compact · zero resultados">
+              <div className={s.rcBody}><WodSummary bl={rcBlFT} showTitle /><KpiGrid kpis={calcKpis([], 'For Time')} btype="For Time" /></div>
+            </Case>
+            <Case label="extended · For Time (sob o WOD)">
+              <div className={s.rcBody}><WodSummary bl={rcBlFT} variant="extended" showTitle /><KpiGrid kpis={calcKpis(rlFT, 'For Time', 'extended')} btype="For Time" variant="extended" /></div>
+            </Case>
+            <Case label="extended · AMRAP (sob o WOD)">
+              <div className={s.rcBody}><WodSummary bl={rcBlAmrap} variant="extended" showTitle /><KpiGrid kpis={calcKpis(rlAmrap, 'AMRAP', 'extended')} btype="AMRAP" variant="extended" /></div>
+            </Case>
+            <Case label="extended · zero resultados">
+              <div className={s.rcBody}><WodSummary bl={rcBlFT} variant="extended" showTitle /><KpiGrid kpis={calcKpis([], 'For Time', 'extended')} btype="For Time" variant="extended" /></div>
+            </Case>
           </Section>
         ),
       },
@@ -302,12 +345,25 @@ const GROUPS = [
         id: 'logform',
         label: 'LogForm',
         render: () => (
-          <Section title="LogForm" sub="src/public/results/LogForm.jsx — formulário de registro/edição de um bloco (mesmos campos, mesma etapa de confirmação; muda só a afordância)">
-            <Case label="Criar · For Time"><LogForm bl={rcBlFT} inp={rcInpEmpty} isSubmitting={false} onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></Case>
-            <Case label="Criar · For Time com CAP (campo de rounds DNF)"><LogForm bl={rcBlFTCap} inp={rcInpEmpty} isSubmitting={false} onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></Case>
-            <Case label="Criar · AMRAP (rounds + reps)"><LogForm bl={rcBlAmrap} inp={rcInpAmrap} isSubmitting={false} onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></Case>
-            <Case label="Editar · preenchido + Cancelar"><LogForm bl={rcBlFT} inp={rcInpDone} isSubmitting={false} mode="edit" onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} onCancel={NOOP} /></Case>
-            <Case label="Enviando"><LogForm bl={rcBlFT} inp={rcInpDone} isSubmitting onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></Case>
+          <Section title="LogForm" sub="src/public/results/LogForm.jsx — formulário de registro/edição de um bloco (mesmos campos, mesma etapa de confirmação; muda só a afordância). Mostrado sob o WOD, como aparece na página.">
+            <Case label="Criar · For Time (mobile — WOD compact)">
+              <div className={s.rcBody}><WodSummary bl={rcBlFT} showTitle /><LogForm bl={rcBlFT} inp={rcInpEmpty} isSubmitting={false} onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></div>
+            </Case>
+            <Case label="Criar · For Time (desktop — WOD extended)">
+              <div className={s.rcBody}><WodSummary bl={rcBlFT} variant="extended" showTitle /><LogForm bl={rcBlFT} inp={rcInpEmpty} isSubmitting={false} onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></div>
+            </Case>
+            <Case label="Criar · For Time com CAP (campo de rounds DNF)">
+              <div className={s.rcBody}><WodSummary bl={rcBlFTCap} showTitle /><LogForm bl={rcBlFTCap} inp={rcInpEmpty} isSubmitting={false} onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></div>
+            </Case>
+            <Case label="Criar · AMRAP (rounds + reps)">
+              <div className={s.rcBody}><WodSummary bl={rcBlAmrap} showTitle /><LogForm bl={rcBlAmrap} inp={rcInpAmrap} isSubmitting={false} onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></div>
+            </Case>
+            <Case label="Editar · preenchido + Cancelar">
+              <div className={s.rcBody}><WodSummary bl={rcBlFT} showTitle /><LogForm bl={rcBlFT} inp={rcInpDone} isSubmitting={false} mode="edit" onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} onCancel={NOOP} /></div>
+            </Case>
+            <Case label="Enviando">
+              <div className={s.rcBody}><WodSummary bl={rcBlFT} showTitle /><LogForm bl={rcBlFT} inp={rcInpDone} isSubmitting onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></div>
+            </Case>
           </Section>
         ),
       },
