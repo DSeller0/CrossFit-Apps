@@ -1,1 +1,0 @@
-var e=[`sessions`,`athletes`,`events`,`locations`,`coach_profile`,`settings`,`goals_data`,`lb_colors`];export{e as t};
