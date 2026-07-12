@@ -63,6 +63,11 @@
    so the composed cases read the same nested or standalone. */
 .rcBody { padding: 8px 10px; background: var(--stone2); border-top: 1px solid var(--divider); }
 
+/* ── leaderboard selector column — mirrors the real .wodCol box (fixed 320px on
+   desktop, full width on mobile) so the cards are judged at their true width. ── */
+.lbCol { max-width: 320px; background: var(--stone); padding: 16px; }
+@media (max-width: 480px) { .lbCol { max-width: none; } }
+
 /* ── Nav demo frame — transform makes the fixed Nav position relative to here.
    Nav's desktop sidebar CSS is `height: 100vh`, which sizes against the real
    browser viewport (transform doesn't rescope vh units) — taller than this

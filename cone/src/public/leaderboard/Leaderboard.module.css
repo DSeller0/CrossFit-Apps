@@ -34,6 +34,7 @@
 .fb {
   font-family: var(--lb-font, var(--font));
   font-size: 11px;
+  font-weight: 700;
   padding: 5px 10px;
   border: 1px solid var(--divider);
   background: transparent;
@@ -41,6 +42,10 @@
   cursor: pointer;
   transition: all .12s;
 }
+.fb:hover:not(.fbOn) { border-color: var(--teal); color: var(--teal); }
+.fb:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+/* Active pill: was a cyan fill from lb_colors (inline style), now a theme token. */
+.fbOn { background: var(--teal); border-color: var(--teal); color: var(--accent-text); }
 
 /* ── Two-pane content area ── */
 .contentArea { }
@@ -110,12 +115,17 @@
   border-right: 1px solid var(--gold2);
 }
 .wodCard:hover { border-color: var(--border); }
-.wodCardSel { border-color: rgba(56,196,208,.4) !important; box-shadow: 0 0 12px rgba(56,196,208,.06); }
-.wodCardSel::before, .wodCardSel::after { border-color: var(--teal) !important; }
+.wodCard:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+/* Selected: was a hardcoded cyan border + glow, now derived from --teal. */
+.wodCardSel { border-color: color-mix(in srgb, var(--teal) 45%, transparent); background: color-mix(in srgb, var(--teal) 6%, var(--stone2)); }
+.wodCardSel::before, .wodCardSel::after { border-color: var(--teal); }
 .wodCardHdr { display:flex; align-items:center; gap:8px; padding:9px 12px; user-select:none; }
 .wodDot { width:9px; height:9px; border-radius:50%; background:var(--teal); flex-shrink:0; }
-.wodName { flex:1; font-size:13px; font-weight:700; color:var(--cream); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.wodTypeTag { font-size:10px; font-weight:900; color:var(--teal); letter-spacing:.08em; text-transform:uppercase; flex-shrink:0; }
+.wodName { flex:1; min-width:0; font-size:13px; font-weight:700; color:var(--cream); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* The tag was flex-shrink:0, so a long block label ("Benchmark de Resistência
+   Muscular") ate the whole row and collapsed the session name to zero width.
+   Cap it and let it truncate — the session name is the primary identifier. */
+.wodTypeTag { flex-shrink:1; min-width:0; max-width:45%; font-size:10px; font-weight:900; color:var(--teal); letter-spacing:.08em; text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .wodMeta { font-size:11px; color:var(--muted); padding:0 12px 9px 29px; display:flex; gap:10px; }
 .noWods { font-size:12px; color:var(--dim); padding:20px 0; font-style:italic; text-align:center; }
 
@@ -127,19 +137,30 @@
 .desktopScale { display: none; }
 @media(min-width:768px) { .desktopScale { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:14px; } }
 
-/* ── WOD header + results ── */
-.lbHdr { padding: 16px 20px 12px; }
+/* ── WOD header + results ──
+   Was a black bar with a 3px #00b8d4 border and white text, every color read
+   from the retired lb_colors blob — the reason this page ignored the theme
+   switcher. Now it is the app's standard section header: gold, uppercase, on
+   --stone, over a gold rule. */
+.lbHdr {
+  padding: 16px 20px 12px;
+  background: var(--stone);
+  border-bottom: 2px solid var(--gold2);
+}
 .lbTitle {
   font-size: 16px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: .06em;
+  color: var(--gold);
+  font-family: var(--lb-font, var(--font));
 }
 .lbMeta {
   font-size: 12px;
   margin-top: 3px;
   text-transform: uppercase;
   letter-spacing: .05em;
+  color: var(--muted);
 }
 .row {
   display: flex;

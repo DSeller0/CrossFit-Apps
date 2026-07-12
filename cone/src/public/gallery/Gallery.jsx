@@ -15,6 +15,9 @@ import KpiGrid from '../results/KpiGrid.jsx'
 import LoggedResult from '../results/LoggedResult.jsx'
 import LogForm from '../results/LogForm.jsx'
 import WodSummary from '../results/WodSummary.jsx'
+import LbHeader from '../leaderboard/LbHeader.jsx'
+import ScaleFilter from '../leaderboard/ScaleFilter.jsx'
+import WodSelectCard from '../leaderboard/WodSelectCard.jsx'
 import { calcKpis, cardSummary } from '../results/resultsHelpers.js'
 import MobileFrame from './MobileFrame.jsx'
 import { blkColor } from '../lib/wod.js'
@@ -139,6 +142,29 @@ const rcInpAmrap = { rpe: 8, scale: 'RX', perfTime: '', perfRounds: '9', perfRep
 const rcBrFT    = { blockId: 'rcb1', rpe: 8, scale: 'RX', perfTime: '10:32' }
 const rcBrDNF   = { blockId: 'rcb2', rpe: 9, scale: 'Inter', perfRounds: '4' }
 const rcBrAmrap = { blockId: 'rcb3', rpe: 7, scale: 'SC', perfRounds: '9', perfReps: '12' }
+
+// ── Mock fixtures — leaderboard/ chrome ──
+const lbWods = [
+  { key: 'w1', label: 'For Time',  sessName: 'Treino A',  dt: 'sex., 10/07', count: 12 },
+  { key: 'w2', label: 'AMRAP',     sessName: 'Treino B',  dt: 'qui., 09/07', count: 8 },
+  { key: 'w3', label: 'Fran',      sessName: '',          dt: 'qua., 08/07', count: 1 },
+  { key: 'w4', label: 'Benchmark de Resistência Muscular', sessName: 'Treino de Sábado — Turma da Manhã', dt: 'sáb., 11/07', count: 23 },
+]
+
+// Stateful wrappers: selection and the active pill are real interactions, so the
+// gallery drives them rather than freezing one visual state.
+function ScaleFilterDemo({ initial = 'Todos' }) {
+  const [v, setV] = useState(initial)
+  return <ScaleFilter value={v} onChange={setV} />
+}
+function WodSelectColDemo() {
+  const [sel, setSel] = useState('w2')
+  return (
+    <div className={s.lbCol}>
+      {lbWods.map(w => <WodSelectCard key={w.key} w={w} selected={sel === w.key} onSelect={setSel} />)}
+    </div>
+  )
+}
 
 function Case({ label, children }) {
   return (
@@ -363,6 +389,68 @@ const GROUPS = [
             </Case>
             <Case label="Enviando">
               <div className={s.rcBody}><WodSummary bl={rcBlFT} showTitle /><LogForm bl={rcBlFT} inp={rcInpDone} isSubmitting onRpe={NOOP} onScale={NOOP} onField={NOOP} onSubmit={NOOP} /></div>
+            </Case>
+          </Section>
+        ),
+      },
+    ],
+  },
+  {
+    group: 'Leaderboard',
+    items: [
+      {
+        id: 'lbheader',
+        label: 'LbHeader',
+        render: () => (
+          <Section title="LbHeader" sub="src/public/leaderboard/LbHeader.jsx — cabeçalho do WOD selecionado. Era uma barra preta com borda #00b8d4 e texto branco, tudo vindo do lb_colors (aposentado) — por isso a página ignorava o tema. Agora é o cabeçalho padrão do app: dourado, maiúsculo, sobre --stone.">
+            <Case label="Completo (rótulo + meta + data + sessão)">
+              <LbHeader label="For Time" meta="5 rounds · CAP 20'" dt="sex., 10/07" sessName="Treino A" />
+            </Case>
+            <Case label="Com filtro de escala ativo (entra no subtítulo)">
+              <LbHeader label="For Time" meta="5 rounds · CAP 20'" dt="sex., 10/07" sessName="Treino A" scaleFilter="RX" />
+            </Case>
+            <Case label="Sem meta do bloco">
+              <LbHeader label="Fran" dt="qua., 08/07" sessName="Treino B" />
+            </Case>
+            <Case label="Só o rótulo (sem subtítulo)">
+              <LbHeader label="AMRAP" />
+            </Case>
+            <Case label="Rótulo longo (quebra)">
+              <LbHeader label="Benchmark de Resistência Muscular" meta="CAP 30'" dt="sáb., 11/07" sessName="Treino de Sábado — Turma da Manhã" scaleFilter="Adaptado" />
+            </Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'scalefilter',
+        label: 'ScaleFilter',
+        render: () => (
+          <Section title="ScaleFilter" sub="src/public/leaderboard/ScaleFilter.jsx — pílulas de escala. Renderizadas duas vezes na página (barra mobile + coluna desktop), o que é justamente por que as duas cópias divergiram. Clique para ver o estado ativo; Tab para o foco.">
+            <Case label="Interativo · 'Todos' inicial"><ScaleFilterDemo /></Case>
+            <Case label="Interativo · 'RX' inicial"><ScaleFilterDemo initial="RX" /></Case>
+            <Case label="Interativo · 'Adaptado' inicial (pílula mais larga)"><ScaleFilterDemo initial="Adaptado" /></Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'wodselectcard',
+        label: 'WodSelectCard',
+        render: () => (
+          <Section title="WodSelectCard" sub="src/public/leaderboard/WodSelectCard.jsx — um WOD na coluna seletora do desktop. Agora alcançável pelo teclado (#14): era um <div> só de clique, e como nada renderiza até escolher um WOD, quem usa teclado via a página permanentemente vazia. Tab + Enter/Espaço para selecionar.">
+            <Case label="Coluna interativa (selecionado = 'Treino B'; Tab/Enter funciona)">
+              <WodSelectColDemo />
+            </Case>
+            <Case label="Não selecionado">
+              <div className={s.lbCol}><WodSelectCard w={lbWods[0]} selected={false} onSelect={NOOP} /></div>
+            </Case>
+            <Case label="Selecionado">
+              <div className={s.lbCol}><WodSelectCard w={lbWods[0]} selected onSelect={NOOP} /></div>
+            </Case>
+            <Case label="Sem nome de sessão → cai para o rótulo do bloco">
+              <div className={s.lbCol}><WodSelectCard w={lbWods[2]} selected={false} onSelect={NOOP} /></div>
+            </Case>
+            <Case label="Nome longo (overflow) + muitos atletas">
+              <div className={s.lbCol}><WodSelectCard w={lbWods[3]} selected={false} onSelect={NOOP} /></div>
             </Case>
           </Section>
         ),
