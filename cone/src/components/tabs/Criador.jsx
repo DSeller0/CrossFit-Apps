@@ -51,9 +51,10 @@ const materializeEx = ex => {
   if (!regDefaults) return rest;
   const out = { ...rest };
   if (!String(out.sets || '').trim() && regDefaults.sets) out.sets = regDefaults.sets;
-  if (regDefaults.dist) {
-    if (!String(out.dist || '').trim()) { out.dist = regDefaults.dist; out.distUnit = regDefaults.distUnit || out.distUnit || 'm'; }
-  } else if (regDefaults.reps && !String(out.reps || '').trim()) {
+  const distEmpty = !String(out.dist || '').trim(), repsEmpty = !String(out.reps || '').trim();
+  if (regDefaults.dist && distEmpty && repsEmpty) {
+    out.dist = regDefaults.dist; out.distUnit = regDefaults.distUnit || out.distUnit || 'm';
+  } else if (regDefaults.reps && repsEmpty && distEmpty) {
     out.reps = regDefaults.reps;
   }
   const hasIntensity = out.intensity && out.intensity.mode && out.intensity.mode !== 'none';
@@ -382,11 +383,11 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
 
   const registryCardio = useMemo(() => isCardioRegistered(ex.name), [ex.name]);
   const regDefaults = useMemo(() => getRegistryDefaults(ex.name), [ex.name]);
-  const [manualDist, setManualDist] = useState(() => !!ex.dist);
-  const isDistMode = registryCardio || manualDist;
+  const [distOverride, setDistOverride] = useState(() => ex.dist ? true : (ex.reps ? false : undefined));
+  const isDistMode = distOverride ?? registryCardio;
   const toggleDistMode = () => {
-    if (manualDist) { setManualDist(false); onUpdate({ ...ex, dist: '', distUnit: 'm' }); }
-    else setManualDist(true);
+    if (isDistMode) { setDistOverride(false); onUpdate({ ...ex, dist: '', distUnit: 'm' }); }
+    else setDistOverride(true);
   };
 
   const toggleComplex = () => {
@@ -538,12 +539,10 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
                 onChange={e => upd('reps', e.target.value)}
               />
             )}
-            {!registryCardio && (
-              <button type="button" className={`ex-dist-toggle${manualDist ? ' on' : ''}`} onClick={toggleDistMode}
-                title={manualDist ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}>
-                <i className={`ti ${manualDist ? 'ti-repeat' : 'ti-ruler-2'}`} />
-              </button>
-            )}
+            <button type="button" className={`ex-dist-toggle${isDistMode ? ' on' : ''}`} onClick={toggleDistMode}
+              title={isDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}>
+              <i className={`ti ${isDistMode ? 'ti-repeat' : 'ti-ruler-2'}`} />
+            </button>
           </div>
         ))}
 
@@ -649,12 +648,10 @@ function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, on
                         <span className="sheet-qty-lbl">Reps</span>
                       </div>
                     )}
-                    {!registryCardio && (
-                      <button type="button" className={`ex-dist-toggle${manualDist ? ' on' : ''}`} onClick={toggleDistMode}
-                        title={manualDist ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}>
-                        <i className={`ti ${manualDist ? 'ti-repeat' : 'ti-ruler-2'}`} />
-                      </button>
-                    )}
+                    <button type="button" className={`ex-dist-toggle${isDistMode ? ' on' : ''}`} onClick={toggleDistMode}
+                      title={isDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}>
+                      <i className={`ti ${isDistMode ? 'ti-repeat' : 'ti-ruler-2'}`} />
+                    </button>
                   </>
                 )}
               </div>
