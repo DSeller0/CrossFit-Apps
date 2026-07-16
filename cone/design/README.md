@@ -69,4 +69,8 @@ DesignSync: `list_files` → `finalize_plan` (localDir `cone/design`) → `write
 | `mockups/18-schedule-design-b1.html` | Mockups | schedule.html design pass B1 (#50) |
 | `mockups/20-result-card-exerciselist.html` | Mockups | result card using the real ExerciseList shape |
 
-Retired 2026-07-16: `components/schedule-card.html` and `components/pills.html` were hand-built mirrors of shipped UI (the anti-pattern WORKFLOW bans) — superseded by the generated `schedule.html` / `shared.html`. Mockup **#19** (`19-result-card-copy-variants`) is cited by #20 but was never committed here; it exists only in the Design project.
+Retired 2026-07-16: `components/schedule-card.html` and `components/pills.html` were hand-built mirrors of shipped UI (the anti-pattern WORKFLOW bans) — superseded by the generated `schedule.html` / `shared.html`.
+
+### The project holds mockups this folder doesn't
+
+Cards authored **in the Design app** are never pulled back here, so the project is ahead on ideation. As of 2026-07-16 these exist only there: `mockups/19-result-card-copy-variants` (the one #20 says it builds on), `03-tv-megaman-x`, `04-tv-arcade-scoreboard`, `05-tv-tactical-hud`, `21-leaderboard-exercise-block`, plus `02-*-v1`/`02-*-done` variants, `uploads/`, and `scraps/`. Nothing is lost — the sync is incremental and only ever touches the paths it plans. But **this folder is the source only for what it contains**: if a project-authored mockup matters long-term, commit it here.
