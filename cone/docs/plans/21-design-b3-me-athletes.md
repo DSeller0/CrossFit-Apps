@@ -1,6 +1,10 @@
 # 21 — Design pass B3: me.html + athletes.html (#52)
 
-> ⏸ **Paused at the gallery gate (2026-07-12)** — components built, all states in `gallery.html`, screenshots in [reviews/img/52-gallery/](../reviews/img/52-gallery/). Awaiting the user's Claude Design mockup pass on the me.html **layout** before the page re-layout proceeds. The retirement, extraction, canonical adoption and fold-ins are done.
+> 🔵 **In progress — the Design pass is live (2026-07-16).** The retirement, extraction, canonical adoption and fold-ins shipped in #52 (`c4c0955`); the gallery gate paused everything else on 2026-07-12 awaiting the user's Claude Design pass on the me.html **layout**.
+>
+> That gate is now open. `npm run design:cards` (#68) put the real components into the Design project, and the first round-trip closed: the user's pass produced `mockups/22-goallist-segbar-hud.html` → the goal bars shipped (`5cc512b`). **§5's "segmented-bar visual, designed once in the gallery" is settled** — `SegBar` now carries the 1% grid + milestone lines.
+>
+> **What's left is the page re-layout itself**, and it still needs the three §5/gate calls below (Desenvolvimento slot placement · body-metrics entry point · Distribuição colors). Mechanical work may proceed; visual re-layout waits on those.
 
 ## Context
 
@@ -29,10 +33,14 @@ Adopting `deriveScale()` is still right — it's the canonical reader and it gen
 
 > 🛑 **The gate is real.** Hand back at "states ready for your review" and remind the user they want to mock up the layout in Claude Design using the extracted components. The page **re-layout** resumes only on their explicit go-ahead. Mechanical extraction, canonical-code adoption and fold-ins may proceed before the gate; visual re-layout may not.
 
-Judgment calls for the gate:
-- **Where the reserved Desenvolvimento slot goes** in `contentGrid` (see §5).
-- **The body-metrics sheet.** Since plans/22 guarantees bodyweight persistence lands (#19), *don't* hide it — that would be hide-then-restore churn. Keep the sheet, give it a **real labeled entry point** (today it's an unlabelled avatar click, `Me.jsx:641`), keep the honest "not yet saved remotely" warning.
-- **Distribuição/WODs bar colors** — collapsing `ECOL` means 7 labeled rows share 2 family colors instead of 13 bespoke ones.
+Judgment calls for the gate — **all three were settled and executed in #52** (2026-07-16 audit; this list read as "still open" long after the code answered it):
+- ~~**Where the reserved Desenvolvimento slot goes** in `contentGrid`~~ → decided: top of `colMain`, recorded in code at `Me.jsx:437-439`, no placeholder until real data backs it.
+- ~~**The body-metrics sheet** needs a real labeled entry point~~ → shipped: the `Corpo` button in `HeroCard.jsx:39-42` (`IconRuler2` + text). The unlabelled avatar click is gone.
+- ~~**Distribuição/WODs bar colors**~~ → shipped: `BarList.jsx` renders from canonical `blkColor()`; `ECOL` is deleted.
+
+**So the re-layout carries no predetermined worklist** — by this plan's own gate it is *whatever the user's Claude Design pass decides*. First output: the goal bars (`5cc512b`).
+
+**Open layout question found in the same audit (2026-07-16), for the user:** `contentGrid` splits **`colMain` 40% / `colPrs` 60%** (`Me.module.css:16-18`). After the 220px nav rail + 272px picker rail, `colMain` is ≈**315px on a 1280 screen — narrower than a phone** — yet it is the "who am I becoming" lane (Objetivos · WODs · Distribuição · sessões · eventos) *and* the reserved home for plans/22's 5–6 bar Desenvolvimento card, which §5 requires be "sized so it drops in without a re-layout". PRs, a reference list, hold the wider 60%. Worth deciding before plans/22 builds against the slot.
 
 ## 1. Retire athletes.html
 
