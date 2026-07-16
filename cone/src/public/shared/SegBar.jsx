@@ -11,8 +11,14 @@ import s from './SegBar.module.css'
 //
 // `color` is a DATA color (block family / scale / an attribute's identity), passed
 // in by the caller — not a theme token. `ticks` are milestone markers positioned by
-// percentage, used by the goal bars and reserved for the Desenvolvimento stats card
-// (plans/22).
+// percentage — full-height lines through the track since mockup 22 — used by the goal
+// bars and reserved for the Desenvolvimento stats card (plans/22).
+//
+// `segments` stays at 10 because that's what the barless callers (BarList, PrSection's
+// mini-bars) want; GoalList opts into the 1% grid with segments={100}. The cells are
+// real elements rather than the mockup's background-image trick on purpose: a tiled
+// gradient lands a divider on the bar's own left edge, which the flex cells'
+// border-right never does, and every caller would have inherited that notch.
 //
 // Presentational only: the caller owns the label, the value, and the accessible name.
 export default function SegBar({

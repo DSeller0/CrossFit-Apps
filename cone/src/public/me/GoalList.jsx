@@ -37,7 +37,7 @@ export default function GoalList({ goals, totalMarcosHit }) {
 
             <details className={styles.msDetails}>
               <summary>
-                <SegBar pct={pct} color="var(--teal)" ticks={ticks} />
+                <SegBar pct={pct} color="var(--teal)" ticks={ticks} segments={100} size="lg" />
                 {ms.length > 0 && <div className={styles.msHint}>◈ ver marcos</div>}
               </summary>
               {ms.length > 0 && (

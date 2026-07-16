@@ -437,7 +437,7 @@ export const GROUPS = [
                 <SegBar pct={0} /><SegBar pct={35} /><SegBar pct={72} /><SegBar pct={100} />
               </div>
             </Case>
-            <Case label="Tamanhos · sm (mini-bar de PR) / md (meta) / lg (stats)">
+            <Case label="Tamanhos · sm (mini-bar de PR) / md (BarList) / lg (meta, stats)">
               <div style={{ display: 'grid', gap: 10 }}>
                 <SegBar pct={60} size="sm" /><SegBar pct={60} size="md" /><SegBar pct={60} size="lg" />
               </div>
@@ -448,19 +448,24 @@ export const GROUPS = [
                 <SegBar pct={45} color={RED} /><SegBar pct={30} color={GREEN} />
               </div>
             </Case>
-            <Case label="Marcos (atingido · próximo · futuro)">
+            <Case label="Marcos como na GoalList · segments=100 + lg (a configuração real)">
+              <SegBar pct={55} segments={100} size="lg" ticks={[{ pct: 20, state: 'hit' }, { pct: 50, state: 'hit' }, { pct: 75, state: 'next' }, { pct: 95, state: 'future' }]} />
+            </Case>
+            <Case label="Marcos (atingido · próximo · futuro) · grid padrão de 10%">
               <SegBar pct={55} ticks={[{ pct: 20, state: 'hit' }, { pct: 50, state: 'hit' }, { pct: 75, state: 'next' }, { pct: 95, state: 'future' }]} />
             </Case>
             <Case label="Marcos nos extremos (0% e 100% não podem vazar da barra)">
-              <SegBar pct={100} ticks={[{ pct: 0, state: 'hit' }, { pct: 100, state: 'hit' }]} />
+              <SegBar pct={100} segments={100} size="lg" ticks={[{ pct: 0, state: 'hit' }, { pct: 100, state: 'hit' }]} />
             </Case>
             <Case label="Fora da faixa (−20 e 140 são fixados em 0/100)">
               <div style={{ display: 'grid', gap: 10 }}>
                 <SegBar pct={-20} /><SegBar pct={140} />
               </div>
             </Case>
-            <Case label="segments=5 (granularidade alternativa)">
-              <SegBar pct={60} segments={5} />
+            <Case label="Granularidade · segments=5 / 10 (padrão) / 100 (GoalList)">
+              <div style={{ display: 'grid', gap: 10 }}>
+                <SegBar pct={60} segments={5} /><SegBar pct={60} /><SegBar pct={60} segments={100} />
+              </div>
             </Case>
           </Section>
         ),
