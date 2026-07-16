@@ -11,11 +11,10 @@
   .pickerWrap  { display:none; }
   .noSel       { display:block; text-align:center; padding:80px 20px; color:var(--dim); font-size:13px; }
   .profPane    { flex:1; overflow-y:auto; }
-  .page        { max-width:none; margin:0; padding:0; }
+  .page        { max-width:none; margin:0; padding:0 0 24px; }
   .heroSection { padding:24px 28px 0; }
-  .contentGrid { display:flex; align-items:flex-start; }
-  .colMain     { flex:0 0 40%; min-width:0; padding:20px 24px; }
-  .colPrs      { flex:0 0 60%; min-width:0; padding:20px 24px; border-left:1px solid var(--divider); }
+  /* Hero + KPIs stay full-bleed; only the card stack is inset (Design mockup 24). */
+  .stack       { padding:20px 24px; }
 }
 
 /* ── Utility ── */
@@ -99,15 +98,17 @@
 .bPr   { background: color-mix(in srgb, var(--gold) 12%, transparent); color: var(--gold); }
 .sessColHdr { display: grid; grid-template-columns: 18px 1fr 88px 68px 44px; gap: 4px; padding: 5px 0 4px; border-bottom: 1px solid var(--divider); }
 .sessColHdr span { font-size: 8px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
-.sessColHdr span:nth-child(4) { text-align: center; }
-.sessColHdr span:nth-child(5) { text-align: right; }
+/* Escala + RPE read as left-aligned columns, matching their cells below and the way
+   RankList already aligns the same two fields (Design mockup 24). */
+.sessColHdr span:nth-child(4) { text-align: left; }
+.sessColHdr span:nth-child(5) { text-align: left; }
 .sessRow    { display: grid; grid-template-columns: 18px 1fr 88px 68px 44px; gap: 4px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--divider); }
 .sessRow:last-child { border-bottom: none; }
 .sdi  { color: var(--gold); font-size: 12px; }
 .sname{ font-size: 12px; font-weight: 900; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
 .sdate{ font-size: 10px; color: var(--muted); }
-.sscale { text-align: center; }
-.srpe { font-size: 11px; font-weight: 700; color: var(--gold); text-align: right; }
+.sscale { text-align: left; }
+.srpe { font-size: 11px; font-weight: 700; color: var(--gold); text-align: left; }
 
 /* ── Events ── */
 .evItem  { display: flex; align-items: flex-start; gap: 9px; padding: 7px 0; border-bottom: 1px solid var(--divider); }

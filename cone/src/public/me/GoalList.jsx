@@ -1,10 +1,10 @@
-import SegBar from '../shared/SegBar.jsx'
+import TallyBar from '../shared/TallyBar.jsx'
 import styles from './Me.module.css'
 
 // The athlete's goals, each an HP bar with milestone markers you can expand.
-// The bar is the shared SegBar (#52) — the same primitive the Desenvolvimento stats
-// card will use (plans/22), so the two can't drift apart the way the three
-// hand-rolled copies of this bar already had.
+// The bar is the shared TallyBar — the same primitive the Desenvolvimento stats card
+// will use (plans/22), so the two can't drift apart the way the three hand-rolled
+// copies of this bar already had (#52).
 export default function GoalList({ goals, totalMarcosHit }) {
   return (
     <section className={styles.sh}><div className={styles.shInner}>
@@ -37,7 +37,7 @@ export default function GoalList({ goals, totalMarcosHit }) {
 
             <details className={styles.msDetails}>
               <summary>
-                <SegBar pct={pct} color="var(--teal)" ticks={ticks} segments={100} size="lg" />
+                <TallyBar pct={pct} color="var(--teal)" ticks={ticks} size="lg" />
                 {ms.length > 0 && <div className={styles.msHint}>◈ ver marcos</div>}
               </summary>
               {ms.length > 0 && (

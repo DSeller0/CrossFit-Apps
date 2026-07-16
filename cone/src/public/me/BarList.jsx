@@ -1,4 +1,4 @@
-import SegBar from '../shared/SegBar.jsx'
+import TallyBar from '../shared/TallyBar.jsx'
 import styles from './Me.module.css'
 
 // Executed-vs-planned bars, one row per block type. Renders both the "WODs" card
@@ -17,7 +17,7 @@ export default function BarList({ title, sub, rows }) {
       {rows.map((r, i) => (
         <div key={i} className={styles.distRow}>
           <span className={styles.distLbl}>{r.type}</span>
-          <SegBar pct={r.pct} color={r.color} grow />
+          <TallyBar pct={r.pct} color={r.color} grow />
           <span className={styles.distVal} style={{ color: r.color }}>{r.ex}/{r.pl}</span>
         </div>
       ))}

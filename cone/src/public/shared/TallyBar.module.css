@@ -1,0 +1,36 @@
+/* position:relative so the milestone ticks can be positioned against the bar itself.
+   Nothing clips them: only each BLOCK sets overflow:hidden (to clip its own units),
+   and the ticks are siblings of the blocks, not children — so a milestone at 0% or
+   100% still renders whole. SegBar needed a separate non-clipping wrapper for exactly
+   this (its track's overflow:hidden sliced edge ticks in half); this doesn't. */
+.bar  { position: relative; display: flex; gap: 3px; align-items: stretch; flex-shrink: 0; }
+.grow { flex: 1; min-width: 0; }
+
+.sm { height: 5px; }
+.md { height: 7px; }
+.lg { height: 14px; }
+
+/* flex:1 + min-width:0 so ten blocks always divide the width they're given, at any
+   card size, on any theme. */
+.block       { flex: 1; min-width: 0; position: relative; overflow: hidden; }
+.blockEmpty  { background: var(--divider); }
+.blockPartial { background: var(--divider); display: flex; }
+/* The caller's data color overrides this inline; the token is the fallback so the
+   class always exists — without a rule here CSS modules map it to undefined and the
+   block ships `class="… undefined"`. */
+.blockFull   { background: var(--teal); }
+
+/* The ten units inside the one partial block. Only filled units carry a divider — the
+   unfilled remainder stays flat, so the eye reads the fill edge, not a ruler.
+   The divider is var(--bg): a real theme color, never a hardcoded rgba(). */
+.unit             { flex: 1; }
+.unitOn           { border-right: 1px solid var(--bg); }
+.unit:last-child  { border-right: none; }
+
+/* Milestone markers — full-height lines, not circles (mockup 22). `hit` is a solid
+   rule; `next`/`future` are hollow so an unreached milestone never looks filled in. */
+.tick       { position: absolute; top: 0; bottom: 0; transform: translateX(-50%);
+              box-sizing: border-box; z-index: 2; }
+.tickHit    { width: 2px; background: var(--gold); }
+.tickNext   { width: 6px; border: 2px solid var(--teal); }
+.tickFuture { width: 6px; border: 2px solid var(--dim); }

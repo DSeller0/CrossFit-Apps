@@ -2,7 +2,7 @@ import { IconCheck, IconCircle, IconPencil, IconX, IconPlus } from '@tabler/icon
 import { blkColor } from '../lib/wod.js'
 import { prBest, prPct, prDelta } from '../lib/goals.js'
 import { onKey } from '../schedule/scheduleHelpers.js'
-import SegBar from '../shared/SegBar.jsx'
+import TallyBar from '../shared/TallyBar.jsx'
 import { PR_SKIP, prValLabel } from './meHelpers.js'
 import styles from './Me.module.css'
 
@@ -50,7 +50,7 @@ export default function PrSection({ prs, registry, openBlock, setOpenBlock, open
               <span className={styles.habCaret} aria-hidden="true">{isBlockOpen ? '▼' : '▶'}</span>
               <span className={styles.habName}>{bt}</span>
               <div className={styles.habMini}>
-                <SegBar pct={miniPct} color={color} size="sm" />
+                <TallyBar pct={miniPct} color={color} size="sm" />
               </div>
               <span className={styles.habCount} style={prCount > 0 ? { color } : undefined}>
                 {prCount} / {total} PRs
@@ -108,7 +108,7 @@ export default function PrSection({ prs, registry, openBlock, setOpenBlock, open
                       <div className={`${styles.habExDetail}${isExOpen ? ' ' + styles.habExDetailOpen : ''}`}>
                         <div className={styles.habDetailRow}>
                           {pct !== null
-                            ? <SegBar pct={pct} color={color} size="sm" grow />
+                            ? <TallyBar pct={pct} color={color} size="sm" grow />
                             : <div className={styles.habDetailSpacer} />}
                           <span className={styles.habDetailVal}>
                             {best ? prValLabel(best.value, pr) : '—'}

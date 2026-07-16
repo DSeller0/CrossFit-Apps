@@ -432,36 +432,36 @@ export default function Me() {
                 <HeroCard athlete={selAthlete} pd={pd} onOpenBody={openBody} onSwitch={selectAll} />
                 <KpiStrip pd={pd} />
 
-                <div className={styles.contentGrid}>
-                  <div className={styles.colMain}>
-                    {/* plans/22 — the "Desenvolvimento" stats card lands here, above
-                        Objetivos: this column is the page's "who am I becoming" lane.
-                        Deliberately no placeholder until it has real data behind it. */}
-                    <SessionList rows={pd.recSess} />
-                    <EventList events={pd.events} />
-                    {pd.goals.length > 0 && <GoalList goals={pd.goals} totalMarcosHit={pd.totalMarcosHit} />}
-                    {pd.wodRows.length > 0 && (
-                      <BarList title="WODs" rows={pd.wodRows}
-                        sub={`${MONTH_PT_SHORT[pd.nowM - 1]} ${pd.nowY} · executados/planejados`} />
-                    )}
-                    {pd.distRows.length > 0 && (
-                      <BarList title="Distribuição" rows={pd.distRows}
-                        sub="Últimos 90 dias · executados/planejados" />
-                    )}
-                  </div>
-
-                  <div className={styles.colPrs}>
-                    <PrSection
-                      prs={pd.prs}
-                      registry={registry}
-                      openBlock={openBlock}
-                      setOpenBlock={b => { setOpenBlock(b); setOpenEx(null) }}
-                      openEx={openEx}
-                      setOpenEx={setOpenEx}
-                      onOpen={openLogSheet}
-                      onClear={askClear}
-                    />
-                  </div>
+                {/* One column at every width (Design mockup 24). The two-column
+                    contentGrid put the identity lane in the NARROW 40% — 314px on a
+                    1280 screen, narrower than a phone — where the Sessões header and
+                    the Distribuição title already painted outside their cards, while
+                    the PR reference list took the wide 60%. Stacking also means
+                    plans/22's Desenvolvimento card is just another card in here: no
+                    reserved slot, no re-layout. It still renders nothing until it has
+                    real data (plans/21 §5). */}
+                <div className={styles.stack}>
+                  {pd.goals.length > 0 && <GoalList goals={pd.goals} totalMarcosHit={pd.totalMarcosHit} />}
+                  <EventList events={pd.events} />
+                  <SessionList rows={pd.recSess} />
+                  {pd.wodRows.length > 0 && (
+                    <BarList title="WODs" rows={pd.wodRows}
+                      sub={`${MONTH_PT_SHORT[pd.nowM - 1]} ${pd.nowY} · executados/planejados`} />
+                  )}
+                  {pd.distRows.length > 0 && (
+                    <BarList title="Distribuição" rows={pd.distRows}
+                      sub="Últimos 90 dias · executados/planejados" />
+                  )}
+                  <PrSection
+                    prs={pd.prs}
+                    registry={registry}
+                    openBlock={openBlock}
+                    setOpenBlock={b => { setOpenBlock(b); setOpenEx(null) }}
+                    openEx={openEx}
+                    setOpenEx={setOpenEx}
+                    onOpen={openLogSheet}
+                    onClear={askClear}
+                  />
                 </div>
               </div>
             )}

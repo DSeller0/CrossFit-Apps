@@ -17,7 +17,7 @@ import LoggedResult from '../results/LoggedResult.jsx'
 import LogForm from '../results/LogForm.jsx'
 import WodSummary from '../results/WodSummary.jsx'
 import WodBlockCard from '../shared/WodBlockCard.jsx'
-import SegBar from '../shared/SegBar.jsx'
+import TallyBar from '../shared/TallyBar.jsx'
 import HeroCard from '../me/HeroCard.jsx'
 import KpiStrip from '../me/KpiStrip.jsx'
 import AthletePicker from '../me/AthletePicker.jsx'
@@ -334,16 +334,6 @@ const meDistRows = [
   { type: 'Cardio', pl: 4, ex: 0, pct: 0,  color: blkColor({ type: 'Cardio' }) },
 ]
 
-// Exported for scripts/me-mockup-entry.jsx (the plans/21 layout mockup), so the mockup
-// argues from the same data the gallery shows instead of a second set that disagrees.
-export const ME_FIXTURES = {
-  get athletes() { return meAthletes }, get pd() { return mePd },
-  get sessRows() { return meSessRows }, get events() { return meEvents },
-  get goals() { return meGoals }, get wodRows() { return meWodRows },
-  get distRows() { return meDistRows }, get registry() { return meRegistry },
-  get prs() { return mePrs },
-}
-
 const meRegistry = {
   'Força': ['Back Squat', 'Deadlift', 'Bench Press', 'Overhead Press'],
   'LPO':   ['Clean and Jerk', 'Snatch'],
@@ -438,43 +428,52 @@ export const GROUPS = [
     group: 'Shared',
     items: [
       {
-        id: 'segbar',
-        label: 'SegBar',
+        id: 'tallybar',
+        label: 'TallyBar',
         render: () => (
-          <Section title="SegBar" sub="src/public/shared/SegBar.jsx — a barra de HP segmentada. Uma implementação para as metas do me.html, os mini-bars de PR e (plans/22) o card Desenvolvimento. Antes do #52 eram três cópias, todas com o fundo escuro do tema hardcoded dentro do gradiente das divisórias.">
+          <Section title="TallyBar" sub="src/public/shared/TallyBar.jsx — a única barra do app (mockup 24). Lê em dezenas: 10 blocos de 10%, e o bloco onde o valor cai se divide em 10 unidades. Sempre 10 blocos, qualquer que seja o denominador — quem chama converte o seu '5 / 6' em % e mantém os números literais ao lado. Substituiu o SegBar (trilho contínuo + grid de 1%).">
             <Case label="0 · 35 · 72 · 100%">
               <div style={{ display: 'grid', gap: 10 }}>
-                <SegBar pct={0} /><SegBar pct={35} /><SegBar pct={72} /><SegBar pct={100} />
+                <TallyBar pct={0} /><TallyBar pct={35} /><TallyBar pct={72} /><TallyBar pct={100} />
               </div>
             </Case>
-            <Case label="Tamanhos · sm (mini-bar de PR) / md (BarList) / lg (meta, stats)">
+            <Case label="Bloco parcial · 60 (redondo, sem parcial) · 76 (7 + 6/10) · 87,5 (8 + 8/10) · 100 (dez blocos cheios)">
               <div style={{ display: 'grid', gap: 10 }}>
-                <SegBar pct={60} size="sm" /><SegBar pct={60} size="md" /><SegBar pct={60} size="lg" />
+                <TallyBar pct={60} size="lg" /><TallyBar pct={76} size="lg" />
+                <TallyBar pct={87.5} size="lg" /><TallyBar pct={100} size="lg" />
+              </div>
+            </Case>
+            <Case label="Valores pequenos · 1 · 4 · 5 · 9% (só o bloco parcial acende)">
+              <div style={{ display: 'grid', gap: 10 }}>
+                <TallyBar pct={1} size="lg" /><TallyBar pct={4} size="lg" />
+                <TallyBar pct={5} size="lg" /><TallyBar pct={9} size="lg" />
+              </div>
+            </Case>
+            <Case label="Tamanhos · sm (mini-bar e detalhe de PR) / md (BarList) / lg (meta, stats)">
+              <div style={{ display: 'grid', gap: 10 }}>
+                <TallyBar pct={76} size="sm" /><TallyBar pct={76} size="md" /><TallyBar pct={76} size="lg" />
               </div>
             </Case>
             <Case label="Cores de dados (famílias de bloco, não tokens)">
               <div style={{ display: 'grid', gap: 10 }}>
-                <SegBar pct={83} color={AMBER} /><SegBar pct={88} color={BLUE} />
-                <SegBar pct={45} color={RED} /><SegBar pct={30} color={GREEN} />
+                <TallyBar pct={83} color={AMBER} /><TallyBar pct={88} color={BLUE} />
+                <TallyBar pct={45} color={RED} /><TallyBar pct={30} color={GREEN} />
               </div>
             </Case>
-            <Case label="Marcos como na GoalList · segments=100 + lg (a configuração real)">
-              <SegBar pct={55} segments={100} size="lg" ticks={[{ pct: 20, state: 'hit' }, { pct: 50, state: 'hit' }, { pct: 75, state: 'next' }, { pct: 95, state: 'future' }]} />
+            <Case label="Marcos como na GoalList (a configuração real · lg + ticks)">
+              <TallyBar pct={55} size="lg" ticks={[{ pct: 20, state: 'hit' }, { pct: 50, state: 'hit' }, { pct: 75, state: 'next' }, { pct: 95, state: 'future' }]} />
             </Case>
-            <Case label="Marcos (atingido · próximo · futuro) · grid padrão de 10%">
-              <SegBar pct={55} ticks={[{ pct: 20, state: 'hit' }, { pct: 50, state: 'hit' }, { pct: 75, state: 'next' }, { pct: 95, state: 'future' }]} />
-            </Case>
-            <Case label="Marcos nos extremos (0% e 100% não podem vazar da barra)">
-              <SegBar pct={100} segments={100} size="lg" ticks={[{ pct: 0, state: 'hit' }, { pct: 100, state: 'hit' }]} />
+            <Case label="Marcos nos extremos (0% e 100% não podem ser cortados ao meio)">
+              <TallyBar pct={100} size="lg" ticks={[{ pct: 0, state: 'hit' }, { pct: 100, state: 'hit' }]} />
             </Case>
             <Case label="Fora da faixa (−20 e 140 são fixados em 0/100)">
               <div style={{ display: 'grid', gap: 10 }}>
-                <SegBar pct={-20} /><SegBar pct={140} />
+                <TallyBar pct={-20} size="lg" /><TallyBar pct={140} size="lg" />
               </div>
             </Case>
-            <Case label="Granularidade · segments=5 / 10 (padrão) / 100 (GoalList)">
+            <Case label="Denominador grande — o motivo das dezenas: 12/20 · 30/45 · 70/100 nunca viram sopa">
               <div style={{ display: 'grid', gap: 10 }}>
-                <SegBar pct={60} segments={5} /><SegBar pct={60} /><SegBar pct={60} segments={100} />
+                <TallyBar pct={60} color={BLUE} /><TallyBar pct={66.7} color={BLUE} /><TallyBar pct={70} color={BLUE} />
               </div>
             </Case>
           </Section>
@@ -843,7 +842,7 @@ export const GROUPS = [
         id: 'goallist',
         label: 'GoalList',
         render: () => (
-          <Section title="GoalList" sub="src/public/me/GoalList.jsx — metas com marcos, sobre o SegBar compartilhado. Clique na barra para abrir os marcos.">
+          <Section title="GoalList" sub="src/public/me/GoalList.jsx — metas com marcos, sobre o TallyBar compartilhado. Clique na barra para abrir os marcos.">
             <Case label="Em progresso · concluída (100%) · sem marcos">
               <GoalList goals={meGoals} totalMarcosHit={3} />
             </Case>
