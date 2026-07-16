@@ -78,7 +78,7 @@ timer_type           TEXT      'For Time'|'AMRAP'|'EMOM'|'TABATA'|...
 timer_cap_secs       INTEGER
 timer_paused_elapsed INTEGER
 timer_started_at     BIGINT
-timer_paused         BOOLEAN   (unused by code — confirm on schema dump, plans/04)
+timer_paused         BOOLEAN   (CONFIRMED unused by code — 0 hits, verified 2026-07-16)
 group_positions      JSONB     { [groupId]: blockId }
 rotation_block_ids   JSONB     DEFAULT '[]'   (empty = all WOD blocks)
 rotation_rest_secs   INTEGER   DEFAULT 0
@@ -126,7 +126,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 --gold:#d8a840  --gold2:#b88820  --teal:#4ac8c0  --cream:#f0e8d0
 --sub:#c8b090  --muted:#806850  --dim:#554a3a
 ```
-- `var(--card)` is NOT defined — resolves to transparent. Use `var(--stone)` or `var(--stone2)`.
+- `var(--card)` is NOT defined — it resolves to transparent, so use `var(--stone)`/`var(--stone2)`. (Historical: the codebase is **clean** as of 2026-07-16 — 0 usages remain. Kept as a don't-reintroduce note, not a live defect.) All 4 themes define exactly the same **29** tokens, verified — the only undefined-token references left in the repo are in `src/App.css`, which **nothing imports** (→ backlog #73).
 - `var(--border)` = stronger (card outlines); `var(--divider)` = subtle (internal separators).
 - No **rounded rectangles** on public pages — but `border-radius: 50%` (true circles: timer ring, avatar badges, dots) is an exempt shape primitive; pills (`999px` ends) count as rounded rects and get squared. Minimal radius on SPA components. (Settled 2026-07-09 — BACKLOG "Decisions recorded".)
 - Font: `var(--font)` → Cinzel (TotK themes) or Amarante (Spirit Blossom themes). Loaded weights (`src/fonts.js`): Cinzel **400/500/600/700/800/900** (500 + 800 added in #52, the first session to touch a weight-800 use), Crimson Pro 400/600, Amarante 400 **only** — Amarante ships no bold upstream, so its synthesized bolds are by design.
@@ -172,7 +172,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 
 - Dev: `supabase start` (once per Docker session) then `npm run dev` inside `cone/` — talks to the local stack, never prod
 - Build: `npm run build` → `dist/`
-- Tests: `npm test` (5 test files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js, useClassTracking.test.js)
+- Tests: `npm test` (136 tests across 7 files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js, useClassTracking.test.js, goals.test.js, meHelpers.test.js)
 - CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder)
 
 **Chunk hash 404 (GitHub Pages limitation):** After every CI deploy, lazy-loaded chunk filenames change. Old hashes 404 until users hard-refresh (Ctrl+Shift+R). GitHub Pages cannot set `Cache-Control: no-cache`. This is structural — do not re-diagnose, just document and tell the user to hard-refresh.
@@ -189,5 +189,5 @@ Always check these before reimplementing a formatting or date utility. `src/util
 - All data: Supabase (no local persistence beyond localStorage for UX state)
 - Icon library: Tabler Icons (`ti-*`)
 - Product name: CONE. Gym name from `settings.value.gymName`.
-- `session.public === false` = hidden; `undefined` or `true` = public (all 6 public pages filter on this)
+- `session.public === false` = hidden; `undefined` or `true` = public — all **5** session-rendering public pages filter on this (Index, Schedule, Results, Me, Leaderboard; verified 2026-07-16). It was 6 before `athletes.html` retired in #52. `timer.html` reads no sessions; `tv.html` deliberately doesn't filter (next line).
 - TvController ignores session visibility — coach always sees all sessions
