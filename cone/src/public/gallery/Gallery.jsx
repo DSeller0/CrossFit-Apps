@@ -30,8 +30,9 @@ import PrLogSheet from '../me/PrLogSheet.jsx'
 import BodySheet from '../me/BodySheet.jsx'
 import ConfirmSheet from '../me/ConfirmSheet.jsx'
 // ScaleFilter lives in shared/, not leaderboard/ — #51 moved it (three copies existed)
-// but left this import pointing at the old path. The gallery is dev-only and never
-// built, so no CI gate could see it: gallery.html has been a hard 500 ever since.
+// but left this import on the old path, which made gallery.html a hard 500 until #52
+// caught it. The gallery is dev-only and never built, so no CI gate can see a broken
+// import here: open the page after touching it.
 import ScaleFilter from '../shared/ScaleFilter.jsx'
 import WodSelectCard from '../leaderboard/WodSelectCard.jsx'
 import WodCard from '../leaderboard/WodCard.jsx'
@@ -420,7 +421,9 @@ function AthletePickerDemo({ variant, athletes }) {
   )
 }
 
-const GROUPS = [
+// Exported for scripts/design-cards-entry.jsx: `npm run design:cards` SSRs these same
+// items into the Claude Design cards, so the cards cannot drift from the gallery.
+export const GROUPS = [
   {
     group: 'Shared',
     items: [

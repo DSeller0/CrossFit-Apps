@@ -9,6 +9,7 @@
     "build": "vite build",
     "build:public": "vite build --config vite.public.config.js",
     "build:all": "npm run build && npm run build:public",
+    "design:cards": "node scripts/build-design-cards.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",

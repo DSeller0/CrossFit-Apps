@@ -62,7 +62,7 @@ The **all-states source of truth is the in-app component gallery** (`gallery.htm
 
 Which lane a change is in:
 
-- **Lane A — changing an existing component:** work **gallery-first**. Adjust the real component → review every state in the gallery across **all 4 themes + both widths** → screenshots go into the Cone Design System (claude.ai/design) `uploads/` for the record. **No hand-built static mockup.**
+- **Lane A — changing an existing component:** work **gallery-first**. Adjust the real component → review every state in the gallery across **all 4 themes + both widths** → **`npm run design:cards`** to regenerate the Cone Design System's component cards from the changed code, and sync (screenshots may also go into `uploads/` for the record). **No hand-built static mockup.**
 - **Lane B — net-new component/surface (no code yet):** ideation mockup first — an ASCII sketch, then a self-contained preview card in `cone/design/` (inline CSS, first line `<!-- @dsCard group="…" -->`) synced to the Design System via DesignSync. User reviews/adjusts → **approves** → build the real component → it enters the gallery → the static card is archived (never maintained as a mirror).
 
 ### State-coverage standard (the acceptance bar for a Lane-B mockup *and* a component's gallery entry)
@@ -84,7 +84,11 @@ The human review is a gate, not a formality. In **auto/non-interactive mode the 
 
 `gallery.html` (repo root) + `cone/src/public/gallery/` mounts a `Gallery` component: a theme `<select>`, a stage-width toggle, and sections that import the **real** components (`ExerciseList`, `Nav` today) rendering each state from small hardcoded fixtures. **Dev-only:** it is deliberately *not* in `vite.public.config.js` `rollupOptions.input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built or deployed. It grows page-by-page: each design-program session that touches a page extracts that page's reusable pieces into components (this is #17) and adds their state entries. Full Storybook was deferred; the gallery is a strict subset of its groundwork.
 
-Claude Design's role is now: **token/palette canon, Lane-B ideation, and a screenshot archive of the real components** — not a mirror. The old loose `design-*.html` files at the repo root are **frozen legacy** — never add new ones.
+### Claude Design (claude.ai/design)
+
+Its role is **token canon, generated component cards, Lane-B ideation, and a screenshot archive** — not a mirror. The old loose `design-*.html` files at the repo root are **frozen legacy** — never add new ones.
+
+**`npm run design:cards`** SSRs the gallery's `GROUPS` into self-contained cards in `cone/design/` (real markup, real CSS, real tokens, 4-theme switcher) so Claude Design can *read and reuse* actual component markup when composing a layout — that's why the cards are generated rather than screenshotted, and why they're readable rather than a compiled bundle. They are a build artifact of the gallery: **never hand-edit a generated card**, change the component and re-run. Setup, limitations (the `ti` webfont doesn't render in a card) and the sync flow: `cone/design/README.md`.
 
 ## Model guidance (per-item, not per-tier)
 
