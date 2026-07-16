@@ -4,7 +4,7 @@ import Nav from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import BlockTypePicker from './BlockTypePicker.jsx'
 import { BENCHMARK_GIRLS, BENCHMARK_HEROES, benchmarkToTimerExes } from '../lib/benchmarks.js'
-import { fmtSecs } from '../lib/wod.js'
+import { fmtSecs, isTimeBlock } from '../lib/wod.js'
 import { fmtDate } from '../lib/week.js'
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -300,7 +300,7 @@ export default function Timer() {
     const e = elapsedRaw(), bt = cfgRef.current?.blockType
     const newSplits = [...splitsRef.current, e]
     splitsRef.current = newSplits
-    if (cfgRef.current?.rounds && newSplits.length >= cfgRef.current.rounds && (bt === 'For Time' || bt === 'Benchmark')) {
+    if (cfgRef.current?.rounds && newSplits.length >= cfgRef.current.rounds && isTimeBlock(bt)) {
       doFinishRaw(); return
     }
     setSplits(newSplits)
@@ -408,7 +408,7 @@ export default function Timer() {
   let clockCls = s.clock
   if (isPaused) clockCls += ' ' + s.paused
   else if (bt === 'AMRAP' && disp <= 30) clockCls += ' ' + s.warn
-  else if ((bt === 'For Time' || bt === 'Benchmark') && cap && e >= cap * 0.85) clockCls += ' ' + s.warn
+  else if (isTimeBlock(bt) && cap && e >= cap * 0.85) clockCls += ' ' + s.warn
 
   // ── Sub-renders ──────────────────────────────────────────────────────────
   function renderRing(clockJsx) {

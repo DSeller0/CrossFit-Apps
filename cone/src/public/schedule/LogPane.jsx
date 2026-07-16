@@ -1,6 +1,6 @@
 import styles from './Schedule.module.css'
 import { LOG_SCALES, fmtDeskPerf } from './scheduleHelpers.js'
-import { blkColor } from '../lib/wod.js'
+import { blkColor, isTimeBlock } from '../lib/wod.js'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
 
 // Estações nests its exercises under stations rather than bl.exercises directly
@@ -106,9 +106,13 @@ export default function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,s
                       <button key={s} type="button" className={`${styles.lpScaleBtn}${bl.scale===s?' '+styles.lpScaleBtnOn:''}`} onClick={()=>setScale(i,s)}>{s}</button>
                     ))}
                   </div>
-                  {(bl.blockType==='For Time'||bl.blockType==='Benchmark')
+                  {isTimeBlock(bl.blockType)
                     ?<><span className={styles.lpLbl}>Tempo (MM:SS)</span>
-                       <input className={styles.lpInput} type="text" placeholder="ex: 12:34" inputMode="numeric" value={bl.perfTime||''} onChange={e=>setField(i,'perfTime',e.target.value)}/></>
+                       <input className={styles.lpInput} type="text" placeholder="ex: 12:34" inputMode="numeric" value={bl.perfTime||''} onChange={e=>setField(i,'perfTime',e.target.value)}/>
+                       {Number(fullBl?.rounds)>0&&<>
+                         <span className={styles.lpLbl}>Rounds completos de {fullBl.rounds} (DNF)</span>
+                         <input className={styles.lpInput} type="number" placeholder={`0/${fullBl.rounds}`} min="0" max={fullBl.rounds} inputMode="numeric" value={bl.perfRounds||''} onChange={e=>setField(i,'perfRounds',e.target.value)}/>
+                       </>}</>
                     :<div className={styles.lpRow2}>
                        <div><span className={styles.lpLbl}>Rounds</span><input className={styles.lpInput} type="number" placeholder="0" min="0" inputMode="numeric" value={bl.perfRounds||''} onChange={e=>setField(i,'perfRounds',e.target.value)}/></div>
                        <div><span className={styles.lpLbl}>Reps</span><input className={styles.lpInput} type="number" placeholder="0" min="0" inputMode="numeric" value={bl.perfReps||''} onChange={e=>setField(i,'perfReps',e.target.value)}/></div>
@@ -116,7 +120,7 @@ export default function LogPane({pane,athId,onAthId,blocks,onBlocks,submitting,s
                 </div>
               )})}
             </div>}
-            <button className={styles.lpSubmit} disabled={submitting||undefined} onClick={()=>onConfirming(true)}>
+            <button className={styles.lpSubmit} disabled={submitting||blocks.some(b=>!b.scale||!b.rpe)||undefined} onClick={()=>onConfirming(true)}>
               <i className="ti ti-check"/> Registrar
             </button>
             {error&&<div className={styles.lpErr}>{error}</div>}

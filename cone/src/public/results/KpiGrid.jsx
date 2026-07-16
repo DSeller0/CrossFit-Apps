@@ -1,11 +1,12 @@
 import styles from './Results.module.css'
+import { isTimeBlock } from '../lib/wod.js'
 
 // One grid, two densities (#51 — was two components over two near-identical
 // calculators). `compact` is the mobile session card; `extended` is the desktop
 // pane, which has room for the per-scale split.
 export default function KpiGrid({ kpis, btype, variant = 'compact' }) {
   const { count, avgRpe, perfKpi, rxPct, rxPctStr, interPct, scPct } = kpis
-  const perfLbl = btype === 'For Time' ? 'Tempo médio' : 'Rds médio'
+  const perfLbl = isTimeBlock(btype) ? 'Tempo médio' : 'Rds médio'
 
   const items = variant === 'extended'
     ? [

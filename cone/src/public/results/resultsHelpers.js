@@ -1,11 +1,15 @@
-import { toSecs, fmtSecs, rankResults, perfStr, deriveScale } from '../lib/wod.js'
+import { toSecs, fmtSecs, rankResults, perfStr, deriveScale, isTimeBlock } from '../lib/wod.js'
 import { dayNameFull } from '../lib/week.js'
 
 // Shared by Results.jsx and its extracted results/ components (#51) — one
 // canonical copy so the extraction can't drift the same helper two ways
 // (mirrors schedule/scheduleHelpers.js).
 
-export const DEF_INP = () => ({ rpe: 7, scale: 'RX', perfTime: '', perfRounds: '', perfReps: '' })
+// scale/rpe start unselected (#61a) — a pre-picked 'RX'/7 meant an athlete who
+// never touched the form still recorded RX at RPE 7, so neither field carried
+// real information. The submit buttons (LogForm) stay disabled until both are
+// explicitly tapped.
+export const DEF_INP = () => ({ rpe: null, scale: null, perfTime: '', perfRounds: '', perfReps: '' })
 
 export function inputKey(sid, bid) { return `${sid}:${bid}` }
 
@@ -51,7 +55,7 @@ export function calcKpis(entries, btype, variant = 'compact') {
   const pctOf  = sc => scales.length ? Math.round(scales.filter(s => s === sc).length / scales.length * 100) : null
 
   let perfKpi = null, avgSecs = 0
-  if (btype === 'For Time') {
+  if (isTimeBlock(btype)) {
     const times = entries.map(b => b.perfTime).filter(Boolean).map(toSecs).filter(t => t > 0 && t < Infinity)
     if (times.length) {
       avgSecs = times.reduce((a, b) => a + b, 0) / times.length

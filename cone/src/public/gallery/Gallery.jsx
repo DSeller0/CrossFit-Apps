@@ -87,7 +87,7 @@ const demoMapComplex  = { 'clean pull': { description: 'Puxada de chão explosiv
 const logPaneBlk        = { id: 'b1', type: 'For Time', exercises: [exStandard] }
 const logPaneSess       = { id: 'sess-lp', sessionName: 'Treino A', blocks: [logPaneBlk] }
 const logPaneAthletes   = [{ id: 'a1', name: 'Bruna' }, { id: 'a2', name: 'Arthur' }]
-const logPaneBlockForm  = [{ blockId: 'b1', blockLabel: 'For Time', blockType: 'For Time', rpe: 7, scale: 'RX', perfTime: '', perfRounds: '', perfReps: '' }]
+const logPaneBlockForm  = [{ blockId: 'b1', blockLabel: 'For Time', blockType: 'For Time', rpe: null, scale: null, perfTime: '', perfRounds: '', perfReps: '' }]
 const logPaneBlockDone  = [{ blockId: 'b1', blockLabel: 'For Time', blockType: 'For Time', rpe: 8, scale: 'RX', perfTime: '12:34', perfRounds: '', perfReps: '' }]
 
 const deskRegBlFixture = { bl: { type: 'For Time' } }
@@ -153,7 +153,7 @@ const rcBlAmrap = { id: 'rcb3', type: 'AMRAP', duration: '20', exercises: [exSta
 const rcBlComplex = { id: 'rcb4', type: 'For Time', label: 'Barra', duration: '15', exercises: [exComplex, exProg] } // complexo: sem `name` próprio
 const rcBlBare  = { id: 'rcb5', type: 'AMRAP' } // sem meta e sem exercícios → não renderiza nada
 
-const rcInpEmpty = { rpe: 7, scale: 'RX', perfTime: '', perfRounds: '', perfReps: '' }
+const rcInpEmpty = { rpe: null, scale: null, perfTime: '', perfRounds: '', perfReps: '' }
 const rcInpDone  = { rpe: 9, scale: 'Inter', perfTime: '11:24', perfRounds: '', perfReps: '' }
 const rcInpAmrap = { rpe: 8, scale: 'RX', perfTime: '', perfRounds: '9', perfReps: '12' }
 
@@ -1091,12 +1091,12 @@ const GROUPS = [
         render: () => (
           <Section title="DeskRegPane" sub="src/public/schedule/DeskRegPane.jsx — painel de registro desktop (3ª coluna)">
             <Case label="Formulário · For Time">
-              <DeskRegPane regBl={deskRegBlFixture} step="form" scale="RX" rpe={7} perfTime="" perfRounds="" perfReps="" athName="Bruna"
+              <DeskRegPane regBl={deskRegBlFixture} step="form" scale={null} rpe={null} perfTime="" perfRounds="" perfReps="" athName="Bruna"
                 onScale={NOOP} onRpe={NOOP} onPerfTime={NOOP} onPerfRounds={NOOP} onPerfReps={NOOP}
                 onConfirm={NOOP} onSubmit={NOOP} onBack={NOOP} onClose={NOOP} submitting={false} error="" />
             </Case>
             <Case label="Formulário · AMRAP (rounds/reps + dica)">
-              <DeskRegPane regBl={deskRegBlAmrap} step="form" scale="RX" rpe={7} perfTime="" perfRounds="" perfReps="" athName="Bruna"
+              <DeskRegPane regBl={deskRegBlAmrap} step="form" scale={null} rpe={null} perfTime="" perfRounds="" perfReps="" athName="Bruna"
                 onScale={NOOP} onRpe={NOOP} onPerfTime={NOOP} onPerfRounds={NOOP} onPerfReps={NOOP}
                 onConfirm={NOOP} onSubmit={NOOP} onBack={NOOP} onClose={NOOP} submitting={false} error="" />
             </Case>

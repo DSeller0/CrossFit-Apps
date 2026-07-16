@@ -1,5 +1,5 @@
 import styles from './Results.module.css'
-import { SCALES } from '../lib/wod.js'
+import { SCALES, isTimeBlock } from '../lib/wod.js'
 
 const RPE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
@@ -40,7 +40,7 @@ export default function LogForm({ bl, inp, isSubmitting, mode = 'create', onRpe,
         </div>
       </div>
 
-      {btype === 'For Time' ? (
+      {isTimeBlock(btype) ? (
         <>
           <label className={styles.field}>
             <span className={styles.formLbl}>Tempo (MM:SS)</span>
@@ -75,7 +75,7 @@ export default function LogForm({ bl, inp, isSubmitting, mode = 'create', onRpe,
         {onCancel && (
           <button type="button" className={styles.btnCancelInline} disabled={dis} onClick={onCancel}>Cancelar</button>
         )}
-        <button type="button" className={styles.btnSubmit} disabled={dis} onClick={onSubmit}>
+        <button type="button" className={styles.btnSubmit} disabled={dis || !inp.scale || !inp.rpe} onClick={onSubmit}>
           <i className="ti ti-check" aria-hidden="true" /> {mode === 'edit' ? 'Salvar alteração' : 'Registrar resultado'}
         </button>
       </div>

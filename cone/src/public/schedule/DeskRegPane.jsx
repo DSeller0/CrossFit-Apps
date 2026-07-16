@@ -1,5 +1,5 @@
 import styles from './Schedule.module.css'
-import { blkLabel } from '../lib/wod.js'
+import { blkLabel, isTimeBlock } from '../lib/wod.js'
 import { LOG_SCALES, fmtDeskPerf } from './scheduleHelpers.js'
 
 // ── Desktop Reg Pane ──────────────────────────────────────────────────────────
@@ -8,7 +8,7 @@ export default function DeskRegPane({regBl,step,scale,rpe,perfTime,perfRounds,pe
   onConfirm,onSubmit,onBack,onClose,submitting,error}) {
   if(!regBl)return null
   const{bl}=regBl
-  const isForTime=bl.type==='For Time'||bl.type==='Benchmark'
+  const isForTime=isTimeBlock(bl.type)
   const label=blkLabel(bl)
   const perfVal=fmtDeskPerf({perfTime,perfRounds,perfReps})
   return(
@@ -62,7 +62,7 @@ export default function DeskRegPane({regBl,step,scale,rpe,perfTime,perfRounds,pe
               {bl.type==='AMRAP'&&<div className={styles.deskRegHint}>Rounds completos + reps extras</div>}
             </div>
           )}
-          <button className={styles.deskRegSubmitBtn} onClick={onConfirm}>Confirmar →</button>
+          <button className={styles.deskRegSubmitBtn} disabled={!scale||!rpe} onClick={onConfirm}>Confirmar →</button>
           {error&&<div className={styles.deskRegErr}>{error}</div>}
         </>}
 

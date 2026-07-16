@@ -1,5 +1,5 @@
 import styles from './Results.module.css'
-import { perfStr, scaleColor } from '../lib/wod.js'
+import { perfStr, scaleColor, isTimeBlock } from '../lib/wod.js'
 
 // An already-logged block result. `onEdit` is what makes self-correction real
 // (#51, decision 2): the submit path always merged correctly — it was only this
@@ -7,7 +7,7 @@ import { perfStr, scaleColor } from '../lib/wod.js'
 // read-only render.
 export default function LoggedResult({ br, btype, onEdit = null }) {
   const perf = perfStr(br, btype)
-  const plbl = btype === 'For Time' ? 'Tempo' : 'Resultado'
+  const plbl = isTimeBlock(btype) ? 'Tempo' : 'Resultado'
 
   return (
     <div className={styles.logged}>

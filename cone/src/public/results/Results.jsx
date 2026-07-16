@@ -5,7 +5,7 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import styles from './Results.module.css'
 import { MONTH_PT, DAY_PT, toISO, todayISO, getWeek, dateToWeekOffset } from '../lib/week.js'
-import { uid, blkLabel, isWodBlock, rankResults, toSecs, fmtSecs } from '../lib/wod.js'
+import { uid, blkLabel, isWodBlock, rankResults, toSecs, fmtSecs, isTimeBlock } from '../lib/wod.js'
 import { onKey } from '../schedule/scheduleHelpers.js'
 import RankList from '../shared/RankList.jsx'
 import ScaleFilter from '../shared/ScaleFilter.jsx'
@@ -172,7 +172,7 @@ export default function Results() {
     const br = getAthBlock(sid, bid)
     if (!br) return
     setInp(sid, bid, {
-      rpe: br.rpe ?? 7, scale: br.scale || 'RX',
+      rpe: br.rpe ?? null, scale: br.scale || null,
       perfTime: br.perfTime || '', perfRounds: br.perfRounds || '', perfReps: br.perfReps || '',
     })
     setEditing(prev => new Set(prev).add(inputKey(sid, bid)))
@@ -186,6 +186,8 @@ export default function Results() {
 
   function showConfirm(sid, bid, dk) {
     if (!selAth) { alert('Selecione um atleta no filtro para registrar resultado.'); return }
+    const inp = getInp(sid, bid)
+    if (!inp.scale || !inp.rpe) { alert('Selecione a escala e o RPE antes de registrar.'); return }
     setConfirmPending({ sid, bid, dk })
   }
   function proceedSubmit() {
@@ -229,7 +231,7 @@ export default function Results() {
     setLogInputs(p => { const n = { ...p }; delete n[k]; return n })
     setEditing(p => { const n = new Set(p); n.delete(k); return n })
     let perf = ''
-    if (btype === 'For Time') perf = inp.perfTime || (inp.perfRounds ? `${inp.perfRounds} rds (DNF)` : '')
+    if (isTimeBlock(btype)) perf = inp.perfTime || (inp.perfRounds ? `${inp.perfRounds} rds (DNF)` : '')
     else if (inp.perfRounds) perf = `${inp.perfRounds} rds${inp.perfReps ? ' + ' + inp.perfReps + ' reps' : ''}`
     setSuccessData({ blockLabel: lbl, scale: inp.scale, rpe: inp.rpe, perf, btype })
   }
@@ -275,9 +277,9 @@ export default function Results() {
     const bl = (sess?.blocks || []).find(b => b.id === bid)
     const lbl = bl ? blkLabel(bl) : bid, btype = bl?.type || ''
     let perf = ''
-    if (btype === 'For Time') perf = inp.perfTime || (inp.perfRounds ? `${inp.perfRounds} rds (DNF)` : '')
+    if (isTimeBlock(btype)) perf = inp.perfTime || (inp.perfRounds ? `${inp.perfRounds} rds (DNF)` : '')
     else if (inp.perfRounds) perf = `${inp.perfRounds} rds${inp.perfReps ? ' + ' + inp.perfReps + ' reps' : ''}`
-    const plbl = btype === 'For Time' ? (inp.perfTime ? 'Tempo' : 'Resultado') : 'Resultado'
+    const plbl = isTimeBlock(btype) ? (inp.perfTime ? 'Tempo' : 'Resultado') : 'Resultado'
     confirmContent = (<>
       <div className={styles.confirmTitle}>{isEditing(sid, bid) ? 'Confirmar alteração' : 'Confirmar registro'}</div>
       <div className={styles.confirmDetail}>
@@ -346,7 +348,7 @@ export default function Results() {
       <div className={`${styles.successModal}${successData ? ' ' + styles.successModalOpen : ''}`} role="dialog" aria-modal="true">
         {successData && (() => {
           const { blockLabel: lbl, scale, rpe, perf, btype } = successData
-          const plbl = btype === 'For Time' ? 'Tempo' : 'Resultado'
+          const plbl = isTimeBlock(btype) ? 'Tempo' : 'Resultado'
           return (<>
             <i className={`ti ti-circle-check ${styles.successIcon}`} aria-hidden="true" />
             <div className={styles.successTitle}>Resultado registrado!</div>

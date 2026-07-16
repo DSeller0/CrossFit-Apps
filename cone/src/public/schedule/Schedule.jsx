@@ -75,7 +75,7 @@ export default function Schedule() {
   const [deskAthSearch,setDeskAthSearch]=useState('')
   const [deskRegBl,setDeskRegBl]=useState(null) // {bl, sess, dateKey}
   const [deskRegStep,setDeskRegStep]=useState('form') // 'form'|'confirm'|'success'
-  const [deskRegScale,setDeskRegScale]=useState('RX')
+  const [deskRegScale,setDeskRegScale]=useState(null)
   const [deskRegRpe,setDeskRegRpe]=useState(null)
   const [deskRegPerfTime,setDeskRegPerfTime]=useState('')
   const [deskRegPerfRounds,setDeskRegPerfRounds]=useState('')
@@ -325,7 +325,7 @@ export default function Schedule() {
     const blocks=wodBls.map(b=>{
       const eb=existing?.blocks?.find(x=>x.blockId===b.id)
       return{blockId:b.id,blockType:b.type,blockLabel:b.label&&b.type&&b.label!==b.type?`${b.label} · ${b.type}`:b.label||b.type,
-        rpe:eb?.rpe??7,scale:eb?.scale||'RX',perfTime:eb?.perfTime||'',perfRounds:eb?.perfRounds||'',perfReps:eb?.perfReps||''}
+        rpe:eb?.rpe??null,scale:eb?.scale||null,perfTime:eb?.perfTime||'',perfRounds:eb?.perfRounds||'',perfReps:eb?.perfReps||''}
     })
     if(prefill?.blockId){const bi=blocks.findIndex(b=>b.blockId===prefill.blockId);if(bi>=0){if(prefill.perfTime)blocks[bi].perfTime=prefill.perfTime;if(prefill.perfRounds)blocks[bi].perfRounds=prefill.perfRounds}}
     setLogPane({sess,dateKey,assignedAth:candidates})
@@ -343,7 +343,7 @@ export default function Schedule() {
     const existing=newAthId?results.find(r=>r.sessionId===logPane.sess.id&&r.athleteId===newAthId):null
     setLogBlocks(prev=>prev.map(b=>{
       const eb=existing?.blocks?.find(x=>x.blockId===b.blockId)
-      return{...b,rpe:eb?.rpe??7,scale:eb?.scale||'RX',perfTime:eb?.perfTime||'',perfRounds:eb?.perfRounds||'',perfReps:eb?.perfReps||''}
+      return{...b,rpe:eb?.rpe??null,scale:eb?.scale||null,perfTime:eb?.perfTime||'',perfRounds:eb?.perfRounds||'',perfReps:eb?.perfReps||''}
     }))
   }
 
@@ -377,7 +377,7 @@ export default function Schedule() {
     const existingBlock=existing?.blocks?.find(b=>b.blockId===bl.id)
     setDeskRegBl({bl,sess,dateKey})
     setDeskRegStep('form')
-    setDeskRegScale(existingBlock?.scale||'RX')
+    setDeskRegScale(existingBlock?.scale||null)
     setDeskRegRpe(existingBlock?.rpe||null)
     setDeskRegPerfTime(existingBlock?.perfTime||'')
     setDeskRegPerfRounds(existingBlock?.perfRounds||'')

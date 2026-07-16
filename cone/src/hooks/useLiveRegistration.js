@@ -25,7 +25,7 @@ export function useLiveRegistration({
         .eq('session_id', selSessId).eq('date', selDate)
         .maybeSingle()
       const newBlk = {
-        blockId, blockType: 'For Time',
+        blockId, blockType: block?.type || 'For Time',
         blockLabel: block?.label || block?.type || 'For Time',
         perfTime, scale, rpe: null,
       }

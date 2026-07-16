@@ -6,7 +6,7 @@ import {
   uid,
 } from '../../utils/storage';
 import { APP_CONFIG, GF } from '../../utils/config';
-import { exVolStr, rankResults, scaleColor } from '../../public/lib/wod.js';
+import { exVolStr, rankResults, scaleColor, isTimeBlock } from '../../public/lib/wod.js';
 import { toISO } from '../../public/lib/week.js';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
@@ -81,7 +81,7 @@ function calcSessionKPIs(dateKey, results) {
 
 
 function getPerformanceStr(r, blockType) {
-  if (blockType==='For Time') return r.perfTime||'—';
+  if (isTimeBlock(blockType)) return r.perfTime||'—';
   const parts=[];
   if (r.perfRounds) parts.push(`${r.perfRounds} rds`);
   if (r.perfReps)   parts.push(`${r.perfReps} reps`);
@@ -208,11 +208,11 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
       setFlag(existing.flagForReview||false);
       setBlockLogs(wodBlocks.map(b => {
         const eb=(existing.blocks||[]).find(eb=>eb.blockId===b.id)||{};
-        return { blockId:b.id,blockType:b.type,blockLabel:b.label||b.type,scale:eb.scale||'RX',perfTime:eb.perfTime||'',perfRounds:eb.perfRounds||'',perfReps:eb.perfReps||'',rpe:eb.rpe||7 };
+        return { blockId:b.id,blockType:b.type,blockLabel:b.label||b.type,scale:eb.scale||null,perfTime:eb.perfTime||'',perfRounds:eb.perfRounds||'',perfReps:eb.perfReps||'',rpe:eb.rpe||null };
       }));
     } else {
       setPresence('Presente'); setEnergyLevel(3); setCoachNote(''); setFlag(false);
-      setBlockLogs(wodBlocks.map(b => ({ blockId:b.id,blockType:b.type,blockLabel:b.label||b.type,scale:'RX',perfTime:'',perfRounds:'',perfReps:'',rpe:7 })));
+      setBlockLogs(wodBlocks.map(b => ({ blockId:b.id,blockType:b.type,blockLabel:b.label||b.type,scale:null,perfTime:'',perfRounds:'',perfReps:'',rpe:null })));
     }
     setDelConfirm(false); setShowNote(false);
   }, [selAthlete?.id, selDateKey, selSession?.id]);
@@ -221,8 +221,16 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
 
   const saveLog = () => {
     if (!selAthlete||!selDateKey||!selSession) return;
-    const entry = { id:uid(), date:selDateKey, athleteId:selAthlete.id, sessionId:selSession.id, presence, energyLevel, blocks:presence==='Presente'?blockLogs:[], coachNote, flagForReview:flag, loggedByAthlete:false };
-    const updated = [...results.filter(r=>!(r.date===selDateKey&&r.athleteId===selAthlete.id&&(r.sessionId===selSession.id||(!r.sessionId&&!selSession.id)))), entry];
+    // Reuse the existing row's id on every re-save. Minting a fresh uid() here
+    // (the old behavior) meant every edit inserted a brand-new results_v2 row
+    // instead of updating one — the 2nd save for the same athlete+session then
+    // violated the table's unique(athlete_id, session_id) constraint, and since
+    // saveResults() upserts the WHOLE local results array in one batch, that one
+    // conflicting row failed the entire upsert silently (console.warn only) while
+    // the UI still flashed "Salvo" (#61c).
+    const existing = results.find(r=>r.date===selDateKey&&r.athleteId===selAthlete.id&&(r.sessionId===selSession.id||(!r.sessionId&&!selSession.id)));
+    const entry = { id:existing?.id||uid(), date:selDateKey, athleteId:selAthlete.id, sessionId:selSession.id, presence, energyLevel, blocks:presence==='Presente'?blockLogs:[], coachNote, flagForReview:flag, loggedByAthlete:false };
+    const updated = [...results.filter(r=>r!==existing), entry];
     setResults(updated); saveResults(updated);
     setSaveFlash(true); setTimeout(()=>setSaveFlash(false),1800);
   };
@@ -238,6 +246,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
   const nextMonth = () => { if (viewMonth===11){setViewYear(y=>y+1);setViewMonth(0);}else setViewMonth(m=>m+1); };
 
   const rpeColor = rpe => {
+    if (!rpe) return '#554a3a';
     const t=(rpe-1)/9;
     return `rgb(${Math.round(t<.5?2*t*(224-96)+96:224)},${Math.round(t<.5?168:168-2*(t-.5)*88)},64)`;
   };
@@ -468,7 +477,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
                         onClick={()=>updBlock(i,'scale',s)}>{s}</button>
                     ))}
                   </div>
-                  {bl.blockType==='For Time' ? (
+                  {isTimeBlock(bl.blockType) ? (
                     <div className="rp-perf-row">
                       <span className="rp-perf-lbl">Tempo</span>
                       <input className="rp-perf-input" type="text" inputMode="numeric" placeholder="MM:SS"
@@ -485,7 +494,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
                     </div>
                   )}
                   <div className="rp-rpe-row">
-                    <span style={{fontSize:11,fontWeight:700,color:rpeCol,width:56,flexShrink:0}}>RPE {bl.rpe}</span>
+                    <span style={{fontSize:11,fontWeight:700,color:rpeCol,width:56,flexShrink:0}}>RPE {bl.rpe??'—'}</span>
                     <div className="rp-rpe-bar">
                       {Array.from({length:10},(_,bi)=>{
                         const t=bi/9,r=Math.round(t<.5?2*t*(224-96)+96:224),g=Math.round(t<.5?168:168-2*(t-.5)*88);
@@ -525,7 +534,9 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
           </div>
           {/* Save + delete */}
           <div style={{display:'flex',gap:8,alignItems:'center'}}>
-            <button type="button" className="b bp" style={{flex:1}} onClick={saveLog}>
+            <button type="button" className="b bp" style={{flex:1}}
+              disabled={presence==='Presente'&&blockLogs.some(b=>!b.scale||!b.rpe)}
+              onClick={saveLog}>
               <i className="ti ti-check"/> Salvar
             </button>
             {hasResult&&!delConfirm&&(

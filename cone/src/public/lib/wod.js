@@ -46,6 +46,14 @@ export function deriveScale(blk) {
   return SCALE_NAMES[min]
 }
 
+// A block's result shape is time-based (mm:ss) vs rounds/reps-based. Benchmark
+// WODs (Fran, Grace, Murph...) are almost always for-time — schedule.html's
+// DeskRegPane/LogPane already treated them that way; #61(d) makes every other
+// perf-shape branch (results.html, the SPA coach view, rankResults/perfStr)
+// agree, so a Benchmark result stores/ranks/renders the same regardless of
+// which page logged it.
+export function isTimeBlock(blType) { return blType === 'For Time' || blType === 'Benchmark' }
+
 export function blkLabel(bl) {
   const l=bl.label&&bl.label!=='-'?bl.label:null,t=bl.type&&bl.type!=='-'?bl.type:null
   return l&&t&&l!==t?`${l} · ${t}`:l||t||''
@@ -94,7 +102,7 @@ export function fmtSecs(s) {
 }
 
 export function rankResults(results, blType) {
-  const isForTime=blType==='For Time'
+  const isForTime=isTimeBlock(blType)
   return [...results].sort((a,b)=>{
     if(isForTime) return toSecs(a.perfTime)-toSecs(b.perfTime)
     const ra=parseInt(a.perfRounds)||0,rb=parseInt(b.perfRounds)||0
@@ -109,7 +117,7 @@ export function perfStr(r, blType) {
   // returned '—', silently hiding the work a capped athlete actually did
   // (rankResults already sorts them last — toSecs('') is Infinity). Absorbed
   // here in #51 so every ranking surface agrees.
-  if(blType==='For Time'){
+  if(isTimeBlock(blType)){
     if(r.perfTime) return r.perfTime
     return r.perfRounds?`${r.perfRounds} rds (DNF)`:'—'
   }
