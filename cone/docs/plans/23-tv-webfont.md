@@ -1,5 +1,7 @@
 # 23 — #69 · tv.html renders in Times New Roman
 
+> ✅ Done: `5f39032` · 2026-07-16 — see BACKLOG.md
+
 ## Context
 
 `tv.html` — the one screen the whole gym looks at — has never rendered in Cinzel.
