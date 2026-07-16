@@ -82,8 +82,15 @@ function parseThemes(css) {
   return out
 }
 
+// Every public page inlines this exact reset in its own <style> (index/schedule/me/
+// results/leaderboard/tv/gallery — verified identical), and the components are built
+// against it. It lives in the page HTML, not in themes.css or any module, so a card that
+// only inlines themes + module CSS silently renders content-box where the app renders
+// border-box — anything mixing padding with a width or flex-basis comes out wider than
+// it really is. Emitted before the component CSS, same as the pages do.
+const PAGE_RESET = '*{box-sizing:border-box;margin:0;padding:0}'
+
 const CHROME = `
-  html,body{margin:0}
   body{background:var(--bg);color:var(--text);font-family:var(--font);padding:0 0 40px}
   .dsBar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
     padding:14px 20px;border-bottom:1px solid var(--divider);background:var(--stone);margin-bottom:8px}
@@ -105,6 +112,7 @@ function card({ file, group, title, subtitle, body, extraCss = '', themes }) {
 <title>${esc(title)}</title>
 <style>${fontFaces()}</style>
 <style>${readFileSync(resolve(REPO, 'themes.css'), 'utf8')}</style>
+<style>${PAGE_RESET}</style>
 <style>${extraCss}</style>
 <style>${CHROME}</style>
 <body>

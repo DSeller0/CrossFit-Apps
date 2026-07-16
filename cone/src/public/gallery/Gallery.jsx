@@ -334,6 +334,16 @@ const meDistRows = [
   { type: 'Cardio', pl: 4, ex: 0, pct: 0,  color: blkColor({ type: 'Cardio' }) },
 ]
 
+// Exported for scripts/me-mockup-entry.jsx (the plans/21 layout mockup), so the mockup
+// argues from the same data the gallery shows instead of a second set that disagrees.
+export const ME_FIXTURES = {
+  get athletes() { return meAthletes }, get pd() { return mePd },
+  get sessRows() { return meSessRows }, get events() { return meEvents },
+  get goals() { return meGoals }, get wodRows() { return meWodRows },
+  get distRows() { return meDistRows }, get registry() { return meRegistry },
+  get prs() { return mePrs },
+}
+
 const meRegistry = {
   'Força': ['Back Squat', 'Deadlift', 'Bench Press', 'Overhead Press'],
   'LPO':   ['Clean and Jerk', 'Snatch'],
