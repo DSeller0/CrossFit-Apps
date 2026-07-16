@@ -1,10 +1,14 @@
 # 21 — Design pass B3: me.html + athletes.html (#52)
 
-> 🔵 **In progress — the Design pass is live (2026-07-16).** The retirement, extraction, canonical adoption and fold-ins shipped in #52 (`c4c0955`); the gallery gate paused everything else on 2026-07-12 awaiting the user's Claude Design pass on the me.html **layout**.
+> ✅ **Done: `c4c0955` + `5cc512b` + `558b1d3` · 2026-07-16 — see BACKLOG.md**
 >
-> That gate is now open. `npm run design:cards` (#68) put the real components into the Design project, and the first round-trip closed: the user's pass produced `mockups/22-goallist-segbar-hud.html` → the goal bars shipped (`5cc512b`). **§5's "segmented-bar visual, designed once in the gallery" is settled** — `SegBar` now carries the 1% grid + milestone lines.
+> The retirement, extraction, canonical adoption and fold-ins shipped in #52 (`c4c0955`) and the gallery gate paused the rest on 2026-07-12, awaiting the user's Claude Design pass on the me.html **layout**.
 >
-> **What's left is the page re-layout itself**, and it still needs the three §5/gate calls below (Desenvolvimento slot placement · body-metrics entry point · Distribuição colors). Mechanical work may proceed; visual re-layout waits on those.
+> That pass ran on 2026-07-16, once `npm run design:cards` (#68) had put the real components into the Design project, and it closed the gate in two rounds:
+> - `mockups/22-goallist-segbar-hud.html` → goal bars got milestone lines + a 1% grid (`5cc512b`);
+> - `mockups/24-me-layout-options.html` (**final**) → **`TallyBar` replaced `SegBar`** and me.html went **single-column** (`558b1d3`), superseding both #22's 1% grid and mockup 23's 60/40 proposal.
+>
+> §5 is fully settled: the segmented-bar visual was designed once and is shared, and the Desenvolvimento slot needs no reservation at all — in a single column it's just another card. **B3 is closed.**
 
 ## Context
 
