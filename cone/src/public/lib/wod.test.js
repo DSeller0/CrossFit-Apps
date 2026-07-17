@@ -56,6 +56,28 @@ describe('exVolStr', () => {
   test('dist takes precedence over legacy cardio intensity', () => {
     expect(exVolStr({ dist: '100', distUnit: 'm', intensity: { mode: 'cardio', cardioVal: '400', cardioUnit: 'm' } })).toBe('100m')
   })
+  test('progression, no ex.reps, uniform step reps → sets×reps', () => {
+    const ex = { intensity: { mode: 'progression', steps: [
+      { reps: '5', load: '60' }, { reps: '5', load: '70' }, { reps: '5', load: '80' },
+    ] } }
+    expect(exVolStr(ex)).toBe('3×5')
+  })
+  test('progression, no ex.reps, single step → reps only (no sets prefix)', () => {
+    const ex = { intensity: { mode: 'progression', steps: [{ reps: '5', load: '60' }] } }
+    expect(exVolStr(ex)).toBe('5')
+  })
+  test('progression, no ex.reps, ladder reps → dash-joined', () => {
+    const ex = { intensity: { mode: 'progression', steps: [
+      { reps: '5', load: '60' }, { reps: '3', load: '70' }, { reps: '1', load: '80' },
+    ] } }
+    expect(exVolStr(ex)).toBe('5-3-1')
+  })
+  test('progression, no ex.reps, no steps → empty string', () => {
+    expect(exVolStr({ intensity: { mode: 'progression' } })).toBe('')
+  })
+  test('progression with ex.reps set → ex.reps wins (unchanged path)', () => {
+    expect(exVolStr({ reps: '10', intensity: { mode: 'progression', steps: [{ reps: '5', load: '60' }] } })).toBe('10')
+  })
 })
 
 describe('groupProgressionSteps', () => {

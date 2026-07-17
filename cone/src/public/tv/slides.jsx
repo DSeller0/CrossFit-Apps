@@ -126,7 +126,7 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
   // Estações intentionally flattens stations into one list — glanceable wall display.
   // Schedule.jsx keeps station structure as the canonical detailed view (#17, decision recorded in BACKLOG.md).
   const exes = bl.type === 'Estações'
-    ? (bl.stations || []).flatMap(st => (st.exercises || []).map(e => ({ ...e, _station: st.name })))
+    ? (bl.stations || []).flatMap(st => st.exercises || [])
     : (bl.exercises || [])
   const meta = [bl.duration && `${bl.duration}'`, bl.rounds && `${bl.rounds} rds`].filter(Boolean).join(' · ')
 
@@ -185,13 +185,14 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
   const exes  = block ? (block.type === 'Estações' ? (block.stations||[]).flatMap(st=>st.exercises||[]) : (block.exercises||[])) : []
   const bColor = block ? blkColor(block) : '#d8a840'
   const bLabel = block ? blkLabel(block) : bt
+  const bMeta  = block ? [block.duration && `${block.duration}'`, block.rounds && `${block.rounds} rds`].filter(Boolean).join(' · ') : ''
 
   const activeClass    = (classExecs || []).find(c => c.id === tv?.class_id && !c.reset_at)
   const groups         = activeClass?.groups || []
   const groupPositions = tv?.group_positions || {}
   const hasGroups      = groups.length > 0
 
-  const allWodBlocks = hasGroups ? (sess?.blocks || []).filter(isWodBlock) : []
+  const allWodBlocks = hasGroups ? (sess?.blocks || []).filter(bl => isWodBlock(bl) && (bl.exercises?.length || bl.stations?.length)) : []
   const mapCols      = allWodBlocks.length > 3 ? 2 : 1
   const orderedMap   = hasGroups ? columnMajor(allWodBlocks, mapCols) : []
 
@@ -253,6 +254,7 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
         <div className={s.timerRight}>
           <div className={s.timerBlockHdr} style={{ borderLeftColor: bColor }}>
             <span style={{ color: bColor }}>{bLabel}</span>
+            {bMeta && <span className={s.blockMeta}>{bMeta}</span>}
           </div>
           <ExerciseList exercises={exes} color={bColor} size="large" />
           {exes.length === 0 && <div className={s.timerNoEx}>Nenhum exercício</div>}

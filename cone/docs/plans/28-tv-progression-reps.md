@@ -43,3 +43,11 @@ Local stack + Playwright:
 - `npm test` (with the new `exVolStr` progression case) + `npm run build:all` green.
 
 Model: Sonnet · Size: S–M
+
+## Outcome (shipped 2026-07-17)
+
+- **Design call, recorded:** `exVolStr` now falls back to `groupProgressionSteps(ex)` when `ex.reps` is empty and `intensity.mode==='progression'`. One group (uniform reps across steps) → `${steps.length}×${reps}` (e.g. `3×5`), or just `reps` when there's a single step. Multiple groups (reps vary per step) → dash-joined ladder, e.g. `5-3-1`. Loads still render separately via `fmtIntensity`.
+- Verified live against the local stack (a temp session with a `Front Squat` progression exercise, reps only in `intensity.steps[].reps`, no top-level `ex.reps`): `tv.html`'s WOD slide and TimerSlide right panel both show `3×5 FRONT SQUAT · 60/70/80% RM`; `schedule.html`'s `ExRow` renders the same exercise unchanged (`5 FRONT SQUAT · 60/70/80% RM`, single row since its own `progGroups` path was untouched). Test data was removed afterward.
+- All three minors fixed as scoped: TimerSlide panel now shows `rounds`/`duration` meta (added `.timerBlockHdr` flex layout + `bMeta` in `slides.jsx`); dead `_station` attach removed from `BlockCard`'s Estações flatten; TimerSlide's `allWodBlocks` now filters empty blocks like `WodSlide` does.
+- Gallery: added `exProgStepsOnly` ("Front Squat", reps only in steps) as its own case ("Progressão · reps só em steps") plus folded into the `size='large'` case, alongside the pre-existing `exProg` fixture (which keeps its top-level `reps`/`sets` and is unaffected).
+- `npm test` (150 passed, incl. 6 new `exVolStr` progression cases) and `npm run build:all` green. `npm run design:cards` regenerated all 5 generated cards — `shared.html` for this change, plus `leaderboard`/`me`/`results`/`schedule` which had pre-existing unrelated drift (a `Results` CSS module rule) picked up by the same regen — all synced to DesignSync.

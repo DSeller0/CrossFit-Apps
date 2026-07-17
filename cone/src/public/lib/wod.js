@@ -65,6 +65,21 @@ export function blkLabel(bl) {
   return l&&t&&l!==t?`${l} · ${t}`:l||t||''
 }
 
+// Progression rep scheme as one glanceable string, for surfaces (TV) that show
+// a single line rather than ExRow's per-step grouped rows: "5×5" when the
+// grouped steps share one rep count, "5-3-1" when the ladder varies per step.
+function progRepsStr(ex) {
+  const groups=groupProgressionSteps(ex)
+  if(!groups.length) return ''
+  if(groups.length===1){
+    const reps=groups[0].reps
+    if(!reps) return ''
+    const sets=ex.intensity.steps.length
+    return sets>1?`${sets}×${reps}`:reps
+  }
+  return groups.map(g=>g.reps||'?').join('-')
+}
+
 export function exVolStr(ex) {
   if(ex.dist){
     const unit=ex.distUnit||'m'
@@ -76,6 +91,7 @@ export function exVolStr(ex) {
     if(!val)return ''
     return (ex.name||'').toLowerCase().includes(String(val).toLowerCase())?'':`${val}${unit}`
   }
+  if(!ex.reps&&ex.intensity?.mode==='progression') return progRepsStr(ex)
   const r=ex.reps||'',rd=r.includes(',')?r.split(',').map(x=>x.trim()).join('-'):r
   return ex.sets&&rd?`${ex.sets}×${rd}`:rd
 }

@@ -142,6 +142,7 @@
   font-size: 26px; font-weight: 900; letter-spacing: .1em;
   text-transform: uppercase; border-left: 5px solid var(--gold);
   padding: 4px 0 4px 20px;
+  display: flex; align-items: center; gap: 14px;
 }
 .timerExList { display: flex; flex-direction: column; gap: 18px; }
 .timerExRow  { display: flex; align-items: flex-start; gap: 18px; }
