@@ -1,7 +1,6 @@
-// Canonical column order for the 8 single-row JSONB blob tables (id=1, value=JSONB)
-// shared by Athletes.jsx and Leaderboard.jsx's fetchState(). Callers destructure
-// blobRows.map(...) by this exact position order.
-export const BLOB_TABLES = ['sessions', 'athletes', 'events', 'locations', 'coach_profile', 'settings', 'goals_data', 'lb_colors']
+// (The BLOB_TABLES fetch-order array retired with its last consumer: #52 removed
+// Athletes.jsx and #81 trimmed Leaderboard.jsx to fetch only the 3 tables it uses.
+// scripts/seed-dev.mjs keeps its own local copy for the dev snapshot.)
 
 // results_v2 row → camelCase. Was hand-written identically in Athletes.jsx and
 // Leaderboard.jsx (11 fields each); canonical since #51 so a new column can't be

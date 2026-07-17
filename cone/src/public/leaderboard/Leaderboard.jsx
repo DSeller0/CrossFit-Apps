@@ -11,7 +11,7 @@ import WodSelectCard from './WodSelectCard.jsx'
 import WodCard from './WodCard.jsx'
 import { isWodBlock, deriveScale, rankResults, perfStr } from '../lib/wod.js'
 import { MONTH_PT_SHORT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
-import { BLOB_TABLES, mapResultRow } from '../lib/blobTables.js'
+import { mapResultRow } from '../lib/blobTables.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 
 // The lb_colors custom-color system is retired (#51). It predated the 4-theme
@@ -74,17 +74,21 @@ function leaderOf(entries, blType) {
   return top ? { leaderName: top.name, leaderPerf: perfStr(top, blType) } : {}
 }
 
+// Only 3 blob tables are actually used here — fetch just those (#81/#73). The old
+// BLOB_TABLES.map() pulled all 8 and ignored 5, including coach_profile/locations,
+// whose reads are now anon-locked (0006) and would 0-row here anyway.
 async function fetchState() {
-  const [blobRows, resRaw] = await Promise.all([
-    Promise.all(BLOB_TABLES.map(t => sb.from(t).select('value').eq('id', 1).maybeSingle())),
+  const [sessionsRow, athletesRow, settingsRow, resRaw] = await Promise.all([
+    sb.from('sessions').select('value').eq('id', 1).maybeSingle(),
+    sb.from('athletes').select('value').eq('id', 1).maybeSingle(),
+    sb.from('settings').select('value').eq('id', 1).maybeSingle(),
     sb.from('results_v2').select('*'),
   ])
-  const [sessions, athletes, , , , settings] = blobRows.map(x => x.data?.value ?? null)
   return {
-    sessions: sessions ?? {},
-    athletes: athletes ?? [],
+    sessions: sessionsRow.data?.value ?? {},
+    athletes: athletesRow.data?.value ?? [],
     results: (resRaw.data || []).map(mapResultRow),
-    settings: settings ?? {},
+    settings: settingsRow.data?.value ?? {},
   }
 }
 

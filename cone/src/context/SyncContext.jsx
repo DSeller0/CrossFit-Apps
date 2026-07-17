@@ -11,13 +11,20 @@ export function SyncProvider({ children }) {
   const [events,   setEvents]   = useState(loadEvents);
   const [syncState, setSyncState] = useState('idle'); // 'idle'|'syncing'|'synced'|'conflict'
 
-  // ── Pull latest data from Supabase on startup ─────────────────────────────
+  // ── Pull latest data from Supabase once the coach's session is established ──
+  // Gated on auth (#81): locations/coach_profile reads now require is_allowed_user(),
+  // so the pull must run with the authenticated JWT attached — not in the brief anon
+  // window during a cold load (which would return null for those two tables). The SPA
+  // is fully behind login, so an anon sync was never useful anyway. Keyed on a boolean
+  // so a token refresh (which changes the session reference) doesn't re-trigger it.
+  const authed = !!session;
   useEffect(() => {
+    if (!authed) return;
     syncFromSupabase().then(fresh => {
       if (fresh.sessions) setSessions(fresh.sessions);
       if (fresh.events)   setEvents(fresh.events);
     }).catch(() => {});
-  }, []);
+  }, [authed]);
 
   // ── Auto-save ─────────────────────────────────────────────────────────────
   useEffect(() => { saveLS(sessions); },    [sessions]);
