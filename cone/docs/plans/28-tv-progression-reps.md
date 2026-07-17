@@ -1,5 +1,7 @@
 # 28 — TV wall loses the rep scheme on progression exercises (#72)
 
+> ✅ Done: `2d7c119`
+
 Backlog: **#72** (Icebox → Ready). From the 2026-07-16 full pass — architecture invariant 3 ("three render paths stay in sync") FAILs in 4 places.
 
 ## Context
