@@ -1,6 +1,8 @@
 # 25 — #75 · Retire the fabricated rpe/scale data
 
 > ✅ Done (code + docs): `9c28d60` — render/write leaks closed, aggregates count only real values, plans/22 corrected + rule 5 added. **Data null pending one hand-run dashboard SQL** (dry-run-verified on the local stack: DELETE 2 orphan rows, null 5 perf-less blocks across 2 of Arthur's rows, 1 real row untouched). Fully closed once that SQL runs on prod.
+>
+> ⚠️ **Prod re-audit 2026-07-17 (before execution) confirmed the plan's Verification step 1 hazard was live:** prod had drifted **+7 new real rows** (Arthur ×4 + Paulo ×3) logged since the local seed — none fabricated (all carry perf). The 4 targeted ids are byte-identical to the audit table, so the id-keyed SQL is unaffected. This is the concrete case that vindicated **id-list over predicate**: Paulo's `mrjg90…` block 2 is `RX @ RPE 7` **but real** (8 rounds) — a `rpe=7 AND scale='RX'` predicate would have wrongly nulled it.
 
 ## Context
 

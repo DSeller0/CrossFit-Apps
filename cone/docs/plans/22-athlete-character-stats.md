@@ -28,7 +28,7 @@ Evidence: the migrations, every write path in `src/`, and the **real production 
 |---|---|
 | Athletes | **14** as of 2026-07-16 — 9 real `mqfj*` + `Atleta00–03` test accounts + Paulo (the 2026-06-24 snapshot had 9). All `level: Competidor`; all `since` = 2026-06-15, the install date — so neither field discriminates. (re-counted by #75) |
 | Sessions | 15 · **79 blocks · 214 prescribed exercises** (37% carry an `intensity`) |
-| **Results** | `results_v2` holds **5 rows / 11 blocks**: **3 real** (all Arthur) + **2 orphan test rows** (owners not in the roster). **5 of the 11 blocks were fabricated** `RX @ RPE 7` with no perf — retired by #75. The old "2 rows" figure **counted the wrong table**: `backup-supabase.mjs` dumps only the single-row blobs (`.eq('id',1)`) and never `results_v2`, so the "2" was the retired v1 `results` blob. Re-audited live 2026-07-16. |
+| **Results** | `results_v2` — **12 rows on prod as of 2026-07-17** (10 after #75 deletes 2 orphan test rows whose owners aren't in the roster). **5 blocks in 2 of Arthur's older rows were fabricated** `RX @ RPE 7` with no perf — nulled by #75. **The rest is real and growing**: Arthur (6 rows) and Paulo (3) have been logging WOD scores (varied scales SC/Inter/RX, real rounds/reps/times) since late June — the "gym logs nothing" premise no longer holds for *WOD scores* (it still holds for training/loads, §4). The old "2 rows" figure **counted the wrong table**: `backup-supabase.mjs` dumps only the single-row blobs (`.eq('id',1)`) and never `results_v2`, so the "2" was the retired v1 `results` blob. (Local seed snapshot was 5 rows on 2026-07-16; prod re-audited live 2026-07-17 and had already drifted +7 real rows — which is why #75 nulled by explicit id, not by predicate: a `rpe=7 AND RX` predicate would have wrongly nulled Paulo's real `RX @ 7` block.) |
 | PRs | 3, across 2 athletes (one real). All 3 have a target. |
 | Goals / milestones | 1 empty goal · **0 milestones** |
 | Registry | 146 entries · **`muscles` 144/144 = 100%** · `description` 100% · `defaults` **0%** |
@@ -108,7 +108,7 @@ Renders on the **shared segmented-bar component** #52 extracts (today the same 1
 
 Steps 1–4 are **~4 sessions** before a single bar renders. Two things make that acceptable:
 - **Every step pays for itself independently.** Step 1 fixes a live leaderboard corruption and a silent coach-data-loss bug. Step 2 fixes demo videos, ghost defaults and PR tagging. Step 3 delivers #19, already on the board. Step 4 is a feature the gym wants on its own merits.
-- **The gym logs almost nothing today** — `results_v2` has just **3 real rows, all Arthur's** (#75's live audit; the "2 test rows" folklore counted the retired v1 `results` blob, which `backup-supabase.mjs` dumps instead of `results_v2`). Shipping bars now would render five dashes for all 14 athletes. **The capture work *is* the feature.**
+- **The gym has only just started logging** — as of 2026-07-17 `results_v2` holds ~9 real WOD-score rows across **Arthur and Paulo** (up from the near-zero the old "2 test rows" folklore implied — that number counted the retired v1 `results` blob, not `results_v2`). But **none of it is training data**: every row is a WOD *score* (rounds/reps/time) — the Força/LPO/Skill blocks this chain exists to capture are still logged by nothing, no loads exist anywhere, and steps 1–4 remain the gate. **The capture work *is* the feature.**
 
 ## Acceptance (of the card, at the end of the chain)
 
