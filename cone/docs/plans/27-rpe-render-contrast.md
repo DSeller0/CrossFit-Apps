@@ -1,6 +1,8 @@
 # 27 — RPE number doesn't render once selected (#78)
 
-Backlog: **#78** (Icebox → Ready). Captured from a user report on 2026-07-17. **Not yet root-caused — reproduce live first.**
+> ✅ Done: `8ce6da1`
+
+Backlog: **#78** (Icebox → Ready → Done). Captured from a user report on 2026-07-17.
 
 ## Context
 
@@ -10,7 +12,17 @@ User-reported against the results-logging flow: after tapping an RPE value, the 
 - `schedule/LogPane.jsx:97-107` (`.lpRpeBtn` / `.lpRpeBtnOn`, `.lpScaleBtn` / `.lpScaleBtnOn`)
 - `schedule/DeskRegPane.jsx:33-37` (its own `On` classes)
 
-**Leading hypothesis (confirm live before touching code):** the selected state paints the digit in `var(--accent-text)` on a bright fill — `.rpeBtnOn` is `background:var(--teal); color:var(--accent-text)` and `.scaleBtnOn` is `background:var(--gold); color:var(--accent-text)`. On the **light** themes `--accent-text` is white/near-white (totk-light `#fff`), so **white-on-bright-teal / white-on-gold** reads as an invisible number while the fill still visibly changes color — matching the report exactly. This is the same bug family as the 2026-07-16 review's dim-7 contrast findings and its dim-2 `--accent-text` note. **Already ruled out:** the SPA's `Resultados.jsx` RPE bar was live-verified rendering correctly during #70's testing on 2026-07-17 — so start on the public pages.
+**Leading hypothesis — ruled out live (2026-07-17).** The `--accent-text`-on-bright-fill theory predicted low contrast on light themes specifically. Computed WCAG ratios for every theme (`.rpeBtnOn`/`.scaleBtnOn` fill vs `--accent-text`) actually ranged 3.80–10.31 — low in spots but never below ~3.5, and screenshotting `LogForm`'s gallery fixture (RPE 8 + RX pre-selected) in all 4 themes showed the digit clearly legible everywhere. Not the bug.
+
+**Actual root cause (confirmed live via `getComputedStyle` on `results.html`, real Bruna/For-Time flow, local stack):** a CSS specificity collision, not a token/contrast problem.
+- `Results.module.css:280` — `.rpeBtn:hover:not(:disabled) { border-color:var(--teal); color:var(--teal); }` (specificity 0,3,0)
+- `Results.module.css:282` — `.rpeBtnOn { background:var(--teal); border-color:var(--teal); color:var(--accent-text); }` (specificity 0,1,0)
+
+The hover rule outranks the selected-state rule regardless of source order. So a button that is both **hovered and selected** renders with `color:var(--teal)` (from the hover rule) on `background:var(--teal)` (from `.rpeBtnOn`) — text and fill are the *exact same value*, not just low-contrast. Verified via `getComputedStyle`: `color` and `backgroundColor` were byte-identical (`rgb(20,144,160)` on both, spirit-blossom-light) while hovering a selected RPE button. Same mechanism for `.scaleBtn:hover:not(:disabled)` vs `.scaleBtnOn` (gold-on-gold). This reproduces in **every theme** (the hover rule always repaints to the same color as the On fill, independent of which theme's hex values are in play) whenever the pointer rests on the button after selecting it — a real mouse hovering post-click, or a touch device with "sticky hover" (iOS/some Android WebKit keep `:hover` active after `touchend` until the user taps elsewhere), which is consistent with the original tap-to-select report.
+
+**`LogPane`/`DeskRegPane` confirmed NOT affected:** `Schedule.module.css` defines no `:hover` rule at all for `.lpRpeBtn`/`.lpScaleBtn`/`.deskRegRpeBtn`/`.deskRegScaleBtn` — grepped the whole file, only 18 unrelated `:hover` rules exist, none touching these classes. So there was never a competing selector there; those two surfaces render correctly as-is.
+
+(SPA's `Resultados.jsx` RPE bar was separately live-verified rendering correctly during #70's testing on 2026-07-17.)
 
 ## Acceptance
 
@@ -26,15 +38,14 @@ Reproduce across all three public RPE surfaces (fix wherever it reproduces, keep
 - `src/public/schedule/DeskRegPane.jsx:33-37` + its `On` classes in `Schedule.module.css`
 - Possibly `themes.css` (if the fix is a per-theme `--accent-text` correction — check every consumer first).
 
-## Approach
+## Approach (as executed)
 
-1. **Reproduce first.** Drive each of the three surfaces at 390 and 1280 across all 4 themes; screenshot the selected state; identify which theme(s)/surface(s) hide the digit and confirm the mechanism via `getComputedStyle` on the selected button (compare `color` to `background-color`).
-2. **Choose the minimal correct fix** once the mechanism is confirmed:
-   - If it's the `--accent-text`-on-bright-fill collision on light themes, pick one and record the reasoning in this file:
-     - **(a) local override** — give the selected `On` state a guaranteed-contrast text color at the button. The teal/gold fills are light-ish in all 4 themes, so a fixed dark digit is safe and touches nothing else. Lowest blast radius.
-     - **(b) token correction** — fix the offending `--accent-text` value per theme in `themes.css`. Shared token: audit every other consumer first (incl. #53/#72's planned Timer `color:#000 → var(--accent-text)` change) so this doesn't regress them.
-   - Apply the same fix to the parallel **scale** `On` state and to the schedule log panes' `On` classes so all three surfaces stay consistent.
-3. Confirm the gallery covers the selected RPE state (LogForm/LogPane have entries under Results/Schedule) so the fix is visible across themes; add a selected-state case if missing.
+1. **Reproduced first.** Drove `results.html` live on the local stack (real Bruna/For-Time flow), selected RPE 8 + RX, then hovered the selected buttons and diffed `getComputedStyle().color` vs `.backgroundColor` — found them byte-identical, confirming the specificity collision above (not the `--accent-text` hypothesis).
+2. **Chosen fix — selector exclusion, lowest blast radius.** Added `:not(.rpeBtnOn)` / `:not(.scaleBtnOn)` to the two hover selectors in `Results.module.css` so the hover-color rule simply doesn't match an already-selected button:
+   - `.rpeBtn:hover:not(:disabled):not(.rpeBtnOn) { border-color:var(--teal); color:var(--teal); }`
+   - `.scaleBtn:hover:not(:disabled):not(.scaleBtnOn) { border-color:var(--gold); color:var(--gold); }`
+   - No `themes.css` token change needed — the bug wasn't token-shaped. `LogPane`/`DeskRegPane` needed no change (confirmed they never had a competing hover rule); "keep in sync" is satisfied because all three surfaces now correctly show the selected digit under hover, not because the same lines were touched.
+3. **Gallery coverage added** (`Gallery.jsx`): `LogPane` had no selected-state case at all (`logPaneBlockForm` fixture always used `rpe:null,scale:null`) — added "Formulário · RPE + Escala selecionados (#78)" reusing the existing `logPaneBlockDone` fixture with `confirming=false` so the interactive (not read-only-confirm) button row renders selected. `DeskRegPane` likewise had no `step="form"` case with a selection — added "Formulário · RPE + Escala selecionados (#78)". `LogForm` already had one (the AMRAP case, fixture-driven `rpe:8,scale:'RX'`).
 
 ## Verification
 
