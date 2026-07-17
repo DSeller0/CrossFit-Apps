@@ -1,5 +1,7 @@
 # 26 — Schedule-launched timer skips the 10s countdown (#79)
 
+> ✅ Done: a6ea617 · 2026-07-17 — see BACKLOG.md
+
 Backlog: **#79** (Icebox → Ready). Captured from a user report on 2026-07-17. Root-caused.
 
 ## Context
