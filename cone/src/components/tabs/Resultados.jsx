@@ -6,18 +6,14 @@ import {
   uid,
 } from '../../utils/storage';
 import { APP_CONFIG, GF } from '../../utils/config';
-import { exVolStr, rankResults, scaleColor, isTimeBlock } from '../../public/lib/wod.js';
-import { toISO } from '../../public/lib/week.js';
+import { exVolStr, rankResults, scaleColor, isTimeBlock, isWodBlock, deriveScale, SCALES } from '../../public/lib/wod.js';
+import { toISO, MONTH_PT, DAY_PT_TITLE } from '../../public/lib/week.js';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const SCALES          = ['RX', 'Inter', 'SC', 'Adaptado'];
 const PRESENCE        = ['Presente', 'Ausente', 'Justificado'];
 const LEVEL_CLS       = { Iniciante:'lv-ini', Intermediário:'lv-int', Avançado:'lv-adv', Competidor:'lv-comp' };
 const SCALE_CLS       = { RX:'sc-rx', Inter:'sc-inter', SC:'sc-sc', Adaptado:'sc-adap' };
-const WOD_BLOCK_TYPES = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
-const PT_MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const DAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
 // ── Module-level helpers ──────────────────────────────────────────────────────
 const sessTitle = s => s.sessionName || s.name || (typeof s.mainTraining === 'string' ? s.mainTraining : '') || 'Treino';
@@ -136,7 +132,6 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
   const [saveFlash,   setSaveFlash]   = useState(false);
 
   const isMobile = useIsMobile(800);
-  const WOD_SET  = new Set(WOD_BLOCK_TYPES);
 
   const weeks = useMemo(() => getWeeksInMonth(viewYear, viewMonth), [viewYear, viewMonth]);
 
@@ -200,7 +195,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
       r.date===selDateKey && r.athleteId===selAthlete.id &&
       (r.sessionId===selSession.id || (!r.sessionId&&!selSession.id))
     );
-    const wodBlocks = (selSession.blocks||[]).filter(b=>WOD_SET.has(b.type));
+    const wodBlocks = (selSession.blocks||[]).filter(isWodBlock);
     if (existing) {
       setPresence(existing.presence||'Presente');
       setEnergyLevel(existing.energyLevel||3);
@@ -265,7 +260,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
       <div className="rp-sticktop">
         <div className="rp-month-nav">
           <button type="button" className="rp-nav-btn" onClick={prevMonth}>‹</button>
-          <span className="rp-month-label">{PT_MONTHS[viewMonth]} {viewYear}</span>
+          <span className="rp-month-label">{MONTH_PT[viewMonth]} {viewYear}</span>
           <button type="button" className="rp-nav-btn" onClick={nextMonth}>›</button>
         </div>
         <div className="rp-weeks">
@@ -279,7 +274,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
       </div>
       {weekDays.map(({date,dk,daySessions:ds}) => {
         const inMonth = date.getMonth()===viewMonth;
-        const dayName = DAY_NAMES[date.getDay()];
+        const dayName = DAY_PT_TITLE[date.getDay()];
         const dayNum  = date.getDate();
         if (!inMonth) return <div key={dk} className="rp-rest-day" style={{opacity:.3}}>{dayName} {dayNum}</div>;
         return (
@@ -297,7 +292,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
                   <div className="rp-sess-name">{sessTitle(sess)}</div>
                   <div className="rp-sess-sub">
                     <span style={{color:logged>0?'#4ac8c0':'#554a3a'}}>{logged}/{athletes.length} reg.</span>
-                    {(sess.blocks||[]).filter(b=>WOD_SET.has(b.type)).slice(0,2).map((b,i)=>(
+                    {(sess.blocks||[]).filter(isWodBlock).slice(0,2).map((b,i)=>(
                       <span key={i} style={{fontSize:9,background:'#161210',padding:'1px 5px',color:'#554a3a',border:'1px solid #2a231c'}}>
                         {b.label||b.type}
                       </span>
@@ -403,7 +398,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
       </div>
     );
     const hasResult = !!loggedAthMap[selAthlete.id];
-    const wodBlocks = (selSession.blocks||[]).filter(b=>WOD_SET.has(b.type));
+    const wodBlocks = (selSession.blocks||[]).filter(isWodBlock);
     return (
       <div className="rp-p3">
         {isMobile && (
@@ -740,7 +735,7 @@ function LeaderboardView({ athletes, sessions, results }) {
     const list=[];
     Object.entries(sessions).sort(([a],[b])=>b.localeCompare(a)).forEach(([dateKey,daySessions])=>{
       (daySessions||[]).forEach(sess=>{
-        (sess.blocks||[]).filter(bl=>WOD_BLOCK_TYPES.includes(bl.label)||WOD_BLOCK_TYPES.includes(bl.type)).forEach(bl=>{
+        (sess.blocks||[]).filter(isWodBlock).forEach(bl=>{
           const hasRes=results.some(r=>r.date===dateKey&&r.sessionId===sess.id&&r.presence==='Presente'&&(r.blocks||[]).some(rb=>rb.blockId===bl.id&&(rb.perfTime||rb.perfRounds||rb.perfReps)));
           if (hasRes) {
             const dt=new Date(dateKey+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
@@ -758,20 +753,15 @@ function LeaderboardView({ athletes, sessions, results }) {
 
   const wodResults=useMemo(()=>{
     if (!selObj) return [];
-    const SCALE_RANK={RX:4,Inter:3,SC:2,Adaptado:1,'-':0},SCALE_NAMES={4:'RX',3:'Inter',2:'SC',1:'Adaptado',0:'-'};
     return results.filter(r=>r.date===selObj.dateKey&&r.sessionId===selObj.sessId&&r.presence==='Presente')
       .map(r=>{
         const blk=(r.blocks||[]).find(b=>b.blockId===selObj.blId)||null;
         if (!blk) return null;
-        const exRows=blk.exerciseRows||[];
-        let minRank=4;
-        exRows.forEach(row=>{ const rank=SCALE_RANK[row.scale]??0; if(rank<minRank) minRank=rank; });
-        const scale=exRows.length>0?SCALE_NAMES[minRank]:blk.scale||'-';
-        return {...r,perfTime:blk.perfTime,perfRounds:blk.perfRounds,perfReps:blk.perfReps,scale};
+        return {...r,perfTime:blk.perfTime,perfRounds:blk.perfRounds,perfReps:blk.perfReps,scale:deriveScale(blk)};
       }).filter(r=>r&&(r.perfTime||r.perfRounds||r.perfReps));
   },[selObj,results]);
 
-  const scales=['Todos','RX','Inter','SC','Adaptado'];
+  const scales=['Todos',...SCALES];
   const filtered=scaleFilter==='Todos'?wodResults:wodResults.filter(r=>r.scale===scaleFilter);
   const ranked=selObj?rankResults(filtered,selObj.blType):[];
   const podLabels=['1º','2º','3º'];
