@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 import { loadAthletes, loadLocations, saveLocations, loadCoach, saveCoach, uid } from '../../utils/storage';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
@@ -66,6 +67,12 @@ function LocFormModal({ editId, form, setF, onSave, onClose }) {
               </button>
             ))}
           </div>
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <label style={{ fontSize: 11, color: '#555', display: 'block', marginBottom: 3 }}>Coach responsável <span style={{ color: '#3a3a3a' }}>(opcional)</span></label>
+          <input value={form.coachName || ''} onChange={e => setF('coachName', e.target.value)} placeholder="ex: quem toca este box"
+            style={{ width: '100%', background: '#111', border: '1px solid #2e2e2e', color: '#ccc', padding: '7px 9px', borderRadius: 5, fontSize: 13 }} />
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
@@ -175,17 +182,15 @@ function CoachProfileForm({ coach, setCoach, compact }) {
 
 // ── Athlete assignment list ───────────────────────────────────────────────────
 function AthleteAssignment({ loc, athletes, onToggle }) {
-  if (loc.type === 'box') {
-    return (
-      <div style={{ fontSize: 12, color: '#555', fontStyle: 'italic', padding: 12, background: '#111', borderRadius: 6, border: '1px solid #1e1e1e' }}>
-        <i className="ti ti-info-circle" style={{ marginRight: 6, color: '#888' }} />
-        Locais do tipo Box são para aulas em grupo. Atletas são registrados via resultado de cada aula.
-      </div>
-    );
-  }
   return (
     <div>
       <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 8 }}>Atletas vinculados</div>
+      {loc.type === 'box' && (
+        <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginBottom: 8 }}>
+          <i className="ti ti-info-circle" style={{ marginRight: 5, color: '#888' }} />
+          Atletas de aulas em grupo também entram automaticamente pelos resultados de cada aula.
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {athletes.map(a => {
           const checked = (loc.athleteIds || []).includes(a.id);
@@ -204,6 +209,45 @@ function AthleteAssignment({ loc, athletes, onToggle }) {
   );
 }
 
+// ── Per-box QR + shareable link ───────────────────────────────────────────────
+// The link opens the public app already filtered to this box (soft view-scope, not
+// access control — see docs). White QR background so it scans on any theme.
+function BoxQrModal({ loc, onClose }) {
+  const [qr, setQr] = useState('');
+  const [copied, setCopied] = useState(false);
+  const link = `${window.location.origin}/CrossFit-Apps/index.html?box=${loc.id}`;
+
+  useEffect(() => {
+    QRCode.toDataURL(link, { width: 320, margin: 2 }).then(setQr).catch(() => {});
+  }, [link]);
+
+  const copy = () => {
+    navigator.clipboard?.writeText(link).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1600); }).catch(() => {});
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.8)', zIndex: 2100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
+      <div style={{ background: '#0d0d0d', border: '1px solid #2e2e2e', borderRadius: 10, padding: 20, width: 360, maxWidth: '92vw', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#ccc' }}>Link do {loc.name}</span>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#555', cursor: 'pointer', fontSize: 16 }}>✕</button>
+        </div>
+        {qr
+          ? <img src={qr} alt="QR" style={{ width: 240, height: 240, background: '#fff', borderRadius: 8, padding: 8 }} />
+          : <div style={{ width: 240, height: 240, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#444', fontSize: 12 }}>Gerando…</div>}
+        <div style={{ fontSize: 11, color: '#666', margin: '12px 0 8px', wordBreak: 'break-all' }}>{link}</div>
+        <button onClick={copy}
+          style={{ width: '100%', background: 'var(--theme-accent)', color: 'var(--theme-accent-text)', border: 'none', padding: 9, borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <i className={`ti ti-${copied ? 'check' : 'copy'}`} /> {copied ? 'Copiado!' : 'Copiar link'}
+        </button>
+        <div style={{ fontSize: 10, color: '#554a3a', marginTop: 10, lineHeight: 1.4 }}>
+          Abre o app já filtrado neste box. Para compartilhar com atletas e testers.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Serviços tab ─────────────────────────────────────────────────────────
 export default function ServicosTab() {
   const [locs, setLocs]         = useState(loadLocations);
@@ -211,9 +255,10 @@ export default function ServicosTab() {
   const [selLoc, setSelLoc]     = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId]     = useState(null);
-  const [form, setForm]         = useState({ name: '', type: 'box', color: '#4ac8c0', rate: '', rateUnit: 'per_session', currency: 'R$' });
+  const [form, setForm]         = useState({ name: '', type: 'box', color: '#4ac8c0', rate: '', rateUnit: 'per_session', currency: 'R$', coachName: '' });
   const [confirmDel, setConfirmDel] = useState(null);
   const [expandedLoc, setExpandedLoc] = useState(null);
+  const [qrLoc, setQrLoc] = useState(null);
 
   const athletes = loadAthletes();
   const isMobile = useIsMobile();
@@ -225,12 +270,12 @@ export default function ServicosTab() {
 
   const openNew = () => {
     setEditId(null);
-    setForm({ name: '', type: 'box', color: '#4ac8c0', rate: '', rateUnit: 'per_session', currency: 'R$' });
+    setForm({ name: '', type: 'box', color: '#4ac8c0', rate: '', rateUnit: 'per_session', currency: 'R$', coachName: '' });
     setShowForm(true);
   };
 
   const startEdit = loc => {
-    setForm({ name: loc.name, type: loc.type, color: loc.color || '#4ac8c0', rate: String(loc.rate || ''), rateUnit: loc.rateUnit || 'per_session', currency: loc.currency || 'R$' });
+    setForm({ name: loc.name, type: loc.type, color: loc.color || '#4ac8c0', rate: String(loc.rate || ''), rateUnit: loc.rateUnit || 'per_session', currency: loc.currency || 'R$', coachName: loc.coachName || '' });
     setEditId(loc.id);
     setShowForm(true);
   };
@@ -244,7 +289,7 @@ export default function ServicosTab() {
     }
     setShowForm(false);
     setEditId(null);
-    setForm({ name: '', type: 'box', color: '#4ac8c0', rate: '', rateUnit: 'per_session', currency: 'R$' });
+    setForm({ name: '', type: 'box', color: '#4ac8c0', rate: '', rateUnit: 'per_session', currency: 'R$', coachName: '' });
   };
 
   const deleteLoc = id => {
@@ -273,6 +318,7 @@ export default function ServicosTab() {
     <div style={{ padding: 10, paddingBottom: 70 }}>
       {confirmDel && <ConfirmDeleteModal locName={confirmLocName} onConfirm={() => deleteLoc(confirmDel)} onCancel={() => setConfirmDel(null)} />}
       {showForm && <LocFormModal editId={editId} form={form} setF={setF} onSave={saveLoc} onClose={() => { setShowForm(false); setEditId(null); }} />}
+      {qrLoc && <BoxQrModal loc={qrLoc} onClose={() => setQrLoc(null)} />}
 
       <CoachProfileForm coach={coach} setCoach={setCoach} compact />
 
@@ -297,6 +343,11 @@ export default function ServicosTab() {
                 <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 3, textTransform: 'uppercase', background: l.type === 'box' ? 'rgba(74,200,192,.1)' : 'rgba(216,168,64,.1)', color: l.type === 'box' ? 'var(--theme-accent)' : '#d8a840', marginRight: 2 }}>
                   {l.type === 'box' ? 'Box' : 'Personal'}
                 </span>
+                {l.type === 'box' && (
+                  <button type="button" title="QR / link do box" onClick={e => { e.stopPropagation(); setQrLoc(l); }} style={{ background: 'transparent', border: '1px solid #2e2e2e', color: 'var(--theme-accent)', padding: '2px 5px', borderRadius: 3, cursor: 'pointer' }}>
+                    <i className="ti ti-qrcode" style={{ fontSize: 11 }} />
+                  </button>
+                )}
                 <button type="button" onClick={e => { e.stopPropagation(); startEdit(l); }} style={{ background: 'transparent', border: '1px solid #2e2e2e', color: '#555', padding: '2px 5px', borderRadius: 3, cursor: 'pointer' }}>
                   <i className="ti ti-edit" style={{ fontSize: 11 }} />
                 </button>
@@ -323,6 +374,7 @@ export default function ServicosTab() {
     <div style={{ display: 'flex', gap: 0, height: '100%', minHeight: 500 }}>
       {confirmDel && <ConfirmDeleteModal locName={confirmLocName} onConfirm={() => deleteLoc(confirmDel)} onCancel={() => setConfirmDel(null)} />}
       {showForm && <LocFormModal editId={editId} form={form} setF={setF} onSave={saveLoc} onClose={() => { setShowForm(false); setEditId(null); }} />}
+      {qrLoc && <BoxQrModal loc={qrLoc} onClose={() => setQrLoc(null)} />}
 
       {/* Left pane */}
       <div style={{ width: 260, flexShrink: 0, borderRight: '1px solid #1e1e1e', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
@@ -347,6 +399,11 @@ export default function ServicosTab() {
                 <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 4px', borderRadius: 3, textTransform: 'uppercase', background: l.type === 'box' ? 'rgba(74,200,192,.1)' : 'rgba(216,168,64,.1)', color: l.type === 'box' ? 'var(--theme-accent)' : '#d8a840' }}>
                   {l.type === 'box' ? 'Box' : 'Personal'}
                 </span>
+                {l.type === 'box' && (
+                  <button type="button" title="QR / link do box" onClick={e => { e.stopPropagation(); setQrLoc(l); }} style={{ background: 'transparent', border: '1px solid #2e2e2e', color: 'var(--theme-accent)', padding: '2px 5px', borderRadius: 3, cursor: 'pointer' }}>
+                    <i className="ti ti-qrcode" style={{ fontSize: 11 }} />
+                  </button>
+                )}
                 <button type="button" onClick={e => { e.stopPropagation(); startEdit(l); }} style={{ background: 'transparent', border: '1px solid #2e2e2e', color: '#555', padding: '2px 5px', borderRadius: 3, cursor: 'pointer' }}>
                   <i className="ti ti-edit" style={{ fontSize: 11 }} />
                 </button>

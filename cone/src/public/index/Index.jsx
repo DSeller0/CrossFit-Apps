@@ -5,6 +5,7 @@ import Nav from '../Nav.jsx'
 import s from './Index.module.css'
 import { WOD_TYPES as WOD_TYPES_ARR } from '../lib/wod.js'
 import { toISO } from '../lib/week.js'
+import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const WOD_TYPES  = new Set(WOD_TYPES_ARR)
@@ -128,6 +129,7 @@ export default function Index() {
   const [error,       setError]       = useState(null)
   const [expandedSet, setExpandedSet] = useState(new Set())
   const [pwaShow,     setPwaShow]     = useState(false)
+  const box = useMemo(() => getBoxScope(), [])   // per-box view scope (?box=)
 
   const deferredPromptRef = useRef(null)
 
@@ -157,7 +159,7 @@ export default function Index() {
       allResults.forEach(r => { if (r.sessionId) counts[r.sessionId] = (counts[r.sessionId] || 0) + 1 })
 
       // Expand today's first session by default
-      const todaySess = (allSessions[TODAY_DK] || []).filter(s => s.public !== false)
+      const todaySess = (allSessions[TODAY_DK] || []).filter(s => s.public !== false && inBoxScope(s, box))
       if (todaySess.length) setExpandedSet(new Set([todaySess[0].id]))
 
       if (settings.gymName) setGymName(settings.gymName.toUpperCase())
@@ -245,9 +247,9 @@ export default function Index() {
   } else {
     sessionsPaneJsx = (
       <>
-        <DaySection dk={YESTER_DK} daySessions={(sessions[YESTER_DK]||[]).filter(s=>s.public!==false)} countBySess={countBySess} offset={-1} expandedSet={expandedSet} onToggle={toggleCard} />
-        <DaySection dk={TODAY_DK}  daySessions={(sessions[TODAY_DK] ||[]).filter(s=>s.public!==false)} countBySess={countBySess} offset={0}  expandedSet={expandedSet} onToggle={toggleCard} />
-        <DaySection dk={TOMOR_DK}  daySessions={(sessions[TOMOR_DK] ||[]).filter(s=>s.public!==false)} countBySess={countBySess} offset={1}  expandedSet={expandedSet} onToggle={toggleCard} />
+        <DaySection dk={YESTER_DK} daySessions={(sessions[YESTER_DK]||[]).filter(s=>s.public!==false&&inBoxScope(s,box))} countBySess={countBySess} offset={-1} expandedSet={expandedSet} onToggle={toggleCard} />
+        <DaySection dk={TODAY_DK}  daySessions={(sessions[TODAY_DK] ||[]).filter(s=>s.public!==false&&inBoxScope(s,box))} countBySess={countBySess} offset={0}  expandedSet={expandedSet} onToggle={toggleCard} />
+        <DaySection dk={TOMOR_DK}  daySessions={(sessions[TOMOR_DK] ||[]).filter(s=>s.public!==false&&inBoxScope(s,box))} countBySess={countBySess} offset={1}  expandedSet={expandedSet} onToggle={toggleCard} />
       </>
     )
   }
@@ -279,7 +281,7 @@ export default function Index() {
         <button className={s.pwaDismiss} onClick={dismissPwa} aria-label="Fechar">✕</button>
       </div>
 
-      <Nav active="index" gymName={gymName} />
+      <Nav active="index" gymName={gymName} box={box} />
     </>
   )
 }

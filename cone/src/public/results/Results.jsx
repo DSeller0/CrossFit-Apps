@@ -7,6 +7,7 @@ import styles from './Results.module.css'
 import { MONTH_PT, DAY_PT, toISO, todayISO, getWeek, dateToWeekOffset } from '../lib/week.js'
 import { uid, blkLabel, isWodBlock, rankResults, toSecs, fmtSecs, isTimeBlock } from '../lib/wod.js'
 import { onKey } from '../schedule/scheduleHelpers.js'
+import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import RankList from '../shared/RankList.jsx'
 import ScaleFilter from '../shared/ScaleFilter.jsx'
 import SessionCard from './SessionCard.jsx'
@@ -20,8 +21,8 @@ const MEDALS = ['🥇', '🥈', '🥉']
 
 function wodBlocks(sess) { return (sess.blocks || []).filter(isWodBlock) }
 
-function sessionsForDay(sessions, dk, lockedAthName) {
-  const all = ((sessions || {})[dk] || []).filter(s => s.public !== false && s.blocks && s.blocks.length)
+function sessionsForDay(sessions, dk, lockedAthName, box) {
+  const all = ((sessions || {})[dk] || []).filter(s => s.public !== false && inBoxScope(s, box) && s.blocks && s.blocks.length)
   if (!lockedAthName) return all
   return all.filter(s => {
     const t = Array.isArray(s.mainTraining) ? s.mainTraining : (s.mainTraining ? [s.mainTraining] : [])
@@ -32,9 +33,9 @@ function sessionsForDay(sessions, dk, lockedAthName) {
 // Auto-select (#51): the desktop opened with two empty panes until you picked a
 // WOD by hand. Prefer today's, else the most recent past day in the visible week,
 // else the first — so the page always lands on the WOD you most likely want.
-function pickDefaultWod(week, sessions, lockedAthName, today) {
+function pickDefaultWod(week, sessions, lockedAthName, today, box) {
   const firstWodOn = dk => {
-    for (const sess of sessionsForDay(sessions, dk, lockedAthName)) {
+    for (const sess of sessionsForDay(sessions, dk, lockedAthName, box)) {
       const wods = wodBlocks(sess)
       if (wods.length) return { sid: sess.id, bid: wods[0].id, dk }
     }
@@ -55,6 +56,7 @@ export default function Results() {
   const [gymName,     setGymName]     = useState('Cone')
   const [weekOffset,  setWeekOffset]  = useState(0)
   const [lockedId]                    = useState(() => new URLSearchParams(location.search).get('id') || '')
+  const [box]                         = useState(() => getBoxScope())
   const [selAth,      setSelAth]      = useState(() => new URLSearchParams(location.search).get('id') || localStorage.getItem('cone_athlete_filter') || '')
   const [expanded,    setExpanded]    = useState(new Set())
   const [logInputs,   setLogInputs]   = useState({})
@@ -124,7 +126,7 @@ export default function Results() {
   useEffect(() => {
     if (status !== 'ok') return
     if (didAutoSelect.current && selWod && week.map(toISO).includes(selWod.dk)) return
-    const pick = pickDefaultWod(week, sessions, lockedAthName, today)
+    const pick = pickDefaultWod(week, sessions, lockedAthName, today, box)
     setSelWod(pick)
     didAutoSelect.current = true
     // Mobile: open the same session. Unlike leaderboard, do NOT require results —
@@ -392,7 +394,7 @@ export default function Results() {
               <div className={styles.calStrip}>
                 {week.map(date => {
                   const dk = toISO(date), isPast = dk < today, isToday = dk === today
-                  const daySess = sessionsForDay(sessions, dk, lockedAthName)
+                  const daySess = sessionsForDay(sessions, dk, lockedAthName, box)
                   const hasWods = daySess.some(s => wodBlocks(s).length > 0)
                   return (
                     <div key={dk} className={`${styles.calDay}${isToday ? ' ' + styles.calDayToday : ''}`}>
@@ -533,7 +535,7 @@ export default function Results() {
             <div className={styles.mobileView}>
               {week.map(date => {
                 const dk = toISO(date), isPast = dk < today, isToday = dk === today
-                const daySess = sessionsForDay(sessions, dk, lockedAthName)
+                const daySess = sessionsForDay(sessions, dk, lockedAthName, box)
                 if (!daySess.length) return null
                 return (
                   <div key={dk} className={`${styles.dayCard}${isToday ? ' ' + styles.dayCardToday : ''}`}>
@@ -577,7 +579,7 @@ export default function Results() {
           </>}
         </main>
       </div>
-      <Nav active="results" lockedId={lockedId} gymName={gymName} />
+      <Nav active="results" lockedId={lockedId} gymName={gymName} box={box} />
     </>
   )
 }

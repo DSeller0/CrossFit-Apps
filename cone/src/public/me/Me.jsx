@@ -5,6 +5,7 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import { mapResultRow } from '../lib/blobTables.js'
 import { toISO, todayISO, fmtDateYear, MONTH_PT_SHORT } from '../lib/week.js'
+import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { WOD_TYPES, blkColor, deriveScale } from '../lib/wod.js'
 import HeroCard from './HeroCard.jsx'
 import KpiStrip from './KpiStrip.jsx'
@@ -43,6 +44,7 @@ export default function Me() {
   const [goalsData, setGoalsData] = useState({ athleteGoals: {}, prs: {} })
   const [registry, setRegistry] = useState({})
   const [selAthlete, setSelAthlete] = useState(null)
+  const [box] = useState(() => getBoxScope())   // per-box view scope (?box=)
   const [query, setQuery] = useState('')
   const [openBlock, setOpenBlock] = useState(null)
   const [openEx, setOpenEx] = useState(null)
@@ -287,7 +289,7 @@ export default function Me() {
     const plannedDates = new Set()
     Object.keys(sessions).forEach(date => {
       if (!date.startsWith(mPrefix)) return
-      ;(sessions[date] || []).filter(s => s.public !== false).forEach(s => {
+      ;(sessions[date] || []).filter(s => s.public !== false && inBoxScope(s, box)).forEach(s => {
         if (matchesAthlete(s, selAthlete.name)) plannedDates.add(date)
       })
     })
@@ -335,14 +337,14 @@ export default function Me() {
 
     // Executed vs planned, by block type.
     const monthStart = `${mPrefix}-01`
-    const wStats = calcBlockStats(sessions, present, selAthlete.name, WOD_TYPES, monthStart, td)
+    const wStats = calcBlockStats(sessions, present, selAthlete.name, WOD_TYPES, monthStart, td, box)
     const wodRows = WOD_TYPES.filter(t => (wStats.planned[t] || 0) > 0).map(t => {
       const pl = wStats.planned[t], ex = Math.min(wStats.executed[t] || 0, pl)
       return { type: t, pl, ex, pct: Math.round(ex / pl * 100), color: blkColor({ type: t }) }
     })
 
     const d90 = new Date(now); d90.setDate(d90.getDate() - 90)
-    const dStats = calcBlockStats(sessions, present, selAthlete.name, DIST_TYPES, toISO(d90), td)
+    const dStats = calcBlockStats(sessions, present, selAthlete.name, DIST_TYPES, toISO(d90), td, box)
     const distRows = DIST_TYPES.filter(t => (dStats.planned[t] || 0) > 0).map(t => {
       const pl = dStats.planned[t], ex = Math.min(dStats.executed[t] || 0, pl)
       return { type: t, pl, ex, pct: Math.round(ex / pl * 100), color: blkColor({ type: t }) }
@@ -466,7 +468,7 @@ export default function Me() {
         </div>
       </div></div>
 
-      <Nav active="me" gymName={gymName} lockedId={selAthlete?.id} />
+      <Nav active="me" gymName={gymName} lockedId={selAthlete?.id} box={box} />
     </>
   )
 }

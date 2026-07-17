@@ -2,6 +2,7 @@ import { toISO, todayISO } from '../lib/week.js'
 import { WOD_TYPES, toSecs, fmtSecs } from '../lib/wod.js'
 import { prBest } from '../lib/goals.js'
 import { getTargets, matchesAthlete } from '../lib/sessions.js'
+import { inBoxScope } from '../lib/boxScope.js'
 
 export { getTargets, matchesAthlete }
 
@@ -63,12 +64,12 @@ export function calcMaxStreak(present) {
 
 // Planned (from the sessions blob) vs executed (from results) block counts per type,
 // inside a date window. Only public sessions the athlete was assigned to count as planned.
-export function calcBlockStats(sessions, present, name, types, start, end) {
+export function calcBlockStats(sessions, present, name, types, start, end, box = null) {
   const ts = new Set(types), planned = {}, executed = {}
   types.forEach(t => { planned[t] = 0; executed[t] = 0 })
   Object.keys(sessions).forEach(date => {
     if (date < start || date > end) return
-    ;(sessions[date] || []).filter(s => s.public !== false).forEach(s => {
+    ;(sessions[date] || []).filter(s => s.public !== false && inBoxScope(s, box)).forEach(s => {
       if (!matchesAthlete(s, name)) return
       ;(s.blocks || []).forEach(b => { if (ts.has(b.type)) planned[b.type]++ })
     })

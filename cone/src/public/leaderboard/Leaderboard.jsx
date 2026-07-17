@@ -12,6 +12,7 @@ import WodCard from './WodCard.jsx'
 import { isWodBlock, deriveScale, rankResults, perfStr } from '../lib/wod.js'
 import { MONTH_PT_SHORT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
 import { BLOB_TABLES, mapResultRow } from '../lib/blobTables.js'
+import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 
 // The lb_colors custom-color system is retired (#51). It predated the 4-theme
 // system and force-wrote --accent onto <html>, which is why this page rendered
@@ -26,11 +27,11 @@ function weekLabelFor(offset) {
 
 // Newest first, and WODs with zero results are dropped — so wodList[0] IS
 // "latest WOD with results", which is what we auto-select.
-function buildWodList(sessions, results) {
+function buildWodList(sessions, results, box) {
   const list = []
   const sessObj = typeof sessions === 'object' && !Array.isArray(sessions) ? sessions : {}
   Object.entries(sessObj).sort(([a], [b]) => b.localeCompare(a)).forEach(([dateKey, daySessions]) => {
-    ;(daySessions || []).filter(sess => sess.public !== false).forEach(sess => {
+    ;(daySessions || []).filter(sess => sess.public !== false && inBoxScope(sess, box)).forEach(sess => {
       ;(sess.blocks || []).filter(isWodBlock).forEach(bl => {
         const count = (results || []).filter(r =>
           r.date === dateKey && r.sessionId === sess.id && r.presence === 'Presente' &&
@@ -94,6 +95,7 @@ export default function Leaderboard() {
   const [scaleFilter, setScaleFilter] = useState('Todos')
   const [error,       setError]       = useState(null)
   const [weekOffset,  setWeekOffset]  = useState(0)
+  const [box] = useState(() => getBoxScope())   // per-box view scope (?box=)
 
   async function load(attempt = 0) {
     try {
@@ -115,7 +117,7 @@ export default function Leaderboard() {
     return () => window.removeEventListener('pageshow', handler)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const wodList = useMemo(() => appState ? buildWodList(appState.sessions, appState.results) : [], [appState])
+  const wodList = useMemo(() => appState ? buildWodList(appState.sessions, appState.results, box) : [], [appState, box])
 
   // Auto-select (#51): the page used to open EMPTY — both panes showed "pick a
   // WOD" until you did. wodList is newest-first and already excludes WODs with no
@@ -162,7 +164,7 @@ export default function Leaderboard() {
           <div className={s.loading} aria-live="polite">Carregando resultados...</div>
         </main>
       </div>
-      <Nav active="leaderboard" gymName={gymName} />
+      <Nav active="leaderboard" gymName={gymName} box={box} />
     </>
   )
 
@@ -183,7 +185,7 @@ export default function Leaderboard() {
           </div>
         </main>
       </div>
-      <Nav active="leaderboard" gymName={gymName} />
+      <Nav active="leaderboard" gymName={gymName} box={box} />
     </>
   )
 
@@ -246,7 +248,7 @@ export default function Leaderboard() {
         </main>
       </div>
 
-      <Nav active="leaderboard" gymName={gymName} />
+      <Nav active="leaderboard" gymName={gymName} box={box} />
     </>
   )
 }

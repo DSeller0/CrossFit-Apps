@@ -6,6 +6,7 @@ import {
   loadAthletes, loadRegistry,
   loadTemplates, saveTemplates,
   loadSettings, saveSettings,
+  loadLocations,
   getTargets,
 } from '../../utils/storage';
 import { APP_CONFIG, ZONES, BTC, PLC, ECOL } from '../../utils/config';
@@ -31,7 +32,7 @@ const emptyBlock = (type = 'For Time') => {
     exercises: [emptyEx()],
   };
 };
-const emptyS = () => ({ id: uid(), date: todayISO(), mainTraining: [], sessionName: '', blocks: [] });
+const emptyS = () => ({ id: uid(), date: todayISO(), mainTraining: [], sessionName: '', locationId: null, blocks: [] });
 
 // Legacy `intensity.mode==='cardio'` exercises carried distance in the load slot (#37).
 // Lazily convert them to the `dist`/`distUnit` siblings on next edit/save — no bulk migration.
@@ -1123,6 +1124,8 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const [recurDone, setRecurDone]           = useState(null);
   const [weekOffset, setWeekOffset]         = useState(0);
   const [weekGridCollapsed, setWeekGridCollapsed] = useState(false);
+  const boxLocs = useMemo(() => loadLocations().filter(l => l.type === 'box'), []);
+  const [selBox, setSelBox]                 = useState('all');   // 'all' | 'none' | <locationId> — grid filter + new-session default
   const [isDirty, setIsDirty]               = useState(false);
   const [showSessNotes, setShowSessNotes]   = useState(false);
   const [undoToast, setUndoToast]           = useState(null);
@@ -1171,6 +1174,12 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     }
     onPreloadConsumed?.();
   }, [preload]);
+
+  // A NEW session inherits the selected box context; editing an existing one never
+  // gets its box clobbered by switching the grid filter.
+  useEffect(() => {
+    if (!editing) setForm(f => ({ ...f, locationId: (selBox === 'all' || selBox === 'none') ? null : selBox }));
+  }, [selBox, editing]);
 
   const startEdit = (s, dateKey) => {
     const targets = getTargets(s);
@@ -1242,7 +1251,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setSessions(prev => {
       const next = { ...prev };
       recurPreviewDates.forEach(dateKey => {
-        const session = { id: uid(), date: dateKey, sessionName: recurringTpl.name, mainTraining: [], blocks: cloneBlocks(recurringTpl.blocks) };
+        const session = { id: uid(), date: dateKey, sessionName: recurringTpl.name, mainTraining: [], locationId: (selBox === 'all' || selBox === 'none') ? null : selBox, blocks: cloneBlocks(recurringTpl.blocks) };
         next[dateKey] = [...(next[dateKey] || []), session];
       });
       return next;
@@ -1401,6 +1410,8 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const weekDates = getSundayWeek(weekOffset);
   const WEEK_DAYS = ['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
   const totalSessions = Object.values(sessions).flat().length;
+  // Box grid filter: 'all' shows everything, 'none' shows only box-less sessions, an id shows that box.
+  const boxFilter = s => selBox === 'all' ? true : selBox === 'none' ? !s.locationId : (s.locationId || null) === selBox;
   const weekLabel = `${weekDates[0].getDate()}/${weekDates[0].getMonth()+1} – ${weekDates[6].getDate()}/${weekDates[6].getMonth()+1}/${weekDates[6].getFullYear()}`;
 
   const athletes = loadAthletes();
@@ -1714,6 +1725,28 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           })}
         </div>
 
+        {/* Box — which location this session belongs to (drives per-box QR scoping) */}
+        {boxLocs.length > 0 && (
+          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span className="lbl" style={{ margin: 0 }}>Box</span>
+            {[{ id: null, name: 'Sem box' }, ...boxLocs].map(b => {
+              const active = (form.locationId || null) === (b.id || null);
+              const accent = b.color || '#806850';
+              return (
+                <button key={b.id || 'none'} type="button"
+                  onClick={() => { setForm(f => ({ ...f, locationId: b.id })); setIsDirty(true); trackSessionField('locationId'); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', fontSize: 11, fontWeight: 700, borderRadius: 4, fontFamily: 'inherit', cursor: 'pointer',
+                    border: `1px solid ${active ? accent : 'var(--div,#2a231c)'}`,
+                    background: active ? `${b.color || '#806850'}1a` : 'transparent',
+                    color: active ? accent : '#554a3a' }}>
+                  {b.id && <span style={{ width: 8, height: 8, borderRadius: '50%', background: b.color || '#555', flexShrink: 0 }} />}
+                  {b.name}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Session notes */}
         <div style={{ marginTop: 6 }}>
           <button type="button" className="blk-adv-toggle" onClick={() => setShowSessNotes(v => !v)}>
@@ -1818,11 +1851,30 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
               <i className={`ti ti-layout-${weekGridCollapsed ? 'rows' : 'navbar'}`} />
             </button>
           </div>
+          {/* Box context selector — filters the grid + sets the box new sessions inherit. Scrollable so any N boxes fit. */}
+          {boxLocs.length > 0 && (
+            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 6, marginBottom: 4 }}>
+              {[{ id: 'all', name: 'Todos', color: '#806850' }, { id: 'none', name: 'Sem box', color: '#554a3a' }, ...boxLocs].map(b => {
+                const on = selBox === b.id;
+                const accent = b.color || 'var(--theme-accent)';
+                return (
+                  <button key={b.id} type="button" onClick={() => setSelBox(b.id)}
+                    style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 5, fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap',
+                      border: `1px solid ${on ? accent : '#2a231c'}`,
+                      background: on ? `${b.color || '#4ac8c0'}1a` : 'transparent',
+                      color: on ? accent : '#806850' }}>
+                    {b.id !== 'all' && b.id !== 'none' && <span style={{ width: 8, height: 8, borderRadius: '50%', background: b.color || '#555', flexShrink: 0 }} />}
+                    {b.name}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           {weekGridCollapsed ? (
             <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 4 }}>
               {weekDates.map((date, di) => {
                 const dateKey = toISO(date);
-                const list = sessions[dateKey] || [];
+                const list = (sessions[dateKey] || []).filter(boxFilter);
                 const isToday = dateKey === todayISO();
                 const isEditing = (sessions[dateKey] || []).some(s => s.id === editing?.id);
                 return (
@@ -1841,7 +1893,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
             <div className="week-grid">
               {weekDates.map((date, di) => {
                 const dateKey = toISO(date);
-                const list = sessions[dateKey] || [];
+                const list = (sessions[dateKey] || []).filter(boxFilter);
                 return (
                   <div key={dateKey} className="wg-col">
                     <div className="wg-head">

@@ -14,10 +14,20 @@ const TABS = [
   { key: 'timer',       href: 'timer.html',       icon: '⏱️', label: 'Timer',      lockable: false, desktopOnly: true  },
 ]
 
-export default function Nav({ active, lockedId, gymName = '' }) {
+export default function Nav({ active, lockedId, gymName = '', box = null }) {
   const [ovOpen, setOvOpen] = useState(false)
 
   if (isNavHidden()) return null
+
+  // Carry the athlete lock (?id=) and the box scope (?box=) across public pages so a
+  // scoped/shared link keeps its filter as the user navigates.
+  const hrefFor = tab => {
+    const p = new URLSearchParams()
+    if (lockedId && tab.lockable) p.set('id', lockedId)
+    if (box) p.set('box', box)
+    const qs = p.toString()
+    return qs ? `${tab.href}?${qs}` : tab.href
+  }
 
   return (
     <>
@@ -56,7 +66,7 @@ export default function Nav({ active, lockedId, gymName = '' }) {
         {/* Tab row */}
         <div className={s.tabRow}>
           {TABS.map((tab, i) => {
-            const href = lockedId && tab.lockable ? `${tab.href}?id=${lockedId}` : tab.href
+            const href = hrefFor(tab)
             return (
               <Fragment key={tab.key}>
                 {i > 0 && <div className={s.sep} />}
