@@ -1,5 +1,7 @@
 # 24 — #70 · SPA canonical adoption
 
+> ✅ Done: `068d3a0` `19f35d7` · 2026-07-17 — see BACKLOG.md
+
 ## Context
 
 Five sessions (#16/#37/#48/#51/#52) canonicalized the **public** side into `src/public/lib/**`. The **SPA never adopted any of it**. Most of the forks are tidiness — but one is a live functional bug, and it is bigger than the backlog row says.
