@@ -46,8 +46,12 @@ function calcKPIs(athleteId, results) {
   const freq = ar.length > 0 ? Math.round(present / ar.length * 100) : 0;
   const rpes = ar.flatMap(r => r.blocks?.map(b => b.rpe).filter(Boolean) || []);
   const avgRpe = rpes.length > 0 ? (rpes.reduce((a,b) => a+b,0) / rpes.length).toFixed(1) : null;
+  // Only scales an athlete actually chose count (plans/22 rules 1, 3, 5): a null
+  // (never-picked, or nulled pre-#61 fabricated) scale is dropped from both sides,
+  // so the rate is — until a real one exists, never a flattering 0% or a fake RX.
   const scales = ar.flatMap(r => r.blocks?.map(b => b.scale).filter(Boolean) || []);
-  const rxRate = scales.length > 0 ? Math.round(scales.filter(s => s==='RX').length / scales.length * 100) : null;
+  const rxCount = scales.filter(s => s==='RX').length;
+  const rxRate = scales.length > 0 ? Math.round(rxCount / scales.length * 100) : null;
   const loadMap = {};
   ar.forEach(r => { r.blocks?.forEach(b => { if (b.exerciseName && b.load) { if (!loadMap[b.exerciseName]) loadMap[b.exerciseName]=[]; loadMap[b.exerciseName].push({date:r.date,load:parseFloat(b.load)}); } }); });
   let loadTrend = null;
@@ -59,7 +63,7 @@ function calcKPIs(athleteId, results) {
     }
   });
   const lastRpes = ar.slice(-8).map(r => { const rs=r.blocks?.map(b=>b.rpe).filter(Boolean)||[]; return rs.length>0?rs.reduce((a,b)=>a+b,0)/rs.length:null; }).filter(Boolean);
-  return { freq, avgRpe, rxRate, loadTrend, lastRpes, totalSessions: present };
+  return { freq, avgRpe, rxRate, rxCount, scaleCount: scales.length, loadTrend, lastRpes, totalSessions: present };
 }
 
 function calcSessionKPIs(dateKey, results) {
@@ -70,9 +74,11 @@ function calcSessionKPIs(dateKey, results) {
   const allScales = sr.flatMap(r => r.blocks?.map(b=>b.scale).filter(Boolean)||[]);
   const scaleDist = {RX:0,Inter:0,SC:0,Adaptado:0};
   allScales.forEach(s => { if (scaleDist[s]!==undefined) scaleDist[s]++; });
-  const rxPct = allScales.length>0 ? Math.round(scaleDist.RX/allScales.length*100) : 0;
+  // null (not 0%) with no real scales — 0% reads as "logged, all scaled" and its
+  // colour threshold would score no-data as "bad" (plans/22 rules 1, 5).
+  const rxPct = allScales.length>0 ? Math.round(scaleDist.RX/allScales.length*100) : null;
   const flags = sr.filter(r=>r.flagForReview).length;
-  return {avgRpe,rxPct,scaleDist,flags,count:sr.length};
+  return {avgRpe,rxPct,scaleDist,scaleTotal:allScales.length,flags,count:sr.length};
 }
 
 
@@ -609,7 +615,7 @@ function HistoryView({ athletes, sessions, results }) {
                 <KpiCard label="RPE médio" value={athleteKPIs.avgRpe||'—'} sub="Média de esforço percebido" colorClass={athleteKPIs.avgRpe?athleteKPIs.avgRpe<=7?'kpi-good':athleteKPIs.avgRpe<=8.5?'kpi-warn':'kpi-bad':''}>
                   {athleteKPIs.lastRpes.length>0&&<div style={{marginTop:8}}><SparkLine values={athleteKPIs.lastRpes}/></div>}
                 </KpiCard>
-                <KpiCard label="Taxa RX" value={athleteKPIs.rxRate!==null?`${athleteKPIs.rxRate}%`:'—'} sub="Sessões completadas como RX" colorClass={athleteKPIs.rxRate!==null?athleteKPIs.rxRate>=60?'kpi-good':athleteKPIs.rxRate>=30?'kpi-warn':'kpi-bad':''} />
+                <KpiCard label="Taxa RX" value={athleteKPIs.rxRate!==null?`${athleteKPIs.rxRate}%`:'—'} sub={athleteKPIs.rxRate!==null?`RX em ${athleteKPIs.rxCount} de ${athleteKPIs.scaleCount} escalas`:'Registre uma escala real'} colorClass={athleteKPIs.rxRate!==null?athleteKPIs.rxRate>=60?'kpi-good':athleteKPIs.rxRate>=30?'kpi-warn':'kpi-bad':''} />
                 {athleteKPIs.loadTrend&&<KpiCard label="Evolução de carga" value={`${athleteKPIs.loadTrend.diff>0?'+':''}${athleteKPIs.loadTrend.diff}%`} sub={`${athleteKPIs.loadTrend.name} · ${athleteKPIs.loadTrend.first}→${athleteKPIs.loadTrend.last}kg`} colorClass={athleteKPIs.loadTrend.diff>0?'kpi-good':athleteKPIs.loadTrend.diff<0?'kpi-bad':'kpi-warn'} />}
               </div>
               <div className="sc-card">
@@ -668,9 +674,9 @@ function HistoryView({ athletes, sessions, results }) {
             <div>
               <div className="kpi-grid">
                 <KpiCard label="RPE médio da turma" value={sessionKPIs.avgRpe||'—'} sub={`${sessionKPIs.count} atletas presentes`} colorClass={sessionKPIs.avgRpe?sessionKPIs.avgRpe<=7?'kpi-good':sessionKPIs.avgRpe<=8.5?'kpi-warn':'kpi-bad':''} />
-                <KpiCard label="Taxa RX" value={`${sessionKPIs.rxPct}%`} sub="Das escalas registradas" colorClass={sessionKPIs.rxPct>=60?'kpi-good':sessionKPIs.rxPct>=30?'kpi-warn':'kpi-bad'} />
+                <KpiCard label="Taxa RX" value={sessionKPIs.rxPct!==null?`${sessionKPIs.rxPct}%`:'—'} sub={sessionKPIs.rxPct!==null?`RX em ${sessionKPIs.scaleDist.RX} de ${sessionKPIs.scaleTotal} escalas`:'Sem escalas registradas'} colorClass={sessionKPIs.rxPct!==null?(sessionKPIs.rxPct>=60?'kpi-good':sessionKPIs.rxPct>=30?'kpi-warn':'kpi-bad'):''} />
                 <KpiCard label="Flags" value={sessionKPIs.flags} sub="Atletas marcados para revisão" colorClass={sessionKPIs.flags===0?'kpi-good':sessionKPIs.flags<=2?'kpi-warn':'kpi-bad'} />
-                <KpiCard label="Distribuição de escala" value={`${sessionKPIs.scaleDist.RX} RX`} sub={`${sessionKPIs.scaleDist.Inter} Inter · ${sessionKPIs.scaleDist.SC} SC · ${sessionKPIs.scaleDist.Adaptado} Adap`} />
+                <KpiCard label="Distribuição de escala" value={sessionKPIs.scaleTotal>0?`${sessionKPIs.scaleDist.RX} RX`:'—'} sub={sessionKPIs.scaleTotal>0?`${sessionKPIs.scaleDist.Inter} Inter · ${sessionKPIs.scaleDist.SC} SC · ${sessionKPIs.scaleDist.Adaptado} Adap`:'Sem escalas registradas'} />
               </div>
               {sessionResults.length>0&&(
                 <div className="sc-card">

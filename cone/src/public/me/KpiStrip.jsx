@@ -29,7 +29,7 @@ export default function KpiStrip({ pd }) {
         <div className={`${styles.kpiV} ${styles.kpiVSub}`}>{pd.rxRate !== null ? pd.rxRate + '%' : '—'}</div>
         <div className={styles.kpiL}>Taxa RX</div>
         <div className={styles.kpiSub}>
-          {pd.rxDelta !== null ? (pd.rxDelta >= 0 ? '↑' : '↓') + ' ' + Math.abs(pd.rxDelta) + '% vs mês ant.' : ''}
+          {pd.rxRate === null ? 'Registre um WOD' : `RX em ${pd.rxCount} de ${pd.rxTotal} WODs`}
         </div>
       </div>
     </div>

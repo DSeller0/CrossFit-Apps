@@ -33,7 +33,7 @@ function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
   const scale = liveReg.liveScales[m.key] ?? 'Rx'
 
   function startEdit() {
-    setDraft({ perfTime: m.entry.perfTime || '', scale: m.entry.scale || 'Rx' })
+    setDraft({ perfTime: m.entry.perfTime || '', scale: m.entry.scale || null })
     setEditing(true)
   }
   async function saveEdit() {
@@ -73,7 +73,7 @@ function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
       </span>
       {m.entry ? (
         <>
-          <span className={st.pill}>{m.entry.scale || 'RX'}</span>
+          <span className={st.pill}>{m.entry.scale || '—'}</span>
           <span className={`${st.perf} ${!m.entry.perfTime && !m.entry.perfRounds ? st.empty : ''}`}>
             {perfStr(m.entry, timerType)}
           </span>

@@ -311,7 +311,7 @@ export function ResultsSlide({ tv, sessions, athletes, results, classExecs }) {
                     <div className={s.podiumMedal}>{MEDALS[rank-1]}</div>
                     <div className={s.podiumName}>{r.athleteName}</div>
                     <div className={s.podiumPerf}>{perfStr(r, selBl.type)}</div>
-                    <div className={s.podiumScale}>{r.scale || 'RX'}</div>
+                    <div className={s.podiumScale}>{r.scale || '—'}</div>
                   </div>
                 )
               })}
@@ -322,7 +322,7 @@ export function ResultsSlide({ tv, sessions, athletes, results, classExecs }) {
                   <div key={i} className={s.restRow}>
                     <span className={s.restRank}>#{i+4}</span>
                     <span className={s.restName}>{r.athleteName}</span>
-                    <span className={s.restScale}>{r.scale || 'RX'}</span>
+                    <span className={s.restScale}>{r.scale || '—'}</span>
                     <span className={s.restPerf}>{perfStr(r, selBl.type)}</span>
                   </div>
                 ))}
@@ -377,7 +377,7 @@ export function ResultsSlide({ tv, sessions, athletes, results, classExecs }) {
                   <div className={s.podiumMedal}>{MEDALS[rank - 1]}</div>
                   <div className={s.podiumName}>{r.athleteName}</div>
                   <div className={s.podiumPerf}>{perfStr(r, selBl.type)}</div>
-                  <div className={s.podiumScale}>{r.scale || 'RX'}</div>
+                  <div className={s.podiumScale}>{r.scale || '—'}</div>
                 </div>
               )
             })}
@@ -389,7 +389,7 @@ export function ResultsSlide({ tv, sessions, athletes, results, classExecs }) {
                 <div key={i} className={s.restRow}>
                   <span className={s.restRank}>#{i + 4}</span>
                   <span className={s.restName}>{r.athleteName}</span>
-                  <span className={s.restScale}>{r.scale || 'RX'}</span>
+                  <span className={s.restScale}>{r.scale || '—'}</span>
                   <span className={s.restPerf}>{perfStr(r, selBl.type)}</span>
                 </div>
               ))}

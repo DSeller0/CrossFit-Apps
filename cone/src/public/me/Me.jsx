@@ -302,17 +302,15 @@ export default function Me() {
     // KPIs. Scales go through canonical deriveScale() (lib/wod.js) rather than reading
     // the flat blk.scale directly — same reader as results/leaderboard, and it's the
     // one that gets legacy rows (which carry per-exercise scales) right.
+    // Count only scales an athlete actually chose. A null (never-picked) scale is
+    // excluded from both numerator and denominator — deriveScale maps it to '-',
+    // which scalesOf filters out — so the rate is — (not a flattering 0% or a fake
+    // RX) until a real scale exists (plans/22 rules 1, 3, 5). The caption states the
+    // denominator so a thin one is visible rather than hidden behind a bare %.
     const scalesOf = rs => rs.flatMap(r => (r.blocks || []).map(b => deriveScale(b)).filter(s => s && s !== '-'))
     const allScales = scalesOf(present)
-    const rxRate = allScales.length
-      ? Math.round(allScales.filter(s => s === 'RX').length / allScales.length * 100)
-      : null
-    const lastMP = new Date(nowY, nowM - 2, 1)
-    const lastMPfx = `${lastMP.getFullYear()}-${String(lastMP.getMonth() + 1).padStart(2, '0')}`
-    const lastMScales = scalesOf(present.filter(r => r.date.startsWith(lastMPfx)))
-    const lastMRx = lastMScales.length
-      ? Math.round(lastMScales.filter(s => s === 'RX').length / lastMScales.length * 100)
-      : null
+    const rxCount = allScales.filter(s => s === 'RX').length
+    const rxRate = allScales.length ? Math.round(rxCount / allScales.length * 100) : null
 
     // Recent sessions
     const prDateSet = new Set(prs.flatMap(p => (p.results || []).map(r => r.date)))
@@ -356,8 +354,7 @@ export default function Me() {
       streak: calcStreak(present), maxStreak: calcMaxStreak(present),
       totalPrs: prs.length,
       prsThisMon: prs.filter(p => p.results?.some(r => r.date?.startsWith(mPrefix))).length,
-      rxRate,
-      rxDelta: rxRate !== null && lastMRx !== null ? rxRate - lastMRx : null,
+      rxRate, rxCount, rxTotal: allScales.length,
       recSess,
       events: buildEvents(prs, goals),
       goals,

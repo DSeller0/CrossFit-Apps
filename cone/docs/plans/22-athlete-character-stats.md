@@ -26,9 +26,9 @@ Evidence: the migrations, every write path in `src/`, and the **real production 
 
 | | Real prod |
 |---|---|
-| Athletes | **9** (all `level: Competidor`; all `since` = 2026-06-15, the install date — so neither field discriminates) |
+| Athletes | **14** as of 2026-07-16 — 9 real `mqfj*` + `Atleta00–03` test accounts + Paulo (the 2026-06-24 snapshot had 9). All `level: Competidor`; all `since` = 2026-06-15, the install date — so neither field discriminates. (re-counted by #75) |
 | Sessions | 15 · **79 blocks · 214 prescribed exercises** (37% carry an `intensity`) |
-| **Results** | **2 rows — and both belong to athlete ids not in the 9-athlete list.** Leftover test accounts. **Effectively zero real results.** |
+| **Results** | `results_v2` holds **5 rows / 11 blocks**: **3 real** (all Arthur) + **2 orphan test rows** (owners not in the roster). **5 of the 11 blocks were fabricated** `RX @ RPE 7` with no perf — retired by #75. The old "2 rows" figure **counted the wrong table**: `backup-supabase.mjs` dumps only the single-row blobs (`.eq('id',1)`) and never `results_v2`, so the "2" was the retired v1 `results` blob. Re-audited live 2026-07-16. |
 | PRs | 3, across 2 athletes (one real). All 3 have a target. |
 | Goals / milestones | 1 empty goal · **0 milestones** |
 | Registry | 146 entries · **`muscles` 144/144 = 100%** · `description` 100% · `defaults` **0%** |
@@ -100,6 +100,7 @@ Only now do the bars mean something.
 2. Bounded 0–100 **by its own definition** — a ratio of things we counted, never a magic constant like `×20`.
 3. The caption says **what it counted** (`"RX em 7 de 9 WODs"`), not just a percentage.
 4. **The bar must move when the athlete trains.** A bar only a coach can move is a report card, not a character sheet.
+5. **Never count a fabricated value.** Rules 1–4 assume *missing = null*. A pre-#61 `RX @ 7` is **not** null — it is a value, so it sails through rule 1 and lands in rule 3's caption as a counted fact. A bar must count only values a human actually chose. (#75 nulled the pre-#61 defaults in `results_v2` and closed the render-time `|| 'RX'` re-fabrication in `slides.jsx`/`ClassPanel.jsx` — without which rule 3's `"RX em 7 de 9 WODs"` would be a lie stated confidently.)
 
 Renders on the **shared segmented-bar component** #52 extracts (today the same 10-segment bar idea exists in three copies: `Athletes.jsx`'s `BlockBar`/`StatRow`, `Atletas.jsx`'s `HpBar`, and me.html's goal bars).
 
@@ -107,7 +108,7 @@ Renders on the **shared segmented-bar component** #52 extracts (today the same 1
 
 Steps 1–4 are **~4 sessions** before a single bar renders. Two things make that acceptable:
 - **Every step pays for itself independently.** Step 1 fixes a live leaderboard corruption and a silent coach-data-loss bug. Step 2 fixes demo videos, ghost defaults and PR tagging. Step 3 delivers #19, already on the board. Step 4 is a feature the gym wants on its own merits.
-- **The gym logs ~nothing today** (2 test rows in prod). Shipping bars now would render five dashes for all 9 athletes. **The capture work *is* the feature.**
+- **The gym logs almost nothing today** — `results_v2` has just **3 real rows, all Arthur's** (#75's live audit; the "2 test rows" folklore counted the retired v1 `results` blob, which `backup-supabase.mjs` dumps instead of `results_v2`). Shipping bars now would render five dashes for all 14 athletes. **The capture work *is* the feature.**
 
 ## Acceptance (of the card, at the end of the chain)
 

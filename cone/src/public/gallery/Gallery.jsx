@@ -287,7 +287,7 @@ const mePd = {
   hearts: ['full','full','full','full','full','full','full','today','empty','empty','empty','empty'],
   heartTotal: 12, thisMon: 8, totalSess: 143,
   streak: 4, maxStreak: 11, totalPrs: 9, prsThisMon: 2,
-  rxRate: 72, rxDelta: 6,
+  rxRate: 72, rxCount: 13, rxTotal: 18,
   sinceStr: '14 Mar 2025', days: 486,
 }
 // The "nothing yet" athlete — the state a new member actually lands in.
@@ -295,7 +295,7 @@ const mePdEmpty = {
   ...mePd, color: '#48b860',
   hearts: Array(12).fill('empty'), thisMon: 0, totalSess: 0,
   streak: 0, maxStreak: 0, totalPrs: 0, prsThisMon: 0,
-  rxRate: null, rxDelta: null, sinceStr: '', days: 0,
+  rxRate: null, rxCount: 0, rxTotal: 0, sinceStr: '', days: 0,
 }
 
 const meSessRows = [
@@ -798,7 +798,7 @@ export const GROUPS = [
             <Case label="Com sequência ativa e Taxa RX em alta"><KpiStrip pd={mePd} /></Case>
             <Case label="Sem sequência · Taxa RX sem dados (— e não 0%)"><KpiStrip pd={mePdEmpty} /></Case>
             <Case label="Recorde de sequência maior que a atual"><KpiStrip pd={{ ...mePd, streak: 2, maxStreak: 11 }} /></Case>
-            <Case label="Taxa RX em queda"><KpiStrip pd={{ ...mePd, rxRate: 41, rxDelta: -13 }} /></Case>
+            <Case label="Taxa RX com denominador fino (mostra o que contou)"><KpiStrip pd={{ ...mePd, rxRate: 50, rxCount: 1, rxTotal: 2 }} /></Case>
           </Section>
         ),
       },
