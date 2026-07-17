@@ -1,9 +1,9 @@
-import { groupProgressionSteps, isWodBlock } from '../lib/wod.js'
+import { groupProgressionSteps, isWodBlock, SCALES } from '../lib/wod.js'
 
 // Shared by Schedule.jsx and its extracted schedule/ components (#17) — one
 // canonical copy so extraction can't drift the same helper two ways.
 
-export const LOG_SCALES = ['RX', 'Inter', 'SC', 'Adaptado']
+export const LOG_SCALES = SCALES
 
 export function isRoundBlock(bl) { return !isWodBlock(bl) && Number(bl.rounds) > 0 }
 

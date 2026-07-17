@@ -1,6 +1,5 @@
 import { useState } from 'react'
-
-const TIMER_TYPES = ['For Time', 'AMRAP', 'EMOM', 'Benchmark']
+import { TIMER_TYPES } from '../public/lib/wod.js'
 
 export function useTimer({ tv, tvRef, push }) {
   const [timerType,  setTimerType]  = useState('For Time')

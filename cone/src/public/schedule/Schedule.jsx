@@ -5,6 +5,8 @@ import { registerSW } from '../registerSW.js'
 import styles from './Schedule.module.css'
 import { MONTH_PT, DAY_PT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
 import { uid, blkLabel, isWodBlock, blkColor } from '../lib/wod.js'
+import { getTargets } from '../lib/sessions.js'
+import { prBest } from '../lib/goals.js'
 import { isRoundBlock, progGroups, parseDurMins, onKey } from './scheduleHelpers.js'
 import DemoPanel from './DemoPanel.jsx'
 import LogPane from './LogPane.jsx'
@@ -14,10 +16,6 @@ import BlockDetail from './BlockDetail.jsx'
 import CheckinSheet from './CheckinSheet.jsx'
 
 // ── Pure helpers ──────────────────────────────────────────────────────────────
-function prBest(pr) {
-  if(!pr?.results?.length)return null
-  return pr.results.reduce((b,r)=>Number(r.value)>Number(b.value)?r:b)
-}
 function buildDemoMap(registry) {
   const map={}
   if(!registry||typeof registry!=='object')return map
@@ -202,11 +200,6 @@ export default function Schedule() {
       if(attempt<2){setTimeout(()=>load(attempt+1),2000*(attempt+1));return}
       setErrMsg(e.message);setStatus('error')
     }
-  }
-
-  function getTargets(s){
-    if(!s?.mainTraining)return[]
-    return Array.isArray(s.mainTraining)?s.mainTraining:[s.mainTraining]
   }
 
   function sessionsForDay(dateKey){

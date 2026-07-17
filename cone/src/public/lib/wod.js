@@ -3,6 +3,12 @@ export function uid() { return Date.now().toString(36)+Math.random().toString(36
 export const WOD_TYPES=['For Time','AMRAP','EMOM','MetCon','HIIT','WOD','Benchmark','Estações']
 export function isWodBlock(bl){ return WOD_TYPES.includes(bl.type)||WOD_TYPES.includes(bl.label) }
 
+// The WOD types a timer can drive — a semantic subset of WOD_TYPES, not derived
+// from it (EMOM/AMRAP/For Time/Benchmark have a duration or cap; MetCon/HIIT/WOD/
+// Estações don't map to a single timer shape). TvController.jsx and useTimer.js
+// both hand-rolled this identically before consolidation.
+export const TIMER_TYPES=['For Time','AMRAP','EMOM','Benchmark']
+
 const BLOCK_FAMILY={
   'WOD':'red','HIIT':'red','MetCon':'red',
   'For Time':'amber','AMRAP':'amber','EMOM':'amber','Benchmark':'amber','Estações':'amber',

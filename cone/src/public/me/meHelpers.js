@@ -1,6 +1,9 @@
 import { toISO, todayISO } from '../lib/week.js'
 import { WOD_TYPES, toSecs, fmtSecs } from '../lib/wod.js'
 import { prBest } from '../lib/goals.js'
+import { getTargets, matchesAthlete } from '../lib/sessions.js'
+
+export { getTargets, matchesAthlete }
 
 // me.html's pure helpers, pulled out of the 907-line Me.jsx (#52) so that the
 // component split can't fork them — same move as schedule/scheduleHelpers.js (#50)
@@ -17,13 +20,6 @@ export const PR_SKIP = new Set(['-','Aquecimento','Descanso',...WOD_TYPES])
 export function initials(n) {
   return n.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase()
 }
-
-export function getTargets(s) {
-  if (!s?.mainTraining) return []
-  return Array.isArray(s.mainTraining) ? s.mainTraining : [s.mainTraining]
-}
-
-export function matchesAthlete(s, name) { return getTargets(s).includes(name) }
 
 export function prValLabel(val, pr) {
   if (pr.type === 'load') return val + ' ' + (pr.unit || 'kg')

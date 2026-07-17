@@ -1,17 +1,6 @@
-export function rowToResult(r) {
-  return {
-    id:              r.id,
-    date:            r.date,
-    athleteId:       r.athlete_id,
-    sessionId:       r.session_id,
-    presence:        r.presence,
-    energyLevel:     r.energy_level,
-    blocks:          r.blocks,
-    coachNote:       r.coach_note,
-    flagForReview:   r.flag_for_review,
-    loggedByAthlete: r.logged_by_athlete,
-  };
-}
+import { mapResultRow } from '../public/lib/blobTables.js';
+
+export { mapResultRow as rowToResult };
 
 export function resultToRow(r) {
   return {

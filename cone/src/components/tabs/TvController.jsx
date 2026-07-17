@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../../utils/supabase'
 import { loadLS, loadAthletes, toISO } from '../../utils/storage'
-import { blkLabel, blkColor, isWodBlock, fmtSecs } from '../../public/lib/wod.js'
+import { blkLabel, blkColor, isWodBlock, fmtSecs, TIMER_TYPES } from '../../public/lib/wod.js'
 import { DAY_PT_TITLE } from '../../public/lib/week.js'
 import { WodSlide, TimerSlide, ResultsSlide, QrSlide } from '../../public/tv/slides.jsx'
 import { useTvSync }           from '../../hooks/useTvSync'
@@ -20,7 +20,6 @@ const SLIDES     = [
   { id: 'results', icon: 'ti-trophy',     lbl: 'Resultados' },
   { id: 'qr',      icon: 'ti-qrcode',     lbl: 'QR Code' },
 ]
-const TIMER_TYPES = ['For Time', 'AMRAP', 'EMOM', 'Benchmark']
 
 function sessLabel(s) {
   return s.sessionName || (Array.isArray(s.mainTraining) ? s.mainTraining[0] : s.mainTraining) || 'Sessão'
