@@ -1075,6 +1075,14 @@ export const GROUPS = [
                   onSubmit={NOOP} onClose={NOOP} lockedAthName="" />
               </FixedFrame>
             </Case>
+            <Case label="Formulário · RPE + Escala selecionados (#78)">
+              <FixedFrame variant="frameSide">
+                <LogPane pane={{ sess: logPaneSess, dateKey: '2026-07-11', assignedAth: logPaneAthletes }} athId="a1" onAthId={NOOP}
+                  blocks={logPaneBlockDone} onBlocks={NOOP}
+                  submitting={false} success={false} error="" confirming={false} onConfirming={NOOP}
+                  onSubmit={NOOP} onClose={NOOP} lockedAthName="" />
+              </FixedFrame>
+            </Case>
             <Case label="Revisão (confirmar)">
               <FixedFrame variant="frameSide">
                 <LogPane pane={{ sess: logPaneSess, dateKey: '2026-07-11', assignedAth: logPaneAthletes }} athId="a1" onAthId={NOOP}
@@ -1109,6 +1117,11 @@ export const GROUPS = [
           <Section title="DeskRegPane" sub="src/public/schedule/DeskRegPane.jsx — painel de registro desktop (3ª coluna)">
             <Case label="Formulário · For Time">
               <DeskRegPane regBl={deskRegBlFixture} step="form" scale={null} rpe={null} perfTime="" perfRounds="" perfReps="" athName="Bruna"
+                onScale={NOOP} onRpe={NOOP} onPerfTime={NOOP} onPerfRounds={NOOP} onPerfReps={NOOP}
+                onConfirm={NOOP} onSubmit={NOOP} onBack={NOOP} onClose={NOOP} submitting={false} error="" />
+            </Case>
+            <Case label="Formulário · RPE + Escala selecionados (#78)">
+              <DeskRegPane regBl={deskRegBlFixture} step="form" scale="RX" rpe={7} perfTime="12:34" perfRounds="" perfReps="" athName="Bruna"
                 onScale={NOOP} onRpe={NOOP} onPerfTime={NOOP} onPerfRounds={NOOP} onPerfReps={NOOP}
                 onConfirm={NOOP} onSubmit={NOOP} onBack={NOOP} onClose={NOOP} submitting={false} error="" />
             </Case>
