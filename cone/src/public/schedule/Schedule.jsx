@@ -298,7 +298,7 @@ export default function Schedule() {
     }else{
       exercises=(bl.exercises||[]).filter(e=>e.name||e.isComplex).map(e=>({name:e.isComplex?(e.name||(e.complexMovements||[]).map(m=>m.name).filter(Boolean).join(' + ')):e.name,sets:e.sets,reps:e.reps}))
     }
-    const config={blockType:bl.type||bl.label,blockLabel:(bl.label&&bl.label!==bl.type&&bl.label!=='-')?bl.label:(bl.label||bl.type||'WOD'),timeCap:bl.duration?parseInt(bl.duration):null,rounds:bl.rounds||bl.stationRepeat||null,exercises,sessionId:sess.id,sessionDate:dateKey,athleteId:ath?.id||null,blockId:bl.id,stationTime,transitionTime}
+    const config={blockType:bl.type||bl.label,blockLabel:(bl.label&&bl.label!==bl.type&&bl.label!=='-')?bl.label:(bl.label||bl.type||'WOD'),timeCap:bl.duration?parseInt(bl.duration):null,rounds:bl.rounds||bl.stationRepeat||null,exercises,sessionId:sess.id,sessionDate:dateKey,athleteId:ath?.id||null,blockId:bl.id,stationTime,transitionTime,countdown:true}
     try{localStorage.setItem('timer_config',JSON.stringify(config));localStorage.removeItem('timer_state')}catch(e){}
     location.href='timer.html?src=sched'
   }

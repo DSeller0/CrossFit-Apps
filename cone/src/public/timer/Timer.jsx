@@ -269,7 +269,7 @@ export default function Timer() {
   }
 
   function handleStart() {
-    if (cfg.countdown) enterGetReady()
+    if (cfg.countdown ?? true) enterGetReady()
     else startTimer()
   }
 
@@ -669,6 +669,13 @@ export default function Timer() {
               ))}
             </div>
           )}
+          <div className={s.pillRow}>
+            <div
+              className={`${s.pillOpt}${(cfg.countdown ?? true) ? ' ' + s.pillOptActive : ''}`}
+              onClick={() => setCfg(c => ({ ...c, countdown: !(c.countdown ?? true) }))}>
+              ⏱ Contagem regressiva 10s
+            </div>
+          </div>
           {renderRecentes(false)}
         </div>
         <div className={s.ctrl}>
