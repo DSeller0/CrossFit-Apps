@@ -1,5 +1,7 @@
 # 25 — #75 · Retire the fabricated rpe/scale data
 
+> ✅ Done (code + docs): `9c28d60` — render/write leaks closed, aggregates count only real values, plans/22 corrected + rule 5 added. **Data null pending one hand-run dashboard SQL** (dry-run-verified on the local stack: DELETE 2 orphan rows, null 5 perf-less blocks across 2 of Arthur's rows, 1 real row untouched). Fully closed once that SQL runs on prod.
+
 ## Context
 
 Until #61(a) (2026-07-16, `6a9a103`) every log form pre-selected `scale:'RX'` and `rpe:7`, so an untouched form silently recorded a fake RX @ RPE 7. #61(a) stopped new corruption but **never marked or cleaned what was already written**. Measured on the prod snapshot: **5/11 blocks** carry the signature (`rpe:7` + `RX` + no perf at all), **10/11 blocks** are `rpe=7`, **5/5 rows** are `energy_level=3`.
