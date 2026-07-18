@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="description" content="Cone — Treinos do dia"/>
-<meta name="theme-color" content="#4ac8c0"/>
+<meta name="theme-color" content="#161210"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -14,19 +14,23 @@
 <link rel="manifest" href="/CrossFit-Apps/assets/manifest-C9WEBRHd.json"/>
 <title>Team Medrado Cross Training</title>
 <script>!function(){var t=localStorage.getItem('cone_theme')||'totk-dark';document.documentElement.classList.add('theme-'+t)}();</script>
+<!-- theme-color follows the active theme's --stone (the sticky header bg). The
+     stylesheet above is render-blocking, so --stone is resolved by the time this runs;
+     the static #161210 above is the no-JS fallback. (#53) -->
+<script>!function(){var c=getComputedStyle(document.documentElement).getPropertyValue('--stone').trim(),m=document.querySelector('meta[name=theme-color]');if(m&&c)m.setAttribute('content',c)}();</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh}
 @media(max-width:699px){body{padding-bottom:64px}}
 </style>
-  <script type="module" crossorigin src="/CrossFit-Apps/assets/index-MfksSNru.js"></script>
+  <script type="module" crossorigin src="/CrossFit-Apps/assets/index-DcBv2F9T.js"></script>
   <link rel="modulepreload" crossorigin href="/CrossFit-Apps/assets/jsx-runtime-DsL4AG8h.js">
   <link rel="modulepreload" crossorigin href="/CrossFit-Apps/assets/week-CEntm94U.js">
-  <link rel="modulepreload" crossorigin href="/CrossFit-Apps/assets/Nav-TSX9xBGK.js">
+  <link rel="modulepreload" crossorigin href="/CrossFit-Apps/assets/Nav-K8gCVJr_.js">
   <link rel="modulepreload" crossorigin href="/CrossFit-Apps/assets/boxScope-1w-Ui7SK.js">
   <link rel="stylesheet" crossorigin href="/CrossFit-Apps/assets/jsx-runtime-DyVM2Xmw.css">
-  <link rel="stylesheet" crossorigin href="/CrossFit-Apps/assets/Nav-uH1Ti7qX.css">
-  <link rel="stylesheet" crossorigin href="/CrossFit-Apps/assets/index-OYzdCMT1.css">
+  <link rel="stylesheet" crossorigin href="/CrossFit-Apps/assets/Nav-_2zK7JOW.css">
+  <link rel="stylesheet" crossorigin href="/CrossFit-Apps/assets/index-D8oZvy_c.css">
 </head>
 <body>
 <div id="root"></div>
