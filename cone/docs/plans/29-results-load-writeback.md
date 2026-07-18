@@ -1,5 +1,7 @@
 # 29 — Stop the load-time `results_v2` write-back (+ `created_at`) (#76)
 
+> ✅ Done: `5ba1dd9` · 2026-07-18 — see BACKLOG.md
+
 Backlog: **#76** (Icebox → Ready). From the 2026-07-16 full pass; found while planning #75.
 
 ## Context
