@@ -11,11 +11,9 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 
 Refilled 2026-07-18 (planning pass) — user picked 3 of 6 proposed candidates. Order: **#76 → #62 → #53** (two Sonnet items first, then the Opus public-design finale). All three independent (no shared files, no ordering dependency). **#76 and #62 shipped** (see Done).
 
-- **#53 Design pass B4 — index + timer + tv + recover** · M→L · Opus · [plans/31](./plans/31-design-b4-public-finale.md) · the last public-page design debt; Part A mechanical, Part B gated on a mockup.
-
 ## 🔵 In Progress
 
-_(none)_
+- **#53 Design pass B4 — index + timer + tv + recover** · M→L · Opus · [plans/31](./plans/31-design-b4-public-finale.md) · **Part A shipped** (mechanical: Nav timer double-render fix, Index→canonical `blkColor`, TV white-alpha→tokens, hex/token/radius sweep across TV/Timer/Index/Recover/Nav, theme-aware QR palette + `index.html` theme-color meta, Benchmark color aligned). **Part B pending** the mockup-approval gate (index dead right-half #18, TV single-block font-scale, Nav icon-language emoji-vs-Tabler, `'Courier New'`→`--font-mono` with #54).
 
 ## 🧊 Icebox (captured + prioritized — no plan yet)
 
@@ -159,6 +157,9 @@ _(none)_
 ---
 
 ### Decisions recorded
+- **2026-07-18 — #53 Part A: Benchmark block-type color = amber (canonical `blkColor`).** The timer `BlockTypePicker` painted the Benchmark *type* card `#d05878` (rose) while `blkColor` (wod.js) classifies Benchmark in the **amber** family (same as For Time / AMRAP / EMOM). Aligned the picker card to `var(--gold)` to match both `blkColor` and its amber-family siblings. The `#d05878` rose survives only as the **Girls** benchmark-*subcategory* accent (a category decoration, not a block-family color).
+- **2026-07-18 — #53 Part A: TV countdown-pill red (`#c84038`) stays a hardcoded status/data color — NOT tokenized.** It's the exact value the timer ring uses for its final-seconds danger state (`ringCol`, slides.jsx). Tokenizing the pill to `var(--red)` would drift it from the still-hardcoded ring on light themes. Exempt like the block families / scales — saturated enough to read on every theme's background. (Plan flagged `TV.module.css:127/133/134/135` for the rgb sweep; kept them as-is, tokenized only the gold glow at `:196` → `color-mix(var(--gold))`.)
+- **2026-07-18 — #53 Part A: `index.html` `theme-color` meta is theme-aware via a post-stylesheet inline script** reading `--stone` (the sticky header bg), not a hardcoded per-theme map (which would duplicate themes.css). The static `#161210` value is the no-JS fallback.
 - **2026-07-09 — #27/#28 restructured into the unified design-pass program.** One analysis pass covered both surfaces (public + SPA); execution is 10 bundled sessions (#49–#59, see [plans/16](./plans/16-design-pass-program.md)) instead of 18 per-page ones, each folding in its own slice of #15 (tokens), #14 (mechanical a11y), and #18 (fixed-height layout — **#18 retired as a standalone row**, it lives entirely inside the B-sessions). #25/#26 execute as the first halves of #59/#58. Program precedes #43 (themes need the token-clean codebase).
 - **2026-07-09 — Border-radius rule: Option A (circles exempt).** `border-radius: 50%` (true circles: timer ring, avatar badges, dots — 19 in public, 27 full-src) is a shape primitive and stays; everything else including pills (`999px` ends) is a rounded rect and gets squared on public pages. Recorded in CLAUDE.md design section; per-page enforcement in the B/C sessions.
 - **2026-07-09 — Font-weights: load real Cinzel 500/800 (first session that touches them adds `@fontsource/cinzel/{500,800}.css`); Amarante ships only weight 400 upstream, so all Spirit Blossom bolds are browser-synthesized by design — not a bug, don't chase it.**

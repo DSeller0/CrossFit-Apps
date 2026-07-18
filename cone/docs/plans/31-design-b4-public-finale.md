@@ -1,5 +1,9 @@
 # 31 — Design pass B4: index + timer + tv + recover (#53)
 
+> 🟡 **Part A shipped: `1ae207b`** (all 7 mechanical items — Nav timer double-render,
+> Index→`blkColor`, TV white-alpha→tokens, hex/token/radius sweep, theme-aware QR +
+> `index.html` theme-color, Benchmark color). **Part B pending the mockup-approval gate.**
+
 Backlog: **#53** (Icebox → Ready). The last public-page design debt — #50/#51/#52 swept the
 other five clean, so these four hold essentially all of it. Unblocked now that **#69** (tv
 webfont) shipped. Program umbrella: [plans/16](./16-design-pass-program.md).
