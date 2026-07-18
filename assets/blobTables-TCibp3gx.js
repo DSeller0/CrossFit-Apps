@@ -1,1 +1,0 @@
-function e(e){return{id:e.id,date:e.date,athleteId:e.athlete_id,sessionId:e.session_id,presence:e.presence,energyLevel:e.energy_level,blocks:e.blocks,coachNote:e.coach_note,flagForReview:e.flag_for_review,loggedByAthlete:e.logged_by_athlete}}export{e as t};
