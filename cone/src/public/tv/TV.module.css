@@ -55,13 +55,13 @@
 /* ── Block card ── */
 .blockCard {
   background: var(--stone); border: 1px solid var(--divider); border-left: 6px solid var(--gold);
-  border-radius: 6px; padding: 26px 30px;
+  padding: 26px 30px;
   display: flex; flex-direction: column; gap: 14px;
 }
 .blockCardHdr { display: flex; align-items: center; gap: 14px; }
 .blockBadge {
   font-size: 18px; font-weight: 900; letter-spacing: .12em;
-  text-transform: uppercase; padding: 4px 14px; border-radius: 4px;
+  text-transform: uppercase; padding: 4px 14px;
 }
 .blockMeta { font-size: 17px; color: var(--muted); font-weight: 600; letter-spacing: .06em; }
 .exList { display: flex; flex-direction: column; gap: 9px; }
@@ -74,7 +74,7 @@
 .exVol  { font-size: 22px; font-weight: 700; color: var(--sub); flex-shrink: 0; }
 .exIns    { font-size: 18px; font-weight: 700; color: var(--muted); flex-shrink: 0; margin-left: 4px; }
 .exNote   { font-size: 16px; color: var(--muted); padding-left: 20px; margin-top: 1px; font-style: italic; }
-.blockNote { font-size: 16px; color: var(--muted); font-style: italic; padding-top: 6px; border-top: 1px solid rgba(255,255,255,.05); }
+.blockNote { font-size: 16px; color: var(--muted); font-style: italic; padding-top: 6px; border-top: 1px solid var(--divider); }
 
 /* ── Complex exercise sub-movements ── */
 .complexBlock { display: flex; flex-direction: column; gap: 4px; }
@@ -124,6 +124,10 @@
   position: absolute; left: 50%; bottom: 8%; transform: translateX(-50%);
   display: flex; align-items: center; justify-content: center;
   min-width: 84px; height: 84px; padding: 0 18px;
+  /* #c84038 is the timer's final-seconds STATUS red — the same hardcoded value the
+     ring uses in slides.jsx (ringCol). A data color, exempt from tokenization like the
+     block families: tokenizing to var(--red) would drift the pill from the ring on
+     light themes. It's saturated enough to read on every theme's background. */
   background: #c84038; color: var(--cream); border: 2px solid var(--cream);
   font-family: 'Courier New', monospace;
   font-size: 48px; font-weight: 900; line-height: 1;
@@ -188,13 +192,13 @@
 }
 .podiumEmpty { min-width: 240px; }
 .podiumCard {
-  background: var(--stone); border: 1px solid var(--divider); border-radius: 10px;
+  background: var(--stone); border: 1px solid var(--divider);
   padding: 28px 36px; display: flex; flex-direction: column;
   align-items: center; gap: 8px; min-width: 240px;
 }
 .podiumFirst {
   border-color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--bg));
-  transform: scale(1.07); box-shadow: 0 0 40px rgba(216,168,64,.18);
+  transform: scale(1.07); box-shadow: 0 0 40px color-mix(in srgb, var(--gold) 18%, transparent);
 }
 .podiumMedal { font-size: 32px; }
 .podiumName {
@@ -214,7 +218,7 @@
 .restRow {
   display: flex; align-items: center; gap: 18px;
   padding: 8px 18px; background: var(--stone);
-  border: 1px solid var(--stone2); border-radius: 4px;
+  border: 1px solid var(--stone2);
 }
 .restRank  { font-size: 15px; font-weight: 700; color: var(--dim); width: 38px; }
 .restName  { font-size: 20px; font-weight: 700; color: var(--cream); text-transform: uppercase; flex: 1; }
@@ -255,7 +259,7 @@
 }
 .qrBig {
   width: 500px; height: 500px; padding: 16px;
-  background: var(--stone); border: 2px solid var(--divider); border-radius: 10px;
+  background: var(--stone); border: 2px solid var(--divider);
 }
 .qrLoading { font-size: 22px; color: var(--dim); }
 .qrUrl {
@@ -266,18 +270,18 @@
 /* ── Group chips (WodSlide + TimerSlide) ── */
 .blockGroups {
   display: flex; flex-direction: column; gap: 6px;
-  margin-top: 8px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.07);
+  margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--divider);
 }
 .blockGroupChip {
   border-left: 4px solid; padding: 5px 10px;
-  background: rgba(255,255,255,.03); border-radius: 2px;
+  background: var(--stone2);
 }
 .blockGroupName  { display: block; font-size: 14px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
 .blockGroupAthletes { display: block; font-size: 12px; font-weight: 500; opacity: .7; margin-top: 2px; line-height: 1.4; }
 .timerBlockLiveBadge {
   font-size: 12px; font-weight: 900; color: var(--teal);
   letter-spacing: .16em; text-transform: uppercase;
-  border: 1px solid color-mix(in srgb, var(--teal) 33%, transparent); padding: 2px 10px; border-radius: 3px;
+  border: 1px solid color-mix(in srgb, var(--teal) 33%, transparent); padding: 2px 10px;
 }
 
 /* ── TimerSlide: group map panel (replaces .timerRight when groups exist) ── */

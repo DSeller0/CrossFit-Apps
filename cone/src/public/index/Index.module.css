@@ -5,7 +5,7 @@
 .hdrLine { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold2)); }
 .hdrLineR { background: linear-gradient(270deg, transparent, var(--gold2)); }
 .hdrDiamond { width: 5px; height: 5px; border: 1px solid var(--gold); transform: rotate(45deg); flex-shrink: 0; }
-.brand { font-size: 22px; font-weight: 900; letter-spacing: 8px; color: var(--cream); text-align: center; text-shadow: 0 0 30px rgba(216,168,64,.12); font-family: var(--font); }
+.brand { font-size: 22px; font-weight: 900; letter-spacing: 8px; color: var(--cream); text-align: center; text-shadow: 0 0 30px color-mix(in srgb, var(--gold) 12%, transparent); font-family: var(--font); }
 .hdrFoot { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 2px; }
 .gym { font-size: 9px; font-weight: 700; color: var(--gold); letter-spacing: .25em; text-transform: uppercase; }
 
@@ -27,7 +27,7 @@
 .sessCard::before, .sessCard::after { content: ''; position: absolute; width: 8px; height: 8px; }
 .sessCard::before { top: -1px; left: -1px; border-top: 1px solid var(--gold2); border-left: 1px solid var(--gold2); }
 .sessCard::after  { bottom: -1px; right: -1px; border-bottom: 1px solid var(--gold2); border-right: 1px solid var(--gold2); }
-.sessToday { border-color: rgba(74,200,192,.3); box-shadow: 0 0 18px rgba(74,200,192,.06); }
+.sessToday { border-color: color-mix(in srgb, var(--teal) 30%, transparent); box-shadow: 0 0 18px color-mix(in srgb, var(--teal) 6%, transparent); }
 .sessToday::before, .sessToday::after { border-color: var(--teal); }
 .sessPast { opacity: .72; }
 
@@ -68,7 +68,7 @@
 /* ── Status ── */
 .loading  { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
 .errorMsg { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 13px; line-height: 1.8; }
-.retryBtn { margin-top: 12px; background: transparent; border: 1px solid var(--divider); color: var(--muted); font-size: 13px; padding: 7px 16px; border-radius: 5px; cursor: pointer; font-family: var(--font); }
+.retryBtn { margin-top: 12px; background: transparent; border: 1px solid var(--divider); color: var(--muted); font-size: 13px; padding: 7px 16px; cursor: pointer; font-family: var(--font); }
 
 /* ── PWA banner ── */
 .pwaBanner { position: fixed; bottom: calc(70px + env(safe-area-inset-bottom,0)); left: 0; right: 0; display: flex; align-items: center; gap: 10px; background: var(--stone); border-top: 1px solid var(--divider); padding: 10px 16px; z-index: 45; transform: translateY(100%); opacity: 0; transition: transform .3s ease, opacity .3s ease; pointer-events: none; }

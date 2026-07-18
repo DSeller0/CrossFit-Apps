@@ -7,7 +7,10 @@ const TYPES = [
   { key: 'AMRAP',     desc: 'Máximo de rounds',       color: 'var(--gold)'  },
   { key: 'EMOM',      desc: 'Todo minuto, on the min',color: 'var(--gold)'  },
   { key: 'Estações',  desc: 'Circuito rotativo',      color: 'var(--teal)'  },
-  { key: 'Benchmark', desc: 'WOD clássico Girls/Heroes', color: '#d05878'   },
+  // Benchmark is an amber-family block type (blkColor, wod.js) — same family as
+  // For Time / AMRAP / EMOM above, so it wears the same var(--gold) here (#53). The
+  // old orphan #d05878 rose lives on below only as the Girls SUBcategory accent.
+  { key: 'Benchmark', desc: 'WOD clássico Girls/Heroes', color: 'var(--gold)'  },
 ]
 
 const BM_CATS = [

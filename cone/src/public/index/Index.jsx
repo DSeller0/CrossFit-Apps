@@ -3,28 +3,16 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import Nav from '../Nav.jsx'
 import s from './Index.module.css'
-import { WOD_TYPES as WOD_TYPES_ARR } from '../lib/wod.js'
+import { WOD_TYPES as WOD_TYPES_ARR, blkColor } from '../lib/wod.js'
 import { toISO } from '../lib/week.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 
 // ── Constants ─────────────────────────────────────────────────────────────
-const WOD_TYPES  = new Set(WOD_TYPES_ARR)
-const STRENGTH_T = new Set(['Força','Weightlifting','Gymnastics'])
-const WARM_T     = new Set(['Aquecimento','Warm-up'])
-const CORE_T     = new Set(['Core','Abdômen'])
-const MOB_T      = new Set(['Mobilidade','Flexibilidade','Cool-down'])
-
-const BLOCK_COLORS = { wod: 'var(--teal)', warm: 'var(--gold)', str: '#c87850', skill: '#9070d8', core: '#70a870', mob: '#5090d8' }
+// Block-family colors are canonical in wod.js (blkColor). Index used to fork its
+// own taxonomy (WOD teal / Força #c87850, missing Cardio/LPO/HIIT/MetCon/Acessórios)
+// so the landing page painted families differently from every other page (#53).
+const WOD_TYPES  = new Set(WOD_TYPES_ARR)   // still needed for the isWod meta ("Cap X'" vs "X'")
 const DAYS_PT = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado']
-
-function blockCls(type) {
-  if (WOD_TYPES.has(type))  return 'wod'
-  if (STRENGTH_T.has(type)) return 'str'
-  if (WARM_T.has(type))     return 'warm'
-  if (CORE_T.has(type))     return 'core'
-  if (MOB_T.has(type))      return 'mob'
-  return 'skill'
-}
 
 function dateKey(offset) {
   const d = new Date(); d.setDate(d.getDate() + offset)
@@ -37,8 +25,7 @@ const TOMOR_DK  = dateKey(1)
 
 // ── Sub-components ────────────────────────────────────────────────────────
 function BlockPill({ block }) {
-  const cls   = blockCls(block.type)
-  const color = BLOCK_COLORS[cls]
+  const color = blkColor(block)
   const hasLabel = block.label && block.label !== block.type
   const isWod = WOD_TYPES.has(block.type)
   let meta = ''

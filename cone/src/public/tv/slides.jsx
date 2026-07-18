@@ -40,6 +40,18 @@ function ringCol(e, cap, bt) {
   return '#c84038'
 }
 function fmt(sec) { return fmtSecs(Math.max(0, Math.floor(sec))) }
+
+// QR canvas can't take a CSS var, so read the live theme's tokens. --cream and --bg
+// always contrast (text vs page background) in every theme, so dark-on-light on light
+// themes / light-on-dark on dark themes — scannable both ways. Hardcoding cream fg on a
+// transparent bg (the old behaviour) went near-white-on-light and stopped scanning (#53).
+function qrColors() {
+  const cs = getComputedStyle(document.documentElement)
+  return {
+    dark:  cs.getPropertyValue('--cream').trim() || '#f0e8d0',
+    light: cs.getPropertyValue('--bg').trim()    || '#0d0b09',
+  }
+}
 function fmtDate(iso) {
   if (!iso) return ''
   const d = new Date(iso + 'T12:00:00')
@@ -53,7 +65,7 @@ function QrFooter({ dateKey, sessId, classId }) {
   const url  = classId ? `${base}&checkin=${classId}` : base
   useEffect(() => {
     if (!dateKey || !sessId) return
-    QRCode.toDataURL(url, { width: 160, margin: 1, color: { dark: '#f0e8d0', light: '#00000000' } })
+    QRCode.toDataURL(url, { width: 160, margin: 1, color: qrColors() })
       .then(setQrUrl).catch(() => {})
   }, [url])
   if (!dateKey || !sessId) return null
@@ -411,7 +423,7 @@ export function QrSlide({ tv }) {
   const title = tv?.class_id ? 'CHECK-IN DA AULA' : 'REGISTRE SEU RESULTADO'
   useEffect(() => {
     if (!tv?.date_key || !tv?.session_id) return
-    QRCode.toDataURL(url, { width: 500, margin: 2, color: { dark: '#f0e8d0', light: '#0d0b0900' } })
+    QRCode.toDataURL(url, { width: 500, margin: 2, color: qrColors() })
       .then(setQrUrl).catch(() => {})
   }, [url])
   return (

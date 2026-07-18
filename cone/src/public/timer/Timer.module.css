@@ -60,9 +60,9 @@
 .splits { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 4px 0 6px; border-bottom: 1px solid var(--div); margin-bottom: 4px; }
 .splitItem { font-size: 10px; font-weight: 700; color: var(--sub); }
 .splitLbl { color: var(--dim); font-weight: 400; }
-.ex { padding: 7px 6px; font-size: 13px; color: var(--sub); font-weight: 600; border-bottom: 1px solid rgba(42,35,28,.35); display: flex; align-items: flex-start; gap: 10px; border-radius: 4px; margin: 0 -6px; }
+.ex { padding: 7px 6px; font-size: 13px; color: var(--sub); font-weight: 600; border-bottom: 1px solid color-mix(in srgb, var(--div) 35%, transparent); display: flex; align-items: flex-start; gap: 10px; margin: 0 -6px; }
 .ex:last-child { border-bottom: none; }
-.exActive { color: var(--cream); font-weight: 800; background: rgba(74,200,192,.06); }
+.exActive { color: var(--cream); font-weight: 800; background: color-mix(in srgb, var(--teal) 6%, transparent); }
 .exDone { color: var(--dim); }
 .exDot { width: 6px; height: 6px; border-radius: 50%; background: var(--div); flex-shrink: 0; margin-top: 5px; }
 .exActive .exDot { background: var(--teal); }
@@ -72,14 +72,14 @@
 
 /* ── Controls ── */
 .ctrl { flex-shrink: 0; display: flex; gap: 8px; padding: 11px 16px; padding-bottom: calc(70px + env(safe-area-inset-bottom,0px)); border-top: 1px solid var(--div); }
-.btn { flex: 1; padding: 18px 8px; border: none; border-radius: 4px; font-family: var(--font); font-size: 14px; font-weight: 800; cursor: pointer; letter-spacing: .04em; -webkit-tap-highlight-color: transparent; transition: opacity .12s; line-height: 1; }
+.btn { flex: 1; padding: 18px 8px; border: none; font-family: var(--font); font-size: 14px; font-weight: 800; cursor: pointer; letter-spacing: .04em; -webkit-tap-highlight-color: transparent; transition: opacity .12s; line-height: 1; }
 .btn:active { opacity: .65; }
 .btnLap    { background: var(--stone2); border: 1px solid var(--div); color: var(--sub); flex: .55; }
 .btnPause  { background: var(--stone2); border: 1px solid var(--div); color: var(--cream); font-size: 16px; }
 .btnDone   { background: var(--stone2); border: 1px solid var(--teal); color: var(--teal); flex: .55; }
-.btnStart  { background: var(--teal); color: #000; font-size: 15px; }
-.btnResume { background: var(--gold); color: #000; font-size: 15px; }
-.btnReg    { background: var(--gold); color: #000; flex: 2; font-size: 14px; }
+.btnStart  { background: var(--teal); color: var(--accent-text); font-size: 15px; }
+.btnResume { background: var(--gold); color: var(--accent-text); font-size: 15px; }
+.btnReg    { background: var(--gold); color: var(--accent-text); flex: 2; font-size: 14px; }
 .btnDisc   { background: transparent; border: 1px solid var(--div); color: var(--muted); }
 .btnClose  { background: var(--stone2); border: 1px solid var(--div); color: var(--sub); }
 
@@ -89,7 +89,7 @@
 .rLabel { font-size: 22px; font-weight: 900; color: var(--cream); line-height: 1.2; margin-top: 6px; }
 .rMeta { font-size: 11px; color: var(--muted); margin-top: 3px; }
 .rExlist { display: flex; flex-direction: column; }
-.rEx { padding: 8px 0; font-size: 14px; color: var(--sub); font-weight: 600; border-bottom: 1px solid rgba(42,35,28,.4); display: flex; align-items: flex-start; gap: 10px; }
+.rEx { padding: 8px 0; font-size: 14px; color: var(--sub); font-weight: 600; border-bottom: 1px solid color-mix(in srgb, var(--div) 40%, transparent); display: flex; align-items: flex-start; gap: 10px; }
 .rEx:last-child { border-bottom: none; }
 .rDot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); flex-shrink: 0; margin-top: 4px; }
 .rExBody { flex: 1; min-width: 0; }
@@ -129,9 +129,9 @@
 
 /* ── Option pills (countdown toggle, etc.) ── */
 .pillRow { display: flex; flex-wrap: wrap; gap: 8px; }
-.pillOpt { padding: 9px 16px; border: 1px solid var(--div); border-radius: 2px; font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer; letter-spacing: .06em; -webkit-tap-highlight-color: transparent; transition: border-color .15s, color .15s, background .15s; }
+.pillOpt { padding: 9px 16px; border: 1px solid var(--div); font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer; letter-spacing: .06em; -webkit-tap-highlight-color: transparent; transition: border-color .15s, color .15s, background .15s; }
 .pillOpt:active { opacity: .7; }
-.pillOptActive { border-color: var(--teal); color: var(--teal); background: rgba(74,200,192,.08); }
+.pillOptActive { border-color: var(--teal); color: var(--teal); background: color-mix(in srgb, var(--teal) 8%, transparent); }
 
 /* ── Benchmark picker ── */
 .bmPickerBg { display: flex; flex-direction: column; gap: 12px; }
@@ -142,7 +142,7 @@
   border-left: 5px solid transparent;
   padding: 18px 14px 16px;
   display: flex; flex-direction: column; align-items: center; gap: 5px;
-  cursor: pointer; border-radius: 2px; -webkit-tap-highlight-color: transparent;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
   transition: opacity .12s;
 }
 .bmCatCard:active { opacity: .7; }
@@ -157,7 +157,7 @@
   border-left: 4px solid transparent;
   padding: 10px 12px;
   cursor: pointer; display: flex; flex-direction: column; gap: 2px;
-  border-radius: 2px; -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent;
   transition: opacity .12s;
 }
 .bmItem:active { opacity: .7; }

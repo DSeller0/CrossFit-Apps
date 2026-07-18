@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="description" content="Cone — Treinos do dia"/>
-<meta name="theme-color" content="#4ac8c0"/>
+<meta name="theme-color" content="#161210"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -15,6 +15,10 @@
 <title>Team Medrado Cross Training</title>
 <script>!function(){var t=localStorage.getItem('cone_theme')||'totk-dark';document.documentElement.classList.add('theme-'+t)}();</script>
 <link rel="stylesheet" href="themes.css"/>
+<!-- theme-color follows the active theme's --stone (the sticky header bg). The
+     stylesheet above is render-blocking, so --stone is resolved by the time this runs;
+     the static #161210 above is the no-JS fallback. (#53) -->
+<script>!function(){var c=getComputedStyle(document.documentElement).getPropertyValue('--stone').trim(),m=document.querySelector('meta[name=theme-color]');if(m&&c)m.setAttribute('content',c)}();</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh}
