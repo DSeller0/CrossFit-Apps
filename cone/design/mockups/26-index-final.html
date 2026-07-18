@@ -1,0 +1,303 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — index.html final (B4 recs applied) · desktop + mobile</title>
+<style>
+  :root{--bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--divider:#2a231c;--gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#48b860;--red:#c84038;--blue:#4878d8;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;--p1:#d8a840;--p2:#b8b8c4;--p3:#c07840}
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px;background:#050403;color:var(--cream);font-family:'Cinzel',Georgia,serif;max-width:1300px}
+  h1{font-size:17px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 6px}
+  h2{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:30px 0 12px;display:flex;align-items:center;gap:10px}
+  h2::after{content:'';flex:1;height:1px;background:var(--divider)}
+  p.intro{font-size:13px;color:var(--sub);font-family:Georgia,serif;line-height:1.6;margin:0 0 4px;max-width:900px}
+  b{color:var(--cream)}
+  .mono{font-family:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;font-variant-numeric:tabular-nums}
+
+  /* Tabler monoline icon */
+  .ic{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+  /* ═══════════ DESKTOP FRAME ═══════════ */
+  .desk{display:flex;width:1240px;height:660px;background:var(--bg);border:1px solid var(--divider);overflow:hidden}
+
+  /* sidebar */
+  .side{width:220px;flex-shrink:0;background:var(--stone);border-right:1px solid var(--divider);display:flex;flex-direction:column}
+  .brand{min-height:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-bottom:1px solid var(--divider)}
+  .bName{font-size:16px;font-weight:900;letter-spacing:6px;color:var(--cream)}
+  .bGym{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.22em;text-transform:uppercase}
+  .tabs{display:flex;flex-direction:column}
+  .tab{display:flex;align-items:center;gap:14px;padding:12px 20px;color:var(--dim);background:color-mix(in srgb,var(--bg) 55%,transparent);position:relative;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .tab::before{content:'';position:absolute;top:0;left:0;width:6px;height:6px;border-top:1px solid var(--divider);border-left:1px solid var(--divider)}
+  .tab::after{content:'';position:absolute;bottom:0;right:0;width:6px;height:6px;border-bottom:1px solid var(--divider);border-right:1px solid var(--divider)}
+  .tab.on{background:color-mix(in srgb,var(--teal) 10%,transparent);color:var(--teal);border-left:3px solid var(--teal);padding-left:17px}
+  .sep{height:1px;background:var(--divider);margin:0}
+
+  /* content region */
+  .content{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+  .hdr{padding:16px 20px 12px;background:var(--stone);border-bottom:1px solid var(--divider);flex-shrink:0}
+  .hRule{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .hLine{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold2))}
+  .hLine.r{background:linear-gradient(270deg,transparent,var(--gold2))}
+  .hDia{width:5px;height:5px;border:1px solid var(--gold);transform:rotate(45deg)}
+  .hBrand{font-size:24px;font-weight:900;letter-spacing:8px;color:var(--cream);text-align:center}
+  .hGym{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;text-align:center;margin-top:3px}
+
+  .cols{flex:1;display:flex;gap:28px;padding:18px 24px;overflow:hidden}
+  .feed{width:520px;flex-shrink:0;display:flex;flex-direction:column}
+  .rail{flex:1;min-width:260px;display:flex;flex-direction:column;gap:14px}
+
+  /* day dividers */
+  .dayRow{display:flex;align-items:center;gap:10px;margin:14px 0 8px}
+  .dayRow:first-child{margin-top:0}
+  .dayLine{flex:1;height:1px;background:var(--divider)}
+  .dayTxt{font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;padding:0 4px}
+  .t-today{color:var(--teal)}.t-past{color:var(--muted)}.t-future{color:var(--sub)}
+
+  /* session cards */
+  .card{background:var(--stone);border:1px solid var(--divider);margin-bottom:8px;position:relative}
+  .card::before{content:'';position:absolute;top:-1px;left:-1px;width:8px;height:8px;border-top:1px solid var(--gold2);border-left:1px solid var(--gold2)}
+  .card::after{content:'';position:absolute;bottom:-1px;right:-1px;width:8px;height:8px;border-bottom:1px solid var(--gold2);border-right:1px solid var(--gold2)}
+  .card.today{border-color:color-mix(in srgb,var(--teal) 30%,transparent);box-shadow:0 0 18px color-mix(in srgb,var(--teal) 6%,transparent)}
+  .card.today::before,.card.today::after{border-color:var(--teal)}
+  .card.past{opacity:.72}
+  .cHdr{display:flex;align-items:center;justify-content:space-between;padding:11px 14px}
+  .cTag{font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .cTag.today{color:var(--teal)}
+  .chev{width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(45deg)}
+  .chev.up{transform:rotate(-45deg)}
+  .compact{padding:0 14px 10px;display:flex;align-items:center;justify-content:space-between}
+  .cName{font-size:13px;font-weight:700;color:var(--sub)}
+  .cBadge{font-size:10px;color:var(--dim);background:var(--stone2);border:1px solid var(--divider);padding:2px 7px}
+  .cBody{padding:0 14px 14px}
+  .cTitle{font-size:16px;font-weight:900;color:var(--cream);margin-bottom:10px;line-height:1.2}
+  .blocks{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+  .pill{display:flex;align-items:center;gap:8px;background:var(--stone2);border:1px solid var(--divider);padding:7px 11px}
+  .dot{width:8px;height:8px;transform:rotate(45deg);flex-shrink:0}
+  .pType{font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+  .pSep{color:var(--dim);font-size:11px}
+  .pLbl{font-size:11px;color:var(--sub);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pMeta{font-size:10px;color:var(--muted);margin-left:auto;white-space:nowrap}
+  .cFoot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .reg{font-size:11px;color:var(--muted)}
+  .btnReg{background:var(--teal);color:#000;font-size:12px;font-weight:900;padding:8px 16px;letter-spacing:.04em}
+
+  /* rail cards */
+  .rBox{background:var(--stone);border:1px solid var(--divider);padding:12px 14px}
+  .rTtl{font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+  .rTtl .ic{width:14px;height:14px;color:var(--gold);stroke-width:1.7}
+  /* week strip */
+  .week{display:flex;gap:4px}
+  .wd{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 0;background:var(--stone2);border:1px solid var(--divider)}
+  .wd.today{background:color-mix(in srgb,var(--teal) 14%,transparent);border-color:var(--teal)}
+  .wdL{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .wd.today .wdL{color:var(--teal)}
+  .wdN{font-size:13px;font-weight:900;color:var(--sub)}
+  .wd.today .wdN{color:var(--cream)}
+  .wdDot{width:4px;height:4px;border-radius:50%;background:var(--gold)}
+  .wdDot.off{background:transparent}
+  /* ranking */
+  .rWod{font-size:11px;font-weight:900;color:var(--cream);letter-spacing:.05em;text-transform:uppercase;margin-bottom:2px}
+  .rWodMeta{font-size:10px;color:var(--muted);margin-bottom:10px}
+  .rk{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid var(--divider)}
+  .rk:last-child{border-bottom:none}
+  .rkPos{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000}
+  .rkName{font-size:12px;font-weight:700;color:var(--cream);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rkScale{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.08em}
+  .rkPerf{font-size:12px;font-weight:800;color:var(--teal);flex-shrink:0}
+  .rMore{display:block;text-align:center;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:9px;padding-top:8px;border-top:1px solid var(--divider)}
+  /* notice */
+  .notice{display:flex;gap:9px;align-items:flex-start}
+  .notice .ic{color:var(--gold);width:15px;height:15px;margin-top:1px}
+  .nTxt{font-size:11.5px;color:var(--sub);font-family:Georgia,serif;line-height:1.5}
+  .nTxt b{color:var(--cream)}
+
+  /* ═══════════ MOBILE FRAME ═══════════ */
+  .mob{width:390px;height:720px;background:var(--bg);border:1px solid var(--divider);display:flex;flex-direction:column;overflow:hidden;position:relative}
+  .mHdr{padding:16px 18px 12px;background:var(--stone);border-bottom:1px solid var(--divider);flex-shrink:0}
+  .mScroll{flex:1;overflow:hidden;padding:14px 14px 0}
+  .mWeek{margin-bottom:16px}
+  .mBotWrap{flex-shrink:0}
+  /* bottom nav */
+  .botNav{background:var(--stone);border-top:1px solid var(--divider);display:flex;flex-direction:column}
+  .pillH{display:flex;justify-content:center;padding:5px 0 2px}
+  .pillBar{width:32px;height:3px;background:var(--muted);opacity:.55}
+  .botRow{display:flex}
+  .bTab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px;color:var(--muted)}
+  .bTab.on{color:var(--teal)}
+  .bTab .ic{width:18px;height:18px}
+  .bLbl{font-size:9px;font-weight:700;letter-spacing:.03em}
+  .mSepV{width:1px;background:var(--divider);margin:10px 0}
+
+  .caption{font-size:11px;color:var(--dim);font-family:Georgia,serif;font-style:italic;margin:6px 0 0}
+  .specs{margin-top:22px;border-top:1px solid var(--divider);padding-top:14px;font-family:Georgia,serif;font-size:12px;color:var(--muted);line-height:1.7;max-width:960px}
+  .specs b{color:var(--sub)}
+  .specs code{font-family:ui-monospace,monospace;color:var(--sub)}
+</style>
+<body>
+
+<h1>index.html — página final · recomendações B4 aplicadas</h1>
+<p class="intro">Aplica <b>1·A</b> (trilho à direita) + <b>3·A</b> (ícones Tabler monoline no Nav, que tingem com o tema). As decisões <b>2·A</b> (escala de fonte da TV) e <b>4·C</b> (<code>--font-mono</code>) são só da <b>TV</b> — não aparecem nesta página; os tempos do "Ranking de hoje" abaixo já mostram a pilha mono do sistema (4·C) só a título de amostra. Tema TotK Dark; tudo em cantos retos, cores de família canônicas (<code>blkColor</code>).</p>
+
+<!-- ═════════════ DESKTOP ═════════════ -->
+<h2>Desktop ≥ 768</h2>
+<div class="desk">
+  <!-- sidebar -->
+  <aside class="side">
+    <div class="brand"><span class="bName">CONE</span><span class="bGym">Team Medrado</span></div>
+    <div class="tabs">
+      <div class="tab on"><svg class="ic" viewBox="0 0 24 24"><path d="M5 12H3l9-9 9 9h-2"/><path d="M5 12v7a1 1 0 0 0 1 1h3v-5h4v5h3a1 1 0 0 0 1-1v-7"/></svg>Início</div>
+      <div class="sep"></div>
+      <div class="tab"><svg class="ic" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Ranking</div>
+      <div class="sep"></div>
+      <div class="tab"><svg class="ic" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><rect x="7" y="12" width="3" height="5"/><rect x="13" y="8" width="3" height="9"/></svg>Resultados</div>
+      <div class="sep"></div>
+      <div class="tab"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Perfil</div>
+      <div class="sep"></div>
+      <div class="tab"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16"/><path d="M4 9h16M8 3v4M16 3v4"/></svg>Agenda</div>
+      <div class="sep"></div>
+      <div class="tab"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 13V9M9 2h6"/></svg>Timer</div>
+      <div class="sep"></div>
+      <div class="tab"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3l1.4 2.4 2.7-.6.6 2.7L19.5 12l-2.2 1.5.6 2.7-2.7.6L12 21l-1.4-2.4-2.7.6-.6-2.7L5 12l2.2-1.5-.6-2.7 2.7.6z"/></svg>Coach</div>
+    </div>
+  </aside>
+
+  <!-- content -->
+  <div class="content">
+    <header class="hdr">
+      <div class="hRule"><span class="hLine"></span><span class="hDia"></span><span class="hLine r"></span></div>
+      <div class="hBrand">TEAM MEDRADO</div>
+      <div class="hGym">Cross Training</div>
+    </header>
+    <div class="cols">
+      <!-- feed -->
+      <div class="feed">
+        <div class="dayRow"><span class="dayLine"></span><span class="dayTxt t-past">Ontem</span><span class="dayLine"></span></div>
+        <div class="card past">
+          <div class="cHdr"><span class="cTag">Anterior</span><span class="chev up"></span></div>
+          <div class="compact"><span class="cName">Treino B</span><span class="cBadge">4 blocos</span></div>
+        </div>
+        <div class="dayRow"><span class="dayLine"></span><span class="dayTxt t-today">◈ Hoje</span><span class="dayLine"></span></div>
+        <div class="card today">
+          <div class="cHdr"><span class="cTag today">◈ Sessão do dia</span><span class="chev"></span></div>
+          <div class="cBody">
+            <div class="cTitle">Treino A</div>
+            <div class="blocks">
+              <div class="pill"><span class="dot" style="background:var(--green)"></span><span class="pType" style="color:var(--green)">Aquecimento</span><span class="pSep">·</span><span class="pLbl">Mobilidade geral</span></div>
+              <div class="pill"><span class="dot" style="background:var(--blue)"></span><span class="pType" style="color:var(--blue)">Força</span><span class="pSep">·</span><span class="pLbl">Back Squat</span></div>
+              <div class="pill"><span class="dot" style="background:var(--gold)"></span><span class="pType" style="color:var(--gold)">For Time</span><span class="pSep">·</span><span class="pLbl">Fran</span><span class="pMeta">Cap 12'</span></div>
+              <div class="pill"><span class="dot" style="background:var(--red)"></span><span class="pType" style="color:var(--red)">MetCon</span><span class="pSep">·</span><span class="pLbl">Chipper</span></div>
+            </div>
+            <div class="cFoot"><span class="reg">8 resultados</span><span class="btnReg">Registrar →</span></div>
+          </div>
+        </div>
+        <div class="dayRow"><span class="dayLine"></span><span class="dayTxt t-future">Amanhã</span><span class="dayLine"></span></div>
+        <div class="card">
+          <div class="cHdr"><span class="cTag">Próxima</span><span class="chev up"></span></div>
+          <div class="compact"><span class="cName">Treino C</span><span class="cBadge">5 blocos</span></div>
+        </div>
+      </div>
+
+      <!-- rail (1·A) -->
+      <div class="rail">
+        <div class="rBox">
+          <div class="rTtl"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16"/><path d="M4 9h16M8 3v4M16 3v4"/></svg>Esta semana</div>
+          <div class="week">
+            <div class="wd"><span class="wdL">Dom</span><span class="wdN">13</span><span class="wdDot off"></span></div>
+            <div class="wd"><span class="wdL">Seg</span><span class="wdN">14</span><span class="wdDot"></span></div>
+            <div class="wd"><span class="wdL">Ter</span><span class="wdN">15</span><span class="wdDot"></span></div>
+            <div class="wd"><span class="wdL">Qua</span><span class="wdN">16</span><span class="wdDot"></span></div>
+            <div class="wd"><span class="wdL">Qui</span><span class="wdN">17</span><span class="wdDot"></span></div>
+            <div class="wd today"><span class="wdL">Sex</span><span class="wdN">18</span><span class="wdDot"></span></div>
+            <div class="wd"><span class="wdL">Sáb</span><span class="wdN">19</span><span class="wdDot off"></span></div>
+          </div>
+        </div>
+        <div class="rBox">
+          <div class="rTtl"><svg class="ic" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Ranking de hoje</div>
+          <div class="rWod">Fran · For Time</div>
+          <div class="rWodMeta">Cap 12' · 8 resultados</div>
+          <div class="rk"><span class="rkPos" style="background:var(--p1)">1</span><span class="rkName">Bruna</span><span class="rkScale">RX</span><span class="rkPerf mono">7:42</span></div>
+          <div class="rk"><span class="rkPos" style="background:var(--p2)">2</span><span class="rkName">Léo</span><span class="rkScale">RX</span><span class="rkPerf mono">8:13</span></div>
+          <div class="rk"><span class="rkPos" style="background:var(--p3)">3</span><span class="rkName">Ana</span><span class="rkScale">Inter</span><span class="rkPerf mono">9:05</span></div>
+          <span class="rMore">Ver leaderboard →</span>
+        </div>
+        <div class="rBox">
+          <div class="rTtl"><svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4M12 17h0M10.3 4.3 3 17a1.5 1.5 0 0 0 1.3 2.2h15.4A1.5 1.5 0 0 0 21 17L13.7 4.3a1.5 1.5 0 0 0-3.4 0z"/></svg>Avisos do box</div>
+          <div class="notice"><span class="nTxt"><b>Sem aula 18h hoje</b> — feriado municipal. Sexta extra amanhã às 9h.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="caption">Trilho à direita transforma os ~470px mortos em: mini-semana (começa no <b style="color:var(--sub)">Dom</b>), top-3 do WOD ao vivo, e avisos do box. Sidebar em ícones Tabler que tingem (ativo = teal).</p>
+
+<!-- ═════════════ MOBILE ═════════════ -->
+<h2>Mobile 390</h2>
+<div class="mob">
+  <div class="mHdr">
+    <div class="hRule"><span class="hLine"></span><span class="hDia"></span><span class="hLine r"></span></div>
+    <div class="hBrand" style="font-size:22px">TEAM MEDRADO</div>
+    <div class="hGym">Cross Training</div>
+  </div>
+  <div class="mScroll">
+    <!-- rail's week strip folds to the top on mobile -->
+    <div class="rBox mWeek">
+      <div class="rTtl"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16"/><path d="M4 9h16M8 3v4M16 3v4"/></svg>Esta semana</div>
+      <div class="week">
+        <div class="wd"><span class="wdL">Dom</span><span class="wdN">13</span><span class="wdDot off"></span></div>
+        <div class="wd"><span class="wdL">Seg</span><span class="wdN">14</span><span class="wdDot"></span></div>
+        <div class="wd"><span class="wdL">Ter</span><span class="wdN">15</span><span class="wdDot"></span></div>
+        <div class="wd"><span class="wdL">Qua</span><span class="wdN">16</span><span class="wdDot"></span></div>
+        <div class="wd"><span class="wdL">Qui</span><span class="wdN">17</span><span class="wdDot"></span></div>
+        <div class="wd today"><span class="wdL">Sex</span><span class="wdN">18</span><span class="wdDot"></span></div>
+        <div class="wd"><span class="wdL">Sáb</span><span class="wdN">19</span><span class="wdDot off"></span></div>
+      </div>
+    </div>
+    <div class="dayRow"><span class="dayLine"></span><span class="dayTxt t-today">◈ Hoje</span><span class="dayLine"></span></div>
+    <div class="card today">
+      <div class="cHdr"><span class="cTag today">◈ Sessão do dia</span><span class="chev"></span></div>
+      <div class="cBody">
+        <div class="cTitle">Treino A</div>
+        <div class="blocks">
+          <div class="pill"><span class="dot" style="background:var(--green)"></span><span class="pType" style="color:var(--green)">Aquecimento</span><span class="pSep">·</span><span class="pLbl">Mobilidade geral</span></div>
+          <div class="pill"><span class="dot" style="background:var(--gold)"></span><span class="pType" style="color:var(--gold)">For Time</span><span class="pSep">·</span><span class="pLbl">Fran</span><span class="pMeta">Cap 12'</span></div>
+          <div class="pill"><span class="dot" style="background:var(--red)"></span><span class="pType" style="color:var(--red)">MetCon</span><span class="pSep">·</span><span class="pLbl">Chipper</span></div>
+        </div>
+        <div class="cFoot"><span class="reg">8 resultados</span><span class="btnReg">Registrar →</span></div>
+      </div>
+    </div>
+    <!-- ranking folds into the feed on mobile -->
+    <div class="rBox" style="margin-top:2px">
+      <div class="rTtl"><svg class="ic" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Ranking de hoje · Fran</div>
+      <div class="rk"><span class="rkPos" style="background:var(--p1)">1</span><span class="rkName">Bruna</span><span class="rkScale">RX</span><span class="rkPerf mono">7:42</span></div>
+      <div class="rk"><span class="rkPos" style="background:var(--p2)">2</span><span class="rkName">Léo</span><span class="rkScale">RX</span><span class="rkPerf mono">8:13</span></div>
+      <div class="rk"><span class="rkPos" style="background:var(--p3)">3</span><span class="rkName">Ana</span><span class="rkScale">Inter</span><span class="rkPerf mono">9:05</span></div>
+      <span class="rMore">Ver leaderboard →</span>
+    </div>
+  </div>
+  <div class="mBotWrap">
+    <nav class="botNav">
+      <div class="pillH"><span class="pillBar"></span></div>
+      <div class="botRow">
+        <div class="bTab on"><svg class="ic" viewBox="0 0 24 24"><path d="M5 12H3l9-9 9 9h-2"/><path d="M5 12v7a1 1 0 0 0 1 1h3v-5h4v5h3a1 1 0 0 0 1-1v-7"/></svg><span class="bLbl">Início</span></div>
+        <div class="mSepV"></div>
+        <div class="bTab"><svg class="ic" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><span class="bLbl">Ranking</span></div>
+        <div class="mSepV"></div>
+        <div class="bTab"><svg class="ic" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><rect x="7" y="12" width="3" height="5"/><rect x="13" y="8" width="3" height="9"/></svg><span class="bLbl">Result.</span></div>
+        <div class="mSepV"></div>
+        <div class="bTab"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span class="bLbl">Perfil</span></div>
+        <div class="mSepV"></div>
+        <div class="bTab"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16"/><path d="M4 9h16M8 3v4M16 3v4"/></svg><span class="bLbl">Agenda</span></div>
+      </div>
+    </nav>
+  </div>
+</div>
+<p class="caption">No mobile não há trilho: a mini-semana sobe pro topo, o ranking de hoje vira um card logo abaixo da sessão. Barra inferior em Tabler; Timer continua na aba "Mais" (puxador). 5 abas + puxador, como hoje.</p>
+
+<div class="specs">
+  <b>Notas de implementação (quando aprovado):</b><br>
+  • <b>1·A trilho</b> — no desktop, <code>.cols</code> = feed 520 + rail flex; some ≤767. Dados: mini-semana de <code>getWeek()</code>/<code>dateToWeekOffset()</code> (<b>Dom-start</b>, <code>week.js</code>); ranking = <code>rankResults()</code> do WOD de hoje (<code>results_v2</code> já é buscado no <code>load()</code>); avisos = novo campo em <code>settings.value</code> (opcional, esconde se vazio).<br>
+  • <b>3·A ícones</b> — trocar os emoji do <code>TABS</code> por componentes <code>@tabler/icons-react</code> (SVG inline), <b>nunca</b> a classe <code>ti-*</code> (o leaderboard não carrega a webfont). Herda <code>color</code> → tinge no ativo/hover.<br>
+  • <b>Mobile</b> — mini-semana e ranking entram no fluxo do feed; barra inferior inalterada estruturalmente, só ícones.<br>
+  • <b>2·A / 4·C</b> — só TV, ficam para a implementação da TV (4·C fecha com #54).
+</div>
+
+</body>
+</html>
