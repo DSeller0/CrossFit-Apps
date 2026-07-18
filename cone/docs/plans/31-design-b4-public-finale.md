@@ -2,7 +2,11 @@
 
 > 🟡 **Part A shipped: `1ae207b`** (all 7 mechanical items — Nav timer double-render,
 > Index→`blkColor`, TV white-alpha→tokens, hex/token/radius sweep, theme-aware QR +
-> `index.html` theme-color, Benchmark color). **Part B pending the mockup-approval gate.**
+> `index.html` theme-color, Benchmark color).
+> 🟡 **Part B index build shipped: `fcaef53`** (1·A right rail + 3·A Tabler nav +
+> `settings.boxWarnings` coach input; mockups 25/26 the gate). **Still open:** the TV
+> items **2·A** (single-block font scale-up) + **4·C** (`'Courier New'`→`--font-mono`,
+> folds into #54) — deferred by the user; build a TV mockup next for the same loop.
 
 Backlog: **#53** (Icebox → Ready). The last public-page design debt — #50/#51/#52 swept the
 other five clean, so these four hold essentially all of it. Unblocked now that **#69** (tv
