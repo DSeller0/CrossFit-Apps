@@ -7,6 +7,7 @@ import {
 import { APP_CONFIG, ECOL } from '../../utils/config';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { toSecs } from '../../public/lib/wod.js';
+import { buildRegistryIndex, resolveExercise } from '../../public/lib/registry.js';
 import { DAY_PT_TITLE } from '../../public/lib/week.js';
 import { prBest, prDelta, prPct } from '../../public/lib/goals.js';
 
@@ -206,16 +207,14 @@ function PrModal({ onSave, onClose, editPr, existingNames }) {
   const [date, setDate]     = useState(todayISO);
   const [value, setValue]   = useState('');
   const registry   = loadRegistry() || {};
-  const blockOrder = Object.keys(registry);
   const isEdit     = !!editPr;
 
-  const exBlocks = useMemo(() => {
-    const n = name.trim().toLowerCase();
-    if (!n) return [];
-    return blockOrder.filter(bt =>
-      (registry[bt] || []).some(e => (typeof e === 'string' ? e : e?.name || '').toLowerCase() === n)
-    );
-  }, [name, registry]);
+  const registryIndex = useMemo(() => buildRegistryIndex(registry), [registry]);
+  // Resolved via #62's alias/normalization layer so a PR logged under shorthand
+  // ("BMU", "T2B") still tags a real category instead of falling into "Sem categoria".
+  const exBlocks = useMemo(() => (
+    name.trim() ? (resolveExercise(name, registryIndex)?.categories || []) : []
+  ), [name, registryIndex]);
 
   const primaryCategory = exBlocks[0] || editPr?.category || '';
 

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import styles from './Schedule.module.css'
 import { extractYtId } from './scheduleHelpers.js'
+import { resolveExercise } from '../lib/registry.js'
 
 // ── Demo Panel ────────────────────────────────────────────────────────────────
 export default function DemoPanel({target,demoMap,onClose}) {
@@ -20,7 +21,7 @@ export default function DemoPanel({target,demoMap,onClose}) {
       </div>
       <div className={styles.demoBody}>
         {target.map((mv,i)=>{
-          const data=demoMap[(mv.name||'').toLowerCase()]||{}
+          const data=resolveExercise(mv.name,demoMap)||{}
           const videoId=extractYtId(data.videoUrl||'')
           const hasVideo=!!videoId&&data.videoPublished===true
           const desc=data.description||'',muscles=data.muscles||'',notes=data.notes||''

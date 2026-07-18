@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
 import styles from './Schedule.module.css'
 import { exVolStr, fmtIntensity } from '../lib/wod.js'
+import { resolveExercise } from '../lib/registry.js'
 import { onKey, progGroups } from './scheduleHelpers.js'
 import RdCounter from './RdCounter.jsx'
 
@@ -9,7 +10,7 @@ export default function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEd
   const key=`${bl.id}|${ex.id}`,done=checked.has(key)
   const isProg=!ex.isComplex&&ex.intensity?.mode==='progression'
   const vol=exVolStr(ex),ins=fmtIntensity(ex.intensity)
-  const exData=demoMap[(ex.name||'').toLowerCase()]||{}
+  const exData=resolveExercise(ex.name,demoMap)||{}
   const hasDemo=!!(exData.videoUrl||exData.description||exData.muscles)
 
   const rmInputRef=useRef(null)
@@ -45,7 +46,7 @@ export default function ExRow({ex,bl,isWod,isRd,checked,roundState,rmValues,rmEd
       if(ex.intensity?.pct)loadStr=ex.intensity.pct+'% RM'
       if(exRm?.rm&&!isNaN(pctNum))calcStr=Math.ceil(exRm.rm*pctNum/100)+' '+(exRm.unit||'kg')
     }else if(ins){loadStr=ins}
-    const hasDemoCx=mvs.some(m=>{const d=demoMap[(m.name||'').toLowerCase()]||{};return!!(d.videoUrl||d.description||d.muscles)})
+    const hasDemoCx=mvs.some(m=>{const d=resolveExercise(m.name,demoMap)||{};return!!(d.videoUrl||d.description||d.muscles)})
     const mvNames=mvs.map(m=>m.name)
     return(
       <div className={styles.detailEx} onClick={e=>e.stopPropagation()}>

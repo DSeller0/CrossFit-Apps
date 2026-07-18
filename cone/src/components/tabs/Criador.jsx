@@ -11,6 +11,7 @@ import {
 } from '../../utils/storage';
 import { APP_CONFIG, ZONES, BTC, PLC, ECOL } from '../../utils/config';
 import { BENCHMARK_GIRLS, BENCHMARK_HEROES, buildBenchmarkBlock } from '../../public/lib/benchmarks.js';
+import { resolveExercise } from '../../public/lib/registry.js';
 import IntensityInput from '../shared/IntensityInput';
 
 
@@ -330,20 +331,15 @@ function CriadorTypePicker({ blockNames, onSelect, onClose }) {
 function isCardioRegistered(name) {
   if (!name) return false;
   const reg = loadRegistry() || {};
-  const names = (reg['Cardio'] || []).map(e => typeof e === 'string' ? e : (e?.name || ''));
-  return names.some(n => n.toLowerCase() === name.trim().toLowerCase());
+  return !!resolveExercise(name, reg)?.categories?.includes('Cardio');
 }
 
-// One registry entry per exercise name (#38) — look it up across every block type.
+// One registry entry per exercise name (#38) — resolved via #62's alias/normalization
+// layer so a coach's shorthand ("BMU", "T2B") still finds its registry defaults.
 function getRegistryDefaults(name) {
   if (!name?.trim()) return null;
   const reg = loadRegistry() || {};
-  const target = name.trim().toLowerCase();
-  for (const list of Object.values(reg)) {
-    const match = (list || []).find(e => typeof e === 'object' && e?.name?.trim().toLowerCase() === target);
-    if (match?.defaults) return match.defaults;
-  }
-  return null;
+  return resolveExercise(name, reg)?.defaults || null;
 }
 
 function loadBadgeStr(ex) {

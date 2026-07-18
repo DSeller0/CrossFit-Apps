@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { loadRegistry, saveRegistry, loadSettings } from '../../utils/storage';
+import { normExName } from '../../public/lib/registry.js';
 import { APP_CONFIG, ECOL } from '../../utils/config';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import IntensityInput from '../shared/IntensityInput';
@@ -64,12 +65,15 @@ export default function ExerciciosTab() {
 
   const blockColor = name => ECOL[name]?.text || MUTED;
   const persist    = reg  => { saveRegistry(reg); APP_CONFIG.blockNames = ['-', ...BLOCK_ORDER]; };
-  const blocksOf   = name => BLOCK_ORDER.filter(b => (registry[b] || []).some(e => getExName(e) === name));
+  // Compared via normExName (#62) — not full alias resolution — so a name that only
+  // differs by whitespace/case/accent still finds its own entry across categories
+  // instead of registering as a silent duplicate.
+  const blocksOf   = name => { const key = normExName(name); return BLOCK_ORDER.filter(b => (registry[b] || []).some(e => normExName(getExName(e)) === key)); };
 
   const allEx = useMemo(() => {
     const map = {};
     BLOCK_ORDER.forEach(b => {
-      (registry[b] || []).forEach(ex => { const n = getExName(ex); if (!map[n]) map[n] = ex; });
+      (registry[b] || []).forEach(ex => { const n = getExName(ex); const key = normExName(n); if (!map[key]) map[key] = ex; });
     });
     return Object.values(map).sort((a, b) => getExName(a).localeCompare(getExName(b), 'pt'));
   }, [registry]);
@@ -118,7 +122,7 @@ export default function ExerciciosTab() {
   const confirmAdd = () => {
     const name = newName.trim();
     if (!name || !selBlock) return;
-    if ((registry[selBlock] || []).some(e => getExName(e) === name)) {
+    if ((registry[selBlock] || []).some(e => normExName(getExName(e)) === normExName(name))) {
       setAddError(`"${name}" já existe em ${selBlock}`); return;
     }
     const reg = { ...registry, [selBlock]: [...(registry[selBlock] || []), { name }] };
@@ -148,10 +152,11 @@ export default function ExerciciosTab() {
     if (defaults?.intensity?.mode && defaults.intensity.mode !== 'none') cleanDefaults.intensity = defaults.intensity;
     if (Object.keys(cleanDefaults).length) newEx.defaults = cleanDefaults;
     const reg = { ...registry };
-    blocksOf(origName).forEach(b => { reg[b] = (reg[b] || []).filter(e => getExName(e) !== origName); });
+    const origKey = normExName(origName), nameKey = normExName(name);
+    blocksOf(origName).forEach(b => { reg[b] = (reg[b] || []).filter(e => normExName(getExName(e)) !== origKey); });
     selectedBlocks.forEach(b => {
-      if (!(reg[b] || []).some(e => getExName(e) === name)) reg[b] = [...(reg[b] || []), newEx];
-      else reg[b] = (reg[b] || []).map(e => getExName(e) === name ? newEx : e);
+      if (!(reg[b] || []).some(e => normExName(getExName(e)) === nameKey)) reg[b] = [...(reg[b] || []), newEx];
+      else reg[b] = (reg[b] || []).map(e => normExName(getExName(e)) === nameKey ? newEx : e);
     });
     setRegistryState(reg); persist(reg);
     setDetail(p => ({ ...p, origName: name, saved: true }));
@@ -162,7 +167,8 @@ export default function ExerciciosTab() {
     const inBlocks = blocksOf(name);
     if (!window.confirm(`Remover "${name}" de ${inBlocks.length} tipo${inBlocks.length > 1 ? 's' : ''}?`)) return;
     const reg = { ...registry };
-    inBlocks.forEach(b => { reg[b] = (reg[b] || []).filter(e => getExName(e) !== name); });
+    const nameKey = normExName(name);
+    inBlocks.forEach(b => { reg[b] = (reg[b] || []).filter(e => normExName(getExName(e)) !== nameKey); });
     setRegistryState(reg); persist(reg);
     setDetail(null);
     if (isMobile) setPane(1);

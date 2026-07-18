@@ -5,6 +5,7 @@ import { registerSW } from '../registerSW.js'
 import styles from './Schedule.module.css'
 import { MONTH_PT, DAY_PT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
 import { uid, blkLabel, isWodBlock, blkColor } from '../lib/wod.js'
+import { buildRegistryIndex } from '../lib/registry.js'
 import { getTargets } from '../lib/sessions.js'
 import { prBest } from '../lib/goals.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
@@ -17,15 +18,6 @@ import BlockDetail from './BlockDetail.jsx'
 import CheckinSheet from './CheckinSheet.jsx'
 
 // ── Pure helpers ──────────────────────────────────────────────────────────────
-function buildDemoMap(registry) {
-  const map={}
-  if(!registry||typeof registry!=='object')return map
-  Object.values(registry).forEach(arr=>{
-    (Array.isArray(arr)?arr:[]).forEach(ex=>{
-      if(typeof ex==='object'&&ex.name){const k=ex.name.toLowerCase();if(!map[k])map[k]=ex}
-    })
-  });return map
-}
 function autofillRm(sD,aths,athId,gdD) {
   if(!athId)return {}
   const ath=aths.find(a=>a.id===athId);if(!ath)return {}
@@ -95,7 +87,7 @@ export default function Schedule() {
   const [lockedId]=useState(()=>new URLSearchParams(location.search).get('id')||'')
   const [box]=useState(()=>getBoxScope())
 
-  const demoMapRef=useRef({})
+  const demoMapRef=useRef(new Map())
   const goalsRef=useRef({})
 
   useEffect(()=>{
@@ -166,7 +158,7 @@ export default function Schedule() {
         }catch(e){}
       }
 
-      demoMapRef.current=buildDemoMap(erD)
+      demoMapRef.current=buildRegistryIndex(erD)
       goalsRef.current=gdD
 
       const sp=new URLSearchParams(location.search)

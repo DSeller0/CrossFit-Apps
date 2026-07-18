@@ -83,10 +83,13 @@ const NOOP = () => {}
 const schedBlPlain = { id: 'erb1', rounds: 0 }
 const schedBlRound = { id: 'erb2', rounds: 4 }
 
-const demoMapFull     = { thruster: { videoUrl: 'https://youtu.be/dQw4w9WgXcQ', videoPublished: true, description: 'Padrão de agachamento com arremesso acima da cabeça.', muscles: 'Pernas, ombros, core.', notes: 'Cotovelos altos na recepção; não deixar o peso cair para frente.' } }
-const demoMapTextOnly = { 'wall ball': { description: 'Agachamento completo com arremesso da bola na parede.' } }
-const demoMapEmpty    = {}
-const demoMapComplex  = { 'clean pull': { description: 'Puxada de chão explosiva, sem receber a barra.' } }
+// ExRow/DemoPanel resolve names via registry.js's resolveExercise (#62), which reads
+// either a raw registry blob or a buildRegistryIndex Map keyed by normalized name —
+// these fixtures use the Map form directly since there's no family structure to mock.
+const demoMapFull     = new Map([['thruster', { videoUrl: 'https://youtu.be/dQw4w9WgXcQ', videoPublished: true, description: 'Padrão de agachamento com arremesso acima da cabeça.', muscles: 'Pernas, ombros, core.', notes: 'Cotovelos altos na recepção; não deixar o peso cair para frente.' }]])
+const demoMapTextOnly = new Map([['wall ball', { description: 'Agachamento completo com arremesso da bola na parede.' }]])
+const demoMapEmpty    = new Map()
+const demoMapComplex  = new Map([['clean pull', { description: 'Puxada de chão explosiva, sem receber a barra.' }]])
 
 const logPaneBlk        = { id: 'b1', type: 'For Time', exercises: [exStandard] }
 const logPaneSess       = { id: 'sess-lp', sessionName: 'Treino A', blocks: [logPaneBlk] }
