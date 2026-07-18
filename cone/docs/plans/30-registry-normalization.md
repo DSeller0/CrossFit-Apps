@@ -1,5 +1,7 @@
 # 30 — Registry alias / normalization layer (#62)
 
+> ✅ Done: `ecf4e6d` · 2026-07-18 — see BACKLOG.md
+
 Backlog: **#62** (Icebox → Ready). Capture-chain step 2 — [plans/22](./22-athlete-character-stats.md) §3 step 2. **Independently valuable, do it whether or not the stats card ships.**
 
 ## Context
