@@ -1,0 +1,111 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — TV finale B4: 2·A single-block scale + 4·C --font-mono (#53)</title>
+<style>
+  :root{--bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--divider:#2a231c;--gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#48b860;--red:#c84038;--blue:#4878d8;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;--p1:#d8a840;--p2:#b8b8c4;--p3:#c07840;
+    --font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace}
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px;background:#050403;color:var(--cream);font-family:'Cinzel',Georgia,serif;max-width:1040px}
+  h1{font-size:17px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 6px}
+  h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:34px 0 4px;border-top:1px solid var(--divider);padding-top:18px}
+  p.intro,p.note{font-size:12.5px;color:var(--muted);font-family:Georgia,serif;line-height:1.55;margin:0 0 10px;max-width:940px}
+  p.intro{color:var(--sub);font-size:13px}
+  b{color:var(--cream)}.rec{color:var(--teal);font-weight:700}.old{color:var(--red)}
+  code{font-family:var(--font-mono);font-size:.92em;color:var(--sub)}
+  .row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+  .col{flex:1;min-width:300px}
+  .cap{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 0 4px}
+  .pick{color:var(--teal)}
+
+  /* ── TV frame (16:9, represents the wall) ── */
+  .tv{aspect-ratio:16/9;background:var(--bg);border:1px solid var(--divider);display:flex;flex-direction:column;overflow:hidden}
+  .tvHdr{display:flex;justify-content:space-between;align-items:flex-end;padding:10px 16px 8px;border-bottom:1px solid var(--divider)}
+  .tvGym{font-size:7px;font-weight:700;letter-spacing:.3em;color:var(--gold);text-transform:uppercase}
+  .tvSess{font-size:15px;font-weight:900;color:var(--cream);text-transform:uppercase;letter-spacing:.04em}
+  .tvDate{font-size:9px;font-weight:700;color:var(--sub);text-transform:uppercase}
+  .tvBody{flex:1;padding:14px 16px;min-height:0}
+  .blk{background:var(--stone);border-left:4px solid var(--gold);padding:10px 12px;height:100%}
+  .blkBadge{display:inline-block;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);background:color-mix(in srgb,var(--gold) 13%,transparent);padding:2px 8px;margin-bottom:8px}
+  .ex{display:flex;align-items:baseline;gap:8px;padding:2px 0}
+  .exDot{width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0}
+  .exVol{color:var(--sub);font-weight:700}.exName{color:var(--cream);font-weight:800;text-transform:uppercase;letter-spacing:.03em}
+  .tvFoot{padding:6px 16px;border-top:1px solid var(--divider);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  /* small (current) */
+  .sm .blkBadge{font-size:9px}.sm .exVol{font-size:10px}.sm .exName{font-size:12px}.sm .ex{padding:1.5px 0}
+  .sm .blk{display:flex;flex-direction:column}
+  .void{flex:1;border:1px dashed var(--dim);opacity:.45;margin-top:8px;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:9px;color:var(--dim)}
+  /* big (2·A) */
+  .big .blkBadge{font-size:14px}.big .exVol{font-size:19px}.big .exName{font-size:26px}.big .ex{padding:7px 0;gap:12px}.big .exDot{width:9px;height:9px}
+  .big .blk{display:flex;flex-direction:column;justify-content:center;gap:2px}
+
+  /* ── 4·C readout samples ── */
+  .mono-old{font-family:'Courier New',monospace}
+  .mono-new{font-family:var(--font-mono)}
+  .readout{background:var(--stone);border:1px solid var(--divider);padding:16px;text-align:center}
+  .clock{font-size:44px;font-weight:900;color:var(--teal);letter-spacing:.03em}
+  .perf{font-size:22px;font-weight:900;color:var(--teal);margin-top:10px}
+  .pill{display:inline-block;margin-top:12px;background:var(--red);color:var(--cream);border:2px solid var(--cream);font-size:22px;font-weight:900;padding:2px 12px}
+  .sites{font-size:12px;color:var(--sub);font-family:Georgia,serif;line-height:1.7;margin:6px 0}
+  .sites code{color:var(--cream)}
+
+  .gate{margin-top:30px;border:1px solid var(--gold2);background:var(--stone);padding:14px 16px;font-family:Georgia,serif;font-size:12.5px;color:var(--sub);line-height:1.6}
+  .gate b{color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-family:'Cinzel',Georgia,serif;font-size:11px}
+</style>
+<body>
+
+<h1>TV — finale B4 · 2·A escala + 4·C mono (#53)</h1>
+<p class="intro">As duas decisões da B4 que são só da <b>TV</b> (a parede do box), deixadas para depois do build da index. Direção recomendada mostrada aplicada; nada implementado — aguardando aprovação para codar. Tema TotK Dark.</p>
+
+<!-- ══════════ 2·A ══════════ -->
+<h2>2·A — escala de fonte com poucos blocos</h2>
+<p class="note">A grade do WOD só <b>reduz</b> pra caber (<code>scale down</code>). Com <b>1–2 blocos</b> ela renderiza no tamanho fixo e sobra parede vazia — ilegível do outro lado do box. Proposta: com <b>≤2 blocos</b>, escalar a tipografia <b>pra cima</b> até preencher a altura (inverso do clamp atual). Com <b>≥3 blocos</b>, nada muda — a grade de 2 colunas de hoje.</p>
+<div class="row">
+  <div class="col">
+    <div class="cap old">Atual — 1 bloco fica pequeno</div>
+    <div class="tv sm">
+      <div class="tvHdr"><div><div class="tvGym">Team Medrado</div><div class="tvSess">Treino A</div></div><div class="tvDate">Sáb, 18 Jul</div></div>
+      <div class="tvBody"><div class="blk"><span class="blkBadge">Fran · For Time</span>
+        <div class="ex"><span class="exDot"></span><span class="exVol">21-15-9</span><span class="exName">Thruster 42,5kg</span></div>
+        <div class="ex"><span class="exDot"></span><span class="exVol">21-15-9</span><span class="exName">Pull-up</span></div>
+        <div class="void">parede vazia</div>
+      </div></div>
+      <div class="tvFoot">Escaneie para registrar resultado</div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="cap"><span class="pick">2·A — escala pra cima (recomendado)</span></div>
+    <div class="tv big">
+      <div class="tvHdr"><div><div class="tvGym">Team Medrado</div><div class="tvSess">Treino A</div></div><div class="tvDate">Sáb, 18 Jul</div></div>
+      <div class="tvBody"><div class="blk"><span class="blkBadge">Fran · For Time</span>
+        <div class="ex"><span class="exDot"></span><span class="exVol">21-15-9</span><span class="exName">Thruster 42,5kg</span></div>
+        <div class="ex"><span class="exDot"></span><span class="exVol">21-15-9</span><span class="exName">Pull-up</span></div>
+      </div></div>
+      <div class="tvFoot">Escaneie para registrar resultado</div>
+    </div>
+  </div>
+</div>
+<p class="note"><b>Como:</b> o <code>useLayoutEffect</code> de auto-scale em <code>slides.jsx</code> (<code>WodSlide</code>) já mede <code>scrollHeight</code> vs <code>clientHeight</code> e faz <code>scale &lt; 1</code>; estender para, com ≤2 blocos, também escalar <b>pra cima</b> (<code>scale &gt; 1</code>, com teto) até preencher. <b>Alternativa B (baixo esforço):</b> manter a fonte e só centralizar na vertical.</p>
+
+<!-- ══════════ 4·C ══════════ -->
+<h2>4·C — <code>'Courier New'</code> → <code>--font-mono</code> (5 usos)</h2>
+<p class="note">A TV usa <code>'Courier New'</code> em 5 lugares — fonte de sistema datada. Proposta <b>4·C</b>: um token <code>--font-mono</code> = pilha mono do sistema (<code>ui-monospace, 'SF Mono', 'Cascadia Code', monospace</code>), custo zero de carregamento, melhor que Courier. A index já usa essa pilha nos tempos do ranking (Part B) — este token a unifica.</p>
+<div class="row">
+  <div class="col">
+    <div class="cap old">Atual — Courier New</div>
+    <div class="readout"><div class="clock mono-old">07:42</div><div class="perf mono-old">Bruna · 7:42</div><div class="pill mono-old">3</div></div>
+  </div>
+  <div class="col">
+    <div class="cap"><span class="pick">4·C — --font-mono (recomendado)</span></div>
+    <div class="readout"><div class="clock mono-new">07:42</div><div class="perf mono-new">Bruna · 7:42</div><div class="pill mono-new">3</div></div>
+  </div>
+</div>
+<p class="sites"><b>Os 5 sites</b> (<code>TV.module.css</code>): <code>.ringClock</code> · <code>.countdownPill</code> · <code>.podiumPerf</code> · <code>.restPerf</code> · <code>.qrUrl</code> → todos <code>font-family:var(--font-mono)</code>. Token definido em <code>themes.css</code> (mesmo valor nos 4 temas — mono é neutro à paleta). Fecha o par com <b>#54</b>; a index troca sua pilha inline pelo token na mesma leva.</p>
+<p class="note"><b>Alternativa B:</b> largar o mono e usar <code>--font</code> (Cinzel) com <code>tabular-nums</code> — unifica com o timer do celular, mas perde o ar de mostrador digital na parede. Rejeitada aqui por causa da parede.</p>
+
+<div class="gate">
+  <b>Portão de aprovação</b><br>
+  Recomendações: <span class="rec">2·A</span> escalar pra cima (≤2 blocos) · <span class="rec">4·C</span> <code>--font-mono</code> = pilha mono do sistema, nos 5 sites da TV. Nada implementado — aprove a direção e eu codo (verifico na TV local com sessão de 1 bloco + timer rodando). A index (1·A + 3·A + aviso do box) já está no ar.
+</div>
+
+</body>
+</html>
