@@ -1,0 +1,208 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — Public finale B4: Part B decisions (#53)</title>
+<style>
+  :root{--bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--divider:#2a231c;--gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#48b860;--red:#c84038;--blue:#4878d8;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a}
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px;background:var(--bg);color:var(--cream);font-family:'Cinzel',Georgia,serif;max-width:960px}
+  h1{font-size:17px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 6px}
+  h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:34px 0 4px;border-top:1px solid var(--divider);padding-top:18px}
+  h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--sub);margin:16px 0 8px}
+  p.note{font-size:12.5px;color:var(--muted);margin:0 0 8px;font-family:Georgia,serif;line-height:1.55}
+  p.intro{font-size:13px;color:var(--sub);font-family:Georgia,serif;line-height:1.6;margin:0 0 4px}
+  b{color:var(--cream)}
+  .rec{color:var(--teal);font-weight:700}
+  .old{color:var(--red)}
+  .gate{margin-top:30px;border:1px solid var(--gold2);background:var(--stone);padding:14px 16px;font-family:Georgia,serif;font-size:12.5px;color:var(--sub);line-height:1.6}
+  .gate b{color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-family:'Cinzel',Georgia,serif;font-size:11px}
+
+  /* option grid */
+  .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:10px 0}
+  .opts.two{grid-template-columns:repeat(2,1fr)}
+  .opt{background:var(--stone);border:1px solid var(--divider);padding:12px}
+  .opt.pick{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal) inset}
+  .optHd{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--cream);margin-bottom:3px;display:flex;align-items:center;gap:6px}
+  .tag{font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:1px 6px;border:1px solid var(--teal);color:var(--teal)}
+  .tag.low{border-color:var(--muted);color:var(--muted)}
+  .optNote{font-size:11px;color:var(--muted);font-family:Georgia,serif;line-height:1.5;margin-top:6px}
+
+  /* ── D1: index layout wireframes ── */
+  .wire{height:150px;background:var(--stone2);border:1px solid var(--divider);display:flex;overflow:hidden;margin-bottom:8px}
+  .wSide{width:34px;background:var(--stone);border-right:1px solid var(--divider);flex-shrink:0;display:flex;flex-direction:column;gap:5px;padding:8px 5px}
+  .wSideRow{height:8px;background:var(--divider)}
+  .wSideRow.on{background:var(--teal);opacity:.6}
+  .wMain{flex:1;padding:10px;display:flex;gap:10px;min-width:0}
+  .wFeed{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .wCard{background:var(--stone);border:1px solid var(--divider);border-left:2px solid var(--gold2);height:26px;flex-shrink:0}
+  .wCard.today{border-left-color:var(--teal);height:44px}
+  .wDead{flex:1;border:1px dashed var(--red);opacity:.5;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:9px;color:var(--red);text-align:center;padding:4px}
+  .wRail{width:150px;flex-shrink:0;display:flex;flex-direction:column;gap:6px}
+  .wRailBox{background:var(--stone);border:1px solid var(--divider);padding:6px}
+  .wRailTtl{font-size:7.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+  .wStrip{display:flex;gap:2px}
+  .wDay{flex:1;height:14px;background:var(--stone2);border:1px solid var(--divider)}
+  .wDay.hot{background:var(--teal);opacity:.5}
+  .wPod{display:flex;flex-direction:column;gap:3px}
+  .wPodRow{display:flex;gap:4px;align-items:center;font-size:8px;color:var(--sub);font-family:Georgia,serif}
+  .wMedal{width:8px;height:8px;flex-shrink:0}
+
+  /* ── D2: TV single-block scale ── */
+  .tvWall{background:var(--bg);border:1px solid var(--divider);padding:14px;margin-bottom:8px}
+  .tvBlk{background:var(--stone);border-left:5px solid var(--gold);padding:12px 14px}
+  .tvBadge{display:inline-block;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);background:rgba(216,168,64,.13);padding:2px 9px;margin-bottom:8px}
+  .tvEx{display:flex;align-items:baseline;gap:9px;padding:3px 0}
+  .tvDot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+  .tvVol{color:var(--sub);font-weight:700}
+  .tvName{color:var(--cream);font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+  .small .tvBadge{font-size:11px}.small .tvVol{font-size:13px}.small .tvName{font-size:15px}
+  .small .tvEx{padding:2px 0}
+  .big .tvBadge{font-size:17px}.big .tvVol{font-size:23px}.big .tvName{font-size:30px}
+  .big .tvEx{padding:6px 0;gap:13px}.big .tvDot{width:9px;height:9px}
+  .void{height:38px;border:1px dashed var(--dim);opacity:.5;margin-top:8px;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:9px;color:var(--dim)}
+
+  /* ── D3: nav icon language ── */
+  .navRow{display:flex;gap:2px;background:var(--stone);border:1px solid var(--divider);padding:4px}
+  .navItem{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;color:var(--muted)}
+  .navItem.on{color:var(--teal)}
+  .navItem .em{font-size:19px;line-height:1}
+  .navItem svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .navLbl{font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+
+  /* ── D4: mono readout ── */
+  .monoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0}
+  .monoCell{background:var(--stone);border:1px solid var(--divider);padding:14px;text-align:center}
+  .monoCell.pick{border-color:var(--teal)}
+  .monoBig{font-size:34px;font-weight:900;color:var(--teal);letter-spacing:.04em}
+  .m-courier{font-family:'Courier New',monospace}
+  .m-system{font-family:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace}
+  .m-cinzel{font-family:'Cinzel',Georgia,serif;font-variant-numeric:tabular-nums}
+  .monoCap{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+  .monoSub{font-size:16px;font-weight:700;color:var(--sub);margin-top:6px}
+</style>
+<body>
+
+<h1>Public finale B4 — decisões de design (Part B, #53)</h1>
+<p class="intro">Part A (mecânico: correção do Nav timer, cores canônicas, varredura de tokens/raio/hex, QR e <code>theme-color</code> por tema) <b>já foi enviada</b>. Estas são as quatro decisões de <i>design</i> que faltam — cada uma passa pelo <b>portão de aprovação</b>. Nada aqui foi implementado. Escolha uma direção por decisão (ou ajuste) e a implementação segue depois.</p>
+
+<!-- ══════════════════ DECISION 1 ══════════════════ -->
+<h2>1 · index.html — a metade direita morta (#18)</h2>
+<p class="note">No desktop, a página é <b>sidebar 220px + coluna de treinos ~560px</b> alinhada à esquerda. Sobra ~470px vazios à direita (mais em telas largas). A landing page não ganha a largura que ocupa.</p>
+<div class="opts">
+  <div class="opt pick">
+    <div class="optHd">A · Trilho à direita <span class="tag">recomendado</span></div>
+    <div class="wire">
+      <div class="wSide"><div class="wSideRow on"></div><div class="wSideRow"></div><div class="wSideRow"></div><div class="wSideRow"></div></div>
+      <div class="wMain">
+        <div class="wFeed" style="flex:1">
+          <div class="wCard today"></div><div class="wCard"></div><div class="wCard"></div>
+        </div>
+        <div class="wRail">
+          <div class="wRailBox"><div class="wRailTtl">Esta semana</div><div class="wStrip"><span class="wDay"></span><span class="wDay hot"></span><span class="wDay"></span><span class="wDay"></span><span class="wDay"></span><span class="wDay"></span><span class="wDay"></span></div></div>
+          <div class="wRailBox"><div class="wRailTtl">Ranking de hoje</div><div class="wPod"><div class="wPodRow"><span class="wMedal" style="background:var(--gold)"></span>Bruna · 12:34</div><div class="wPodRow"><span class="wMedal" style="background:#b8b8c4"></span>Léo · 13:01</div><div class="wPodRow"><span class="wMedal" style="background:#c07840"></span>Ana · 13:40</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="optNote">Espaço morto vira info ambiente: mini semana (começa no <b>Dom</b>), horários da aula de hoje, top-3 do WOD ao vivo, slot de aviso do box. É o que mais trabalho dá, e o que mais valor entrega.</div>
+  </div>
+  <div class="opt">
+    <div class="optHd">B · Centralizar <span class="tag low">baixo esforço</span></div>
+    <div class="wire">
+      <div class="wSide"><div class="wSideRow on"></div><div class="wSideRow"></div><div class="wSideRow"></div><div class="wSideRow"></div></div>
+      <div class="wMain" style="justify-content:center">
+        <div class="wFeed" style="width:120px"><div class="wCard today"></div><div class="wCard"></div><div class="wCard"></div></div>
+      </div>
+    </div>
+    <div class="optNote">A coluna de 560px só centraliza no espaço disponível. Remove o desequilíbrio sem conteúdo novo — mas continua sendo muito branco, só que centralizado.</div>
+  </div>
+  <div class="opt">
+    <div class="optHd">C · Cards em 2 colunas</div>
+    <div class="wire">
+      <div class="wSide"><div class="wSideRow on"></div><div class="wSideRow"></div><div class="wSideRow"></div><div class="wSideRow"></div></div>
+      <div class="wMain" style="flex-direction:column;gap:6px">
+        <div class="wCard today" style="width:100%"></div>
+        <div style="display:flex;gap:8px"><div class="wCard" style="flex:1;height:40px"></div><div class="wCard" style="flex:1;height:40px"></div></div>
+      </div>
+    </div>
+    <div class="optNote">Alarga para ~900px: hoje ocupa a largura toda, ontem/amanhã lado a lado. Preenche mais que B, sem inventar conteúdo novo como A.</div>
+  </div>
+</div>
+
+<!-- ══════════════════ DECISION 2 ══════════════════ -->
+<h2>2 · TV — escala de fonte com poucos blocos</h2>
+<p class="note">A grade do WOD só <b>reduz</b> para caber (<code>scale down</code>). Com <b>1 bloco</b>, ele renderiza no tamanho fixo e sobra parede vazia embaixo — um Fran sozinho fica pequeno visto do outro lado do box.</p>
+<div class="opts two">
+  <div class="opt">
+    <div class="optHd">Hoje — bloco único fica pequeno</div>
+    <div class="tvWall small">
+      <div class="tvBlk"><span class="tvBadge">Fran · For Time</span>
+        <div class="tvEx"><span class="tvDot"></span><span class="tvVol">21-15-9</span><span class="tvName">Thruster 42,5kg</span></div>
+        <div class="tvEx"><span class="tvDot"></span><span class="tvVol">21-15-9</span><span class="tvName">Pull-up</span></div>
+      </div>
+      <div class="void">parede vazia</div>
+    </div>
+    <div class="optNote">Fontes fixas (name 26px). Legível de perto, apagado na parede.</div>
+  </div>
+  <div class="opt pick">
+    <div class="optHd">A · Escalar pra cima <span class="tag">recomendado</span></div>
+    <div class="tvWall big">
+      <div class="tvBlk"><span class="tvBadge">Fran · For Time</span>
+        <div class="tvEx"><span class="tvDot"></span><span class="tvVol">21-15-9</span><span class="tvName">Thruster 42,5kg</span></div>
+        <div class="tvEx"><span class="tvDot"></span><span class="tvVol">21-15-9</span><span class="tvName">Pull-up</span></div>
+      </div>
+    </div>
+    <div class="optNote">Com ≤2 blocos, aumenta a tipografia (name 26→~40) até preencher a altura — inverso do clamp atual, que só reduz. <b>Alternativa B (baixo esforço):</b> manter a fonte e só centralizar na vertical.</div>
+  </div>
+</div>
+
+<!-- ══════════════════ DECISION 3 ══════════════════ -->
+<h2>3 · Nav — linguagem de ícones (emoji × Tabler)</h2>
+<p class="note">O Nav usa <b>emoji</b> (🏠🏆📊…). O resto do app usa <b>Tabler</b>. Emoji são coloridos, dependem do SO e <b>não tingem</b> com o tema (ficam sempre em cor cheia, fora da estética TotK).</p>
+<h3>Atual — emoji</h3>
+<div class="navRow">
+  <div class="navItem on"><span class="em">🏠</span><span class="navLbl">Início</span></div>
+  <div class="navItem"><span class="em">🏆</span><span class="navLbl">Ranking</span></div>
+  <div class="navItem"><span class="em">📊</span><span class="navLbl">Result.</span></div>
+  <div class="navItem"><span class="em">👤</span><span class="navLbl">Perfil</span></div>
+  <div class="navItem"><span class="em">📅</span><span class="navLbl">Agenda</span></div>
+  <div class="navItem"><span class="em">⏱️</span><span class="navLbl">Timer</span></div>
+  <div class="navItem"><span class="em">⚙️</span><span class="navLbl">Coach</span></div>
+</div>
+<h3>A · Tabler monoline (tinge com o tema) <span class="tag" style="vertical-align:middle">recomendado</span></h3>
+<div class="navRow">
+  <div class="navItem on"><svg viewBox="0 0 24 24"><path d="M5 12H3l9-9 9 9h-2"/><path d="M5 12v7a1 1 0 0 0 1 1h3v-5h4v5h3a1 1 0 0 0 1-1v-7"/></svg><span class="navLbl">Início</span></div>
+  <div class="navItem"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><span class="navLbl">Ranking</span></div>
+  <div class="navItem"><svg viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><rect x="7" y="12" width="3" height="5"/><rect x="13" y="8" width="3" height="9"/></svg><span class="navLbl">Result.</span></div>
+  <div class="navItem"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span class="navLbl">Perfil</span></div>
+  <div class="navItem"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16"/><path d="M4 9h16M8 3v4M16 3v4"/></svg><span class="navLbl">Agenda</span></div>
+  <div class="navItem"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 13V9M12 2h0M9 2h6"/></svg><span class="navLbl">Timer</span></div>
+  <div class="navItem"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3l1.5 2.5 2.8-.6.6 2.8L19.5 12l-2.1 1.5.6 2.8-2.8.6L12 21l-1.5-2.5-2.8.6-.6-2.8L5 12l2.1-1.5-.6-2.8 2.8.6z"/></svg><span class="navLbl">Coach</span></div>
+</div>
+<p class="note" style="margin-top:8px"><b>Restrição real (CLAUDE.md):</b> o Nav é compartilhado por todas as páginas públicas, e <code>leaderboard.html</code> <b>não carrega a webfont <code>ti</code></b>. Então a troca tem de usar <code>@tabler/icons-react</code> (SVG inline), <span class="old">nunca a classe <code>ti-*</code></span> — que renderizaria vazio no ranking. Os ícones acima são aproximações; os finais vêm do pacote React. <b>Opção B:</b> manter emoji (amigável, zero dependência, mas fora da marca).</p>
+
+<!-- ══════════════════ DECISION 4 ══════════════════ -->
+<h2>4 · Fonte mono dos números — <code>'Courier New'</code> → <code>--font-mono</code> (par com #54)</h2>
+<p class="note">A TV usa <code>'Courier New'</code> em <b>5 lugares</b> (relógio do anel, pill de contagem, perf do pódio, perf da lista, URL do QR). Courier é fonte de sistema, datada e inconsistente. O timer do celular já usa <code>--font</code> (Cinzel) com <code>tabular-nums</code> — ou seja, os dois relógios já divergem.</p>
+<div class="monoGrid">
+  <div class="monoCell">
+    <div class="monoBig m-courier">12:34</div><div class="monoSub m-courier">Bruna · RX</div>
+    <div class="monoCap"><span class="old">Atual · Courier New</span></div>
+  </div>
+  <div class="monoCell pick">
+    <div class="monoBig m-system">12:34</div><div class="monoSub m-system">Bruna · RX</div>
+    <div class="monoCap">C · pilha mono do sistema</div>
+  </div>
+  <div class="monoCell">
+    <div class="monoBig m-cinzel">12:34</div><div class="monoSub m-cinzel">Bruna · RX</div>
+    <div class="monoCap">B · Cinzel tabular-nums</div>
+  </div>
+</div>
+<p class="note"><b>C</b> (<code>ui-monospace, 'SF Mono', 'Cascadia Code', monospace</code> como <code>--font-mono</code>) é melhor que Courier e custa zero de carregamento — um bom padrão que <b>#54 formaliza</b>. <b>B</b> unifica os dois timers (celular já é Cinzel tabular), mas perde o ar de "mostrador digital". Como esta decisão <b>faz par com #54</b>, o token final é lá; aqui só se aprova a direção.</p>
+
+<!-- ══════════════════ GATE ══════════════════ -->
+<div class="gate">
+  <b>Portão de aprovação</b><br>
+  Recomendações: <span class="rec">1·A</span> (trilho à direita) · <span class="rec">2·A</span> (escalar pra cima) · <span class="rec">3·A</span> (Tabler via <code>@tabler/icons-react</code>) · <span class="rec">4·C</span> (pilha mono do sistema como <code>--font-mono</code>, formalizada em #54). Nenhuma foi implementada — aguardando sua escolha/aprovação antes de codar. Part A já está no ar.
+</div>
+
+</body>
+</html>
