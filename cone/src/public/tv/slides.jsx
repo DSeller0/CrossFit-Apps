@@ -87,6 +87,10 @@ export function WodSlide({ sessions, tv, gymName, classExecs, athletes }) {
   const blocks  = sess ? (sess.blocks || []).filter(bl => (bl.exercises?.length || bl.stations?.length)) : []
   const cols    = blocks.length > 3 ? 2 : 1
   const ordered = columnMajor(blocks, cols)
+  // 2·A (#53): with ≤2 blocks a fixed-size WOD leaves the wall half-empty. Render those
+  // big (large ExerciseList + badge) and vertically centered; the scale-down effect below
+  // still caps a rare long single block so it can't overflow.
+  const few     = blocks.length <= 2
 
   const activeClass    = (classExecs || []).find(c => c.id === tv?.class_id && !c.reset_at)
   const groups         = activeClass?.groups || []
@@ -120,8 +124,8 @@ export function WodSlide({ sessions, tv, gymName, classExecs, athletes }) {
       </div>
 
       <div className={s.wodBlocksOuter}>
-        <div ref={gridRef} className={s.wodBlocks} style={{ gridTemplateColumns: `repeat(${cols},1fr)` }}>
-          {ordered.map(bl => <BlockCard key={bl.id} bl={bl} groups={groups} groupPositions={groupPositions} athletes={athletes} />)}
+        <div ref={gridRef} className={`${s.wodBlocks}${few ? ' ' + s.wodBlocksFew : ''}`} style={{ gridTemplateColumns: `repeat(${cols},1fr)` }}>
+          {ordered.map(bl => <BlockCard key={bl.id} bl={bl} groups={groups} groupPositions={groupPositions} athletes={athletes} big={few} />)}
         </div>
       </div>
 
@@ -130,7 +134,7 @@ export function WodSlide({ sessions, tv, gymName, classExecs, athletes }) {
   )
 }
 
-export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
+export function BlockCard({ bl, groups, groupPositions, athletes, isActive, big }) {
   const groupsHere = (groups || []).filter(g => (groupPositions || {})[g.id] === bl.id)
   // Group color takes priority over block-type color when a group is assigned here
   const color = groupsHere.length > 0 ? groupsHere[0].color : blkColor(bl)
@@ -143,13 +147,13 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive }) {
   const meta = [bl.duration && `${bl.duration}'`, bl.rounds && `${bl.rounds} rds`].filter(Boolean).join(' · ')
 
   return (
-    <div className={s.blockCard} style={{ borderLeftColor: color }}>
+    <div className={`${s.blockCard}${big ? ' ' + s.blockCardBig : ''}`} style={{ borderLeftColor: color }}>
       <div className={s.blockCardHdr}>
         <span className={s.blockBadge} style={{ background: color + '22', color }}>{label}</span>
         {isActive && <span className={s.timerBlockLiveBadge}>AO VIVO</span>}
         {meta && <span className={s.blockMeta}>{meta}</span>}
       </div>
-      <ExerciseList exercises={exes} color={color} />
+      <ExerciseList exercises={exes} color={color} size={big ? 'large' : undefined} />
       {bl.notes && <div className={s.blockNote}>{bl.notes}</div>}
       {groupsHere.length > 0 && (
         <div className={s.blockGroups}>

@@ -51,6 +51,9 @@
   display: grid; gap: 24px;
   padding: 36px 80px; align-items: start;
 }
+/* 2·A (#53): ≤2 blocks fill the wall — grid takes the full height and centers its rows,
+   the cards render `big` (below). ≥3 blocks are unchanged. */
+.wodBlocksFew { height: 100%; align-content: center; gap: 32px; }
 
 /* ── Block card ── */
 .blockCard {
@@ -58,12 +61,15 @@
   padding: 26px 30px;
   display: flex; flex-direction: column; gap: 14px;
 }
+.blockCardBig { padding: 40px 46px; gap: 22px; border-left-width: 8px; }
 .blockCardHdr { display: flex; align-items: center; gap: 14px; }
 .blockBadge {
   font-size: 18px; font-weight: 900; letter-spacing: .12em;
   text-transform: uppercase; padding: 4px 14px;
 }
+.blockCardBig .blockBadge { font-size: 28px; padding: 6px 22px; }
 .blockMeta { font-size: 17px; color: var(--muted); font-weight: 600; letter-spacing: .06em; }
+.blockCardBig .blockMeta { font-size: 25px; }
 .exList { display: flex; flex-direction: column; gap: 9px; }
 .exRow  { display: flex; align-items: center; gap: 12px; }
 .exDot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -111,7 +117,7 @@
 .ring { width: 435px; height: 435px; }
 .ringClock {
   position: absolute;
-  font-size: 108px; font-weight: 900; font-family: 'Courier New', monospace;
+  font-size: 108px; font-weight: 900; font-family: var(--font-mono);
   letter-spacing: .04em; transition: color .3s; user-select: none;
   text-align: center;
 }
@@ -129,7 +135,7 @@
      block families: tokenizing to var(--red) would drift the pill from the ring on
      light themes. It's saturated enough to read on every theme's background. */
   background: #c84038; color: var(--cream); border: 2px solid var(--cream);
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-mono);
   font-size: 48px; font-weight: 900; line-height: 1;
   animation: countdownPulse 1s ease-in-out infinite;
 }
@@ -207,7 +213,7 @@
 }
 .podiumPerf {
   font-size: 30px; font-weight: 900; color: var(--teal);
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-mono);
 }
 .podiumScale {
   font-size: 13px; font-weight: 700; color: var(--dim);
@@ -223,7 +229,7 @@
 .restRank  { font-size: 15px; font-weight: 700; color: var(--dim); width: 38px; }
 .restName  { font-size: 20px; font-weight: 700; color: var(--cream); text-transform: uppercase; flex: 1; }
 .restScale { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .1em; }
-.restPerf  { font-size: 20px; font-weight: 700; color: var(--teal); font-family: 'Courier New', monospace; width: 90px; text-align: right; }
+.restPerf  { font-size: 20px; font-weight: 700; color: var(--teal); font-family: var(--font-mono); width: 90px; text-align: right; }
 
 .noResults {
   font-size: 26px; color: var(--dim); text-align: center;
@@ -264,7 +270,7 @@
 .qrLoading { font-size: 22px; color: var(--dim); }
 .qrUrl {
   font-size: 20px; color: var(--dim); letter-spacing: .05em;
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-mono);
 }
 
 /* ── Group chips (WodSlide + TimerSlide) ── */
