@@ -17,5 +17,6 @@ export function mapResultRow(r) {
     coachNote: r.coach_note,
     flagForReview: r.flag_for_review,
     loggedByAthlete: r.logged_by_athlete,
+    createdAt: r.created_at,   // provenance (#76); undefined pre-migration
   }
 }

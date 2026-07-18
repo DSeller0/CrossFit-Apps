@@ -45,6 +45,13 @@ describe('rowToResult', () => {
     expect(r.energyLevel).toBeNull()
     expect(r.coachNote).toBeNull()
   })
+
+  test('surfaces created_at as createdAt (#76 provenance)', () => {
+    const ts = '2026-06-24T10:00:00.000Z'
+    expect(rowToResult({ ...sampleRow, created_at: ts }).createdAt).toBe(ts)
+    // undefined pre-migration rows stay undefined, not an error
+    expect(rowToResult(sampleRow).createdAt).toBeUndefined()
+  })
 })
 
 describe('resultToRow', () => {
@@ -94,6 +101,11 @@ describe('resultToRow', () => {
 
   test('missing blocks defaults to []', () => {
     expect(resultToRow({ ...sampleResult, blocks: undefined }).blocks).toEqual([])
+  })
+
+  test('never sends created_at — so upserts cannot clobber DB provenance (#76)', () => {
+    const row = resultToRow({ ...sampleResult, createdAt: '2026-01-01T00:00:00.000Z' })
+    expect('created_at' in row).toBe(false)
   })
 })
 

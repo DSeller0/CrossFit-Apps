@@ -104,7 +104,11 @@ export const saveAthletes  = d => { try { localStorage.setItem(LS_ATHLETES, JSON
 
 // ── Results ───────────────────────────────────────────────────────────────────
 export const loadResults   = () => { try { const d = localStorage.getItem(LS_RESULTS); const p = d ? JSON.parse(d) : []; return Array.isArray(p) ? p : []; } catch { return []; } };
-export const saveResults   = d => { try { localStorage.setItem(LS_RESULTS, JSON.stringify(d)); } catch {} dbSaveResults(d); };
+// Cache to localStorage only — no Supabase write. Used by the startup pull so a
+// *read* never re-upserts (#76): saveResults → dbSaveResults stamps updated_at on
+// every row, so pulling on each SPA load was rewriting all provenance timestamps.
+export const cacheResultsLS = d => { try { localStorage.setItem(LS_RESULTS, JSON.stringify(d)); } catch {} };
+export const saveResults   = d => { cacheResultsLS(d); dbSaveResults(d); };
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 export const loadSettings  = () => { try { const d = localStorage.getItem(LS_SETTINGS);  return d ? JSON.parse(d) : {}; } catch { return {}; } };
@@ -158,7 +162,8 @@ export async function syncFromSupabase() {
     out.sessions = migrated;
   }
   if (Array.isArray(athletes))   { saveAthletes(athletes);   out.athletes = athletes; }
-  if (Array.isArray(results))    { saveResults(results);     out.results  = results;  }
+  // Cache-only, never re-upsert — a pull must not rewrite every row's updated_at (#76).
+  if (Array.isArray(results))    { cacheResultsLS(results);  out.results  = results;  }
   if (events && typeof events === 'object' && !Array.isArray(events)) {
     saveEvents(events); out.events = events;
   }
