@@ -1,0 +1,35 @@
+/* Index right-rail cards (#53 Part B). Desktop rail + mobile folds; page-level layout
+   (where these sit) lives in Index.module.css — this file is the card internals only. */
+
+.rBox { background: var(--stone); border: 1px solid var(--divider); padding: 12px 14px; }
+.rTtl { font-size: 9px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; display: flex; align-items: center; gap: 7px; }
+.rTtlIc { width: 14px; height: 14px; flex-shrink: 0; stroke: var(--gold); }
+
+/* ── Esta semana ── */
+.week { display: flex; gap: 4px; }
+.wd { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 6px 0; background: var(--stone2); border: 1px solid var(--divider); min-width: 0; }
+.wdToday { background: color-mix(in srgb, var(--teal) 14%, transparent); border-color: var(--teal); }
+.wdL { font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.wdToday .wdL { color: var(--teal); }
+.wdN { font-size: 13px; font-weight: 900; color: var(--sub); }
+.wdToday .wdN { color: var(--cream); }
+.wdDot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }
+.wdDotOff { background: transparent; }
+
+/* ── Ranking de hoje ── */
+.rWod { font-size: 11px; font-weight: 900; color: var(--cream); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 2px; }
+.rWodMeta { font-size: 10px; color: var(--muted); margin-bottom: 10px; }
+.rk { display: flex; align-items: center; gap: 9px; padding: 6px 0; border-bottom: 1px solid var(--divider); }
+.rk:last-of-type { border-bottom: none; }
+.rkPos { width: 16px; height: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900; color: var(--pcol); background: color-mix(in srgb, var(--pcol) 16%, transparent); }
+.rkName { font-size: 12px; font-weight: 700; color: var(--cream); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rkScale { font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: .08em; flex-shrink: 0; }
+/* mono for the numeric readout. Uses a system-mono stack until #54/the TV build lands --font-mono. */
+.rkPerf { font-size: 12px; font-weight: 800; color: var(--teal); flex-shrink: 0; font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', monospace; font-variant-numeric: tabular-nums; }
+.rMore { display: block; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--divider); text-decoration: none; }
+.rMore:hover { color: var(--teal); }
+
+/* ── Avisos do box ── */
+.notice { display: flex; gap: 9px; align-items: flex-start; }
+.nIcon { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; stroke: var(--gold); }
+.nTxt { font-size: 12px; color: var(--sub); line-height: 1.5; }

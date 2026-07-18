@@ -3,9 +3,11 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import Nav from '../Nav.jsx'
 import s from './Index.module.css'
-import { WOD_TYPES as WOD_TYPES_ARR, blkColor } from '../lib/wod.js'
+import { WOD_TYPES as WOD_TYPES_ARR, blkColor, blkLabel, isWodBlock, rankResults, perfStr } from '../lib/wod.js'
 import { toISO } from '../lib/week.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
+import { mapResultRow } from '../lib/blobTables.js'
+import { WeekStrip, TodayRanking, BoxNotice } from './rail.jsx'
 
 // ── Constants ─────────────────────────────────────────────────────────────
 // Block-family colors are canonical in wod.js (blkColor). Index used to fork its
@@ -116,6 +118,9 @@ export default function Index() {
   const [error,       setError]       = useState(null)
   const [expandedSet, setExpandedSet] = useState(new Set())
   const [pwaShow,     setPwaShow]     = useState(false)
+  const [athletes,    setAthletes]    = useState([])          // for the rail ranking's names
+  const [todayResults,setTodayResults]= useState([])          // full results_v2 for today's session
+  const [boxWarnings, setBoxWarnings] = useState({})          // settings.boxWarnings (#53)
   const box = useMemo(() => getBoxScope(), [])   // per-box view scope (?box=)
 
   const deferredPromptRef = useRef(null)
@@ -123,14 +128,16 @@ export default function Index() {
   // ── Data loading ─────────────────────────────────────────────────────────
   async function load(attempt = 0) {
     try {
-      const [sessRes, resRaw, settRes] = await Promise.all([
+      const [sessRes, resRaw, settRes, athRes] = await Promise.all([
         sb.from('sessions').select('value').eq('id',1).maybeSingle(),
         sb.from('results_v2').select('session_id'),
         sb.from('settings').select('value').eq('id',1).maybeSingle(),
+        sb.from('athletes').select('value').eq('id',1).maybeSingle(),
       ])
       const allSessions = sessRes.data?.value || {}
       const allResults  = (resRaw.data||[]).map(r=>({sessionId:r.session_id}))
       const settings    = settRes.data?.value || {}
+      const allAthletes = athRes.data?.value || []
 
       // Theme sync from Supabase
       if (settings.theme) {
@@ -149,10 +156,21 @@ export default function Index() {
       const todaySess = (allSessions[TODAY_DK] || []).filter(s => s.public !== false && inBoxScope(s, box))
       if (todaySess.length) setExpandedSet(new Set([todaySess[0].id]))
 
+      // Rail "Ranking de hoje" needs the full result rows for today's session (the feed's
+      // count query only selects session_id). Only fetch when there's a today session.
+      let todayRes = []
+      if (todaySess.length) {
+        const { data } = await sb.from('results_v2').select('*').eq('session_id', todaySess[0].id)
+        todayRes = (data || []).map(mapResultRow)
+      }
+
       if (settings.gymName) setGymName(settings.gymName.toUpperCase())
       setGymSub(settings.gymSub || 'Cross Training')
       setSessions(allSessions)
       setCountBySess(counts)
+      setAthletes(allAthletes)
+      setTodayResults(todayRes)
+      setBoxWarnings(settings.boxWarnings || {})
       setStatus('ok')
     } catch (err) {
       if (attempt < 2) { setTimeout(() => load(attempt + 1), 2000*(attempt+1)); return }
@@ -219,6 +237,34 @@ export default function Index() {
     setPwaShow(false); localStorage.setItem('cone_pwa_dismissed', '1')
   }
 
+  // ── Rail data (#53) ─────────────────────────────────────────────────────────
+  // Top-3 of today's first in-scope WOD, ranked with the canonical rankResults/perfStr.
+  const rankData = useMemo(() => {
+    const todaySess = (sessions[TODAY_DK] || []).filter(x => x.public !== false && inBoxScope(x, box))
+    const sess = todaySess[0]
+    const wod = sess && (sess.blocks || []).find(isWodBlock)
+    if (!wod) return null
+    const nameById = Object.fromEntries((athletes || []).map(a => [a.id, a.name]))
+    const blockRes = (todayResults || []).flatMap(r =>
+      (r.blocks || []).filter(b => b.blockId === wod.id)
+        .map(b => ({ ...b, name: nameById[r.athleteId] || '—' })))
+    const ranked = rankResults(blockRes, wod.type).slice(0, 3)
+    if (!ranked.length) return null
+    const n = blockRes.length
+    return {
+      wodLabel: blkLabel(wod),
+      wodMeta: [wod.duration && `Cap ${wod.duration}'`, `${n} resultado${n !== 1 ? 's' : ''}`].filter(Boolean).join(' · '),
+      rows: ranked.map(r => ({ name: r.name, scale: r.scale, perf: perfStr(r, wod.type) })),
+      href: `leaderboard.html${box ? '?box=' + encodeURIComponent(box) : ''}`,
+    }
+  }, [sessions, todayResults, athletes, box])
+
+  // Active box warning for the current scope (Criador → settings.boxWarnings).
+  const noticeMsg = useMemo(() => {
+    const w = box ? boxWarnings[box] : boxWarnings.all
+    return (w && w.active && w.message?.trim()) ? w.message : ''
+  }, [boxWarnings, box])
+
   // ── Sessions pane content ─────────────────────────────────────────────────
   let sessionsPaneJsx
   if (status === 'loading') {
@@ -252,8 +298,31 @@ export default function Index() {
           <div className={s.brand}>{gymName}</div>
           <div className={s.hdrFoot}><div className={s.gym}>{gymSub}</div></div>
         </header>
-        <div className={s.paneLeft}>
-          {sessionsPaneJsx}
+        <div className={s.body}>
+          <div className={s.paneLeft}>
+            {/* Mobile: the rail folds into the feed — week strip on top, ranking + notice below.
+                Hidden on desktop (the aside takes over). */}
+            {status === 'ok' && (
+              <div className={`${s.mobileRail} ${s.mobileRailTop}`}>
+                <WeekStrip sessions={sessions} box={box} />
+              </div>
+            )}
+            {sessionsPaneJsx}
+            {status === 'ok' && (
+              <div className={s.mobileRail}>
+                {rankData && <TodayRanking {...rankData} />}
+                <BoxNotice message={noticeMsg} />
+              </div>
+            )}
+          </div>
+          {/* Desktop: right rail (hidden on mobile). */}
+          {status === 'ok' && (
+            <aside className={s.rail}>
+              <WeekStrip sessions={sessions} box={box} />
+              {rankData && <TodayRanking {...rankData} />}
+              <BoxNotice message={noticeMsg} />
+            </aside>
+          )}
         </div>
       </div>
 

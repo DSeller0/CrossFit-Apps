@@ -1122,6 +1122,10 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const [weekGridCollapsed, setWeekGridCollapsed] = useState(false);
   const boxLocs = useMemo(() => loadLocations().filter(l => l.type === 'box'), []);
   const [selBox, setSelBox]                 = useState('all');   // 'all' | 'none' | <locationId> — grid filter + new-session default
+  // Per-box "Avisos do box" for index.html's rail (#53 Part B). Keyed by locationId,
+  // or 'all' for a gym-wide notice. Lives in settings.value (anon-readable) because
+  // locations is anon-locked (#81) and the index is public. { [key]: {message, active} }.
+  const [boxWarnings, setBoxWarnings]       = useState(() => loadSettings().boxWarnings || {});
   const [isDirty, setIsDirty]               = useState(false);
   const [showSessNotes, setShowSessNotes]   = useState(false);
   const [undoToast, setUndoToast]           = useState(null);
@@ -1156,6 +1160,19 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     clearTimeout(undoTimerRef.current);
     setUndoToast({ msg, undoFn });
     undoTimerRef.current = setTimeout(() => setUndoToast(null), 5000);
+  };
+
+  // Read-merge-write the whole settings blob (mirrors Config.jsx) so we never clobber
+  // theme/gymName; empty-message keys are pruned to keep the blob tidy.
+  const updateWarning = (key, patch) => {
+    setBoxWarnings(prev => {
+      const merged = { ...(prev[key] || { message: '', active: false }), ...patch };
+      const next = { ...prev };
+      if (!merged.message.trim() && !merged.active) delete next[key];
+      else next[key] = merged;
+      saveSettings({ ...loadSettings(), boxWarnings: next });
+      return next;
+    });
   };
 
   // Preload
@@ -1866,6 +1883,32 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
               })}
             </div>
           )}
+          {/* Box warning — feeds index.html's "Avisos do box" rail card (#53). Contextual to
+              selBox: a box id → that box, 'all' → gym-wide notice, 'none' → hidden (no public audience). */}
+          {selBox !== 'none' && (() => {
+            const w = boxWarnings[selBox] || { message: '', active: false };
+            const scopeName = selBox === 'all' ? 'todos os boxes' : (boxLocs.find(b => b.id === selBox)?.name || 'este box');
+            const has = !!w.message.trim();
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, padding: '6px 10px', background: '#141210', border: '1px solid #2a231c', borderRadius: 6 }}>
+                <i className="ti ti-alert-triangle" style={{ color: '#d8a840', fontSize: 15, flexShrink: 0 }} />
+                <input type="text" value={w.message}
+                  onChange={e => updateWarning(selBox, { message: e.target.value })}
+                  placeholder={`Aviso para ${scopeName} — aparece na tela inicial`}
+                  style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', color: '#e8e2d4', fontSize: 12, fontFamily: 'inherit', outline: 'none' }} />
+                <button type="button" disabled={!has}
+                  onClick={() => updateWarning(selBox, { active: !w.active })}
+                  title={has ? (w.active ? 'Aviso visível — clique para ocultar' : 'Aviso oculto — clique para exibir') : 'Escreva uma mensagem primeiro'}
+                  style={{ flexShrink: 0, padding: '3px 10px', borderRadius: 4, fontSize: 10, fontWeight: 700, fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '.06em',
+                    cursor: has ? 'pointer' : 'not-allowed', opacity: has ? 1 : .5,
+                    border: `1px solid ${w.active && has ? '#4ac8c0' : '#2a231c'}`,
+                    background: w.active && has ? 'rgba(74,200,192,.12)' : 'transparent',
+                    color: w.active && has ? '#4ac8c0' : '#806850' }}>
+                  {w.active && has ? '● Ativo' : 'Inativo'}
+                </button>
+              </div>
+            );
+          })()}
           {weekGridCollapsed ? (
             <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 4 }}>
               {weekDates.map((date, di) => {

@@ -3,6 +3,8 @@ import { ExerciseList } from '../shared/ExerciseList.jsx'
 import RankList from '../shared/RankList.jsx'
 import AccordionCard from '../shared/AccordionCard.jsx'
 import Nav from '../Nav.jsx'
+import { WeekStrip, TodayRanking, BoxNotice } from '../index/rail.jsx'
+import { getWeek, toISO } from '../lib/week.js'
 import RdCounter from '../schedule/RdCounter.jsx'
 import DemoPanel from '../schedule/DemoPanel.jsx'
 import LogPane from '../schedule/LogPane.jsx'
@@ -426,6 +428,18 @@ function AthletePickerDemo({ variant, athletes }) {
       query={query} onQuery={setQuery} onSelect={setSel} onClear={() => setSel(null)} />
   )
 }
+
+// ── Mock fixtures — index/ rail (#53) ──
+// Sessions on Mon–Fri of the current week so WeekStrip shows dots; today is whatever it is.
+const idxWeek = getWeek(0)
+const idxSessions = Object.fromEntries(
+  [1, 2, 3, 4, 5].map(i => [toISO(idxWeek[i]), [{ id: 's' + i, public: true }]])
+)
+const idxRankRows = [
+  { name: 'Bruna', scale: 'RX',    perf: '7:42' },
+  { name: 'Léo',   scale: 'RX',    perf: '8:13' },
+  { name: 'Ana',   scale: 'Inter', perf: '9:05' },
+]
 
 // Exported for scripts/design-cards-entry.jsx: `npm run design:cards` SSRs these same
 // items into the Claude Design cards, so the cards cannot drift from the gallery.
@@ -1192,6 +1206,50 @@ export const GROUPS = [
                   checkinAnonName="" onCheckinAnonName={NOOP}
                   checkinSubmitting={false} onSubmit={NOOP} onClose={NOOP} />
               </FixedFrame>
+            </Case>
+          </Section>
+        ),
+      },
+    ],
+  },
+  {
+    group: 'Index',
+    items: [
+      {
+        id: 'weekstrip',
+        label: 'WeekStrip',
+        render: () => (
+          <Section title="WeekStrip" sub="src/public/index/rail.jsx — faixa da semana (começa no Dom); um ponto marca os dias com sessão pública no escopo; hoje destacado em teal.">
+            <Case label="Semana atual">
+              <div style={{ maxWidth: 300 }}><WeekStrip sessions={idxSessions} box={null} /></div>
+            </Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'todayranking',
+        label: 'TodayRanking',
+        render: () => (
+          <Section title="TodayRanking" sub="src/public/index/rail.jsx — top-3 do WOD de hoje (rankResults/perfStr canônicos). Tempos em mono. Não renderiza sem WOD ou sem resultados.">
+            <Case label="Com resultados">
+              <div style={{ maxWidth: 300 }}><TodayRanking wodLabel="Fran · For Time" wodMeta="Cap 12' · 8 resultados" rows={idxRankRows} href="leaderboard.html" /></div>
+            </Case>
+            <Case label="Sem resultados → não renderiza (vazio proposital)">
+              <div style={{ maxWidth: 300 }}><TodayRanking rows={[]} /></div>
+            </Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'boxnotice',
+        label: 'BoxNotice',
+        render: () => (
+          <Section title="BoxNotice" sub="src/public/index/rail.jsx — aviso do box (Criador → settings.boxWarnings). Não renderiza sem mensagem ativa.">
+            <Case label="Com aviso">
+              <div style={{ maxWidth: 300 }}><BoxNotice message="Sem aula 18h hoje — feriado municipal. Sexta extra amanhã às 9h." /></div>
+            </Case>
+            <Case label="Sem aviso → não renderiza">
+              <div style={{ maxWidth: 300 }}><BoxNotice message="" /></div>
             </Case>
           </Section>
         ),

@@ -13,6 +13,13 @@
 .layout { }
 .paneLeft { padding: 16px 16px 90px; }
 
+/* Right rail (#53) — desktop-only aside; on mobile its cards fold into the feed
+   via .mobileRail. */
+.body { }
+.rail { display: none; }
+.mobileRail { display: flex; flex-direction: column; gap: 10px; margin: 8px 0 4px; }
+.mobileRailTop { margin: 0 0 16px; }
+
 /* ── Day label ── */
 .dayLblRow { display: flex; align-items: center; gap: 10px; margin: 16px 0 8px; }
 .dayLblRow:first-child { margin-top: 0; }
@@ -90,9 +97,12 @@
   .loading { font-size: 13px; } .errorMsg { font-size: 16px; }
   .pwaTitle { font-size: 16px; } .pwaSub { font-size: 13px; }
 
-  /* Desktop: sidebar offset + left-aligned feed column */
+  /* Desktop: sidebar offset + feed column + right rail */
   .layout { margin-left: 220px; min-height: 100vh; background: var(--stone); }
-  .paneLeft { max-width: 560px; margin-left: 28px; min-height: 100vh; padding: 16px 16px 40px; }
+  .body { display: flex; align-items: flex-start; gap: 28px; padding-left: 28px; }
+  .paneLeft { flex: 1 1 0; max-width: 560px; min-height: 100vh; padding: 16px 16px 40px; }
+  .mobileRail { display: none; }
+  .rail { display: flex; flex-direction: column; gap: 14px; flex: 0 0 300px; padding-top: 16px; }
   .hdr { position: sticky; top: 0; }
 
   .pwaBanner { left: 220px; bottom: 16px; right: 0; }
