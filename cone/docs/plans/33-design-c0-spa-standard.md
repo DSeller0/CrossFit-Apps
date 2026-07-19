@@ -1,0 +1,115 @@
+# 33 — #54 · Design pass C0 — the SPA design standard (starts the C-program)
+
+## Context
+The public-page design program (B1–B4, #50–#53) is done: public hex ≈ 0, radius 0,
+FOUC 0/9. The debt has **migrated into the SPA** (`src/components/**`) and is
+*growing* — `Criador.jsx` 84→102 hex, `Servicos.jsx` 64→75 (2026-07-18 review). The
+SPA has a **button zoo** (45 uses of global `b`/`bsm`/`tb-btn`/`btn` classes across
+5 files, no component behind them), **three divergent confirm blocks** (public
+`Results.jsx` "Confirmar registro"/"Cancelar"/"Confirmar"; `Schedule.jsx` DeskRegPane
+"Revisar registro"/"← Editar"/"Registrar ✓"; LogPane "Confirmar ✓"), no shared input
+or masked-time component, and no card/spacing standard.
+
+**C0 defines that standard once so C1–C5 (#55–#59) apply it** instead of re-inventing
+a button style per page. This plan also answers the question — **how to properly
+start the SPA design pass.**
+
+## How to start the SPA design pass (the recommendation)
+1. **C0 first, standalone. Do not touch a single tab until the standard exists.**
+   Starting with a page (C1) before C0 just reproduces the zoo per-page.
+2. **C0 is the program's only mockup-first item** (plans/16 rule 1: "Only C0 and #43
+   are Lane B"). So it runs in **two phases**:
+   - **Phase 1 — ideation (this session's execution):** inventory the SPA's current
+     button/input/card/modal variants → define the token-based standard → ASCII
+     sketch → self-contained preview cards in `cone/design/` (inline CSS, first line
+     `<!-- @dsCard group="…" -->`) → **DesignSync** → **STOP at the approval gate.**
+     Do not build components, do not touch tabs, do not self-certify "approved."
+   - **Phase 2 — build (a later session, after the user approves the mockup):** build
+     the primitives, add them to the gallery, `npm run design:cards`, ship C0.
+3. **Then C1→C5, in order, each Lane A (gallery-first):** C1 (#55 Exercícios/Config/
+   Agenda) · C2 (#56 Atletas/Serviços) · C3 (#57 Resultados) · C4 (#58 — **#26 Criador
+   decomposition first**) · C5 (#59 — **#25 Publicador decomposition first**). Each
+   folds in its page's hex→token / radius / mechanical-a11y slice (plans/16 rule 2).
+4. **After C5:** #43 (themes) needs a token-clean codebase; then **#14's site-wide
+   a11y residue** (landmarks/heading architecture, live regions, contrast roles) —
+   the pieces no single page owns. Keeping #14 here (not folded into C0) is the user's
+   call and matches plans/16 rule 5.
+
+## Acceptance (Phase 1 — ideation, this item)
+1. A written SPA design standard covering: **button hierarchy** (primary / secondary /
+   destructive / ghost), **input**, **card**, **spacing scale**, and **confirm-modal
+   policy** — every value a `themes.css` token, zero hardcoded hex.
+2. Preview cards in `cone/design/` for the net-new primitives (Button set, Input +
+   MaskedTime, ConfirmReview, Card), rendering their states across **4 themes**,
+   synced to the Cone Design System.
+3. The **primitive-location + gallery decision** recorded (see Approach §4).
+4. Run **stops at the approval gate** with the mockup synced — no primitives built,
+   no tab touched.
+
+## Files (Phase 1 — mostly reading + `cone/design/` cards)
+- Read to inventory: `src/components/tabs/*.jsx` (button/input classes), the three
+  confirm blocks (`src/public/results/LogForm.jsx` or `Results.jsx`,
+  `src/public/schedule/DeskRegPane.jsx` + `LogPane.jsx`), `src/index.css` /
+  `App.css` global `.b`/`.tb-btn` rules, `themes.css` (token inventory).
+- Write: preview cards in `cone/design/` + this plan + BACKLOG note.
+- **No `src/**` component files in Phase 1.**
+
+## Approach
+1. **Inventory the zoo (concrete census).** Enumerate every button variant (`b`,
+   `bsm`, `tb-btn`, `tb-save`, `tb-load`, inline-styled buttons), input pattern
+   (placeholder-only vs `<label>`, the `ex-input` class, masked vs raw time), card
+   surfaces, and the 3 confirm blocks with their exact labels/casing. This census is
+   the standard's evidence base and seeds C1–C5's per-page work.
+2. **Define the standard from tokens.** Button hierarchy → primary (`--gold`/accent),
+   secondary (outline `--border`), destructive (`--red`-family, currently the
+   ad-hoc `#6a1a1a`/`#d05050` in `App.jsx:337`), ghost (text-only). Input: real
+   `<label htmlFor>`, token borders, focus-visible ring. Card: `--stone`/`--stone2`
+   surface, `--border`/`--divider`, **minimal radius** (SPA rule) — no pills. Spacing:
+   a small token scale. **Confirm-modal policy:** one `ConfirmReview` shell + one set
+   of canonical pt-BR labels (recommend "Revisar" / "Editar" / "Confirmar", settle
+   in-session) replacing all three forks.
+3. **Bake accessibility into the primitives** (this is what makes deferring #14 safe):
+   an icon-only `Button` **requires** an accessible label prop; `ConfirmReview` traps
+   focus + closes on Escape; `Input`/`MaskedTime` render a real `<label htmlFor>`.
+   Every C1–C5 page that adopts a primitive then inherits its a11y for free — so
+   #14's remaining scope shrinks to the genuinely site-wide residue.
+4. **Primitive location + gallery decision (record it).** The gallery
+   (`src/public/gallery/`) imports only `src/public/**` and runs on the **public** dev
+   server, so any primitive it renders must be **client-free** (no `src/utils/
+   supabase.js` import) or it breaches the dual-client rule. **Recommendation:**
+   - Cross-surface primitives (`ConfirmReview`, `MaskedTimeInput` — both have public
+     consumers too: the confirm forks are on public pages, #35 rolls masked-time out
+     to public timer/schedule inputs) → **`src/public/shared/`** (client-free by rule,
+     already the gallery's turf; plans/20 explicitly parked `ConfirmReview` for C0).
+   - SPA-chrome primitives (`Button`, `Input`, `Card`) → new **`src/components/ui/`**,
+     kept client-free, added to the gallery as a new **"SPA / UI"** group (verify the
+     import chain pulls in no client — open `gallery.html` after, since no CI gate
+     catches a broken/heavy gallery import).
+5. **Absorb #35** — the masked mm:ss input is the `MaskedTimeInput` primitive here;
+   its *rollout* to every time input rides C1–C5 + the B sessions per #35's row.
+6. **Sketch → cards → sync → STOP.** ASCII first, then the `cone/design/` cards,
+   then DesignSync, then hand back. Phase 2 (build) is a separate promoted session.
+
+## Decisions to settle in-session (recommendations noted)
+- Confirm-modal canonical labels/casing (rec. "Revisar"/"Editar"/"Confirmar").
+- Button hierarchy names + which tokens map to destructive (define a `--danger` role,
+  or reuse an existing red-family value — record it, since themes.css has no explicit
+  danger token today).
+- Does `Button` **wrap** the global `.b`/`.tb-btn` classes (migrate incrementally) or
+  **replace** them (C1–C5 delete the classes as they adopt)? Rec. replace, page-by-page.
+- Primitive locations per §4.
+
+## Out of scope
+- Applying the standard to any tab (C1–C5 own that).
+- `#26`/`#25` decomposition (ride C4/C5).
+- `#14` site-wide a11y residue (own post-C5 session, per the user).
+- Building the primitives (Phase 2 — after approval).
+
+## Verification (Phase 1)
+- Preview cards render in `cone/design/` across all 4 themes (open them; the `ti`
+  webfont won't load in a card — expected, note it on the card).
+- DesignSync succeeds; the Cone Design System shows the new cards.
+- **Stop.** The acceptance test for Phase 1 is "states synced, handed back" — not a
+  build or a test run (no code changed yet).
+
+Model: Opus · Size: M (Phase 1 ideation; Phase 2 build is a follow-up promotion)
