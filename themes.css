@@ -30,6 +30,17 @@
   --podium-1:#d8a840;--podium-2:#b8b8c4;--podium-3:#c07840;
 }
 
+/* ── SPA geometry (#54/C0) — theme-INVARIANT, so they live only here in :root,
+   not in the per-theme blocks: spacing/radius don't change with the palette, and
+   keeping them out of the theme classes preserves the "30 color/font tokens per
+   theme" invariant the palette card counts. Every page loads themes.css, so the
+   src/public/shared primitives (ConfirmReview, MaskedTimeInput) inherit them too. */
+:root{
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;
+  --radius-sm:4px;   /* buttons, inputs */
+  --radius-md:6px;   /* cards, modals — "minimal", not the public-page zero */
+}
+
 /* ── TotK Dark ───────────────────────────────────────────────────────────── */
 html.theme-totk-dark{
   --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;

@@ -141,6 +141,16 @@ export function fmtSecs(s) {
   return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`
 }
 
+// mm:ss input mask — powers MaskedTimeInput (#54/C0). Keeps digits only (max 4 →
+// up to 99:99, ample for a WOD cap) and fills seconds from the right as the coach
+// types: '1'→'1', '123'→'1:23', '1234'→'12:34', '12:34'→'12:34'. A mask, not a
+// validator — it never rejects impossible seconds, downstream toSecs() reads it.
+export function maskMMSS(raw) {
+  const d=String(raw??'').replace(/\D/g,'').slice(0,4)
+  if(d.length<=2) return d
+  return d.slice(0,d.length-2)+':'+d.slice(d.length-2)
+}
+
 export function rankResults(results, blType) {
   const isForTime=isTimeBlock(blType)
   return [...results].sort((a,b)=>{

@@ -1,0 +1,20 @@
+/* SPA Card (#54/C0). Token-only surface. */
+.card{
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+}
+.stone{background:var(--stone)}
+.stone2{background:var(--stone2);border-color:var(--divider)}
+
+.pad-md{padding:var(--sp-4)}
+.pad-sm{padding:var(--sp-3)}
+.pad-none{padding:0}
+
+.title{
+  font-size:10px;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:600;
+  margin-bottom:var(--sp-3);
+}

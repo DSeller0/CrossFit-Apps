@@ -1,0 +1,68 @@
+/* ConfirmReview (#54/C0). Token-only shell; one backdrop opacity for all confirms. */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  z-index:600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.modal{
+  background:var(--stone);
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  width:300px;
+  max-width:100%;
+  padding:var(--sp-4);
+  box-shadow:0 8px 40px rgba(0,0,0,.5);
+  outline:none;
+}
+.title{
+  font-size:13px;
+  font-weight:700;
+  color:var(--cream);
+  margin-bottom:var(--sp-3);
+  letter-spacing:.02em;
+}
+.body{margin-bottom:var(--sp-4)}
+.err{font-size:12px;color:var(--err);margin-bottom:var(--sp-3)}
+
+.btns{display:flex;gap:var(--sp-2)}
+.btn{
+  flex:1;
+  font-family:var(--font);
+  font-size:13px;
+  line-height:1;
+  min-height:40px;
+  padding:0 14px;
+  border:1px solid transparent;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  transition:filter .12s,background .12s,color .12s,border-color .12s;
+}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+
+.edit{background:transparent;color:var(--sub);border-color:var(--border)}
+.edit:hover:not(:disabled){background:var(--stone2);color:var(--cream);border-color:var(--dim)}
+
+.confirm{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
+.confirm:hover:not(:disabled){filter:brightness(1.08)}
+.confirm:active:not(:disabled){filter:brightness(.94)}
+
+/* Read-back rows — the shape the 3 forks share (Bloco/Escala/RPE/Resultado). */
+.readbox{
+  background:var(--stone2);
+  border:1px solid var(--divider);
+  border-radius:var(--radius-sm);
+  padding:var(--sp-3);
+}
+.wodline{font-size:12px;font-weight:700;color:var(--cream);margin-bottom:var(--sp-2);letter-spacing:.02em}
+.row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
+.rowLbl{color:var(--muted)}
+.rowVal{color:var(--sub);font-weight:600}
+.rowVal.mono{font-family:var(--font-mono)}

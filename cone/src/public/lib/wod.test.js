@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { blkLabel, exVolStr, toSecs, fmtSecs, rankResults, perfStr, groupProgressionSteps } from './wod.js'
+import { blkLabel, exVolStr, toSecs, fmtSecs, maskMMSS, rankResults, perfStr, groupProgressionSteps } from './wod.js'
 
 describe('blkLabel', () => {
   test('label and type differ → label · type', () => {
@@ -134,6 +134,19 @@ describe('fmtSecs', () => {
   test('round-trips with toSecs', () => {
     expect(fmtSecs(toSecs('12:45'))).toBe('12:45')
   })
+})
+
+describe('maskMMSS', () => {
+  test('empty stays empty', () => expect(maskMMSS('')).toBe(''))
+  test('one digit', () => expect(maskMMSS('1')).toBe('1'))
+  test('two digits (minutes being typed)', () => expect(maskMMSS('12')).toBe('12'))
+  test('three digits fill seconds from the right', () => expect(maskMMSS('123')).toBe('1:23'))
+  test('four digits → MM:SS', () => expect(maskMMSS('1234')).toBe('12:34'))
+  test('re-masking an already-masked value is stable', () => expect(maskMMSS('12:34')).toBe('12:34'))
+  test('caps at 4 digits (99:99 ceiling)', () => expect(maskMMSS('12345')).toBe('12:34'))
+  test('strips non-digits', () => expect(maskMMSS('a1b2c3')).toBe('1:23'))
+  test('null/undefined → empty', () => { expect(maskMMSS(null)).toBe(''); expect(maskMMSS(undefined)).toBe('') })
+  test('does not validate — 999 → 9:99', () => expect(maskMMSS('9:99')).toBe('9:99'))
 })
 
 describe('rankResults', () => {

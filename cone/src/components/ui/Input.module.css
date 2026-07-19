@@ -1,0 +1,37 @@
+/* SPA Input (#54/C0). Token-only. One focus-visible ring for the whole app. */
+.field{display:flex;flex-direction:column;gap:5px}
+
+.label{
+  font-size:10px;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:600;
+}
+
+.control{
+  font-family:var(--font);
+  font-size:16px;              /* 16px = iOS won't zoom the viewport on focus */
+  padding:9px 11px;
+  width:100%;
+  background:var(--bg);
+  color:var(--text);
+  border:1px solid var(--divider);
+  border-radius:var(--radius-sm);
+  outline:none;
+  -webkit-appearance:none;
+  appearance:none;
+  transition:border-color .15s,box-shadow .15s;
+}
+.control::placeholder{color:var(--dim)}
+.control:hover{border-color:var(--dim)}
+.control:focus-visible{border-color:var(--sub);outline:2px solid var(--accent);outline-offset:1px}
+.control:disabled{opacity:.5;cursor:not-allowed}
+
+.errored{border-color:var(--err)}
+.errored:focus-visible{border-color:var(--err);outline-color:var(--err)}
+
+textarea.control{resize:vertical;min-height:60px;font-size:14px;line-height:1.5}
+
+.error{font-size:11px;color:var(--err)}
+.hint{font-size:11px;color:var(--muted)}
