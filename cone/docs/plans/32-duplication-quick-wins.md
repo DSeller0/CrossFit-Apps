@@ -1,5 +1,7 @@
 # 32 — #83 · Duplication quick-wins (byte-identical forks)
 
+> ✅ Done: 5a3da38 · 2026-07-19 — see BACKLOG.md
+
 ## Context
 The 2026-07-18 code sweep found three families of byte-identical constant forks
 whose canonical already exists in `src/public/lib/**`. All mechanical, no decision —
