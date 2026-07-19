@@ -1,0 +1,1 @@
+import{s as e}from"./week-M83I82aa.js";function t(e){return e?.mainTraining?Array.isArray(e.mainTraining)?e.mainTraining:[e.mainTraining]:[]}function n(e,n){return t(e).includes(n)}function r(n,r){if(n?.sessionName||n?.name)return n.sessionName||n.name;let i=t(n);return(i.length?i.join(`, `):null)||(r?e(r):`Sessão`)}export{n,r,t};
