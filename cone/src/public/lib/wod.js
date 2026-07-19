@@ -65,6 +65,10 @@ export function blkLabel(bl) {
   return l&&t&&l!==t?`${l} · ${t}`:l||t||''
 }
 
+// Timer/TV mode display label — Timer.jsx and tv/slides.jsx both hand-rolled
+// this identically before consolidation.
+export const MODE_LBL = { 'For Time':'FOR TIME', AMRAP:'AMRAP', EMOM:'EMOM', Benchmark:'BENCHMARK', 'Estações':'ESTAÇÕES' }
+
 // Progression rep scheme as one glanceable string, for surfaces (TV) that show
 // a single line rather than ExRow's per-step grouped rows: "5×5" when the
 // grouped steps share one rep count, "5-3-1" when the ladder varies per step.

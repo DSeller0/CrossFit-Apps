@@ -12,6 +12,7 @@ import {
 import { APP_CONFIG, ZONES, BTC, PLC, ECOL } from '../../utils/config';
 import { BENCHMARK_GIRLS, BENCHMARK_HEROES, buildBenchmarkBlock } from '../../public/lib/benchmarks.js';
 import { resolveExercise } from '../../public/lib/registry.js';
+import { DAY_PT } from '../../public/lib/week.js';
 import IntensityInput from '../shared/IntensityInput';
 
 
@@ -1415,7 +1416,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     return Array.from({ length: 7 }, (_, i) => { const w = new Date(d); w.setDate(d.getDate() + i); return w; });
   };
   const weekDates = getSundayWeek(weekOffset);
-  const WEEK_DAYS = ['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
+  const WEEK_DAYS = DAY_PT;
   const totalSessions = Object.values(sessions).flat().length;
   // Box grid filter: 'all' shows everything, 'none' shows only box-less sessions, an id shows that box.
   const boxFilter = s => selBox === 'all' ? true : selBox === 'none' ? !s.locationId : (s.locationId || null) === selBox;

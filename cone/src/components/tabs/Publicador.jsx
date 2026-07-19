@@ -8,7 +8,7 @@ import { APP_CONFIG, ZONES, ECOL, DSHORT, PLC, GF } from '../../utils/config';
 import { buildPixPayload } from '../../utils/pix';
 import PresenterView from '../PresenterView';
 import { exVolStr, fmtIntensity, groupProgressionSteps } from '../../public/lib/wod.js';
-import { MONTH_PT, DAY_PT_TITLE } from '../../public/lib/week.js';
+import { MONTH_PT, DAY_PT, DAY_PT_TITLE } from '../../public/lib/week.js';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
@@ -284,7 +284,6 @@ function WeeklyExportView({ sessions, label, year, month, onDayClick }) {
 // ── WeeklyCalendarExportView — 1920×1080 single week Mon-Fri ─────────────────
 function WeeklyCalendarExportView({ sessions, label, year, month, gymName, logoDataUrl, logoScale, fontScale, weekDates, wkColors }) {
   const wk = wkColors || {};
-  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   const ls = logoScale || 1;
   const fs = fontScale || 1;
   const today = new Date();
@@ -305,7 +304,7 @@ function WeeklyCalendarExportView({ sessions, label, year, month, gymName, logoD
       ),
       React.createElement('div', { style: { textAlign: 'right' } },
         React.createElement('div', { style: { fontSize: `calc(32px * var(--fs,1))`, fontWeight: 900, color: wk.header || '#e87820', textTransform: 'uppercase', letterSpacing: '.1em', lineHeight: 1 } }, weekLabel),
-        React.createElement('div', { style: { fontSize: `calc(18px * var(--fs,1))`, color: wk.dateNum || '#666', marginTop: '4px', letterSpacing: '.06em', textTransform: 'uppercase' } }, monthNames[midDate.getMonth()] + ' ' + midDate.getFullYear()),
+        React.createElement('div', { style: { fontSize: `calc(18px * var(--fs,1))`, color: wk.dateNum || '#666', marginTop: '4px', letterSpacing: '.06em', textTransform: 'uppercase' } }, MONTH_PT[midDate.getMonth()] + ' ' + midDate.getFullYear()),
         label && React.createElement('div', { style: { fontSize: `calc(14px * var(--fs,1))`, color: '#444', marginTop: '2px', letterSpacing: '.06em', textTransform: 'uppercase' } }, label)
       )
     ),
@@ -361,8 +360,7 @@ function WeeklyCalendarExportView({ sessions, label, year, month, gymName, logoD
 function CalendarExportView({ sessions, label, year, month, gymName, logoDataUrl, logoScale, fontScale, wkColors }) {
   const wk = wkColors || {};
   const weeks = getWeeksOfMonth(year, month);
-  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-  const monthName = monthNames[month];
+  const monthName = MONTH_PT[month];
   const today = new Date();
   const ls = logoScale || 1;
   const SHOW_DAYS = [1, 2, 3, 4, 5];
@@ -575,7 +573,7 @@ function MobileMegaManExportView({ sessions, selectedDate, currentWeekDates, gym
 function MobileWeeklySingleDay({ date, sessions, f, col, variant }) {
   const dateKey = toISO(date);
   const s = (sessions[dateKey] || [])[0] || null;
-  const dow = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'][date.getDay()];
+  const dow = DAY_PT[date.getDay()];
   const dateNum = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
   const restLabel = APP_CONFIG.restDayLabel || 'Descanso';
   const pad = Math.round(18 * f);
@@ -617,7 +615,6 @@ function MobileWeeklySingleDay({ date, sessions, f, col, variant }) {
 
 // ── MobileWeeklyExportView ────────────────────────────────────────────────────
 function MobileWeeklyExportView({ sessions, gymName, logoDataUrl, logoScale, fontScale, weekDates, variant }) {
-  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   const f = fontScale || 1;
   const ls = logoScale || 1;
   const pad = Math.round(22 * f);
@@ -639,7 +636,7 @@ function MobileWeeklyExportView({ sessions, gymName, logoDataUrl, logoScale, fon
       ),
       React.createElement('div', { style: { textAlign: 'right' } },
         React.createElement('div', { style: { fontSize: mfs(16, f), fontWeight: 900, color: accent, textTransform: 'uppercase', letterSpacing: '.1em', fontFamily } }, weekLabel),
-        React.createElement('div', { style: { fontSize: mfs(12, f), color: isA ? '#3a8a80' : '#3a6a80', marginTop: mfs(2, f), textTransform: 'uppercase', letterSpacing: '.06em', fontFamily } }, monthNames[midDate.getMonth()] + ' ' + midDate.getFullYear())
+        React.createElement('div', { style: { fontSize: mfs(12, f), color: isA ? '#3a8a80' : '#3a6a80', marginTop: mfs(2, f), textTransform: 'uppercase', letterSpacing: '.06em', fontFamily } }, MONTH_PT[midDate.getMonth()] + ' ' + midDate.getFullYear())
       )
     ),
     orderedDays.map((date, i) =>
@@ -812,7 +809,6 @@ function ReportModal({ events, sessions, onClose }) {
   const [showHeader, setShowHeader] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [showPix, setShowPix] = useState(false);
-  const MONTHS_PT = MONTH_PT;
 
   function filteredEvents() {
     const from = useRange ? rangeFrom : `${yr}-${String(mo + 1).padStart(2, '0')}-01`;
@@ -874,7 +870,7 @@ function ReportModal({ events, sessions, onClose }) {
         const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         const evs = filteredEvents();
         const groups = groupByLocation(evs);
-        const period = useRange ? `${fmtDate(rangeFrom)} – ${fmtDate(rangeTo)}` : MONTHS_PT[mo] + ' ' + yr;
+        const period = useRange ? `${fmtDate(rangeFrom)} – ${fmtDate(rangeTo)}` : MONTH_PT[mo] + ' ' + yr;
         const gymName = gymCfg.gymName || 'Cone';
         let y = 15;
         if (showHeader) {
@@ -937,7 +933,7 @@ function ReportModal({ events, sessions, onClose }) {
             const cap = coach.pixTestCap && Number(coach.pixTestCap) > 0 ? Number(coach.pixTestCap) : null;
             const payAmount = cap && t.total > cap ? cap : t.total;
             const isCapped = cap && t.total > cap;
-            const prd = useRange ? `${fmtDate(rangeFrom)}-${fmtDate(rangeTo)}` : (MONTHS_PT[mo].substring(0, 3) + yr).replace(/\s/g, '');
+            const prd = useRange ? `${fmtDate(rangeFrom)}-${fmtDate(rangeTo)}` : (MONTH_PT[mo].substring(0, 3) + yr).replace(/\s/g, '');
             const desc = `${name} ${prd}`.slice(0, 72);
             const txid = (name.replace(/\s/g, '').slice(0, 10) + String(mo + 1).padStart(2, '0') + yr).slice(0, 25);
             const pixPayload = buildPixPayload({ pixKey: coach.pixKey, merchantName: coach.name || gymName, merchantCity: coach.cidade || 'BRASIL', amount: payAmount, description: desc, txid });
@@ -979,7 +975,7 @@ function ReportModal({ events, sessions, onClose }) {
         React.createElement('div', { style: { fontSize: '10px', fontWeight: 700, color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '6px' } }, 'Período'),
         React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' } },
           React.createElement('button', { type: 'button', onClick: () => { if (mo === 0) { setMo(11); setYr(y => y - 1); } else setMo(m => m - 1); }, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer' } }, '‹'),
-          React.createElement('span', { style: { flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 700, color: '#c8b090' } }, MONTHS_PT[mo] + ' ' + yr),
+          React.createElement('span', { style: { flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 700, color: '#c8b090' } }, MONTH_PT[mo] + ' ' + yr),
           React.createElement('button', { type: 'button', onClick: () => { if (mo === 11) { setMo(0); setYr(y => y + 1); } else setMo(m => m + 1); }, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer' } }, '›')
         ),
         React.createElement('label', { style: { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#887060', cursor: 'pointer' } },
@@ -1099,8 +1095,6 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
   const isMobile = useIsMobile(800);
 
   const todayISO = toISO(new Date());
-  const MONTHS_PT = MONTH_PT;
-  const DAYS_PT_SHORT = DAY_PT_TITLE;
   const BLOCK_C = { 'Força': '#d8a840', 'LPO': '#4ac8c0', 'For Time': '#e87820', 'Core': '#68d8a0', 'Acessórios': '#c884f0', 'AMRAP': '#e87820', 'Cardio': '#64b5f6', 'EMOM': '#ff8a65', 'WOD': '#e87820', 'HIIT': '#ff6d00' };
   const mobileWeeks = getWeeksOfMonth(year, month);
 
@@ -1363,7 +1357,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
     return React.createElement('div', { className: 'rp-sticktop pub-mobile-hdr' },
       React.createElement('div', { className: 'rp-month-nav' },
         React.createElement('button', { type: 'button', className: 'rp-nav-btn', onClick: prevMonth }, '‹'),
-        React.createElement('span', { className: 'rp-month-label' }, `${MONTHS_PT[month]} ${year}`),
+        React.createElement('span', { className: 'rp-month-label' }, `${MONTH_PT[month]} ${year}`),
         React.createElement('button', { type: 'button', className: 'rp-nav-btn', onClick: nextMonth }, '›')
       ),
       React.createElement('div', { className: 'rp-weeks' },
@@ -1401,7 +1395,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
         const allCards = [...gymSessions.map(s => ({ kind: 'session', data: s })), ...evs.map(ev => ({ kind: 'event', data: ev }))];
         return React.createElement('div', { key: iso, className: 'pub-day-row', style: { opacity: inMonth ? 1 : .28 }, onClick: () => { if (inMonth) setSelDay(iso); } },
           React.createElement('div', { className: 'pub-day-left' },
-            React.createElement('div', { className: 'pub-day-name', style: { color: isToday ? 'var(--theme-accent)' : '#806850' } }, DAYS_PT_SHORT[date.getDay()]),
+            React.createElement('div', { className: 'pub-day-name', style: { color: isToday ? 'var(--theme-accent)' : '#806850' } }, DAY_PT_TITLE[date.getDay()]),
             isToday
               ? React.createElement('div', { className: 'pub-day-num today' }, date.getDate())
               : React.createElement('div', { className: 'pub-day-num' }, date.getDate())
@@ -1447,7 +1441,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
     return React.createElement('div', { className: 'agenda-header', style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderBottom: '1px solid #2a2318', flexWrap: 'wrap', flexShrink: 0 } },
       React.createElement('button', { onClick: prevMonth, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '16px', lineHeight: 1 } }, '‹'),
       React.createElement('button', { onClick: () => setShowReport(true), style: { background: 'rgba(216,168,64,.1)', border: '1px solid rgba(216,168,64,.3)', color: '#d8a840', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' } }, React.createElement('i', { className: 'ti ti-file-analytics' }), ' Relatório'),
-      React.createElement('span', { style: { fontSize: '14px', fontWeight: 700, color: '#c8b090', flex: '1 1 100px', minWidth: '80px', textTransform: 'uppercase', letterSpacing: '.03em' } }, `${MONTHS_PT[month]} ${year}`),
+      React.createElement('span', { style: { fontSize: '14px', fontWeight: 700, color: '#c8b090', flex: '1 1 100px', minWidth: '80px', textTransform: 'uppercase', letterSpacing: '.03em' } }, `${MONTH_PT[month]} ${year}`),
       React.createElement('button', { onClick: nextMonth, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '16px', lineHeight: 1 } }, '›'),
       React.createElement('button', { onClick: () => { const now = new Date(); setMonth(now.getMonth()); setYear(now.getFullYear()); setSelDay(now.toISOString().slice(0, 10)); }, style: { background: 'transparent', border: '1px solid #2a2318', color: '#887060', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer', fontSize: '11px', fontWeight: 700 } }, 'Hoje'),
       React.createElement('div', { className: 'agenda-stats', style: { display: 'flex', gap: '8px', fontSize: '11px', flexWrap: 'wrap' } },
@@ -1465,7 +1459,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
     return React.createElement('div', { style: { display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' } },
       React.createElement('div', { style: { flex: selDay ? '0 0 60%' : '1', minWidth: 0, overflowY: 'auto', borderRight: selDay ? '1px solid #2a2318' : 'none' } },
         React.createElement('div', { className: 'agenda-day-hdrs', style: { display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', borderBottom: '1px solid #2a2318', position: 'sticky', top: 0, background: '#0d0b08', zIndex: 2 } },
-          DAYS_PT_SHORT.map(d => React.createElement('div', { key: d, className: 'agenda-day-hdr' }, d))
+          DAY_PT_TITLE.map(d => React.createElement('div', { key: d, className: 'agenda-day-hdr' }, d))
         ),
         weeks.map((week, wi) => React.createElement('div', { key: wi, className: 'agenda-week-row', style: { display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', borderBottom: '1px solid #2a2318' } },
           week.map((day, di) => day
@@ -1726,7 +1720,6 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
     ? Object.fromEntries(Object.entries(sessions).map(([k, v]) => [k, v.filter(s => matchesAthlete(s, filterAthlete.name))]))
     : sessions;
   const allSessionDates = Object.keys(filteredSessions).filter(k => filteredSessions[k]?.length > 0).sort();
-  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
   if (!hasAny) return React.createElement('div', { className: 'empty2' },
     React.createElement('i', { className: 'ti ti-calendar', style: { fontSize: '32px', display: 'block', marginBottom: '10px', color: '#444' }, 'aria-hidden': 'true' }),
@@ -1814,7 +1807,7 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
         React.createElement('button', { type: 'button', className: 'b bsm', onClick: () => { const d = new Date(year, month - 1, 1); setMonth(d.getMonth()); setYear(d.getFullYear()); } },
           React.createElement('i', { className: 'ti ti-chevron-left', 'aria-hidden': 'true' })
         ),
-        React.createElement('span', { style: { fontSize: '13px', color: '#ccc', padding: '0 6px', whiteSpace: 'nowrap', lineHeight: '1', display: 'flex', alignItems: 'center' } }, `${monthNames[month]} ${year}`),
+        React.createElement('span', { style: { fontSize: '13px', color: '#ccc', padding: '0 6px', whiteSpace: 'nowrap', lineHeight: '1', display: 'flex', alignItems: 'center' } }, `${MONTH_PT[month]} ${year}`),
         React.createElement('button', { type: 'button', className: 'b bsm', onClick: () => { const d = new Date(year, month + 1, 1); setMonth(d.getMonth()); setYear(d.getFullYear()); } },
           React.createElement('i', { className: 'ti ti-chevron-right', 'aria-hidden': 'true' })
         )

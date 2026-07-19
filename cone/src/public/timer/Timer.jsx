@@ -4,11 +4,10 @@ import Nav from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import BlockTypePicker from './BlockTypePicker.jsx'
 import { BENCHMARK_GIRLS, BENCHMARK_HEROES, benchmarkToTimerExes } from '../lib/benchmarks.js'
-import { fmtSecs, isTimeBlock } from '../lib/wod.js'
+import { fmtSecs, isTimeBlock, MODE_LBL } from '../lib/wod.js'
 import { fmtDate } from '../lib/week.js'
 
 // ── Constants ──────────────────────────────────────────────────────────────
-const MODE_LBL = { 'For Time':'FOR TIME', AMRAP:'AMRAP', EMOM:'EMOM', Benchmark:'BENCHMARK', 'Estações':'ESTAÇÕES' }
 const K_CFG = 'timer_config', K_STATE = 'timer_state', K_HIST = 'timer_history'
 const RING_R = 85, RING_C = +(2 * Math.PI * RING_R).toFixed(1)
 

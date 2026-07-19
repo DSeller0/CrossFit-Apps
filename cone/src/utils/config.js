@@ -1,5 +1,5 @@
 export const DAYS = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
-export const DSHORT = ['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
+export { DAY_PT as DSHORT } from '../public/lib/week.js';
 
 export const APP_CONFIG = {
   gymName: 'Cone',

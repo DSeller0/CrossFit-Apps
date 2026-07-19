@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import QRCode from 'qrcode'
-import { blkLabel, blkColor, isWodBlock, rankResults, perfStr, fmtSecs } from '../lib/wod.js'
+import { blkLabel, blkColor, isWodBlock, rankResults, perfStr, fmtSecs, MODE_LBL } from '../lib/wod.js'
 import { DAY_PT_TITLE, MONTH_PT_SHORT } from '../lib/week.js'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
 import s from './TV.module.css'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const RING_R = 115, RING_C = +(2 * Math.PI * RING_R).toFixed(1)
-const MODE_LBL = { 'For Time':'FOR TIME', AMRAP:'AMRAP', EMOM:'EMOM', Benchmark:'BENCHMARK', 'Estações':'ESTAÇÕES' }
 
 // column-major reorder: fills top→bottom first, then left→right
 function columnMajor(items, cols) {
