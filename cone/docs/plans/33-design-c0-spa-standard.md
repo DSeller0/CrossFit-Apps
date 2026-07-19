@@ -1,5 +1,7 @@
 # 33 — #54 · Design pass C0 — the SPA design standard (starts the C-program)
 
+> ✅ Done: Phase 1 (mockup synced) `728a501` · Phase 2 (built) `96e48f3` · 2026-07-19 — see BACKLOG.md. The standard + the 5 primitives (`Button`/`Input`/`Card` in `src/components/ui/`, `ConfirmReview`/`MaskedTimeInput` in `src/public/shared/`) are built and gallery-covered; **C1–C5 (#55–#59) adopt them page-by-page**.
+
 ## Context
 The public-page design program (B1–B4, #50–#53) is done: public hex ≈ 0, radius 0,
 FOUC 0/9. The debt has **migrated into the SPA** (`src/components/**`) and is
