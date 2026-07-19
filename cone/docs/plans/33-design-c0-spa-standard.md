@@ -113,3 +113,147 @@ start the SPA design pass.**
   build or a test run (no code changed yet).
 
 Model: Opus · Size: M (Phase 1 ideation; Phase 2 build is a follow-up promotion)
+
+---
+
+## Phase 1 deliverable — the standard (for review · 2026-07-19)
+
+> **Status: synced, awaiting approval.** Mockup card:
+> `cone/design/mockups/28-spa-standard-c0.html` (4-theme switcher, verified
+> rendering across TotK dark/light + Spirit Blossom dark/light). **No primitives
+> built, no tab touched.** Phase 2 (build) is a separate promotion.
+
+### The zoo, as counted (evidence base for C1–C5)
+
+- **Buttons.** Global `.b` base + modifiers `.bp` (primary/accent), `.bsec`
+  (misnamed — it's a *second* accent-fill primary with a stale `#c86010` orange
+  hover), `.bd` (destructive, hardcoded `#d05050`/`#2e1a1a`/`#1a0a0a`), `.bsm`
+  (size), `.bfull`. A separate `.tb-btn` toolbar family (`.tb-load` blue,
+  `.tb-save` green, `.tb-sync-warn` amber — all hardcoded). Plus bespoke per-file
+  classes (`.collapse-btn`, `.blk-type-btn`, `.cr-athletes-btn`, `.insert-blk-btn`,
+  `.add-blk-btn`, `.rp-nav-btn`, `.rp-add-btn`, `.login-btn`) and **dozens of
+  inline-`style` overrides** doing two jobs at the call site: micro-sizing
+  (`minHeight:22/24/26`) and semantic recolor via raw hex (teal go-to-publish,
+  purple template, green confirm, orange "Hoje"). Three axes hand-managed
+  everywhere: **size · hierarchy/color · icon-only-vs-label**.
+- **`.bp:hover{background:#e8e8e8}`** washes the primary to grey on hover in every
+  theme; `App.jsx:337` sets a destructive toolbar button with inline
+  `#6a1a1a`/`#d05050`.
+- **Inputs.** ~14 divergent field treatments (`.fg input`, `.ex-input`,
+  `.login-input`, `.login-otp-input`, `.ql-perf-input`, `.cfg-input`,
+  `.blk-name-input`, `.blk-meta-field input`, `.ex-qty-input`, `.ex-complex-name`,
+  `.sheet-qty-input`, `.color-input`, `.prog-table input`, `.blk-mini-input`),
+  each hand-rolling a `:focus{border-color:…}` in a *different* token
+  (`--sub`/`--dim`/`--accent`/`--gold`) or raw hex (`#4ac8c0`/`#00b8d4`). **No
+  `:focus-visible` ring anywhere.** 95 `placeholder=` uses across 7 tabs, many
+  placeholder-as-label. **No mm:ss masking exists** — every time field is raw
+  `type="text" inputMode="numeric"` with a `12:34` placeholder → `MaskedTime` is
+  genuinely net-new (#35).
+- **Confirm blocks — 3 forks.** Public `Results.jsx` (title "Confirmar registro" /
+  "Confirmar alteração"; buttons "Cancelar" + "Confirmar"; own CSS `confirm*`).
+  `DeskRegPane.jsx` (title "Revisar registro"; "← Editar" + "Registrar ✓"; CSS
+  `deskConfirm*`). `LogPane.jsx` (title "Revisar registro" + clipboard icon;
+  "← Editar" + "Confirmar ✓"; reuses `deskConfirm*`). 2 CSS implementations, 3
+  label sets, none with `role="dialog"`/focus-trap/Escape.
+- **Modals.** `.confirm-overlay`, `.settings-overlay`+`.settings-modal`,
+  `.btp-backdrop`+`.btp-modal`, `.ex-sheet-backdrop` — backdrop opacity spread
+  `.5/.7/.72/.78/.82`, radii `12/14/16px`, ad-hoc z-indexes; no dialog semantics.
+- **`Atletas.jsx:14-20`** freezes the totk-dark palette as JS consts
+  (`BG/STONE/DIV/CREAM/SUB/MUTED/DIM`) → wrong in 3 of 4 themes (already #56's fix;
+  same class as the retired `athletes.html`). Tokenized primitives kill it.
+
+### The correction that reshapes the plan
+
+`themes.css` **already defines `--red` and `--err` in all 4 themes** (verified) —
+the plan's "themes.css has no explicit danger token today" premise was wrong.
+**No new danger token is needed.** Destructive maps to `--red`; keep `--err`
+named for validation/error *messages* (same value today, distinct role).
+
+### Button hierarchy (replaces `.b`/`.bsec`/`.bd`/`.tb-btn` families)
+
+| Variant | Fill | Text | Border | Hover | Use |
+|---|---|---|---|---|---|
+| **primary** | `--accent` | `--accent-text` | `--accent` | `filter:brightness(1.08)` | the one main action (Salvar, Confirmar, Registrar) |
+| **secondary** | transparent | `--sub` | `--border` | bg `--stone` · border `--dim` · text `--cream` | neutral (Cancelar, toolbar, nav) |
+| **destructive** | transparent | `--red` | `color-mix(--red 45%, --border)` | bg `color-mix(--red 12%, transparent)` | delete / remove / clear |
+| **ghost** | transparent | `--muted` | none | bg `--stone` · text `--cream` | tertiary, dense-row icon-only |
+
+- **Sizes** `md` (40px / 13px / pad 0×14) · `sm` (32 / 12 / 0×10) · `xs` (24 / 11 /
+  0×8) — replaces `.bsm` **and** the inline `minHeight:22/24/26` micro-sizes.
+- **Icon-only** is a variant of any hierarchy; the component **requires an
+  `aria-label` prop** (this is the a11y that lets #14 shrink to site-wide residue).
+- Hover/active are `filter:brightness()` (filled) or a token `color-mix()` wash
+  (outline) — **never a baked hex**, so all 4 themes respond. Focus-visible =
+  `outline:2px solid var(--accent)` + offset.
+
+### Input + MaskedTime
+
+- Real `<label htmlFor>` (or wrapping `<label>`); label style = existing `.lbl`
+  (10px uppercase `--muted`). Field: bg `--bg`, border `--divider`, text `--text`,
+  **`font-size:16px`** (no iOS zoom), `--radius-sm`.
+- **One** `:focus-visible` ring (`outline:2px solid --accent` + border `--sub`)
+  replaces the ~14 divergent focus rules. Error: border `--err` + `--err` helper
+  text. Disabled: `opacity:.5`.
+- **`MaskedTimeInput`** (net-new, #35): auto-inserts the colon, `inputMode=numeric`,
+  placeholder `12:34`, value in `--font-mono`. Becomes the one mm:ss field the
+  confirm forks + public timer/schedule adopt (rollout rides C1–C5 + B sessions).
+
+### Card / surface
+
+- Card = `--stone` + `--border` + `--radius-md`, padded on the spacing scale.
+  Nested content steps to `--stone2`/`--divider`. Section titles reuse `.lbl`.
+- Replaces `.sc-card`/`.ex-card`/the modal shells that each pick their own radius
+  (6–16px) and padding.
+
+### Spacing + radius (theme-invariant geometry)
+
+- **Spacing** `--sp-1..--sp-5` = **4 / 8 / 12 / 16 / 24** (4px base).
+- **Radius** `--radius-sm:4px` (buttons, inputs) · `--radius-md:6px` (cards,
+  modals). "Minimal" per the SPA rule — not the public-page zero. Circles (`50%`)
+  stay exempt.
+- These are **not colors and not per-theme** → add them to the **`:root` fallback
+  block in `themes.css`** (which every page loads, precedent: `--font-mono`), so
+  the `src/public/shared/` primitives inherit them too. Do **not** put them only in
+  the SPA-only `src/index.css`, or public/shared components can't use them.
+
+### Confirm-modal policy → `ConfirmReview`
+
+One `role="dialog" aria-modal="true"` shell: **focus-trap · Escape → back to the
+form · one backdrop opacity (`rgba(0,0,0,.7)`)**. Body = labeled read-back rows
+(the `deskConfirmRow` shape) + optional `ExerciseList`. **Canonical labels:**
+
+- Title: **"Revisar registro"** / **"Revisar alteração"** (edit mode).
+- Secondary button: **"Editar"** — *not* "Cancelar": the back button returns to
+  the form **without discarding**, so "Editar" is accurate.
+- Primary button: **"Confirmar"** (→ "Enviando…" while submitting).
+
+Kills the "Confirmar registro" title and the "Registrar ✓" / "Confirmar ✓" /
+"Confirmar" button divergence across the 3 forks.
+
+### Decisions settled (the plan's open questions)
+
+1. **Confirm labels** → "Revisar registro"/"Revisar alteração" · "Editar" ·
+   "Confirmar" (drop the `←`/`✓` glyphs; the button hierarchy carries the
+   affordance).
+2. **Destructive token** → `--red` (exists in all 4 themes; no new token).
+3. **Wrap vs replace** → **replace, page-by-page.** The `Button` component fully
+   supersedes `.b`/`.bp`/`.bsec`/`.bd`/`.bsm`/`.bfull` + the `.tb-btn` family; each
+   C1–C5 page deletes the global rules it used as it migrates (a wrapper would
+   perpetuate the hardcoded hex).
+4. **Primitive locations** →
+   - `ConfirmReview`, `MaskedTimeInput` → **`src/public/shared/`** (cross-surface —
+     the confirm forks + #35 have public consumers; client-free by the shared/
+     rule; already the gallery's turf).
+   - `Button`, `Input`, `Card` → new **`src/components/ui/`**, added to the gallery
+     as a new **"SPA / UI"** group. **Hard constraint:** these must import **no**
+     Supabase client (directly or transitively) or they breach the dual-client
+     rule *and* break the public-server gallery build — and **no CI gate catches a
+     heavy/broken gallery import**, so open `gallery.html` after wiring it.
+
+### Phase 2 build order (when approved)
+
+Add `--sp-*`/`--radius-*` to `themes.css :root` → build `Button` + `Input` +
+`Card` in `src/components/ui/` → `ConfirmReview` + `MaskedTimeInput` in
+`src/public/shared/` → gallery "SPA / UI" group + open `gallery.html` to verify
+the import chain → `npm run design:cards` → sync → ship C0. Then C1→C5 adopt +
+delete the global classes page-by-page.
