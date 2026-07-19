@@ -1122,10 +1122,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const [weekGridCollapsed, setWeekGridCollapsed] = useState(false);
   const boxLocs = useMemo(() => loadLocations().filter(l => l.type === 'box'), []);
   const [selBox, setSelBox]                 = useState('all');   // 'all' | 'none' | <locationId> — grid filter + new-session default
-  // Per-box "Avisos do box" for index.html's rail (#53 Part B). Keyed by locationId,
-  // or 'all' for a gym-wide notice. Lives in settings.value (anon-readable) because
-  // locations is anon-locked (#81) and the index is public. { [key]: {message, active} }.
-  const [boxWarnings, setBoxWarnings]       = useState(() => loadSettings().boxWarnings || {});
+  // "Avisos do box" for index.html — a dated list. Each: { id, date, message, box, active }
+  // where box is a locationId or 'all' (gym-wide). Lives in settings.value (anon-readable;
+  // locations is anon-locked #81 and the index is public). The index shows the 3 most recent
+  // active in-scope ones. #53.
+  const [boxWarnings, setBoxWarnings]       = useState(() => { const w = loadSettings().boxWarnings; return Array.isArray(w) ? w : []; });
   const [isDirty, setIsDirty]               = useState(false);
   const [showSessNotes, setShowSessNotes]   = useState(false);
   const [undoToast, setUndoToast]           = useState(null);
@@ -1162,18 +1163,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     undoTimerRef.current = setTimeout(() => setUndoToast(null), 5000);
   };
 
-  // Read-merge-write the whole settings blob (mirrors Config.jsx) so we never clobber
-  // theme/gymName; empty-message keys are pruned to keep the blob tidy.
-  const updateWarning = (key, patch) => {
-    setBoxWarnings(prev => {
-      const merged = { ...(prev[key] || { message: '', active: false }), ...patch };
-      const next = { ...prev };
-      if (!merged.message.trim() && !merged.active) delete next[key];
-      else next[key] = merged;
-      saveSettings({ ...loadSettings(), boxWarnings: next });
-      return next;
-    });
-  };
+  // Read-merge-write the whole settings blob (mirrors Config.jsx) so theme/gymName survive.
+  const persistWarnings = list => { setBoxWarnings(list); saveSettings({ ...loadSettings(), boxWarnings: list }); };
+  const addWarning    = key => persistWarnings([{ id: uid(), date: todayISO(), box: key, message: '', active: true }, ...boxWarnings]);
+  const patchWarning  = (id, patch) => persistWarnings(boxWarnings.map(w => w.id === id ? { ...w, ...patch } : w));
+  const removeWarning = id => persistWarnings(boxWarnings.filter(w => w.id !== id));
 
   // Preload
   useEffect(() => {
@@ -1883,29 +1877,43 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
               })}
             </div>
           )}
-          {/* Box warning — feeds index.html's "Avisos do box" rail card (#53). Contextual to
-              selBox: a box id → that box, 'all' → gym-wide notice, 'none' → hidden (no public audience). */}
+          {/* Box warnings — feed index.html's "Avisos do box" strip (#53). A dated list scoped
+              to the box selector: a box id → that box, 'all' → gym-wide, 'none' → hidden. The
+              index shows the 3 most recent active in-scope ones. */}
           {selBox !== 'none' && (() => {
-            const w = boxWarnings[selBox] || { message: '', active: false };
+            const key = selBox;   // 'all' or a locationId
             const scopeName = selBox === 'all' ? 'todos os boxes' : (boxLocs.find(b => b.id === selBox)?.name || 'este box');
-            const has = !!w.message.trim();
+            const list = boxWarnings.filter(w => w.box === key).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
             return (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, padding: '6px 10px', background: '#141210', border: '1px solid #2a231c', borderRadius: 6 }}>
-                <i className="ti ti-alert-triangle" style={{ color: '#d8a840', fontSize: 15, flexShrink: 0 }} />
-                <input type="text" value={w.message}
-                  onChange={e => updateWarning(selBox, { message: e.target.value })}
-                  placeholder={`Aviso para ${scopeName} — aparece na tela inicial`}
-                  style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', color: '#e8e2d4', fontSize: 12, fontFamily: 'inherit', outline: 'none' }} />
-                <button type="button" disabled={!has}
-                  onClick={() => updateWarning(selBox, { active: !w.active })}
-                  title={has ? (w.active ? 'Aviso visível — clique para ocultar' : 'Aviso oculto — clique para exibir') : 'Escreva uma mensagem primeiro'}
-                  style={{ flexShrink: 0, padding: '3px 10px', borderRadius: 4, fontSize: 10, fontWeight: 700, fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '.06em',
-                    cursor: has ? 'pointer' : 'not-allowed', opacity: has ? 1 : .5,
-                    border: `1px solid ${w.active && has ? '#4ac8c0' : '#2a231c'}`,
-                    background: w.active && has ? 'rgba(74,200,192,.12)' : 'transparent',
-                    color: w.active && has ? '#4ac8c0' : '#806850' }}>
-                  {w.active && has ? '● Ativo' : 'Inativo'}
-                </button>
+              <div style={{ marginBottom: 8, padding: '8px 10px', background: '#141210', border: '1px solid #2a231c', borderRadius: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <i className="ti ti-alert-triangle" style={{ color: '#d8a840', fontSize: 14 }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#c8b090', letterSpacing: '.04em' }}>Avisos — {scopeName}</span>
+                  <span style={{ flex: 1 }} />
+                  <button type="button" onClick={() => addWarning(key)}
+                    style={{ fontSize: 11, fontWeight: 700, fontFamily: 'inherit', color: '#4ac8c0', background: 'transparent', border: '1px solid #2a4a48', borderRadius: 4, padding: '3px 10px', cursor: 'pointer' }}>
+                    + Adicionar
+                  </button>
+                </div>
+                {list.map(w => (
+                  <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+                    <input type="date" value={w.date || ''} onChange={e => patchWarning(w.id, { date: e.target.value })}
+                      style={{ flexShrink: 0, background: '#1e1a16', border: '1px solid #2a231c', color: '#c8b090', fontSize: 11, fontFamily: 'inherit', padding: '3px 6px', borderRadius: 4 }} />
+                    <input type="text" value={w.message} onChange={e => patchWarning(w.id, { message: e.target.value })}
+                      placeholder="Mensagem — use ' — ' entre título e detalhe"
+                      style={{ flex: 1, minWidth: 0, background: '#1e1a16', border: '1px solid #2a231c', color: '#e8e2d4', fontSize: 12, fontFamily: 'inherit', padding: '4px 8px', borderRadius: 4, outline: 'none' }} />
+                    <button type="button" onClick={() => patchWarning(w.id, { active: !w.active })}
+                      title={w.active ? 'Visível — clique para ocultar' : 'Oculto — clique para exibir'}
+                      style={{ flexShrink: 0, padding: '3px 9px', borderRadius: 4, fontSize: 10, fontWeight: 700, fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '.05em', cursor: 'pointer',
+                        border: `1px solid ${w.active ? '#4ac8c0' : '#2a231c'}`, background: w.active ? 'rgba(74,200,192,.12)' : 'transparent', color: w.active ? '#4ac8c0' : '#806850' }}>
+                      {w.active ? '● On' : 'Off'}
+                    </button>
+                    <button type="button" onClick={() => removeWarning(w.id)} title="Remover"
+                      style={{ flexShrink: 0, background: 'transparent', border: 'none', color: '#806850', cursor: 'pointer', fontSize: 15, lineHeight: 1, padding: '2px 4px' }}>
+                      <i className="ti ti-x" />
+                    </button>
+                  </div>
+                ))}
               </div>
             );
           })()}
