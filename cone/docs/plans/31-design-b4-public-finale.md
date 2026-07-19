@@ -1,12 +1,10 @@
 # 31 — Design pass B4: index + timer + tv + recover (#53)
 
-> 🟡 **Part A shipped: `1ae207b`** (all 7 mechanical items — Nav timer double-render,
-> Index→`blkColor`, TV white-alpha→tokens, hex/token/radius sweep, theme-aware QR +
-> `index.html` theme-color, Benchmark color).
-> 🟡 **Part B index build shipped: `fcaef53`** (1·A right rail + 3·A Tabler nav +
-> `settings.boxWarnings` coach input; mockups 25/26 the gate). **Still open:** the TV
-> items **2·A** (single-block font scale-up) + **4·C** (`'Courier New'`→`--font-mono`,
-> folds into #54) — deferred by the user; build a TV mockup next for the same loop.
+> ✅ **Done.** Part A `1ae207b` (mechanical sweep). Part B: `fcaef53` (initial rail + Tabler
+> nav + box warnings) → `7b55f76` (**TV** 2·A scale-up + 4·C `--font-mono`) → `3437e79`
+> (**index re-architecture** to the Design the user evolved in Claude Design, prints 02/03:
+> full-width week grid → selected-day panel with expandable blocks + Agenda/Registrar +
+> ranking, dated warnings strip). Mockups 25/26/27 were the gates. See BACKLOG Done.
 
 Backlog: **#53** (Icebox → Ready). The last public-page design debt — #50/#51/#52 swept the
 other five clean, so these four hold essentially all of it. Unblocked now that **#69** (tv
