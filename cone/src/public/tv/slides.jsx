@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import QRCode from 'qrcode'
-import { blkLabel, blkColor, isWodBlock, rankResults, perfStr, fmtSecs, MODE_LBL } from '../lib/wod.js'
+import { blkLabel, blkColor, isWodBlock, rankResults, perfStr, fmtSecs, MODE_LBL, blkMeta } from '../lib/wod.js'
 import { DAY_PT_TITLE, MONTH_PT_SHORT } from '../lib/week.js'
+import { sessName } from '../lib/sessions.js'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
 import s from './TV.module.css'
 
@@ -117,7 +118,7 @@ export function WodSlide({ sessions, tv, gymName, classExecs, athletes }) {
       <div className={s.wodHdr}>
         <div className={s.wodHdrLeft}>
           {gymName && <div className={s.wodGym}>{gymName}</div>}
-          <div className={s.wodSessName}>{sess.sessionName || (Array.isArray(sess.mainTraining) ? sess.mainTraining.join(', ') : sess.mainTraining) || 'Sessão'}</div>
+          <div className={s.wodSessName}>{sessName(sess, tv.date_key)}</div>
         </div>
         <div className={s.wodDate}>{fmtDate(tv.date_key)}</div>
       </div>
@@ -143,7 +144,7 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive, big 
   const exes = bl.type === 'Estações'
     ? (bl.stations || []).flatMap(st => st.exercises || [])
     : (bl.exercises || [])
-  const meta = [bl.duration && `${bl.duration}'`, bl.rounds && `${bl.rounds} rds`].filter(Boolean).join(' · ')
+  const meta = blkMeta(bl)
 
   return (
     <div className={`${s.blockCard}${big ? ' ' + s.blockCardBig : ''}`} style={{ borderLeftColor: color }}>
@@ -200,7 +201,7 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
   const exes  = block ? (block.type === 'Estações' ? (block.stations||[]).flatMap(st=>st.exercises||[]) : (block.exercises||[])) : []
   const bColor = block ? blkColor(block) : '#d8a840'
   const bLabel = block ? blkLabel(block) : bt
-  const bMeta  = block ? [block.duration && `${block.duration}'`, block.rounds && `${block.rounds} rds`].filter(Boolean).join(' · ') : ''
+  const bMeta  = block ? blkMeta(block) : ''
 
   const activeClass    = (classExecs || []).find(c => c.id === tv?.class_id && !c.reset_at)
   const groups         = activeClass?.groups || []

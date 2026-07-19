@@ -1,5 +1,5 @@
 import styles from './Schedule.module.css'
-import { blkLabel, blkColor, isWodBlock } from '../lib/wod.js'
+import { blkLabel, blkColor, isWodBlock, blkMeta } from '../lib/wod.js'
 import { isRoundBlock, progGroups, stationsCapMins, fmtDeskPerf } from './scheduleHelpers.js'
 import ExRow from './ExRow.jsx'
 
@@ -66,7 +66,7 @@ export default function BlockDetail({bl,sess,dateKey,checked,roundState,rmValues
   }
 
   const exs=(bl.exercises||[]).filter(e=>e.name||e.isComplex)
-  const meta=[bl.rounds&&`${bl.rounds} RDS`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ')
+  const meta=blkMeta(bl)
 
   let rdBadgeEl=null
   if(isRd){

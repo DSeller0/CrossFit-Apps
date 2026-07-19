@@ -7,6 +7,7 @@ import { mapResultRow } from '../lib/blobTables.js'
 import { toISO, todayISO, fmtDateYear, MONTH_PT_SHORT } from '../lib/week.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { WOD_TYPES, blkColor, deriveScale } from '../lib/wod.js'
+import { sessName } from '../lib/sessions.js'
 import HeroCard from './HeroCard.jsx'
 import KpiStrip from './KpiStrip.jsx'
 import AthletePicker from './AthletePicker.jsx'
@@ -328,7 +329,7 @@ export default function Me() {
       }
       return {
         date: r.date,
-        name: s?.sessionName || s?.name || 'Treino',
+        name: sessName(s, r.date),
         rpe: rs.length ? Math.round(rs.reduce((a, b) => a + b, 0) / rs.length) : null,
         scale,
         hasPr: prDateSet.has(r.date),

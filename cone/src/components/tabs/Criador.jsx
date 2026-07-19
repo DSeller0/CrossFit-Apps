@@ -13,6 +13,7 @@ import { APP_CONFIG, ZONES, BTC, PLC, ECOL } from '../../utils/config';
 import { BENCHMARK_GIRLS, BENCHMARK_HEROES, buildBenchmarkBlock } from '../../public/lib/benchmarks.js';
 import { resolveExercise } from '../../public/lib/registry.js';
 import { DAY_PT } from '../../public/lib/week.js';
+import { sessName } from '../../public/lib/sessions.js';
 import IntensityInput from '../shared/IntensityInput';
 
 
@@ -1984,7 +1985,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 4, marginBottom: 5 }}>
-                          <span className="wg-sc-name">{s.sessionName || (typeof s.mainTraining === 'string' ? s.mainTraining : null) || '—'}</span>
+                          <span className="wg-sc-name">{sessName(s, dateKey)}</span>
                           <button type="button" className="b bd"
                             style={{ padding: '2px 6px', fontSize: 10, minHeight: 20, flexShrink: 0 }}
                             onClick={e => { e.stopPropagation(); del(dateKey, s.id); }}>

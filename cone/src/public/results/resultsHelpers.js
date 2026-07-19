@@ -1,5 +1,5 @@
-import { toSecs, fmtSecs, rankResults, perfStr, deriveScale, isTimeBlock } from '../lib/wod.js'
-import { dayNameFull } from '../lib/week.js'
+import { toSecs, fmtSecs, rankResults, perfStr, deriveScale, isTimeBlock, blkMeta } from '../lib/wod.js'
+import { sessName } from '../lib/sessions.js'
 
 // Shared by Results.jsx and its extracted results/ components (#51) — one
 // canonical copy so the extraction can't drift the same helper two ways
@@ -13,16 +13,10 @@ export const DEF_INP = () => ({ rpe: null, scale: null, perfTime: '', perfRounds
 
 export function inputKey(sid, bid) { return `${sid}:${bid}` }
 
-export function sessName(sess, dateKey) {
-  return sess.sessionName || sess.name || dayNameFull(dateKey)
-}
-
-export function blkMeta(bl) {
-  const p = []
-  if (bl.rounds)   p.push(`${bl.rounds} rounds`)
-  if (bl.duration) p.push(`CAP ${bl.duration}'`)
-  return p.join(' · ')
-}
+// blkMeta/sessName went app-wide in #84 — re-exported here so this folder's
+// existing consumers (Results.jsx, SessionCard.jsx, WodSummary.jsx) stay
+// byte-unchanged.
+export { blkMeta, sessName }
 
 // The block rows for one session+block across every present athlete, shaped for
 // both the KPI grid and RankList.

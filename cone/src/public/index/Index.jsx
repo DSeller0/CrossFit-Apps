@@ -3,7 +3,7 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import Nav from '../Nav.jsx'
 import s from './Index.module.css'
-import { blkLabel, isWodBlock, rankResults, perfStr } from '../lib/wod.js'
+import { blkLabel, isWodBlock, rankResults, perfStr, blkMeta } from '../lib/wod.js'
 import { getWeek, toISO, todayISO } from '../lib/week.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { mapResultRow } from '../lib/blobTables.js'
@@ -142,7 +142,7 @@ export default function Index() {
     const n = blockRes.length
     return {
       wodLabel: blkLabel(wod),
-      wodMeta: [wod.duration && `Cap ${wod.duration}'`, `${n} resultado${n !== 1 ? 's' : ''}`].filter(Boolean).join(' · '),
+      wodMeta: [blkMeta(wod), `${n} resultado${n !== 1 ? 's' : ''}`].filter(Boolean).join(' · '),
       rows: ranked.map(r => ({ name: r.name, scale: r.scale, perf: perfStr(r, wod.type) })),
       href,
     }

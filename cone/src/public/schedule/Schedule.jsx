@@ -6,7 +6,7 @@ import styles from './Schedule.module.css'
 import { MONTH_PT, DAY_PT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
 import { uid, blkLabel, isWodBlock, blkColor } from '../lib/wod.js'
 import { buildRegistryIndex } from '../lib/registry.js'
-import { getTargets } from '../lib/sessions.js'
+import { getTargets, sessName } from '../lib/sessions.js'
 import { prBest } from '../lib/goals.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { isRoundBlock, progGroups, parseDurMins, onKey } from './scheduleHelpers.js'
@@ -543,7 +543,7 @@ export default function Schedule() {
                       role="button" tabIndex={0} aria-pressed={isSel}
                       onClick={()=>{setSelSess(isSel?null:{dateKey:dk,sessId:sess.id});setDeskRegBl(null)}}
                       onKeyDown={onKey(()=>{setSelSess(isSel?null:{dateKey:dk,sessId:sess.id});setDeskRegBl(null)})}>
-                      <div className={styles.deskSCardName}>{sess.sessionName||'–'}</div>
+                      <div className={styles.deskSCardName}>{sessName(sess,dk)}</div>
                       <div className={styles.deskSCardFoot}>
                         <span className={styles.deskSCardLogLbl}>{logCount} logs</span>
                         <span className={`${styles.deskSCardDot}${logCount>0?' '+styles.deskSCardDotFilled:''}`}/>
@@ -604,7 +604,7 @@ export default function Schedule() {
           {selSessObj?<>
             <div className={styles.deskSessPaneHdr}>
               <div className={styles.deskSessDot}/>
-              <span className={styles.deskSessNameHdr}>{selSessObj.sessionName||'–'}</span>
+              <span className={styles.deskSessNameHdr}>{sessName(selSessObj,selSess.dateKey)}</span>
               <span className={styles.deskSessDateHdr}>{selSessDateStr}</span>
             </div>
             <div className={styles.deskSessScroll}>

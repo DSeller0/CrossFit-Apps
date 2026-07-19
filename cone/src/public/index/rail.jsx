@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { IconCalendar, IconChartBar, IconTrophy, IconAlertTriangle } from '@tabler/icons-react'
 import { getWeek, toISO, todayISO, DAY_PT_TITLE, DAY_PT_FULL, MONTH_PT_SHORT } from '../lib/week.js'
 import { inBoxScope } from '../lib/boxScope.js'
-import { blkColor, isWodBlock } from '../lib/wod.js'
+import { blkColor, isWodBlock, blkMeta } from '../lib/wod.js'
+import { sessName } from '../lib/sessions.js'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
 import s from './rail.module.css'
 
@@ -20,7 +21,7 @@ export function WeekGrid({ sessions, box, selectedDate, onSelect }) {
     const list = (sessions?.[key] || []).filter(x => x.public !== false && inBoxScope(x, box))
     return {
       key, dow: d.getDay(), num: d.getDate(), count: list.length,
-      name: list[0]?.sessionName || list[0]?.name || '',
+      name: list[0] ? sessName(list[0], key) : '',
       isToday: key === today,
     }
   })
@@ -31,7 +32,7 @@ export function WeekGrid({ sessions, box, selectedDate, onSelect }) {
           className={`${s.wd}${d.key === selectedDate ? ' ' + s.wdSel : ''}${d.isToday ? ' ' + s.wdToday : ''}`}>
           <span className={s.wdL}>{DAY_PT_TITLE[d.dow]}</span>
           <span className={s.wdN}>{d.num}</span>
-          <span className={s.wdName}>{d.count ? (d.name || `${d.count} treino${d.count > 1 ? 's' : ''}`) : 'Descanso'}</span>
+          <span className={s.wdName}>{d.count ? d.name : 'Descanso'}</span>
           {d.count > 0 && <span className={s.wdDot} />}
         </button>
       ))}
@@ -62,7 +63,7 @@ export function DaySessionCard({ sess, tag, count, isFuture, box }) {
   return (
     <div className={s.sessCard}>
       <div className={s.sessTag}>{tag}</div>
-      <div className={s.sessTitle}>{sess.sessionName || sess.name || 'Sessão'}</div>
+      <div className={s.sessTitle}>{sessName(sess, sess._dk)}</div>
       <div className={s.blocks}>
         {blocks.map((b, i) => <SessionBlock key={b.id || i} block={b} expanded={expanded.has(b.id || i)} onToggle={() => toggle(b.id || i)} />)}
       </div>
@@ -80,8 +81,9 @@ function SessionBlock({ block, expanded, onToggle }) {
   const color = blkColor(block)
   const label = block.label && block.label !== block.type ? block.label : null
   const meta = [
-    block.duration && (isWodBlock(block) ? `Cap ${block.duration}'` : `${block.duration}'`),
-    block.rounds && `${block.rounds} rds`,
+    isWodBlock(block)
+      ? blkMeta(block)
+      : [block.duration && `${block.duration}'`, block.rounds && `${block.rounds} rds`].filter(Boolean).join(' · '),
     block.stationRepeat && `${block.stationRepeat}×`,
   ].filter(Boolean).join(' · ')
   const exes = block.type === 'Estações'

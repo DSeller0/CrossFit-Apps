@@ -6,8 +6,9 @@ import {
   uid,
 } from '../../utils/storage';
 import { APP_CONFIG, GF } from '../../utils/config';
-import { exVolStr, rankResults, scaleColor, isTimeBlock, isWodBlock, deriveScale, SCALES } from '../../public/lib/wod.js';
-import { toISO, MONTH_PT, DAY_PT_TITLE } from '../../public/lib/week.js';
+import { exVolStr, rankResults, scaleColor, isTimeBlock, isWodBlock, deriveScale, SCALES, blkMeta } from '../../public/lib/wod.js';
+import { toISO, MONTH_PT, DAY_PT_TITLE, monthGridCells } from '../../public/lib/week.js';
+import { sessName } from '../../public/lib/sessions.js';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -16,20 +17,8 @@ const LEVEL_CLS       = { Iniciante:'lv-ini', Intermediário:'lv-int', Avançado
 const SCALE_CLS       = { RX:'sc-rx', Inter:'sc-inter', SC:'sc-sc', Adaptado:'sc-adap' };
 
 // ── Module-level helpers ──────────────────────────────────────────────────────
-const sessTitle = s => s.sessionName || s.name || (typeof s.mainTraining === 'string' ? s.mainTraining : '') || 'Treino';
-
 function getWeeksInMonth(year, month) {
-  const weeks = [];
-  const cur = new Date(year, month, 1);
-  cur.setDate(cur.getDate() - cur.getDay());
-  const lastDay = new Date(year, month + 1, 0);
-  while (cur <= lastDay) {
-    const end = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 6);
-    if (cur.getMonth() === month || end.getMonth() === month)
-      weeks.push({ start: new Date(cur), end: new Date(end) });
-    cur.setDate(cur.getDate() + 7);
-  }
-  return weeks;
+  return monthGridCells(year, month).map(week => ({ start: week[0].date, end: week[6].date }));
 }
 
 function weekLabel(week, year, month) {
@@ -295,7 +284,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
               return (
                 <div key={k} className={`rp-sess-card${on?' on':''}`}
                   onClick={()=>{setSelKey(k);setSelAthlete(null);setAddOpen(false);if(isMobile)setMobilePanel(2);}}>
-                  <div className="rp-sess-name">{sessTitle(sess)}</div>
+                  <div className="rp-sess-name">{sessName(sess, dk)}</div>
                   <div className="rp-sess-sub">
                     <span style={{color:logged>0?'#4ac8c0':'#554a3a'}}>{logged}/{athletes.length} reg.</span>
                     {(sess.blocks||[]).filter(isWodBlock).slice(0,2).map((b,i)=>(
@@ -336,7 +325,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
         )}
         <div className="rp-sticktop">
           <div className="rp-p2-hdr">
-            <div className="rp-p2-title">{sessTitle(selSession)}</div>
+            <div className="rp-p2-title">{sessName(selSession, selDateKey)}</div>
             <div className="rp-p2-meta">{dateLabel}</div>
           </div>
         </div>
@@ -455,8 +444,7 @@ function RegistroView({ athletes, sessions, results, setResults, preload, onPrel
                 <div className="rp-block-label">
                   {bl.blockLabel!==bl.blockType?`${bl.blockLabel} · `:''}
                   {bl.blockType}
-                  {sessbl?.duration?` ${sessbl.duration}'`:''}
-                  {sessbl?.rounds?` ${sessbl.rounds}rds`:''}
+                  {sessbl && blkMeta(sessbl) ? ` ${blkMeta(sessbl)}` : ''}
                 </div>
                 <div className="rp-block-body">
                   {exercises.length>0 && (
@@ -746,7 +734,7 @@ function LeaderboardView({ athletes, sessions, results }) {
           if (hasRes) {
             const dt=new Date(dateKey+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
             const label=bl.label&&bl.label!=='-'?bl.label:bl.type;
-            const meta=[bl.rounds&&`${bl.rounds}rds`,bl.duration&&`CAP ${bl.duration}'`].filter(Boolean).join(' · ');
+            const meta=blkMeta(bl);
             list.push({key:`${dateKey}|${sess.id}|${bl.id}`,dateKey,sessId:sess.id,blId:bl.id,blType:bl.type,blLabel:label,meta,sessName:sess.mainTraining||'',dt});
           }
         });

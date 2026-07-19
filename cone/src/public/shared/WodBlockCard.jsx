@@ -1,5 +1,5 @@
 import { ExerciseList } from './ExerciseList.jsx'
-import { blkColor, blkLabel } from '../lib/wod.js'
+import { blkColor, blkLabel, blkMetaParts } from '../lib/wod.js'
 import s from './WodBlockCard.module.css'
 
 // The WOD itself, above a ranking — same shape as TV's BlockCard (slides.jsx:121):
@@ -19,10 +19,7 @@ export default function WodBlockCard({ bl, dt, sessName, scaleFilter = 'Todos', 
     ? (bl.stations || []).flatMap(st => (st.exercises || []).map(e => ({ ...e, _station: st.name })))
     : (bl.exercises || [])
 
-  const chips = [
-    bl.rounds && `${bl.rounds} rounds`,
-    bl.duration && `CAP ${bl.duration}'`,
-  ].filter(Boolean)
+  const chips = blkMetaParts(bl)
 
   const foot = [dt, sessName, scaleFilter !== 'Todos' ? scaleFilter : null].filter(Boolean).join(' · ')
 

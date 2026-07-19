@@ -65,6 +65,20 @@ export function blkLabel(bl) {
   return l&&t&&l!==t?`${l} · ${t}`:l||t||''
 }
 
+// Block-meta "rounds · CAP" fragment — rounds-first, full word "rounds", "CAP"
+// prefix. Canonical since #84 (was folder-scoped to results/resultsHelpers.js;
+// ~10 other sites hand-rolled it with casing/order drift — "RDS"/"rds" instead
+// of "rounds", duration-first on the TV wall, lowercase "Cap" on the index).
+// blkMetaParts is the array form for callers that render each piece as its own
+// chip (WodBlockCard) rather than one joined string.
+export function blkMetaParts(bl) {
+  const p = []
+  if (bl.rounds)   p.push(`${bl.rounds} rounds`)
+  if (bl.duration) p.push(`CAP ${bl.duration}'`)
+  return p
+}
+export function blkMeta(bl) { return blkMetaParts(bl).join(' · ') }
+
 // Timer/TV mode display label — Timer.jsx and tv/slides.jsx both hand-rolled
 // this identically before consolidation.
 export const MODE_LBL = { 'For Time':'FOR TIME', AMRAP:'AMRAP', EMOM:'EMOM', Benchmark:'BENCHMARK', 'Estações':'ESTAÇÕES' }

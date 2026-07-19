@@ -7,8 +7,9 @@ import {
 import { APP_CONFIG, ZONES, ECOL, DSHORT, PLC, GF } from '../../utils/config';
 import { buildPixPayload } from '../../utils/pix';
 import PresenterView from '../PresenterView';
-import { exVolStr, fmtIntensity, groupProgressionSteps } from '../../public/lib/wod.js';
-import { MONTH_PT, DAY_PT, DAY_PT_TITLE } from '../../public/lib/week.js';
+import { exVolStr, fmtIntensity, groupProgressionSteps, blkMeta } from '../../public/lib/wod.js';
+import { MONTH_PT, DAY_PT, DAY_PT_TITLE, monthGridCells } from '../../public/lib/week.js';
+import { sessName } from '../../public/lib/sessions.js';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
@@ -48,17 +49,7 @@ function complexLine(ex) {
 }
 
 function getWeeksOfMonth(year, month) {
-  const weeks = [];
-  let cursor = new Date(year, month, 1);
-  const dow = cursor.getDay();
-  cursor.setDate(cursor.getDate() - dow);
-  const endOfMonth = new Date(year, month + 1, 0);
-  while (cursor <= endOfMonth) {
-    const week = [];
-    for (let i = 0; i < 7; i++) { week.push(new Date(cursor)); cursor.setDate(cursor.getDate() + 1); }
-    weeks.push(week);
-  }
-  return weeks;
+  return monthGridCells(year, month).map(week => week.map(c => c.date));
 }
 
 function buildMobileSession(sessions, selectedDate, currentWeekDates) {
@@ -186,7 +177,7 @@ function DailyExportView({ sessions, label, weekDates, gymName, fontScale, zoneS
                     bli > 0 && React.createElement('div', { className: 'dv-block-type-label', style: { color: dv.blockLabel || ec.text || '#e87820' } },
                       bl.type,
                       (bl.rounds || bl.duration) && React.createElement('span', { className: 'dv-block-cap', style: { color: dv.blockLabel || ec.text || '#e87820' } },
-                        [bl.rounds && `${bl.rounds} RDS`, bl.duration && `CAP ${bl.duration}'`].filter(Boolean).join(' · ')
+                        blkMeta(bl)
                       )
                     ),
                     (bl.exercises || []).filter(e => e.name || e.isComplex).map(ex => {
@@ -335,7 +326,7 @@ function WeeklyCalendarExportView({ sessions, label, year, month, gymName, logoD
                   (s.blocks || []).map(bl => {
                     const ec = ECOL[bl.type] || ECOL['Força'];
                     const blCol = wk.blockType || ec.text;
-                    const meta = [bl.rounds && `${bl.rounds} RDS`, bl.duration && `CAP ${bl.duration}'`].filter(Boolean).join(' · ');
+                    const meta = blkMeta(bl);
                     const exs = bl.exercises?.filter(e => e.name || e.isComplex) || [];
                     return React.createElement('div', { key: bl.id, style: { borderLeft: `2px solid ${blCol}`, paddingLeft: '8px', flexShrink: 0 } },
                       React.createElement('div', { style: { fontSize: `calc(12px * var(--fs,1))`, fontWeight: 900, color: blCol, textTransform: 'uppercase', letterSpacing: '.07em', lineHeight: 1.2 } }, bl.type + (meta ? ` · ${meta}` : '')),
@@ -420,7 +411,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
   const _lbl = bl.label && bl.label !== '-' ? bl.label : null;
   const _typ = bl.type && bl.type !== '-' ? bl.type : null;
   const title = _lbl && _typ && _lbl !== _typ ? `${_lbl} · ${_typ}` : _lbl || _typ || '';
-  const meta = [bl.rounds && `${bl.rounds} RDS`, bl.duration && `CAP ${bl.duration}'`].filter(Boolean).join(' · ');
+  const meta = blkMeta(bl);
   const blockBg = bg || APP_CONFIG.mobileEaglesBg || '#000';
   return React.createElement('div', { style: { borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}` } },
     React.createElement('div', { style: { background: col.blockHdr || 'rgba(0,184,212,0.12)', padding: `${Math.round(10 * f)}px ${pad}px ${Math.round(6 * f)}px`, borderTop: '2px solid #00b8d4' } },
@@ -499,7 +490,7 @@ function MobileBlockB({ bl, fs, colors }) {
   const _lbl = bl.label && bl.label !== '-' ? bl.label : null;
   const _typ = bl.type && bl.type !== '-' ? bl.type : null;
   const title = _lbl && _typ && _lbl !== _typ ? `${_lbl} · ${_typ}` : _lbl || _typ || '';
-  const meta = [bl.rounds && `${bl.rounds} RDS`, bl.duration && `CAP ${bl.duration}'`].filter(Boolean).join(' · ');
+  const meta = blkMeta(bl);
   return React.createElement('div', { style: { borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}` } },
     React.createElement('div', { style: { background: col.blockHdr || 'rgba(0,184,212,0.12)', padding: `${Math.round(10 * f)}px ${pad}px`, borderTop: `${Math.max(2, Math.round(3 * f))}px solid ${col.blockType || '#00b8d4'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
       React.createElement('div', { style: { fontSize: mfs(16, f), fontWeight: 900, color: col.blockType || '#00b8d4', textTransform: 'uppercase', letterSpacing: '.1em', fontFamily: GF(), lineHeight: 1.2 } }, title),
@@ -593,7 +584,7 @@ function MobileWeeklySingleDay({ date, sessions, f, col, variant }) {
             const _lbl = bl.label && bl.label !== '-' ? bl.label : null;
             const _typ = bl.type && bl.type !== '-' ? bl.type : null;
             const title = _lbl && _typ && _lbl !== _typ ? `${_lbl} · ${_typ}` : _lbl || _typ || '';
-            const meta = [bl.rounds && `${bl.rounds} RDS`, bl.duration && `CAP ${bl.duration}'`].filter(Boolean).join(' · ');
+            const meta = blkMeta(bl);
             const exNames = (bl.exercises || []).filter(e => e.name || e.isComplex);
             const blkBg = isA ? 'rgba(74,200,192,0.12)' : 'rgba(0,184,212,0.12)';
             const blkDiv = isA ? 'rgba(74,200,192,0.08) 1px solid' : 'rgba(0,184,212,0.08) 1px solid';
@@ -745,7 +736,7 @@ function EventFormInner({ showForm, sessions, athletes, initialData, onSave, onC
       daySessions.length > 0 && S('Sessão vinculada',
         sel(fd.sessionId || '', e => set('sessionId', e.target.value || null),
           [React.createElement('option', { key: '', value: '' }, 'Nenhuma'),
-           ...daySessions.map(s => React.createElement('option', { key: s.id, value: s.id }, s.mainTraining || 'Sessão'))]
+           ...daySessions.map(s => React.createElement('option', { key: s.id, value: s.id }, sessName(s, showForm.date)))]
         )
       ),
       S('Notas (opcional)',
@@ -1095,6 +1086,9 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
   const isMobile = useIsMobile(800);
 
   const todayISO = toISO(new Date());
+  // Deliberate per-type rainbow for the mini-calendar dots below — distinct color per
+  // block *type*, not the 4-family blkColor taxonomy. Verified #84 — do not collapse
+  // into blkColor; its hardcoded hex is #59's (Publicador design pass), not this one.
   const BLOCK_C = { 'Força': '#d8a840', 'LPO': '#4ac8c0', 'For Time': '#e87820', 'Core': '#68d8a0', 'Acessórios': '#c884f0', 'AMRAP': '#e87820', 'Cardio': '#64b5f6', 'EMOM': '#ff8a65', 'WOD': '#e87820', 'HIIT': '#ff6d00' };
   const mobileWeeks = getWeeksOfMonth(year, month);
 
@@ -1111,13 +1105,8 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
   }
   function dayGymSessions(iso) { return (sessions[iso] || []).filter(s => getTargets(s).length === 0); }
 
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
-  const cells = [];
-  for (let i = 0; i < totalCells; i++) { const d = i - firstDay + 1; cells.push(d >= 1 && d <= daysInMonth ? d : null); }
-  const weeks = [];
-  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+  const weeks = mobileWeeks.map(week => week.map(d => d.getMonth() === month ? d.getDate() : null));
+  const cells = weeks.flat();
 
   let totalAulas = 0, totalPersonal = 0, completedAulas = 0, completedPersonal = 0;
   cells.filter(Boolean).forEach(d => {
@@ -1201,7 +1190,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
           return React.createElement('div', { key: 's' + ci, className: 'cell-card', style: { marginBottom: '2px', padding: '2px 4px', borderRadius: '3px', borderLeft: '2px solid var(--theme-accent)', background: 'rgba(74,200,192,.06)' } },
             React.createElement('div', { className: 'cell-card-full', style: { fontSize: '9px', fontWeight: 700, color: 'var(--theme-accent)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', alignItems: 'center' } },
               React.createElement('i', { className: 'ti ti-calendar-event', style: { fontSize: '8px', marginRight: '2px' }, 'aria-hidden': 'true' }),
-              s.mainTraining || 'Sessão'
+              sessName(s, iso)
             ),
             React.createElement('div', { className: 'cell-card-mini' },
               React.createElement('span', { style: { width: '5px', height: '5px', borderRadius: '50%', background: 'var(--theme-accent)', display: 'inline-block' } })
@@ -1256,7 +1245,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
           React.createElement('div', { style: { fontSize: '10px', color: '#554a3a', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '6px' } }, 'Sessão do dia'),
           gymSessions.map((s, si) => React.createElement('div', { key: si, style: { background: '#0d0b08', border: '1px solid #2a2318', borderTop: '2px solid var(--theme-accent)', borderRadius: '6px', padding: '8px 10px', marginBottom: '6px' } },
             React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '5px' } },
-              React.createElement('span', { style: { fontSize: '12px', fontWeight: 700, color: '#c8b090' } }, s.mainTraining || 'Sessão'),
+              React.createElement('span', { style: { fontSize: '12px', fontWeight: 700, color: '#c8b090' } }, sessName(s, iso)),
               React.createElement('div', { style: { display: 'flex', gap: '4px' } },
                 onEditSession && React.createElement('button', { onClick: e => { e.stopPropagation(); onEditSession(s); }, style: { background: 'transparent', border: '1px solid #2a2318', color: '#554a3a', padding: '2px 6px', borderRadius: '3px', cursor: 'pointer', fontSize: '10px', fontWeight: 700 } }, 'Editar')
               )
@@ -1407,7 +1396,7 @@ function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLo
                   allCards.slice(0, 9).map((card, ci) => {
                     if (card.kind === 'session') {
                       return React.createElement('span', { key: ci, className: 'pub-chip pub-chip-sess' },
-                        React.createElement('i', { className: 'ti ti-calendar-event', style: { fontSize: '8px' } }), ' ', card.data.mainTraining || 'Sessão'
+                        React.createElement('i', { className: 'ti ti-calendar-event', style: { fontSize: '8px' } }), ' ', sessName(card.data, iso)
                       );
                     }
                     const ev = card.data;

@@ -47,6 +47,33 @@ export function getWeek(off) {
   return Array.from({length:7},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return d})
 }
 
+// Sunday-start month grid, chunked into weeks of 7 cells. Every cell (including
+// the leading/trailing days padding the first/last week) carries a real Date —
+// not just in-month day numbers — because some callers (Publicador's export
+// views) preview session content on padding days; `inMonth` flags which cells
+// belong to the requested month. Canonical since #84, folding in 3 divergent
+// month-grid builders (Publicador's Date-per-cell weeks, its day-number-or-null
+// AgendaView grid, Resultados' {start,end} week summaries) — each derives its
+// own shape from these cells (e.g. `inMonth ? date.getDate() : null`).
+export function monthGridCells(year, month) {
+  const first = new Date(year, month, 1)
+  const start = new Date(year, month, 1 - first.getDay())
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const totalWeeks = Math.ceil((first.getDay() + daysInMonth) / 7)
+  const startDate = start.getDate()
+  const weeks = []
+  for (let w = 0; w < totalWeeks; w++) {
+    const week = []
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(start)
+      date.setDate(startDate + w * 7 + d)
+      week.push({ date, inMonth: date.getMonth() === month })
+    }
+    weeks.push(week)
+  }
+  return weeks
+}
+
 export function dateToWeekOffset(dateKey) {
   const now=new Date()
   const todaySun=new Date(now);todaySun.setDate(now.getDate()-now.getDay());todaySun.setHours(0,0,0,0)

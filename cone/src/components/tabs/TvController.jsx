@@ -3,6 +3,7 @@ import { supabase } from '../../utils/supabase'
 import { loadLS, loadAthletes, toISO } from '../../utils/storage'
 import { blkLabel, blkColor, isWodBlock, fmtSecs, TIMER_TYPES } from '../../public/lib/wod.js'
 import { DAY_PT_TITLE } from '../../public/lib/week.js'
+import { sessName } from '../../public/lib/sessions.js'
 import { WodSlide, TimerSlide, ResultsSlide, QrSlide } from '../../public/tv/slides.jsx'
 import { useTvSync }           from '../../hooks/useTvSync'
 import { useTimer }             from '../../hooks/useTimer'
@@ -20,10 +21,6 @@ const SLIDES     = [
   { id: 'results', icon: 'ti-trophy',     lbl: 'Resultados' },
   { id: 'qr',      icon: 'ti-qrcode',     lbl: 'QR Code' },
 ]
-
-function sessLabel(s) {
-  return s.sessionName || (Array.isArray(s.mainTraining) ? s.mainTraining[0] : s.mainTraining) || 'Sessão'
-}
 
 // ── Full-width date picker (Sunday-start) ────────────────────────────────────
 function DatePicker({ selDate, sessions, onChange }) {
@@ -239,7 +236,7 @@ export default function TvController({ sessions: propSessions }) {
                 return (
                   <div key={sess.id} onClick={() => selectSession(sess.id)}
                     className={`${st.sessChip} ${sel ? st.sel : ''}`}>
-                    <div className={st.sessChipTitle}>{sessLabel(sess)}</div>
+                    <div className={st.sessChipTitle}>{sessName(sess, selDate)}</div>
                     <div className={st.sessChipBlocks}>
                       {blocks.slice(0, 5).map(bl => {
                         const col = blkColor(bl)
