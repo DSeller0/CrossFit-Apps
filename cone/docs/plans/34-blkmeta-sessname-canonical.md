@@ -1,5 +1,7 @@
 # 34 — #84 · Promote block-meta + session-name formatters (single canonical)
 
+> ✅ Done: e0358ce · 2026-07-19 — see BACKLOG.md
+
 ## Context
 The block-meta "rounds · CAP" string is hand-rolled at ~11 sites and session-name
 resolution at ~9 sites, each with casing/order/fallback drift. Both already have a
