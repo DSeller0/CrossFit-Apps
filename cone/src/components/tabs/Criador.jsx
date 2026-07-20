@@ -14,6 +14,7 @@ import { BENCHMARK_GIRLS, BENCHMARK_HEROES, buildBenchmarkBlock } from '../../pu
 import { resolveExercise } from '../../public/lib/registry.js';
 import { DAY_PT } from '../../public/lib/week.js';
 import { sessName } from '../../public/lib/sessions.js';
+import { sessionBoxIds } from '../../public/lib/boxScope.js';
 import IntensityInput from '../shared/IntensityInput';
 
 
@@ -35,7 +36,7 @@ const emptyBlock = (type = 'For Time') => {
     exercises: [emptyEx()],
   };
 };
-const emptyS = () => ({ id: uid(), date: todayISO(), mainTraining: [], sessionName: '', locationId: null, blocks: [] });
+const emptyS = () => ({ id: uid(), date: todayISO(), mainTraining: [], sessionName: '', locationIds: [], blocks: [] });
 
 // Legacy `intensity.mode==='cardio'` exercises carried distance in the load slot (#37).
 // Lazily convert them to the `dist`/`distUnit` siblings on next edit/save — no bulk migration.
@@ -1187,13 +1188,13 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   // A NEW session inherits the selected box context; editing an existing one never
   // gets its box clobbered by switching the grid filter.
   useEffect(() => {
-    if (!editing) setForm(f => ({ ...f, locationId: (selBox === 'all' || selBox === 'none') ? null : selBox }));
+    if (!editing) setForm(f => ({ ...f, locationIds: (selBox === 'all' || selBox === 'none') ? [] : [selBox] }));
   }, [selBox, editing]);
 
   const startEdit = (s, dateKey) => {
     const targets = getTargets(s);
     const sName = typeof s.mainTraining === 'string' ? s.mainTraining : (s.sessionName || '');
-    setForm({ ...s, date: dateKey, mainTraining: targets, sessionName: sName });
+    setForm({ ...s, date: dateKey, mainTraining: targets, sessionName: sName, locationIds: sessionBoxIds(s) });
     setBlocks(s.blocks?.length ? normalizeLegacyCardio(s.blocks) : []);
     setEditing({ dateKey, id: s.id });
     setIsDirty(false); setChangedBlockFields({}); setChangedSessionFields(new Set()); setActiveTemplateId(null);
@@ -1260,7 +1261,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setSessions(prev => {
       const next = { ...prev };
       recurPreviewDates.forEach(dateKey => {
-        const session = { id: uid(), date: dateKey, sessionName: recurringTpl.name, mainTraining: [], locationId: (selBox === 'all' || selBox === 'none') ? null : selBox, blocks: cloneBlocks(recurringTpl.blocks) };
+        const session = { id: uid(), date: dateKey, sessionName: recurringTpl.name, mainTraining: [], locationIds: (selBox === 'all' || selBox === 'none') ? [] : [selBox], blocks: cloneBlocks(recurringTpl.blocks) };
         next[dateKey] = [...(next[dateKey] || []), session];
       });
       return next;
@@ -1420,7 +1421,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const WEEK_DAYS = DAY_PT;
   const totalSessions = Object.values(sessions).flat().length;
   // Box grid filter: 'all' shows everything, 'none' shows only box-less sessions, an id shows that box.
-  const boxFilter = s => selBox === 'all' ? true : selBox === 'none' ? !s.locationId : (s.locationId || null) === selBox;
+  const boxFilter = s => selBox === 'all' ? true : selBox === 'none' ? sessionBoxIds(s).length === 0 : sessionBoxIds(s).includes(selBox);
   const weekLabel = `${weekDates[0].getDate()}/${weekDates[0].getMonth()+1} – ${weekDates[6].getDate()}/${weekDates[6].getMonth()+1}/${weekDates[6].getFullYear()}`;
 
   const athletes = loadAthletes();
@@ -1734,16 +1735,27 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           })}
         </div>
 
-        {/* Box — which location this session belongs to (drives per-box QR scoping) */}
+        {/* Box — which location(s) this session belongs to (drives per-box scoping). Multi-select,
+            same "toggle to add/remove" pattern as exercise categories: a session with any box tag
+            is visible only under those boxes' scoped links, never on the untagged general view
+            (see boxScope.js inBoxScope) — "Sem box" is the 0-tags state, not a tag itself. */}
         {boxLocs.length > 0 && (
           <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span className="lbl" style={{ margin: 0 }}>Box</span>
             {[{ id: null, name: 'Sem box' }, ...boxLocs].map(b => {
-              const active = (form.locationId || null) === (b.id || null);
+              const ids = form.locationIds || [];
+              const active = b.id === null ? ids.length === 0 : ids.includes(b.id);
               const accent = b.color || '#806850';
               return (
                 <button key={b.id || 'none'} type="button"
-                  onClick={() => { setForm(f => ({ ...f, locationId: b.id })); setIsDirty(true); trackSessionField('locationId'); }}
+                  onClick={() => {
+                    setForm(f => {
+                      const cur = f.locationIds || [];
+                      const next = b.id === null ? [] : (cur.includes(b.id) ? cur.filter(x => x !== b.id) : [...cur, b.id]);
+                      return { ...f, locationIds: next };
+                    });
+                    setIsDirty(true); trackSessionField('locationIds');
+                  }}
                   style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', fontSize: 11, fontWeight: 700, borderRadius: 4, fontFamily: 'inherit', cursor: 'pointer',
                     border: `1px solid ${active ? accent : 'var(--div,#2a231c)'}`,
                     background: active ? `${b.color || '#806850'}1a` : 'transparent',

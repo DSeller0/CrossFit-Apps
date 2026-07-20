@@ -24,8 +24,22 @@ export function getBoxScope() {
 
 export function clearBoxScope() { try { localStorage.removeItem(KEY); } catch { /* ignore */ } }
 
-// True if a session belongs in the active scope. No scope → everything passes; a scoped
-// view hides sessions from other boxes AND box-less (legacy/unassigned) sessions.
+// A session's box tags, normalized to an array. Canonical field is `locationIds`; a
+// session saved before multi-box support only has the singular `locationId` — read-side
+// fallback, never written for new saves (Criador always writes `locationIds`).
+export function sessionBoxIds(session) {
+  if (Array.isArray(session.locationIds)) return session.locationIds;
+  return session.locationId ? [session.locationId] : [];
+}
+
+// True if a session belongs in the active scope. A session's own box tags decide which
+// single audience sees it — never both:
+//   - No tags ("Sem box")   → visible only with no scope active (the general/all view).
+//   - One or more tags      → visible only under a scope matching one of those tags,
+//                              not in the untagged general view.
+// So a box-tagged session is invisible on the plain, unscoped page — it only ever shows
+// up via its own box's link.
 export function inBoxScope(session, box) {
-  return !box || (session.locationId || null) === box;
+  const boxes = sessionBoxIds(session);
+  return box ? boxes.includes(box) : boxes.length === 0;
 }
