@@ -9,6 +9,29 @@
 .ovIc { width:24px; height:24px; color:var(--sub); }  /* explicit: the <a>.ovTile sets no color, so stroke:currentColor would fall back to the UA link blue */
 .ovLbl { font-size:9px; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
 
+/* ── Box scope banner — fixed top strip, visible whenever a `?box=` scope is active ── */
+.boxBanner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 31;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: color-mix(in srgb, var(--gold) 14%, var(--stone));
+  border-bottom: 1px solid var(--gold2);
+}
+.boxBannerText { font-size: 11px; font-weight: 700; color: var(--cream); letter-spacing: .03em; }
+.boxBannerClear {
+  display: flex; align-items: center; gap: 4px;
+  background: none; border: 1px solid var(--gold2); border-radius: var(--radius-sm);
+  color: var(--gold); font-family: var(--font); font-size: 11px; font-weight: 700;
+  padding: 2px 8px; cursor: pointer;
+}
+.boxBannerClear:hover { background: color-mix(in srgb, var(--gold) 12%, transparent); }
+.boxBannerIc { width: 13px; height: 13px; }
+
 /* ── Nav (mobile: fixed bottom bar) ── */
 .nav {
   position: fixed;

@@ -1,5 +1,5 @@
 import { useState, Fragment } from 'react'
-import { IconHome, IconTrophy, IconChartBar, IconUser, IconCalendar, IconClock, IconSettings } from '@tabler/icons-react'
+import { IconHome, IconTrophy, IconChartBar, IconUser, IconCalendar, IconClock, IconSettings, IconFilterX } from '@tabler/icons-react'
 import s from './Nav.module.css'
 
 export function isNavHidden() {
@@ -32,8 +32,25 @@ export default function Nav({ active, lockedId, gymName = '', box = null }) {
     return qs ? `${tab.href}?${qs}` : tab.href
   }
 
+  // Clearing needs to win over a `?box=` param already in the URL (getBoxScope prefers a
+  // fresh URL param over localStorage), so navigate through the explicit `all` branch
+  // rather than just wiping localStorage.
+  const clearScope = () => { window.location.href = `${window.location.pathname}?box=all` }
+
   return (
     <>
+      {/* Box scope is sticky (localStorage) and silently carried into every Nav link — with
+          no indicator, a leftover scope from an earlier `?box=` visit looks identical to
+          "no sessions today" on every public page. Surface it. */}
+      {box && (
+        <div className={s.boxBanner}>
+          <span className={s.boxBannerText}>Filtro de box ativo</span>
+          <button type="button" className={s.boxBannerClear} onClick={clearScope}>
+            <IconFilterX className={s.boxBannerIc} /> Limpar
+          </button>
+        </div>
+      )}
+
       {/* Mobile overflow overlay */}
       {ovOpen && <div className={s.ovOverlay} onClick={() => setOvOpen(false)} />}
 
