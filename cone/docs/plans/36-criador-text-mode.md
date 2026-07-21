@@ -200,7 +200,7 @@ New in `src/components/tabs/criador/`:
 | `BlockTextEditor.jsx` | per-block textarea + parse status line |
 | `SessionTextPane.jsx` | session textarea + live preview pane |
 | `WeekImportModal.jsx` | paste box + per-day detection + create-all |
-| `WeekTextView.jsx` | read-only week-as-text (the comparison view) |
+| ~~`WeekTextView.jsx`~~ | **dropped 2026-07-21 — see "the week grid gets a mode" below.** The week-as-text is a *render mode of the existing grid*, not a new surface. |
 
 Touched: `criador/BlockEditor.jsx` (mode toggle in the block bar),
 `criador/WeekGrid.jsx` (toolbar entry points), `Criador.jsx` (mode state, import
@@ -409,7 +409,41 @@ per non-blank line) beyond the planned `{blocks, warnings}`. That is what makes
 **Warning kinds produced:** `type-unresolved` · `unknown-exercise` · `complex-detected` ·
 `interval-approximated` · `unparsed-line` · `orphan-load` · `preamble`.
 
+## The week grid gets a mode — `WeekTextView` is dropped (coach review, 2026-07-21)
+
+The plan's week-as-text was a **separate read-only view that replaced the grid**, and on
+review that doesn't do the job it was added for: toggling into it while writing Tuesday
+shows you Monday's text with nowhere to type, so you toggle back — the same two-context
+problem in a new coat.
+
+**It becomes a render mode of the week grid instead.** Same 7 columns, same `boxFilter`,
+same week arrows, same `weekGridCollapsed`; only the contents of the session card change.
+The comparison problem then dissolves, because the grid is already the surface that is
+always on screen. No new view to navigate to, and one fewer component.
+
+| Mode | Session card renders | Why that one |
+|---|---|---|
+| **Grade** | `ExerciseList` at size **`tiny`** (the phone/web size), replacing today's bare `wg-pill` type chips | denser, prettier, already shipped |
+| **Texto** | `serializeSession(session)` | copy-pasteable back into his notepad, and the only one of the two that can show the structure line, `Meta:` and the kept-verbatim notes — `ExerciseList` has no row for those |
+
+- **Width is a non-issue** — `index.css:133` is already `repeat(7, minmax(200px,1fr))` +
+  `min-width:1400px` inside `.week-scroll`. 7 columns with horizontal scroll is the
+  grid's *existing* pattern, and the notation fits ~200px at 10.5px mono without wrapping
+  (verified in the mockup).
+- **Height is the real cost, recorded:** a full Monday (4 blocks / 14 exercises) makes a
+  ~340–380px card in either mode, and the grid row follows the tallest day.
+  `weekGridCollapsed` is the existing escape hatch. If it bites in practice, cap the card
+  at N blocks with a "+2 blocos" — do not redesign the grid.
+- **Mobile:** columns stack; a card is collapsed (day · name · block count), tapping
+  **expands it in place read-only** in whichever mode is active, and **Editar** opens
+  today's editor. **Editing inline in the week list is deliberately left to
+  [37](./37-design-c4-criador.md)**, which already re-lays-out this exact screen — #92
+  must not land a competing editor layout.
+
+So `WeekGrid.jsx` gains a `mode` prop and a `SessionCard` that renders one of the two
+shapes; the toolbar toggle sits next to the existing minimize-grid button.
+
 ### Still to do (next session, after the mockup is approved)
-`BlockTextEditor.jsx` · `SessionTextPane.jsx` · `WeekImportModal.jsx` · `WeekTextView.jsx`,
-their wiring in `BlockEditor.jsx` / `WeekGrid.jsx` / `Criador.jsx`, their `GROUPS` entries
-in `gallery.html`, `npm run design:cards` + sync, and the `CLAUDE.md` note.
+`BlockTextEditor.jsx` · `SessionTextPane.jsx` · `WeekImportModal.jsx` · the `SessionCard`
++ `mode` prop in `WeekGrid.jsx`, their wiring in `BlockEditor.jsx` / `Criador.jsx`, their
+`GROUPS` entries in `gallery.html`, `npm run design:cards` + sync, and the `CLAUDE.md` note.

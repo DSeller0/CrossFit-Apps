@@ -1,10 +1,11 @@
 <!-- @dsCard group="Mockups" -->
 <meta charset="utf-8">
-<title>Cone — Criador texto (#92 · plans/36) · SessionTextPane · BlockTextEditor · WeekImportModal · WeekTextView</title>
+<title>Cone — Criador texto (#92 · plans/36) · SessionTextPane · BlockTextEditor · WeekImportModal · WeekGrid (Grade/Texto)</title>
 <style>
   /* ═══════════════════════════════════════════════════════════════════════
      #92 — Criador text-entry mode (Lane-B ideation, plans/36).
-     Four net-new surfaces. Every string below is REAL PARSER OUTPUT for
+     Three net-new surfaces + a two-mode week grid. Every string below is REAL
+     PARSER OUTPUT for
      `cone/Coach training week example.txt` — the preview counts, the
      warnings and the "5mM HSW" typo are what textFormat.js actually
      produces, not illustration.
@@ -174,15 +175,42 @@
   .modalBtns{display:flex;justify-content:flex-end;gap:10px;
     border-top:1px solid var(--divider);padding:var(--sp-3) var(--sp-4)}
 
-  /* ── week as text ───────────────────────────────────────────────────── */
-  .weekCols{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--divider)}
-  .wcol{background:var(--stone);padding:var(--sp-3)}
-  .wcolHd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:var(--sp-2)}
-  .wcolHd .d{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:700}
-  .wcolHd .n{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
-  .wtxt{font-family:var(--font-mono);font-size:11px;line-height:1.75;color:var(--sub);white-space:pre-wrap}
+  /* ── the week grid, both modes (real geometry: 7 × minmax(200px,1fr)) ── */
+  .gridCols{display:grid;grid-template-columns:repeat(4,minmax(200px,1fr));gap:1px;
+    background:var(--divider);border-top:1px solid var(--divider)}
+  .gcol{background:var(--stone);padding:0 0 var(--sp-2)}
+  .gcolHd{display:flex;align-items:baseline;justify-content:space-between;gap:6px;
+    padding:6px 8px;border-bottom:1px solid var(--divider)}
+  .gcolHd .d{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .gcolHd .n{font-size:10px;color:var(--teal);font-family:var(--font-mono)}
+  .gcard{background:var(--stone2);border:1px solid var(--divider);border-radius:var(--radius-sm);
+    margin:6px;padding:8px;cursor:pointer}
+  .gcard:hover{border-color:var(--sub)}
+  .gcardHd{display:flex;align-items:flex-start;justify-content:space-between;gap:4px;margin-bottom:6px}
+  .gcardHd .nm{font-size:12px;font-weight:600;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gcardHd .x{font-size:10px;color:var(--muted);flex-shrink:0}
+  .gblkHd{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:7px 0 3px}
+  .gblkHd:first-of-type{margin-top:0}
+  .gblkHd .meta{font-size:10.5px;color:var(--muted);font-family:var(--font-mono)}
+  .gadd{font-size:10px;color:var(--dim);padding:2px 8px;font-family:var(--font-mono)}
+  .gempty{font-size:11px;color:var(--dim);font-style:italic;padding:10px 8px}
+  .scrollHint{font-size:10px;color:var(--dim);font-family:var(--font-mono);
+    padding:6px 10px;border-top:1px solid var(--divider)}
+  .wtxt{font-family:var(--font-mono);font-size:10.5px;line-height:1.7;color:var(--sub);white-space:pre-wrap}
   .wtxt .hd{color:var(--cream);font-weight:700}
   .wempty{font-size:11px;color:var(--dim);font-style:italic}
+
+  /* ── mobile stacked rows ────────────────────────────────────────────── */
+  .mrow{display:flex;align-items:center;gap:8px;padding:9px 8px;border-bottom:1px solid var(--divider);cursor:pointer}
+  .mrow .ch{color:var(--muted);font-size:10px;width:10px}
+  .mrow .d{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);
+    font-weight:700;width:52px;flex-shrink:0}
+  .mrow .nm{font-size:12px;color:var(--cream);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mrow .n{font-size:10px;color:var(--muted);font-family:var(--font-mono);flex-shrink:0}
+  .mrow.open{background:var(--stone2);border-bottom-color:transparent}
+  .mbody{background:var(--stone2);border-bottom:1px solid var(--divider);padding:2px 12px 10px}
+  .mact{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;
+    border-top:1px solid var(--divider);padding-top:9px}
 
   /* ── mobile frames ──────────────────────────────────────────────────── */
   .frames{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
@@ -207,8 +235,9 @@
   </div>
   <p class="lede">
     O Criador foi feito para <b>substituir</b> o arquivo de texto do coach. Não substituiu — ele escreve a semana
-    inteira no bloco de notas e <b>redigita</b> tudo aqui. Estas quatro superfícies aceitam o formato que ele já
-    escreve (<b>parser determinístico, sem LLM</b>) e devolvem a semana como texto para comparar os dias lado a lado.
+    inteira no bloco de notas e <b>redigita</b> tudo aqui. Estas superfícies aceitam o formato que ele já escreve
+    (<b>parser determinístico, sem LLM</b>), e a <b>grade da semana ganha um modo texto</b> em vez de virar uma
+    tela nova — comparar os dias deixa de ser problema porque a grade já está sempre na tela.
     <b>Os blocos continuam canônicos</b> — texto é projeção de entrada/saída, nunca armazenamento; TV,
     <code>schedule.html</code>, <code>results.html</code> e Publicador leem os mesmos objetos de hoje.
     Todo número, aviso e nome abaixo é <b>saída real</b> de <code>textFormat.js</code> sobre
@@ -469,24 +498,107 @@ Warm Up
     </div>
   </div>
 
-  <!-- ══════════ 4 · WEEK TEXT VIEW ══════════ -->
-  <h2>4 · WeekTextView — a semana lado a lado (só leitura)</h2>
+  <!-- ══════════ 4 · A GRADE EM DOIS MODOS ══════════ -->
+  <h2>4 · A grade da semana em dois modos — Grade / Texto</h2>
   <div class="note">
-    A resposta direta ao segundo problema: <i>"para ajustar quarta preciso ver segunda e terça"</i>. Sai de graça
-    assim que o serializador existe — um toggle na barra da semana projeta as sessões visíveis em colunas
-    (empilhadas no telefone), com <b>Copiar tudo</b>. Só leitura: nada aqui edita nada.
+    <b>Não é uma tela nova.</b> É a mesma grade de sempre — mesmas 7 colunas, mesmo filtro de box, mesmas setas
+    de semana — trocando só <i>o que vai dentro do card da sessão</i>. Assim o problema de comparar dias some
+    sozinho: a grade já é a superfície que está sempre na tela. <b>Grade</b> troca as pílulas de tipo de hoje
+    pelo <code>ExerciseList</code> (tamanho <code>tiny</code>, o do telefone) — o card passa a mostrar conteúdo.
+    <b>Texto</b> mostra a notação serializada, que é copiável e carrega a linha de estrutura, o <code>Meta:</code>
+    e as notas — coisas para as quais o <code>ExerciseList</code> não tem linha. A grade já rola na horizontal
+    (<code>repeat(7,minmax(200px,1fr))</code> + <code>min-width:1400px</code>), então as 7 colunas continuam
+    sendo o padrão existente, não uma novidade.
   </div>
+
   <div class="card">
     <div class="paneBar">
-      <span class="count">Semana 20/07 – 26/07</span>
+      <button class="btn xs">‹</button>
+      <span class="count">20/07 – 26/07</span>
+      <button class="btn xs">›</button>
+      <span class="modeSeg"><button class="on">▤ Grade</button><button>¶ Texto</button></span>
+      <span class="spacer"></span>
+      <button class="btn sm">⧉ Copiar semana</button>
+      <button class="btn ghost sm" title="Minimizar grade">▤</button>
+    </div>
+    <div class="gridCols">
+      <div class="gcol">
+        <div class="gcolHd"><span class="d">Seg 20</span><span class="n">1s</span></div>
+        <div class="gcard">
+          <div class="gcardHd"><span class="nm">Treino 06h</span><span class="x">✕</span></div>
+          <div class="gblkHd"><span class="chip green">Aquecimento</span><span class="meta">3×</span></div>
+          <div class="pex"><span class="q">100m</span><span class="nm">Run</span></div>
+          <div class="pex"><span class="q">10</span><span class="nm">Shoulder Taps</span></div>
+          <div class="pex"><span class="q">5</span><span class="nm">Inchworm + Push Up</span></div>
+          <div class="gblkHd"><span class="chip green">Skill</span><span class="meta">Handstand Walk · 3×</span></div>
+          <div class="pex"><span class="q">20"</span><span class="nm">Handstand Hold wall</span></div>
+          <div class="pex"><span class="q">10</span><span class="nm">Wall Shoulder Taps</span></div>
+          <div class="pex"><span class="q">—</span><span class="nm">Deslocamento com apoio</span></div>
+          <div class="gblkHd"><span class="chip">For Time</span><span class="meta">5× · CAP 14'</span></div>
+          <div class="pex"><span class="q">8</span><span class="nm">Power Clean</span><span class="load">M 60/50 · F 45/35</span></div>
+          <div class="pex"><span class="q">10</span><span class="nm">Toes to Bar</span></div>
+          <div class="pex"><span class="q">10</span><span class="nm">Box Jump</span></div>
+          <div class="pex"><span class="q">100m</span><span class="nm">Run</span></div>
+          <div class="pgoal">Meta 11:00–12:00</div>
+        </div>
+        <div class="gadd">+ add &nbsp;·&nbsp; ⧉ copy</div>
+      </div>
+
+      <div class="gcol">
+        <div class="gcolHd"><span class="d">Ter 21</span><span class="n">1s</span></div>
+        <div class="gcard">
+          <div class="gcardHd"><span class="nm">Treino 06h</span><span class="x">✕</span></div>
+          <div class="gblkHd"><span class="chip green">Aquecimento</span><span class="meta">2×</span></div>
+          <div class="pex"><span class="q">10</span><span class="nm">Ring Row</span></div>
+          <div class="pex"><span class="q">10</span><span class="nm">Scap Pull Up</span></div>
+          <div class="pex"><span class="q">10</span><span class="nm">Hollow Rock</span></div>
+          <div class="gblkHd"><span class="chip green">Skill</span><span class="meta">Pull Up · 4×</span></div>
+          <div class="pex"><span class="q">5</span><span class="nm">Strict Pull Up</span></div>
+          <div class="pex"><span class="q">5</span><span class="nm">Kipping Pull Up na Caixa</span></div>
+          <div class="gblkHd"><span class="chip">EMOM</span><span class="meta">Quem já faz ! · 15'</span></div>
+          <div class="pex"><span class="q">4</span><span class="nm">Strict C2B</span></div>
+          <div class="pex"><span class="q">8</span><span class="nm">Kipping Pull Up</span></div>
+          <div class="pex"><span class="q">—</span><span class="nm">Rest</span></div>
+        </div>
+        <div class="gadd">+ add &nbsp;·&nbsp; ⧉ copy</div>
+      </div>
+
+      <div class="gcol">
+        <div class="gcolHd"><span class="d">Qua 22</span></div>
+        <div class="gempty">sem sessão</div>
+        <div class="gadd">+ add</div>
+      </div>
+
+      <div class="gcol">
+        <div class="gcolHd"><span class="d">Qui 23</span><span class="n">1s</span></div>
+        <div class="gcard">
+          <div class="gcardHd"><span class="nm">HYROX</span><span class="x">✕</span></div>
+          <div class="gblkHd"><span class="chip green">Aquecimento</span><span class="meta">3×</span></div>
+          <div class="pex"><span class="q">200</span><span class="nm">Run</span></div>
+          <div class="pex"><span class="q">20m</span><span class="nm">Farmer Carry</span></div>
+          <div class="pex"><span class="q">20m</span><span class="nm">Lunges</span></div>
+        </div>
+        <div class="gadd">+ add</div>
+      </div>
+    </div>
+    <div class="scrollHint">↔ Sex · Sáb · Dom seguem à direita — a grade já rola na horizontal</div>
+  </div>
+
+  <div class="clbl">Modo texto — as mesmas colunas, a notação dele</div>
+  <div class="card">
+    <div class="paneBar">
+      <button class="btn xs">‹</button>
+      <span class="count">20/07 – 26/07</span>
+      <button class="btn xs">›</button>
       <span class="modeSeg"><button>▤ Grade</button><button class="on">¶ Texto</button></span>
       <span class="spacer"></span>
-      <button class="btn sm">⧉ Copiar tudo</button>
+      <button class="btn sm">⧉ Copiar semana</button>
     </div>
-    <div class="weekCols">
-      <div class="wcol">
-        <div class="wcolHd"><span class="d">Seg 20</span><span class="n">4 blocos</span></div>
-        <div class="wtxt"><span class="hd">Aquecimento</span>
+    <div class="gridCols">
+      <div class="gcol">
+        <div class="gcolHd"><span class="d">Seg 20</span><span class="n">⧉</span></div>
+        <div class="gcard"><div class="gcardHd"><span class="nm">Treino 06h</span><span class="x">✕</span></div>
+          <div class="wtxt"><span class="hd">Aquecimento</span>
 3 rounds
 100m Run
 10 Shoulder Taps
@@ -502,11 +614,17 @@ C Deslocamento com apoio
 5 rounds Cap 14'
 8 Power Clean 60/45kg – 50/35kg
 10 Toes to Bar
+10 Box Jump
+100m Run
 Meta: 11-12'</div>
+        </div>
+        <div class="gadd">+ add &nbsp;·&nbsp; ⧉ copy</div>
       </div>
-      <div class="wcol">
-        <div class="wcolHd"><span class="d">Ter 21</span><span class="n">4 blocos</span></div>
-        <div class="wtxt"><span class="hd">Aquecimento</span>
+
+      <div class="gcol">
+        <div class="gcolHd"><span class="d">Ter 21</span><span class="n">⧉</span></div>
+        <div class="gcard"><div class="gcardHd"><span class="nm">Treino 06h</span><span class="x">✕</span></div>
+          <div class="wtxt"><span class="hd">Aquecimento</span>
 2 rounds
 10 Ring Row
 10 Scap Pull Up
@@ -522,17 +640,104 @@ B 5 Kipping Pull Up na Caixa
 A 4 Strict C2B
 B 8 Kipping Pull Up
 C Rest</div>
+        </div>
+        <div class="gadd">+ add &nbsp;·&nbsp; ⧉ copy</div>
       </div>
-      <div class="wcol">
-        <div class="wcolHd"><span class="d">Qua 22</span><span class="n">sem sessão</span></div>
-        <div class="wempty">—</div>
+
+      <div class="gcol">
+        <div class="gcolHd"><span class="d">Qua 22</span></div>
+        <div class="gempty">sem sessão</div>
+        <div class="gadd">+ add</div>
+      </div>
+
+      <div class="gcol">
+        <div class="gcolHd"><span class="d">Qui 23</span><span class="n">⧉</span></div>
+        <div class="gcard"><div class="gcardHd"><span class="nm">HYROX</span><span class="x">✕</span></div>
+          <div class="wtxt"><span class="hd">Aquecimento</span>
+3 rounds
+200 Run
+20m Farmer Carry
+20m Lunges</div>
+        </div>
+        <div class="gadd">+ add</div>
       </div>
     </div>
+    <div class="scrollHint">↔ a coluna inteira é copiável — é exatamente o que ele cola no bloco de notas</div>
+  </div>
+
+  <div class="note" style="margin-top:14px">
+    <b>Risco de altura, registrado.</b> Uma segunda cheia (4 blocos, 14 exercícios) dá um card de ~380px nos
+    dois modos, e a linha da grade acompanha o dia mais alto. Não é problema novo e a saída já existe: o botão
+    <b>minimizar grade</b> (<code>weekGridCollapsed</code>) colapsa tudo na tira de dias. Se incomodar na
+    prática, o passo seguinte é limitar o card a N blocos com um <i>“+2 blocos”</i> — não reprojetar a grade.
   </div>
 
   <!-- ══════════ MOBILE ══════════ -->
-  <h2>5 · Mobile 390 — a pré-visualização empilha sob o textarea</h2>
+  <h2>5 · Mobile 390 — a grade empilha, o card abre no lugar</h2>
+  <div class="note">
+    Mesma grade, colunas empilhadas. O card vem <b>recolhido</b> (dia + nome + contagem); tocar <b>expande no
+    lugar, só leitura</b>, no modo que estiver ativo; <b>Editar</b> abre o editor de hoje. Editar dentro da
+    lista fica para <b>plans/37</b>, que já vai reprojetar exatamente esta tela — #92 não disputa esse desenho.
+  </div>
   <div class="frames">
+    <div class="frame">
+      <div class="paneBar">
+        <button class="btn xs">‹</button><span class="count">20/07</span><button class="btn xs">›</button>
+        <span class="modeSeg"><button>▤</button><button class="on">¶ Texto</button></span>
+      </div>
+      <div style="padding:10px">
+        <div class="mrow"><span class="ch">▸</span><span class="d">Seg 20</span><span class="nm">Treino 06h</span><span class="n">4 blocos</span></div>
+        <div class="mrow open"><span class="ch">▾</span><span class="d">Ter 21</span><span class="nm">Treino 06h</span><span class="n">4 blocos</span></div>
+        <div class="mbody">
+          <div class="wtxt"><span class="hd">Aquecimento</span>
+2 rounds
+10 Ring Row
+10 Scap Pull Up
+10 Hollow Rock
+
+<span class="hd">Skill – Pull Up</span>
+4 rounds
+A 5 Strict Pull Up (band)
+B 5 Kipping Pull Up na Caixa
+
+<span class="hd">EMOM – Quem já faz !</span>
+15'
+A 4 Strict C2B
+B 8 Kipping Pull Up
+C Rest</div>
+          <div class="mact"><button class="btn sm">⧉ Copiar</button><button class="btn primary sm">✎ Editar</button></div>
+        </div>
+        <div class="mrow"><span class="ch">▸</span><span class="d">Qua 22</span><span class="nm" style="color:var(--dim);font-style:italic">sem sessão</span><span class="n">+ add</span></div>
+        <div class="mrow"><span class="ch">▸</span><span class="d">Qui 23</span><span class="nm">HYROX</span><span class="n">3 blocos</span></div>
+      </div>
+    </div>
+
+    <div class="frame">
+      <div class="paneBar">
+        <button class="btn xs">‹</button><span class="count">20/07</span><button class="btn xs">›</button>
+        <span class="modeSeg"><button class="on">▤ Grade</button><button>¶</button></span>
+      </div>
+      <div style="padding:10px">
+        <div class="mrow"><span class="ch">▸</span><span class="d">Seg 20</span><span class="nm">Treino 06h</span><span class="n">4 blocos</span></div>
+        <div class="mrow open"><span class="ch">▾</span><span class="d">Ter 21</span><span class="nm">Treino 06h</span><span class="n">4 blocos</span></div>
+        <div class="mbody">
+          <div class="gblkHd"><span class="chip green">Aquecimento</span><span class="meta">2×</span></div>
+          <div class="pex"><span class="q">10</span><span class="nm">Ring Row</span></div>
+          <div class="pex"><span class="q">10</span><span class="nm">Scap Pull Up</span></div>
+          <div class="pex"><span class="q">10</span><span class="nm">Hollow Rock</span></div>
+          <div class="gblkHd"><span class="chip green">Skill</span><span class="meta">Pull Up · 4×</span></div>
+          <div class="pex"><span class="q">5</span><span class="nm">Strict Pull Up</span><span class="load">band</span></div>
+          <div class="pex"><span class="q">5</span><span class="nm">Kipping Pull Up na Caixa</span></div>
+          <div class="gblkHd"><span class="chip">EMOM</span><span class="meta">Quem já faz ! · 15'</span></div>
+          <div class="pex"><span class="q">4</span><span class="nm">Strict C2B</span></div>
+          <div class="pex"><span class="q">8</span><span class="nm">Kipping Pull Up</span></div>
+          <div class="pex"><span class="q">—</span><span class="nm">Rest</span></div>
+          <div class="mact"><button class="btn primary sm">✎ Editar</button></div>
+        </div>
+        <div class="mrow"><span class="ch">▸</span><span class="d">Qua 22</span><span class="nm" style="color:var(--dim);font-style:italic">sem sessão</span><span class="n">+ add</span></div>
+      </div>
+    </div>
+
     <div class="frame">
       <div class="pane">
         <div class="left">
@@ -572,44 +777,20 @@ C Rest</div>
         </div>
       </div>
     </div>
-
-    <div class="frame">
-      <div class="scrim">
-        <div class="card modal">
-          <div class="modalHd">Importar semana</div>
-          <div class="modalBody">
-            <label class="lbl">Cole o texto da semana</label>
-            <div class="inp tall" style="min-height:76px">SEGUNDA-FEIRA
-
-Warm Up
-3 rounds …</div>
-            <div class="weekPick">
-              <button class="btn xs">‹</button><span class="v">20/07 – 26/07</span><button class="btn xs">›</button>
-            </div>
-            <table class="det">
-              <tr><td class="d">SEG 20</td><td class="c">4 bl · 14 ex</td><td class="s ok">✓</td></tr>
-              <tr><td class="d">TER 21</td><td class="c">4 bl · 12 ex</td><td class="s warn">⚠ 1 tipo</td></tr>
-              <tr><td class="d">QUA 22</td><td class="c">3 bl · 10 ex</td><td class="s ok">✓</td></tr>
-              <tr><td class="d">QUI 23</td><td class="c">3 bl · 12 ex</td><td class="s nm">"HYROX"</td></tr>
-            </table>
-            <div class="pills">
-              <button class="pill on">Sem box</button><button class="pill">Eagles</button><button class="pill">Garra</button>
-            </div>
-          </div>
-          <div class="modalBtns">
-            <button class="btn sm">Cancelar</button>
-            <button class="btn primary sm">Criar 4 sessões</button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
+
 
   <!-- ══════════ NOTES ══════════ -->
   <h2>Decisões que este cartão fixa</h2>
   <div class="note">
-    <b>1 · Um só toggle.</b> <code>▤ Detalhado / ¶ Texto</code> aparece igual nos três níveis (bloco, sessão,
-    semana). Nunca persistido.<br>
+    <b>1 · Um só toggle, três níveis.</b> <code>▤ / ¶</code> aparece igual no bloco, na sessão e na semana.
+    Nunca persistido — é estado de UI.<br>
+    <b>1b · A semana não ganha tela nova.</b> "Texto" é um <b>modo de render da grade que já existe</b>: mesmas
+    7 colunas, mesmo <code>boxFilter</code>, mesmas setas. <b>Grade</b> passa a usar <code>ExerciseList</code>
+    (<code>tiny</code>) no lugar das pílulas de tipo; <b>Texto</b> mostra a notação, que é o que dá para copiar
+    de volta para o bloco de notas e o único dos dois que carrega estrutura, <code>Meta:</code> e notas.<br>
+    <b>1c · No telefone o card abre só leitura</b> + <b>Editar</b>. Editar dentro da lista é desenho de
+    <b>plans/37</b>, que já vai refazer esta tela — #92 não disputa isso.<br>
     <b>2 · O tipo por definir é um botão, não um erro.</b> Um cabeçalho não reconhecido
     (<code>Quem já faz tc 15'</code>) vira o <b>rótulo</b> do bloco e o chip de tipo abre o
     <code>TypePicker</code> existente. Um toque para corrigir — nada é adivinhado.<br>
