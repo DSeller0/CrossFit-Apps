@@ -1,5 +1,12 @@
 # 36 — #92 · Criador text-entry mode (parse the coach's own week format)
 
+> 🔵 **In progress — 2026-07-21: the parser landed, the run stopped at the Lane-B gate.**
+> Built: `criador/textFormat.js` + `textFormat.test.js` (98 tests, green). The real coach
+> file → **5 sessions, zero dropped lines**, and it round-trips through text unchanged.
+> Mockup for the four net-new surfaces: `design/mockups/29-criador-text-mode.html`,
+> synced to Claude Design, **awaiting approval**. No component built, nothing wired into
+> the Criador. See "Recorded while building" at the bottom before resuming.
+
 > Second of three sessions in the Criador overhaul (planning session 2026-07-21).
 > Run order: [35 decomposition](./35-criador-decomposition.md) → **36 (this)** →
 > [37 design C4](./37-design-c4-criador.md). **Depends on 35** — this builds inside
@@ -351,3 +358,58 @@ maintained as a mirror).
    blocks-are-canonical rule in `CLAUDE.md`, and move #92 to Done in `BACKLOG.md`.
 
 Model: Opus · Size: L
+
+---
+
+## Recorded while building the parser (2026-07-21)
+
+Everything below is a deliberate refinement of the grammar above, decided against the
+real coach file and the app's real block shapes. Read it before resuming — the UI
+slice depends on several of these.
+
+**Block-level fields the parser adds.** `block.goal` (as specified), plus two flags:
+`typeUnresolved: true` when a header didn't resolve (the block's `type` is then `''` —
+*nothing is guessed*, and the preview's type chip is the fix), and `lettered: true` when
+any exercise line carried an `A`/`B)`/`C -` slot. Both are set only when true, so an
+app-built block stays deep-equal through a round trip.
+
+**Slot letters are re-emitted only for `lettered` blocks, not for every EMOM.** The plan
+said "EMOM/lettered"; emitting them for all EMOMs would add `lettered` on the way back
+in and break round-trip for app-built EMOM blocks.
+
+**Progression steps carry no `reps` of their own** (the plan's `steps:[{reps:5,…}]` was
+illustrative). `groupProgressionSteps` already falls back to `ex.reps`, and blank step
+reps is what `IntensityInput` actually writes. Cost, recorded: a progression whose steps
+have *different* reps has no text notation, so those collapse to the exercise's reps.
+
+**Load-form disambiguation** — `a/b<unit>` (exactly 2 values) is a **gender pair**;
+1 or 3+ slash-separated values with a unit is a **progression**; anything ending in `%`
+is pct/progression and is matched first. The gender pair additionally requires a unit on
+its rightmost pair, which is what keeps `6 RMU /8 BMU / 10 C2B` off that path.
+
+**A trailing parenthetical is `ex.note`** — `5 Strict Pull Up ( band )` → name
+"Strict Pull Up", note "band". Trade-off: a registry display name that itself carries
+parens ("Bike (Assault/Echo)") splits the same way; the bare name still resolves.
+
+**`unparsed-line` fires on the unconsumed half of a structure line**, not on bare name
+lines. A line with no quantity and no load is a legitimate exercise — `Deslocamento com
+apoio` proves it — so it becomes one, and `unknown-exercise` (registry) is what surfaces
+a name the coach should look at. The "never drops a line" contract is asserted by the
+`audit` array (one entry per non-blank input line), not by counting notes.
+
+**Estações and Benchmark are not text-editable** (`isTextEditable(block)`). Estações
+carries `stations`, not `exercises`, and Benchmark is read-only in the detailed editor.
+`serializeBlock` still renders Estações one-way so the week-as-text view is complete —
+the toggle must render **disabled with a title**, not hidden.
+
+**`parseSession`/`parseWeek`/`parseBlock` also return `audit`** (`{lineNo, kind, line}`
+per non-blank line) beyond the planned `{blocks, warnings}`. That is what makes
+"every input line accounted for" an explicit assertion rather than a fuzzy one.
+
+**Warning kinds produced:** `type-unresolved` · `unknown-exercise` · `complex-detected` ·
+`interval-approximated` · `unparsed-line` · `orphan-load` · `preamble`.
+
+### Still to do (next session, after the mockup is approved)
+`BlockTextEditor.jsx` · `SessionTextPane.jsx` · `WeekImportModal.jsx` · `WeekTextView.jsx`,
+their wiring in `BlockEditor.jsx` / `WeekGrid.jsx` / `Criador.jsx`, their `GROUPS` entries
+in `gallery.html`, `npm run design:cards` + sync, and the `CLAUDE.md` note.

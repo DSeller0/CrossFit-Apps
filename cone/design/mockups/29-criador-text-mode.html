@@ -1,0 +1,642 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — Criador texto (#92 · plans/36) · SessionTextPane · BlockTextEditor · WeekImportModal · WeekTextView</title>
+<style>
+  /* ═══════════════════════════════════════════════════════════════════════
+     #92 — Criador text-entry mode (Lane-B ideation, plans/36).
+     Four net-new surfaces. Every string below is REAL PARSER OUTPUT for
+     `cone/Coach training week example.txt` — the preview counts, the
+     warnings and the "5mM HSW" typo are what textFormat.js actually
+     produces, not illustration.
+     Fonts fall back to serif (Cinzel is CDN-loaded, CSP blocks it).
+     Icons are inline SVG / text glyphs — no `ti` webfont.
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  .page{
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
+    --radius-sm:4px; --radius-md:6px;
+    /* data colours — block families (blkColor, lib/wod.js). Exempt from
+       tokenization: they identify a thing, so they stay put across themes. */
+    --fam-red:#c84038; --fam-amber:#d8a840; --fam-blue:#4878d8; --fam-green:#48b860;
+  }
+
+  /* ── 4 theme palettes (verbatim from themes.css) ─────────────────────── */
+  .page[data-theme="totk-dark"]{
+    --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--divider:#2a231c;--border:#2a231c;
+    --gold:#d8a840;--teal:#4ac8c0;--green:#18cc30;--red:#c83030;
+    --cream:#f0e8d0;--text:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+    --accent:#4ac8c0;--accent-text:#000;--font-mono:ui-monospace,'SF Mono','Cascadia Code',monospace;
+  }
+  .page[data-theme="totk-light"]{
+    --bg:#ede8dc;--stone:#f5f1e8;--stone2:#e8e2d4;--divider:#d4cab8;--border:#d4cab8;
+    --gold:#9a6c14;--teal:#1c6860;--green:#1a6830;--red:#b83020;
+    --cream:#1c1508;--text:#1c1508;--sub:#503828;--muted:#7a6448;--dim:#a89070;
+    --accent:#1c6860;--accent-text:#fff;--font-mono:ui-monospace,'SF Mono','Cascadia Code',monospace;
+  }
+  .page[data-theme="spirit"]{
+    --bg:#09070f;--stone:#100d1c;--stone2:#17122a;--divider:#221638;--border:#221638;
+    --gold:#e05490;--teal:#38c4d0;--green:#50d890;--red:#c82850;
+    --cream:#ede4f8;--text:#ede4f8;--sub:#c4a0d0;--muted:#7d5090;--dim:#4a2d60;
+    --accent:#38c4d0;--accent-text:#09070f;--font-mono:ui-monospace,'SF Mono','Cascadia Code',monospace;
+  }
+  .page[data-theme="spirit-light"]{
+    --bg:#f4eefb;--stone:#ffffff;--stone2:#f0e8f8;--divider:#e2d4f0;--border:#e2d4f0;
+    --gold:#c83070;--teal:#1490a0;--green:#28a064;--red:#c02040;
+    --cream:#1a0828;--text:#1a0828;--sub:#4a2460;--muted:#7840a0;--dim:#9070b0;
+    --accent:#1490a0;--accent-text:#fff;--font-mono:ui-monospace,'SF Mono','Cascadia Code',monospace;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:#050403}
+  .page{background:var(--bg);color:var(--text);font-family:Georgia,serif;min-height:100vh;
+    padding:24px 26px 60px;transition:background .15s,color .15s}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  h1{font-size:16px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);margin:0}
+  .themebar{display:flex;gap:6px;flex-wrap:wrap}
+  .tbtn{font-family:inherit;font-size:11px;letter-spacing:.04em;padding:6px 11px;border:1px solid var(--divider);
+    background:var(--stone);color:var(--muted);cursor:pointer;border-radius:var(--radius-sm)}
+  .tbtn.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:700}
+  .lede{font-size:13px;color:var(--sub);line-height:1.6;max-width:900px;margin:10px 0 4px}
+  .lede b{color:var(--cream)} .lede code{font-family:var(--font-mono);font-size:12px;color:var(--gold)}
+  h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+    margin:36px 0 4px;display:flex;align-items:center;gap:10px}
+  h2::after{content:'';flex:1;height:1px;background:var(--divider)}
+  .note{font-size:12px;color:var(--muted);line-height:1.55;margin:6px 0 14px;max-width:900px}
+  .note code{font-family:var(--font-mono);color:var(--sub)}
+  .clbl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
+    font-family:var(--font-mono);margin:18px 0 6px}
+
+  /* ── shared SPA primitives (#54/C0 — Button / Input / Card) ──────────── */
+  .btn{font-family:inherit;font-size:13px;line-height:1;padding:9px 15px;border-radius:var(--radius-sm);
+    border:1px solid var(--border);background:var(--stone2);color:var(--text);cursor:pointer}
+  .btn.sm{font-size:12px;padding:7px 12px}
+  .btn.xs{font-size:11px;padding:5px 9px}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:700}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+  .btn.s-focus{outline:2px solid var(--accent);outline-offset:2px}
+  .btn.s-disabled{opacity:.45;cursor:not-allowed}
+  .card{background:var(--stone);border:1px solid var(--border);border-radius:var(--radius-md)}
+
+  /* mode toggle — the one new control, used at session AND block level */
+  .modeSeg{display:inline-flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+  .modeSeg button{font-family:inherit;font-size:11px;letter-spacing:.06em;padding:6px 11px;border:0;
+    background:var(--stone2);color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px}
+  .modeSeg button + button{border-left:1px solid var(--border)}
+  .modeSeg button.on{background:var(--accent);color:var(--accent-text);font-weight:700}
+  .modeSeg button.s-focus{outline:2px solid var(--accent);outline-offset:-2px}
+
+  /* ── the editor shell ───────────────────────────────────────────────── */
+  .pane{display:grid;grid-template-columns:1fr 320px;gap:0}
+  .pane > .left{border-right:1px solid var(--divider)}
+  .paneBar{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap;
+    padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--divider)}
+  .paneBar .count{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .paneBar .spacer{flex:1}
+  .fmtLink{font-size:11px;color:var(--sub);border-bottom:1px dotted var(--muted);cursor:help}
+
+  textarea.ta,.ta{width:100%;min-height:330px;border:0;background:transparent;color:var(--text);
+    font-family:var(--font-mono);font-size:12.5px;line-height:1.85;padding:var(--sp-4);resize:vertical;
+    white-space:pre;overflow-x:auto;display:block}
+  .ta:focus{outline:0;box-shadow:inset 2px 0 0 var(--accent)}
+  /* syntax echo — read-only tinting of the same text, to show what the parser saw */
+  .ta .hd{color:var(--gold);font-weight:700}
+  .ta .st{color:var(--teal)}
+  .ta .mt{color:var(--green)}
+  .ta .unk{color:var(--red);text-decoration:underline dotted}
+
+  .prev{padding:var(--sp-3) var(--sp-3) var(--sp-4)}
+  .prevTitle{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);
+    font-family:var(--font-mono);margin-bottom:var(--sp-3)}
+  .pblk{background:var(--stone2);border:1px solid var(--border);border-left:3px solid var(--fam-amber);
+    border-radius:var(--radius-sm);padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-2)}
+  .pblk.green{border-left-color:var(--fam-green)}
+  .pblk.blue{border-left-color:var(--fam-blue)}
+  .pblk.pending{border-left-color:var(--muted);border-style:dashed}
+  .pblkHd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+  .chip{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+    padding:2px 7px;border-radius:var(--radius-sm);color:#0d0b09;background:var(--fam-amber)}
+  .chip.green{background:var(--fam-green)} .chip.blue{background:var(--fam-blue)}
+  .chip.pick{background:transparent;border:1px dashed var(--red);color:var(--red);cursor:pointer;
+    font-weight:700;display:inline-flex;align-items:center;gap:4px}
+  .chip.pick.s-focus{outline:2px solid var(--accent);outline-offset:2px}
+  .pblkHd .lbl{font-size:12px;color:var(--cream)}
+  .pblkHd .meta{font-size:10.5px;color:var(--muted);font-family:var(--font-mono)}
+  .pex{font-size:11.5px;color:var(--sub);line-height:1.75;display:flex;gap:6px}
+  .pex .q{font-family:var(--font-mono);color:var(--cream);flex-shrink:0}
+  .pex .load{font-family:var(--font-mono);color:var(--gold);font-size:10.5px}
+  .pex.unknown .nm{text-decoration:underline dotted var(--red);cursor:help}
+  .pnote{font-size:10.5px;color:var(--muted);font-style:italic;margin-top:4px;
+    padding-left:8px;border-left:1px solid var(--divider)}
+  .pgoal{font-size:10.5px;font-family:var(--font-mono);color:var(--teal);margin-top:5px}
+
+  .prevFoot{border-top:1px solid var(--divider);margin-top:var(--sp-3);padding-top:var(--sp-2);
+    font-size:11px;line-height:1.85;color:var(--muted)}
+  .prevFoot .w{color:var(--red)} .prevFoot .i{color:var(--sub)}
+  .prevFoot b{color:var(--cream)}
+
+  /* ── block bar (per-block text mode) ────────────────────────────────── */
+  .blkBar{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);
+    border-bottom:1px solid var(--divider);flex-wrap:wrap}
+  .grip{color:var(--dim);cursor:grab;font-size:14px;line-height:1}
+  .blkBody{padding:0 0 var(--sp-2) 0}
+  .blkBody .ta{min-height:0;padding:var(--sp-3) var(--sp-4)}
+  .blkFoot{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);
+    font-family:var(--font-mono);padding:0 var(--sp-4) var(--sp-2)}
+  .blkFoot .ok{color:var(--green)}
+
+  /* ── import modal ───────────────────────────────────────────────────── */
+  .scrim{background:rgba(0,0,0,.55);padding:26px;border-radius:var(--radius-md);
+    display:flex;justify-content:center}
+  .modal{width:560px;max-width:100%}
+  .modalHd{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:700;
+    padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--divider)}
+  .modalBody{padding:var(--sp-4)}
+  .lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+    display:block;margin-bottom:6px}
+  .inp{width:100%;border:1px solid var(--border);background:var(--stone2);color:var(--text);
+    border-radius:var(--radius-sm);padding:9px 11px;font-family:var(--font-mono);font-size:12px}
+  .inp:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 28%,transparent)}
+  .inp.tall{min-height:112px;white-space:pre;overflow:auto;line-height:1.7}
+  .weekPick{display:flex;align-items:center;gap:10px;margin:var(--sp-4) 0 var(--sp-3)}
+  .weekPick .v{font-family:var(--font-mono);font-size:12.5px;color:var(--cream)}
+  .det{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:var(--sp-3)}
+  .det td{padding:5px 0;border-bottom:1px solid var(--divider);vertical-align:middle}
+  .det td.d{font-family:var(--font-mono);color:var(--cream);width:64px}
+  .det td.c{color:var(--sub);font-family:var(--font-mono);font-size:11.5px}
+  .det td.s{text-align:right;font-size:11px;white-space:nowrap}
+  .det .ok{color:var(--green)} .det .warn{color:var(--red)} .det .nm{color:var(--gold)}
+  .det tr.skip td{opacity:.5}
+  .pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:var(--sp-3)}
+  .pill{font-size:11px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);
+    background:var(--stone2);color:var(--muted);cursor:pointer}
+  .pill.on{background:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:700}
+  .modalBtns{display:flex;justify-content:flex-end;gap:10px;
+    border-top:1px solid var(--divider);padding:var(--sp-3) var(--sp-4)}
+
+  /* ── week as text ───────────────────────────────────────────────────── */
+  .weekCols{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--divider)}
+  .wcol{background:var(--stone);padding:var(--sp-3)}
+  .wcolHd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:var(--sp-2)}
+  .wcolHd .d{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .wcolHd .n{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+  .wtxt{font-family:var(--font-mono);font-size:11px;line-height:1.75;color:var(--sub);white-space:pre-wrap}
+  .wtxt .hd{color:var(--cream);font-weight:700}
+  .wempty{font-size:11px;color:var(--dim);font-style:italic}
+
+  /* ── mobile frames ──────────────────────────────────────────────────── */
+  .frames{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+  .frame{width:390px;border:1px solid var(--divider);border-radius:var(--radius-md);overflow:hidden;
+    background:var(--bg)}
+  .frame .pane{grid-template-columns:1fr}
+  .frame .pane > .left{border-right:0;border-bottom:1px solid var(--divider)}
+  .frame .ta{min-height:190px;font-size:12px}
+  .frame .modal{width:100%}
+  .frame .scrim{padding:10px;border-radius:0}
+</style>
+
+<div class="page" data-theme="totk-dark">
+  <div class="topbar">
+    <h1>#92 · Criador — modo texto</h1>
+    <div class="themebar" id="themebar">
+      <button class="tbtn on" data-t="totk-dark">TotK Dark</button>
+      <button class="tbtn" data-t="totk-light">TotK Light</button>
+      <button class="tbtn" data-t="spirit">Spirit Blossom</button>
+      <button class="tbtn" data-t="spirit-light">Spirit Light</button>
+    </div>
+  </div>
+  <p class="lede">
+    O Criador foi feito para <b>substituir</b> o arquivo de texto do coach. Não substituiu — ele escreve a semana
+    inteira no bloco de notas e <b>redigita</b> tudo aqui. Estas quatro superfícies aceitam o formato que ele já
+    escreve (<b>parser determinístico, sem LLM</b>) e devolvem a semana como texto para comparar os dias lado a lado.
+    <b>Os blocos continuam canônicos</b> — texto é projeção de entrada/saída, nunca armazenamento; TV,
+    <code>schedule.html</code>, <code>results.html</code> e Publicador leem os mesmos objetos de hoje.
+    Todo número, aviso e nome abaixo é <b>saída real</b> de <code>textFormat.js</code> sobre
+    <code>Coach training week example.txt</code>.
+  </p>
+
+  <!-- ══════════ 1 · SESSION TEXT PANE ══════════ -->
+  <h2>1 · SessionTextPane — a sessão inteira como texto (desktop 1280)</h2>
+  <div class="note">
+    O toggle <b>Detalhado / Texto</b> fica ao lado de Recolher/Expandir e é <b>estado de UI, nunca persistido</b>:
+    detalhado→texto serializa, texto→detalhado faz o parse. A pré-visualização é ao vivo; <b>Aplicar</b> só troca
+    os blocos quando o coach confirma. Nenhuma linha some: o que o parser não classifica vai <b>literal</b> para
+    <code>block.notes</code> e é contado no rodapé.
+  </div>
+
+  <div class="card pane">
+    <div class="left">
+      <div class="paneBar">
+        <span class="count">4 blocos</span>
+        <span class="modeSeg">
+          <button>▤ Detalhado</button>
+          <button class="on">¶ Texto</button>
+        </span>
+        <span class="spacer"></span>
+        <span class="fmtLink">ⓘ Formato</span>
+        <button class="btn primary sm">Aplicar</button>
+      </div>
+      <div class="ta" contenteditable="false" tabindex="0"><span class="hd">Warm Up</span>
+<span class="st">3 rounds</span>
+100m Run
+10 Shoulder Taps
+5 Inchworm + Push Up
+
+<span class="hd">Skill – Handstand Walk</span>
+<span class="st">3 sets cada letra</span>
+A 20" Handstand Hold wall
+B 10 Wall Shoulder Taps
+C Deslocamento com apoio
+
+<span class="hd">Quem já faz tc 15'</span>
+<span class="st">5 sets</span>
+5M HSW
+200m Row
+<span class="unk">5mM HSW</span>
+Rest 1'
+
+<span class="hd">WOD – TC 14'</span>
+<span class="st">5 Rounds For Time</span>
+8 Power Clean 60/45kg – 50/35kg
+10 Toes to Bar
+10 Box Jump
+100m Run
+<span class="mt">Meta: 11-12'</span></div>
+    </div>
+
+    <div class="prev">
+      <div class="prevTitle">Pré-visualização</div>
+
+      <div class="pblk green">
+        <div class="pblkHd"><span class="chip green">Aquecimento</span><span class="meta">3 rounds</span></div>
+        <div class="pex"><span class="q">100m</span><span class="nm">Run</span></div>
+        <div class="pex"><span class="q">10</span><span class="nm">Shoulder Taps</span></div>
+        <div class="pex"><span class="q">5</span><span class="nm">Inchworm + Push Up</span></div>
+      </div>
+
+      <div class="pblk green">
+        <div class="pblkHd"><span class="chip green">Skill</span><span class="lbl">Handstand Walk</span><span class="meta">3 rounds</span></div>
+        <div class="pex"><span class="q">20"</span><span class="nm">Handstand Hold wall</span></div>
+        <div class="pex"><span class="q">10</span><span class="nm">Wall Shoulder Taps</span></div>
+        <div class="pex"><span class="q">—</span><span class="nm">Deslocamento com apoio</span></div>
+        <div class="pnote">cada letra</div>
+      </div>
+
+      <div class="pblk pending">
+        <div class="pblkHd">
+          <button class="chip pick">? escolher tipo</button>
+          <span class="lbl">Quem já faz tc 15'</span><span class="meta">5 rounds</span>
+        </div>
+        <div class="pex"><span class="q">5m</span><span class="nm">HSW</span></div>
+        <div class="pex"><span class="q">200m</span><span class="nm">Row</span></div>
+        <div class="pex unknown"><span class="q">—</span><span class="nm" title="fora do registro — sem vídeo de demo nem categoria de PR">5mM HSW</span></div>
+        <div class="pex"><span class="q">—</span><span class="nm">Rest 1'</span></div>
+      </div>
+
+      <div class="pblk">
+        <div class="pblkHd"><span class="chip">For Time</span><span class="meta">5 rounds · CAP 14'</span></div>
+        <div class="pex"><span class="q">8</span><span class="nm">Power Clean</span><span class="load">M 60/50 · F 45/35 kg</span></div>
+        <div class="pex"><span class="q">10</span><span class="nm">Toes to Bar</span></div>
+        <div class="pex"><span class="q">10</span><span class="nm">Box Jump</span></div>
+        <div class="pex"><span class="q">100m</span><span class="nm">Run</span></div>
+        <div class="pgoal">Meta 11:00–12:00</div>
+      </div>
+
+      <div class="prevFoot">
+        <b>4 blocos · 14 exercícios</b><br>
+        <span class="w">⚠ 1 tipo por definir</span><br>
+        <span class="i">ⓘ 1 nome fora do registro</span><br>
+        <span class="i">ⓘ 1 linha mantida como nota</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="clbl">Estados do painel — vazio · foco no textarea · tipo por definir (foco) · sem avisos</div>
+  <div class="frames">
+    <div class="card" style="width:300px">
+      <div class="prev">
+        <div class="prevTitle">Pré-visualização</div>
+        <div class="wempty">Cole ou escreva o treino à esquerda.<br>Nada ainda.</div>
+      </div>
+    </div>
+    <div class="card" style="width:300px">
+      <div class="prev">
+        <div class="prevTitle">Pré-visualização</div>
+        <div class="pblk blue">
+          <div class="pblkHd"><span class="chip blue">LPO</span><span class="lbl">LPO – Complex</span><span class="meta">5 rounds · 1'</span></div>
+          <div class="pex"><span class="q">5×</span><span class="nm">(1 Hang Squat Snatch + 1 Squat Snatch)</span></div>
+          <div class="pex"><span class="q"></span><span class="load">70/75/80/82/85 % RM</span></div>
+          <div class="pnote">A cada 1'20" 5 sets</div>
+        </div>
+        <div class="prevFoot">
+          <b>1 bloco · 1 exercício</b><br>
+          <span class="w">⚠ Complexo detectado — desfazer?</span><br>
+          <span class="i">ⓘ Intervalo 1'20" aproximado para 1'</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="width:300px">
+      <div class="prev">
+        <div class="prevTitle">Pré-visualização</div>
+        <div class="pblk pending">
+          <div class="pblkHd">
+            <button class="chip pick s-focus">? escolher tipo</button>
+            <span class="lbl">Bloco muito longo que precisa truncar em algum ponto</span>
+          </div>
+          <div class="pex"><span class="q">10</span><span class="nm">Movimento com um nome absurdamente comprido</span></div>
+        </div>
+        <div class="prevFoot"><span class="w">⚠ 1 tipo por definir</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 2 · BLOCK TEXT EDITOR ══════════ -->
+  <h2>2 · BlockTextEditor — um bloco por vez, sem linha de cabeçalho</h2>
+  <div class="note">
+    Mesmo toggle na barra do bloco. Aqui o <b>tipo já está escolhido</b> no seletor à esquerda, então a primeira
+    linha nunca é lida como cabeçalho — só como estrutura (<code>5 Rounds For Time</code>) ou exercício. O rodapé
+    é o retorno do parser em uma linha. <b>Estações</b> e <b>Benchmark</b> não têm forma textual: o toggle aparece
+    desativado (não escondido) para que a ausência seja explicável.
+  </div>
+  <div class="frames">
+    <div class="card" style="width:520px">
+      <div class="blkBar">
+        <span class="grip">⣿</span><span class="btn ghost xs">▾</span>
+        <span class="chip">⏱ For Time</span>
+        <input class="inp" style="width:150px;font-family:inherit" placeholder="Nome personalizado…">
+        <span class="spacer" style="flex:1"></span>
+        <span class="modeSeg"><button>▤</button><button class="on">¶</button></span>
+        <span class="btn ghost xs">⧉</span><span class="btn ghost xs">🗑</span>
+      </div>
+      <div class="blkBody">
+        <div class="ta" tabindex="0"><span class="st">5 Rounds For Time</span>
+8 Power Clean 60/45kg – 50/35kg
+10 Toes to Bar
+<span class="mt">Meta: 11-12'</span></div>
+        <div class="blkFoot"><span class="ok">✓</span> 2 exercícios · CAP 14' · Meta 11:00–12:00</div>
+      </div>
+    </div>
+    <div class="card" style="width:340px;align-self:flex-start">
+      <div class="blkBar">
+        <span class="grip">⣿</span><span class="btn ghost xs">▸</span>
+        <span class="chip">📍 Estações</span>
+        <span class="spacer" style="flex:1"></span>
+        <span class="modeSeg" title="Estações não tem forma textual"><button class="on">▤</button><button class="s-disabled" style="opacity:.4;cursor:not-allowed">¶</button></span>
+      </div>
+      <div class="blkFoot" style="padding-top:10px">sem modo texto — grupos e rodízio</div>
+    </div>
+  </div>
+
+  <!-- ══════════ 3 · WEEK IMPORT MODAL ══════════ -->
+  <h2>3 · WeekImportModal — colar a semana inteira</h2>
+  <div class="note">
+    O caminho que resolve o problema real: uma colagem, cinco sessões. Detecção por dia <b>antes</b> de criar
+    qualquer coisa. Box e visibilidade valem para todas as sessões criadas — <code>locationIds</code> em array
+    (multi-box, <code>sessionBoxIds</code>), nunca o <code>locationId</code> singular legado. A importação
+    <b>adiciona</b>: um dia que já tem sessão aparece marcado e é pulado, nunca sobrescrito.
+  </div>
+  <div class="scrim">
+    <div class="card modal">
+      <div class="modalHd">Importar semana</div>
+      <div class="modalBody">
+        <label class="lbl">Cole o texto da semana</label>
+        <div class="inp tall" tabindex="0">SEGUNDA-FEIRA
+
+Warm Up
+3 rounds
+100m Run
+10 Shoulder Taps …</div>
+
+        <div class="weekPick">
+          <button class="btn xs">‹</button>
+          <span class="lbl" style="margin:0">Semana de</span>
+          <span class="v">20/07 – 26/07</span>
+          <button class="btn xs">›</button>
+        </div>
+
+        <label class="lbl">Detectado</label>
+        <table class="det">
+          <tr><td class="d">SEG 20</td><td class="c">4 blocos · 14 ex</td><td class="s ok">✓</td></tr>
+          <tr><td class="d">TER 21</td><td class="c">4 blocos · 12 ex</td><td class="s warn">⚠ 1 tipo por definir</td></tr>
+          <tr><td class="d">QUA 22</td><td class="c">3 blocos · 10 ex</td><td class="s ok">✓</td></tr>
+          <tr><td class="d">QUI 23</td><td class="c">3 blocos · 12 ex</td><td class="s nm">✓ "HYROX"</td></tr>
+          <tr class="skip"><td class="d">SEX 24</td><td class="c">4 blocos · 11 ex</td><td class="s">já tem sessão — pular</td></tr>
+        </table>
+
+        <label class="lbl">Box</label>
+        <div class="pills">
+          <button class="pill on">Sem box</button>
+          <button class="pill">Eagles</button>
+          <button class="pill">Garra</button>
+        </div>
+        <label class="lbl">Visibilidade</label>
+        <div class="pills">
+          <button class="pill on">Público</button>
+          <button class="pill">Oculto</button>
+        </div>
+      </div>
+      <div class="modalBtns">
+        <button class="btn sm">Cancelar</button>
+        <button class="btn primary sm">Criar 4 sessões</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="clbl">Estados do modal — colagem vazia · nenhum dia reconhecido</div>
+  <div class="frames">
+    <div class="card" style="width:340px">
+      <div class="modalBody">
+        <label class="lbl">Detectado</label>
+        <div class="wempty">Nada colado ainda.</div>
+        <div class="modalBtns" style="border-top:0;padding:14px 0 0">
+          <button class="btn sm">Cancelar</button>
+          <button class="btn primary sm s-disabled">Criar sessões</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="width:340px">
+      <div class="modalBody">
+        <label class="lbl">Detectado</label>
+        <div class="prevFoot" style="border-top:0;margin:0;padding:0">
+          <span class="w">⚠ Nenhum dia da semana reconhecido.</span><br>
+          <span class="i">Comece cada dia com o nome dele: <b>SEGUNDA-FEIRA</b>.</span>
+        </div>
+        <div class="modalBtns" style="border-top:0;padding:14px 0 0">
+          <button class="btn sm">Cancelar</button>
+          <button class="btn primary sm s-disabled">Criar sessões</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 4 · WEEK TEXT VIEW ══════════ -->
+  <h2>4 · WeekTextView — a semana lado a lado (só leitura)</h2>
+  <div class="note">
+    A resposta direta ao segundo problema: <i>"para ajustar quarta preciso ver segunda e terça"</i>. Sai de graça
+    assim que o serializador existe — um toggle na barra da semana projeta as sessões visíveis em colunas
+    (empilhadas no telefone), com <b>Copiar tudo</b>. Só leitura: nada aqui edita nada.
+  </div>
+  <div class="card">
+    <div class="paneBar">
+      <span class="count">Semana 20/07 – 26/07</span>
+      <span class="modeSeg"><button>▤ Grade</button><button class="on">¶ Texto</button></span>
+      <span class="spacer"></span>
+      <button class="btn sm">⧉ Copiar tudo</button>
+    </div>
+    <div class="weekCols">
+      <div class="wcol">
+        <div class="wcolHd"><span class="d">Seg 20</span><span class="n">4 blocos</span></div>
+        <div class="wtxt"><span class="hd">Aquecimento</span>
+3 rounds
+100m Run
+10 Shoulder Taps
+5 Inchworm + Push Up
+
+<span class="hd">Skill – Handstand Walk</span>
+3 rounds
+A 20" Handstand Hold wall
+B 10 Wall Shoulder Taps
+C Deslocamento com apoio
+
+<span class="hd">For Time</span>
+5 rounds Cap 14'
+8 Power Clean 60/45kg – 50/35kg
+10 Toes to Bar
+Meta: 11-12'</div>
+      </div>
+      <div class="wcol">
+        <div class="wcolHd"><span class="d">Ter 21</span><span class="n">4 blocos</span></div>
+        <div class="wtxt"><span class="hd">Aquecimento</span>
+2 rounds
+10 Ring Row
+10 Scap Pull Up
+10 Hollow Rock
+
+<span class="hd">Skill – Pull Up</span>
+4 rounds
+A 5 Strict Pull Up (band)
+B 5 Kipping Pull Up na Caixa
+
+<span class="hd">EMOM – Quem já faz !</span>
+15'
+A 4 Strict C2B
+B 8 Kipping Pull Up
+C Rest</div>
+      </div>
+      <div class="wcol">
+        <div class="wcolHd"><span class="d">Qua 22</span><span class="n">sem sessão</span></div>
+        <div class="wempty">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ MOBILE ══════════ -->
+  <h2>5 · Mobile 390 — a pré-visualização empilha sob o textarea</h2>
+  <div class="frames">
+    <div class="frame">
+      <div class="pane">
+        <div class="left">
+          <div class="paneBar">
+            <span class="count">4 blocos</span>
+            <span class="modeSeg"><button>▤</button><button class="on">¶ Texto</button></span>
+            <span class="spacer"></span>
+            <button class="btn primary xs">Aplicar</button>
+          </div>
+          <div class="ta" tabindex="0"><span class="hd">Warm Up</span>
+<span class="st">3 rounds</span>
+100m Run
+10 Shoulder Taps
+5 Inchworm + Push Up
+
+<span class="hd">WOD – TC 14'</span>
+<span class="st">5 Rounds For Time</span>
+8 Power Clean 60/45kg – 50/35kg
+10 Toes to Bar
+<span class="mt">Meta: 11-12'</span></div>
+        </div>
+        <div class="prev">
+          <div class="prevTitle">Pré-visualização</div>
+          <div class="pblk green">
+            <div class="pblkHd"><span class="chip green">Aquecimento</span><span class="meta">3 rounds</span></div>
+            <div class="pex"><span class="q">100m</span><span class="nm">Run</span></div>
+            <div class="pex"><span class="q">10</span><span class="nm">Shoulder Taps</span></div>
+            <div class="pex"><span class="q">5</span><span class="nm">Inchworm + Push Up</span></div>
+          </div>
+          <div class="pblk">
+            <div class="pblkHd"><span class="chip">For Time</span><span class="meta">5 rounds · CAP 14'</span></div>
+            <div class="pex"><span class="q">8</span><span class="nm">Power Clean</span><span class="load">M 60/50 · F 45/35 kg</span></div>
+            <div class="pex"><span class="q">10</span><span class="nm">Toes to Bar</span></div>
+            <div class="pgoal">Meta 11:00–12:00</div>
+          </div>
+          <div class="prevFoot"><b>2 blocos · 5 exercícios</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame">
+      <div class="scrim">
+        <div class="card modal">
+          <div class="modalHd">Importar semana</div>
+          <div class="modalBody">
+            <label class="lbl">Cole o texto da semana</label>
+            <div class="inp tall" style="min-height:76px">SEGUNDA-FEIRA
+
+Warm Up
+3 rounds …</div>
+            <div class="weekPick">
+              <button class="btn xs">‹</button><span class="v">20/07 – 26/07</span><button class="btn xs">›</button>
+            </div>
+            <table class="det">
+              <tr><td class="d">SEG 20</td><td class="c">4 bl · 14 ex</td><td class="s ok">✓</td></tr>
+              <tr><td class="d">TER 21</td><td class="c">4 bl · 12 ex</td><td class="s warn">⚠ 1 tipo</td></tr>
+              <tr><td class="d">QUA 22</td><td class="c">3 bl · 10 ex</td><td class="s ok">✓</td></tr>
+              <tr><td class="d">QUI 23</td><td class="c">3 bl · 12 ex</td><td class="s nm">"HYROX"</td></tr>
+            </table>
+            <div class="pills">
+              <button class="pill on">Sem box</button><button class="pill">Eagles</button><button class="pill">Garra</button>
+            </div>
+          </div>
+          <div class="modalBtns">
+            <button class="btn sm">Cancelar</button>
+            <button class="btn primary sm">Criar 4 sessões</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ NOTES ══════════ -->
+  <h2>Decisões que este cartão fixa</h2>
+  <div class="note">
+    <b>1 · Um só toggle.</b> <code>▤ Detalhado / ¶ Texto</code> aparece igual nos três níveis (bloco, sessão,
+    semana). Nunca persistido.<br>
+    <b>2 · O tipo por definir é um botão, não um erro.</b> Um cabeçalho não reconhecido
+    (<code>Quem já faz tc 15'</code>) vira o <b>rótulo</b> do bloco e o chip de tipo abre o
+    <code>TypePicker</code> existente. Um toque para corrigir — nada é adivinhado.<br>
+    <b>3 · Nome fora do registro é informativo, não bloqueante.</b> Sublinhado pontilhado: o coach fica sabendo
+    que vídeo de demo e categoria de PR não vão colar naquele nome, mas o texto dele <b>nunca é reescrito</b>
+    (regra do <code>registry.js</code>).<br>
+    <b>4 · A carga por gênero é escrita agrupada por ESCALA</b> — <code>60/45kg – 50/35kg</code> (par RX, par
+    Inter), do jeito que o coach escreve. O canônico <code>fmtIntensity</code> agrupa por gênero
+    (<code>M: 60/50 kg | F: 45/35 kg</code>) e é o que a pré-visualização mostra. Eixos diferentes, os dois
+    corretos na sua superfície — <b>não "consertar" o fmtIntensity</b>.<br>
+    <b>5 · Estações e Benchmark ficam de fora do modo texto</b> (toggle desativado, com título explicando).
+    Estações carrega grupos, e Benchmark é só leitura no editor detalhado.
+  </div>
+
+  <div class="note" style="border-top:1px solid var(--divider);padding-top:14px;margin-top:24px">
+    <b>Portão de aprovação (Lane B).</b> O parser e o serializador já existem e estão testados
+    (<code>textFormat.js</code> + 98 testes, incluindo o arquivo real do coach com <b>zero linhas perdidas</b> e
+    ida-e-volta estável). <b>Nenhum componente foi construído</b> — é o que vem depois deste cartão ser aprovado.
+  </div>
+</div>
+
+<script>
+  var bar = document.getElementById('themebar');
+  var page = document.querySelector('.page');
+  bar.addEventListener('click', function(e){
+    var b = e.target.closest('.tbtn'); if(!b) return;
+    page.setAttribute('data-theme', b.dataset.t);
+    Array.prototype.forEach.call(bar.children, function(c){ c.classList.toggle('on', c===b); });
+  });
+</script>

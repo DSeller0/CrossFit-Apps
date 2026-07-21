@@ -18,7 +18,7 @@ Then back to the program: **C1 (#55 Exercícios + Configurações + Agenda)**, t
 
 ## 🔵 In Progress
 
-_(none)_
+- 🔵 **[plans/36](./plans/36-criador-text-mode.md)** — **#92 Criador text-entry mode** · **L** · Opus · **Lane B — stopped at the approval gate.** Landed 2026-07-21: `criador/textFormat.js` (parser + serializer, pure — no React, no client) and `textFormat.test.js` (**98 tests**). The real coach file parses to **5 sessions with zero dropped lines** and round-trips through text unchanged, per-day and whole-week. The Lane-B mockup for the four net-new surfaces (`SessionTextPane`, `BlockTextEditor`, `WeekImportModal`, `WeekTextView`) is `design/mockups/29-criador-text-mode.html`, synced to Claude Design and **awaiting review**. Nothing is wired into the Criador yet — that is the next session, after approval.
 
 ## 🧊 Icebox (captured + prioritized — no plan yet)
 
