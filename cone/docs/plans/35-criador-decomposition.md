@@ -1,5 +1,7 @@
 # 35 — #26 · Criador decomposition (no behavior change)
 
+> ✅ Done: `8f81e6c` · 2026-07-21 — see BACKLOG.md
+
 > First of three sessions in the Criador overhaul (planning session 2026-07-21).
 > Run order: **35 (this)** → [36 text mode](./36-criador-text-mode.md) → [37 design C4](./37-design-c4-criador.md).
 > 36 and 37 both rewrite large parts of the same file, so this one lands first — it is
