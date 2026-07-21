@@ -344,10 +344,7 @@ function buildBlock(lines, o) {
     if (head) { audit.push({ lineNo: lines[0].lineNo, kind: head.pureStructure ? 'structure' : 'header', line: normLine(lines[0].raw) }); i = 1 }
   }
   block.type = head?.type || o.knownType || ''
-  if (head?.unresolved) {
-    block.typeUnresolved = true
-    warn('type-unresolved', lines[0], 'Tipo de bloco não reconhecido — escolha um tipo')
-  }
+  if (head?.unresolved) block.typeUnresolved = true
   const labelParts = head?.labelParts || []
 
   // Structure line: the line right after the header, unless the header WAS one.
@@ -376,6 +373,9 @@ function buildBlock(lines, o) {
     if (!block.type && struct.type) { block.type = struct.type; delete block.typeUnresolved }
     if (!block.type && struct.everySecs != null) { block.type = 'EMOM'; delete block.typeUnresolved }
   }
+  // Warn only once the structure line has had its say: `Quem já faz !` followed by
+  // `Emom 15'` resolves to EMOM, so warning at header-parse time cried wolf.
+  if (block.typeUnresolved) warn('type-unresolved', lines[0], 'Tipo de bloco não reconhecido — escolha um tipo')
 
   // Body
   let lettered = false
@@ -503,6 +503,28 @@ export function parseSession(text, opts = {}) {
     audit.push(...r.audit)
   })
   return { blocks, warnings, audit }
+}
+
+// The 0-based line index each parsed block starts on, aligned 1:1 with
+// parseSession(text).blocks. Lets a caller edit one block's header line in place
+// (the preview's "escolher tipo" button) instead of re-serializing the whole
+// session and reformatting text the coach hasn't finished with.
+export function blockLineStarts(text) {
+  const all = String(text ?? '').split(/\r?\n/).map((raw, i) => ({ raw, lineNo: i }))
+  const groups = []
+  let cur = []
+  all.forEach(l => {
+    if (normLine(l.raw)) cur.push(l)
+    else if (cur.length) { groups.push(cur); cur = [] }
+  })
+  if (cur.length) groups.push(cur)
+
+  const starts = []
+  groups.forEach(g => {
+    if (isRestOnlyGroup(g) && starts.length) return // folds into the block above
+    starts.push(g[0].lineNo)
+  })
+  return starts
 }
 
 const DAY_MAP = new Map()

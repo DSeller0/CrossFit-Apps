@@ -75,6 +75,14 @@ describe('block header', () => {
     expect(b.label).toBe('Quem já faz !')
   })
 
+  test('...and does NOT warn about it — the warning waits for the structure line', () => {
+    const resolved = parseBlock("Quem já faz !\nEmom 15'\nA 4 Strict C2B")
+    expect(resolved.warnings.map(w => w.kind)).not.toContain('type-unresolved')
+    // still warns when nothing resolves it
+    const unresolved = parseBlock("Quem já faz tc 15'\n5 sets\n5M HSW")
+    expect(unresolved.warnings.map(w => w.kind)).toContain('type-unresolved')
+  })
+
   test('with a knownType the first line is never eaten as a header', () => {
     const b = blk('Deslocamento com apoio\n10 Wall Walk', { knownType: 'Skill' })
     expect(b.type).toBe('Skill')

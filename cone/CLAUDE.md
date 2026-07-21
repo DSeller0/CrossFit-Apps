@@ -27,6 +27,43 @@ Each page is a self-contained HTML file. Most use a React component mounted at `
 
 **Page whitelist** — the HTML entry list lives in `cone/vite.public.config.js` (`rollupOptions.input`, 9 pages). Every new public HTML page must be added there or it isn't built and 404s live. (`deploy.yml` at the repo root copies `public-dist/` wholesale — no whitelist there anymore.) The HTML entry files and `themes.css` live at the **repo root** (`CrossFit-Apps/`), not inside `cone/` — the public Vite config sets `root: '..'`.
 
+### Criador text format (#92)
+
+The Criador was built to *replace* the coach's free-text weekly file and didn't — he
+writes the week in a phone notepad and re-types it. `src/components/tabs/criador/textFormat.js`
+parses **his** notation into the real block model (deterministic grammar, **no LLM**) and
+serializes back: `parseWeek`/`parseSession`/`parseBlock`/`parseExerciseLine` +
+`serializeBlock`/`serializeSession`/`serializeGoal`. Pure — no React, no client; the
+registry is passed in (same convention as `blockModel.js`). Grammar + recorded
+refinements: [docs/plans/36](./docs/plans/36-criador-text-mode.md).
+
+- **Blocks stay canonical — text is an input/output projection, never storage.** TV,
+  `schedule.html`, `results.html` and Publicador read the same block objects as before.
+  The only new persisted field is **`block.goal`** (`{kind:'time'|'rounds'|'text', …}`,
+  the coach's `Meta:` line). Mode toggles are editor UI state and are **never persisted**.
+- **The parser never drops a line.** Anything unclassified lands verbatim in
+  `block.notes`; `audit` returns one entry per non-blank input line, which is how
+  "nothing was lost" is asserted rather than hoped. Warning kinds: `type-unresolved` ·
+  `unknown-exercise` · `complex-detected` · `interval-approximated` · `unparsed-line` ·
+  `orphan-load` · `preamble`.
+- **An unresolved block type is `type: ''` + `typeUnresolved: true`** — nothing is
+  guessed; the preview's chip is a button onto the existing `TypePicker`.
+- **The week grid has two render modes, it is not a new view** (`WeekGrid` `gridMode` +
+  `WeekSessionCard`): **Grade** = the real `ExerciseList` at size `tiny`; **Texto** =
+  `serializeSession`. Same 7 columns, same `boxFilter`. Texto is the copyable one and
+  the only one carrying the structure line, `Meta:` and notes.
+- **`isTextEditable(block)` is false for Estações and Benchmark** — neither is
+  expressible in the grammar. The block toggle renders **disabled, not hidden**.
+- **Flipping a session to text and back normalizes whitespace and curly quotes in
+  names** (`40” prancha ` → `40" prancha`). Verified on real prod data: 4 diffs in 42
+  lines, all of that kind — no semantic loss.
+- **The gender-load emitter groups by SCALE** (`60/45kg – 50/35kg` = RX pair, Inter
+  pair) while canonical `fmtIntensity` groups by GENDER (`M: 60/50 kg | F: 45/35 kg`).
+  Different axis order, both correct for their surface — **do not "fix" `fmtIntensity`**.
+- `SessionTextPane` takes its **type picker as a prop** and `WeekImportModal` imports
+  `uid`/`toISO` from `public/lib/` rather than `utils/storage` — both render in the
+  client-free gallery, and `utils/storage` pulls the SPA Supabase client.
+
 ### SPA (React — `src/`)
 Entry: `src/App.jsx`. All tabs lazy-loaded with `React.lazy()`:  
 Criador, Atletas, Exercícios, Serviços, Resultados, Agenda, Publicador, Configurações, TvController.  
@@ -136,7 +173,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 - Font: `var(--font)` → Cinzel (TotK themes) or Amarante (Spirit Blossom themes). Loaded weights (`src/fonts.js`): Cinzel **400/500/600/700/800/900** (500 + 800 added in #52, the first session to touch a weight-800 use), Crimson Pro 400/600, Amarante 400 **only** — Amarante ships no bold upstream, so its synthesized bolds are by design.
 - All UI strings: pt-BR.
 - **Design process is component-driven, two lanes (WORKFLOW.md "Design work"):** the all-states source of truth is the **in-app component gallery** (`gallery.html`, dev-only), which renders the *real* components — Lane A (changing existing UI) is gallery-first, no static mockup; Lane B (net-new) does a Claude Design ideation mockup first, then the built component enters the gallery. The moment code exists, the gallery is the truth — never hand-maintain a mirror. Claude Design (`cone/design/` → "Cone Design System" project) is token canon + **generated component cards** + Lane-B ideation + a screenshot archive, not a mirror.
-- **Component gallery:** `gallery.html` (repo root) + `cone/src/public/gallery/` (`main.jsx`, `Gallery.jsx`) — theme switcher + width toggle rendering the real components in every state from mock fixtures; `GROUPS` holds 40 items across **SPA**/Shared/Results/Leaderboard/Me/Schedule/**Index** (the **SPA** group = the #54/C0 primitives `Button`/`Input`/`MaskedTimeInput`/`Card`/`ConfirmReview`; the Index group = the #53 landing-page pieces: `WeekGrid`/`DaySessionCard`/`DayRanking`/`BoxWarnings`, all from `src/public/index/rail.jsx`), picked from a sidebar. (The SPA group's card generates as `design/components/spa.html` — `design:cards` derives the filename from `group.toLowerCase()`, so that group name is a single clean token, not "SPA / UI".) **Dev-only:** NOT in `vite.public.config.js` `input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built/deployed. Grows page-by-page as components are extracted (#17).
+- **Component gallery:** `gallery.html` (repo root) + `cone/src/public/gallery/` (`main.jsx`, `Gallery.jsx`) — theme switcher + width toggle rendering the real components in every state from mock fixtures; `GROUPS` holds 44 items across **SPA**/**Criador**/Shared/Results/Leaderboard/Me/Schedule/**Index** (the **SPA** group = the #54/C0 primitives `Button`/`Input`/`MaskedTimeInput`/`Card`/`ConfirmReview`; the **Criador** group = #92's text mode: `SessionTextPane`/`BlockTextEditor`/`WeekSessionCard`/`WeekImportModal`; the Index group = the #53 landing-page pieces: `WeekGrid`/`DaySessionCard`/`DayRanking`/`BoxWarnings`, all from `src/public/index/rail.jsx`), picked from a sidebar. (The SPA group's card generates as `design/components/spa.html` — `design:cards` derives the filename from `group.toLowerCase()`, so that group name is a single clean token, not "SPA / UI".) **Dev-only:** NOT in `vite.public.config.js` `input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built/deployed. Grows page-by-page as components are extracted (#17).
 - **`npm run design:cards`** (`vite.design.config.js` + `scripts/build-design-cards.mjs`) SSRs the gallery's exported `GROUPS` into the self-contained Claude Design cards — real markup + real CSS + inlined themes/fonts + a 4-theme switcher — so Claude Design can read and compose from actual component markup. Cards are a **build artifact: never hand-edit one**, change the component and re-run (Lane A ends with regenerate + sync). Cards can't load the `ti` webfont or any external URL (CSP), so `results`/`schedule` cards show blank icon gaps — expected, noted on the card itself. `tokens/palette.html` is generated from `themes.css`, which is what finally killed its 13-vs-29 token drift. Details: `cone/design/README.md`.
 - Design-pass program (restructured #27/#28, sessions #49–#59): `docs/plans/16-design-pass-program.md`. Product docs: `docs/FEATURES.md` (feature catalog + gate candidates), `docs/PRODUCT.md` (personas/tiers), `docs/MOBILE.md` (Android/iOS assessment — do nothing until a trigger fires). Consolidated interactive view: `docs/site/cone-docs.html` (open via `file://` — repo-only, NOT in the deploy whitelist by design; interactive tier board + coach-services worksheet for the tier meeting, full screenshot baseline in `docs/site/img/`; snapshot of the .md docs, regenerate on request).
 
@@ -176,7 +213,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 
 - Dev: `supabase start` (once per Docker session) then `npm run dev` inside `cone/` — talks to the local stack, never prod
 - Build: `npm run build` → `dist/`
-- Tests: `npm test` (240 tests across 11 files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js, useClassTracking.test.js, goals.test.js, meHelpers.test.js, boxScope.test.js, entries.test.js, storage.test.js, registry.test.js)
+- Tests: `npm test` (370 tests across 13 files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js, useClassTracking.test.js, goals.test.js, meHelpers.test.js, boxScope.test.js, entries.test.js, storage.test.js, registry.test.js, blockModel.test.js, textFormat.test.js)
 - CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder)
 
 **Chunk hash 404 (GitHub Pages limitation):** After every CI deploy, lazy-loaded chunk filenames change. Old hashes 404 until users hard-refresh (Ctrl+Shift+R). GitHub Pages cannot set `Cache-Control: no-cache`. This is structural — do not re-diagnose, just document and tell the user to hard-refresh.

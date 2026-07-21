@@ -46,6 +46,14 @@ import Input from '../../components/ui/Input.jsx'
 import Card from '../../components/ui/Card.jsx'
 import MaskedTimeInput from '../shared/MaskedTimeInput.jsx'
 import ConfirmReview, { ReadBox, ReadRow } from '../shared/ConfirmReview.jsx'
+// Criador text mode (#92). Client-free by construction: these deliberately import
+// uid/toISO from public/lib rather than utils/storage (which pulls the SPA Supabase
+// client), and SessionTextPane takes its type picker as a PROP for the same reason.
+import { SessionTextPane } from '../../components/tabs/criador/SessionTextPane.jsx'
+import { BlockTextEditor } from '../../components/tabs/criador/BlockTextEditor.jsx'
+import { WeekSessionCard } from '../../components/tabs/criador/WeekSessionCard.jsx'
+import { WeekImportModal } from '../../components/tabs/criador/WeekImportModal.jsx'
+import { parseSession } from '../../components/tabs/criador/textFormat.js'
 import WodSelectCard from '../leaderboard/WodSelectCard.jsx'
 import WodCard from '../leaderboard/WodCard.jsx'
 import lb from '../leaderboard/Leaderboard.module.css'
@@ -502,6 +510,96 @@ function ConfirmReviewDemo() {
   )
 }
 
+// ── Criador text-mode fixtures (#92) ──────────────────────────────────────────
+// The blocks are the PARSER'S OWN OUTPUT for the real coach file (Monday), not a
+// hand-written shape — so this entry cannot drift from what textFormat.js does.
+const MONDAY_TEXT = `Warm Up
+3 rounds
+100m Run
+10 Shoulder Taps
+5 Inchworm + Push Up
+
+Skill – Handstand Walk
+3 sets cada letra
+A 20" Handstand Hold wall
+B 10 Wall Shoulder Taps
+C Deslocamento com apoio
+
+Quem já faz tc 15'
+5 sets
+5M HSW
+200m Row
+5mM HSW
+Rest 1'
+
+WOD – TC 14'
+5 Rounds For Time
+8 Power Clean 60/45kg – 50/35kg
+10 Toes to Bar
+10 Box Jump
+100m Run
+Meta: 11-12'`
+
+const WEEK_TEXT = `SEGUNDA-FEIRA
+
+${MONDAY_TEXT}
+
+TERÇA-FEIRA
+
+Warm Up
+2 rounds
+10 Ring Row
+10 Scap Pull Up
+
+Quem já faz !
+Emom 15'
+A 4 Strict C2B
+B 8 Kipping Pull Up
+
+QUARTA-FEIRA
+Warm Up
+2 rounds
+200m Run
+10 KB Deadlift
+
+QUINTA-FEIRA (HYROX)
+Warm Up
+3 rounds
+200 Run
+20m Farmer Carry`
+
+const txtMondayBlocks = parseSession(MONDAY_TEXT).blocks
+// Covers every movement in the fixture EXCEPT "5mM HSW" — the real typo in the
+// coach's file. That one miss is exactly what the ⓘ counter exists to surface:
+// the name won't attach a demo video or a PR category until he fixes it.
+// ("Run"→Corrida and "HSW"→Handstand Walk resolve through registry.js's aliases.)
+const txtRegistry = {
+  Cardio: [{ name: 'Corrida' }, { name: 'Remo (Ergômetro)' }],
+  Ginástica: [{ name: 'Toes to Bar' }, { name: 'Handstand Walk' }, { name: 'Shoulder Taps' },
+    { name: 'Wall Shoulder Taps' }, { name: 'Handstand Hold wall' }, { name: 'Deslocamento com apoio' },
+    { name: 'Inchworm + Push Up' }, { name: 'Box Jump' }],
+  LPO: [{ name: 'Power Clean' }],
+}
+const txtWeekDates = getWeek(0)
+const txtBoxLocs = [{ id: 'b1', name: 'Eagles', color: '#4ac8c0' }, { id: 'b2', name: 'Garra', color: '#e87820' }]
+// Thursday already booked → the import lists it and skips it, never overwrites.
+const txtExistingSessions = { [toISO(txtWeekDates[4])]: [{ id: 's1', sessionName: 'HYROX', blocks: [] }] }
+const gridColStyle = { width: 200, background: 'var(--stone2)', border: '1px solid var(--divider)', borderRadius: 6, padding: 8 }
+function TallModalBox({ children }) {
+  return <div style={{ position: 'relative', transform: 'translateZ(0)', height: 560, overflow: 'hidden', border: '1px solid var(--divider)' }}>{children}</div>
+}
+// The real picker reaches utils/storage for custom benchmarks (→ Supabase client),
+// so the gallery injects a stub: the chip-as-button state is what matters here.
+function StubTypePicker({ onClose }) {
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
+      <div style={{ background: 'var(--stone)', border: '1px solid var(--divider)', borderRadius: 6, padding: 20, fontSize: 12, color: 'var(--sub)' }}>
+        CriadorTypePicker (injetado pelo Criador)
+      </div>
+    </div>
+  )
+}
+
 // Exported for scripts/design-cards-entry.jsx: `npm run design:cards` SSRs these same
 // items into the Claude Design cards, so the cards cannot drift from the gallery.
 export const GROUPS = [
@@ -626,6 +724,79 @@ export const GROUPS = [
             </Case>
             <Case label="Com erro">
               <ModalBox><ConfirmReview open error="Erro ao enviar. Tente novamente." onEdit={NOOP} onConfirm={NOOP} onClose={NOOP}>{crBody}</ConfirmReview></ModalBox>
+            </Case>
+          </Section>
+        ),
+      },
+    ],
+  },
+  {
+    group: 'Criador',
+    items: [
+      {
+        id: 'criador-sessiontextpane',
+        label: 'SessionTextPane',
+        render: () => (
+          <Section title="SessionTextPane" sub="src/components/tabs/criador/SessionTextPane.jsx — a sessão inteira na notação do próprio coach, com pré-visualização ao vivo do que o parser entendeu (#92). Texto é PROJEÇÃO: os blocos seguem canônicos, e nada é aplicado até o coach clicar em Aplicar. O tipo não reconhecido vira botão, não erro.">
+            <Case label="Semana real do coach — segunda-feira (4 blocos, 14 exercícios, 1 tipo por definir)">
+              <SessionTextPane blocks={txtMondayBlocks} registry={txtRegistry} onApply={NOOP} onCancel={NOOP} typePicker={StubTypePicker} />
+            </Case>
+            <Case label="Vazio — nada colado ainda">
+              <SessionTextPane blocks={[]} onApply={NOOP} typePicker={StubTypePicker} />
+            </Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'criador-blocktexteditor',
+        label: 'BlockTextEditor',
+        render: () => (
+          <Section title="BlockTextEditor" sub="src/components/tabs/criador/BlockTextEditor.jsx — um bloco por vez, SEM linha de cabeçalho: o tipo já está escolhido na barra do bloco, então a primeira linha só pode ser estrutura ou exercício. O commit é no blur (o parse gera ids novos; commitar a cada tecla trocaria as linhas embaixo do dedo dele).">
+            <Case label="For Time com carga por gênero e Meta">
+              <BlockTextEditor block={txtMondayBlocks[3]} onApply={NOOP} registry={txtRegistry} />
+            </Case>
+            <Case label="Bloco com nome fora do registro (ⓘ no rodapé)">
+              <BlockTextEditor block={txtMondayBlocks[2]} onApply={NOOP} registry={txtRegistry} />
+            </Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'criador-weeksessioncard',
+        label: 'WeekSessionCard (grade da semana)',
+        render: () => (
+          <Section title="WeekSessionCard" sub="src/components/tabs/criador/WeekSessionCard.jsx — o conteúdo do card dentro da grade da semana, nos dois modos. NÃO é tela nova: mesmas 7 colunas, mesmo filtro de box. Grade usa o ExerciseList real (tamanho tiny); Texto usa serializeSession — o copiável, e o único que carrega estrutura, Meta: e notas.">
+            <Case label="Modo Grade · coluna de 200px (a largura real da grade)">
+              <div style={gridColStyle}><WeekSessionCard session={{ blocks: txtMondayBlocks }} mode="grade" /></div>
+            </Case>
+            <Case label="Modo Texto · a mesma sessão, a notação dele">
+              <div style={gridColStyle}><WeekSessionCard session={{ blocks: txtMondayBlocks }} mode="texto" /></div>
+            </Case>
+            <Case label="Sessão sem blocos → não renderiza nada">
+              <div style={gridColStyle}><WeekSessionCard session={{ blocks: [] }} mode="grade" /></div>
+            </Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'criador-weekimportmodal',
+        label: 'WeekImportModal',
+        render: () => (
+          <Section title="WeekImportModal" sub="src/components/tabs/criador/WeekImportModal.jsx — uma colagem, cinco sessões. A detecção roda ANTES de criar qualquer coisa, e a importação só ADICIONA: um dia que já tem sessão aparece marcado e é pulado. locationIds em array (multi-box), nunca o locationId singular legado.">
+            <Case label="Semana real colada — 4 dias a criar, quinta já ocupada">
+              <TallModalBox><WeekImportModal
+                weekDates={txtWeekDates} weekLabel="20/07 – 26/07" initialText={WEEK_TEXT}
+                sessions={txtExistingSessions} boxFilter={() => true}
+                boxLocs={txtBoxLocs} selBox="all"
+                onPrevWeek={NOOP} onNextWeek={NOOP} onCreate={NOOP} onClose={NOOP}
+              /></TallModalBox>
+            </Case>
+            <Case label="Vazio — nada colado">
+              <TallModalBox><WeekImportModal
+                weekDates={txtWeekDates} weekLabel="20/07 – 26/07"
+                sessions={{}} boxFilter={() => true} boxLocs={txtBoxLocs} selBox="all"
+                onPrevWeek={NOOP} onNextWeek={NOOP} onCreate={NOOP} onClose={NOOP}
+              /></TallModalBox>
             </Case>
           </Section>
         ),

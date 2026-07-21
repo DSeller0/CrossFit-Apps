@@ -1,11 +1,12 @@
 # 36 — #92 · Criador text-entry mode (parse the coach's own week format)
 
-> 🔵 **In progress — 2026-07-21: the parser landed, the run stopped at the Lane-B gate.**
-> Built: `criador/textFormat.js` + `textFormat.test.js` (98 tests, green). The real coach
-> file → **5 sessions, zero dropped lines**, and it round-trips through text unchanged.
-> Mockup for the four net-new surfaces: `design/mockups/29-criador-text-mode.html`,
-> synced to Claude Design, **awaiting approval**. No component built, nothing wired into
-> the Criador. See "Recorded while building" at the bottom before resuming.
+> ✅ Done: `a8a4169` (parser) · `c06f2be` (design) · build commit · 2026-07-21 — see BACKLOG.md
+>
+> Shipped as specified except for one reviewed change: **`WeekTextView` was dropped** —
+> the week-as-text is a render mode of the existing grid, not a new view. See
+> "The week grid gets a mode" below. Grammar refinements made while building are in
+> "Recorded while building the parser" at the bottom; read those before touching
+> `textFormat.js`.
 
 > Second of three sessions in the Criador overhaul (planning session 2026-07-21).
 > Run order: [35 decomposition](./35-criador-decomposition.md) → **36 (this)** →
@@ -443,7 +444,13 @@ always on screen. No new view to navigate to, and one fewer component.
 So `WeekGrid.jsx` gains a `mode` prop and a `SessionCard` that renders one of the two
 shapes; the toolbar toggle sits next to the existing minimize-grid button.
 
-### Still to do (next session, after the mockup is approved)
-`BlockTextEditor.jsx` · `SessionTextPane.jsx` · `WeekImportModal.jsx` · the `SessionCard`
-+ `mode` prop in `WeekGrid.jsx`, their wiring in `BlockEditor.jsx` / `Criador.jsx`, their
-`GROUPS` entries in `gallery.html`, `npm run design:cards` + sync, and the `CLAUDE.md` note.
+### Built (2026-07-21, after approval)
+`BlockTextEditor.jsx` · `SessionTextPane.jsx` · `WeekImportModal.jsx` · `WeekSessionCard.jsx`
+(named so, not `SessionCard` — results already has one) + the `gridMode` prop and the mobile
+stacked list in `WeekGrid.jsx`, wired through `BlockEditor.jsx` / `Criador.jsx`, with a
+`textMode.module.css` that is token-only. New gallery **Criador** group → `design/components/criador.html`.
+
+Two constraints discovered while wiring the gallery, both now load-bearing: `SessionTextPane`
+takes its **type picker as a prop** and `WeekImportModal` imports `uid`/`toISO` from
+`public/lib/` rather than `utils/storage` — the gallery is client-free and `utils/storage`
+pulls the SPA Supabase client.

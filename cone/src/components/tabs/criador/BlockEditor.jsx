@@ -4,12 +4,16 @@ import { BTC, ZONES } from '../../../utils/config';
 import { StationEditor } from './StationEditor';
 import { ExerciseRow } from './ExerciseRow';
 import { CriadorTypePicker } from './TypePicker';
+import { BlockTextEditor } from './BlockTextEditor';
+import { isTextEditable } from './textFormat.js';
 import { emptyEx, getTypeCfg, blockSummary, stationsCapStr, loadBadgeStr } from './blockModel.js';
+import tm from './textMode.module.css';
 
 // ── BlockEditor ───────────────────────────────────────────────────────────────
-export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy, collapsed, onToggleCollapse, dragBlkIdx, dragOverBlkIdx, setDragOverBlkIdx, reorderBlocks, blockIdx, changedFields }) {
+export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy, collapsed, onToggleCollapse, dragBlkIdx, dragOverBlkIdx, setDragOverBlkIdx, reorderBlocks, blockIdx, changedFields, registry }) {
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [bmSaveFlash, setBmSaveFlash] = useState(false);
+  const [textMode, setTextMode] = useState(false);
   const dragExIdx = useRef(null);
   const [dragOverExIdx, setDragOverExIdx] = useState(null);
 
@@ -123,6 +127,19 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
 
         <div className="blk-spacer" />
 
+        {/* Detalhado / Texto for this block alone (#92). Estações carries groups
+            and a Benchmark is read-only, so neither has a text form — the toggle
+            is DISABLED rather than hidden, so its absence is explainable. */}
+        {!collapsed && (
+          <span className={tm.modeSeg} role="group" aria-label="Modo de edição do bloco">
+            <button type="button" className={!textMode ? tm.on : ''} aria-pressed={!textMode}
+              onClick={() => setTextMode(false)} title="Editar em campos">▤</button>
+            <button type="button" className={textMode ? tm.on : ''} aria-pressed={textMode}
+              disabled={!isTextEditable(block)} onClick={() => setTextMode(true)}
+              title={isTextEditable(block) ? 'Editar como texto' : 'Este tipo de bloco não tem forma textual'}>¶</button>
+          </span>
+        )}
+
         <button type="button" className="b bsm" style={{ padding: '3px 8px', minHeight: 26, fontSize: 11 }} onClick={onCopy} title="Duplicar bloco">
           <i className="ti ti-copy" />
         </button>
@@ -137,6 +154,11 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
       {!collapsed && (
         <div className="blk-body">
           {(() => {
+            // ── Text mode ──────────────────────────────────────────────────
+            if (textMode && isTextEditable(block)) {
+              return <BlockTextEditor key={block.id} block={block} onApply={onUpdate} registry={registry} />;
+            }
+
             // ── Locked benchmark view ──────────────────────────────────────
             if (block.benchmarkRef) {
               return (

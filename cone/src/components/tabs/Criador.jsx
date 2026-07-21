@@ -17,6 +17,9 @@ import { CriadorTypePicker } from './criador/TypePicker';
 import { WeekGrid } from './criador/WeekGrid';
 import { TemplatesModal } from './criador/TemplatesModal';
 import { RecurringModal } from './criador/RecurringModal';
+import { SessionTextPane } from './criador/SessionTextPane';
+import { WeekImportModal } from './criador/WeekImportModal';
+import tm from './criador/textMode.module.css';
 
 // ── TrainingCreator ───────────────────────────────────────────────────────────
 function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreloadConsumed, onGoToPublish }) {
@@ -37,6 +40,12 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const [recurDone, setRecurDone]           = useState(null);
   const [weekOffset, setWeekOffset]         = useState(0);
   const [weekGridCollapsed, setWeekGridCollapsed] = useState(false);
+  // Text mode (#92) is EDITOR UI STATE, never persisted: detalhado→texto
+  // serializes, texto→detalhado parses. The blocks stay canonical either way.
+  const [sessionMode, setSessionMode]       = useState('detalhado'); // 'detalhado' | 'texto'
+  const [gridMode, setGridMode]             = useState('grade');     // 'grade' | 'texto'
+  const [showImport, setShowImport]         = useState(false);
+  const registry = useMemo(() => loadRegistry(), []);
   const boxLocs = useMemo(() => loadLocations().filter(l => l.type === 'box'), []);
   const [selBox, setSelBox]                 = useState('all');   // 'all' | 'none' | <locationId> — grid filter + new-session default
   // "Avisos do box" for index.html — a dated list. Each: { id, date, message, box, active }
@@ -451,6 +460,30 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
         <CriadorTypePicker blockNames={blockNames} onSelect={addBlock} onClose={() => setShowBlockPicker(false)} />
       )}
 
+      {/* ── Week import (#92) — one paste, one session per weekday ── */}
+      {showImport && (
+        <WeekImportModal
+          weekDates={weekDates} weekLabel={weekLabel}
+          sessions={sessions} boxFilter={boxFilter}
+          boxLocs={boxLocs} selBox={selBox}
+          onPrevWeek={() => setWeekOffset(o => o - 1)}
+          onNextWeek={() => setWeekOffset(o => o + 1)}
+          onClose={() => setShowImport(false)}
+          onCreate={created => {
+            setSessions(prev => {
+              const next = { ...prev };
+              created.forEach(({ dateKey, session }) => {
+                next[dateKey] = [...(next[dateKey] || []), { ...session, blocks: materializeBlocks(session.blocks, registry) }];
+              });
+              return next;
+            });
+            setShowImport(false);
+            setWeekGridCollapsed(false);
+            setTimeout(() => weekGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+          }}
+        />
+      )}
+
       {/* ── Content area: flex when TV preview is open (desktop only) ── */}
       <div style={tvPreviewOpen && !isMobile ? { display: 'flex', gap: 24, alignItems: 'flex-start' } : {}}>
       <div style={tvPreviewOpen && !isMobile ? { flex: 1, minWidth: 0 } : {}}>
@@ -607,19 +640,44 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
             <span style={{ fontSize: 12, fontWeight: 700, color: '#666', textTransform: 'uppercase', letterSpacing: '.06em' }}>
               {blocks.length ? `${blocks.length} Bloco${blocks.length !== 1 ? 's' : ''}` : 'Blocos'}
             </span>
-            {blocks.length > 1 && (
-              <div className="collapse-all-row" style={{ margin: 0 }}>
-                <button type="button" className="collapse-all-btn" onClick={() => setCollapsedBlocks(Object.fromEntries(blocks.map(b => [b.id, true])))}>
-                  <i className="ti ti-arrows-minimize" /> Recolher
-                </button>
-                <button type="button" className="collapse-all-btn" onClick={() => setCollapsedBlocks({})}>
-                  <i className="ti ti-arrows-maximize" /> Expandir
-                </button>
-              </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {blocks.length > 1 && sessionMode === 'detalhado' && (
+                <div className="collapse-all-row" style={{ margin: 0 }}>
+                  <button type="button" className="collapse-all-btn" onClick={() => setCollapsedBlocks(Object.fromEntries(blocks.map(b => [b.id, true])))}>
+                    <i className="ti ti-arrows-minimize" /> Recolher
+                  </button>
+                  <button type="button" className="collapse-all-btn" onClick={() => setCollapsedBlocks({})}>
+                    <i className="ti ti-arrows-maximize" /> Expandir
+                  </button>
+                </div>
+              )}
+              {/* Detalhado / Texto — the whole session as the coach's own notation */}
+              <span className={tm.modeSeg} role="group" aria-label="Modo de edição da sessão">
+                <button type="button" className={sessionMode === 'detalhado' ? tm.on : ''}
+                  aria-pressed={sessionMode === 'detalhado'} onClick={() => setSessionMode('detalhado')}>▤ Detalhado</button>
+                <button type="button" className={sessionMode === 'texto' ? tm.on : ''}
+                  aria-pressed={sessionMode === 'texto'} onClick={() => setSessionMode('texto')}>¶ Texto</button>
+              </span>
+            </div>
           </div>
 
-          {blocks.flatMap((bl, i) => {
+          {sessionMode === 'texto' && (
+            <SessionTextPane
+              blocks={blocks}
+              registry={registry}
+              blockNames={blockNames || APP_CONFIG.blockNames}
+              typePicker={CriadorTypePicker}
+              onCancel={() => setSessionMode('detalhado')}
+              onApply={parsed => {
+                setBlocks(normalizeLegacyCardio(parsed));
+                setIsDirty(true);
+                setCollapsedBlocks({});
+                setSessionMode('detalhado');
+              }}
+            />
+          )}
+
+          {sessionMode === 'detalhado' && blocks.flatMap((bl, i) => {
             const editor = (
               <BlockEditor
                 key={bl.id}
@@ -633,6 +691,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                 dragBlkIdx={dragBlkIdx} dragOverBlkIdx={dragOverBlkIdx}
                 setDragOverBlkIdx={setDragOverBlkIdx} reorderBlocks={reorderBlocks} blockIdx={i}
                 changedFields={changedBlockFields[bl.id] || null}
+                registry={registry}
               />
             );
             if (i < blocks.length - 1) {
@@ -648,9 +707,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           })}
 
           {/* Add block */}
-          <button type="button" className="add-blk-btn" style={{ width: '100%', marginBottom: 0 }} onClick={() => { setInsertAtIdx(null); setShowBlockPicker(true); }}>
-            <i className="ti ti-layout-grid-add" style={{ fontSize: 16 }} /> Adicionar bloco
-          </button>
+          {sessionMode === 'detalhado' && (
+            <button type="button" className="add-blk-btn" style={{ width: '100%', marginBottom: 0 }} onClick={() => { setInsertAtIdx(null); setShowBlockPicker(true); }}>
+              <i className="ti ti-layout-grid-add" style={{ fontSize: 16 }} /> Adicionar bloco
+            </button>
+          )}
         </div>
 
         {/* Save row */}
@@ -690,7 +751,16 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           onDelete={del}
           formRef={formRef}
           setForm={setForm}
+          gridMode={gridMode} setGridMode={setGridMode}
+          onImport={() => setShowImport(true)}
         />
+      )}
+      {/* With no sessions yet the grid doesn't render, so the import — the whole
+          point of which is bootstrapping a week — would have no entry point. */}
+      {totalSessions === 0 && (
+        <button type="button" className="b bsm" onClick={() => setShowImport(true)}>
+          <i className="ti ti-clipboard-text" /> Importar semana
+        </button>
       )}
       </div> {/* end left pane */}
 
