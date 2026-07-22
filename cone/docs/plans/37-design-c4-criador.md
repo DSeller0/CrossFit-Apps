@@ -1,5 +1,13 @@
 # 37 — #58 · Design pass C4 — Criador (+ #10 goals, #90 box dots, #35/#14/#15 slices)
 
+> ✅ Done: `aea2e9d` (2026-07-22). Shipped as planned, with two recorded deviations:
+> the athlete picker became **inline inside `SessionMetaModal`** rather than the
+> nested modal the mockup implied (one modal layer, not two), and a new session
+> opens with **no blocks** rather than a seeded one — the coach picks the first
+> type, as before. `criador.module.css` is new (the plan's file list didn't name it).
+> The mm:ss slice covers station `restBetweenCycles` + `timer.html`'s For Time goal;
+> `block.duration` stayed a minutes field per the plan's own warning (#93).
+
 > Third of three sessions in the Criador overhaul (planning session 2026-07-21).
 > Run order: [35 decomposition](./35-criador-decomposition.md) →
 > [36 text mode](./36-criador-text-mode.md) → **37 (this)**.
