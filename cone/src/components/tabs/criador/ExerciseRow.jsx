@@ -199,8 +199,12 @@ export function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLad
               /* Reps takes free text ("15,12,9" in escada mode), so inputMode is
                  numeric but the type stays text — a number input would eat the commas. */
               <input
-                type="text" inputMode="numeric" className="ex-qty-input"
-                value={ex.reps} placeholder={ladderMode ? '15,12,9' : (regDefaults?.reps || '—')} title="Reps"
+                type="text" inputMode="numeric" className="ex-qty-input ex-qty-reps"
+                value={ex.reps} placeholder={ladderMode ? '15,12,9' : (regDefaults?.reps || '—')}
+                /* The value in the tooltip, not just the field name: a long ladder
+                   ("10-9-8-7-6-5-4-3-2-1") outruns even the wider box, and hovering
+                   is the only way to read it back without focusing and scrolling. */
+                title={ex.reps ? `Reps: ${ex.reps}` : 'Reps'}
                 aria-label="Reps"
                 onChange={e => upd('reps', e.target.value)}
               />
@@ -322,8 +326,9 @@ export function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLad
                     ) : (
                       <div className="sheet-qty-field">
                         <input
-                          type="text" inputMode="numeric" className="sheet-qty-input"
-                          value={ex.reps} placeholder={ladderMode ? '15,12,9' : (regDefaults?.reps || '—')} title="Reps" aria-label="Reps"
+                          type="text" inputMode="numeric" className="sheet-qty-input sheet-qty-reps"
+                          value={ex.reps} placeholder={ladderMode ? '15,12,9' : (regDefaults?.reps || '—')}
+                          title={ex.reps ? `Reps: ${ex.reps}` : 'Reps'} aria-label="Reps"
                           onChange={e => upd('reps', e.target.value)}
                         />
                         <span className="sheet-qty-lbl">Reps</span>

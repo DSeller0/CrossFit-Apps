@@ -60,13 +60,19 @@ export function WeekGrid({
   gridRef, weekOffset, setWeekOffset, weekLabel, weekGridCollapsed, setWeekGridCollapsed,
   boxLocs, selBox, setSelBox, boxWarnings, addWarning, patchWarning, removeWarning,
   weekDates, sessions, setSessions, boxFilter, editing, activeDate, highlightedSessionId,
-  startEdit, onDelete, onPickDay, gridMode, setGridMode, onImport,
+  startEdit, onDelete, onPickDay, gridMode, setGridMode, onImport, editorOpen,
 }) {
   const isMobile = useIsMobile();
   const [openId, setOpenId] = useState(null);      // mobile: which card is expanded
   const [copied, copy] = useCopy();
   const isText = gridMode === 'texto';
   const showDots = selBox === 'all' && boxLocs.length > 0;
+  // With a session open the week is ALWAYS the strip — the card grid below an open
+  // editor is a second view of a week you are already inside. So the collapse
+  // toggle isn't a choice there, and everything in the bar that acts on the card
+  // grid (Grade/Texto, Copiar semana, Importar) has nothing to act on: hidden, not
+  // disabled. What stays is navigation — the week arrows, Hoje, and the box tabs.
+  const collapsed = editorOpen || weekGridCollapsed;
 
   const weekSessions = weekDates.flatMap(d => (sessions[toISO(d)] || []).filter(boxFilter).map(sess => ({ date: d, dateKey: toISO(d), sess })));
 
@@ -109,12 +115,16 @@ export function WeekGrid({
   };
 
   return (
-    <div ref={gridRef}>
-      {/* Week picker + box tabs stay pinned under the tab bar while the grid
-          scrolls — they are how you change what the grid is showing, so scrolling
-          away from them means scrolling back up to switch week or box. Avisos and
-          the page toolbar above deliberately scroll: they are not navigation. */}
-      <div className={cr.stickyHead}>
+    /* A FRAGMENT, not a wrapper div: `position: sticky` is clipped by its parent's
+       box, so while this component owned a div of its own the pinned header could
+       only travel the height of that div — it scrolled away as soon as you got into
+       the block list. As a fragment the header's parent is the container that holds
+       the editor too, which is the region it needs to stay pinned over. */
+    <>
+      {/* Week picker + box tabs + the day strip stay pinned under the app chrome:
+          they are how you change what you are looking at. Avisos and the page
+          toolbar deliberately scroll — they are content, not navigation. */}
+      <div className={cr.stickyHead} ref={gridRef}>
       <div className={cr.weekBar}>
         <Button size="sm" iconOnly aria-label="Semana anterior" onClick={() => setWeekOffset(o => o-1)}>
           <i className="ti ti-chevron-left" />
@@ -125,29 +135,33 @@ export function WeekGrid({
         </Button>
         {weekOffset !== 0 && <Button size="sm" onClick={() => setWeekOffset(0)}>Hoje</Button>}
         <span className={cr.toolbarSpacer} />
-        {/* Grade / Texto — a render mode of this grid, never persisted */}
-        <span className={s.modeSeg} role="group" aria-label="Modo da grade">
-          <button type="button" className={!isText ? s.on : ''} aria-pressed={!isText}
-            onClick={() => setGridMode('grade')} title="Ver como lista de exercícios">▤ Grade</button>
-          <button type="button" className={isText ? s.on : ''} aria-pressed={isText}
-            onClick={() => setGridMode('texto')} title="Ver como texto">¶ Texto</button>
-        </span>
-        {isText && weekSessions.length > 0 && (
-          <Button size="sm" onClick={copyWeek} title="Copiar a semana inteira como texto">
-            <i className={`ti ${copied === 'week' ? 'ti-check' : 'ti-copy'}`} /> {copied === 'week' ? 'Copiado' : 'Copiar semana'}
-          </Button>
+        {!editorOpen && (
+          <>
+            {/* Grade / Texto — a render mode of this grid, never persisted */}
+            <span className={s.modeSeg} role="group" aria-label="Modo da grade">
+              <button type="button" className={!isText ? s.on : ''} aria-pressed={!isText}
+                onClick={() => setGridMode('grade')} title="Ver como lista de exercícios">▤ Grade</button>
+              <button type="button" className={isText ? s.on : ''} aria-pressed={isText}
+                onClick={() => setGridMode('texto')} title="Ver como texto">¶ Texto</button>
+            </span>
+            {isText && weekSessions.length > 0 && (
+              <Button size="sm" onClick={copyWeek} title="Copiar a semana inteira como texto">
+                <i className={`ti ${copied === 'week' ? 'ti-check' : 'ti-copy'}`} /> {copied === 'week' ? 'Copiado' : 'Copiar semana'}
+              </Button>
+            )}
+            {onImport && (
+              <Button size="sm" onClick={onImport} title="Colar a semana inteira de uma vez">
+                <i className="ti ti-clipboard-text" /> Importar
+              </Button>
+            )}
+            <Button size="sm" iconOnly onClick={() => setWeekGridCollapsed(v => !v)}
+              aria-label={weekGridCollapsed ? 'Expandir grade da semana' : 'Minimizar grade da semana'}
+              aria-expanded={!weekGridCollapsed}
+              title={weekGridCollapsed ? 'Expandir grade' : 'Minimizar grade'}>
+              <i className={`ti ti-layout-${weekGridCollapsed ? 'rows' : 'navbar'}`} />
+            </Button>
+          </>
         )}
-        {onImport && (
-          <Button size="sm" onClick={onImport} title="Colar a semana inteira de uma vez">
-            <i className="ti ti-clipboard-text" /> Importar
-          </Button>
-        )}
-        <Button size="sm" iconOnly onClick={() => setWeekGridCollapsed(v => !v)}
-          aria-label={weekGridCollapsed ? 'Expandir grade da semana' : 'Minimizar grade da semana'}
-          aria-expanded={!weekGridCollapsed}
-          title={weekGridCollapsed ? 'Expandir grade' : 'Minimizar grade'}>
-          <i className={`ti ti-layout-${weekGridCollapsed ? 'rows' : 'navbar'}`} />
-        </Button>
       </div>
       {/* Box context selector — filters the grid + sets the box new sessions inherit. Scrollable so any N boxes fit. */}
       {boxLocs.length > 0 && (
@@ -165,14 +179,11 @@ export function WeekGrid({
           })}
         </div>
       )}
-      </div>
-      <BoxWarnings
-        selBox={selBox} boxLocs={boxLocs} boxWarnings={boxWarnings}
-        addWarning={addWarning} patchWarning={patchWarning} removeWarning={removeWarning}
-      />
-      {weekGridCollapsed ? (
-        /* Collapsed = the index's week strip. Same component the athletes see, with
-           the coach's own filter (he sees hidden sessions) and his browsed week. */
+      {/* The strip pins WITH the week arrows and the box tabs, because in this state
+          it IS the week picker — the card grid it used to sit under is gone. Left
+          below the pinned bar it scrolled under it the moment a session opened, and
+          then changing day cost a scroll up. Avisos stays below, and still scrolls. */}
+      {collapsed && (
         <div className={cr.dayStrip}>
           <DayStrip
             sessions={sessions}
@@ -183,7 +194,13 @@ export function WeekGrid({
             onSelect={onPickDay}
           />
         </div>
-      ) : isMobile ? (
+      )}
+      </div>
+      <BoxWarnings
+        selBox={selBox} boxLocs={boxLocs} boxWarnings={boxWarnings}
+        addWarning={addWarning} patchWarning={patchWarning} removeWarning={removeWarning}
+      />
+      {collapsed ? null : isMobile ? (
         /* ── Mobile: the columns stack. A card is collapsed until tapped, then
               opens READ-ONLY in whichever mode is active; "Editar" opens the
               editor, which takes over the screen. ── */
@@ -308,6 +325,6 @@ export function WeekGrid({
         </div>
       </div>
       )}
-    </div>
+    </>
   );
 }

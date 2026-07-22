@@ -115,10 +115,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setEditorOpen(true);
     setWeekGridCollapsed(true);
     setIsDirty(false); setChangedBlockFields({}); setActiveTemplateId(null);
-    // Top of the PAGE, not the top of the editor — scrolling to the editor put the
-    // day strip and the session header above the fold, so opening a session landed
-    // you mid-form with no idea which day you were on.
-    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 60);
+    // To the session you opened. This was scroll-to-page-top for exactly as long as
+    // the card grid sat above the editor and pushed it off the fold — with the week
+    // reduced to the strip while editing, the session itself is the right target.
+    // cr.editorScroll's scroll-margin-top keeps it clear of the pinned week bar.
+    setTimeout(() => editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   };
 
   // A new session inherits the browsing filter's box — the coach is almost always
@@ -177,10 +178,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setEditorOpen(true);
     setWeekGridCollapsed(true);
     setIsDirty(true); setChangedBlockFields({}); setActiveTemplateId(null);
-    // Top of the PAGE, not the top of the editor — scrolling to the editor put the
-    // day strip and the session header above the fold, so opening a session landed
-    // you mid-form with no idea which day you were on.
-    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 60);
+    // To the session you opened. This was scroll-to-page-top for exactly as long as
+    // the card grid sat above the editor and pushed it off the fold — with the week
+    // reduced to the strip while editing, the session itself is the right target.
+    // cr.editorScroll's scroll-margin-top keeps it clear of the pinned week bar.
+    setTimeout(() => editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   };
 
   // Preload from another tab
@@ -594,12 +596,13 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           onPickDay={pickDay}
           gridMode={gridMode} setGridMode={setGridMode}
           onImport={() => setShowImport(true)}
+          editorOpen={editorOpen}
         />
       )}
 
       {/* ── Session editor ── */}
       {editorOpen && (
-        <div ref={editorRef}>
+        <div ref={editorRef} className={cr.editorScroll}>
         <Card>
           <div className={cr.editorHd}>
             {isMobile && (

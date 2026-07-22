@@ -55,15 +55,26 @@ can't carry — a *new* session is being edited but has no id/dateKey yet).
   filters by his own box selector) and `showCount` (he has more than one session a
   day; the index renders only the first, so it stays off there). Imported aliased —
   `criador/WeekGrid.jsx` exports a `WeekGrid` of its own, the 7-column card grid.
-- **The week picker + box tabs are sticky (`cr.stickyHead`); the toolbar and Avisos
-  are not** — the two controls that decide *what* the grid shows stay reachable, the
-  rest is content. Offset is **`var(--spa-sticky-top)`** (`index.css`), not the flat
-  `88px` that `.ql-sess-bar`/`.sync-conflict-banner` still hardcode: that figure is
-  topbar + tab bar, and at ≥768px the tab bar is `display:none` and the sidebar takes
-  over, so 88px parks the block 39px *below* its own flow position, on top of Avisos.
-- **Opening a session scrolls to the top of the page**, not to the editor —
-  `scrollIntoView` on the editor put the day strip and the session header above the
-  fold, so you landed mid-form not knowing which day you were on.
+- **With a session open the week is *always* the strip** — `collapsed = editorOpen ||
+  weekGridCollapsed`, and the week bar drops everything that acts on the card grid
+  (Grade/Texto, Copiar semana, Importar, the collapse toggle) because that grid isn't
+  on screen. What stays is navigation: week arrows, Hoje, box tabs. With nothing open
+  the card grid is still the landing surface and the toggle still works.
+- **`cr.stickyHead` pins week arrows + box tabs + the strip; the toolbar and Avisos
+  scroll.** Two traps, both hit live:
+  - **Offset is `var(--spa-sticky-top)`** (`index.css`), not the flat `88px` that
+    `.ql-sess-bar`/`.sync-conflict-banner` still hardcode: that figure is topbar +
+    tab bar, and at ≥768px the tab bar is `display:none` and the sidebar takes over,
+    so 88px parks the block 39px *below* its own flow position, on top of Avisos.
+  - **`WeekGrid` returns a FRAGMENT, not a wrapper div.** `position: sticky` is
+    clipped by its parent's box, so while the component owned a div the header could
+    only travel that div's height and scrolled away as soon as you reached the block
+    list. As a fragment its parent is the container holding the editor too.
+  The strip is *inside* the sticky block, not below it: once the card grid is gone it
+  **is** the week picker, and left below the bar it slid under it on every open.
+- **Opening a session scrolls to the session** (`editorRef.scrollIntoView`), with
+  `cr.editorScroll`'s `scroll-margin-top` clearing the pinned block — without it the
+  editor arrives with its header hidden underneath.
 - **Closing the editor asks before discarding** (`requestClose` → `pendingClose`
   `ConfirmReview`), and only when `isDirty`. The close control is the same red ✕ as
   the exercise delete; it always threw the edit away, but as a red ✕ beside *Salvar*
@@ -82,6 +93,12 @@ can't carry — a *new* session is being edited but has no id/dateKey yet).
 - **On mobile the exercise name is a tap target, not a field** — the real
   `ExerciseCombobox` lives in the bottom sheet below Séries/Reps, where its dropdown
   has room; tapping the name and tapping the gear are the same gesture.
+- **Séries and Reps are not the same width.** Séries is one or two digits; Reps holds
+  a rep *scheme* (`21-15-9`, `10-9-8-7`, `15,12,9` in escada mode). Both shared one
+  40px box (76px at 20px font in the mobile sheet), which clipped `21-15-9` to
+  `21-15` with nothing on screen saying so — on a row with ~800px unused beside it.
+  `.ex-qty-reps` (88px) / `.sheet-qty-reps` (130px) split them, and the tooltip
+  carries the value so a ladder longer than the box is still readable.
 - **`TypePicker`'s three benchmark-category colours are data colours** (gold/blue/
   violet, the same values the block-family palette uses) — exempt from #15, recorded
   in a comment there.
