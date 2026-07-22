@@ -79,6 +79,39 @@ export function blkMetaParts(bl) {
 }
 export function blkMeta(bl) { return blkMetaParts(bl).join(' · ') }
 
+// The coach's `Meta:` line as one display string (#10). `bl.goal` is the ONE new
+// persisted block field — same shape the text parser emits (plans/36), written by
+// the Criador's GoalInput:
+//   { kind:'time',   min?:'MM:SS', max?:'MM:SS' }
+//   { kind:'rounds', min?:number,  reps?:number }
+//   { kind:'text',   text:string }
+// One formatter, four render sites (WodBlockCard · schedule BlockDetail · TV
+// BlockCard + TimerSlide) — do not hand-roll a fifth.
+//
+// Deliberately NOT the same function as textFormat.js's serializeGoal: that one
+// emits the coach's ASCII notation and must survive a re-parse ("11-12'"), this
+// one is display-only and uses a real en dash. Same data, different contracts.
+export function goalStr(bl) {
+  const g = bl?.goal
+  if (!g) return ''
+  const short = t => (t && /:00$/.test(t) ? `${t.slice(0, -3)}'` : t)
+  if (g.kind === 'time') {
+    if (g.min && g.max) {
+      // "11–12'" when both are whole minutes; "11:30–12:15" the moment either isn't.
+      const whole = /:00$/.test(g.min) && /:00$/.test(g.max)
+      return whole ? `${g.min.slice(0, -3)}–${g.max.slice(0, -3)}'` : `${g.min}–${g.max}`
+    }
+    if (g.max) return `sub ${short(g.max)}`
+    return short(g.min) || ''
+  }
+  if (g.kind === 'rounds') {
+    const r = g.min ? `${g.min} round${Number(g.min) === 1 ? '' : 's'}` : ''
+    const x = g.reps ? `${g.reps} reps` : ''
+    return [r, x].filter(Boolean).join(' + ')
+  }
+  return (g.text || '').trim()
+}
+
 // Timer/TV mode display label — Timer.jsx and tv/slides.jsx both hand-rolled
 // this identically before consolidation.
 export const MODE_LBL = { 'For Time':'FOR TIME', AMRAP:'AMRAP', EMOM:'EMOM', Benchmark:'BENCHMARK', 'Estações':'ESTAÇÕES' }

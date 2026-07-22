@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import QRCode from 'qrcode'
-import { blkLabel, blkColor, isWodBlock, rankResults, perfStr, fmtSecs, MODE_LBL, blkMeta } from '../lib/wod.js'
+import { blkLabel, blkColor, isWodBlock, rankResults, perfStr, fmtSecs, MODE_LBL, blkMeta, goalStr } from '../lib/wod.js'
 import { DAY_PT_TITLE, MONTH_PT_SHORT } from '../lib/week.js'
 import { sessName } from '../lib/sessions.js'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
@@ -145,6 +145,7 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive, big 
     ? (bl.stations || []).flatMap(st => st.exercises || [])
     : (bl.exercises || [])
   const meta = blkMeta(bl)
+  const goal = goalStr(bl)
 
   return (
     <div className={`${s.blockCard}${big ? ' ' + s.blockCardBig : ''}`} style={{ borderLeftColor: color }}>
@@ -152,6 +153,7 @@ export function BlockCard({ bl, groups, groupPositions, athletes, isActive, big 
         <span className={s.blockBadge} style={{ background: color + '22', color }}>{label}</span>
         {isActive && <span className={s.timerBlockLiveBadge}>AO VIVO</span>}
         {meta && <span className={s.blockMeta}>{meta}</span>}
+        {goal && <span className={s.blockGoal}>Meta {goal}</span>}
       </div>
       <ExerciseList exercises={exes} color={color} size={big ? 'large' : undefined} />
       {bl.notes && <div className={s.blockNote}>{bl.notes}</div>}
@@ -202,6 +204,7 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
   const bColor = block ? blkColor(block) : '#d8a840'
   const bLabel = block ? blkLabel(block) : bt
   const bMeta  = block ? blkMeta(block) : ''
+  const bGoal  = block ? goalStr(block) : ''
 
   const activeClass    = (classExecs || []).find(c => c.id === tv?.class_id && !c.reset_at)
   const groups         = activeClass?.groups || []
@@ -271,6 +274,7 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
           <div className={s.timerBlockHdr} style={{ borderLeftColor: bColor }}>
             <span style={{ color: bColor }}>{bLabel}</span>
             {bMeta && <span className={s.blockMeta}>{bMeta}</span>}
+            {bGoal && <span className={s.blockGoal}>Meta {bGoal}</span>}
           </div>
           <ExerciseList exercises={exes} color={bColor} size="large" />
           {exes.length === 0 && <div className={s.timerNoEx}>Nenhum exercício</div>}

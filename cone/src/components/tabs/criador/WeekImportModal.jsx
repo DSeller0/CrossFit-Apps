@@ -6,6 +6,7 @@ import { uid } from '../../../public/lib/wod.js';
 import { DAY_PT, toISO } from '../../../public/lib/week.js';
 import { parseWeek } from './textFormat.js';
 import s from './textMode.module.css';
+import Button from '../../ui/Button.jsx';
 
 // ── WeekImportModal (#92) ─────────────────────────────────────────────────────
 // One paste, five sessions. The coach writes the whole week in a phone notepad;
@@ -46,7 +47,7 @@ export function WeekImportModal({ weekDates, weekLabel, sessions, boxFilter, box
       <div className={s.modal} role="dialog" aria-label="Importar semana" onClick={e => e.stopPropagation()}>
         <div className={s.modalHd}>
           <span className={s.modalTitle}><i className="ti ti-clipboard-text" /> Importar semana</span>
-          <button type="button" className="b bsm" onClick={onClose} aria-label="Fechar"><i className="ti ti-x" /></button>
+          <Button size="xs" iconOnly variant="ghost" onClick={onClose} aria-label="Fechar"><i className="ti ti-x" /></Button>
         </div>
 
         <div className={s.modalBody}>
@@ -62,10 +63,10 @@ export function WeekImportModal({ weekDates, weekLabel, sessions, boxFilter, box
           />
 
           <div className={s.weekPick}>
-            <button type="button" className="b bsm" onClick={onPrevWeek} aria-label="Semana anterior"><i className="ti ti-chevron-left" /></button>
+            <Button size="sm" iconOnly onClick={onPrevWeek} aria-label="Semana anterior"><i className="ti ti-chevron-left" /></Button>
             <span className={s.lbl} style={{ margin: 0 }}>Semana de</span>
             <span className={s.weekPickVal}>{weekLabel}</span>
-            <button type="button" className="b bsm" onClick={onNextWeek} aria-label="Próxima semana"><i className="ti ti-chevron-right" /></button>
+            <Button size="sm" iconOnly onClick={onNextWeek} aria-label="Próxima semana"><i className="ti ti-chevron-right" /></Button>
           </div>
 
           <span className={s.lbl}>Detectado</span>
@@ -122,11 +123,10 @@ export function WeekImportModal({ weekDates, weekLabel, sessions, boxFilter, box
         </div>
 
         <div className={s.modalFoot}>
-          <button type="button" className="b bsm" onClick={onClose}>Cancelar</button>
-          <button type="button" className="b bp bsm" disabled={!creatable.length} onClick={create}
-            style={creatable.length ? undefined : { opacity: .45 }}>
+          <Button size="sm" onClick={onClose}>Cancelar</Button>
+          <Button size="sm" variant="primary" disabled={!creatable.length} onClick={create}>
             <i className="ti ti-calendar-plus" /> Criar {creatable.length} {creatable.length === 1 ? 'sessão' : 'sessões'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

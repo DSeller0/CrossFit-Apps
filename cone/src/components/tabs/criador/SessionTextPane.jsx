@@ -4,6 +4,7 @@ import { blkColor } from '../../../public/lib/wod.js';
 import { parseSession, serializeSession, serializeGoal, blockLineStarts } from './textFormat.js';
 import { getTypeCfg } from './blockModel.js';
 import s from './textMode.module.css';
+import Button from '../../ui/Button.jsx';
 
 const FORMAT_HELP = `Warm Up                     ← tipo do bloco (aceita Warm Up, Skill, WOD, Emom…)
 3 rounds                    ← estrutura: 3 rounds · AMRAP 15' · TC 14' · 21-15-9
@@ -91,10 +92,10 @@ export function SessionTextPane({ blocks, onApply, onCancel, registry, blockName
           ⓘ Formato
         </button>
         <span className={s.paneSpacer} />
-        {onCancel && <button type="button" className="b bsm" onClick={onCancel}>Descartar</button>}
-        <button type="button" className="b bp bsm" onClick={() => onApply(parsed)} disabled={!parsed.length}>
+        {onCancel && <Button size="sm" onClick={onCancel}>Descartar</Button>}
+        <Button size="sm" variant="primary" onClick={() => onApply(parsed)} disabled={!parsed.length}>
           <i className="ti ti-check" /> Aplicar
-        </button>
+        </Button>
       </div>
       {showHelp && <div className={s.fmtBox}>{FORMAT_HELP}</div>}
 

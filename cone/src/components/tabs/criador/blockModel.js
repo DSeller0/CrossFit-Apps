@@ -95,6 +95,17 @@ export const TYPE_CONFIG = {
 export const DEFAULT_TYPE_CFG = { icon: 'ti-edit', color: '#888', desc: 'Bloco livre', showDuration: true, showRounds: true, durationLabel: 'Duração (min)' };
 export const getTypeCfg = t => TYPE_CONFIG[t] || DEFAULT_TYPE_CFG;
 
+// Which shape the block's `Meta:` takes (#10). A For Time-family block is scored in
+// time, an AMRAP in rounds, and everything else has no numeric scoring axis at all —
+// so the goal falls back to whatever sentence the coach wants to write.
+// Same three kinds textFormat's parseGoal emits, so a goal typed in Texto mode and
+// one typed in Detalhado mode are the same object.
+const GOAL_KIND = {
+  'For Time': 'time', 'Benchmark': 'time', 'MetCon': 'time', 'HIIT': 'time',
+  'AMRAP': 'rounds',
+};
+export const goalKindFor = type => GOAL_KIND[type] || 'text';
+
 export function stationsCapStr(block) {
   if (block.type !== 'Estações') return null;
   const parse = v => { if (!v) return 0; const p = String(v).split(':'); return p.length >= 2 ? (+p[0]||0)*60+(+p[1]||0) : (+p[0]||0)*60; };

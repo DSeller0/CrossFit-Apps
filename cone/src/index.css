@@ -142,9 +142,9 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .wg-sc-name{font-size:12px;font-weight:600;color:var(--cream);margin-bottom:5px;line-height:1.3}
 .wg-pill{display:inline-flex;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;margin:0 2px 2px 0}
 .wg-ex{font-size:10px;color:var(--dim);margin-top:2px;line-height:1.4}
-.wg-add{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:var(--dim);padding:7px;margin:2px 6px;border:1px dashed var(--divider);border-radius:5px;cursor:pointer;transition:all .15s;flex:1}
+.wg-add{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:var(--dim);padding:7px;margin:2px 6px;border:1px dashed var(--divider);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;flex:1;background:transparent;font-family:inherit}
 .wg-add-row{display:flex;gap:4px;margin:4px 6px}
-.wg-copy{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:var(--dim);padding:7px;border:1px dashed var(--divider);border-radius:5px;cursor:pointer;transition:all .15s;flex:1}
+.wg-copy{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:var(--dim);padding:7px;border:1px dashed var(--divider);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;flex:1;background:transparent;font-family:inherit}
 .wg-copy:hover{color:var(--gold);border-color:var(--gold)}
 .alvo-wrap{display:flex;gap:4px;align-items:center}
 .alvo-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
@@ -153,6 +153,7 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .confirm-msg{font-size:14px;color:var(--cream);line-height:1.6;margin-bottom:16px}
 .confirm-btns{display:flex;gap:8px;justify-content:flex-end}
 .wg-add:hover{color:var(--sub);border-color:var(--dim)}
+.wg-add:focus-visible,.wg-copy:focus-visible,.wg-sc:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .hint-txt{font-size:11px;color:var(--dim);margin-bottom:8px}
 
 /* pill colours — RED family */

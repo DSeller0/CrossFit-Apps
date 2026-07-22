@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { uid, toISO, todayISO } from '../../../utils/storage';
 import { DAY_PT } from '../../../public/lib/week.js';
 import { sessName } from '../../../public/lib/sessions.js';
+import { sessionBoxIds } from '../../../public/lib/boxScope.js';
 import { serializeSession } from './textFormat.js';
 import { BoxWarnings } from './BoxWarnings';
 import { WeekSessionCard } from './WeekSessionCard';
 import { useIsMobile } from '../../../hooks/useIsMobile';
+import Button from '../../ui/Button.jsx';
 import s from './textMode.module.css';
+import cr from './criador.module.css';
 
 // Copy helper — clipboard writes can reject (permissions, insecure origin), and a
 // silent failure on a "Copiar" button is worse than no button.
@@ -21,26 +24,44 @@ function useCopy() {
   return [copied, copy];
 }
 
+// Box dots (#90) — one per box the session is tagged with, in that box's own colour.
+// Only under the "Todos" filter: under a single-box filter every card would carry
+// the same dot, which is decoration rather than information.
+function BoxDots({ session, boxLocs, show }) {
+  if (!show) return null;
+  const ids = sessionBoxIds(session);
+  if (!ids.length) return null;
+  const boxes = ids.map(id => boxLocs.find(b => b.id === id)).filter(Boolean);
+  if (!boxes.length) return null;
+  return (
+    <span className={cr.boxDots} title={boxes.map(b => b.name).join(' · ')}>
+      {boxes.map(b => (
+        <span key={b.id} className={cr.boxDot} style={{ background: b.color || 'var(--muted)' }}
+          aria-label={b.name} role="img" />
+      ))}
+    </span>
+  );
+}
+
 // ── Week grid + collapsed day strip + box selector ────────────────────────────
+// The Criador's landing surface (#58): the coach thinks in weeks, so the week is
+// what the page opens on and it renders even when it's empty — the day columns and
+// their "+ sessão" affordances ARE the empty state.
+//
 // The grid has two render modes (#92) — Grade (ExerciseList) and Texto (the
 // coach's own notation). It is deliberately the SAME grid in both: same columns,
-// same box filter, same week arrows. Comparing Monday against Tuesday costs
-// nothing because the grid is already the always-on-screen surface.
+// same box filter, same week arrows.
 export function WeekGrid({
   gridRef, weekOffset, setWeekOffset, weekLabel, weekGridCollapsed, setWeekGridCollapsed,
   boxLocs, selBox, setSelBox, boxWarnings, addWarning, patchWarning, removeWarning,
   weekDates, sessions, setSessions, boxFilter, editing, highlightedSessionId,
-  startEdit, onDelete, formRef, setForm, gridMode, setGridMode, onImport,
+  startEdit, onDelete, onPickDay, gridMode, setGridMode, onImport,
 }) {
   const isMobile = useIsMobile();
   const [openId, setOpenId] = useState(null);      // mobile: which card is expanded
   const [copied, copy] = useCopy();
   const isText = gridMode === 'texto';
-
-  const pickDate = dateKey => {
-    setForm(f => ({ ...f, date: dateKey }));
-    setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
-  };
+  const showDots = selBox === 'all' && boxLocs.length > 0;
 
   const weekSessions = weekDates.flatMap(d => (sessions[toISO(d)] || []).filter(boxFilter).map(sess => ({ date: d, dateKey: toISO(d), sess })));
 
@@ -84,14 +105,16 @@ export function WeekGrid({
 
   return (
     <div ref={gridRef}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
-        <button type="button" className="b bsm" onClick={() => setWeekOffset(o => o-1)}><i className="ti ti-chevron-left" /></button>
-        <span style={{ fontSize: 12, color: '#aaa', fontWeight: 600 }}>{weekLabel}</span>
-        <button type="button" className="b bsm" onClick={() => setWeekOffset(o => o+1)}><i className="ti ti-chevron-right" /></button>
-        {weekOffset !== 0 && (
-          <button type="button" className="b bsm" style={{ fontSize: 11, color: '#e87820', borderColor: '#e87820' }} onClick={() => setWeekOffset(0)}>Hoje</button>
-        )}
-        <span style={{ flex: 1 }} />
+      <div className={cr.weekBar}>
+        <Button size="sm" iconOnly aria-label="Semana anterior" onClick={() => setWeekOffset(o => o-1)}>
+          <i className="ti ti-chevron-left" />
+        </Button>
+        <span className={cr.weekLabel}>{weekLabel}</span>
+        <Button size="sm" iconOnly aria-label="Próxima semana" onClick={() => setWeekOffset(o => o+1)}>
+          <i className="ti ti-chevron-right" />
+        </Button>
+        {weekOffset !== 0 && <Button size="sm" onClick={() => setWeekOffset(0)}>Hoje</Button>}
+        <span className={cr.toolbarSpacer} />
         {/* Grade / Texto — a render mode of this grid, never persisted */}
         <span className={s.modeSeg} role="group" aria-label="Modo da grade">
           <button type="button" className={!isText ? s.on : ''} aria-pressed={!isText}
@@ -100,33 +123,32 @@ export function WeekGrid({
             onClick={() => setGridMode('texto')} title="Ver como texto">¶ Texto</button>
         </span>
         {isText && weekSessions.length > 0 && (
-          <button type="button" className="b bsm" onClick={copyWeek} title="Copiar a semana inteira como texto">
+          <Button size="sm" onClick={copyWeek} title="Copiar a semana inteira como texto">
             <i className={`ti ${copied === 'week' ? 'ti-check' : 'ti-copy'}`} /> {copied === 'week' ? 'Copiado' : 'Copiar semana'}
-          </button>
+          </Button>
         )}
         {onImport && (
-          <button type="button" className="b bsm" onClick={onImport} title="Colar a semana inteira de uma vez">
+          <Button size="sm" onClick={onImport} title="Colar a semana inteira de uma vez">
             <i className="ti ti-clipboard-text" /> Importar
-          </button>
+          </Button>
         )}
-        <button type="button" className="b bsm" title={weekGridCollapsed ? 'Expandir grade' : 'Minimizar grade'}
-          onClick={() => setWeekGridCollapsed(v => !v)}>
+        <Button size="sm" iconOnly onClick={() => setWeekGridCollapsed(v => !v)}
+          aria-label={weekGridCollapsed ? 'Expandir grade da semana' : 'Minimizar grade da semana'}
+          aria-expanded={!weekGridCollapsed}
+          title={weekGridCollapsed ? 'Expandir grade' : 'Minimizar grade'}>
           <i className={`ti ti-layout-${weekGridCollapsed ? 'rows' : 'navbar'}`} />
-        </button>
+        </Button>
       </div>
       {/* Box context selector — filters the grid + sets the box new sessions inherit. Scrollable so any N boxes fit. */}
       {boxLocs.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 6, marginBottom: 4 }}>
-          {[{ id: 'all', name: 'Todos', color: '#806850' }, { id: 'none', name: 'Sem box', color: '#554a3a' }, ...boxLocs].map(b => {
+        <div className={cr.boxTabs} role="group" aria-label="Filtrar por box">
+          {[{ id: 'all', name: 'Todos' }, { id: 'none', name: 'Sem box' }, ...boxLocs].map(b => {
             const on = selBox === b.id;
-            const accent = b.color || 'var(--theme-accent)';
             return (
-              <button key={b.id} type="button" onClick={() => setSelBox(b.id)}
-                style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 5, fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap',
-                  border: `1px solid ${on ? accent : '#2a231c'}`,
-                  background: on ? `${b.color || '#4ac8c0'}1a` : 'transparent',
-                  color: on ? accent : '#806850' }}>
-                {b.id !== 'all' && b.id !== 'none' && <span style={{ width: 8, height: 8, borderRadius: '50%', background: b.color || '#555', flexShrink: 0 }} />}
+              <button key={b.id} type="button" aria-pressed={on} onClick={() => setSelBox(b.id)}
+                className={`${cr.pill}${on ? ' ' + cr.pillOn : ''}`}
+                style={on && b.color ? { borderColor: b.color, color: b.color } : undefined}>
+                {b.id !== 'all' && b.id !== 'none' && <span className={cr.dot} style={{ background: b.color || 'var(--muted)' }} />}
                 {b.name}
               </button>
             );
@@ -138,7 +160,7 @@ export function WeekGrid({
         addWarning={addWarning} patchWarning={patchWarning} removeWarning={removeWarning}
       />
       {weekGridCollapsed ? (
-        <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 4 }}>
+        <div className={cr.dayStrip}>
           {weekDates.map((date, di) => {
             const dateKey = toISO(date);
             const list = (sessions[dateKey] || []).filter(boxFilter);
@@ -146,11 +168,13 @@ export function WeekGrid({
             const isEditing = (sessions[dateKey] || []).some(x => x.id === editing?.id);
             return (
               <button key={dateKey} type="button"
-                style={{ flexShrink: 0, minWidth: 52, padding: '6px 8px', background: isEditing ? 'rgba(74,200,192,.08)' : isToday ? '#1a1a12' : '#161616', border: '1px solid ' + (isEditing ? '#4ac8c060' : isToday ? '#3a3a20' : '#252525'), borderRadius: 7, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, cursor: 'pointer' }}
-                onClick={() => pickDate(dateKey)}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: isToday ? '#d8a840' : '#666', textTransform: 'uppercase', letterSpacing: '.04em' }}>{DAY_PT[di]}</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: isEditing ? '#4ac8c0' : isToday ? '#d8a840' : '#bbb' }}>{date.getDate()}</span>
-                {list.length > 0 && <span style={{ fontSize: 10, color: '#4ac8c0', fontWeight: 700 }}>{list.length}</span>}
+                className={`${cr.dayChip}${isToday ? ' ' + cr.dayChipToday : ''}${isEditing ? ' ' + cr.dayChipActive : ''}`}
+                aria-current={isEditing ? 'true' : undefined}
+                aria-label={`${DAY_PT[di]} ${date.getDate()} — ${list.length} sessão(ões)`}
+                onClick={() => onPickDay(dateKey)}>
+                <span className={cr.dayChipDay}>{DAY_PT[di]}</span>
+                <span className={cr.dayChipNum}>{date.getDate()}</span>
+                {list.length > 0 && <span className={cr.dayChipCount}>{list.length}</span>}
               </button>
             );
           })}
@@ -158,18 +182,18 @@ export function WeekGrid({
       ) : isMobile ? (
         /* ── Mobile: the columns stack. A card is collapsed until tapped, then
               opens READ-ONLY in whichever mode is active; "Editar" opens the
-              editor. Editing inline in this list is plans/37's slice. ── */
-        <div style={{ border: '1px solid var(--divider)', borderRadius: 8, overflow: 'hidden', marginBottom: 12 }}>
+              editor, which takes over the screen. ── */
+        <div className={cr.mobileList}>
           {weekDates.map((date, di) => {
             const dateKey = toISO(date);
             const list = (sessions[dateKey] || []).filter(boxFilter);
             if (!list.length) {
               return (
-                <button key={dateKey} type="button" className={s.mRow} onClick={() => pickDate(dateKey)}>
+                <button key={dateKey} type="button" className={s.mRow} onClick={() => onPickDay(dateKey)}>
                   <span className={s.mChev} />
                   <span className={s.mDay}>{DAY_PT[di]} {date.getDate()}</span>
                   <span className={`${s.mName} ${s.mNameEmpty}`}>sem sessão</span>
-                  <span className={s.mCount}>+ add</span>
+                  <span className={s.mCount}>+ sessão</span>
                 </button>
               );
             }
@@ -182,23 +206,25 @@ export function WeekGrid({
                     <span className={s.mChev}><i className={`ti ti-chevron-${open ? 'down' : 'right'}`} /></span>
                     <span className={s.mDay}>{DAY_PT[di]} {date.getDate()}</span>
                     <span className={s.mName}>{sessName(sess, dateKey)}</span>
-                    <span className={s.mCount}>{(sess.blocks || []).length} blocos</span>
+                    <BoxDots session={sess} boxLocs={boxLocs} show={showDots} />
+                    <span className={s.mCount}>{(sess.blocks || []).length} bloco{(sess.blocks || []).length !== 1 ? 's' : ''}</span>
                   </button>
                   {open && (
                     <div className={s.mBody}>
                       <WeekSessionCard session={sess} mode={gridMode} />
                       <div className={s.mActions}>
                         {isText && (
-                          <button type="button" className="b bsm" onClick={() => copySession(sess.id, sess)}>
+                          <Button size="sm" onClick={() => copySession(sess.id, sess)}>
                             <i className={`ti ${copied === sess.id ? 'ti-check' : 'ti-copy'}`} /> {copied === sess.id ? 'Copiado' : 'Copiar'}
-                          </button>
+                          </Button>
                         )}
-                        <button type="button" className="b bd bsm" onClick={() => onDelete(dateKey, sess.id)}>
+                        <Button size="sm" iconOnly variant="destructive"
+                          aria-label={`Remover ${sessName(sess, dateKey)}`} onClick={() => onDelete(dateKey, sess.id)}>
                           <i className="ti ti-trash" />
-                        </button>
-                        <button type="button" className="b bp bsm" onClick={() => startEdit(sess, dateKey)}>
+                        </Button>
+                        <Button size="sm" variant="primary" onClick={() => startEdit(sess, dateKey)}>
                           <i className="ti ti-pencil" /> Editar
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -220,9 +246,14 @@ export function WeekGrid({
                   {list.length > 0 && <span className="wg-sub">{list.length}s</span>}
                 </div>
                 {list.map(sess => (
+                  /* The card is the click target for "open this session" — so it is a
+                     real button role with a keyboard path, not a bare div (#14). */
                   <div key={sess.id} className={`wg-sc${sess.id === highlightedSessionId ? ' wg-saved' : ''}`} draggable
-                    style={{ outline: editing?.id === sess.id ? '2px solid #4ac8c0' : 'none', outlineOffset: 1 }}
+                    role="button" tabIndex={0}
+                    aria-label={`Abrir ${sessName(sess, dateKey)}`}
+                    style={{ outline: editing?.id === sess.id ? '2px solid var(--accent)' : 'none', outlineOffset: 1 }}
                     onClick={() => startEdit(sess, dateKey)}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startEdit(sess, dateKey); } }}
                     onDragStart={e => { e.dataTransfer.setData('sess-id', sess.id); e.dataTransfer.setData('sess-date', dateKey); e.dataTransfer.effectAllowed = 'move'; e.stopPropagation(); }}
                     onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('drag-over'); e.stopPropagation(); }}
                     onDragLeave={e => e.currentTarget.classList.remove('drag-over')}
@@ -232,34 +263,40 @@ export function WeekGrid({
                       moveSession(e.dataTransfer.getData('sess-id'), e.dataTransfer.getData('sess-date'), dateKey, sess.id);
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 4, marginBottom: 5 }}>
+                    <div className={cr.cardHd}>
                       <span className="wg-sc-name">{sessName(sess, dateKey)}</span>
-                      <span style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
+                      <BoxDots session={sess} boxLocs={boxLocs} show={showDots} />
+                      <span className={cr.cardHdBtns}>
                         {isText && (
-                          <button type="button" className="b"
-                            style={{ padding: '2px 6px', fontSize: 10, minHeight: 20 }}
-                            title="Copiar este dia como texto"
+                          <Button size="xs" iconOnly variant="ghost" title="Copiar este dia como texto"
+                            aria-label={`Copiar ${sessName(sess, dateKey)} como texto`}
                             onClick={e => { e.stopPropagation(); copySession(sess.id, sess); }}>
                             <i className={`ti ${copied === sess.id ? 'ti-check' : 'ti-copy'}`} />
-                          </button>
+                          </Button>
                         )}
-                        <button type="button" className="b bd"
-                          style={{ padding: '2px 6px', fontSize: 10, minHeight: 20 }}
+                        <Button size="xs" iconOnly variant="ghost" className={cr.dangerGhost}
+                          aria-label={`Remover ${sessName(sess, dateKey)}`}
                           onClick={e => { e.stopPropagation(); onDelete(dateKey, sess.id); }}>
                           <i className="ti ti-x" />
-                        </button>
+                        </Button>
                       </span>
                     </div>
                     <WeekSessionCard session={sess} mode={gridMode} />
                   </div>
                 ))}
                 <div className="wg-add-row">
-                  <div className="wg-add" onClick={() => pickDate(dateKey)}>
-                    <i className="ti ti-plus" /> add
-                  </div>
-                  <div className="wg-copy" onClick={() => dupSession(dateKey)}>
-                    <i className="ti ti-copy" /> copy
-                  </div>
+                  <button type="button" className="wg-add"
+                    aria-label={`Nova sessão em ${DAY_PT[di]} ${date.getDate()}`}
+                    onClick={() => onPickDay(dateKey)}>
+                    <i className="ti ti-plus" /> sessão
+                  </button>
+                  {list.length > 0 && (
+                    <button type="button" className="wg-copy"
+                      aria-label={`Duplicar a última sessão de ${DAY_PT[di]} ${date.getDate()}`}
+                      onClick={() => dupSession(dateKey)}>
+                      <i className="ti ti-copy" /> copy
+                    </button>
+                  )}
                 </div>
               </div>
             );

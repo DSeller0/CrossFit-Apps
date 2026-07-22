@@ -1,6 +1,6 @@
 import { ExerciseList } from '../../../public/shared/ExerciseList.jsx';
-import { blkColor } from '../../../public/lib/wod.js';
-import { serializeSession, serializeGoal } from './textFormat.js';
+import { blkColor, goalStr } from '../../../public/lib/wod.js';
+import { serializeSession } from './textFormat.js';
 import { getTypeCfg } from './blockModel.js';
 import s from './textMode.module.css';
 
@@ -38,7 +38,9 @@ export function WeekSessionCard({ session, mode }) {
         const cfg = getTypeCfg(bl.type);
         const color = blkColor(bl);
         const label = bl.label && bl.label !== bl.type ? bl.label : '';
-        const goal = serializeGoal(bl.goal);
+        // Display form (goalStr), not the notation form (serializeGoal) — the
+        // Texto mode above already carries the re-parseable one.
+        const goal = goalStr(bl);
         const meta = [
           label,
           bl.rounds && `${bl.rounds}×`,

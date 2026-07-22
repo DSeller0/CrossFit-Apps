@@ -4,7 +4,7 @@ import Nav from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import BlockTypePicker from './BlockTypePicker.jsx'
 import { BENCHMARK_GIRLS, BENCHMARK_HEROES, benchmarkToTimerExes } from '../lib/benchmarks.js'
-import { fmtSecs, isTimeBlock, MODE_LBL } from '../lib/wod.js'
+import { fmtSecs, isTimeBlock, MODE_LBL, maskMMSS } from '../lib/wod.js'
 import { fmtDate } from '../lib/week.js'
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -557,6 +557,7 @@ export default function Timer() {
                   <div className={s.cfgHalf}>
                     <div className={s.cfgLbl}>Meta (opcional)</div>
                     <input className={s.cfgInp} type="text" placeholder="ex: 20 rounds" value={form.goal}
+                      aria-label="Meta de rounds"
                       onChange={e => setForm(f => ({ ...f, goal: e.target.value }))} />
                   </div>
                 )}
@@ -565,8 +566,11 @@ export default function Timer() {
               {isForTime && (
                 <div>
                   <div className={s.cfgLbl}>Meta de Tempo (opcional)</div>
-                  <input className={s.cfgInp} type="text" placeholder="ex: 08:30" value={form.goal}
-                    onChange={e => setForm(f => ({ ...f, goal: e.target.value }))} />
+                  {/* mm:ss mask (#35) — the goal is only ever a clock time here, and a
+                      free-text field let "8.30"/"8,30" through to the wall display. */}
+                  <input className={s.cfgInp} type="text" inputMode="numeric" placeholder="08:30" value={form.goal}
+                    aria-label="Meta de tempo (MM:SS)"
+                    onChange={e => setForm(f => ({ ...f, goal: maskMMSS(e.target.value) }))} />
                 </div>
               )}
 

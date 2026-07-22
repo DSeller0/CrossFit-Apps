@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { maskMMSS } from '../../../public/lib/wod.js';
 import { ExerciseRow } from './ExerciseRow';
 import { emptyEx, emptyStation } from './blockModel.js';
+import MaskedTimeInput from '../../../public/shared/MaskedTimeInput.jsx';
+import Button from '../../ui/Button.jsx';
+import Input from '../../ui/Input.jsx';
+import cr from './criador.module.css';
 
 // ── StationEditor ─────────────────────────────────────────────────────────────
 export function StationEditor({ block, onUpdate }) {
@@ -43,16 +47,14 @@ export function StationEditor({ block, onUpdate }) {
     <div>
       {/* Cycle controls */}
       <div className="st-repeat-row">
-        <label className="blk-meta-field">
-          <span>Repetições do ciclo</span>
-          <input type="number" min={1} placeholder="1" value={block.stationRepeat || 1}
-            onChange={e => updBlock({ stationRepeat: parseInt(e.target.value) || 1 })} />
-        </label>
-        <label className="blk-meta-field">
-          <span>Descanso entre ciclos</span>
-          <input type="text" placeholder="ex: 2:00" value={block.restBetweenCycles || ''}
-            onChange={e => updBlock({ restBetweenCycles: e.target.value })} />
-        </label>
+        <Input className={cr.metaField} label="Repetições do ciclo" type="number" min={1}
+          inputMode="numeric" placeholder="1" value={block.stationRepeat || 1}
+          onChange={e => updBlock({ stationRepeat: parseInt(e.target.value) || 1 })} />
+        {/* Already stored as mm:ss and read that way by stationsCapStr — so unlike
+            block.duration this one is a straight swap to the masked field (#35). */}
+        <MaskedTimeInput className={cr.metaFieldWide} label="Descanso entre ciclos" placeholder="02:00"
+          value={block.restBetweenCycles || ''}
+          onChange={v => updBlock({ restBetweenCycles: v })} />
       </div>
 
       {/* Station list */}
@@ -72,10 +74,19 @@ export function StationEditor({ block, onUpdate }) {
               setDragIdx(null);
             }
           }}
-          style={{ outline: dragOverIdx === si ? '2px solid #c8a030' : 'none', outlineOffset: 2 }}
+          style={{ outline: dragOverIdx === si ? '2px solid var(--gold)' : 'none', outlineOffset: 2 }}
         >
           <div className="st-header">
-            <i className="ti ti-grip-vertical" style={{ color: '#2a2a2a', fontSize: 13, cursor: 'grab', flexShrink: 0 }}
+            <i className="ti ti-grip-vertical" style={{ color: 'var(--dim)', fontSize: 13, cursor: 'grab', flexShrink: 0 }}
+              role="button" tabIndex={0} aria-label={`Mover grupo ${si + 1} — setas ↑ ↓`}
+              title="Arrastar grupo (ou ↑ ↓ pelo teclado)"
+              onKeyDown={e => {
+                const to = e.key === 'ArrowUp' ? si - 1 : e.key === 'ArrowDown' ? si + 1 : null;
+                if (to === null || to < 0 || to >= stations.length) return;
+                e.preventDefault();
+                const ss = [...stations]; const [mv] = ss.splice(si, 1); ss.splice(to, 0, mv);
+                updBlock({ stations: ss });
+              }}
               draggable onDragStart={() => setDragIdx(si)} onDragEnd={() => { setDragIdx(null); setDragOverIdx(null); }} />
             {st.isRest
               ? <span className="st-rest-badge">Descanso</span>
@@ -83,6 +94,7 @@ export function StationEditor({ block, onUpdate }) {
             <input className="st-name-input" placeholder={st.isRest ? 'Descanso' : 'Nome do grupo'}
               value={st.name} onChange={e => updStation(si, { name: e.target.value })} />
             <input className="st-dur-input" placeholder="00:00" title="Duração (MM:SS)"
+              inputMode="numeric" aria-label={`Duração do ${st.name || 'grupo'} (MM:SS)`}
               value={st.duration} onChange={e => updStation(si, { duration: maskMMSS(e.target.value) })} />
             <button type="button" className={`ex-mode-btn${st.isRest ? ' on' : ''}`}
               style={{ padding: '3px 8px', fontSize: 11 }}
@@ -91,10 +103,10 @@ export function StationEditor({ block, onUpdate }) {
               Descanso
             </button>
             {stations.length > 1 && (
-              <button type="button" className="b bd bsm" style={{ padding: '3px 7px', minHeight: 26 }}
-                onClick={() => delStation(si)}>
+              <Button size="xs" iconOnly variant="destructive"
+                aria-label={`Remover ${st.name || 'grupo'}`} onClick={() => delStation(si)}>
                 <i className="ti ti-x" />
-              </button>
+              </Button>
             )}
           </div>
 
@@ -114,9 +126,9 @@ export function StationEditor({ block, onUpdate }) {
                 />
               ))}
               <div className="blk-ex-actions" style={{ paddingTop: 4 }}>
-                <button type="button" className="b bsm" style={{ flex: 1 }} onClick={() => addStationEx(si)}>
+                <Button size="sm" className={cr.grow} onClick={() => addStationEx(si)}>
                   <i className="ti ti-plus" /> Exercício
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -125,12 +137,12 @@ export function StationEditor({ block, onUpdate }) {
 
       {/* Add station buttons */}
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-        <button type="button" className="b bsm" style={{ flex: 1 }} onClick={() => addStation(false)}>
+        <Button size="sm" className={cr.grow} onClick={() => addStation(false)}>
           <i className="ti ti-plus" /> Grupo
-        </button>
-        <button type="button" className="b bsm" style={{ flex: 1 }} onClick={() => addStation(true)}>
+        </Button>
+        <Button size="sm" className={cr.grow} onClick={() => addStation(true)}>
           <i className="ti ti-clock-pause" /> Descanso
-        </button>
+        </Button>
       </div>
     </div>
   );

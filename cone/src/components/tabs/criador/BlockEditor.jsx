@@ -5,15 +5,21 @@ import { StationEditor } from './StationEditor';
 import { ExerciseRow } from './ExerciseRow';
 import { CriadorTypePicker } from './TypePicker';
 import { BlockTextEditor } from './BlockTextEditor';
+import { GoalInput } from './GoalInput';
 import { isTextEditable } from './textFormat.js';
 import { emptyEx, getTypeCfg, blockSummary, stationsCapStr, loadBadgeStr } from './blockModel.js';
+import Button from '../../ui/Button.jsx';
+import Input from '../../ui/Input.jsx';
+import ConfirmReview, { ReadRow } from '../../../public/shared/ConfirmReview.jsx';
 import tm from './textMode.module.css';
+import cr from './criador.module.css';
 
 // ── BlockEditor ───────────────────────────────────────────────────────────────
 export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete, onCopy, collapsed, onToggleCollapse, dragBlkIdx, dragOverBlkIdx, setDragOverBlkIdx, reorderBlocks, blockIdx, changedFields, registry }) {
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [bmSaveFlash, setBmSaveFlash] = useState(false);
   const [textMode, setTextMode] = useState(false);
+  const [pendingDelEx, setPendingDelEx] = useState(null);
   const dragExIdx = useRef(null);
   const [dragOverExIdx, setDragOverExIdx] = useState(null);
 
@@ -21,6 +27,16 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
   const summary = blockSummary(block);
   const capStr = stationsCapStr(block);
   const customName = block.label && block.label !== block.type ? block.label : '';
+
+  // Keyboard equivalent of the drag handle (#14) — dragging is mouse-only, and a
+  // block list you can't reorder without a pointer is a list half the coaches can't
+  // reorder at all on a tablet.
+  const moveByKey = e => {
+    const to = e.key === 'ArrowUp' ? blockIdx - 1 : e.key === 'ArrowDown' ? blockIdx + 1 : null;
+    if (to === null || to < 0 || to >= total) return;
+    e.preventDefault();
+    reorderBlocks?.(blockIdx, to);
+  };
 
   const addEx = () => onUpdate({ ...block, exercises: [...block.exercises, emptyEx()] });
   const copyLastEx = () => {
@@ -40,9 +56,12 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
     }
   };
 
-  const delEx = id => {
-    if (!window.confirm('Remover este exercício?')) return;
-    onUpdate({ ...block, exercises: block.exercises.filter(x => x.id !== id) });
+  // The 4th confirm fork (#54/C0) — this one was a raw window.confirm, the only
+  // dialog in the app that couldn't be themed, translated or keyboard-trapped.
+  const delEx = id => setPendingDelEx(block.exercises.find(x => x.id === id) || null);
+  const confirmDelEx = () => {
+    onUpdate({ ...block, exercises: block.exercises.filter(x => x.id !== pendingDelEx.id) });
+    setPendingDelEx(null);
   };
 
   const changeType = newTypeOrBlock => {
@@ -76,7 +95,7 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
   return (
     <div
       className={`blk-wrap ${BTC[block.type] || 'bt-st'}`}
-      style={{ outline: dragOverBlkIdx === blockIdx ? '2px solid var(--theme-accent)' : 'none', outlineOffset: 2, borderRadius: 8, transition: 'outline .1s, border-color .15s', borderColor: (collapsed && changedFields?.size) ? 'rgba(74,200,192,0.65)' : undefined }}
+      style={{ outline: dragOverBlkIdx === blockIdx ? '2px solid var(--theme-accent)' : 'none', outlineOffset: 2, borderRadius: 'var(--radius-md)', transition: 'outline .1s, border-color .15s', borderColor: (collapsed && changedFields?.size) ? 'color-mix(in srgb, var(--accent) 65%, transparent)' : undefined }}
       onDragOver={e => { e.preventDefault(); if (dragBlkIdx?.current !== null && dragBlkIdx?.current !== blockIdx) setDragOverBlkIdx?.(blockIdx); }}
       onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOverBlkIdx?.(null); }}
       onDrop={e => {
@@ -91,7 +110,10 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
       <div className="blk-bar">
         <span
           className="drag-handle"
-          title="Arrastar bloco"
+          title="Arrastar bloco (ou ↑ ↓ pelo teclado)"
+          role="button" tabIndex={0}
+          aria-label={`Mover bloco ${idx + 1} de ${total} — setas ↑ ↓`}
+          onKeyDown={moveByKey}
           draggable
           onDragStart={e => { if (dragBlkIdx) dragBlkIdx.current = blockIdx; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(blockIdx)); }}
           onDragEnd={() => { if (dragBlkIdx) dragBlkIdx.current = null; setDragOverBlkIdx?.(null); }}
@@ -140,13 +162,13 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
           </span>
         )}
 
-        <button type="button" className="b bsm" style={{ padding: '3px 8px', minHeight: 26, fontSize: 11 }} onClick={onCopy} title="Duplicar bloco">
+        <Button size="xs" iconOnly aria-label="Duplicar bloco" title="Duplicar bloco" onClick={onCopy}>
           <i className="ti ti-copy" />
-        </button>
+        </Button>
         {total > 1 && (
-          <button type="button" className="b bd bsm" style={{ padding: '3px 8px', minHeight: 26, fontSize: 11 }} onClick={onDelete}>
+          <Button size="xs" iconOnly variant="destructive" aria-label="Remover bloco" title="Remover bloco" onClick={onDelete}>
             <i className="ti ti-trash" />
-          </button>
+          </Button>
         )}
       </div>
 
@@ -180,32 +202,32 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
                       );
                     })}
                   </div>
-                  <div className="fg" style={{ marginTop:4 }}>
-                    <span className="lbl">Nota do coach</span>
-                    <textarea
-                      className="blk-notes-quick"
-                      placeholder="Escala, adaptações, contexto para hoje..."
-                      value={block.coachNote||''}
-                      onChange={e => onUpdate({...block, coachNote:e.target.value})}
-                    />
-                  </div>
+                  <Input as="textarea" label="Nota do coach" className={cr.mt2}
+                    placeholder="Escala, adaptações, contexto para hoje..."
+                    value={block.coachNote||''}
+                    onChange={e => onUpdate({...block, coachNote:e.target.value})}
+                  />
                   <div className="blk-meta-row" style={{ marginTop:6 }}>
-                    <label className="blk-meta-field">
-                      <span>Zona</span>
-                      <select value={block.zone||'Zona 01'} onChange={e => onUpdate({...block, zone:e.target.value})}
-                        style={{background:'#111',border:'1px solid #2e2e2e',borderRadius:5,color:'#ccc',padding:'8px 10px',fontFamily:'inherit',fontSize:13,outline:'none'}}>
-                        {ZONES.map(z=><option key={z}>{z}</option>)}
-                      </select>
-                    </label>
+                    <Input className={cr.metaFieldWide} label="Zona" as="select"
+                      value={block.zone||'Zona 01'} onChange={e => onUpdate({...block, zone:e.target.value})}>
+                      {ZONES.map(z=><option key={z}>{z}</option>)}
+                    </Input>
+                    {/* A benchmark's movements are locked, but the target for today is
+                        the coach's — so the Meta field is live here too. */}
+                    <GoalInput block={block} onUpdate={onUpdate} />
                   </div>
                 </>
               );
             }
 
-            const fch = (...fields) => fields.some(f => changedFields?.has(f)) ? { borderColor: 'rgba(74,200,192,0.65)' } : {};
+            const fch = (...fields) => fields.some(f => changedFields?.has(f)) ? { borderColor: 'color-mix(in srgb, var(--accent) 65%, transparent)' } : {};
             return (<>
           {/* Drag strip — second grab point when block is expanded */}
           <div className="blk-body-drag"
+            role="button" tabIndex={0}
+            aria-label={`Mover bloco ${idx + 1} de ${total} — setas ↑ ↓`}
+            title="Arrastar bloco (ou ↑ ↓ pelo teclado)"
+            onKeyDown={moveByKey}
             draggable
             onDragStart={e => { if (dragBlkIdx) dragBlkIdx.current = blockIdx; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(blockIdx)); }}
             onDragEnd={() => { if (dragBlkIdx) dragBlkIdx.current = null; setDragOverBlkIdx?.(null); }}
@@ -229,27 +251,29 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
             />
           </div>
 
-          {/* Adaptive meta fields */}
-          {(cfg.showDuration || cfg.showRounds) && (
-            <div className="blk-meta-row">
-              {cfg.showDuration && (
-                <label className="blk-meta-field">
-                  <span>{cfg.durationLabel || 'Duração (min)'}</span>
-                  <input type="number" min={1} placeholder="—" value={block.duration}
-                    onChange={e => onUpdate({ ...block, duration: e.target.value })}
-                    style={fch('duration')} />
-                </label>
-              )}
-              {cfg.showRounds && (
-                <label className="blk-meta-field">
-                  <span>Rounds</span>
-                  <input type="number" min={1} placeholder="—" value={block.rounds}
-                    onChange={e => onUpdate({ ...block, rounds: e.target.value })}
-                    style={fch('rounds')} />
-                </label>
-              )}
-            </div>
-          )}
+          {/* Adaptive meta fields. The Meta (#10) sits here beside Duração/Rounds and
+              renders for EVERY type — a block with no time cap can still have a target. */}
+          <div className="blk-meta-row">
+            {cfg.showDuration && (
+              /* Stays a minutes NUMBER field on purpose: `duration` is stored as bare
+                 minutes everywhere (TV, timer, blkMeta, Schedule, Publicador) and
+                 toSecs('14') reads 14 as seconds — the mm:ss conversion is a data
+                 migration with its own backlog row, not an input swap. */
+              <Input className={cr.metaField} label={cfg.durationLabel || 'Duração (min)'}
+                type="number" min={1} inputMode="numeric" placeholder="—"
+                value={block.duration}
+                onChange={e => onUpdate({ ...block, duration: e.target.value })}
+                style={fch('duration')} />
+            )}
+            {cfg.showRounds && (
+              <Input className={cr.metaField} label="Rounds"
+                type="number" min={1} inputMode="numeric" placeholder="—"
+                value={block.rounds}
+                onChange={e => onUpdate({ ...block, rounds: e.target.value })}
+                style={fch('rounds')} />
+            )}
+            <GoalInput block={block} onUpdate={onUpdate} />
+          </div>
 
           {/* Exercise list or StationEditor */}
           {cfg.isStations ? (
@@ -258,7 +282,7 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
             <>
               <div className="blk-ex-list">
                 {(block.exercises || []).map((ex, ei) => (
-                  <div key={ex.id} style={changedFields?.has(`ex:${ex.id}`) ? { borderRadius: 6, outline: '1.5px solid rgba(74,200,192,0.5)', outlineOffset: 2, marginBottom: 4 } : undefined}>
+                  <div key={ex.id} style={changedFields?.has(`ex:${ex.id}`) ? { borderRadius: 'var(--radius-md)', outline: '1.5px solid color-mix(in srgb, var(--accent) 50%, transparent)', outlineOffset: 2, marginBottom: 4 } : undefined}>
                   <ExerciseRow
                     ex={ex}
                     myIdx={ei}
@@ -278,45 +302,38 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
                 ))}
               </div>
               <div className="blk-ex-actions">
-                <button type="button" className="b bsm" style={{ flex: 1 }} onClick={addEx}>
+                <Button size="sm" className={cr.grow} onClick={addEx}>
                   <i className="ti ti-plus" /> Exercício
-                </button>
+                </Button>
                 {block.exercises.length > 0 && (
-                  <button type="button" className="b bsm" style={{ flex: 1 }} onClick={copyLastEx}>
+                  <Button size="sm" className={cr.grow} onClick={copyLastEx}>
                     <i className="ti ti-copy" /> Copiar último
-                  </button>
+                  </Button>
                 )}
               </div>
             </>
           )}
 
           {/* Notes — always visible */}
-          <div className="fg" style={{ marginTop: 8 }}>
-            <textarea
-              className="blk-notes-quick"
-              placeholder="Notas do bloco — descrição, time cap, regras, buy-in..."
-              value={block.notes}
-              onChange={e => onUpdate({ ...block, notes: e.target.value })}
-              style={fch('notes')}
-            />
-          </div>
+          <Input as="textarea" label="Notas do bloco" className={cr.mt2} style={fch('notes')}
+            placeholder="Descrição, regras, buy-in..."
+            value={block.notes}
+            onChange={e => onUpdate({ ...block, notes: e.target.value })}
+          />
 
           <div className="blk-meta-row" style={{ marginTop: 6 }}>
-            <label className="blk-meta-field">
-              <span>Zona</span>
-              <select value={block.zone || 'Zona 01'} onChange={e => onUpdate({ ...block, zone: e.target.value })}
-                style={{ background: '#111', border: '1px solid #2e2e2e', borderRadius: 5, color: '#ccc', padding: '8px 10px', fontFamily: 'inherit', fontSize: 13, outline: 'none', ...fch('zone') }}>
-                {ZONES.map(z => <option key={z}>{z}</option>)}
-              </select>
-            </label>
+            <Input className={cr.metaFieldWide} label="Zona" as="select"
+              value={block.zone || 'Zona 01'} onChange={e => onUpdate({ ...block, zone: e.target.value })}
+              style={fch('zone')}>
+              {ZONES.map(z => <option key={z}>{z}</option>)}
+            </Input>
           </div>
 
           {block.type !== 'Estações' && (block.exercises||[]).some(e => e.name?.trim()) && (
-            <button type="button" className={`b bsm bm-save-btn${bmSaveFlash?' bm-save-flash':''}`}
-              onClick={saveCustomBenchmark}>
+            <Button variant="ghost" size="sm" full className={cr.mt2} onClick={saveCustomBenchmark}>
               <i className={`ti ${bmSaveFlash?'ti-check':'ti-bookmark-plus'}`} />
               {bmSaveFlash ? 'Salvo!' : 'Salvar como Benchmark'}
-            </button>
+            </Button>
           )}
             </>);
           })()}
@@ -326,6 +343,18 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
       {showTypePicker && (
         <CriadorTypePicker blockNames={blockNames} onSelect={changeType} onClose={() => setShowTypePicker(false)} />
       )}
+
+      <ConfirmReview
+        open={!!pendingDelEx}
+        title="Remover exercício"
+        editLabel="Cancelar" confirmLabel="Remover"
+        onEdit={() => setPendingDelEx(null)}
+        onClose={() => setPendingDelEx(null)}
+        onConfirm={confirmDelEx}
+      >
+        <ReadRow label="Exercício" value={pendingDelEx?.name?.trim() || 'sem nome'} />
+        <ReadRow label="Bloco" value={customName || block.type || 'sem tipo'} />
+      </ConfirmReview>
     </div>
   );
 }

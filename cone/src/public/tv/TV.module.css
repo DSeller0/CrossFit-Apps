@@ -70,6 +70,10 @@
 .blockCardBig .blockBadge { font-size: 28px; padding: 6px 22px; }
 .blockMeta { font-size: 17px; color: var(--muted); font-weight: 600; letter-spacing: .06em; }
 .blockCardBig .blockMeta { font-size: 25px; }
+/* The coach's Meta (#10) — teal against the muted meta so a target reads as a
+   target from across the room, not as another fact about the block. */
+.blockGoal { font-size: 17px; color: var(--teal); font-weight: 700; letter-spacing: .06em; }
+.blockCardBig .blockGoal { font-size: 25px; }
 .exList { display: flex; flex-direction: column; gap: 9px; }
 .exRow  { display: flex; align-items: center; gap: 12px; }
 .exDot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }

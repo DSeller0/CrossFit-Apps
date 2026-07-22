@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { blkLabel, exVolStr, toSecs, fmtSecs, maskMMSS, rankResults, perfStr, groupProgressionSteps } from './wod.js'
+import { blkLabel, exVolStr, toSecs, fmtSecs, maskMMSS, rankResults, perfStr, groupProgressionSteps, goalStr } from './wod.js'
 
 describe('blkLabel', () => {
   test('label and type differ → label · type', () => {
@@ -200,5 +200,39 @@ describe('perfStr', () => {
   })
   test('AMRAP empty → —', () => {
     expect(perfStr({}, 'AMRAP')).toBe('—')
+  })
+})
+
+describe('goalStr', () => {
+  test('no goal → empty string', () => {
+    expect(goalStr({ type: 'For Time' })).toBe('')
+    expect(goalStr(null)).toBe('')
+  })
+  test('time range of whole minutes collapses to one apostrophe', () => {
+    expect(goalStr({ goal: { kind: 'time', min: '11:00', max: '12:00' } })).toBe("11–12'")
+  })
+  test('time range with seconds keeps both mm:ss', () => {
+    expect(goalStr({ goal: { kind: 'time', min: '11:30', max: '12:15' } })).toBe('11:30–12:15')
+  })
+  test('max only → sub', () => {
+    expect(goalStr({ goal: { kind: 'time', max: '09:00' } })).toBe("sub 09'")
+    expect(goalStr({ goal: { kind: 'time', max: '08:45' } })).toBe('sub 08:45')
+  })
+  test('min only → the bare time', () => {
+    expect(goalStr({ goal: { kind: 'time', min: '11:00' } })).toBe("11'")
+  })
+  test('rounds', () => {
+    expect(goalStr({ goal: { kind: 'rounds', min: 5 } })).toBe('5 rounds')
+    expect(goalStr({ goal: { kind: 'rounds', min: 1 } })).toBe('1 round')
+    expect(goalStr({ goal: { kind: 'rounds', min: 5, reps: 12 } })).toBe('5 rounds + 12 reps')
+    expect(goalStr({ goal: { kind: 'rounds', reps: 12 } })).toBe('12 reps')
+  })
+  test('free text passes through trimmed', () => {
+    expect(goalStr({ goal: { kind: 'text', text: '  sem quebrar  ' } })).toBe('sem quebrar')
+  })
+  test('an empty goal object renders nothing rather than a stray dash', () => {
+    expect(goalStr({ goal: { kind: 'time' } })).toBe('')
+    expect(goalStr({ goal: { kind: 'rounds' } })).toBe('')
+    expect(goalStr({ goal: { kind: 'text', text: '' } })).toBe('')
   })
 })

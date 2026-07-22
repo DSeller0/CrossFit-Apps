@@ -1,5 +1,5 @@
 import styles from './Schedule.module.css'
-import { blkLabel, blkColor, isWodBlock, blkMeta } from '../lib/wod.js'
+import { blkLabel, blkColor, isWodBlock, blkMeta, goalStr } from '../lib/wod.js'
 import { isRoundBlock, progGroups, stationsCapMins, fmtDeskPerf } from './scheduleHelpers.js'
 import ExRow from './ExRow.jsx'
 
@@ -44,6 +44,7 @@ export default function BlockDetail({bl,sess,dateKey,checked,roundState,rmValues
           <div style={{display:'flex',alignItems:'center',gap:6}}>
             <button className={styles.timerBtn} onClick={e=>{e.stopPropagation();onTimer(bl)}}><i className="ti ti-player-play"/> Timer</button>
             {(repeat||capMins>0)&&<span className={styles.detailBlockMeta}>{[repeat,capMins>0?`Cap ${capMins}'`:''].filter(Boolean).join(' · ')}</span>}
+            {goalStr(bl)&&<span className={styles.detailBlockGoal}>Meta {goalStr(bl)}</span>}
             {wodDone&&<span className={styles.detailBlockDone}>✓ Completo</span>}
           </div>
         </div>
@@ -67,6 +68,7 @@ export default function BlockDetail({bl,sess,dateKey,checked,roundState,rmValues
 
   const exs=(bl.exercises||[]).filter(e=>e.name||e.isComplex)
   const meta=blkMeta(bl)
+  const goal=goalStr(bl)
 
   let rdBadgeEl=null
   if(isRd){
@@ -91,6 +93,7 @@ export default function BlockDetail({bl,sess,dateKey,checked,roundState,rmValues
         <span className={styles.detailBlockTitle} style={{color:col}}>{label}</span>
         <div style={{display:'flex',alignItems:'center',gap:6}}>
           {isRd?rdBadgeEl:(meta?<span className={styles.detailBlockMeta}>{meta}</span>:null)}
+          {goal&&<span className={styles.detailBlockGoal}>Meta {goal}</span>}
           {!isRd&&wodDone&&<span className={styles.detailBlockDone}>✓ Completo</span>}
         </div>
       </div>

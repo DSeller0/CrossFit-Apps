@@ -1,5 +1,5 @@
 import { ExerciseList } from './ExerciseList.jsx'
-import { blkColor, blkLabel, blkMetaParts } from '../lib/wod.js'
+import { blkColor, blkLabel, blkMetaParts, goalStr } from '../lib/wod.js'
 import s from './WodBlockCard.module.css'
 
 // The WOD itself, above a ranking — same shape as TV's BlockCard (slides.jsx:121):
@@ -20,6 +20,7 @@ export default function WodBlockCard({ bl, dt, sessName, scaleFilter = 'Todos', 
     : (bl.exercises || [])
 
   const chips = blkMetaParts(bl)
+  const goal = goalStr(bl)
 
   const foot = [dt, sessName, scaleFilter !== 'Todos' ? scaleFilter : null].filter(Boolean).join(' · ')
 
@@ -28,6 +29,7 @@ export default function WodBlockCard({ bl, dt, sessName, scaleFilter = 'Todos', 
       <header className={s.hdr}>
         <h2 className={s.badge} style={{ background: `color-mix(in srgb, ${color} 14%, transparent)`, color }}>{label}</h2>
         {chips.map(c => <span key={c} className={s.chip}>{c}</span>)}
+        {goal && <span className={s.goal}>Meta {goal}</span>}
       </header>
 
       {/* Always `tiny`: ExerciseList's `compact` is TV-wall scale (26px names) and

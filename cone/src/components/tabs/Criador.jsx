@@ -10,8 +10,9 @@ import {
   getTargets,
 } from '../../utils/storage';
 import { APP_CONFIG } from '../../utils/config';
+import { DAY_PT } from '../../public/lib/week.js';
 import { sessionBoxIds } from '../../public/lib/boxScope.js';
-import { emptyS, emptyBlock, normalizeLegacyCardio, materializeBlocks, cloneBlocks } from './criador/blockModel.js';
+import { emptyS, normalizeLegacyCardio, materializeBlocks, cloneBlocks, emptyBlock } from './criador/blockModel.js';
 import { BlockEditor } from './criador/BlockEditor';
 import { CriadorTypePicker } from './criador/TypePicker';
 import { WeekGrid } from './criador/WeekGrid';
@@ -19,14 +20,27 @@ import { TemplatesModal } from './criador/TemplatesModal';
 import { RecurringModal } from './criador/RecurringModal';
 import { SessionTextPane } from './criador/SessionTextPane';
 import { WeekImportModal } from './criador/WeekImportModal';
+import { SessionMetaModal } from './criador/SessionMetaModal';
+import Button from '../ui/Button.jsx';
+import Card from '../ui/Card.jsx';
+import ConfirmReview, { ReadRow } from '../../public/shared/ConfirmReview.jsx';
 import tm from './criador/textMode.module.css';
+import cr from './criador/criador.module.css';
 
 // ── TrainingCreator ───────────────────────────────────────────────────────────
+// The page opens on THE WEEK (#58). It used to open on an empty session form with
+// the week below it — but the coach thinks in weeks, and creating a session is a
+// deliberate act, not the default state of the screen. So: the grid is the landing
+// surface and renders even when empty, `+ sessão` / `+ Nova sessão` open the
+// session-meta dialog, and confirming it opens the block editor.
 function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreloadConsumed, onGoToPublish }) {
   const [form, setForm]                     = useState(emptyS());
   const [blocks, setBlocks]                 = useState([]);
   const [editing, setEditing]               = useState(null);
-  const [showAlvoModal, setShowAlvoModal]   = useState(false);
+  // The editor exists only while a session is open. `editing` alone can't carry this:
+  // a NEW session is being edited but has no id/dateKey yet.
+  const [editorOpen, setEditorOpen]         = useState(false);
+  const [metaModal, setMetaModal]           = useState(null);  // { isEdit, draft }
   const [pendingDate, setPendingDate]       = useState(null);
   const [collapsedBlocks, setCollapsedBlocks] = useState({});
   const [showBlockPicker, setShowBlockPicker] = useState(false);
@@ -54,13 +68,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   // active in-scope ones. #53.
   const [boxWarnings, setBoxWarnings]       = useState(() => { const w = loadSettings().boxWarnings; return Array.isArray(w) ? w : []; });
   const [isDirty, setIsDirty]               = useState(false);
-  const [showSessNotes, setShowSessNotes]   = useState(false);
   const [undoToast, setUndoToast]           = useState(null);
   const undoTimerRef = useRef(null);
-  const formRef = useRef();
+  const editorRef = useRef();
   const weekGridRef = useRef();
   const [changedBlockFields, setChangedBlockFields] = useState({});
-  const [changedSessionFields, setChangedSessionFields] = useState(() => new Set());
   const [activeTemplateId, setActiveTemplateId]     = useState(null);
   const [showUpdateTemplateModal, setShowUpdateTemplateModal] = useState(false);
   const [highlightedSessionId, setHighlightedSessionId] = useState(null);
@@ -80,9 +92,6 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     return () => obs.disconnect();
   }, [tvPreviewOpen]);
 
-  const trackSessionField = field =>
-    setChangedSessionFields(prev => { const n = new Set(prev); n.add(field); return n; });
-
   const fireUndo = (msg, undoFn) => {
     clearTimeout(undoTimerRef.current);
     setUndoToast({ msg, undoFn });
@@ -95,41 +104,79 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const patchWarning  = (id, patch) => persistWarnings(boxWarnings.map(w => w.id === id ? { ...w, ...patch } : w));
   const removeWarning = id => persistWarnings(boxWarnings.filter(w => w.id !== id));
 
-  // Preload
-  useEffect(() => {
-    if (!preload) return;
-    if (preload._newForDate) {
-      setForm({ ...emptyS(), date: preload._newForDate });
-      setBlocks([]);
-      setEditing(null);
-    } else {
-      startEdit(preload, preload.date || preload._dateKey || '');
-    }
-    onPreloadConsumed?.();
-  }, [preload]);
-
-  // A NEW session inherits the selected box context; editing an existing one never
-  // gets its box clobbered by switching the grid filter.
-  useEffect(() => {
-    if (!editing) setForm(f => ({ ...f, locationIds: (selBox === 'all' || selBox === 'none') ? [] : [selBox] }));
-  }, [selBox, editing]);
-
+  // ── Opening / closing the editor ───────────────────────────────────────────
   const startEdit = (s, dateKey) => {
     const targets = getTargets(s);
     const sName = typeof s.mainTraining === 'string' ? s.mainTraining : (s.sessionName || '');
     setForm({ ...s, date: dateKey, mainTraining: targets, sessionName: sName, locationIds: sessionBoxIds(s) });
     setBlocks(s.blocks?.length ? normalizeLegacyCardio(s.blocks) : []);
     setEditing({ dateKey, id: s.id });
-    setIsDirty(false); setChangedBlockFields({}); setChangedSessionFields(new Set()); setActiveTemplateId(null);
-    setShowSessNotes(!!(s.notes));
-    setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    setEditorOpen(true);
+    setWeekGridCollapsed(true);
+    setIsDirty(false); setChangedBlockFields({}); setActiveTemplateId(null);
+    setTimeout(() => editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   };
 
-  const cancel = () => {
-    setForm(emptyS()); setBlocks([]); setEditing(null); setShowAlvoModal(false);
-    setIsDirty(false); setShowSessNotes(false);
-    setChangedBlockFields({}); setChangedSessionFields(new Set()); setActiveTemplateId(null);
+  // A new session inherits the browsing filter's box — the coach is almost always
+  // building for the box he is looking at.
+  const openNewSession = dateKey => setMetaModal({
+    isEdit: false,
+    draft: {
+      ...emptyS(),
+      date: dateKey || todayISO(),
+      locationIds: (selBox === 'all' || selBox === 'none') ? [] : [selBox],
+    },
+  });
+
+  // Clicking a day: open that day's session if there is one, otherwise start a new
+  // one there. Same gesture on the full grid and on the collapsed strip.
+  const pickDay = dateKey => {
+    const first = (sessions[dateKey] || []).filter(boxFilter)[0];
+    if (first) startEdit(first, dateKey);
+    else openNewSession(dateKey);
   };
+
+  const closeEditor = () => {
+    setForm(emptyS()); setBlocks([]); setEditing(null); setEditorOpen(false);
+    setWeekGridCollapsed(false); setSessionMode('detalhado');
+    setIsDirty(false);
+    setChangedBlockFields({}); setActiveTemplateId(null);
+  };
+
+  // ── Session meta (date/name/audience/visibility/box/briefing) ──────────────
+  const commitMeta = draft => {
+    const wasDate = form.date || todayISO();
+    setMetaModal(null);
+
+    if (metaModal?.isEdit) {
+      // Moving an already-saved session to another day is the one meta change that
+      // needs confirming — it rewrites which day the athletes see it on.
+      if (editing && draft.date !== wasDate) {
+        setPendingDate({ draft, oldDate: wasDate, newDate: draft.date });
+        return;
+      }
+      setForm(f => ({ ...f, ...draft }));
+      setIsDirty(true);
+      return;
+    }
+
+    // New session — the meta dialog IS the create step.
+    setForm(draft);
+    setBlocks([]);
+    setEditing(null);
+    setEditorOpen(true);
+    setWeekGridCollapsed(true);
+    setIsDirty(true); setChangedBlockFields({}); setActiveTemplateId(null);
+    setTimeout(() => editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  };
+
+  // Preload from another tab
+  useEffect(() => {
+    if (!preload) return;
+    if (preload._newForDate) openNewSession(preload._newForDate);
+    else startEdit(preload, preload.date || preload._dateKey || '');
+    onPreloadConsumed?.();
+  }, [preload]);
 
   // Templates
   const saveAsTemplate = () => {
@@ -145,7 +192,10 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setForm(f => ({ ...f, sessionName: f.sessionName || tpl.name }));
     setShowTemplateModal(false);
     setActiveTemplateId(tpl.id);
-    setChangedBlockFields({}); setChangedSessionFields(new Set());
+    setChangedBlockFields({});
+    // A template applied from the week view has to land somewhere — open the editor.
+    if (!editorOpen) { setEditorOpen(true); setWeekGridCollapsed(true); }
+    setIsDirty(true);
   };
   const deleteTemplate = id => {
     const updated = templates.filter(t => t.id !== id);
@@ -221,11 +271,10 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     });
 
     setWeekOffset(targetWeekOffset);
-    setWeekGridCollapsed(false);
     setHighlightedSessionId(savedId);
     setTimeout(() => weekGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     setTimeout(() => setHighlightedSessionId(null), 2000);
-    cancel();
+    closeEditor();
   };
 
   const del = (dateKey, id) => {
@@ -239,6 +288,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     const snap = (sessions[dateKey] || []).find(s => s.id === id);
     setSessions(prev => { const n = { ...prev }; n[dateKey] = (n[dateKey] || []).filter(s => s.id !== id); return n; });
     setPendingDelete(null);
+    if (editing?.id === id) closeEditor();
     if (snap) {
       fireUndo(`Sessão "${sessionName}" removida`, () => {
         setSessions(prev => { const n = { ...prev }; n[dateKey] = [...(n[dateKey] || []), snap]; return n; });
@@ -287,8 +337,8 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setIsDirty(true);
     if (!old) return;
     const newFields = new Set();
-    ['label', 'type', 'duration', 'rounds', 'notes', 'zone', 'ladderMode'].forEach(f => {
-      if (upd[f] !== old[f]) newFields.add(f);
+    ['label', 'type', 'duration', 'rounds', 'notes', 'zone', 'ladderMode', 'goal'].forEach(f => {
+      if (JSON.stringify(upd[f]) !== JSON.stringify(old[f])) newFields.add(f);
     });
     const oldExs = old.exercises || [];
     (upd.exercises || []).forEach(ex => {
@@ -323,6 +373,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
       arr.splice(toIdx, 0, mv);
       return arr;
     });
+    setIsDirty(true);
   };
 
   // Week grid
@@ -333,70 +384,82 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     return Array.from({ length: 7 }, (_, i) => { const w = new Date(d); w.setDate(d.getDate() + i); return w; });
   };
   const weekDates = getSundayWeek(weekOffset);
-  const totalSessions = Object.values(sessions).flat().length;
   // Box grid filter: 'all' shows everything, 'none' shows only box-less sessions, an id shows that box.
   const boxFilter = s => selBox === 'all' ? true : selBox === 'none' ? sessionBoxIds(s).length === 0 : sessionBoxIds(s).includes(selBox);
   const weekLabel = `${weekDates[0].getDate()}/${weekDates[0].getMonth()+1} – ${weekDates[6].getDate()}/${weekDates[6].getMonth()+1}/${weekDates[6].getFullYear()}`;
 
   const athletes = loadAthletes();
-  const targets = Array.isArray(form.mainTraining) ? form.mainTraining : [];
+  const editorDate = new Date((form.date || todayISO()) + 'T12:00:00');
+  const editorDateStr = `${DAY_PT[editorDate.getDay()]} ${String(editorDate.getDate()).padStart(2, '0')}/${String(editorDate.getMonth() + 1).padStart(2, '0')}`;
+  const editorBoxes = (form.locationIds || []).map(id => boxLocs.find(b => b.id === id)).filter(Boolean);
 
   return (
     <div>
-      {/* ── Pending date confirm ── */}
-      {pendingDate && (
-        <div className="confirm-overlay">
-          <div className="confirm-box">
-            <div className="confirm-msg">
-              Mover sessão de {new Date(pendingDate.oldDate + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' })} para {new Date(pendingDate.newDate + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' })}?
-            </div>
-            <div className="confirm-btns">
-              <button type="button" className="b bsm" onClick={() => setPendingDate(null)}>Cancelar</button>
-              <button type="button" className="b bp bsm" onClick={() => { setForm(f => ({ ...f, date: pendingDate.newDate })); setPendingDate(null); }}>Confirmar</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── Move-session-to-another-date confirm ── */}
+      <ConfirmReview
+        open={!!pendingDate}
+        title="Mover sessão de dia"
+        editLabel="Manter o dia" confirmLabel="Mover"
+        onEdit={() => {
+          // Keep every other meta edit; only the date reverts.
+          if (pendingDate) setForm(f => ({ ...f, ...pendingDate.draft, date: pendingDate.oldDate }));
+          setPendingDate(null);
+        }}
+        onConfirm={() => {
+          if (pendingDate) { setForm(f => ({ ...f, ...pendingDate.draft })); setIsDirty(true); }
+          setPendingDate(null);
+        }}
+      >
+        <ReadRow label="De" value={pendingDate ? new Date(pendingDate.oldDate + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' }) : ''} />
+        <ReadRow label="Para" value={pendingDate ? new Date(pendingDate.newDate + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' }) : ''} />
+      </ConfirmReview>
 
       {/* ── Delete confirm ── */}
-      {pendingDelete && (
-        <div className="confirm-overlay">
-          <div className="confirm-box">
-            <div className="confirm-msg">
-              Remover sessão <strong>{pendingDelete.sessionName}</strong>?
-            </div>
-            <div className="confirm-btns">
-              <button type="button" className="b bsm" onClick={() => setPendingDelete(null)}>Cancelar</button>
-              <button type="button" className="b bd bsm" onClick={confirmDelete}>Remover</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmReview
+        open={!!pendingDelete}
+        title="Remover sessão"
+        editLabel="Cancelar" confirmLabel="Remover"
+        onEdit={() => setPendingDelete(null)}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+      >
+        <ReadRow label="Sessão" value={pendingDelete?.sessionName || '—'} />
+        <ReadRow label="Dia" value={pendingDelete ? new Date(pendingDelete.dateKey + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' }) : ''} />
+      </ConfirmReview>
 
       {/* ── Update template confirm ── */}
-      {showUpdateTemplateModal && (
-        <div className="confirm-overlay">
-          <div className="confirm-box">
-            <div className="confirm-msg">
-              Atualizar o template <strong>{templates.find(t => t.id === activeTemplateId)?.name || ''}</strong> com os blocos atuais?
-            </div>
-            <div className="confirm-btns">
-              <button type="button" className="b bsm" onClick={() => setShowUpdateTemplateModal(false)}>Cancelar</button>
-              <button type="button" className="b bp bsm" onClick={updateTemplate}>Atualizar</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmReview
+        open={showUpdateTemplateModal}
+        title="Atualizar template"
+        editLabel="Cancelar" confirmLabel="Atualizar"
+        onEdit={() => setShowUpdateTemplateModal(false)}
+        onClose={() => setShowUpdateTemplateModal(false)}
+        onConfirm={updateTemplate}
+      >
+        <ReadRow label="Template" value={templates.find(t => t.id === activeTemplateId)?.name || ''} />
+        <ReadRow label="Blocos" value={`${blocks.length}`} />
+      </ConfirmReview>
 
       {/* ── Undo toast ── */}
       {undoToast && (
-        <div style={{ position: 'fixed', bottom: 84, left: '50%', transform: 'translateX(-50%)', background: '#1a1a1a', border: '1px solid #333', borderRadius: 8, padding: '10px 16px', display: 'flex', gap: 12, alignItems: 'center', zIndex: 3500, boxShadow: '0 4px 20px rgba(0,0,0,.7)', fontSize: 13, color: '#ccc', whiteSpace: 'nowrap' }}>
+        <div className={cr.toast} role="status">
           {undoToast.msg}
-          <button type="button" className="b bsm" style={{ padding: '4px 12px', color: '#4ac8c0', borderColor: '#4ac8c0' }}
-            onClick={() => { undoToast.undoFn(); setUndoToast(null); clearTimeout(undoTimerRef.current); }}>
+          <Button size="sm" onClick={() => { undoToast.undoFn(); setUndoToast(null); clearTimeout(undoTimerRef.current); }}>
             Desfazer
-          </button>
+          </Button>
         </div>
+      )}
+
+      {/* ── Session meta modal — create, and "Editar dados" from the editor header ── */}
+      {metaModal && (
+        <SessionMetaModal
+          initial={metaModal.draft}
+          isEdit={metaModal.isEdit}
+          athletes={athletes}
+          boxLocs={boxLocs}
+          onCancel={() => setMetaModal(null)}
+          onConfirm={commitMeta}
+        />
       )}
 
       {/* ── Template modal ── */}
@@ -422,37 +485,6 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           recurDone={recurDone}
           onApply={applyRecurring}
         />
-      )}
-
-      {/* ── Athlete picker modal ── */}
-      {showAlvoModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.75)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          onClick={() => setShowAlvoModal(false)}>
-          <div style={{ background: '#0d0d0d', border: '1px solid #2e2e2e', borderRadius: 10, padding: 18, width: 320, maxWidth: '90vw' }}
-            onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#ccc' }}>Para quem é essa sessão?</span>
-              <button type="button" className="b bsm" onClick={() => setShowAlvoModal(false)}><i className="ti ti-x" /></button>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 300, overflowY: 'auto', marginBottom: 14 }}>
-              {athletes.map(a => {
-                const checked = targets.includes(a.name);
-                return (
-                  <label key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 7, cursor: 'pointer', background: checked ? 'rgba(74,200,192,.06)' : 'transparent', border: '1px solid ' + (checked ? 'rgba(74,200,192,.25)' : '#1e1e1e') }}>
-                    <input type="checkbox" checked={checked}
-                      onChange={() => { setForm(f => ({ ...f, mainTraining: checked ? targets.filter(n => n !== a.name) : [...targets, a.name] })); setIsDirty(true); trackSessionField('mainTraining'); }}
-                      style={{ accentColor: a.color || 'var(--theme-accent)', width: 14, height: 14 }} />
-                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: a.color || '#555', flexShrink: 0 }} />
-                    <span style={{ fontSize: 13, color: '#ccc', flex: 1 }}>{a.name}</span>
-                    <span style={{ fontSize: 11, color: '#555' }}>{a.level || ''}</span>
-                  </label>
-                );
-              })}
-            </div>
-            <button type="button" style={{ width: '100%', background: 'var(--theme-accent)', color: 'var(--theme-accent-text)', border: 'none', padding: 9, borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 700 }}
-              onClick={() => setShowAlvoModal(false)}>Confirmar</button>
-          </div>
-        </div>
       )}
 
       {/* ── Block type picker ── */}
@@ -485,256 +517,36 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
       )}
 
       {/* ── Content area: flex when TV preview is open (desktop only) ── */}
-      <div style={tvPreviewOpen && !isMobile ? { display: 'flex', gap: 24, alignItems: 'flex-start' } : {}}>
-      <div style={tvPreviewOpen && !isMobile ? { flex: 1, minWidth: 0 } : {}}>
+      <div className={tvPreviewOpen && !isMobile ? cr.split : undefined}>
+      <div className={tvPreviewOpen && !isMobile ? cr.splitMain : undefined}>
 
-      {/* ── Session form ── */}
-      <div className="sc-card" ref={formRef}>
-        {/* Header */}
-        <div className="sc-hdr">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span className="sc-title">{editing ? 'Editar sessão' : 'Nova sessão'}</span>
-            {templateFlash && (
-              <span style={{ fontSize: 11, color: '#9070d8' }}>
-                <i className="ti ti-bookmark-filled" /> &ldquo;{templateFlash}&rdquo; salvo
-              </span>
-            )}
-          </div>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            {onGoToPublish && (
-              <button type="button" className="b bsm" style={{ borderColor: '#1a4a2a', color: '#40b878' }} onClick={onGoToPublish} title="Ir para Publicador">
-                <i className="ti ti-calendar-event" /> Publicar
-              </button>
-            )}
-            <button type="button" className="b bsm" style={{ borderColor: '#4a2880', color: '#9070d8' }} onClick={() => setShowTemplateModal(true)}>
-              <i className="ti ti-template" /> Templates
-            </button>
-            {editing && <button type="button" className="b bsm" onClick={cancel}>Cancelar</button>}
-            {!isMobile && (
-              <button type="button" className="b bsm"
-                title="Preview TV"
-                style={{ borderColor: tvPreviewOpen ? '#4ac8c0' : undefined, color: tvPreviewOpen ? '#4ac8c0' : undefined }}
-                onClick={() => setTvPreviewOpen(v => !v)}>
-                <i className="ti ti-device-tv" /> TV
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Date + Name */}
-        <div className="g2">
-          <div className="fg">
-            <span className="lbl">Data</span>
-            <input type="date" value={form.date || todayISO()}
-              style={changedSessionFields.has('date') ? { borderColor: 'rgba(74,200,192,0.65)' } : undefined}
-              onChange={e => {
-                const newDate = e.target.value;
-                const oldDate = form.date || todayISO();
-                if (editing && newDate !== oldDate) { setPendingDate({ newDate, oldDate }); e.target.value = oldDate; }
-                else { setForm(f => ({ ...f, date: newDate })); setIsDirty(true); trackSessionField('date'); }
-              }} />
-          </div>
-          <div className="fg">
-            <span className="lbl">Nome da sessão</span>
-            <input
-              placeholder="ex: Semana 3 · D1 · Força Lower"
-              value={form.sessionName || ''}
-              style={changedSessionFields.has('sessionName') ? { borderColor: 'rgba(74,200,192,0.65)' } : undefined}
-              onChange={e => { setForm(f => ({ ...f, sessionName: e.target.value })); setIsDirty(true); trackSessionField('sessionName'); }}
-            />
-          </div>
-        </div>
-
-        {/* Athletes */}
-        <div className="fg" style={{ marginTop: 4 }}>
-          <span className="lbl">Para quem</span>
-          <button type="button" className="cr-athletes-btn"
-            style={changedSessionFields.has('mainTraining') ? { borderColor: 'rgba(74,200,192,0.65)' } : undefined}
-            onClick={() => setShowAlvoModal(true)}>
-            <i className="ti ti-users" style={{ color: 'var(--theme-accent)', fontSize: 15 }} />
-            {targets.length === 0
-              ? <span style={{ color: '#444' }}>Nenhum atleta — clique para selecionar</span>
-              : <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                  {targets.map((name, i) => (
-                    <span key={i} style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--theme-accent)22', color: 'var(--theme-accent)', border: '1px solid var(--theme-accent)44' }}>{name}</span>
-                  ))}
-                </div>
-            }
-          </button>
-        </div>
-
-        {/* Visibility */}
-        <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span className="lbl" style={{ margin: 0 }}>Visibilidade</span>
-          {[{ label: 'Público', val: true }, { label: 'Oculto', val: false }].map(({ label, val }) => {
-            const active = val ? form.public !== false : form.public === false
-            return (
-              <button key={label} type="button"
-                onClick={() => { setForm(f => ({ ...f, public: val })); setIsDirty(true); trackSessionField('public') }}
-                style={{
-                  padding: '4px 12px', fontSize: 11, fontWeight: 700, borderRadius: 4, fontFamily: 'inherit',
-                  border: `1px solid ${active ? (val ? '#4ac8c0' : '#806850') : 'var(--div,#2a231c)'}`,
-                  background: active ? (val ? 'rgba(74,200,192,.1)' : 'rgba(128,104,80,.12)') : 'transparent',
-                  color: active ? (val ? '#4ac8c0' : '#806850') : '#554a3a',
-                  cursor: 'pointer',
-                }}>
-                {label}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Box — which location(s) this session belongs to (drives per-box scoping). Multi-select,
-            same "toggle to add/remove" pattern as exercise categories: a session with any box tag
-            is visible only under those boxes' scoped links, never on the untagged general view
-            (see boxScope.js inBoxScope) — "Sem box" is the 0-tags state, not a tag itself. */}
-        {boxLocs.length > 0 && (
-          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span className="lbl" style={{ margin: 0 }}>Box</span>
-            {[{ id: null, name: 'Sem box' }, ...boxLocs].map(b => {
-              const ids = form.locationIds || [];
-              const active = b.id === null ? ids.length === 0 : ids.includes(b.id);
-              const accent = b.color || '#806850';
-              return (
-                <button key={b.id || 'none'} type="button"
-                  onClick={() => {
-                    setForm(f => {
-                      const cur = f.locationIds || [];
-                      const next = b.id === null ? [] : (cur.includes(b.id) ? cur.filter(x => x !== b.id) : [...cur, b.id]);
-                      return { ...f, locationIds: next };
-                    });
-                    setIsDirty(true); trackSessionField('locationIds');
-                  }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', fontSize: 11, fontWeight: 700, borderRadius: 4, fontFamily: 'inherit', cursor: 'pointer',
-                    border: `1px solid ${active ? accent : 'var(--div,#2a231c)'}`,
-                    background: active ? `${b.color || '#806850'}1a` : 'transparent',
-                    color: active ? accent : '#554a3a' }}>
-                  {b.id && <span style={{ width: 8, height: 8, borderRadius: '50%', background: b.color || '#555', flexShrink: 0 }} />}
-                  {b.name}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Session notes */}
-        <div style={{ marginTop: 6 }}>
-          <button type="button" className="blk-adv-toggle" onClick={() => setShowSessNotes(v => !v)}>
-            <i className={`ti ti-chevron-${showSessNotes ? 'up' : 'down'}`} />
-            Briefing da sessão{form.notes ? <span style={{ color: '#4ac8c0', fontSize: 10, marginLeft: 4 }}>●</span> : null}
-          </button>
-          {showSessNotes && (
-            <textarea
-              className="blk-notes-quick"
-              style={{ marginTop: 6, ...(changedSessionFields.has('notes') ? { borderColor: 'rgba(74,200,192,0.65)' } : {}) }}
-              placeholder="Contexto, objetivos, link de vídeo, regras..."
-              value={form.notes || ''}
-              onChange={e => { setForm(f => ({ ...f, notes: e.target.value })); setIsDirty(true); trackSessionField('notes'); }}
-            />
+      {/* ── Toolbar — the page's actions, above the week ── */}
+      {!editorOpen && (
+        <div className={cr.toolbar}>
+          <span className={cr.toolbarTitle}>Criador</span>
+          <span className={cr.toolbarSpacer} />
+          <Button size="sm" onClick={() => setShowImport(true)} title="Colar a semana inteira de uma vez">
+            <i className="ti ti-clipboard-text" /> Importar semana
+          </Button>
+          <Button size="sm" onClick={() => setShowTemplateModal(true)}>
+            <i className="ti ti-template" /> Templates
+          </Button>
+          {onGoToPublish && (
+            <Button size="sm" onClick={onGoToPublish} title="Ir para Publicador">
+              <i className="ti ti-calendar-event" /> Publicar
+            </Button>
           )}
+          <Button size="sm" variant="primary" onClick={() => openNewSession(todayISO())}>
+            <i className="ti ti-plus" /> Nova sessão
+          </Button>
         </div>
+      )}
 
-        {/* Blocks */}
-        <div style={{ borderTop: '1px solid #242424', paddingTop: 14, marginTop: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: blocks.length ? 10 : 0 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#666', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-              {blocks.length ? `${blocks.length} Bloco${blocks.length !== 1 ? 's' : ''}` : 'Blocos'}
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {blocks.length > 1 && sessionMode === 'detalhado' && (
-                <div className="collapse-all-row" style={{ margin: 0 }}>
-                  <button type="button" className="collapse-all-btn" onClick={() => setCollapsedBlocks(Object.fromEntries(blocks.map(b => [b.id, true])))}>
-                    <i className="ti ti-arrows-minimize" /> Recolher
-                  </button>
-                  <button type="button" className="collapse-all-btn" onClick={() => setCollapsedBlocks({})}>
-                    <i className="ti ti-arrows-maximize" /> Expandir
-                  </button>
-                </div>
-              )}
-              {/* Detalhado / Texto — the whole session as the coach's own notation */}
-              <span className={tm.modeSeg} role="group" aria-label="Modo de edição da sessão">
-                <button type="button" className={sessionMode === 'detalhado' ? tm.on : ''}
-                  aria-pressed={sessionMode === 'detalhado'} onClick={() => setSessionMode('detalhado')}>▤ Detalhado</button>
-                <button type="button" className={sessionMode === 'texto' ? tm.on : ''}
-                  aria-pressed={sessionMode === 'texto'} onClick={() => setSessionMode('texto')}>¶ Texto</button>
-              </span>
-            </div>
-          </div>
-
-          {sessionMode === 'texto' && (
-            <SessionTextPane
-              blocks={blocks}
-              registry={registry}
-              blockNames={blockNames || APP_CONFIG.blockNames}
-              typePicker={CriadorTypePicker}
-              onCancel={() => setSessionMode('detalhado')}
-              onApply={parsed => {
-                setBlocks(normalizeLegacyCardio(parsed));
-                setIsDirty(true);
-                setCollapsedBlocks({});
-                setSessionMode('detalhado');
-              }}
-            />
-          )}
-
-          {sessionMode === 'detalhado' && blocks.flatMap((bl, i) => {
-            const editor = (
-              <BlockEditor
-                key={bl.id}
-                block={bl} idx={i} total={blocks.length}
-                blockNames={blockNames || APP_CONFIG.blockNames}
-                onUpdate={upd => updBlock(bl.id, upd)}
-                onDelete={() => delBlock(bl.id)}
-                onCopy={() => copyBlock(bl.id)}
-                collapsed={!!collapsedBlocks[bl.id]}
-                onToggleCollapse={() => setCollapsedBlocks(p => ({ ...p, [bl.id]: !p[bl.id] }))}
-                dragBlkIdx={dragBlkIdx} dragOverBlkIdx={dragOverBlkIdx}
-                setDragOverBlkIdx={setDragOverBlkIdx} reorderBlocks={reorderBlocks} blockIdx={i}
-                changedFields={changedBlockFields[bl.id] || null}
-                registry={registry}
-              />
-            );
-            if (i < blocks.length - 1) {
-              return [editor, (
-                <button key={`ins-${i}`} type="button" className="insert-blk-btn"
-                  title="Inserir bloco aqui"
-                  onClick={() => { setInsertAtIdx(i); setShowBlockPicker(true); }}>
-                  <i className="ti ti-plus" />
-                </button>
-              )];
-            }
-            return [editor];
-          })}
-
-          {/* Add block */}
-          {sessionMode === 'detalhado' && (
-            <button type="button" className="add-blk-btn" style={{ width: '100%', marginBottom: 0 }} onClick={() => { setInsertAtIdx(null); setShowBlockPicker(true); }}>
-              <i className="ti ti-layout-grid-add" style={{ fontSize: 16 }} /> Adicionar bloco
-            </button>
-          )}
-        </div>
-
-        {/* Save row */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-          <button type="button" className="b bp bfull" onClick={saveS}
-            style={isDirty ? { boxShadow: '0 0 0 2px #4ac8c040' } : undefined}>
-            <i className="ti ti-check" />
-            {isDirty && <span style={{ color: '#4ac8c0', fontSize: 11, marginLeft: 4 }}>●</span>}
-            {' '}{editing ? 'Salvar alterações' : 'Salvar sessão'}
-          </button>
-          {blocks.length > 0 && (
-            <button type="button" className="b bsm"
-              style={{ borderColor: '#4a2880', color: '#9070d8', flexShrink: 0, minWidth: 38, background: activeTemplateId ? 'rgba(144,112,216,0.12)' : undefined }}
-              title={activeTemplateId ? 'Template ativo — clique para atualizar' : 'Salvar como template'}
-              onClick={activeTemplateId ? () => setShowUpdateTemplateModal(true) : saveAsTemplate}>
-              <i className={`ti ${activeTemplateId ? 'ti-bookmark-filled' : 'ti-bookmark'}`} />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Week grid ── */}
-      {totalSessions > 0 && (
+      {/* ── The week. Always rendered — an empty week IS this page's empty state, with
+             its day columns and their "+ sessão" affordances. While editing it stays
+             on screen as the collapsed day strip on desktop; on mobile the editor
+             takes the whole screen and the week steps aside. ── */}
+      {(!editorOpen || !isMobile) && (
         <WeekGrid
           gridRef={weekGridRef}
           weekOffset={weekOffset} setWeekOffset={setWeekOffset}
@@ -749,29 +561,164 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           highlightedSessionId={highlightedSessionId}
           startEdit={startEdit}
           onDelete={del}
-          formRef={formRef}
-          setForm={setForm}
+          onPickDay={pickDay}
           gridMode={gridMode} setGridMode={setGridMode}
           onImport={() => setShowImport(true)}
         />
       )}
-      {/* With no sessions yet the grid doesn't render, so the import — the whole
-          point of which is bootstrapping a week — would have no entry point. */}
-      {totalSessions === 0 && (
-        <button type="button" className="b bsm" onClick={() => setShowImport(true)}>
-          <i className="ti ti-clipboard-text" /> Importar semana
-        </button>
+
+      {/* ── Session editor ── */}
+      {editorOpen && (
+        <div ref={editorRef}>
+        <Card>
+          <div className={cr.editorHd}>
+            {isMobile && (
+              <button type="button" className={cr.editorBack} onClick={closeEditor}>
+                <i className="ti ti-chevron-left" aria-hidden="true" /> Voltar à semana
+              </button>
+            )}
+            <span className={cr.editorDate}>{editorDateStr}</span>
+            <span className={cr.editorName}>{form.sessionName?.trim() || 'Sessão sem nome'}</span>
+            {editorBoxes.map(b => (
+              <span key={b.id} className={cr.editorTag} style={{ borderColor: b.color, color: b.color }}>
+                <span className={cr.dot} style={{ background: b.color || 'var(--muted)' }} />{b.name}
+              </span>
+            ))}
+            <span className={`${cr.editorTag}${form.public === false ? ' ' + cr.editorTagHidden : ''}`}>
+              {form.public === false ? 'Oculto' : 'Público'}
+            </span>
+            {templateFlash && (
+              <span className={cr.editorTag}>
+                <i className="ti ti-bookmark-filled" aria-hidden="true" /> &ldquo;{templateFlash}&rdquo; salvo
+              </span>
+            )}
+            <span className={cr.editorHdSpacer} />
+            <Button size="sm" onClick={() => setMetaModal({ isEdit: true, draft: { ...form } })}>
+              <i className="ti ti-settings" /> Editar dados
+            </Button>
+            {blocks.length > 0 && (
+              <Button size="sm" iconOnly
+                aria-label={activeTemplateId ? 'Template ativo — clique para atualizar' : 'Salvar como template'}
+                title={activeTemplateId ? 'Template ativo — clique para atualizar' : 'Salvar como template'}
+                onClick={activeTemplateId ? () => setShowUpdateTemplateModal(true) : saveAsTemplate}>
+                <i className={`ti ${activeTemplateId ? 'ti-bookmark-filled' : 'ti-bookmark'}`} />
+              </Button>
+            )}
+            {!isMobile && (
+              <Button size="sm" iconOnly aria-label="Preview TV" title="Preview TV"
+                aria-pressed={tvPreviewOpen}
+                onClick={() => setTvPreviewOpen(v => !v)}>
+                <i className="ti ti-device-tv" />
+              </Button>
+            )}
+            {!isMobile && <Button size="sm" onClick={closeEditor}>Fechar</Button>}
+            <Button size="sm" variant="primary" onClick={saveS}>
+              <i className="ti ti-check" /> {editing ? 'Salvar alterações' : 'Salvar sessão'}
+              {isDirty && <span aria-hidden="true"> ●</span>}
+            </Button>
+          </div>
+
+          {/* Blocks */}
+          <div>
+            <div className={cr.blocksBar}>
+              <span className={cr.blocksCount}>
+                {blocks.length ? `${blocks.length} Bloco${blocks.length !== 1 ? 's' : ''}` : 'Blocos'}
+              </span>
+              <div className={cr.blocksBarActions}>
+                {blocks.length > 1 && sessionMode === 'detalhado' && (
+                  <>
+                    <Button size="xs" variant="ghost" onClick={() => setCollapsedBlocks(Object.fromEntries(blocks.map(b => [b.id, true])))}>
+                      <i className="ti ti-arrows-minimize" /> Recolher
+                    </Button>
+                    <Button size="xs" variant="ghost" onClick={() => setCollapsedBlocks({})}>
+                      <i className="ti ti-arrows-maximize" /> Expandir
+                    </Button>
+                  </>
+                )}
+                {/* Detalhado / Texto — the whole session as the coach's own notation */}
+                <span className={tm.modeSeg} role="group" aria-label="Modo de edição da sessão">
+                  <button type="button" className={sessionMode === 'detalhado' ? tm.on : ''}
+                    aria-pressed={sessionMode === 'detalhado'} onClick={() => setSessionMode('detalhado')}>▤ Detalhado</button>
+                  <button type="button" className={sessionMode === 'texto' ? tm.on : ''}
+                    aria-pressed={sessionMode === 'texto'} onClick={() => setSessionMode('texto')}>¶ Texto</button>
+                </span>
+              </div>
+            </div>
+
+            {sessionMode === 'texto' && (
+              <SessionTextPane
+                blocks={blocks}
+                registry={registry}
+                blockNames={blockNames || APP_CONFIG.blockNames}
+                typePicker={CriadorTypePicker}
+                onCancel={() => setSessionMode('detalhado')}
+                onApply={parsed => {
+                  setBlocks(normalizeLegacyCardio(parsed));
+                  setIsDirty(true);
+                  setCollapsedBlocks({});
+                  setSessionMode('detalhado');
+                }}
+              />
+            )}
+
+            {sessionMode === 'detalhado' && blocks.flatMap((bl, i) => {
+              const editor = (
+                <BlockEditor
+                  key={bl.id}
+                  block={bl} idx={i} total={blocks.length}
+                  blockNames={blockNames || APP_CONFIG.blockNames}
+                  onUpdate={upd => updBlock(bl.id, upd)}
+                  onDelete={() => delBlock(bl.id)}
+                  onCopy={() => copyBlock(bl.id)}
+                  collapsed={!!collapsedBlocks[bl.id]}
+                  onToggleCollapse={() => setCollapsedBlocks(p => ({ ...p, [bl.id]: !p[bl.id] }))}
+                  dragBlkIdx={dragBlkIdx} dragOverBlkIdx={dragOverBlkIdx}
+                  setDragOverBlkIdx={setDragOverBlkIdx} reorderBlocks={reorderBlocks} blockIdx={i}
+                  changedFields={changedBlockFields[bl.id] || null}
+                  registry={registry}
+                />
+              );
+              if (i < blocks.length - 1) {
+                return [editor, (
+                  <button key={`ins-${i}`} type="button" className="insert-blk-btn"
+                    aria-label={`Inserir bloco depois do bloco ${i + 1}`}
+                    title="Inserir bloco aqui"
+                    onClick={() => { setInsertAtIdx(i); setShowBlockPicker(true); }}>
+                    <i className="ti ti-plus" />
+                  </button>
+                )];
+              }
+              return [editor];
+            })}
+
+            {/* Add block */}
+            {sessionMode === 'detalhado' && (
+              <button type="button" className="add-blk-btn" style={{ width: '100%', marginBottom: 0 }} onClick={() => { setInsertAtIdx(null); setShowBlockPicker(true); }}>
+                <i className="ti ti-layout-grid-add" style={{ fontSize: 16 }} /> Adicionar bloco
+              </button>
+            )}
+          </div>
+
+          {/* Save row — the header's save is out of reach once the block list is long. */}
+          <div className={cr.mt3}>
+            <Button variant="primary" full onClick={saveS}>
+              <i className="ti ti-check" /> {editing ? 'Salvar alterações' : 'Salvar sessão'}
+              {isDirty && <span aria-hidden="true"> ●</span>}
+            </Button>
+          </div>
+        </Card>
+        </div>
       )}
       </div> {/* end left pane */}
 
       {/* ── TV Preview pane (desktop only, when toggled) ── */}
-      {tvPreviewOpen && !isMobile && (
-        <div style={{ flex: '0 0 38%', position: 'sticky', top: 20 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#806850', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <i className="ti ti-device-tv" style={{ color: '#4ac8c0' }} /> Preview TV
-            <span style={{ fontSize: 9, color: '#554a3a', fontWeight: 400 }}>· atualiza em tempo real</span>
+      {tvPreviewOpen && !isMobile && editorOpen && (
+        <div className={cr.splitAside}>
+          <div className={cr.previewTitle}>
+            <i className="ti ti-device-tv" aria-hidden="true" /> Preview TV
+            <span className={cr.previewSub}>· atualiza em tempo real</span>
           </div>
-          <div ref={previewPaneRef} style={{ width: '100%', aspectRatio: '16/9', position: 'relative', overflow: 'hidden', background: '#0d0b09', border: '1px solid #2a231c', borderRadius: 6 }}>
+          <div ref={previewPaneRef} className={cr.previewFrame}>
             <div style={{ width: 1920, height: 1080, transform: `scale(${prevScale})`, transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
               <WodSlide sessions={tvPreviewSessions} tv={tvPreviewTv} gymName={gymName} />
             </div>

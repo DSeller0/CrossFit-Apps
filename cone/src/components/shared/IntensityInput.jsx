@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Button from '../ui/Button.jsx';
 
 // ── IntensityInput ────────────────────────────────────────────────────────────
 // Shared by Criador (ghost/suggested defaults from the registry, via `ghostDefault`)
@@ -39,7 +40,9 @@ export default function IntensityInput({ value, onChange, defaultReps, defaultSe
       onChange({ mode: 'progression', steps });
     } else onChange({ ...v, mode: m });
   };
-  const inlineSelStyle = { fontFamily: 'inherit', fontSize: '11px', border: '1px solid #2e2e2e', borderRadius: '4px', padding: '4px 6px', background: '#111', color: '#ccc', outline: 'none', WebkitAppearance: 'none', appearance: 'none', width: '66px' };
+  // Token-only (#15): this renders inside the Criador, so a baked #111 painted a
+  // dark box across both light themes.
+  const inlineSelStyle = { fontFamily: 'inherit', fontSize: '11px', border: '1px solid var(--divider)', borderRadius: 'var(--radius-sm)', padding: '4px 6px', background: 'var(--bg)', color: 'var(--text)', outline: 'none', WebkitAppearance: 'none', appearance: 'none', width: '66px' };
   const steps = isGhost ? (gv.steps || []) : (value?.steps || []);
   const updStep = (i, field, val) => {
     if (isGhost) { promoteGhost({ steps: steps.map((s, j) => j === i ? { ...s, [field]: val } : s) }); return; }
@@ -63,17 +66,22 @@ export default function IntensityInput({ value, onChange, defaultReps, defaultSe
         {[['pct','% RM'],['progression','Progressão'],['gender','M/F']].map(([m,l]) => {
           const active = mode === m;
           return (
-            <button key={m} type="button" className={`itb${active ? (isGhost ? ' ighost' : ' iact') : ''}`} onClick={() => setM(m)}>
-              {l}{active && !isGhost ? ' ✕' : ''}
+            /* No `✕` on the active tab — re-clicking it already clears the mode
+               (setM), so the glyph was a second affordance for the same gesture and
+               the coach read it as "close this panel". aria-pressed carries the
+               state instead. */
+            <button key={m} type="button" className={`itb${active ? (isGhost ? ' ighost' : ' iact') : ''}`}
+              aria-pressed={active} onClick={() => setM(m)}>
+              {l}
             </button>
           );
         })}
       </div>
-      {mode === 'none' && <div style={{ fontSize: 12, color: '#444', padding: '2px 0' }}>Sem intensidade definida.</div>}
+      {mode === 'none' && <div style={{ fontSize: 12, color: 'var(--dim)', padding: '2px 0' }}>Sem intensidade definida.</div>}
       {mode === 'pct' && (
         <div className="fg">
           <span className="lbl">% do RM</span>
-          <input type="number" min={1} max={110} placeholder={isGhost ? (gv.pct || 'ex: 80') : 'ex: 80'}
+          <input type="number" inputMode="numeric" min={1} max={110} placeholder={isGhost ? (gv.pct || 'ex: 80') : 'ex: 80'}
             value={isGhost ? '' : (v.pct || '')} onChange={e => upd({ pct: e.target.value })} />
         </div>
       )}
@@ -84,9 +92,9 @@ export default function IntensityInput({ value, onChange, defaultReps, defaultSe
             <tbody>
               {steps.map((s, i) => (
                 <tr key={i}>
-                  <td style={{ color: '#555', fontSize: 11, textAlign: 'center' }}>{i+1}</td>
+                  <td style={{ color: 'var(--muted)', fontSize: 11, textAlign: 'center' }}>{i+1}</td>
                   <td><input type="text" placeholder={isGhost ? (s.reps || defaultReps || '—') : (defaultReps||'—')} value={isGhost ? '' : (s.reps??'')} onChange={e => updStep(i,'reps',e.target.value)} /></td>
-                  <td><input type="number" placeholder={isGhost ? (s.load || '—') : '—'} value={isGhost ? '' : (s.load||'')} onChange={e => updStep(i,'load',e.target.value)} /></td>
+                  <td><input type="number" inputMode="numeric" placeholder={isGhost ? (s.load || '—') : '—'} value={isGhost ? '' : (s.load||'')} onChange={e => updStep(i,'load',e.target.value)} /></td>
                   <td>
                     <select value={s.unit||'% do RM'} onChange={e => updStep(i,'unit',e.target.value)} style={inlineSelStyle}>
                       <option>% do RM</option><option value="kg">kg</option><option value="lb">lb</option>
@@ -98,8 +106,8 @@ export default function IntensityInput({ value, onChange, defaultReps, defaultSe
           </table>
           {!isGhost && (
             <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-              <button type="button" className="b bsm" onClick={addStep}><i className="ti ti-plus" /> Série</button>
-              {steps.length > 1 && <button type="button" className="b bd bsm" onClick={() => delStep(steps.length-1)}><i className="ti ti-minus" /></button>}
+              <Button size="sm" onClick={addStep}><i className="ti ti-plus" /> Série</Button>
+              {steps.length > 1 && <Button size="sm" iconOnly variant="destructive" aria-label="Remover última série" onClick={() => delStep(steps.length-1)}><i className="ti ti-minus" /></Button>}
             </div>
           )}
         </div>
@@ -118,7 +126,7 @@ export default function IntensityInput({ value, onChange, defaultReps, defaultSe
               {['RX','Inter','SC'].map(cat => (
                 <div key={cat} className="fg" style={{ marginBottom: 6 }}>
                   <span className="lbl">{cat}</span>
-                  <input type="number" placeholder={isGhost ? (gv[`${g}_${cat}`] || '0') : '0'} value={isGhost ? '' : (v[`${g}_${cat}`]||'')} onChange={e => upd({ [`${g}_${cat}`]: e.target.value })} />
+                  <input type="number" inputMode="numeric" placeholder={isGhost ? (gv[`${g}_${cat}`] || '0') : '0'} value={isGhost ? '' : (v[`${g}_${cat}`]||'')} onChange={e => upd({ [`${g}_${cat}`]: e.target.value })} />
                 </div>
               ))}
             </div>

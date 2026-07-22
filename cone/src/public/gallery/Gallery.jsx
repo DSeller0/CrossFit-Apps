@@ -53,6 +53,8 @@ import { SessionTextPane } from '../../components/tabs/criador/SessionTextPane.j
 import { BlockTextEditor } from '../../components/tabs/criador/BlockTextEditor.jsx'
 import { WeekSessionCard } from '../../components/tabs/criador/WeekSessionCard.jsx'
 import { WeekImportModal } from '../../components/tabs/criador/WeekImportModal.jsx'
+import { GoalInput } from '../../components/tabs/criador/GoalInput.jsx'
+import { SessionMetaModal } from '../../components/tabs/criador/SessionMetaModal.jsx'
 import { parseSession } from '../../components/tabs/criador/textFormat.js'
 import WodSelectCard from '../leaderboard/WodSelectCard.jsx'
 import WodCard from '../leaderboard/WodCard.jsx'
@@ -584,6 +586,17 @@ const txtWeekDates = getWeek(0)
 const txtBoxLocs = [{ id: 'b1', name: 'Eagles', color: '#4ac8c0' }, { id: 'b2', name: 'Garra', color: '#e87820' }]
 // Thursday already booked → the import lists it and skips it, never overwrites.
 const txtExistingSessions = { [toISO(txtWeekDates[4])]: [{ id: 's1', sessionName: 'HYROX', blocks: [] }] }
+// #58 fixtures — the Meta field and the session dialog that replaced the permanent
+// form slab. Both are client-free, which is why they render here at all.
+const goalAthletes = [
+  { id: 'a1', name: 'Ana', level: 'RX', color: '#4ac8c0' },
+  { id: 'a2', name: 'Bruno', level: 'Inter', color: '#e87820' },
+  { id: 'a3', name: 'Carla', level: 'SC', color: '#9070d8' },
+]
+const goalMetaDraft = {
+  id: 'sX', date: toISO(txtWeekDates[1]), sessionName: 'Semana 3 · D1 · Força Lower',
+  mainTraining: ['Ana'], locationIds: ['b1'], notes: '', public: true, blocks: [],
+}
 const gridColStyle = { width: 200, background: 'var(--stone2)', border: '1px solid var(--divider)', borderRadius: 6, padding: 8 }
 function TallModalBox({ children }) {
   return <div style={{ position: 'relative', transform: 'translateZ(0)', height: 560, overflow: 'hidden', border: '1px solid var(--divider)' }}>{children}</div>
@@ -796,6 +809,49 @@ export const GROUPS = [
                 weekDates={txtWeekDates} weekLabel="20/07 – 26/07"
                 sessions={{}} boxFilter={() => true} boxLocs={txtBoxLocs} selBox="all"
                 onPrevWeek={NOOP} onNextWeek={NOOP} onCreate={NOOP} onClose={NOOP}
+              /></TallModalBox>
+            </Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'criador-goalinput',
+        label: 'GoalInput (Meta)',
+        render: () => (
+          <Section title="GoalInput" sub="src/components/tabs/criador/GoalInput.jsx — a linha 'Meta:' do coach como campo, ciente do tipo (#10). Escreve block.goal, o ÚNICO campo novo persistido, na mesma forma que o parser de texto emite — então uma Meta digitada aqui e uma digitada no modo Texto são o mesmo objeto. Meta vazia vira undefined, nunca um objeto oco.">
+            <Case label="For Time — faixa de tempo (MaskedTimeInput, mm:ss)">
+              <GoalInput block={{ type: 'For Time', goal: { kind: 'time', min: '11:00', max: '12:00' } }} onUpdate={NOOP} />
+            </Case>
+            <Case label="For Time — vazia">
+              <GoalInput block={{ type: 'For Time' }} onUpdate={NOOP} />
+            </Case>
+            <Case label="AMRAP — rounds + reps">
+              <GoalInput block={{ type: 'AMRAP', goal: { kind: 'rounds', min: 5, reps: 12 } }} onUpdate={NOOP} />
+            </Case>
+            <Case label="Força — texto livre (sem eixo numérico de pontuação)">
+              <GoalInput block={{ type: 'Força', goal: { kind: 'text', text: 'sem quebrar' } }} onUpdate={NOOP} />
+            </Case>
+            <Case label="Tipo trocado (goal antigo de outro kind) — não renderiza no campo errado">
+              <GoalInput block={{ type: 'AMRAP', goal: { kind: 'time', min: '11:00' } }} onUpdate={NOOP} />
+            </Case>
+          </Section>
+        ),
+      },
+      {
+        id: 'criador-sessionmetamodal',
+        label: 'SessionMetaModal',
+        render: () => (
+          <Section title="SessionMetaModal" sub="src/components/tabs/criador/SessionMetaModal.jsx — tudo o que uma sessão tem e não é bloco. Era uma laje permanente acima dos blocos; virou diálogo, aberto para criar e reaberto pelo cabeçalho do editor (#58). Segura um RASCUNHO e só aplica no confirmar, então Cancelar cancela de verdade. O seletor de atletas é inline, não um segundo modal por cima deste.">
+            <Case label="Nova sessão">
+              <TallModalBox><SessionMetaModal
+                initial={{ ...goalMetaDraft, sessionName: '', mainTraining: [], locationIds: [] }}
+                athletes={goalAthletes} boxLocs={txtBoxLocs} onCancel={NOOP} onConfirm={NOOP}
+              /></TallModalBox>
+            </Case>
+            <Case label="Editar dados — preenchida, sessão oculta">
+              <TallModalBox><SessionMetaModal
+                initial={{ ...goalMetaDraft, public: false, notes: 'Buy-in: 400m corrida.' }}
+                isEdit athletes={goalAthletes} boxLocs={txtBoxLocs} onCancel={NOOP} onConfirm={NOOP}
               /></TallModalBox>
             </Case>
           </Section>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { loadRegistry } from '../../../utils/storage';
 import { ECOL } from '../../../utils/config';
+import s from './criador.module.css';
 
 // ── ExerciseCombobox ──────────────────────────────────────────────────────────
 export function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
@@ -58,11 +59,13 @@ export function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
   const select = name => { setQuery(name); onChange(name); setOpen(false); };
 
   return (
-    <div ref={ref} style={{ position: 'relative', flex: 1 }}>
+    <div ref={ref} className={s.comboWrap}>
       <input
+        className={s.comboInput}
         value={query}
         placeholder={placeholder}
-        style={{ width: '100%', fontFamily: 'inherit', fontSize: 15, border: '1px solid #2e2e2e', borderRadius: 6, padding: '9px 11px', background: '#111', color: '#e0e0e0', outline: 'none', transition: 'border-color .15s' }}
+        aria-label={placeholder || 'Nome do exercício'}
+        role="combobox" aria-expanded={open} aria-autocomplete="list"
         onChange={e => { setQuery(e.target.value); onChange(e.target.value); openDrop(); }}
         onFocus={openDrop}
         onKeyDown={e => {
@@ -71,23 +74,23 @@ export function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
         }}
       />
       {open && suggestions.length > 0 && dropRect && (
-        <div ref={dropdownRef} style={{ position: 'fixed', top: dropRect.bottom + 2, left: dropRect.left, width: dropRect.width, zIndex: 9999, background: '#1a1a1a', border: '1px solid #333', borderRadius: 5, maxHeight: 180, overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,.5)' }}>
-          {suggestions.map((s, i) => (
+        <div ref={dropdownRef} className={s.comboDrop} role="listbox"
+          style={{ top: dropRect.bottom + 2, left: dropRect.left, width: dropRect.width }}>
+          {suggestions.map((sug, i) => (
             <div
-              key={i} className="ex-suggestion" tabIndex={0}
-              style={{ padding: '6px 10px', fontSize: 13, color: '#ddd', cursor: 'pointer', borderBottom: i < suggestions.length - 1 ? '1px solid #222' : 'none', display: 'flex', alignItems: 'center', gap: 8 }}
-              onMouseDown={e => { e.preventDefault(); select(s.name); }}
+              key={i} className={`ex-suggestion ${s.comboItem}`} tabIndex={0} role="option"
+              onMouseDown={e => { e.preventDefault(); select(sug.name); }}
               onKeyDown={e => {
-                if (e.key === 'Enter') select(s.name);
+                if (e.key === 'Enter') select(sug.name);
                 if (e.key === 'ArrowDown') e.currentTarget.nextSibling?.focus();
                 if (e.key === 'ArrowUp') { const prev = e.currentTarget.previousSibling; prev ? prev.focus() : ref.current?.querySelector('input')?.focus(); }
                 if (e.key === 'Escape') { setOpen(false); ref.current?.querySelector('input')?.focus(); }
               }}
-              onMouseEnter={e => e.currentTarget.style.background = '#252525'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: ECOL[s.blockType]?.text || '#555', flexShrink: 0, display: 'inline-block' }} />
-              {s.name}
+              {/* Registry-category colour — a data colour (it identifies the family
+                  the exercise is registered under), so it stays a literal. */}
+              <span className={s.comboDot} style={{ background: ECOL[sug.blockType]?.text || 'var(--muted)' }} />
+              {sug.name}
             </div>
           ))}
         </div>

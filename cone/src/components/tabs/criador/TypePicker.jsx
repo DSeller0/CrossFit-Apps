@@ -3,6 +3,7 @@ import { APP_CONFIG } from '../../../utils/config';
 import { loadSettings } from '../../../utils/storage';
 import { BENCHMARK_GIRLS, BENCHMARK_HEROES, buildBenchmarkBlock } from '../../../public/lib/benchmarks.js';
 import { TYPE_CONFIG, getTypeCfg } from './blockModel.js';
+import Button from '../../ui/Button.jsx';
 
 // ── CriadorTypePicker (SPA block-type/benchmark chooser — distinct from the public Timer's BlockTypePicker.jsx) ──
 export function CriadorTypePicker({ blockNames, onSelect, onClose }) {
@@ -40,13 +41,13 @@ export function CriadorTypePicker({ blockNames, onSelect, onClose }) {
         <div className="btp-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {level > 0 && (
-              <button type="button" className="b bsm" style={{ padding: '3px 8px' }} onClick={goBack}>
+              <Button size="xs" iconOnly aria-label="Voltar" onClick={goBack}>
                 <i className="ti ti-arrow-left" />
-              </button>
+              </Button>
             )}
             <span>{title}</span>
           </div>
-          <button type="button" className="b bsm" onClick={onClose}><i className="ti ti-x" /></button>
+          <Button size="xs" iconOnly variant="ghost" aria-label="Fechar" onClick={onClose}><i className="ti ti-x" /></Button>
         </div>
 
         {level === 0 && (
@@ -67,6 +68,9 @@ export function CriadorTypePicker({ blockNames, onSelect, onClose }) {
 
         {level === 1 && (
           <div className="btp-grid">
+            {/* Benchmark-category colours are DATA colours — the same three the
+                block-family palette uses (Benchmark gold, Força blue, SC violet).
+                They identify a category, so they stay literals like blkColor. */}
             {[
               { key:'girls',  label:'Girls',  icon:'ti-trophy',   color:'#d8a840', desc:'Fran, Grace, Helen, Annie...' },
               { key:'heroes', label:'Heroes', icon:'ti-shield',   color:'#5090e0', desc:'Murph, DT, JT, Nate...'       },

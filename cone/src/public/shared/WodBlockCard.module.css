@@ -28,8 +28,20 @@
   border: 1px solid var(--divider);
   color: var(--muted);
 }
-/* Chips sit at the far end of the header row, away from the badge. */
-.chip:first-of-type { margin-left: auto; }
+/* The coach's Meta (#10) — a chip, but accent-toned: it is a target, not a fact. */
+.goal {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--teal) 45%, transparent);
+  color: var(--teal);
+}
+/* Chips sit at the far end of the header row, away from the badge. The badge is
+   an <h2>, so the first *span* is the first chip — or the Meta when there is none. */
+.chip:first-of-type,
+.goal:first-of-type { margin-left: auto; }
 
 .foot {
   margin-top: 8px;
@@ -46,4 +58,5 @@
 .large { padding: 14px 16px; }
 .large .badge { font-size: 14px; }
 .large .chip  { font-size: 11px; }
+.large .goal  { font-size: 11px; }
 .large .foot  { font-size: 12px; }
