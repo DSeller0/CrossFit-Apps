@@ -33,22 +33,44 @@
 /* ── tiny: phone register-form context (LogPane) — approved design
    mockups/20-result-card-exerciselist.html. compact's sizes (name 26px/
    vol 22px/ins 18px) are TV-wall-display scale; this matches the 10-14px
-   type scale of the rest of that form instead. ── */
-.tiny { gap: 6px; }
-.tiny .row  { gap: 8px; }
-.tiny .dot  { width: 6px; height: 6px; }
-.tiny .body { gap: 8px; }
-.tiny .vol  { font-size: 12px; }
-.tiny .name { font-size: 15px; }
-.tiny .ins  { font-size: 12px; }
+   type scale of the rest of that form instead.
+   `grid` shares every one of these values — see its own block below. ── */
+.tiny, .grid { gap: 6px; }
+.tiny .row,  .grid .row  { gap: 8px; }
+.tiny .dot,  .grid .dot  { width: 6px; height: 6px; }
+.tiny .body, .grid .body { gap: 8px; }
+.tiny .vol,  .grid .vol  { font-size: 12px; }
+.tiny .name, .grid .name { font-size: 15px; }
+.tiny .ins,  .grid .ins  { font-size: 12px; }
 /* The complex sub-movements and the note had no tiny overrides, so they fell back
    to compact's TV-wall sizes (20px/16px) and towered over the 15px name they sit
    under. Reaches every tiny consumer — LogPane too. */
-.tiny .note   { font-size: 11px; padding-left: 14px; }
-.tiny .mvs    { padding-left: 14px; gap: 2px; }
-.tiny .mvRow  { gap: 6px; }
-.tiny .mvReps { font-size: 11px; }
-.tiny .mvName { font-size: 13px; }
+.tiny .note,   .grid .note   { font-size: 11px; padding-left: 14px; }
+.tiny .mvs,    .grid .mvs    { padding-left: 14px; gap: 2px; }
+.tiny .mvRow,  .grid .mvRow  { gap: 6px; }
+.tiny .mvReps, .grid .mvReps { font-size: 11px; }
+.tiny .mvName, .grid .mvName { font-size: 13px; }
+
+/* ── grid: tiny, re-tuned for the Criador week column (#58 follow-up) ──────────
+   Same scale as tiny everywhere except two things a 200px column forces:
+   the name drops to 12px so it stops being the one oversized word on the card,
+   and the intensity takes its own line instead of trailing the name — inline it
+   ran past the column's right edge and clipped ("63/70/75/80/85 %", "M: 22.5 kg
+   | F: 15"). vol stays on the name line: it reads as part of the prescription,
+   and dropping it too would make every exercise three lines tall.
+   NOT folded into `tiny` — that one is shared with results.html's LogPane and
+   WodBlockCard, which are not in a 200px column.
+   The body stops being a flex row here and becomes a text block: `flex-wrap` put
+   the vol on its OWN line whenever the name was too long to sit beside it
+   ("4×(2+1+1)" / "CLEAN PULL + POWER CLEAN + PUSH JERK"), which is the opposite
+   of keeping them together. Inline vol + inline name flow as one run and wrap
+   like a sentence; only `ins` is forced to break. ── */
+.grid .name { font-size: 12px; }
+.grid .row  { align-items: flex-start; }
+.grid .dot  { margin-top: 5px; }
+.grid .body { display: block; }
+.grid .vol  { display: inline; margin-right: 5px; }
+.grid .ins  { display: block; margin-top: 1px; }
 
 /* ── Complex sub-movements — compact ── */
 .mvs  { display: flex; flex-direction: column; gap: 4px; padding-left: 20px; }

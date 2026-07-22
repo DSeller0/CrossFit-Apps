@@ -77,6 +77,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const [showUpdateTemplateModal, setShowUpdateTemplateModal] = useState(false);
   const [highlightedSessionId, setHighlightedSessionId] = useState(null);
   const [pendingDelete, setPendingDelete]           = useState(null);
+  const [pendingClose, setPendingClose]             = useState(false);
   const [tvPreviewOpen, setTvPreviewOpen]           = useState(false);
   const isMobile        = useIsMobile();
   const previewPaneRef  = useRef(null);
@@ -114,7 +115,10 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setEditorOpen(true);
     setWeekGridCollapsed(true);
     setIsDirty(false); setChangedBlockFields({}); setActiveTemplateId(null);
-    setTimeout(() => editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    // Top of the PAGE, not the top of the editor — scrolling to the editor put the
+    // day strip and the session header above the fold, so opening a session landed
+    // you mid-form with no idea which day you were on.
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 60);
   };
 
   // A new session inherits the browsing filter's box — the coach is almost always
@@ -141,7 +145,13 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setWeekGridCollapsed(false); setSessionMode('detalhado');
     setIsDirty(false);
     setChangedBlockFields({}); setActiveTemplateId(null);
+    setPendingClose(false);
   };
+
+  // Closing throws the edit away. That was survivable while the button read
+  // "Fechar"; as a red ✕ next to "Salvar" it is one slip away from losing a
+  // session's worth of work, so it asks — but only when there IS work.
+  const requestClose = () => { if (isDirty) setPendingClose(true); else closeEditor(); };
 
   // ── Session meta (date/name/audience/visibility/box/briefing) ──────────────
   const commitMeta = draft => {
@@ -167,7 +177,10 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setEditorOpen(true);
     setWeekGridCollapsed(true);
     setIsDirty(true); setChangedBlockFields({}); setActiveTemplateId(null);
-    setTimeout(() => editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    // Top of the PAGE, not the top of the editor — scrolling to the editor put the
+    // day strip and the session header above the fold, so opening a session landed
+    // you mid-form with no idea which day you were on.
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 60);
   };
 
   // Preload from another tab
@@ -427,6 +440,20 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
         <ReadRow label="Dia" value={pendingDelete ? new Date(pendingDelete.dateKey + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' }) : ''} />
       </ConfirmReview>
 
+      {/* ── Discard-on-close confirm ── */}
+      <ConfirmReview
+        open={pendingClose}
+        title="Descartar alterações"
+        editLabel="Voltar" confirmLabel="Descartar"
+        onEdit={() => setPendingClose(false)}
+        onClose={() => setPendingClose(false)}
+        onConfirm={closeEditor}
+      >
+        <ReadRow label="Sessão" value={form.sessionName?.trim() || 'Sessão sem nome'} />
+        <ReadRow label="Dia" value={editorDateStr} />
+        <ReadRow label="Blocos" value={`${blocks.length}`} />
+      </ConfirmReview>
+
       {/* ── Update template confirm ── */}
       <ConfirmReview
         open={showUpdateTemplateModal}
@@ -558,6 +585,9 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           sessions={sessions} setSessions={setSessions}
           boxFilter={boxFilter}
           editing={editing}
+          /* The day being worked on — form.date, not editing.dateKey: a new session
+             has no dateKey, and a moved one is on its new day the moment you confirm. */
+          activeDate={editorOpen ? (form.date || todayISO()) : null}
           highlightedSessionId={highlightedSessionId}
           startEdit={startEdit}
           onDelete={del}
@@ -573,7 +603,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
         <Card>
           <div className={cr.editorHd}>
             {isMobile && (
-              <button type="button" className={cr.editorBack} onClick={closeEditor}>
+              <button type="button" className={cr.editorBack} onClick={requestClose}>
                 <i className="ti ti-chevron-left" aria-hidden="true" /> Voltar à semana
               </button>
             )}
@@ -587,15 +617,18 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
             <span className={`${cr.editorTag}${form.public === false ? ' ' + cr.editorTagHidden : ''}`}>
               {form.public === false ? 'Oculto' : 'Público'}
             </span>
+            {/* The gear belongs to the title, not to the action cluster: everything
+                it edits — date, name, box, visibility — is what the title shows. */}
+            <Button size="sm" iconOnly aria-label="Editar dados" title="Editar dados"
+              onClick={() => setMetaModal({ isEdit: true, draft: { ...form } })}>
+              <i className="ti ti-settings" />
+            </Button>
             {templateFlash && (
               <span className={cr.editorTag}>
                 <i className="ti ti-bookmark-filled" aria-hidden="true" /> &ldquo;{templateFlash}&rdquo; salvo
               </span>
             )}
             <span className={cr.editorHdSpacer} />
-            <Button size="sm" onClick={() => setMetaModal({ isEdit: true, draft: { ...form } })}>
-              <i className="ti ti-settings" /> Editar dados
-            </Button>
             {blocks.length > 0 && (
               <Button size="sm" iconOnly
                 aria-label={activeTemplateId ? 'Template ativo — clique para atualizar' : 'Salvar como template'}
@@ -611,11 +644,19 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                 <i className="ti ti-device-tv" />
               </Button>
             )}
-            {!isMobile && <Button size="sm" onClick={closeEditor}>Fechar</Button>}
             <Button size="sm" variant="primary" onClick={saveS}>
               <i className="ti ti-check" /> {editing ? 'Salvar alterações' : 'Salvar sessão'}
               {isDirty && <span aria-hidden="true"> ●</span>}
             </Button>
+            {/* Same red ✕ as the exercise/movement delete — it is the discard, and
+                it now looks like one. Which is exactly why it asks first when
+                there is something to lose. */}
+            {!isMobile && (
+              <Button size="sm" iconOnly variant="destructive" aria-label="Fechar" title="Fechar"
+                onClick={requestClose}>
+                <i className="ti ti-x" />
+              </Button>
+            )}
           </div>
 
           {/* Blocks */}

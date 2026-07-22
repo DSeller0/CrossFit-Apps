@@ -17,6 +17,14 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .tb-btn.tb-save:hover{background:#1a2a10}
 #state-file-input{display:none}
 .tab-bar{display:flex;background:var(--stone,#161210);border-bottom:1px solid var(--divider,#2a231c);overflow-x:auto;-webkit-overflow-scrolling:touch;position:sticky;top:44px;z-index:99}
+/* Where a tab's own sticky content has to start, i.e. the bottom of the app chrome.
+   Two values because the chrome itself has two layouts: below 768px the topbar sits
+   above a 49px tab bar pinned at 44; at 768px and up the tab bar is display:none and
+   the sidebar takes over, leaving only the 49px topbar. Hardcoding 88px — which is
+   what .ql-sess-bar and .sync-conflict-banner still do — is right for the narrow
+   layout and 39px too low for the wide one, where it pushes the sticky block down
+   over the content that follows it. Override lives with the layout switch below. */
+:root{--spa-sticky-top:93px}
 .tab3{padding:11px 18px;font-size:13px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted,#806850);font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;transition:color .15s}
 .tab3.on{color:var(--cream,#f0e8d0);border-bottom-color:var(--cream,#f0e8d0)}
 .tab3:hover:not(.on){color:var(--sub,#c8b090)}
@@ -909,6 +917,7 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .spa-sb-link:hover{color:var(--muted,#806850);background:var(--stone2,#1e1a16)}
 .spa-sb-link i{font-size:20px;flex-shrink:0}
 @media(min-width:768px){
+  :root{--spa-sticky-top:49px}
   .spa-sidebar{display:flex}
   #root{margin-left:220px;margin-right:0;max-width:none}
   .tab-bar{display:none}

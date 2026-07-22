@@ -9,8 +9,8 @@ import s from './textMode.module.css';
 // Not a new surface — the grid keeps its columns, its box filter and its week
 // arrows; only this changes, which is what makes comparing days free.
 //
-//   grade — the real ExerciseList at size `tiny` (the phone/web scale), replacing
-//           the bare type pills the card used to show.
+//   grade — the real ExerciseList at size `grid` (tiny's scale, with a 12px name
+//           and the intensity on its own line — a 200px column clips it inline).
 //   texto — the coach's own notation, straight from serializeSession. It is the
 //           copyable one, and the only one that can carry the structure line,
 //           `Meta:` and the verbatim notes (ExerciseList has no row for those).
@@ -58,7 +58,7 @@ export function WeekSessionCard({ session, mode }) {
             </div>
             {bl.type === 'Estações'
               ? <div className={s.prevMeta}>{(bl.stations || []).filter(st => !st.isRest).length} grupos</div>
-              : <ExerciseList exercises={bl.exercises || []} color={color} size="tiny" />}
+              : <ExerciseList exercises={bl.exercises || []} color={color} size="grid" />}
             {goal && <div className={s.prevGoal}>Meta {goal}</div>}
           </div>
         );

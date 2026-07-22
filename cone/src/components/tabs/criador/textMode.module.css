@@ -36,7 +36,12 @@
 .pane { display: grid; grid-template-columns: 1fr 300px; gap: var(--sp-3); align-items: start }
 .paneStacked { grid-template-columns: 1fr }
 .paneBar { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-2) }
-.paneSpacer { flex: 1 }
+/* Descartar / Aplicar sit below the pane, not above it: the preview is what you
+   read before committing, so the commit belongs after it. */
+.paneFoot {
+  display: flex; align-items: center; justify-content: flex-end; gap: var(--sp-2);
+  margin-top: var(--sp-3); padding-top: var(--sp-2); border-top: 1px solid var(--divider);
+}
 .fmtHelp {
   font-size: 11px; color: var(--sub); background: none; border: 0; padding: 0;
   border-bottom: 1px dotted var(--muted); cursor: help; font-family: inherit;

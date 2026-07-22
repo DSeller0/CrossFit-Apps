@@ -14,11 +14,24 @@ import s from './rail.module.css'
 // Full-width 7-day Sunday-start grid. Each day shows its first session's name (or
 // "Descanso"); clicking selects it — the panel below swaps to that day. Selected +
 // today highlighted.
-export function WeekGrid({ sessions, box, selectedDate, onSelect }) {
+//
+// Also the Criador's collapsed day strip (#58 follow-up), which is why three
+// things are props rather than baked in:
+//   dates    — the week to draw. Defaults to the current one; the Criador browses
+//              weeks with its own offset and passes them in.
+//   filter   — which sessions count. Defaults to the public rule (visible + in
+//              box scope); the coach sees hidden sessions and filters by his own
+//              box selector instead, so he passes his.
+//   showCount — a "2" badge on days with more than one session. The public page
+//              only ever surfaces the first one, so it stays off there.
+const publicFilter = box => x => x.public !== false && inBoxScope(x, box)
+
+export function WeekGrid({ sessions, box, selectedDate, onSelect, dates, filter, showCount = false }) {
   const today = todayISO()
-  const days = getWeek(0).map(d => {
+  const keep = filter || publicFilter(box)
+  const days = (dates || getWeek(0)).map(d => {
     const key = toISO(d)
-    const list = (sessions?.[key] || []).filter(x => x.public !== false && inBoxScope(x, box))
+    const list = (sessions?.[key] || []).filter(keep)
     return {
       key, dow: d.getDay(), num: d.getDate(), count: list.length,
       name: list[0] ? sessName(list[0], key) : '',
@@ -29,10 +42,12 @@ export function WeekGrid({ sessions, box, selectedDate, onSelect }) {
     <div className={s.week}>
       {days.map(d => (
         <button key={d.key} type="button" onClick={() => onSelect(d.key)}
+          aria-current={d.key === selectedDate ? 'true' : undefined}
           className={`${s.wd}${d.key === selectedDate ? ' ' + s.wdSel : ''}${d.isToday ? ' ' + s.wdToday : ''}`}>
           <span className={s.wdL}>{DAY_PT_TITLE[d.dow]}</span>
           <span className={s.wdN}>{d.num}</span>
           <span className={s.wdName}>{d.count ? d.name : 'Descanso'}</span>
+          {showCount && d.count > 1 && <span className={s.wdCount}>{d.count}</span>}
           {d.count > 0 && <span className={s.wdDot} />}
         </button>
       ))}

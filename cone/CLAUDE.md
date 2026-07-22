@@ -40,11 +40,34 @@ can't carry — a *new* session is being edited but has no id/dateKey yet).
   block (date · name · audience · visibility · box tags · briefing) — it was a
   permanent slab above the blocks. It holds a **draft** and commits on confirm, so
   Cancelar really cancels; the athlete picker is **inline inside it**, not a second
-  modal on top. The move-to-another-date confirm stays in `Criador.jsx` (only the
-  container knows whether the session is saved, and on which day).
-- **Desktop keeps the week in view** while editing, auto-collapsed to the existing
-  day strip (`weekGridCollapsed`); **mobile hides it** and the editor takes over
-  with a `‹ Voltar à semana` link.
+  modal on top; the briefing is **always visible** (it was a disclosure — a seventh
+  field in a dialog doesn't need folding). It opens from an **icon-only gear beside
+  the Público/Oculto tag in the editor title**, not from the action cluster: what it
+  edits is what the title shows. The move-to-another-date confirm stays in
+  `Criador.jsx` (only the container knows whether the session is saved, and on which
+  day). Editor header order is **gear · Template · TV Preview · Salvar · ✕**.
+- **Desktop keeps the week in view** while editing, auto-collapsed to a day strip
+  (`weekGridCollapsed`); **mobile hides it** and the editor takes over with a
+  `‹ Voltar à semana` link. That strip **is the index's own `WeekGrid`**
+  (`public/index/rail.jsx`), not a private one — it shows each day's *session name*,
+  which the retired `dayChip` set didn't. Three props exist for the coach's case:
+  `dates` (he browses other weeks), `filter` (he sees `public:false` sessions and
+  filters by his own box selector) and `showCount` (he has more than one session a
+  day; the index renders only the first, so it stays off there). Imported aliased —
+  `criador/WeekGrid.jsx` exports a `WeekGrid` of its own, the 7-column card grid.
+- **The week picker + box tabs are sticky (`cr.stickyHead`); the toolbar and Avisos
+  are not** — the two controls that decide *what* the grid shows stay reachable, the
+  rest is content. Offset is **`var(--spa-sticky-top)`** (`index.css`), not the flat
+  `88px` that `.ql-sess-bar`/`.sync-conflict-banner` still hardcode: that figure is
+  topbar + tab bar, and at ≥768px the tab bar is `display:none` and the sidebar takes
+  over, so 88px parks the block 39px *below* its own flow position, on top of Avisos.
+- **Opening a session scrolls to the top of the page**, not to the editor —
+  `scrollIntoView` on the editor put the day strip and the session header above the
+  fold, so you landed mid-form not knowing which day you were on.
+- **Closing the editor asks before discarding** (`requestClose` → `pendingClose`
+  `ConfirmReview`), and only when `isDirty`. The close control is the same red ✕ as
+  the exercise delete; it always threw the edit away, but as a red ✕ beside *Salvar*
+  it is one slip from losing a session.
 - **`block.goal` is the one new persisted field (#10)** — `{kind:'time'|'rounds'
   |'text', min?, max?, reps?, text?}`, written by `criador/GoalInput.jsx` (type-aware
   via `goalKindFor` in `blockModel.js`) and by textFormat's `parseGoal`, same shape
@@ -166,7 +189,7 @@ updated_at           BIGINT
 3. `src/public/schedule/Schedule.jsx` → exercise rows
 
 **Shared components (`src/public/shared/`)** — each renders in the gallery:
-- `ExerciseList.jsx` — read-only exercise rows. **Sizes: `tiny` (12–15px, phone/web — LogPane, WodBlockCard) · `compact` (22–26px, TV-wall scale) · `large` (30–42px, TV).** `compact` is *not* a web-page size; picking it for a phone card is the mistake #51 made and fixed.
+- `ExerciseList.jsx` — read-only exercise rows. **Sizes: `grid` (tiny's scale with a 12px name, Criador week column) · `tiny` (12–15px, phone/web — LogPane, WodBlockCard) · `compact` (22–26px, TV-wall scale) · `large` (30–42px, TV).** `compact` is *not* a web-page size; picking it for a phone card is the mistake #51 made and fixed. **`grid` exists because `tiny` is shared** — a 200px column needs the 12px name and the intensity on its own line (inline, `63/70/75/80/85 %` clips at the column edge), and `tiny`'s other consumers are not in a 200px column. Its body is a **text block, not a flex row**: `flex-wrap` split the vol off onto its own line whenever the name was too long to sit beside it, so vol and name are inline and wrap as one run, and only `ins` is forced to break.
 - `RankList.jsx` — the one ranking list (leaderboard + both results panes; 3 divergent copies collapsed in #51). Scale/perf are fixed **left-aligned** columns; rows go **two-line via a container query** (`@container (max-width:400px)`) because the list is narrow both on a phone and inside results' 300px desktop pane. Podium via `--podium-*`. TV's podium rows deliberately stay separate (wall-display CSS).
 - `AccordionCard.jsx` — the disclosure shell behind results' `SessionCard` and leaderboard's `WodCard`. One keyboard contract / `aria-expanded` / chevron; the two headers stay separate because they carry different data.
 - `WodBlockCard.jsx` — the WOD above a ranking (family rule + type badge + `ExerciseList`, then date · session footer). Same shape as TV's `BlockCard`.
@@ -209,7 +232,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 - Font: `var(--font)` → Cinzel (TotK themes) or Amarante (Spirit Blossom themes). Loaded weights (`src/fonts.js`): Cinzel **400/500/600/700/800/900** (500 + 800 added in #52, the first session to touch a weight-800 use), Crimson Pro 400/600, Amarante 400 **only** — Amarante ships no bold upstream, so its synthesized bolds are by design.
 - All UI strings: pt-BR.
 - **Design process is component-driven, two lanes (WORKFLOW.md "Design work"):** the all-states source of truth is the **in-app component gallery** (`gallery.html`, dev-only), which renders the *real* components — Lane A (changing existing UI) is gallery-first, no static mockup; Lane B (net-new) does a Claude Design ideation mockup first, then the built component enters the gallery. The moment code exists, the gallery is the truth — never hand-maintain a mirror. Claude Design (`cone/design/` → "Cone Design System" project) is token canon + **generated component cards** + Lane-B ideation + a screenshot archive, not a mirror.
-- **Component gallery:** `gallery.html` (repo root) + `cone/src/public/gallery/` (`main.jsx`, `Gallery.jsx`) — theme switcher + width toggle rendering the real components in every state from mock fixtures; `GROUPS` holds 46 items across **SPA**/**Criador**/Shared/Results/Leaderboard/Me/Schedule/**Index** (the **SPA** group = the #54/C0 primitives `Button`/`Input`/`MaskedTimeInput`/`Card`/`ConfirmReview`; the **Criador** group = #92's text mode (`SessionTextPane`/`BlockTextEditor`/`WeekSessionCard`/`WeekImportModal`) plus #58's `GoalInput`/`SessionMetaModal`; the Index group = the #53 landing-page pieces: `WeekGrid`/`DaySessionCard`/`DayRanking`/`BoxWarnings`, all from `src/public/index/rail.jsx`), picked from a sidebar. (The SPA group's card generates as `design/components/spa.html` — `design:cards` derives the filename from `group.toLowerCase()`, so that group name is a single clean token, not "SPA / UI".) **Dev-only:** NOT in `vite.public.config.js` `input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built/deployed. Grows page-by-page as components are extracted (#17).
+- **Component gallery:** `gallery.html` (repo root) + `cone/src/public/gallery/` (`main.jsx`, `Gallery.jsx`) — theme switcher + width toggle rendering the real components in every state from mock fixtures; `GROUPS` holds 46 items across **SPA**/**Criador**/Shared/Results/Leaderboard/Me/Schedule/**Index** (the **SPA** group = the #54/C0 primitives `Button`/`Input`/`MaskedTimeInput`/`Card`/`ConfirmReview`; the **Criador** group = #92's text mode (`SessionTextPane`/`BlockTextEditor`/`WeekSessionCard`/`WeekImportModal`) plus #58's `GoalInput`/`SessionMetaModal`; the Index group = the #53 landing-page pieces: `WeekGrid`/`DaySessionCard`/`DayRanking`/`BoxWarnings`, all from `src/public/index/rail.jsx` — `WeekGrid` carries a second case for its Criador day-strip use, `filter`+`showCount`), picked from a sidebar. (The SPA group's card generates as `design/components/spa.html` — `design:cards` derives the filename from `group.toLowerCase()`, so that group name is a single clean token, not "SPA / UI".) **Dev-only:** NOT in `vite.public.config.js` `input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built/deployed. Grows page-by-page as components are extracted (#17).
 - **`npm run design:cards`** (`vite.design.config.js` + `scripts/build-design-cards.mjs`) SSRs the gallery's exported `GROUPS` into the self-contained Claude Design cards — real markup + real CSS + inlined themes/fonts + a 4-theme switcher — so Claude Design can read and compose from actual component markup. Cards are a **build artifact: never hand-edit one**, change the component and re-run (Lane A ends with regenerate + sync). Cards can't load the `ti` webfont or any external URL (CSP), so `results`/`schedule` cards show blank icon gaps — expected, noted on the card itself. `tokens/palette.html` is generated from `themes.css`, which is what finally killed its 13-vs-29 token drift. Details: `cone/design/README.md`.
 - Design-pass program (restructured #27/#28, sessions #49–#59): `docs/plans/16-design-pass-program.md`. Product docs: `docs/FEATURES.md` (feature catalog + gate candidates), `docs/PRODUCT.md` (personas/tiers), `docs/MOBILE.md` (Android/iOS assessment — do nothing until a trigger fires). Consolidated interactive view: `docs/site/cone-docs.html` (open via `file://` — repo-only, NOT in the deploy whitelist by design; interactive tier board + coach-services worksheet for the tier meeting, full screenshot baseline in `docs/site/img/`; snapshot of the .md docs, regenerate on request).
 

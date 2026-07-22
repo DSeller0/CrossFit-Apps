@@ -13,6 +13,9 @@
 /* mobile: a dot instead of the (too-wide-for-51px) session name; desktop shows the name */
 .wdName { display: none; font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--sub); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wdDot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }
+/* Opt-in (`showCount`) — only where more than one session a day is a thing the
+   surface has to show. The index never does: it renders the first one and stops. */
+.wdCount { font-size: 9px; font-weight: 700; color: var(--gold); line-height: 1; }
 @media (min-width: 768px) {
   .wdName { display: block; }
   .wdDot { display: none; }

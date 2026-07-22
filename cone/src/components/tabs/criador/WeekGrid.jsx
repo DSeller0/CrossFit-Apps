@@ -1,11 +1,16 @@
 import { useState } from 'react';
-import { uid, toISO, todayISO } from '../../../utils/storage';
+import { uid, toISO } from '../../../utils/storage';
 import { DAY_PT } from '../../../public/lib/week.js';
 import { sessName } from '../../../public/lib/sessions.js';
 import { sessionBoxIds } from '../../../public/lib/boxScope.js';
 import { serializeSession } from './textFormat.js';
 import { BoxWarnings } from './BoxWarnings';
 import { WeekSessionCard } from './WeekSessionCard';
+// The index's own week strip, reused verbatim (#58 follow-up) — it shows each day's
+// SESSION NAME, which the Criador's old chip strip didn't, so the coach can see
+// what Thursday holds without leaving Wednesday. Aliased: this file exports a
+// `WeekGrid` of its own (the 7-column card grid), which is a different thing.
+import { WeekGrid as DayStrip } from '../../../public/index/rail.jsx';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import Button from '../../ui/Button.jsx';
 import s from './textMode.module.css';
@@ -54,7 +59,7 @@ function BoxDots({ session, boxLocs, show }) {
 export function WeekGrid({
   gridRef, weekOffset, setWeekOffset, weekLabel, weekGridCollapsed, setWeekGridCollapsed,
   boxLocs, selBox, setSelBox, boxWarnings, addWarning, patchWarning, removeWarning,
-  weekDates, sessions, setSessions, boxFilter, editing, highlightedSessionId,
+  weekDates, sessions, setSessions, boxFilter, editing, activeDate, highlightedSessionId,
   startEdit, onDelete, onPickDay, gridMode, setGridMode, onImport,
 }) {
   const isMobile = useIsMobile();
@@ -105,6 +110,11 @@ export function WeekGrid({
 
   return (
     <div ref={gridRef}>
+      {/* Week picker + box tabs stay pinned under the tab bar while the grid
+          scrolls — they are how you change what the grid is showing, so scrolling
+          away from them means scrolling back up to switch week or box. Avisos and
+          the page toolbar above deliberately scroll: they are not navigation. */}
+      <div className={cr.stickyHead}>
       <div className={cr.weekBar}>
         <Button size="sm" iconOnly aria-label="Semana anterior" onClick={() => setWeekOffset(o => o-1)}>
           <i className="ti ti-chevron-left" />
@@ -155,29 +165,23 @@ export function WeekGrid({
           })}
         </div>
       )}
+      </div>
       <BoxWarnings
         selBox={selBox} boxLocs={boxLocs} boxWarnings={boxWarnings}
         addWarning={addWarning} patchWarning={patchWarning} removeWarning={removeWarning}
       />
       {weekGridCollapsed ? (
+        /* Collapsed = the index's week strip. Same component the athletes see, with
+           the coach's own filter (he sees hidden sessions) and his browsed week. */
         <div className={cr.dayStrip}>
-          {weekDates.map((date, di) => {
-            const dateKey = toISO(date);
-            const list = (sessions[dateKey] || []).filter(boxFilter);
-            const isToday = dateKey === todayISO();
-            const isEditing = (sessions[dateKey] || []).some(x => x.id === editing?.id);
-            return (
-              <button key={dateKey} type="button"
-                className={`${cr.dayChip}${isToday ? ' ' + cr.dayChipToday : ''}${isEditing ? ' ' + cr.dayChipActive : ''}`}
-                aria-current={isEditing ? 'true' : undefined}
-                aria-label={`${DAY_PT[di]} ${date.getDate()} — ${list.length} sessão(ões)`}
-                onClick={() => onPickDay(dateKey)}>
-                <span className={cr.dayChipDay}>{DAY_PT[di]}</span>
-                <span className={cr.dayChipNum}>{date.getDate()}</span>
-                {list.length > 0 && <span className={cr.dayChipCount}>{list.length}</span>}
-              </button>
-            );
-          })}
+          <DayStrip
+            sessions={sessions}
+            dates={weekDates}
+            filter={boxFilter}
+            showCount
+            selectedDate={activeDate}
+            onSelect={onPickDay}
+          />
         </div>
       ) : isMobile ? (
         /* ── Mobile: the columns stack. A card is collapsed until tapped, then

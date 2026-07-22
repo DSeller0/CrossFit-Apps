@@ -17,7 +17,6 @@ import s from './criador.module.css';
 export function SessionMetaModal({ initial, athletes = [], boxLocs = [], isEdit = false, onCancel, onConfirm }) {
   const [d, setD] = useState(initial);
   const [showAth, setShowAth] = useState(false);
-  const [showNotes, setShowNotes] = useState(!!initial.notes);
 
   // Escape cancels — the draft is discarded either way, so it's a safe dismissal.
   useEffect(() => {
@@ -125,19 +124,12 @@ export function SessionMetaModal({ initial, athletes = [], boxLocs = [], isEdit 
             </div>
           )}
 
-          <div>
-            <button type="button" className={s.disclosure} aria-expanded={showNotes}
-              onClick={() => setShowNotes(v => !v)}>
-              <i className={`ti ti-chevron-${showNotes ? 'up' : 'down'}`} aria-hidden="true" />
-              Briefing da sessão
-              {d.notes ? <span className={s.disclosureDot} aria-label="preenchido">●</span> : null}
-            </button>
-            {showNotes && (
-              <Input as="textarea" label="Briefing" className={s.mt2}
-                placeholder="Contexto, objetivos, link de vídeo, regras..."
-                value={d.notes || ''} onChange={e => set({ notes: e.target.value })} />
-            )}
-          </div>
+          {/* Always open. It was behind a disclosure, which cost a click on every
+              session that has a briefing and hid the field on every one that
+              should. There are six fields here; a seventh doesn't need folding. */}
+          <Input as="textarea" label="Briefing da sessão"
+            placeholder="Contexto, objetivos, link de vídeo, regras..."
+            value={d.notes || ''} onChange={e => set({ notes: e.target.value })} />
         </div>
 
         <div className={s.modalFoot}>

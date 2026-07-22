@@ -91,11 +91,6 @@ export function SessionTextPane({ blocks, onApply, onCancel, registry, blockName
         <button type="button" className={s.fmtHelp} onClick={() => setShowHelp(v => !v)} aria-expanded={showHelp}>
           ⓘ Formato
         </button>
-        <span className={s.paneSpacer} />
-        {onCancel && <Button size="sm" onClick={onCancel}>Descartar</Button>}
-        <Button size="sm" variant="primary" onClick={() => onApply(parsed)} disabled={!parsed.length}>
-          <i className="ti ti-check" /> Aplicar
-        </Button>
       </div>
       {showHelp && <div className={s.fmtBox}>{FORMAT_HELP}</div>}
 
@@ -123,6 +118,15 @@ export function SessionTextPane({ blocks, onApply, onCancel, registry, blockName
             </div>
           )}
         </div>
+      </div>
+
+      {/* Commit row at the FOOT of the pane — you decide after reading the preview,
+          not before. Right-aligned, so it lands where the eye leaves the page. */}
+      <div className={s.paneFoot}>
+        {onCancel && <Button size="sm" onClick={onCancel}>Descartar</Button>}
+        <Button size="sm" variant="primary" onClick={() => onApply(parsed)} disabled={!parsed.length}>
+          <i className="ti ti-check" /> Aplicar
+        </Button>
       </div>
 
       {pickForIdx != null && TypePicker && (

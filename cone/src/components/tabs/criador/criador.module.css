@@ -16,6 +16,16 @@
 .toolbarSpacer { flex: 1 }
 
 /* ── Week bar / box tabs / collapsed day strip ───────────────────────────── */
+/* The two controls that decide WHAT the grid shows stay pinned while it scrolls.
+   --spa-sticky-top (index.css) is the bottom of the app chrome, and it is a
+   variable because that chrome has two layouts — the flat 88px the other sticky
+   bars use is 39px too low once the sidebar replaces the tab bar, which parks
+   this block on top of Avisos. Below the tab bar's z-index, above the grid.
+   The toolbar and Avisos are content, not navigation — they scroll away. */
+.stickyHead {
+  position: sticky; top: var(--spa-sticky-top, 88px); z-index: 40;
+  background: var(--bg); padding-top: var(--sp-1);
+}
 .weekBar {
   display: flex; align-items: center; gap: var(--sp-2);
   margin-bottom: var(--sp-2); flex-wrap: wrap;
@@ -24,24 +34,11 @@
 .boxTabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: var(--sp-1) }
 .boxTabs .pill { flex-shrink: 0; white-space: nowrap }
 
-.dayStrip { display: flex; gap: var(--sp-1); overflow-x: auto; padding-bottom: var(--sp-1); margin-bottom: var(--sp-3) }
-.dayChip {
-  flex-shrink: 0; min-width: 52px; padding: 6px 8px; cursor: pointer;
-  background: var(--stone); border: 1px solid var(--divider); border-radius: var(--radius-sm);
-  display: flex; flex-direction: column; align-items: center; gap: 2px; font-family: inherit;
-}
-.dayChip:hover { border-color: var(--dim) }
-.dayChip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
-.dayChipDay { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em }
-.dayChipNum { font-size: 15px; font-weight: 700; color: var(--sub) }
-.dayChipCount { font-size: 10px; color: var(--accent); font-weight: 700 }
-.dayChipToday { border-color: var(--gold) }
-.dayChipToday .dayChipDay, .dayChipToday .dayChipNum { color: var(--gold) }
-.dayChipActive {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-}
-.dayChipActive .dayChipNum { color: var(--accent) }
+/* Just the spacing around the index's own week strip — the chips themselves are
+   that component's (rail.module.css). The Criador's private .dayChip* set was
+   retired with it: two strips for the same job, one of which showed the day's
+   session name and one of which didn't. */
+.dayStrip { margin-bottom: var(--sp-3) }
 
 .mobileList { border: 1px solid var(--divider); border-radius: var(--radius-md); overflow: hidden; margin-bottom: var(--sp-3) }
 
@@ -178,14 +175,6 @@
 .athRow input { width: 14px; height: 14px }
 .athName { flex: 1; min-width: 0 }
 .athLevel { font-size: 11px; color: var(--dim) }
-
-.disclosure {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: inherit; font-size: 11.5px; color: var(--sub);
-  background: none; border: 0; padding: 2px 0; cursor: pointer;
-}
-.disclosure:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
-.disclosureDot { color: var(--teal); font-size: 10px }
 
 /* Block meta fields (Duração / Rounds / Zona) — the C0 Input in the existing
    .blk-meta-row flex row, which is what retires .blk-meta-field's 7px radius. */

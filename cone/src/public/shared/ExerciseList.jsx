@@ -1,8 +1,10 @@
 import { exVolStr, fmtIntensity } from '../lib/wod.js'
 import s from './ExerciseList.module.css'
 
+const SIZE_CLS = { large: 'large', tiny: 'tiny', grid: 'grid' }
+
 export function ExerciseList({ exercises = [], color, size = 'compact' }) {
-  const cls = `${s.list} ${size === 'large' ? s.large : size === 'tiny' ? s.tiny : ''}`
+  const cls = `${s.list} ${s[SIZE_CLS[size]] || ''}`
 
   return (
     <div className={cls}>

@@ -457,6 +457,17 @@ const idxSessions = Object.fromEntries(
   [1, 2, 3, 4, 5].map(i => [toISO(idxWeek[i]), [{ id: 's' + i, public: true, sessionName: idxNames[i] }]])
 )
 const idxToday = toISO(idxWeek[new Date().getDay()])
+// The same week as the COACH sees it in the Criador's day strip: a second session
+// on Wednesday (the count badge) and a hidden one on Saturday (which his filter
+// keeps and the public one drops).
+const idxSessionsCoach = {
+  ...idxSessions,
+  [toISO(idxWeek[3])]: [
+    { id: 's3', public: true, sessionName: 'Treino C' },
+    { id: 's3b', public: true, sessionName: 'Treino C · turma 2' },
+  ],
+  [toISO(idxWeek[6])]: [{ id: 's6', public: false, sessionName: 'Open gym' }],
+}
 const idxRankRows = [
   { name: 'Bruna', scale: 'RX',    perf: '7:42' },
   { name: 'Léo',   scale: 'RX',    perf: '8:13' },
@@ -778,7 +789,7 @@ export const GROUPS = [
         id: 'criador-weeksessioncard',
         label: 'WeekSessionCard (grade da semana)',
         render: () => (
-          <Section title="WeekSessionCard" sub="src/components/tabs/criador/WeekSessionCard.jsx — o conteúdo do card dentro da grade da semana, nos dois modos. NÃO é tela nova: mesmas 7 colunas, mesmo filtro de box. Grade usa o ExerciseList real (tamanho tiny); Texto usa serializeSession — o copiável, e o único que carrega estrutura, Meta: e notas.">
+          <Section title="WeekSessionCard" sub="src/components/tabs/criador/WeekSessionCard.jsx — o conteúdo do card dentro da grade da semana, nos dois modos. NÃO é tela nova: mesmas 7 colunas, mesmo filtro de box. Grade usa o ExerciseList real (tamanho grid: nome 12px, intensidade em linha própria); Texto usa serializeSession — o copiável, e o único que carrega estrutura, Meta: e notas.">
             <Case label="Modo Grade · coluna de 200px (a largura real da grade)">
               <div style={gridColStyle}><WeekSessionCard session={{ blocks: txtMondayBlocks }} mode="grade" /></div>
             </Case>
@@ -930,6 +941,15 @@ export const GROUPS = [
             <Case label="Só nota (sem volume)"><ExerciseList exercises={[exNoteOnly]} color={GREEN} /></Case>
             <Case label="Vazio"><ExerciseList exercises={[]} color={AMBER} /></Case>
             <Case label="size='large' (TV)"><ExerciseList exercises={[exStandard, exComplex, exProgStepsOnly]} color={AMBER} size="large" /></Case>
+            <Case label="size='tiny' (LogPane / WodBlockCard)"><ExerciseList exercises={[exStandard, exProg, exComplex, exLong]} color={BLUE} size="tiny" /></Case>
+            {/* 200px wide on purpose: `grid` exists for the Criador week column, and
+                the two things it changes (12px name, intensity on its own line)
+                only read as fixes at the width that broke them. */}
+            <Case label="size='grid' (coluna da semana do Criador · 200px)">
+              <div style={{ width: 200, background: 'var(--stone2)', border: '1px solid var(--divider)', padding: 8 }}>
+                <ExerciseList exercises={[exStandard, exProg, exComplex, exLong]} color={AMBER} size="grid" />
+              </div>
+            </Case>
           </Section>
         ),
       },
@@ -1634,9 +1654,13 @@ export const GROUPS = [
         id: 'weekgrid',
         label: 'WeekGrid',
         render: () => (
-          <Section title="WeekGrid" sub="src/public/index/rail.jsx — grade da semana (começa no Dom), largura toda; cada dia mostra o nome da sessão (ou Descanso). Clicar seleciona o dia; hoje/selecionado em teal.">
+          <Section title="WeekGrid" sub="src/public/index/rail.jsx — grade da semana (começa no Dom), largura toda; cada dia mostra o nome da sessão (ou Descanso). Clicar seleciona o dia; hoje/selecionado em teal. Também é a tira de dias do Criador: dates/filter/showCount são props justamente por isso — o coach navega outras semanas, enxerga sessões ocultas e tem mais de uma sessão por dia.">
             <Case label="Semana atual (hoje selecionado)">
               <WeekGrid sessions={idxSessions} box={null} selectedDate={idxToday} onSelect={NOOP} />
+            </Case>
+            <Case label="showCount — uso do Criador (filtro do coach, sessões ocultas incluídas)">
+              <WeekGrid sessions={idxSessionsCoach} box={null} selectedDate={idxToday} onSelect={NOOP}
+                filter={() => true} showCount />
             </Case>
           </Section>
         ),
