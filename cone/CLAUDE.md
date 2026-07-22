@@ -55,11 +55,12 @@ can't carry — a *new* session is being edited but has no id/dateKey yet).
   filters by his own box selector) and `showCount` (he has more than one session a
   day; the index renders only the first, so it stays off there). Imported aliased —
   `criador/WeekGrid.jsx` exports a `WeekGrid` of its own, the 7-column card grid.
-- **With a session open the week is *always* the strip** — `collapsed = editorOpen ||
-  weekGridCollapsed`, and the week bar drops everything that acts on the card grid
-  (Grade/Texto, Copiar semana, Importar, the collapse toggle) because that grid isn't
-  on screen. What stays is navigation: week arrows, Hoje, box tabs. With nothing open
-  the card grid is still the landing surface and the toggle still works.
+- **The week grid stays exactly as it is while editing** — opening a session does
+  *not* collapse it, and the week bar keeps all its controls. The coach wants the
+  week's contents and the session he is editing on screen together; the collapsed
+  strip is a manual choice (the toggle), never something opening a session does for
+  him. Two earlier attempts — auto-collapse to the strip (#58) and then forcing the
+  strip whenever `editorOpen` — were both rejected on the same ground.
 - **`cr.stickyHead` pins week arrows + box tabs + the strip; the toolbar and Avisos
   scroll.** Two traps, both hit live:
   - **Offset is `var(--spa-sticky-top)`** (`index.css`), not the flat `88px` that
@@ -72,9 +73,13 @@ can't carry — a *new* session is being edited but has no id/dateKey yet).
     list. As a fragment its parent is the container holding the editor too.
   The strip is *inside* the sticky block, not below it: once the card grid is gone it
   **is** the week picker, and left below the bar it slid under it on every open.
-- **Opening a session scrolls to the session** (`editorRef.scrollIntoView`), with
-  `cr.editorScroll`'s `scroll-margin-top` clearing the pinned block — without it the
-  editor arrives with its header hidden underneath.
+- **Opening a session brings the editor into view and no further** (`scrollToEditor`
+  in `Criador.jsx`). At a normal window size the editor already sits below the grid
+  and in view, so opening a session **scrolls nothing at all** — that is the point:
+  scrolling it to the top would push the grid off screen and undo the bullet above.
+  It only moves from a scrolled-down position, or with the grid collapsed. It measures
+  rather than using a CSS `scroll-margin`, because the pinned block's height isn't
+  constant (week bar + box tabs, plus the strip when collapsed).
 - **Closing the editor asks before discarding** (`requestClose` → `pendingClose`
   `ConfirmReview`), and only when `isDirty`. The close control is the same red ✕ as
   the exercise delete; it always threw the edit away, but as a red ✕ beside *Salvar*

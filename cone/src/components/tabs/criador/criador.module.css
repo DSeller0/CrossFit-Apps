@@ -34,12 +34,6 @@
 .boxTabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: var(--sp-1) }
 .boxTabs .pill { flex-shrink: 0; white-space: nowrap }
 
-/* scrollIntoView puts an element's top at the viewport top — which is UNDER the
-   pinned week bar + box tabs, so the session header (day · name · box · the gear)
-   would arrive hidden. The margin is the chrome offset plus the sticky block's own
-   height, so the editor lands just below it. */
-.editorScroll { scroll-margin-top: calc(var(--spa-sticky-top, 88px) + 166px) }
-
 /* Just the spacing around the index's own week strip — the chips themselves are
    that component's (rail.module.css). The Criador's private .dayChip* set was
    retired with it: two strips for the same job, one of which showed the day's

@@ -105,6 +105,27 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
   const patchWarning  = (id, patch) => persistWarnings(boxWarnings.map(w => w.id === id ? { ...w, ...patch } : w));
   const removeWarning = id => persistWarnings(boxWarnings.filter(w => w.id !== id));
 
+  // Bring the session into view — and no further. Scrolling it to the top of the
+  // page would push the week grid off the screen, and the whole point of keeping
+  // the grid while editing is seeing the week and the session together: at a normal
+  // window size the editor is already below the grid and in view, so opening a
+  // session scrolls nothing at all. It only moves when the editor genuinely isn't
+  // visible — from a scrolled-down position, or with the grid collapsed.
+  //
+  // Not `scrollIntoView` with a CSS scroll-margin: the pinned block's height is not
+  // a constant (week bar + box tabs, plus the day strip when the grid is collapsed),
+  // so a fixed margin would be wrong in one of the two states. Measured, both work.
+  const scrollToEditor = () => {
+    const el = editorRef.current;
+    if (!el) return;
+    const chrome = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--spa-sticky-top'), 10) || 88;
+    const stuck = weekGridRef.current?.getBoundingClientRect().height || 0;
+    const safeTop = chrome + stuck + 8;   // first row of pixels the pinned chrome doesn't cover
+    const { top } = el.getBoundingClientRect();
+    if (top >= safeTop && top < window.innerHeight) return;
+    window.scrollTo({ top: Math.max(0, window.scrollY + top - safeTop), behavior: 'smooth' });
+  };
+
   // ── Opening / closing the editor ───────────────────────────────────────────
   const startEdit = (s, dateKey) => {
     const targets = getTargets(s);
@@ -113,13 +134,10 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setBlocks(s.blocks?.length ? normalizeLegacyCardio(s.blocks) : []);
     setEditing({ dateKey, id: s.id });
     setEditorOpen(true);
-    setWeekGridCollapsed(true);
     setIsDirty(false); setChangedBlockFields({}); setActiveTemplateId(null);
-    // To the session you opened. This was scroll-to-page-top for exactly as long as
-    // the card grid sat above the editor and pushed it off the fold — with the week
-    // reduced to the strip while editing, the session itself is the right target.
-    // cr.editorScroll's scroll-margin-top keeps it clear of the pinned week bar.
-    setTimeout(() => editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    // The week grid stays as it is — opening a session used to auto-collapse it to
+    // the strip, but the coach wants the week's contents in view while he edits.
+    setTimeout(scrollToEditor, 60);
   };
 
   // A new session inherits the browsing filter's box — the coach is almost always
@@ -143,7 +161,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
 
   const closeEditor = () => {
     setForm(emptyS()); setBlocks([]); setEditing(null); setEditorOpen(false);
-    setWeekGridCollapsed(false); setSessionMode('detalhado');
+    setSessionMode('detalhado');
     setIsDirty(false);
     setChangedBlockFields({}); setActiveTemplateId(null);
     setPendingClose(false);
@@ -176,13 +194,8 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setBlocks([]);
     setEditing(null);
     setEditorOpen(true);
-    setWeekGridCollapsed(true);
     setIsDirty(true); setChangedBlockFields({}); setActiveTemplateId(null);
-    // To the session you opened. This was scroll-to-page-top for exactly as long as
-    // the card grid sat above the editor and pushed it off the fold — with the week
-    // reduced to the strip while editing, the session itself is the right target.
-    // cr.editorScroll's scroll-margin-top keeps it clear of the pinned week bar.
-    setTimeout(() => editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    setTimeout(scrollToEditor, 60);
   };
 
   // Preload from another tab
@@ -209,7 +222,7 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
     setActiveTemplateId(tpl.id);
     setChangedBlockFields({});
     // A template applied from the week view has to land somewhere — open the editor.
-    if (!editorOpen) { setEditorOpen(true); setWeekGridCollapsed(true); }
+    if (!editorOpen) setEditorOpen(true);
     setIsDirty(true);
   };
   const deleteTemplate = id => {
@@ -596,13 +609,12 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
           onPickDay={pickDay}
           gridMode={gridMode} setGridMode={setGridMode}
           onImport={() => setShowImport(true)}
-          editorOpen={editorOpen}
         />
       )}
 
       {/* ── Session editor ── */}
       {editorOpen && (
-        <div ref={editorRef} className={cr.editorScroll}>
+        <div ref={editorRef}>
         <Card>
           <div className={cr.editorHd}>
             {isMobile && (
