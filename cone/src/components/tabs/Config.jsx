@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { loadSettings, saveSettings } from '../../utils/storage';
+import Button from '../ui/Button';
+import Input from '../ui/Input';
+import s from './Config.module.css';
 
 const THEMES = [
-  { id: 'totk-dark',              label: 'TotK Dark'              },
-  { id: 'totk-light',             label: 'TotK Light'             },
-  { id: 'spirit-blossom',         label: 'Spirit Blossom Dark'    },
-  { id: 'spirit-blossom-light',   label: 'Spirit Blossom Light'   },
+  { id: 'totk-dark',              label: 'TotK Dark',           swatch: 'swatchTotkDark'  },
+  { id: 'totk-light',             label: 'TotK Light',          swatch: 'swatchTotkLight' },
+  { id: 'spirit-blossom',         label: 'Spirit Blossom Dark', swatch: 'swatchSbDark'    },
+  { id: 'spirit-blossom-light',   label: 'Spirit Blossom Light',swatch: 'swatchSbLight'   },
 ];
 
 function getTheme() {
@@ -22,7 +25,7 @@ function applyTheme(id) {
 export default function ConfigTab() {
   const init = loadSettings();
   const [gymName, setGymName]   = useState(init.gymName || '');
-  const [gymSub,  setGymSub]   = useState(init.gymSub  || '');
+  const [gymSub,  setGymSub]    = useState(init.gymSub  || '');
   const [label,   setLabel]     = useState(init.label   || '');
   const [logo,    setLogo]      = useState(init.logo    || '');
   const [flash,   setFlash]     = useState(false);
@@ -35,59 +38,47 @@ export default function ConfigTab() {
   };
 
   return (
-    <div className="cfg-wrap">
+    <div className={s.wrap}>
 
-      <div className="cfg-section">
-        <div className="cfg-section-title">
+      <div className={s.section}>
+        <div className={s.sectionTitle}>
           <i className="ti ti-building-community" /> Academia
         </div>
 
-        <label className="cfg-field">
-          <span className="cfg-label">Nome da academia</span>
-          <input
-            className="cfg-input"
-            value={gymName}
-            onChange={e => setGymName(e.target.value)}
-            placeholder="Ex: Team Medrado"
-          />
-          <span className="cfg-hint">Aparece no hub público e no leaderboard.</span>
-        </label>
+        <Input
+          label="Nome da academia"
+          value={gymName}
+          onChange={e => setGymName(e.target.value)}
+          placeholder="Ex: Team Medrado"
+          hint="Aparece no hub público e no leaderboard."
+        />
 
-        <label className="cfg-field">
-          <span className="cfg-label">Modalidade</span>
-          <input
-            className="cfg-input"
-            value={gymSub}
-            onChange={e => setGymSub(e.target.value)}
-            placeholder="Ex: Cross Training"
-          />
-          <span className="cfg-hint">Subtítulo exibido na página inicial (padrão: Cross Training).</span>
-        </label>
+        <Input
+          label="Modalidade"
+          value={gymSub}
+          onChange={e => setGymSub(e.target.value)}
+          placeholder="Ex: Cross Training"
+          hint="Subtítulo exibido na página inicial (padrão: Cross Training)."
+        />
 
-        <label className="cfg-field">
-          <span className="cfg-label">Subtítulo / label</span>
-          <input
-            className="cfg-input"
-            value={label}
-            onChange={e => setLabel(e.target.value)}
-            placeholder="Ex: Box Zona Sul"
-          />
-          <span className="cfg-hint">Linha secundária usada nos relatórios exportados.</span>
-        </label>
+        <Input
+          label="Subtítulo / label"
+          value={label}
+          onChange={e => setLabel(e.target.value)}
+          placeholder="Ex: Box Zona Sul"
+          hint="Linha secundária usada nos relatórios exportados."
+        />
 
-        <label className="cfg-field">
-          <span className="cfg-label">URL do logo</span>
-          <input
-            className="cfg-input"
-            value={logo}
-            onChange={e => setLogo(e.target.value)}
-            placeholder="https://..."
-          />
-          <span className="cfg-hint">Imagem exibida na agenda e nos exports PDF.</span>
-        </label>
+        <Input
+          label="URL do logo"
+          value={logo}
+          onChange={e => setLogo(e.target.value)}
+          placeholder="https://..."
+          hint="Imagem exibida na agenda e nos exports PDF."
+        />
 
         {logo && (
-          <div className="cfg-logo-preview">
+          <div className={s.logoPreview}>
             <img
               src={logo}
               alt="Preview do logo"
@@ -97,33 +88,35 @@ export default function ConfigTab() {
         )}
       </div>
 
-      <div className="cfg-section">
-        <div className="cfg-section-title">
+      <div className={s.section}>
+        <div className={s.sectionTitle}>
           <i className="ti ti-palette" /> Tema
         </div>
-        <div className="cfg-theme-grid">
+        <div className={s.themeGrid}>
           {THEMES.map(t => (
             <button
               key={t.id}
-              className={'cfg-theme-btn' + (theme === t.id ? ' active' : '')}
+              type="button"
+              className={`${s.themeBtn}${theme === t.id ? ' ' + s.active : ''}`}
+              aria-pressed={theme === t.id}
               onClick={() => { applyTheme(t.id); setTheme(t.id); }}
             >
-              <span className={'cfg-theme-swatch theme-' + t.id} />
+              <span className={`${s.swatch} ${s[t.swatch]}`} />
               {t.label}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="cfg-save-row">
-        <button className="b bp" onClick={save} style={{ minWidth: 120 }}>
+      <div className={s.saveRow}>
+        <Button variant="primary" onClick={save} style={{ minWidth: 120 }}>
           {flash
             ? <><i className="ti ti-check" /> Salvo</>
             : <><i className="ti ti-device-floppy" /> Salvar</>
           }
-        </button>
+        </Button>
         {flash && (
-          <span className="cfg-flash">
+          <span className={s.flash}>
             Configurações salvas e sincronizadas.
           </span>
         )}

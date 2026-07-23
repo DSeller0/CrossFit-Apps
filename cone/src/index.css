@@ -599,51 +599,7 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
   .ql-scale-btn{font-size:11px}
 }
 
-/* ── Config tab ── */
-.cfg-wrap{max-width:520px;margin:0 auto;padding:24px 20px 60px}
-.cfg-section{
-  background:var(--stone,#161210);border:1px solid var(--divider,#2a231c);border-radius:12px;
-  padding:20px;margin-bottom:20px;display:flex;flex-direction:column;gap:16px
-}
-.cfg-section-title{
-  font-size:11px;font-weight:900;color:var(--accent,#4ac8c0);
-  letter-spacing:.12em;text-transform:uppercase;
-  display:flex;align-items:center;gap:7px
-}
-.cfg-field{display:flex;flex-direction:column;gap:5px;cursor:default}
-.cfg-label{font-size:12px;font-weight:700;color:var(--sub,#c8b090)}
-.cfg-hint{font-size:11px;color:var(--muted,#806850)}
-.cfg-input{
-  background:var(--bg,#0d0b09);border:1px solid var(--divider,#2a231c);border-radius:8px;
-  color:var(--text,#f0e8d0);font-family:inherit;font-size:14px;
-  padding:10px 13px;outline:none;transition:border-color .15s
-}
-.cfg-input:focus{border-color:var(--accent,#4ac8c0)}
-.cfg-input::placeholder{color:var(--dim,#554a3a)}
-.cfg-logo-preview{
-  display:flex;align-items:center;justify-content:center;
-  background:var(--bg,#0d0b09);border:1px solid var(--divider,#2a231c);border-radius:8px;
-  padding:14px;min-height:72px
-}
-.cfg-logo-preview img{max-height:56px;max-width:200px;object-fit:contain}
-.cfg-save-row{display:flex;align-items:center;gap:14px}
-.cfg-flash{font-size:12px;color:var(--accent,#4ac8c0)}
-.cfg-theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.cfg-theme-btn{
-  display:flex;align-items:center;gap:8px;padding:10px 12px;
-  background:var(--bg,#0d0b09);border:1px solid var(--divider,#2a231c);border-radius:8px;
-  color:var(--sub,#c8b090);font-family:inherit;font-size:12px;font-weight:600;
-  cursor:pointer;transition:border-color .15s,color .15s;text-align:left
-}
-.cfg-theme-btn:hover{border-color:var(--sub,#c8b090);color:var(--cream,#f0e8d0)}
-.cfg-theme-btn.active{border-color:var(--accent,#4ac8c0);color:var(--cream,#f0e8d0)}
-.cfg-theme-swatch{
-  width:16px;height:16px;border-radius:4px;border:1px solid rgba(255,255,255,.15);flex-shrink:0
-}
-.cfg-theme-swatch.theme-totk-dark{background:#0d0b09}
-.cfg-theme-swatch.theme-totk-light{background:#f5f0e8}
-.cfg-theme-swatch.theme-spirit-blossom{background:#1a0d14}
-.cfg-theme-swatch.theme-spirit-blossom-light{background:#fdf4f7}
+/* Config tab styles moved to Config.module.css (#55/C1). */
 
 /* ── Sync / conflict ─────────────────────────────────────────────────────── */
 .tb-btn.tb-sync-warn{border-color:#7a4a10;color:#e87820;animation:sync-pulse 2s ease-in-out infinite}

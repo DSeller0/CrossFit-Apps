@@ -1,17 +1,13 @@
 import { useState, useMemo } from 'react';
-import { loadRegistry, saveRegistry, loadSettings } from '../../utils/storage';
+import { loadRegistry, saveRegistry } from '../../utils/storage';
 import { normExName } from '../../public/lib/registry.js';
 import { APP_CONFIG, ECOL } from '../../utils/config';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import IntensityInput from '../shared/IntensityInput';
-
-const BG    = '#0d0b09';
-const STONE = '#161210';
-const DIV   = '#2a231c';
-const CREAM = '#f0e8d0';
-const SUB   = '#c8b090';
-const MUTED = '#806850';
-const DIM   = '#554a3a';
+import Button from '../ui/Button';
+import Input from '../ui/Input';
+import ConfirmReview from '../../public/shared/ConfirmReview';
+import s from './Exercicios.module.css';
 
 const BLOCK_ORDER = [
   'HIIT','MetCon','EMOM','For Time','AMRAP',
@@ -20,6 +16,10 @@ const BLOCK_ORDER = [
 ];
 
 const getExName = ex => typeof ex === 'string' ? ex : (ex?.name || '');
+// Alphabetical-within-category is the canonical stored order (#87) — the registry is a
+// lookup catalog, not an ordered playlist, so insertion order + a manual A→Z button /
+// drag-reorder are retired. Every mutation re-sorts the touched category here.
+const sortCat = arr => [...arr].sort((a, b) => getExName(a).localeCompare(getExName(b), 'pt'));
 
 const extractYouTubeId = url => {
   if (!url) return null;
@@ -36,9 +36,14 @@ function initRegistry() {
     let needsSave = false;
     BLOCK_ORDER.forEach(n => {
       if (!existing[n]) { reg[n] = []; needsSave = true; return; }
-      const raw = Array.isArray(existing[n]) ? existing[n] : [];
+      const raw      = Array.isArray(existing[n]) ? existing[n] : [];
       if (raw.some(e => typeof e === 'string')) needsSave = true;
-      reg[n] = raw.map(migrateEx);
+      const migrated = raw.map(migrateEx);
+      const sorted   = sortCat(migrated);
+      // reference-compare: sortCat reuses the same objects, so a positional diff means
+      // stored order wasn't alphabetical yet (#87) — persist the normalized order once.
+      if (sorted.some((e, i) => e !== migrated[i])) needsSave = true;
+      reg[n] = sorted;
     });
     if (needsSave) saveRegistry(reg);
     return reg;
@@ -54,16 +59,16 @@ export default function ExerciciosTab() {
   const [registry, setRegistryState] = useState(() => initRegistry());
   const [selBlock, setSelBlock]       = useState(null);
   const [pane,     setPane]           = useState(0);
+  const [search,   setSearch]         = useState('');
   const [adding,   setAdding]         = useState(false);
   const [newName,  setNewName]        = useState('');
   const [addError, setAddError]       = useState('');
   const [detail,   setDetail]         = useState(null);
-  const [dragFrom, setDragFrom]       = useState(null);
-  const [dragOver, setDragOver]       = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const isMobile = useIsMobile();
 
-  const blockColor = name => ECOL[name]?.text || MUTED;
+  const blockColor = name => ECOL[name]?.text || 'var(--muted)';
   const persist    = reg  => { saveRegistry(reg); APP_CONFIG.blockNames = ['-', ...BLOCK_ORDER]; };
   // Compared via normExName (#62) — not full alias resolution — so a name that only
   // differs by whitespace/case/accent still finds its own entry across categories
@@ -78,14 +83,20 @@ export default function ExerciciosTab() {
     return Object.values(map).sort((a, b) => getExName(a).localeCompare(getExName(b), 'pt'));
   }, [registry]);
 
-  const exsForPane = useMemo(() => (
-    selBlock === null ? allEx : (registry[selBlock] || [])
-  ), [registry, selBlock, allEx]);
+  // Category lists are already alpha-canonical (sortCat on every write); search filters
+  // the visible rows by the registry's own comparison key (accent/case/whitespace-safe).
+  const visibleExs = useMemo(() => {
+    const base = selBlock === null ? allEx : (registry[selBlock] || []);
+    const q = normExName(search);
+    if (!q) return base;
+    return base.filter(ex => normExName(getExName(ex)).includes(q));
+  }, [registry, selBlock, allEx, search]);
 
   // ── Navigation ──────────────────────────────────────────────────────────────
   const goToType = block => {
     setSelBlock(block);
     setDetail(null);
+    setSearch('');
     setAdding(false); setNewName(''); setAddError('');
     if (isMobile) setPane(1);
   };
@@ -125,9 +136,9 @@ export default function ExerciciosTab() {
     if ((registry[selBlock] || []).some(e => normExName(getExName(e)) === normExName(name))) {
       setAddError(`"${name}" já existe em ${selBlock}`); return;
     }
-    const reg = { ...registry, [selBlock]: [...(registry[selBlock] || []), { name }] };
+    const reg = { ...registry, [selBlock]: sortCat([...(registry[selBlock] || []), { name }]) };
     setRegistryState(reg); persist(reg);
-    setNewName(''); setAdding(false); setAddError('');
+    setNewName(''); setAdding(false); setAddError(''); setSearch('');
     goToEx({ name });
   };
 
@@ -157,85 +168,36 @@ export default function ExerciciosTab() {
     selectedBlocks.forEach(b => {
       if (!(reg[b] || []).some(e => normExName(getExName(e)) === nameKey)) reg[b] = [...(reg[b] || []), newEx];
       else reg[b] = (reg[b] || []).map(e => normExName(getExName(e)) === nameKey ? newEx : e);
+      reg[b] = sortCat(reg[b]);
     });
     setRegistryState(reg); persist(reg);
     setDetail(p => ({ ...p, origName: name, saved: true }));
     setTimeout(() => setDetail(p => p ? { ...p, saved: false } : p), 1500);
   };
 
-  const deleteEx = name => {
-    const inBlocks = blocksOf(name);
-    if (!window.confirm(`Remover "${name}" de ${inBlocks.length} tipo${inBlocks.length > 1 ? 's' : ''}?`)) return;
+  const confirmDelete = () => {
+    const name = pendingDelete;
+    if (!name) return;
     const reg = { ...registry };
     const nameKey = normExName(name);
-    inBlocks.forEach(b => { reg[b] = (reg[b] || []).filter(e => normExName(getExName(e)) !== nameKey); });
+    blocksOf(name).forEach(b => { reg[b] = (reg[b] || []).filter(e => normExName(getExName(e)) !== nameKey); });
     setRegistryState(reg); persist(reg);
+    setPendingDelete(null);
     setDetail(null);
     if (isMobile) setPane(1);
   };
 
-  const reorderExs = (from, to) => {
-    if (from == null || from === to || !selBlock) return;
-    const exs = [...registry[selBlock]];
-    const moved = exs.splice(from, 1)[0]; exs.splice(to, 0, moved);
-    const reg = { ...registry, [selBlock]: exs };
-    setRegistryState(reg); persist(reg);
-  };
-
-  const sortAZ = () => {
-    if (!selBlock) return;
-    const exs = [...(registry[selBlock] || [])].sort((a, b) => getExName(a).localeCompare(getExName(b), 'pt'));
-    const reg = { ...registry, [selBlock]: exs };
-    setRegistryState(reg); persist(reg);
-  };
-
-  const saveConfig = () => {
-    const savedSettings = loadSettings();
-    const exportCfg = {
-      appTitle: APP_CONFIG.appTitle, appDescription: APP_CONFIG.appDescription || '',
-      scheduleTitle: APP_CONFIG.scheduleTitle || APP_CONFIG.appTitle,
-      leaderboardTitle: APP_CONFIG.leaderboardTitle || APP_CONFIG.appTitle,
-      logo: APP_CONFIG.logo || 'icon-192.png',
-      fontFamily: APP_CONFIG.fontFamily || "'Arial Black',Arial,sans-serif",
-      googleFontsUrl: APP_CONFIG.googleFontsUrl || '',
-      themeAccent: APP_CONFIG.themeAccent, themeAccentText: APP_CONFIG.themeAccentText,
-      gymName: APP_CONFIG.gymName, fontScale: savedSettings.fontScale || 1.5,
-      logoScale: APP_CONFIG.logoScale || 1,
-      zoneScales: APP_CONFIG.zoneScales || [1, 1, 1],
-      blockTitleScales: APP_CONFIG.blockTitleScales || [1, 1, 1],
-      mobileEaglesBg: APP_CONFIG.mobileEaglesBg, mobileMegaManBg: APP_CONFIG.mobileMegaManBg,
-      mobileExerciseNoteColor: APP_CONFIG.mobileExerciseNoteColor,
-      restDayLabel: APP_CONFIG.restDayLabel, mobileWeeklyLabels: APP_CONFIG.mobileWeeklyLabels,
-      exportScale: savedSettings.exportScale || 2,
-      blockColors: APP_CONFIG.blockColors || {}, blockNames: ['-', ...BLOCK_ORDER],
-      athleteLevels: APP_CONFIG.athleteLevels, athleteGoals: APP_CONFIG.athleteGoals,
-      exerciseRegistry: registry, ...savedSettings,
-    };
-    const raw = window.prompt('Nome do arquivo (sem extensão):', 'config');
-    if (raw === null) return;
-    const fname = (raw.trim().replace(/[^a-zA-Z0-9_-]/g, '-') || 'config');
-    const blob  = new Blob([JSON.stringify(exportCfg, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a'); a.download = fname + '.json';
-    a.href = URL.createObjectURL(blob); a.click(); URL.revokeObjectURL(a.href);
-  };
-
-  // ── Section label helper ────────────────────────────────────────────────────
-  const SLabel = ({ children }) => (
-    <div style={{ fontSize: 9, fontWeight: 700, color: DIM, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>{children}</div>
-  );
-
   // ── Pane 1: Type list ───────────────────────────────────────────────────────
   const renderPane1 = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', overflowY: 'auto', flex: isMobile ? undefined : 1 }}>
+    <div className={`${s.typeList}${isMobile ? '' : ' ' + s.typeListFlex}`}>
       {(() => {
         const isSel = selBlock === null;
         return (
-          <div onClick={() => goToType(null)}
-            style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '11px 14px', background: isSel ? STONE : 'transparent', borderLeft: `3px solid ${isSel ? 'var(--theme-accent)' : 'transparent'}`, borderBottom: `1px solid ${DIV}`, cursor: 'pointer' }}>
-            <i className="ti ti-list" style={{ color: isSel ? 'var(--theme-accent)' : MUTED, fontSize: 13 }} />
-            <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: isSel ? CREAM : SUB, textTransform: 'uppercase', letterSpacing: '.05em' }}>Todos</span>
-            <span style={{ fontSize: 11, color: DIM }}>{allEx.length}</span>
-          </div>
+          <button type="button" className={`${s.navRow}${isSel ? ' ' + s.sel : ''}`} onClick={() => goToType(null)}>
+            <i className={`ti ti-list ${s.navIcon}`} />
+            <span className={s.navName}>Todos</span>
+            <span className={s.navCount}>{allEx.length}</span>
+          </button>
         );
       })()}
       {BLOCK_ORDER.map(name => {
@@ -243,13 +205,13 @@ export default function ExerciciosTab() {
         const cnt   = (registry[name] || []).length;
         const isSel = selBlock === name;
         return (
-          <div key={name} onClick={() => goToType(name)}
-            style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '11px 14px', background: isSel ? STONE : 'transparent', borderLeft: `3px solid ${isSel ? col : 'transparent'}`, borderBottom: `1px solid ${DIV}`, cursor: 'pointer', transition: 'background .1s' }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
-            <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: isSel ? CREAM : SUB, textTransform: 'uppercase', letterSpacing: '.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
-            <span style={{ fontSize: 11, color: isSel ? MUTED : DIM }}>{cnt}</span>
-            {isMobile && <i className="ti ti-chevron-right" style={{ color: DIM, fontSize: 12, flexShrink: 0 }} />}
-          </div>
+          <button key={name} type="button" className={`${s.navRow}${isSel ? ' ' + s.sel : ''}`} onClick={() => goToType(name)}
+            style={isSel ? { borderLeftColor: col } : undefined}>
+            <span className={s.navDot} style={{ background: col }} />
+            <span className={s.navName}>{name}</span>
+            <span className={s.navCount}>{cnt}</span>
+            {isMobile && <i className={`ti ti-chevron-right ${s.navChevron}`} />}
+          </button>
         );
       })}
     </div>
@@ -257,73 +219,74 @@ export default function ExerciciosTab() {
 
   // ── Pane 2: Exercise list ───────────────────────────────────────────────────
   const renderPane2 = () => {
-    const blockCol = selBlock ? blockColor(selBlock) : MUTED;
+    const blockCol = selBlock ? blockColor(selBlock) : 'var(--muted)';
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderBottom: `1px solid ${DIV}`, flexShrink: 0 }}>
+      <div className={s.pane2}>
+        <div className={s.paneHead}>
           {selBlock === null
-            ? <><i className="ti ti-list" style={{ color: MUTED, fontSize: 13 }} /><span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: MUTED, textTransform: 'uppercase', letterSpacing: '.06em' }}>Todos · {allEx.length}</span></>
-            : <><span style={{ width: 8, height: 8, borderRadius: '50%', background: blockCol, flexShrink: 0 }} /><span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: blockCol, textTransform: 'uppercase', letterSpacing: '.06em' }}>{selBlock}</span><span style={{ fontSize: 11, color: DIM }}>{exsForPane.length}</span></>
+            ? <><i className={`ti ti-list ${s.paneHeadIcon}`} /><span className={s.paneHeadTitle} style={{ color: 'var(--muted)' }}>Todos</span></>
+            : <><span className={s.paneHeadDot} style={{ background: blockCol }} /><span className={s.paneHeadTitle} style={{ color: blockCol }}>{selBlock}</span></>
           }
-          {selBlock && (
-            <button type="button" className="b bsm" style={{ padding: '3px 6px' }} onClick={sortAZ} title="A→Z">
-              <i className="ti ti-sort-ascending-letters" />
+          <span className={s.paneHeadCount}>{visibleExs.length}</span>
+        </div>
+
+        <div className={s.searchRow}>
+          <i className={`ti ti-search ${s.searchIcon}`} />
+          <input className={s.searchInput} type="text" value={search} placeholder="Buscar exercício..."
+            aria-label="Buscar exercício"
+            onChange={e => setSearch(e.target.value)} />
+          {search && (
+            <button type="button" className={s.searchClear} onClick={() => setSearch('')} aria-label="Limpar busca">
+              <i className="ti ti-x" />
             </button>
           )}
         </div>
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {exsForPane.length === 0
-            ? <div style={{ padding: 20, textAlign: 'center', color: DIM, fontSize: 12, fontStyle: 'italic' }}>
-                {selBlock ? 'Nenhum exercício. Adicione abaixo.' : 'Nenhum exercício cadastrado.'}
+
+        <div className={s.exScroll}>
+          {visibleExs.length === 0
+            ? <div className={s.empty}>
+                {search ? 'Nenhum exercício encontrado.' : (selBlock ? 'Nenhum exercício. Adicione abaixo.' : 'Nenhum exercício cadastrado.')}
               </div>
-            : exsForPane.map((ex, ei) => {
-                const name       = getExName(ex);
-                const hasVideo   = typeof ex === 'object' && !!ex.videoUrl;
-                const isPubl     = typeof ex === 'object' && ex.videoPublished === true;
-                const isActive   = detail?.origName === name;
-                const isDragOver = dragOver === ei;
-                const exTags     = selBlock === null ? blocksOf(name) : [];
+            : visibleExs.map(ex => {
+                const name     = getExName(ex);
+                const hasVideo = typeof ex === 'object' && !!ex.videoUrl;
+                const isPubl   = typeof ex === 'object' && ex.videoPublished === true;
+                const isActive = detail?.origName === name;
+                const exTags   = selBlock === null ? blocksOf(name) : [];
                 return (
-                  <div key={ei}
-                    draggable={selBlock !== null}
-                    onDragStart={selBlock !== null ? () => setDragFrom(ei) : undefined}
-                    onDragEnd={selBlock !== null ? () => { setDragFrom(null); setDragOver(null); } : undefined}
-                    onDragOver={selBlock !== null ? e => { e.preventDefault(); setDragOver(ei); } : undefined}
-                    onDrop={selBlock !== null ? e => { e.preventDefault(); reorderExs(dragFrom, ei); setDragOver(null); } : undefined}
-                    onClick={() => goToEx(ex)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderBottom: `1px solid ${DIV}`, background: isActive ? STONE : (isDragOver ? '#1a1410' : 'transparent'), borderLeft: `2px solid ${isActive ? 'var(--theme-accent)' : 'transparent'}`, cursor: 'pointer', transition: 'background .1s' }}>
-                    {selBlock !== null && <i className="ti ti-grip-vertical" style={{ color: DIM, fontSize: 13, flexShrink: 0, cursor: 'grab' }} />}
-                    <span style={{ flex: 1, fontSize: 13, color: isActive ? CREAM : SUB, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+                  <button key={name} type="button" className={`${s.exRow}${isActive ? ' ' + s.active : ''}`} onClick={() => goToEx(ex)}>
+                    <span className={s.exName}>{name}</span>
                     {selBlock === null && exTags.length > 0 && (
-                      <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
+                      <div className={s.exTags}>
                         {exTags.slice(0, 2).map(t => {
                           const c = blockColor(t);
-                          return <span key={t} style={{ fontSize: 9, fontWeight: 700, padding: '1px 4px', background: c + '22', color: c, textTransform: 'uppercase', letterSpacing: '.03em' }}>{t}</span>;
+                          return <span key={t} className={s.exTag} style={{ background: c + '22', color: c }}>{t}</span>;
                         })}
-                        {exTags.length > 2 && <span style={{ fontSize: 9, color: DIM }}>+{exTags.length - 2}</span>}
+                        {exTags.length > 2 && <span className={s.exTagMore}>+{exTags.length - 2}</span>}
                       </div>
                     )}
-                    {hasVideo && <i className="ti ti-video" style={{ color: isPubl ? '#4ac8c0' : DIM, fontSize: 11, flexShrink: 0 }} />}
-                    <i className="ti ti-chevron-right" style={{ color: DIM, fontSize: 12, flexShrink: 0 }} />
-                  </div>
+                    {hasVideo && <i className={`ti ti-video ${s.exVideoIcon}`} style={{ color: isPubl ? 'var(--teal)' : 'var(--dim)' }} />}
+                    <i className={`ti ti-chevron-right ${s.exChevron}`} />
+                  </button>
                 );
               })
           }
           {selBlock !== null && (
-            <div style={{ borderTop: `1px solid ${DIV}`, padding: '10px 12px' }}>
-              {addError && <div style={{ fontSize: 11, color: '#e05848', marginBottom: 6 }}>{addError}</div>}
+            <div className={s.addWrap}>
+              {addError && <div className={s.addError}>{addError}</div>}
               {adding ? (
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  <input autoFocus className="ex-input" placeholder="Nome do exercício..." value={newName} style={{ flex: 1 }}
+                <div className={s.addRow}>
+                  <input autoFocus className={s.addInput} placeholder="Nome do exercício..." value={newName}
+                    aria-label="Nome do novo exercício"
                     onChange={e => { setNewName(e.target.value); setAddError(''); }}
                     onKeyDown={e => { if (e.key === 'Enter') confirmAdd(); if (e.key === 'Escape') { setAdding(false); setNewName(''); setAddError(''); } }} />
-                  <button type="button" className="b bsec" style={{ padding: '6px 9px', flexShrink: 0 }} onClick={confirmAdd} disabled={!newName.trim()}><i className="ti ti-check" /></button>
-                  <button type="button" className="b bd" style={{ padding: '6px 9px', flexShrink: 0 }} onClick={() => { setAdding(false); setNewName(''); setAddError(''); }}><i className="ti ti-x" /></button>
+                  <Button variant="primary" iconOnly onClick={confirmAdd} disabled={!newName.trim()} aria-label="Confirmar"><i className="ti ti-check" /></Button>
+                  <Button variant="destructive" iconOnly onClick={() => { setAdding(false); setNewName(''); setAddError(''); }} aria-label="Cancelar"><i className="ti ti-x" /></Button>
                 </div>
               ) : (
-                <button type="button" className="b bsec" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setAdding(true)}>
+                <Button variant="primary" full onClick={() => setAdding(true)}>
                   <i className="ti ti-plus" /> Adicionar exercício
-                </button>
+                </Button>
               )}
             </div>
           )}
@@ -334,11 +297,7 @@ export default function ExerciciosTab() {
 
   // ── Pane 3: Exercise detail ─────────────────────────────────────────────────
   const renderPane3 = () => {
-    if (!detail) return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: DIM, fontSize: 12, fontStyle: 'italic', padding: 20, textAlign: 'center' }}>
-        Selecione um exercício para editar
-      </div>
-    );
+    if (!detail) return <div className={s.detailEmpty}>Selecione um exercício para editar</div>;
 
     const toggleTag = block => {
       setDetail(p => {
@@ -350,61 +309,59 @@ export default function ExerciciosTab() {
     const videoId = extractYouTubeId(detail.videoUrl);
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <div style={{ padding: '9px 14px', borderBottom: `1px solid ${DIV}`, flexShrink: 0 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: DIM, textTransform: 'uppercase', letterSpacing: '.07em' }}>Exercício</span>
+      <div className={s.pane3}>
+        <div className={s.detailHead}>
+          <span className={s.detailKicker}>Exercício</span>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className={s.detailBody}>
           {/* Name */}
-          <div>
-            <SLabel>Nome</SLabel>
-            <input className="ex-input" value={detail.name}
-              onChange={e => setDetail(p => ({ ...p, name: e.target.value, saved: false, error: undefined }))}
-              onKeyDown={e => { if (e.key === 'Enter') saveDetail(); }}
-            />
-          </div>
+          <Input label="Nome" value={detail.name}
+            onChange={e => setDetail(p => ({ ...p, name: e.target.value, saved: false, error: undefined }))}
+            onKeyDown={e => { if (e.key === 'Enter') saveDetail(); }}
+          />
 
           {/* Type tags */}
           <div>
-            <SLabel>Tipos</SLabel>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            <div className={s.sLabel}>Tipos</div>
+            <div className={s.tagWrap}>
               {BLOCK_ORDER.map(block => {
                 const col   = blockColor(block);
                 const isSel = detail.selectedBlocks.includes(block);
                 return (
-                  <span key={block} onClick={() => toggleTag(block)}
-                    style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', cursor: 'pointer', letterSpacing: '.04em', textTransform: 'uppercase', background: isSel ? col : 'transparent', color: isSel ? BG : col, border: `1px solid ${isSel ? col : col + '55'}`, transition: 'all .1s', userSelect: 'none' }}>
+                  <button key={block} type="button" className={s.tagToggle} onClick={() => toggleTag(block)} aria-pressed={isSel}
+                    style={{ background: isSel ? col : 'transparent', color: isSel ? 'var(--bg)' : col, border: `1px solid ${isSel ? col : col + '55'}` }}>
                     {block}
-                  </span>
+                  </button>
                 );
               })}
             </div>
-            {detail.error && <div style={{ fontSize: 11, color: '#e05848', marginTop: 6 }}>{detail.error}</div>}
+            {detail.error && <div className={s.fieldError}>{detail.error}</div>}
           </div>
 
           {/* Default loads — shown as ghost placeholders in the builder */}
           <div>
-            <SLabel>Cargas padrão (Criador)</SLabel>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
-              <input className="ex-input" style={{ width: 64 }} placeholder="Séries" value={detail.defaults.sets}
+            <div className={s.sLabel}>Cargas padrão (Criador)</div>
+            <div className={s.defRow}>
+              <input className={s.defInput} style={{ width: 64 }} placeholder="Séries" value={detail.defaults.sets} aria-label="Séries padrão"
                 onChange={e => setDetail(p => ({ ...p, defaults: { ...p.defaults, sets: e.target.value }, saved: false }))} />
-              <span style={{ color: MUTED, fontSize: 13 }}>×</span>
+              <span className={s.defTimes}>×</span>
               {detail.defaultsDistMode ? (
                 <>
-                  <input className="ex-input" style={{ width: 90 }} placeholder="Distância" value={detail.defaults.dist}
+                  <input className={s.defInput} style={{ width: 90 }} placeholder="Distância" value={detail.defaults.dist} aria-label="Distância padrão"
                     onChange={e => setDetail(p => ({ ...p, defaults: { ...p.defaults, dist: e.target.value }, saved: false }))} />
-                  <select className="ex-input" style={{ width: 74 }} value={detail.defaults.distUnit}
+                  <select className={s.defInput} style={{ width: 74 }} value={detail.defaults.distUnit} aria-label="Unidade de distância"
                     onChange={e => setDetail(p => ({ ...p, defaults: { ...p.defaults, distUnit: e.target.value }, saved: false }))}>
                     <option value="m">m</option><option value="cal">cal</option>
                   </select>
                 </>
               ) : (
-                <input className="ex-input" style={{ width: 90 }} placeholder="Reps" value={detail.defaults.reps}
+                <input className={s.defInput} style={{ width: 90 }} placeholder="Reps" value={detail.defaults.reps} aria-label="Reps padrão"
                   onChange={e => setDetail(p => ({ ...p, defaults: { ...p.defaults, reps: e.target.value }, saved: false }))} />
               )}
-              <button type="button" className={`ex-dist-toggle${detail.defaultsDistMode ? ' on' : ''}`}
+              <button type="button" className={`${s.distToggle}${detail.defaultsDistMode ? ' ' + s.on : ''}`}
                 onClick={() => setDetail(p => ({ ...p, defaultsDistMode: !p.defaultsDistMode, defaults: { ...p.defaults, ...(p.defaultsDistMode ? { dist: '' } : {}) }, saved: false }))}
+                aria-label={detail.defaultsDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}
                 title={detail.defaultsDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}>
                 <i className={`ti ${detail.defaultsDistMode ? 'ti-repeat' : 'ti-ruler-2'}`} />
               </button>
@@ -419,60 +376,50 @@ export default function ExerciciosTab() {
 
           {/* Video URL + published toggle */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <SLabel>Vídeo (YouTube)</SLabel>
-              <button type="button"
+            <div className={s.videoHead}>
+              <div className={s.sLabel} style={{ marginBottom: 0 }}>Vídeo (YouTube)</div>
+              <button type="button" className={`${s.pubToggle}${detail.videoPublished ? ' ' + s.on : ''}`}
                 onClick={() => setDetail(p => ({ ...p, videoPublished: !p.videoPublished, saved: false }))}
-                style={{ fontSize: 9, fontWeight: 900, padding: '3px 10px', letterSpacing: '.08em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'all .15s', background: detail.videoPublished ? '#4ac8c0' : DIM, color: detail.videoPublished ? BG : MUTED }}>
+                aria-pressed={detail.videoPublished}
+                aria-label={detail.videoPublished ? 'Vídeo publicado — clique para ocultar' : 'Vídeo oculto — clique para publicar'}>
                 {detail.videoPublished ? 'ON' : 'OFF'}
               </button>
             </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <input className="ex-input" placeholder="https://youtu.be/..." value={detail.videoUrl} style={{ flex: 1 }}
+            <div className={s.videoRow}>
+              <input className={s.videoInput} placeholder="https://youtu.be/..." value={detail.videoUrl} aria-label="URL do vídeo"
                 onChange={e => setDetail(p => ({ ...p, videoUrl: e.target.value, saved: false }))}
               />
               {videoId && (
-                <button type="button" className="b bsm" style={{ flexShrink: 0, padding: '0 12px' }} title="Pré-visualizar vídeo" onClick={() => setShowVideoModal(true)}>
+                <Button variant="secondary" iconOnly onClick={() => setShowVideoModal(true)} aria-label="Pré-visualizar vídeo" title="Pré-visualizar vídeo">
                   <i className="ti ti-player-play" />
-                </button>
+                </Button>
               )}
             </div>
           </div>
 
           {/* Description */}
-          <div>
-            <SLabel>Descrição</SLabel>
-            <textarea className="ex-input" placeholder="Descrição breve do movimento..." value={detail.description} rows={2}
-              style={{ resize: 'vertical', fontFamily: 'inherit' }}
-              onChange={e => setDetail(p => ({ ...p, description: e.target.value, saved: false }))}
-            />
-          </div>
+          <Input as="textarea" label="Descrição" placeholder="Descrição breve do movimento..." value={detail.description} rows={2}
+            onChange={e => setDetail(p => ({ ...p, description: e.target.value, saved: false }))}
+          />
 
           {/* Muscles */}
-          <div>
-            <SLabel>Músculo(s) Alvo(s)</SLabel>
-            <input className="ex-input" placeholder="Ex: Quadríceps, glúteos, isquiotibiais." value={detail.muscles}
-              onChange={e => setDetail(p => ({ ...p, muscles: e.target.value, saved: false }))}
-            />
-          </div>
+          <Input label="Músculo(s) Alvo(s)" placeholder="Ex: Quadríceps, glúteos, isquiotibiais." value={detail.muscles}
+            onChange={e => setDetail(p => ({ ...p, muscles: e.target.value, saved: false }))}
+          />
 
           {/* Notes / Detalhe */}
-          <div>
-            <SLabel>Detalhe</SLabel>
-            <textarea className="ex-input" placeholder="Observações, cuidados ou pontos de atenção..." value={detail.notes} rows={2}
-              style={{ resize: 'vertical', fontFamily: 'inherit' }}
-              onChange={e => setDetail(p => ({ ...p, notes: e.target.value, saved: false }))}
-            />
-          </div>
+          <Input as="textarea" label="Detalhe" placeholder="Observações, cuidados ou pontos de atenção..." value={detail.notes} rows={2}
+            onChange={e => setDetail(p => ({ ...p, notes: e.target.value, saved: false }))}
+          />
         </div>
 
-        <div style={{ borderTop: `1px solid ${DIV}`, padding: '10px 14px', display: 'flex', gap: 8, flexShrink: 0 }}>
-          <button type="button" className="b bsec" style={{ flex: 1 }} onClick={saveDetail}>
+        <div className={s.detailFoot}>
+          <Button variant="primary" full onClick={saveDetail}>
             {detail.saved ? <><i className="ti ti-check" /> Salvo</> : 'Salvar'}
-          </button>
-          <button type="button" className="b bd" style={{ padding: '0 12px' }} onClick={() => deleteEx(detail.origName)}>
+          </Button>
+          <Button variant="destructive" iconOnly onClick={() => setPendingDelete(detail.origName)} aria-label="Remover exercício">
             <i className="ti ti-trash" />
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -481,18 +428,18 @@ export default function ExerciciosTab() {
   // ── Video modal ─────────────────────────────────────────────────────────────
   const videoId = detail ? extractYouTubeId(detail.videoUrl) : null;
   const VideoModal = showVideoModal && videoId ? (
-    <div className="settings-overlay" onClick={() => setShowVideoModal(false)}>
-      <div className="settings-modal" style={{ maxWidth: 640 }} onClick={e => e.stopPropagation()}>
-        <div className="settings-drag-hdr">
-          <span style={{ fontSize: 13, fontWeight: 700, color: CREAM }}>{detail.name}</span>
-          <button type="button" className="b bd bsm" style={{ marginLeft: 'auto', padding: '3px 8px', minHeight: 24 }} onClick={() => setShowVideoModal(false)}>
+    <div className={s.overlay} onClick={() => setShowVideoModal(false)}>
+      <div className={s.modal} role="dialog" aria-modal="true" aria-label={detail.name} onClick={e => e.stopPropagation()}>
+        <div className={s.modalHead}>
+          <span className={s.modalTitle}>{detail.name}</span>
+          <Button variant="ghost" size="sm" iconOnly onClick={() => setShowVideoModal(false)} aria-label="Fechar">
             <i className="ti ti-x" />
-          </button>
+          </Button>
         </div>
-        <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#000' }}>
+        <div className={s.videoBox}>
           <iframe
+            className={s.videoFrame}
             src={`https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1`}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
             allowFullScreen
             allow="autoplay"
           />
@@ -501,58 +448,71 @@ export default function ExerciciosTab() {
     </div>
   ) : null;
 
-  // ── Footer ──────────────────────────────────────────────────────────────────
+  // ── Delete confirm ────────────────────────────────────────────────────────────
+  const deleteBlocks = pendingDelete ? blocksOf(pendingDelete) : [];
+  const DeleteConfirm = (
+    <ConfirmReview
+      open={!!pendingDelete}
+      title="Remover exercício"
+      editLabel="Cancelar"
+      confirmLabel="Remover"
+      onEdit={() => setPendingDelete(null)}
+      onClose={() => setPendingDelete(null)}
+      onConfirm={confirmDelete}
+    >
+      <div style={{ fontSize: 13, color: 'var(--sub)', lineHeight: 1.5 }}>
+        Remover <strong style={{ color: 'var(--cream)' }}>{pendingDelete}</strong> de{' '}
+        {deleteBlocks.length} tipo{deleteBlocks.length !== 1 ? 's' : ''}? Vídeo, cargas
+        padrão e descrição serão perdidos.
+      </div>
+    </ConfirmReview>
+  );
+
+  // ── Footer (count line) ───────────────────────────────────────────────────────
   const Footer = () => (
-    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: BG, borderTop: `1px solid ${DIV}`, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 10, zIndex: 50 }}>
-      <span style={{ fontSize: 11, color: DIM, flex: 1 }}>{BLOCK_ORDER.length} tipos · {allEx.length} exercícios</span>
-      <button type="button" className="b bsec" onClick={saveConfig}>
-        <i className="ti ti-download" /> Salvar config.json
-      </button>
+    <div className={s.footer}>
+      <span className={s.footerCount}>{BLOCK_ORDER.length} tipos · {allEx.length} exercícios</span>
     </div>
   );
 
   // ── Mobile layout ───────────────────────────────────────────────────────────
   if (isMobile) {
     const BackBtn = ({ label }) => (
-      <button type="button" className="rp-mobile-back" onClick={goBack}>
+      <button type="button" className={s.backBtn} onClick={goBack}>
         <i className="ti ti-chevron-left" /> {label}
       </button>
     );
     return (
-      <div style={{ background: BG, minHeight: '100%', paddingBottom: 70 }}>
+      <div className={s.mobileWrap}>
         {pane === 0 && renderPane1()}
         {pane === 1 && (
-          <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
+          <div className={s.mobilePane}>
             <BackBtn label="Tipos" />
             {renderPane2()}
           </div>
         )}
         {pane === 2 && (
-          <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
+          <div className={s.mobilePane}>
             <BackBtn label={selBlock || 'Todos'} />
             {renderPane3()}
           </div>
         )}
         <Footer />
         {VideoModal}
+        {DeleteConfirm}
       </div>
     );
   }
 
   // ── Desktop layout ──────────────────────────────────────────────────────────
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 120px)', minHeight: 400, background: BG }}>
-      <div style={{ width: 190, flexShrink: 0, borderRight: `1px solid ${DIV}`, overflowY: 'auto', paddingBottom: 60 }}>
-        {renderPane1()}
-      </div>
-      <div style={{ width: 250, flexShrink: 0, borderRight: `1px solid ${DIV}`, display: 'flex', flexDirection: 'column' }}>
-        {renderPane2()}
-      </div>
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingBottom: 60 }}>
-        {renderPane3()}
-      </div>
+    <div className={s.wrap}>
+      <div className={s.col1}>{renderPane1()}</div>
+      <div className={s.col2}>{renderPane2()}</div>
+      <div className={s.col3}>{renderPane3()}</div>
       <Footer />
       {VideoModal}
+      {DeleteConfirm}
     </div>
   );
 }

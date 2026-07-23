@@ -1,0 +1,44 @@
+/* Configurações tab (#55 · C1). Token-only; the fields + Salvar adopt the C0
+   primitives (Input/Button), this file carries the section + theme-grid chrome on
+   the --radius scale (was the .cfg-* block in index.css). */
+.wrap{ max-width:520px; margin:0 auto; padding:24px 20px 60px }
+
+.section{
+  background:var(--stone); border:1px solid var(--border); border-radius:var(--radius-md);
+  padding:20px; margin-bottom:20px; display:flex; flex-direction:column; gap:16px;
+}
+.sectionTitle{
+  font-size:11px; font-weight:900; color:var(--accent); letter-spacing:.12em;
+  text-transform:uppercase; display:flex; align-items:center; gap:7px;
+}
+
+.logoPreview{
+  display:flex; align-items:center; justify-content:center; background:var(--bg);
+  border:1px solid var(--divider); border-radius:var(--radius-md); padding:14px; min-height:72px;
+}
+.logoPreview img{ max-height:56px; max-width:200px; object-fit:contain }
+
+.saveRow{ display:flex; align-items:center; gap:14px }
+.flash{ font-size:12px; color:var(--accent) }
+
+.themeGrid{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
+.themeBtn{
+  display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--bg);
+  border:1px solid var(--divider); border-radius:var(--radius-md); color:var(--sub);
+  font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;
+  transition:border-color .15s,color .15s; text-align:left;
+}
+.themeBtn:hover{ border-color:var(--sub); color:var(--cream) }
+.themeBtn:focus-visible{ outline:2px solid var(--accent); outline-offset:1px }
+.themeBtn.active{ border-color:var(--accent); color:var(--cream) }
+
+.swatch{
+  width:16px; height:16px; border-radius:var(--radius-sm); border:1px solid var(--divider); flex-shrink:0;
+}
+/* Theme-preview swatches: each shows one theme's --bg regardless of the active theme,
+   so these are fixed identity colors (data), not theme surfaces. Values mirror the
+   per-theme --bg in themes.css. */
+.swatchTotkDark{ background:#0d0b09 }
+.swatchTotkLight{ background:#ede8dc }
+.swatchSbDark{ background:#09070f }
+.swatchSbLight{ background:#f4eefb }
