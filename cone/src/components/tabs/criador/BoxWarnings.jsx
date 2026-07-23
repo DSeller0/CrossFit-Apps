@@ -29,8 +29,12 @@ export function BoxWarnings({ selBox, boxLocs, boxWarnings, addWarning, patchWar
         <i className="ti ti-alert-triangle" aria-hidden="true" />
         <span className={s.warnTitle}>Avisos — {scopeName}</span>
         <span className={s.toolbarSpacer} />
+        {/* The sheet is a mobile affordance — on desktop the new row is edited
+            inline, so only open the sheet (setEditingId) on mobile. Without this
+            guard, adding a warning on desktop popped the mobile bottom sheet over
+            the inline list. */}
         <Button size="xs" variant="ghost"
-          onClick={() => setEditingId(addWarning(key))}>+ Adicionar</Button>
+          onClick={() => { const id = addWarning(key); if (isMobile) setEditingId(id); }}>+ Adicionar</Button>
       </div>
 
       {isMobile ? (
@@ -66,7 +70,7 @@ export function BoxWarnings({ selBox, boxLocs, boxWarnings, addWarning, patchWar
         ))
       )}
 
-      {editing && (
+      {isMobile && editing && (
         <div className="ex-sheet-backdrop" onClick={() => setEditingId(null)}>
           <div className="ex-sheet" onClick={e => e.stopPropagation()}>
             <div className="ex-sheet-handle" />
