@@ -129,8 +129,11 @@ export function BlockEditor({ block, idx, total, blockNames, onUpdate, onDelete,
           <i className={`ti ${cfg.icon}`} /> {block.type}
         </span>
 
-        {/* Custom name if set */}
-        {customName && <span className="blk-custom-name">{customName}</span>}
+        {/* Custom name — COLLAPSED only. Expanded, the body's own name input
+            (blk-name-input, below) already shows it; showing it twice was the
+            print-03 duplicate ("AQUECIMENTO · Mobilidade" in the bar, "Mobilidade"
+            again in the field one line down). */}
+        {collapsed && customName && <span className="blk-custom-name">{customName}</span>}
 
         {/* Summary (collapsed all types; expanded Estações: cap time only) */}
         {collapsed && summary && <span className="blk-summary">{summary}</span>}

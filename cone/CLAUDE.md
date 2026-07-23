@@ -73,6 +73,11 @@ can't carry — a *new* session is being edited but has no id/dateKey yet).
     list. As a fragment its parent is the container holding the editor too.
   The strip is *inside* the sticky block, not below it: once the card grid is gone it
   **is** the week picker, and left below the bar it slid under it on every open.
+  **The strip renders in the SAME slot the card grid occupies (below `BoxWarnings`),
+  not inside `stickyHead`** — an earlier version pinned it alongside the week bar,
+  which is *above* Avisos, while the expanded grid sits *below* Avisos: minimizing
+  silently swapped their vertical order (a real bug, caught live 2026-07-22). Collapse
+  is a manual choice only (see above), so the strip losing its pin costs nothing.
 - **Opening a session brings the editor into view and no further** (`scrollToEditor`
   in `Criador.jsx`). At a normal window size the editor already sits below the grid
   and in view, so opening a session **scrolls nothing at all** — that is the point:
@@ -84,6 +89,16 @@ can't carry — a *new* session is being edited but has no id/dateKey yet).
   `ConfirmReview`), and only when `isDirty`. The close control is the same red ✕ as
   the exercise delete; it always threw the edit away, but as a red ✕ beside *Salvar*
   it is one slip from losing a session.
+- **The editor header is two different layouts, not one that reflows** — desktop is
+  the single flex-wrap row; mobile is **4 explicit stacked rows** (close · date+name ·
+  box+visibility tags · actions). Forcing one flex-wrap row to break into exactly
+  those 4 groups at 390px would need the content to happen to fill each line right;
+  explicit row wrappers don't depend on that. Mobile drops the TV-preview button
+  (desktop-only pane) and the red ✕ (`‹ Voltar à semana` is already the close there).
+- **A block's custom name shows in the collapsed bar only** — expanded, the body's
+  own `blk-name-input` already carries it one line down, so showing it in the bar too
+  was a literal duplicate on screen (`{collapsed && customName && …}` in
+  `BlockEditor.jsx`).
 - **`block.goal` is the one new persisted field (#10)** — `{kind:'time'|'rounds'
   |'text', min?, max?, reps?, text?}`, written by `criador/GoalInput.jsx` (type-aware
   via `goalKindFor` in `blockModel.js`) and by textFormat's `parseGoal`, same shape
@@ -104,6 +119,32 @@ can't carry — a *new* session is being edited but has no id/dateKey yet).
   `21-15` with nothing on screen saying so — on a row with ~800px unused beside it.
   `.ex-qty-reps` (88px) / `.sheet-qty-reps` (130px) split them, and the tooltip
   carries the value so a ladder longer than the box is still readable.
+- **The mobile exercise sheet's distance field is value + unit side by side,
+  centered** (`.sheetDistInline`), not stacked. `.sheet-qty-field` (index.css,
+  global) is a column flexbox for every field in that sheet — value on top, label
+  under — which is right for a plain number but stacked the `m`/`cal` `<select>`
+  *under* the input instead of beside it for the one field with two controls.
+  `.sheetDistInline` wraps just those two, ahead of the shared label.
+- **The mobile exercise sheet's close button reads "Salvar alterações"**, matching
+  the header Salvar button elsewhere — it was "Feito", inconsistent wording for the
+  same action (the button has never gated a save; every field writes on change,
+  same as the box-warning sheet below).
+- **Mobile session-card actions are icon-only, pencil (edit) then trash** — no
+  "Editar" label. Same treatment as the editor header's gear/close.
+- **Mobile can have more than one day's card open at once** — `WeekGrid`'s
+  `openIds` is a `Set`, not a single id, so the coach can expand two days to
+  compare them without closing the first.
+- **Mobile box tabs wrap 4-per-row instead of scrolling** (`@media (max-width:600px)`
+  on `.boxTabs`, matching `useIsMobile`'s breakpoint) — a side-scrolling filter row
+  gives no visual hint there's more to the right; wrapping doesn't, since box counts
+  here stay small.
+- **`criador/BoxWarnings.jsx` forks on `useIsMobile`.** Desktop keeps the original
+  inline row (date input · message input · on/off toggle · remove, all live). Mobile
+  can't fit that row, so it renders compact read-only rows (date · message · a dot for
+  active) and edits through a bottom sheet — the same `ex-sheet*` global classes
+  (index.css) the exercise row's sheet uses, tap a row to edit it. `addWarning` now
+  **returns the new id**, so "+ Adicionar" can open the sheet straight onto the row it
+  just created instead of leaving the coach to find it in the list.
 - **`TypePicker`'s three benchmark-category colours are data colours** (gold/blue/
   violet, the same values the block-family palette uses) — exempt from #15, recorded
   in a comment there.

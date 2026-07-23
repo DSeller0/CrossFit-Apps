@@ -312,15 +312,21 @@ export function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLad
                     <span className="ex-qty-sep sheet-qty-sep-lg">×</span>
                     {isDistMode ? (
                       <div className="sheet-qty-field">
-                        <input
-                          type="text" inputMode="numeric" className="sheet-qty-input" style={{ width: 90 }}
-                          value={ex.dist} placeholder={regDefaults?.dist || '100'} title="Distância/Calorias" aria-label="Distância ou calorias"
-                          onChange={e => upd('dist', e.target.value)}
-                        />
-                        <select className="ex-unit-sel" value={ex.distUnit || 'm'} title="Unidade"
-                          onChange={e => upd('distUnit', e.target.value)}>
-                          <option value="m">m</option><option value="cal">cal</option>
-                        </select>
+                        {/* Input + unit side by side, centered as one unit — sheet-qty-field
+                            is a column flexbox (for the label-under-value pattern every
+                            other field here uses), which stacked the unit selector under
+                            the input instead of beside it. */}
+                        <div className={cr.sheetDistInline}>
+                          <input
+                            type="text" inputMode="numeric" className="sheet-qty-input" style={{ width: 90 }}
+                            value={ex.dist} placeholder={regDefaults?.dist || '100'} title="Distância/Calorias" aria-label="Distância ou calorias"
+                            onChange={e => upd('dist', e.target.value)}
+                          />
+                          <select className="ex-unit-sel" value={ex.distUnit || 'm'} title="Unidade"
+                            onChange={e => upd('distUnit', e.target.value)}>
+                            <option value="m">m</option><option value="cal">cal</option>
+                          </select>
+                        </div>
                         <span className="sheet-qty-lbl">Distância</span>
                       </div>
                     ) : (
@@ -368,7 +374,7 @@ export function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLad
             </div>
             <div className="ex-sheet-footer">
               <button className="ex-sheet-close" type="button" onClick={() => setShowDetail(false)}>
-                <i className="ti ti-check" /> Feito
+                <i className="ti ti-check" /> Salvar alterações
               </button>
             </div>
           </div>

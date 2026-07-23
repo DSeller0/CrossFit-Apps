@@ -63,7 +63,15 @@ export function WeekGrid({
   startEdit, onDelete, onPickDay, gridMode, setGridMode, onImport,
 }) {
   const isMobile = useIsMobile();
-  const [openId, setOpenId] = useState(null);      // mobile: which card is expanded
+  // mobile: which cards are expanded — a Set, not a single id, so the coach can
+  // open Wednesday AND Friday at once to compare them (that was the ask: a single
+  // openId forced closing one day before looking at another).
+  const [openIds, setOpenIds] = useState(() => new Set());
+  const toggleOpen = id => setOpenIds(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
   const [copied, copy] = useCopy();
   const isText = gridMode === 'texto';
   const showDots = selBox === 'all' && boxLocs.length > 0;
@@ -163,17 +171,23 @@ export function WeekGrid({
                 className={`${cr.pill}${on ? ' ' + cr.pillOn : ''}`}
                 style={on && b.color ? { borderColor: b.color, color: b.color } : undefined}>
                 {b.id !== 'all' && b.id !== 'none' && <span className={cr.dot} style={{ background: b.color || 'var(--muted)' }} />}
-                {b.name}
+                <span className={cr.pillLabel}>{b.name}</span>
               </button>
             );
           })}
         </div>
       )}
-      {/* The strip pins WITH the week arrows and the box tabs, because in this state
-          it IS the week picker — the card grid it used to sit under is gone. Left
-          below the pinned bar it scrolled under it the moment a session opened, and
-          then changing day cost a scroll up. Avisos stays below, and still scrolls. */}
-      {weekGridCollapsed && (
+      </div>
+      <BoxWarnings
+        selBox={selBox} boxLocs={boxLocs} boxWarnings={boxWarnings}
+        addWarning={addWarning} patchWarning={patchWarning} removeWarning={removeWarning}
+      />
+      {weekGridCollapsed ? (
+        /* Same slot the grid occupies below — NOT inside stickyHead. It used to pin
+           alongside the week bar, which put it ABOVE Avisos while the expanded grid
+           sits BELOW Avisos: minimizing silently swapped their vertical order (a
+           real bug, caught live). Collapse is now a manual choice only (opening a
+           session doesn't trigger it), so losing the pin costs nothing. */
         <div className={cr.dayStrip}>
           <DayStrip
             sessions={sessions}
@@ -184,13 +198,7 @@ export function WeekGrid({
             onSelect={onPickDay}
           />
         </div>
-      )}
-      </div>
-      <BoxWarnings
-        selBox={selBox} boxLocs={boxLocs} boxWarnings={boxWarnings}
-        addWarning={addWarning} patchWarning={patchWarning} removeWarning={removeWarning}
-      />
-      {weekGridCollapsed ? null : isMobile ? (
+      ) : isMobile ? (
         /* ── Mobile: the columns stack. A card is collapsed until tapped, then
               opens READ-ONLY in whichever mode is active; "Editar" opens the
               editor, which takes over the screen. ── */
@@ -209,11 +217,11 @@ export function WeekGrid({
               );
             }
             return list.map(sess => {
-              const open = openId === sess.id;
+              const open = openIds.has(sess.id);
               return (
                 <div key={sess.id}>
                   <button type="button" className={`${s.mRow} ${open ? s.mRowOpen : ''}`}
-                    aria-expanded={open} onClick={() => setOpenId(open ? null : sess.id)}>
+                    aria-expanded={open} onClick={() => toggleOpen(sess.id)}>
                     <span className={s.mChev}><i className={`ti ti-chevron-${open ? 'down' : 'right'}`} /></span>
                     <span className={s.mDay}>{DAY_PT[di]} {date.getDate()}</span>
                     <span className={s.mName}>{sessName(sess, dateKey)}</span>
@@ -229,12 +237,17 @@ export function WeekGrid({
                             <i className={`ti ${copied === sess.id ? 'ti-check' : 'ti-copy'}`} /> {copied === sess.id ? 'Copiado' : 'Copiar'}
                           </Button>
                         )}
-                        <Button size="sm" iconOnly variant="destructive"
-                          aria-label={`Remover ${sessName(sess, dateKey)}`} onClick={() => onDelete(dateKey, sess.id)}>
-                          <i className="ti ti-trash" />
+                        {/* Icon-only, edit leading — the same treatment as the editor
+                            header's gear/close, and the pencil reads as the primary
+                            action of the two. */}
+                        <Button size="sm" iconOnly aria-label={`Editar ${sessName(sess, dateKey)}`}
+                          title="Editar" onClick={() => startEdit(sess, dateKey)}>
+                          <i className="ti ti-pencil" />
                         </Button>
-                        <Button size="sm" variant="primary" onClick={() => startEdit(sess, dateKey)}>
-                          <i className="ti ti-pencil" /> Editar
+                        <Button size="sm" iconOnly variant="destructive"
+                          aria-label={`Remover ${sessName(sess, dateKey)}`} title="Remover"
+                          onClick={() => onDelete(dateKey, sess.id)}>
+                          <i className="ti ti-trash" />
                         </Button>
                       </div>
                     </div>

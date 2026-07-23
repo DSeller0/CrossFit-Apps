@@ -33,6 +33,15 @@
 .weekLabel { font-size: 12px; color: var(--sub); font-weight: 600; font-family: var(--font-mono); padding: 0 var(--sp-1); white-space: nowrap }
 .boxTabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: var(--sp-1) }
 .boxTabs .pill { flex-shrink: 0; white-space: nowrap }
+/* Mobile: 4 pills per row instead of a side-scroll — side-scrolling controls are
+   easy to miss on a phone (nothing hints there's more to the right), and box
+   counts here are small enough that wrapping never grows past 2-3 rows. Matches
+   useIsMobile's breakpoint (600px). */
+@media (max-width: 600px) {
+  .boxTabs { flex-wrap: wrap; overflow-x: visible }
+  .boxTabs .pill { flex: 1 1 calc(25% - 5px); min-width: 0; justify-content: center }
+}
+.pillLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 
 /* Just the spacing around the index's own week strip — the chips themselves are
    that component's (rail.module.css). The Criador's private .dayChip* set was
@@ -86,6 +95,17 @@
 }
 .editorTagHidden { border-color: var(--muted); color: var(--sub) }
 .editorHdSpacer { flex: 1 }
+
+/* Mobile editor header: 4 explicit rows instead of one flex-wrap line — the
+   desktop line reflows fine at 1280px, but at 390px "Voltar", the date+name, the
+   box/visibility tags, and the actions all need their own line to stay legible
+   rather than wrapping mid-group wherever the width happens to break. */
+.editorHdMobile {
+  display: flex; flex-direction: column; gap: var(--sp-2);
+  padding-bottom: var(--sp-3); margin-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--divider);
+}
+.editorHdRow { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap }
 
 /* ── Blocks header row ───────────────────────────────────────────────────── */
 .blocksBar {
@@ -187,6 +207,12 @@
 .goalFieldWide { flex: 1 1 200px; min-width: 160px }
 .goalSep { font-size: 12px; color: var(--muted); align-self: flex-end; padding-bottom: 11px; flex-shrink: 0 }
 
+/* Mobile exercise sheet — distance value + unit as one centered row, not stacked.
+   .sheet-qty-field (index.css, global) is a column flexbox for every OTHER field
+   here (value on top, label under) — reused as-is, this just groups the two
+   distance controls into a row before that label. */
+.sheetDistInline { display: flex; align-items: center; gap: 6px; justify-content: center }
+
 /* ── Exercise name as a mobile tap target ────────────────────────────────── */
 /* Looks like the field it replaces, but opens the sheet instead of focusing —
    the real combobox is in the sheet, where its dropdown has room. */
@@ -228,6 +254,18 @@
   background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 .warnToggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+
+/* Mobile: the desktop row (date input + text input + toggle + remove, all inline)
+   doesn't fit — read-only compact rows instead, tap to edit in a bottom sheet. */
+.warnRowMobile {
+  display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 6px;
+  background: var(--stone2); border: 1px solid var(--divider); border-radius: var(--radius-sm);
+  padding: 7px 9px; font-family: inherit; text-align: left; cursor: pointer;
+}
+.warnDateChip { flex-shrink: 0; font-size: 10px; color: var(--muted); font-family: var(--font-mono) }
+.warnMsgPreview { flex: 1; min-width: 0; font-size: 12px; color: var(--cream); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.warnDot { flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; background: var(--dim) }
+.warnDotOn { background: var(--accent) }
 
 /* ── Templates modal ─────────────────────────────────────────────────────── */
 .modalSm { width: 380px }

@@ -101,7 +101,13 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
 
   // Read-merge-write the whole settings blob (mirrors Config.jsx) so theme/gymName survive.
   const persistWarnings = list => { setBoxWarnings(list); saveSettings({ ...loadSettings(), boxWarnings: list }); };
-  const addWarning    = key => persistWarnings([{ id: uid(), date: todayISO(), box: key, message: '', active: true }, ...boxWarnings]);
+  // Returns the new id — mobile's "+ Adicionar" opens the edit sheet straight onto
+  // the row it just created, rather than leaving the coach to find it in the list.
+  const addWarning = key => {
+    const id = uid();
+    persistWarnings([{ id, date: todayISO(), box: key, message: '', active: true }, ...boxWarnings]);
+    return id;
+  };
   const patchWarning  = (id, patch) => persistWarnings(boxWarnings.map(w => w.id === id ? { ...w, ...patch } : w));
   const removeWarning = id => persistWarnings(boxWarnings.filter(w => w.id !== id));
 
@@ -616,12 +622,57 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
       {editorOpen && (
         <div ref={editorRef}>
         <Card>
-          <div className={cr.editorHd}>
-            {isMobile && (
+          {isMobile ? (
+            /* Four explicit rows — the coach reads this on a 390px screen, not
+               1280px, so grouping by row beats one long flex-wrap line: close,
+               then who/when, then where/visibility, then what you can do. No TV
+               preview (desktop-only pane) and no red ✕ — "Voltar à semana" IS the
+               close here, so a second one would be a redundant destructive action. */
+            <div className={cr.editorHdMobile}>
               <button type="button" className={cr.editorBack} onClick={requestClose}>
                 <i className="ti ti-chevron-left" aria-hidden="true" /> Voltar à semana
               </button>
-            )}
+              <div className={cr.editorHdRow}>
+                <span className={cr.editorDate}>{editorDateStr}</span>
+                <span className={cr.editorName}>{form.sessionName?.trim() || 'Sessão sem nome'}</span>
+              </div>
+              <div className={cr.editorHdRow}>
+                {editorBoxes.map(b => (
+                  <span key={b.id} className={cr.editorTag} style={{ borderColor: b.color, color: b.color }}>
+                    <span className={cr.dot} style={{ background: b.color || 'var(--muted)' }} />{b.name}
+                  </span>
+                ))}
+                <span className={`${cr.editorTag}${form.public === false ? ' ' + cr.editorTagHidden : ''}`}>
+                  {form.public === false ? 'Oculto' : 'Público'}
+                </span>
+                {templateFlash && (
+                  <span className={cr.editorTag}>
+                    <i className="ti ti-bookmark-filled" aria-hidden="true" /> &ldquo;{templateFlash}&rdquo; salvo
+                  </span>
+                )}
+              </div>
+              <div className={cr.editorHdRow}>
+                <Button size="sm" iconOnly aria-label="Editar dados" title="Editar dados"
+                  onClick={() => setMetaModal({ isEdit: true, draft: { ...form } })}>
+                  <i className="ti ti-settings" />
+                </Button>
+                {blocks.length > 0 && (
+                  <Button size="sm" iconOnly
+                    aria-label={activeTemplateId ? 'Template ativo — clique para atualizar' : 'Salvar como template'}
+                    title={activeTemplateId ? 'Template ativo — clique para atualizar' : 'Salvar como template'}
+                    onClick={activeTemplateId ? () => setShowUpdateTemplateModal(true) : saveAsTemplate}>
+                    <i className={`ti ${activeTemplateId ? 'ti-bookmark-filled' : 'ti-bookmark'}`} />
+                  </Button>
+                )}
+                <span className={cr.editorHdSpacer} />
+                <Button size="sm" variant="primary" onClick={saveS}>
+                  <i className="ti ti-check" /> {editing ? 'Salvar alterações' : 'Salvar sessão'}
+                  {isDirty && <span aria-hidden="true"> ●</span>}
+                </Button>
+              </div>
+            </div>
+          ) : (
+          <div className={cr.editorHd}>
             <span className={cr.editorDate}>{editorDateStr}</span>
             <span className={cr.editorName}>{form.sessionName?.trim() || 'Sessão sem nome'}</span>
             {editorBoxes.map(b => (
@@ -652,13 +703,11 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
                 <i className={`ti ${activeTemplateId ? 'ti-bookmark-filled' : 'ti-bookmark'}`} />
               </Button>
             )}
-            {!isMobile && (
-              <Button size="sm" iconOnly aria-label="Preview TV" title="Preview TV"
-                aria-pressed={tvPreviewOpen}
-                onClick={() => setTvPreviewOpen(v => !v)}>
-                <i className="ti ti-device-tv" />
-              </Button>
-            )}
+            <Button size="sm" iconOnly aria-label="Preview TV" title="Preview TV"
+              aria-pressed={tvPreviewOpen}
+              onClick={() => setTvPreviewOpen(v => !v)}>
+              <i className="ti ti-device-tv" />
+            </Button>
             <Button size="sm" variant="primary" onClick={saveS}>
               <i className="ti ti-check" /> {editing ? 'Salvar alterações' : 'Salvar sessão'}
               {isDirty && <span aria-hidden="true"> ●</span>}
@@ -666,13 +715,12 @@ function TrainingCreator({ sessions, setSessions, blockNames, preload, onPreload
             {/* Same red ✕ as the exercise/movement delete — it is the discard, and
                 it now looks like one. Which is exactly why it asks first when
                 there is something to lose. */}
-            {!isMobile && (
-              <Button size="sm" iconOnly variant="destructive" aria-label="Fechar" title="Fechar"
-                onClick={requestClose}>
-                <i className="ti ti-x" />
-              </Button>
-            )}
+            <Button size="sm" iconOnly variant="destructive" aria-label="Fechar" title="Fechar"
+              onClick={requestClose}>
+              <i className="ti ti-x" />
+            </Button>
           </div>
+          )}
 
           {/* Blocks */}
           <div>
