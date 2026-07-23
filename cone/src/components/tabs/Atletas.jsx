@@ -6,7 +6,7 @@ import {
 } from '../../utils/storage';
 import { APP_CONFIG, ECOL } from '../../utils/config';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { toSecs } from '../../public/lib/wod.js';
+import { toSecs, isWodBlock } from '../../public/lib/wod.js';
 import { buildRegistryIndex, resolveExercise } from '../../public/lib/registry.js';
 import { DAY_PT_TITLE } from '../../public/lib/week.js';
 import { prBest, prDelta, prPct } from '../../public/lib/goals.js';
@@ -617,8 +617,10 @@ export default function AtletasTab({ sessions, results, onEditSession, onLogResu
                   const isPast   = date <= todayKey;
                   const d        = new Date(date+'T12:00:00');
                   const myResult = athResults.find(r=>r.date===date&&r.sessionId===session.id);
-                  const WOD_T    = ['WOD','For Time','AMRAP','EMOM','MetCon','HIIT'];
-                  const wb       = myResult ? (myResult.blocks||[]).find(b=>WOD_T.includes(b.blockType)||WOD_T.includes(b.blockLabel)) : null;
+                  // Canonical WOD-type test (#77) — the local fork missed Benchmark/Estações,
+                  // so a logged Fran or a stations WOD showed no perf in this strip. isWodBlock
+                  // reads .type/.label; result blocks carry blockType/blockLabel, hence the adapter.
+                  const wb       = myResult ? (myResult.blocks||[]).find(b=>isWodBlock({ type: b.blockType, label: b.blockLabel })) : null;
                   const perf     = wb ? (wb.perfTime||(wb.perfRounds?wb.perfRounds+'rds':null)) : null;
                   return (
                     <div key={date+'|'+session.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 0', borderBottom:`1px solid ${DIV}` }}>

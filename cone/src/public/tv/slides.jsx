@@ -241,7 +241,10 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
         <div className={s.timerMode}>{isResting ? 'DESCANSO' : MODE_LBL[bt] || bt.toUpperCase()}</div>
         <div className={s.ringWrap}>
           <svg className={s.ring} viewBox="0 0 260 260">
-            <circle cx={130} cy={130} r={RING_R} fill="none" stroke="#1e1a16" strokeWidth={12} />
+            {/* Track: theme-aware via the CSS `stroke` PROPERTY (not the SVG attribute,
+                which can't take a var) — #85. Was hardcoded #1e1a16 (= totk-dark --stone2),
+                which stayed dark on both light themes on the gym wall. */}
+            <circle cx={130} cy={130} r={RING_R} fill="none" style={{ stroke: 'var(--stone2, #1e1a16)' }} strokeWidth={12} />
             <circle
               cx={130} cy={130} r={RING_R} fill="none"
               stroke={isFinished ? '#c84038' : col} strokeWidth={12}
