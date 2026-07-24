@@ -1,5 +1,13 @@
 # 38 — #55 · Design pass C1 — Exercícios + Configurações (+ #87 registry & PR board)
 
+> 🟡 **Phase A shipped 2026-07-23 · `cab19c8`** — Exercícios + Configurações adopt C0
+> (Button/Input/ConfirmReview), the frozen totk-dark palette is gone, "Salvar
+> config.json" removed, native-button a11y, and #87's search + alphabetical-canonical
+> registry ordering (drag-reorder + A→Z retired). Live-verified 4 themes × 2 widths.
+> **Phase B (PR board → sub-cards) mockup synced to Claude Design**
+> (`design/mockups/38-me-pr-board-subcards.html`) — **STOPPED at the approval gate; the
+> `PrSection.jsx` build is post-approval.**
+
 > C1 in the [design-pass program](./16-design-pass-program.md). Adopts the
 > [C0 standard](./33-design-c0-spa-standard.md) (shipped 2026-07-19) on two SPA tabs
 > and folds in their #15/#14/#35 slices. **Two scope decisions were settled at planning

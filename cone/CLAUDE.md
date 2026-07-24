@@ -351,6 +351,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 - No TypeScript — JSDoc comments if prop shapes need documenting
 - All data: Supabase (no local persistence beyond localStorage for UX state)
 - Icon library: Tabler Icons (`ti-*`)
+- **Exercícios registry is stored alphabetically within each category** (canonical, #55/#87 · C1) — `initRegistry`/`confirmAdd`/`saveDetail` re-sort the touched category on every write. The manual **A→Z button and drag-reorder are retired** (insertion order carried no meaning; the catalog is searched, not hand-ordered). The tab has a **search box** filtering via `normExName` (accent/case/whitespace-safe, the registry's own key). Don't reintroduce drag or an ordering field.
 - Product name: CONE. Gym name from `settings.value.gymName`.
 - `session.public === false` = hidden; `undefined` or `true` = public — all **5** session-rendering public pages filter on this (Index, Schedule, Results, Me, Leaderboard; verified 2026-07-16). It was 6 before `athletes.html` retired in #52. `timer.html` reads no sessions; `tv.html` deliberately doesn't filter (next line).
 - TvController ignores session visibility — coach always sees all sessions

@@ -1,0 +1,374 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — me.html PR board as sub-cards (#55 / #87 · plans/38 Phase B)</title>
+<style>
+  /* ── themes.css (inlined; 4 themes as html.theme-* + :root fallback) ───────── */
+  :root{
+    --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
+    --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
+    --red:#c83030;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+    --font:'Cinzel',Georgia,serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
+    --divider:#2a231c;--border:#2a231c;--accent:#4ac8c0;--accent-text:#000;--text:#f0e8d0;--err:#c83030;
+    --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;
+  }
+  html.theme-totk-dark{
+    --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
+    --gold:#d8a840;--teal:#4ac8c0;--green:#18cc30;--red:#c83030;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+    --font:'Cinzel',Georgia,serif;--divider:#2a231c;--border:#2a231c;--accent:#4ac8c0;--accent-text:#000;--text:#f0e8d0;--err:#c83030;
+  }
+  html.theme-totk-light{
+    --bg:#ede8dc;--stone:#f5f1e8;--stone2:#e8e2d4;--div:#d4cab8;
+    --gold:#9a6c14;--teal:#1c6860;--green:#1a6830;--red:#b83020;--cream:#1c1508;--sub:#503828;--muted:#7a6448;--dim:#a89070;
+    --font:'Cinzel',Georgia,serif;--divider:#d4cab8;--border:#d4cab8;--accent:#1c6860;--accent-text:#fff;--text:#1c1508;--err:#b83020;
+  }
+  html.theme-spirit-blossom{
+    --bg:#09070f;--stone:#100d1c;--stone2:#17122a;--div:#221638;
+    --gold:#e05490;--teal:#38c4d0;--green:#50d890;--red:#c82850;--cream:#ede4f8;--sub:#c4a0d0;--muted:#7d5090;--dim:#4a2d60;
+    --font:'Amarante',Georgia,serif;--divider:#221638;--border:#221638;--accent:#38c4d0;--accent-text:#09070f;--text:#ede4f8;--err:#c82850;
+  }
+  html.theme-spirit-blossom-light{
+    --bg:#f4eefb;--stone:#ffffff;--stone2:#f0e8f8;--div:#e2d4f0;
+    --gold:#c83070;--teal:#1490a0;--green:#28a064;--red:#c02040;--cream:#1a0828;--sub:#4a2460;--muted:#7840a0;--dim:#9070b0;
+    --font:'Amarante',Georgia,serif;--divider:#e2d4f0;--border:#e2d4f0;--accent:#1490a0;--accent-text:#fff;--text:#1a0828;--err:#c02040;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;padding:28px 22px 60px;background:var(--bg);color:var(--text);font-family:var(--font)}
+  h1{font-size:17px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 4px}
+  p.note{font-size:12.5px;color:var(--muted);margin:0 0 18px;font-family:Georgia,serif;max-width:940px;line-height:1.6}
+  p.note b{color:var(--sub)} p.note code{font-family:var(--font-mono);color:var(--sub);font-size:11.5px}
+
+  /* theme switcher */
+  .themebar{display:flex;gap:6px;margin:0 0 22px;flex-wrap:wrap}
+  .themebar button{font-family:var(--font);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 12px;background:var(--stone);color:var(--sub);border:1px solid var(--divider);cursor:pointer}
+  .themebar button:hover{color:var(--cream);border-color:var(--dim)}
+
+  .sectionLbl{font-size:10px;font-weight:900;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin:26px 0 12px}
+
+  /* ── the board (me.html is a PUBLIC page → SQUARE corners, only dots are circles) ── */
+  .board{max-width:560px}
+
+  /* Family / benchmark card — a stone surface with a family-colored left accent. */
+  .famCard{background:var(--stone);border:1px solid var(--divider);border-left:3px solid var(--fam,var(--teal));margin-bottom:12px}
+  .famHead{display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer;user-select:none}
+  .famDot{width:9px;height:9px;border-radius:50%;background:var(--fam);flex-shrink:0}
+  .famName{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--cream)}
+  .famSub{font-size:10px;color:var(--muted);letter-spacing:.03em;margin-left:2px}
+  .famSpacer{flex:1}
+  .famCov{display:flex;align-items:center;gap:8px}
+  .famCovNum{font-size:11px;font-weight:700;color:var(--muted);font-family:var(--font-mono);white-space:nowrap}
+  .famCovNum.has{color:var(--fam)}
+  .famChev{color:var(--dim);font-size:11px;width:12px;text-align:center}
+
+  .famBody{padding:0 14px 14px}
+  .tileGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+
+  /* PR tile (movement: load / reps / dist) */
+  .tile{background:var(--stone2);border:1px solid var(--divider);padding:10px 11px 11px;display:flex;flex-direction:column;gap:7px;min-width:0}
+  .tileTop{display:flex;align-items:flex-start;gap:6px}
+  .tileName{flex:1;font-size:12px;color:var(--sub);line-height:1.25;min-width:0;word-break:break-word}
+  .tile.has .tileName{color:var(--cream)}
+  .tileActs{display:flex;gap:2px;flex-shrink:0;margin:-2px -3px 0 0}
+  .iconBtn{width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:transparent;
+    border:none;color:var(--muted);cursor:pointer;font-size:12px;line-height:1;padding:0}
+  .iconBtn:hover{color:var(--cream)}
+  .iconBtn.danger:hover{color:var(--red)}
+
+  .tileVal{display:flex;align-items:baseline;gap:4px}
+  .tileNum{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--cream);line-height:1;letter-spacing:-.01em}
+  .tileUnit{font-size:11px;color:var(--muted);font-weight:700}
+
+  .barRow{display:flex;align-items:center;gap:8px}
+  .tileMeta{font-size:10px;color:var(--dim);letter-spacing:.02em;white-space:nowrap}
+
+  .delta{font-size:10.5px;font-weight:700;font-family:var(--font-mono);letter-spacing:.02em;white-space:nowrap}
+  .delta.good{color:var(--green)} .delta.bad{color:var(--red)} .delta.even{color:var(--muted)}
+
+  /* no-PR tile: recessed, dashed, invites a first log */
+  .tile.none{border-style:dashed;border-color:var(--dim);background:transparent;align-items:stretch;justify-content:center;gap:8px}
+  .tile.none .tileName{color:var(--muted)}
+  .noneBtn{align-self:flex-start;font-family:var(--font);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--fam,var(--teal));background:transparent;border:1px solid color-mix(in srgb,var(--fam,var(--teal)) 40%,var(--divider));
+    padding:4px 9px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  .noneBtn:hover{background:color-mix(in srgb,var(--fam,var(--teal)) 12%,transparent)}
+
+  /* Benchmark tile — carries a prescription sub-line + a stopwatch-time value. */
+  .benchTile{grid-column:1 / -1}
+  .benchTop{display:flex;align-items:baseline;gap:8px}
+  .benchName{font-size:13px;font-weight:700;color:var(--cream);letter-spacing:.03em}
+  .benchRx{flex:1;font-size:10.5px;color:var(--muted);line-height:1.3;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .benchBottom{display:flex;align-items:baseline;gap:10px;margin-top:7px}
+  .benchTime{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--gold);line-height:1;letter-spacing:.01em}
+  .benchTimeUnit{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+
+  /* TallyBar replica (shared/TallyBar) — 10 blocks, data-color fill, var(--bg) dividers */
+  .tally{position:relative;display:flex;gap:3px;align-items:stretch;flex:1;min-width:0;height:5px}
+  .tblock{flex:1;min-width:0;position:relative;overflow:hidden;background:var(--divider)}
+  .tblock.full{background:var(--fam,var(--teal))}
+  .tblock.part{display:flex}
+  .tunit{flex:1}
+  .tunit.on{border-right:1px solid var(--bg)}
+  .tunit:last-child{border-right:none}
+</style>
+
+<body>
+<h1>me.html · PR board as sub-cards</h1>
+<p class="note">
+  <b>#55 / #87 · plans/38 Phase B (Lane B ideation).</b> Redesigns me.html's PR board from a two-level
+  disclosure <em>list</em> (block accordion → exercise rows → detail row — you can't see a single PR value
+  without two taps) into <b>family cards holding a grid of PR tiles</b>, so best values are glanceable.
+  Reuses the real primitives: <code>blkColor</code> family colors (data — same in every theme),
+  <code>TallyBar</code> (10-block, data-color fill), <code>prBest</code>/<code>prPct</code>/<code>prDelta</code>.
+  <b>me.html is a public page → square corners</b> (no <code>border-radius</code> except the circular family dot),
+  per the design-system rule.<br>
+  <b>#87 benchmarks:</b> named WODs are currently in <code>PR_SKIP</code> (it holds all <code>WOD_TYPES</code>, and
+  <code>Benchmark</code> is one). A benchmark's PR is its <b>completion time</b> — a <code>type:'time'</code> PR, a
+  different surface from per-movement load/reps. It gets its <b>own card</b> below the movement families; the other
+  WOD-score types (For&nbsp;Time / AMRAP / EMOM / MetCon / HIIT) stay skipped. One AMRAP benchmark (Cindy) shows the
+  <b>rounds-PR variant</b> the same tile absorbs.
+  <b>Not built</b> — this stops at the approval gate; build lands in <code>PrSection.jsx</code> + <code>Me.module.css</code> after sign-off.
+</p>
+
+<div class="themebar">
+  <button onclick="document.documentElement.className='theme-totk-dark'">TotK Dark</button>
+  <button onclick="document.documentElement.className='theme-totk-light'">TotK Light</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom'">Spirit Blossom</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom-light'">SB Light</button>
+</div>
+
+<div class="board">
+
+  <div class="sectionLbl">PR — por família de movimento</div>
+
+  <!-- ══ FORÇA — mixed: some PRs (w/ + w/o target), some empty. Blue family. ══ -->
+  <div class="famCard" style="--fam:#5090e0">
+    <div class="famHead">
+      <span class="famDot"></span>
+      <span class="famName">Força</span>
+      <span class="famSpacer"></span>
+      <span class="famCov">
+        <span class="tally" aria-hidden="true">
+          <span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span>
+          <span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span>
+          <span class="tblock part"><i class="tunit on"></i><i class="tunit on"></i><i class="tunit on"></i><i class="tunit"></i><i class="tunit"></i><i class="tunit"></i><i class="tunit"></i><i class="tunit"></i><i class="tunit"></i><i class="tunit"></i></span>
+          <span class="tblock"></span><span class="tblock"></span><span class="tblock"></span>
+        </span>
+        <span class="famCovNum has">4 / 6</span>
+      </span>
+      <span class="famChev">▼</span>
+    </div>
+    <div class="famBody">
+      <div class="tileGrid">
+
+        <!-- has PR + target → TallyBar + meta -->
+        <div class="tile has">
+          <div class="tileTop">
+            <span class="tileName">Back Squat</span>
+            <span class="tileActs"><button class="iconBtn" title="Editar">✎</button><button class="iconBtn danger" title="Apagar">✕</button></span>
+          </div>
+          <div class="tileVal"><span class="tileNum">140</span><span class="tileUnit">kg</span></div>
+          <div class="barRow">
+            <span class="tally" style="--fam:#5090e0" aria-hidden="true">
+              <span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span>
+              <span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span>
+              <span class="tblock full"></span><span class="tblock full"></span>
+              <span class="tblock part"><i class="tunit on"></i><i class="tunit on"></i><i class="tunit on"></i><i class="tunit on"></i><i class="tunit on"></i><i class="tunit on"></i><i class="tunit on"></i><i class="tunit"></i><i class="tunit"></i><i class="tunit"></i></span>
+              <span class="tblock"></span>
+            </span>
+            <span class="delta good">↑ +5 kg</span>
+          </div>
+          <div class="tileMeta">meta 160 kg</div>
+        </div>
+
+        <!-- has PR, no target → delta only -->
+        <div class="tile has">
+          <div class="tileTop">
+            <span class="tileName">Deadlift</span>
+            <span class="tileActs"><button class="iconBtn" title="Editar">✎</button><button class="iconBtn danger" title="Apagar">✕</button></span>
+          </div>
+          <div class="tileVal"><span class="tileNum">180</span><span class="tileUnit">kg</span></div>
+          <div class="barRow"><span class="delta good">↑ +10 kg</span></div>
+        </div>
+
+        <!-- has PR, even delta -->
+        <div class="tile has">
+          <div class="tileTop">
+            <span class="tileName">Front Squat</span>
+            <span class="tileActs"><button class="iconBtn" title="Editar">✎</button><button class="iconBtn danger" title="Apagar">✕</button></span>
+          </div>
+          <div class="tileVal"><span class="tileNum">100</span><span class="tileUnit">kg</span></div>
+          <div class="barRow">
+            <span class="tally" style="--fam:#5090e0" aria-hidden="true">
+              <span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span>
+              <span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span>
+              <span class="tblock full"></span><span class="tblock full"></span><span class="tblock"></span><span class="tblock"></span>
+            </span>
+            <span class="delta even">=</span>
+          </div>
+          <div class="tileMeta">meta 120 kg</div>
+        </div>
+
+        <!-- overflow: long name -->
+        <div class="tile has">
+          <div class="tileTop">
+            <span class="tileName">Bulgarian Split Squat</span>
+            <span class="tileActs"><button class="iconBtn" title="Editar">✎</button><button class="iconBtn danger" title="Apagar">✕</button></span>
+          </div>
+          <div class="tileVal"><span class="tileNum">42.5</span><span class="tileUnit">kg</span></div>
+          <div class="barRow"><span class="delta bad">↓ −2.5 kg</span></div>
+        </div>
+
+        <!-- no PR -->
+        <div class="tile none">
+          <span class="tileName">Overhead Squat</span>
+          <button class="noneBtn" style="--fam:#5090e0">+ Registrar</button>
+        </div>
+
+        <!-- no PR -->
+        <div class="tile none">
+          <span class="tileName">Strict Press</span>
+          <button class="noneBtn" style="--fam:#5090e0">+ Registrar</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LPO — all PRs done ("3 / 3"). Blue family. ══ -->
+  <div class="famCard" style="--fam:#4070c0">
+    <div class="famHead">
+      <span class="famDot"></span>
+      <span class="famName">LPO</span>
+      <span class="famSpacer"></span>
+      <span class="famCov">
+        <span class="tally" aria-hidden="true">
+          <span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span>
+          <span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span>
+        </span>
+        <span class="famCovNum has">3 / 3</span>
+      </span>
+      <span class="famChev">▼</span>
+    </div>
+    <div class="famBody">
+      <div class="tileGrid">
+        <div class="tile has">
+          <div class="tileTop"><span class="tileName">Snatch</span>
+            <span class="tileActs"><button class="iconBtn" title="Editar">✎</button><button class="iconBtn danger" title="Apagar">✕</button></span></div>
+          <div class="tileVal"><span class="tileNum">72</span><span class="tileUnit">kg</span></div>
+          <div class="barRow"><span class="delta good">↑ +2 kg</span></div>
+        </div>
+        <div class="tile has">
+          <div class="tileTop"><span class="tileName">Clean &amp; Jerk</span>
+            <span class="tileActs"><button class="iconBtn" title="Editar">✎</button><button class="iconBtn danger" title="Apagar">✕</button></span></div>
+          <div class="tileVal"><span class="tileNum">95</span><span class="tileUnit">kg</span></div>
+          <div class="barRow">
+            <span class="tally" style="--fam:#4070c0" aria-hidden="true">
+              <span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span>
+              <span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span><span class="tblock full"></span><span class="tblock part"><i class="tunit on"></i><i class="tunit on"></i><i class="tunit on"></i><i class="tunit on"></i><i class="tunit on"></i><i class="tunit"></i><i class="tunit"></i><i class="tunit"></i><i class="tunit"></i><i class="tunit"></i></span>
+            </span>
+            <span class="delta good">↑ +5 kg</span>
+          </div>
+          <div class="tileMeta">meta 100 kg</div>
+        </div>
+        <div class="tile has">
+          <div class="tileTop"><span class="tileName">Power Clean</span>
+            <span class="tileActs"><button class="iconBtn" title="Editar">✎</button><button class="iconBtn danger" title="Apagar">✕</button></span></div>
+          <div class="tileVal"><span class="tileNum">80</span><span class="tileUnit">kg</span></div>
+          <div class="barRow"><span class="delta even">=</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CORE — 0 PRs, collapsed. Blue family. ══ -->
+  <div class="famCard" style="--fam:#6090d8">
+    <div class="famHead">
+      <span class="famDot"></span>
+      <span class="famName">Core</span>
+      <span class="famSpacer"></span>
+      <span class="famCov">
+        <span class="tally" aria-hidden="true">
+          <span class="tblock"></span><span class="tblock"></span><span class="tblock"></span><span class="tblock"></span><span class="tblock"></span>
+          <span class="tblock"></span><span class="tblock"></span><span class="tblock"></span><span class="tblock"></span><span class="tblock"></span>
+        </span>
+        <span class="famCovNum">0 / 4</span>
+      </span>
+      <span class="famChev">▶</span>
+    </div>
+  </div>
+
+  <div class="sectionLbl">Benchmarks — tempo de conclusão</div>
+
+  <!-- ══ BENCHMARK card — the #87 time-PR surface. Gold family. ══ -->
+  <div class="famCard" style="--fam:#d8a840">
+    <div class="famHead">
+      <span class="famDot"></span>
+      <span class="famName">Benchmarks</span>
+      <span class="famSub">WODs nomeados</span>
+      <span class="famSpacer"></span>
+      <span class="famCov"><span class="famCovNum has">3 / 10</span></span>
+      <span class="famChev">▼</span>
+    </div>
+    <div class="famBody">
+      <div class="tileGrid">
+
+        <!-- time PR + target -->
+        <div class="tile has benchTile">
+          <div class="benchTop">
+            <span class="benchName">Fran</span>
+            <span class="benchRx">21-15-9 · Thrusters + Pull-ups</span>
+            <span class="tileActs"><button class="iconBtn" title="Editar">✎</button><button class="iconBtn danger" title="Apagar">✕</button></span>
+          </div>
+          <div class="benchBottom">
+            <span class="benchTime">3:42</span><span class="benchTimeUnit">mm:ss</span>
+            <span class="delta good">↓ −0:14</span>
+            <span class="tileMeta">meta 3:30</span>
+          </div>
+        </div>
+
+        <!-- time PR, no target -->
+        <div class="tile has benchTile">
+          <div class="benchTop">
+            <span class="benchName">Grace</span>
+            <span class="benchRx">30 Clean &amp; Jerks</span>
+            <span class="tileActs"><button class="iconBtn" title="Editar">✎</button><button class="iconBtn danger" title="Apagar">✕</button></span>
+          </div>
+          <div class="benchBottom">
+            <span class="benchTime">2:58</span><span class="benchTimeUnit">mm:ss</span>
+            <span class="delta good">↓ −0:06</span>
+          </div>
+        </div>
+
+        <!-- AMRAP benchmark → the rounds-PR variant the same tile absorbs -->
+        <div class="tile has benchTile">
+          <div class="benchTop">
+            <span class="benchName">Cindy</span>
+            <span class="benchRx">20' AMRAP · 5 Pull-up + 10 Push-up + 15 Air Squat</span>
+            <span class="tileActs"><button class="iconBtn" title="Editar">✎</button><button class="iconBtn danger" title="Apagar">✕</button></span>
+          </div>
+          <div class="benchBottom">
+            <span class="benchTime">18<span style="font-size:14px"> + 12</span></span><span class="benchTimeUnit">rounds</span>
+            <span class="delta good">↑ +1 rd</span>
+          </div>
+        </div>
+
+        <!-- no PR yet → invite -->
+        <div class="tile none benchTile">
+          <div class="benchTop">
+            <span class="benchName" style="color:var(--muted)">Murph</span>
+            <span class="benchRx">1mi Run · 100 Pull · 200 Push · 300 Squat · 1mi Run</span>
+          </div>
+          <button class="noneBtn" style="--fam:#d8a840">+ Registrar tempo</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // default theme so the card opens on brand
+  if(!document.documentElement.className) document.documentElement.className='theme-totk-dark';
+</script>
