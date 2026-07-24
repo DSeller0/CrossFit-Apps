@@ -1,137 +1,225 @@
-import { IconCheck, IconCircle, IconPencil, IconX, IconPlus } from '@tabler/icons-react'
+import { IconPencil, IconX, IconPlus } from '@tabler/icons-react'
 import { blkColor } from '../lib/wod.js'
 import { prBest, prPct, prDelta } from '../lib/goals.js'
+import { normExName } from '../lib/registry.js'
 import { onKey } from '../schedule/scheduleHelpers.js'
 import TallyBar from '../shared/TallyBar.jsx'
-import { PR_SKIP, prValLabel } from './meHelpers.js'
+import { PR_SKIP, BENCHMARK_CAT, prValLabel } from './meHelpers.js'
 import styles from './Me.module.css'
 
-// The PR board: registry block → exercise → detail, two levels of disclosure.
+// The PR board (#55 / #87 · plans/38 Phase B). Redesigned from a two-level disclosure
+// LIST (block → exercise row → detail row: two taps to see one value) into FAMILY CARDS
+// holding a grid of PR TILES, so each best value is glanceable at one tap. Reuses the
+// real primitives: blkColor family colors (data — same in every theme), TallyBar
+// (10-block, data-color fill), prBest/prPct/prDelta. me.html is a PUBLIC page → square
+// corners (only the family dot is a circle), per the design-system rule.
 //
-// NOT on shared/AccordionCard (a deviation from plans/21, flagged at the gallery
-// gate): AccordionCard is a *card* shell — border, padding, dot, chevron — while
-// these are dense list rows inside an existing card, and the exercise row hosts its
-// own action buttons (editar / apagar / adicionar), which AccordionCard has no slot
-// for and which cannot legally nest inside its role="button" header. Adopting it
-// here would turn the PR list into stacked cards, which is a design decision for the
-// Claude Design pass, not a mechanical one. What it *does* take from AccordionCard is
-// the interaction contract: role, tabIndex, aria-expanded, and the shared onKey
-// Enter/Space handler. Before #52 both levels were click-only <div>s with a text
-// caret and no keyboard path at all.
+// Benchmarks (#87): named WODs live in PR_SKIP (it holds all WOD_TYPES). A benchmark's
+// PR is its completion TIME — a different surface from per-movement load/reps — so it
+// gets its own gold card below the movement families, read straight off BENCHMARK_CAT.
 //
 // Icons are @tabler/icons-react, not the `ti` webfont — me.html no longer loads it.
-export default function PrSection({ prs, registry, openBlock, setOpenBlock, openEx, setOpenEx, onOpen, onClear }) {
-  const getName = e => typeof e === 'string' ? e : (e?.name || '')
-  const blockOrder = Object.keys(registry).filter(bt => !PR_SKIP.has(bt) && (registry[bt] || []).length > 0)
-  if (!blockOrder.length) return null
+const getName = e => (typeof e === 'string' ? e : e?.name || '')
+const getDesc = e => (typeof e === 'object' && e ? e.description || '' : '')
+
+// The best result split into a big mono number + a small unit label, per surface.
+function bestParts(pr, bench = false) {
+  const best = prBest(pr)
+  if (!best) return null
+  let unit
+  if (pr.type === 'time') unit = 'mm:ss'
+  else if (pr.type === 'reps') unit = bench ? 'rounds' : 'reps'
+  else if (pr.type === 'dist') unit = pr.unit || 'm'
+  else unit = pr.unit || 'kg'
+  return { num: best.value, unit }
+}
+
+// Arrow follows the VALUE direction (from the label's sign); color follows good/bad.
+// So a faster time ("-0:14", better) shows ↓ green, more load ("+5 kg") shows ↑ green.
+function Delta({ delta }) {
+  if (!delta) return null
+  const arrow = delta.label.startsWith('-') ? '↓ ' : delta.label.startsWith('+') ? '↑ ' : ''
+  const tone = delta.good === true ? styles.deltaGood
+    : delta.good === false ? styles.deltaBad : styles.deltaEven
+  return <span className={`${styles.delta} ${tone}`}>{arrow}{delta.label}</span>
+}
+
+function MovTile({ name, pr, color, bt, onOpen, onClear }) {
+  if (!pr) {
+    return (
+      <div className={`${styles.tile} ${styles.tileNone}`}>
+        <span className={styles.tileName}>{name}</span>
+        <button className={styles.noneBtn} style={{ '--fam': color }}
+          onClick={() => onOpen(name, bt ? [bt] : [], null)}>
+          <IconPlus size={12} aria-hidden="true" /> Registrar
+        </button>
+      </div>
+    )
+  }
+  const parts = bestParts(pr)
+  const pct = prPct(pr)
+  const delta = prDelta(pr)
+  return (
+    <div className={`${styles.tile} ${styles.tileHas}`}>
+      <div className={styles.tileTop}>
+        <span className={styles.tileName}>{name}</span>
+        <span className={styles.tileActs}>
+          <button className={styles.iconBtn} aria-label={`Editar PR de ${name}`}
+            onClick={() => onOpen(name, pr.categories || [pr.category].filter(Boolean), pr)}>
+            <IconPencil size={12} aria-hidden="true" />
+          </button>
+          <button className={`${styles.iconBtn} ${styles.iconBtnDanger}`} aria-label={`Apagar registros de ${name}`}
+            onClick={() => onClear(name)}>
+            <IconX size={12} aria-hidden="true" />
+          </button>
+        </span>
+      </div>
+      <div className={styles.tileVal}>
+        <span className={styles.tileNum}>{parts?.num ?? '—'}</span>
+        {parts && <span className={styles.tileUnit}>{parts.unit}</span>}
+      </div>
+      {(pct !== null || delta) && (
+        <div className={styles.barRow}>
+          {pct !== null && <span className={styles.barGrow}><TallyBar pct={pct} color={color} size="sm" grow /></span>}
+          <Delta delta={delta} />
+        </div>
+      )}
+      {pr.target && <div className={styles.tileMeta}>meta {prValLabel(pr.target, pr)}</div>}
+    </div>
+  )
+}
+
+function BenchTile({ name, desc, pr, color, onOpen, onClear }) {
+  const parts = pr ? bestParts(pr, true) : null
+  const delta = pr ? prDelta(pr) : null
+  return (
+    <div className={`${styles.tile} ${styles.benchTile} ${pr ? styles.tileHas : styles.tileNone}`}>
+      <div className={styles.benchTop}>
+        <span className={styles.benchName}>{name}</span>
+        {desc && <span className={styles.benchRx}>{desc}</span>}
+        {pr && (
+          <span className={styles.tileActs}>
+            <button className={styles.iconBtn} aria-label={`Editar PR de ${name}`}
+              onClick={() => onOpen(name, pr.categories || [BENCHMARK_CAT], pr)}>
+              <IconPencil size={12} aria-hidden="true" />
+            </button>
+            <button className={`${styles.iconBtn} ${styles.iconBtnDanger}`} aria-label={`Apagar registros de ${name}`}
+              onClick={() => onClear(name)}>
+              <IconX size={12} aria-hidden="true" />
+            </button>
+          </span>
+        )}
+      </div>
+      {pr ? (
+        <div className={styles.benchBottom}>
+          <span className={styles.benchTime}>{parts?.num}</span>
+          <span className={styles.benchTimeUnit}>{parts?.unit}</span>
+          <Delta delta={delta} />
+          {pr.target && <span className={styles.tileMeta}>meta {prValLabel(pr.target, pr)}</span>}
+        </div>
+      ) : (
+        <button className={styles.noneBtn} style={{ '--fam': color }}
+          onClick={() => onOpen(name, [BENCHMARK_CAT], null)}>
+          <IconPlus size={12} aria-hidden="true" /> Registrar tempo
+        </button>
+      )}
+    </div>
+  )
+}
+
+// Family / benchmark card: a stone surface with a family-colored left accent, a header
+// carrying coverage (TallyBar + N/M), and a body of PR tiles rendered only when open.
+function FamCard({ bt, color, sub, entries, isOpen, toggle, prFor, onOpen, onClear, bench = false }) {
+  const total = entries.length
+  const prCount = entries.filter(e => !!prFor(getName(e))).length
+  const pct = total ? Math.round(prCount / total * 100) : 0
+
+  return (
+    <div className={styles.famCard} style={{ '--fam': color }}>
+      <div className={styles.famHead} role="button" tabIndex={0} aria-expanded={isOpen}
+        onClick={toggle} onKeyDown={onKey(toggle)}>
+        <span className={styles.famDot} aria-hidden="true" />
+        <span className={styles.famName}>{bt}</span>
+        {sub && <span className={styles.famSub}>{sub}</span>}
+        <span className={styles.famSpacer} />
+        <span className={styles.famCov}>
+          <span className={styles.famCovBar}><TallyBar pct={pct} color={color} size="sm" grow /></span>
+          <span className={`${styles.famCovNum}${prCount ? ' ' + styles.famCovNumHas : ''}`}
+            style={prCount ? { color } : undefined}>{prCount} / {total}</span>
+        </span>
+        <span className={styles.famChev} aria-hidden="true">{isOpen ? '▼' : '▶'}</span>
+      </div>
+
+      {isOpen && (
+        <div className={styles.famBody}>
+          <div className={styles.tileGrid}>
+            {entries.map(e => {
+              const name = getName(e)
+              return bench
+                ? <BenchTile key={name} name={name} desc={getDesc(e)} pr={prFor(name)}
+                    color={color} onOpen={onOpen} onClear={onClear} />
+                : <MovTile key={name} name={name} pr={prFor(name)} color={color} bt={bt}
+                    onOpen={onOpen} onClear={onClear} />
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function PrSection({ prs, registry, openBlocks, setOpenBlock, onOpen, onClear, query = '', onQuery }) {
+  const q = normExName(query || '')
+  const matches = name => !q || normExName(name).includes(q)
+  const prFor = name => prs.find(p => (p.name || '').toLowerCase() === name.toLowerCase())
+
+  // Movement families: registry categories that carry per-movement PRs (Força, LPO,
+  // Core, Acessórios, Skill, Cardio, Mobilidade). WOD formats + filler are skipped;
+  // Benchmark is pulled into its own card below.
+  const famBlocks = Object.keys(registry)
+    .filter(bt => !PR_SKIP.has(bt) && bt !== BENCHMARK_CAT && (registry[bt] || []).length > 0)
+    .map(bt => ({ bt, entries: (registry[bt] || []).filter(e => matches(getName(e))) }))
+    .filter(f => f.entries.length)
+
+  const benchEntries = (registry[BENCHMARK_CAT] || []).filter(e => matches(getName(e)))
+
+  const hasAny = Object.keys(registry).some(bt =>
+    (bt === BENCHMARK_CAT || !PR_SKIP.has(bt)) && (registry[bt] || []).length > 0)
+  if (!hasAny) return null
+
+  const nothing = q && !famBlocks.length && !benchEntries.length
+  // When searching, matching families reveal their matches; otherwise respect the Set.
+  const isOpen = bt => !!q || openBlocks.has(bt)
 
   return (
     <section className={styles.sh}><div className={styles.shInner}>
-      <h2 className={styles.shTitle}>PR <span className={styles.shTitleR}>bloco → exercício → detalhe</span></h2>
+      <h2 className={styles.shTitle}>PR <span className={styles.shTitleR}>por família de movimento</span></h2>
 
-      {blockOrder.map(bt => {
-        const exercises = (registry[bt] || []).map(getName).filter(Boolean)
-        if (!exercises.length) return null
+      {onQuery && (
+        <div className={styles.prSearch}>
+          <input className={styles.prSearchInput} type="search" value={query}
+            onChange={e => onQuery(e.target.value)} placeholder="Buscar exercício…"
+            aria-label="Buscar exercício por nome" />
+        </div>
+      )}
 
-        const color = blkColor({ type: bt })
-        const exNamesLow = new Set(exercises.map(n => n.toLowerCase()))
-        const btPrs = prs.filter(p =>
-          (p.categories || []).includes(bt) || p.category === bt || exNamesLow.has((p.name || '').toLowerCase()))
-        const prCount = btPrs.length, total = exercises.length
-        const miniPct = total > 0 ? Math.round(prCount / total * 100) : 0
-        const isBlockOpen = openBlock === bt
-        const toggleBlock = () => setOpenBlock(isBlockOpen ? null : bt)
+      {nothing && <div className={styles.emptyLine}>Nenhum exercício encontrado.</div>}
 
-        return (
-          <div key={bt}>
-            <div className={`${styles.habBlock}${isBlockOpen ? ' ' + styles.habBlockOpen : ''}`}
-              role="button" tabIndex={0} aria-expanded={isBlockOpen}
-              onClick={toggleBlock} onKeyDown={onKey(toggleBlock)}>
-              <span className={styles.habCaret} aria-hidden="true">{isBlockOpen ? '▼' : '▶'}</span>
-              <span className={styles.habName}>{bt}</span>
-              <div className={styles.habMini}>
-                <TallyBar pct={miniPct} color={color} size="sm" />
-              </div>
-              <span className={styles.habCount} style={prCount > 0 ? { color } : undefined}>
-                {prCount} / {total} PRs
-              </span>
-            </div>
+      {famBlocks.map(({ bt, entries }) => (
+        <FamCard key={bt} bt={bt} color={blkColor({ type: bt })} entries={entries}
+          isOpen={isOpen(bt)} toggle={() => setOpenBlock(bt)}
+          prFor={prFor} onOpen={onOpen} onClear={onClear} />
+      ))}
 
-            <div className={`${styles.habExList}${isBlockOpen ? ' ' + styles.habExListOpen : ''}`}>
-              {exercises.map(name => {
-                const pr = prs.find(p => (p.name || '').toLowerCase() === name.toLowerCase())
-                const hasPr = !!pr
-                const exKey = bt + ':' + name
-                const isExOpen = openEx === exKey
-                const toggleEx = () => { if (hasPr) setOpenEx(isExOpen ? null : exKey) }
-
-                let best = null, pct = null, delta = null
-                if (pr) { best = prBest(pr); pct = prPct(pr); delta = prDelta(pr) }
-                const deltaTone = delta?.good === true ? styles.toneGood
-                  : delta?.good === false ? styles.toneBad
-                  : styles.toneEven
-
-                return (
-                  <div key={name}>
-                    <div className={`${styles.habEx}${isExOpen ? ' ' + styles.habExOpen : ''}`}
-                      {...(hasPr ? { role: 'button', tabIndex: 0, 'aria-expanded': isExOpen, onKeyDown: onKey(toggleEx) } : {})}
-                      onClick={e => { e.stopPropagation(); toggleEx() }}>
-                      <span className={`${styles.habCheck} ${hasPr ? styles.habCheckYes : styles.habCheckNo}`} aria-hidden="true">
-                        {hasPr ? <IconCheck size={13} /> : <IconCircle size={13} />}
-                      </span>
-                      {/* The check/circle icon is the only thing that says whether a PR exists —
-                          it needs a text alternative, not just a color and a glyph. */}
-                      <span className={styles.srOnly}>{hasPr ? 'Com PR:' : 'Sem PR:'}</span>
-                      <span className={`${styles.habExName}${hasPr ? '' : ' ' + styles.habExNameNone}`}>{name}</span>
-
-                      {hasPr ? (
-                        <>
-                          <button className={styles.habBtnEdit} aria-label={`Editar PR de ${name}`}
-                            onClick={e => { e.stopPropagation(); onOpen(name, pr.categories || [pr.category].filter(Boolean), pr) }}>
-                            <IconPencil size={12} aria-hidden="true" />
-                          </button>
-                          <button className={styles.habBtnClear} aria-label={`Apagar registros de ${name}`}
-                            onClick={e => { e.stopPropagation(); onClear(name) }}>
-                            <IconX size={12} aria-hidden="true" />
-                          </button>
-                          <span className={styles.habExArr} aria-hidden="true">{isExOpen ? '▼' : '▶'}</span>
-                        </>
-                      ) : (
-                        <button className={styles.habBtnAdd} aria-label={`Registrar PR de ${name}`}
-                          onClick={e => { e.stopPropagation(); onOpen(name, bt ? [bt] : [], null) }}>
-                          <IconPlus size={13} aria-hidden="true" />
-                        </button>
-                      )}
-                    </div>
-
-                    {hasPr && (
-                      <div className={`${styles.habExDetail}${isExOpen ? ' ' + styles.habExDetailOpen : ''}`}>
-                        <div className={styles.habDetailRow}>
-                          {pct !== null
-                            ? <TallyBar pct={pct} color={color} size="sm" grow />
-                            : <div className={styles.habDetailSpacer} />}
-                          <span className={styles.habDetailVal}>
-                            {best ? prValLabel(best.value, pr) : '—'}
-                            {pr.target ? ' / ' + prValLabel(pr.target, pr) : ''}
-                          </span>
-                          {delta && delta.label !== '=' && (
-                            <span className={`${styles.habDetailDelta} ${deltaTone}`}>
-                              {delta.good === true ? '↑' : delta.good === false ? '↓' : ''} {delta.label}
-                            </span>
-                          )}
-                        </div>
-                        {pct !== null && pr.target && (
-                          <div className={styles.habDetailSub}>meta: {prValLabel(pr.target, pr)}</div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )
-      })}
+      {benchEntries.length > 0 && (
+        <>
+          <div className={styles.prSubLabel}>Benchmarks — tempo de conclusão</div>
+          <FamCard bt="Benchmarks" sub="WODs nomeados" color={blkColor({ type: BENCHMARK_CAT })}
+            entries={benchEntries} isOpen={isOpen(BENCHMARK_CAT)}
+            toggle={() => setOpenBlock(BENCHMARK_CAT)}
+            prFor={prFor} onOpen={onOpen} onClear={onClear} bench />
+        </>
+      )}
     </div></section>
   )
 }

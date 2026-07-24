@@ -16,7 +16,11 @@ export { getTargets, matchesAthlete }
 export const DIST_TYPES = ['Força','LPO','Acessórios','Skill','Core','Cardio','Mobilidade']
 
 // Registry categories that never carry a PR (they're formats or filler, not movements).
+// Benchmark is one of the WOD_TYPES it holds, so the movement grid skips it too — but
+// a benchmark's PR *is* a real record (its completion time / rounds), so PrSection reads
+// BENCHMARK_CAT directly for a dedicated time-PR card below the movement families (#87).
 export const PR_SKIP = new Set(['-','Aquecimento','Descanso',...WOD_TYPES])
+export const BENCHMARK_CAT = 'Benchmark'
 
 export function initials(n) {
   return n.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase()

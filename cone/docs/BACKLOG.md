@@ -17,7 +17,7 @@ Each remaining C-session replaces its page's `.b`/`.tb-btn`/inline-hex buttons w
 
 ## 🔵 In Progress
 
-- 🟡 **[plans/38](./plans/38-design-c1-exercicios-config.md)** — **#55 / #87 C1** · Phase A (Exercícios + Configurações → C0 + registry search/alpha) shipped `cab19c8`; **Phase B** PR-board sub-card mockup (`design/mockups/38-me-pr-board-subcards.html`) synced to Claude Design → **at the approval gate**, build post-approval.
+- 🟡 **[plans/38](./plans/38-design-c1-exercicios-config.md)** — **#55 / #87 C1** · Phase A (Exercícios + Configurações → C0 + registry search/alpha) shipped `cab19c8`; **Phase B** (me.html PR board → family cards + tiles, #87 benchmark time-PR card, multi-open + PR search) **BUILT** — `PrSection.jsx`/`Me.module.css` adopt mockups 38/39, me card re-synced. Remaining: the Exercícios rework batch (family grouping · variation curated-roots · sticky search+add · clean-detail create · no-scroll detail · save-summary modal) is **plan-mode approved**, gated on 5 design mockups (D1–D5) → approval → build. Scrollbar tokenize quick-win shipped `63d8394`. **`/code-review` still owed** — never run on Phase A; run it at the Exercícios build gate to cover Phase A + the new work in one pass.
 
 ## 🧊 Icebox (captured + prioritized — no plan yet)
 
@@ -91,6 +91,10 @@ Each remaining C-session replaces its page's `.b`/`.tb-btn`/inline-hex buttons w
 
 - ✅ **[shipped 2026-07-21 · plans/36](./plans/36-criador-text-mode.md)** (see Done) — **#92 Criador text-entry mode — parse the coach's own week format** · **L** · Opus
 - **#93 Block `duration` is bare minutes — migrate to mm:ss** · **M** · Sonnet · **split out of #58/plans/37 deliberately, do not fold it back in.** The coach asked for *all* time inputs to be MM:SS (#35). Every mm:ss-shaped field is converted in plans/37 — but `block.duration` is stored as **bare minutes** and read that way by TV, timer, `blkMeta`, `stationsCapStr`, Schedule and Publicador, and `toSecs('14')` reads `14` as **seconds**. So mixing the two shapes silently corrupts every time cap. Converting it is a data migration across every saved session plus a read-side compat shim at ~6 call sites — its own item, not an input swap. Until it ships, `Duração (min)` / `Time cap (min)` stay number fields.
+
+### From the 2026-07-24 C1 session (coach directive)
+
+- **#94 Audit prod: exercise names used in sessions but absent from the registry** · **S** · Sonnet · **coach directive (2026-07-24), to run after the C1 build lands.** Scan every block's exercise `name` across all prod `sessions` and list the ones that don't resolve to an `exercise_registry` entry via `resolveExercise`/`normExName` (`lib/registry.js`) — the coach free-types names and only ~51% currently match (see the registry note in CLAUDE.md). Output the deduped miss-list so the coach can decide which to register (or add as aliases). Read-only analysis against prod (`.env.production`), not a code change; deliverable is the list + a short frequency count. Related to #62 (the resolve path) and the registry-coverage numbers already measured there.
 
 ## ✅ Done (recent)
 

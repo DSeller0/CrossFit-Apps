@@ -152,40 +152,81 @@
 .distLbl { font-size: 11px; font-weight: 700; color: var(--sub); width: 72px; flex-shrink: 0; }
 .distVal { font-size: 10px; font-weight: 700; flex-shrink: 0; width: 36px; text-align: right; }
 
-/* ── PR drilldown ── */
-.habBlock { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--divider); cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.habBlock:last-of-type { border-bottom: none; }
-.habBlock:focus-visible { outline: 1px solid var(--teal); outline-offset: -1px; }
-.habBlockOpen .habCaret,
-.habBlockOpen .habName { color: var(--teal); }
-.habCaret { font-size: 9px; color: var(--dim); width: 10px; flex-shrink: 0; text-align: center; }
-.habName  { flex: 1; font-size: 12px; font-weight: 700; color: var(--sub); }
-.habMini  { width: 80px; flex-shrink: 0; }
-.habCount { font-size: 10px; font-weight: 700; color: var(--muted); width: 62px; text-align: right; flex-shrink: 0; white-space: nowrap; }
-.habExList { background: var(--stone2); border-left: 2px solid var(--teal); margin: 3px 0 6px 18px; overflow: hidden; max-height: 0; transition: max-height .3s cubic-bezier(.4,0,.2,1); }
-.habExListOpen { max-height: 600px; padding: 3px 0; }
-.habEx { display: flex; align-items: center; gap: 8px; padding: 5px 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.habEx:focus-visible { outline: 1px solid var(--teal); outline-offset: -1px; }
-.habExOpen { background: color-mix(in srgb, var(--teal) 5%, transparent); }
-.habCheck     { display: flex; flex-shrink: 0; pointer-events: none; }
-.habCheckYes  { color: var(--teal); }
-.habCheckNo   { color: var(--dim); }
-.habExName    { flex: 1; font-size: 11px; color: var(--sub); font-weight: 600; }
-.habExNameNone{ color: var(--dim); }
-.habExOpen .habExName { color: var(--teal); }
-.habExArr { font-size: 9px; flex-shrink: 0; color: var(--dim); }
-.habBtnAdd,.habBtnEdit,.habBtnClear { display: flex; align-items: center; padding: 2px 7px; font-family: var(--font); cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; letter-spacing: .04em; background: transparent; border: none; }
-.habBtnAdd   { border: 1px solid var(--teal); color: var(--teal); }
-.habBtnEdit  { border: 1px solid var(--gold2); color: var(--gold); padding: 2px 5px; }
-.habBtnClear { color: var(--dim); padding: 2px 4px; }
-.habBtnClear:hover { color: var(--err); }
-.habExDetail { overflow: hidden; max-height: 0; margin: 0; padding: 0; border-top: none; transition: max-height .2s cubic-bezier(.4,0,.2,1); }
-.habExDetailOpen { max-height: 160px; margin: 0 10px 4px 10px; padding: 6px 0 2px; border-top: 1px solid var(--divider); }
-.habDetailRow { display: flex; align-items: center; gap: 8px; }
-.habDetailSpacer { flex: 1; }
-.habDetailVal { font-size: 11px; font-weight: 800; color: var(--cream); white-space: nowrap; flex-shrink: 0; }
-.habDetailDelta { font-size: 11px; font-weight: 700; flex-shrink: 0; }
-.habDetailSub { font-size: 9px; color: var(--dim); margin-top: 3px; text-align: right; }
+/* ── PR board — family cards + tile grid (#55/#87 · plans/38 Phase B) ──
+   Redesigned from the two-level disclosure list (bloco → exercício → detalhe) into
+   family cards holding a grid of glanceable PR tiles. me.html is a PUBLIC page →
+   SQUARE corners; only .famDot is a circle. Family/benchmark color is passed in as
+   --fam (a DATA color), inherited by the tiles inside. */
+
+/* Search + section sub-label */
+.prSearch { margin-bottom: 12px; }
+.prSearchInput { width: 100%; background: var(--stone2); border: 1px solid var(--divider); color: var(--cream);
+  font-family: var(--font); font-size: 12px; letter-spacing: .02em; padding: 8px 11px; }
+.prSearchInput::placeholder { color: var(--dim); }
+.prSearchInput:focus-visible { outline: none; border-color: var(--teal); }
+.prSubLabel { font-size: 9px; font-weight: 900; color: var(--gold); letter-spacing: .12em;
+  text-transform: uppercase; margin: 16px 0 10px; }
+
+/* Family / benchmark card */
+.famCard { background: var(--stone); border: 1px solid var(--divider); border-left: 3px solid var(--fam, var(--teal)); margin-bottom: 12px; }
+.famCard:last-child { margin-bottom: 0; }
+.famHead { display: flex; align-items: center; gap: 9px; padding: 11px 13px; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+.famHead:focus-visible { outline: 1px solid var(--teal); outline-offset: -2px; }
+.famDot { width: 9px; height: 9px; border-radius: 50%; background: var(--fam, var(--teal)); flex-shrink: 0; }
+.famName { font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--cream); }
+.famSub { font-size: 10px; color: var(--muted); letter-spacing: .03em; margin-left: 2px; }
+.famSpacer { flex: 1; }
+.famCov { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.famCovBar { width: 64px; display: flex; }
+.famCovNum { font-size: 11px; font-weight: 700; color: var(--muted); font-family: var(--font-mono); white-space: nowrap; }
+.famChev { color: var(--dim); font-size: 11px; width: 12px; text-align: center; flex-shrink: 0; }
+
+.famBody { padding: 0 13px 13px; }
+.tileGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+/* PR tile (movement: load / reps / dist) */
+.tile { background: var(--stone2); border: 1px solid var(--divider); padding: 10px 11px 11px; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.tileTop { display: flex; align-items: flex-start; gap: 6px; }
+.tileName { flex: 1; font-size: 12px; color: var(--sub); line-height: 1.25; min-width: 0; word-break: break-word; }
+.tileHas .tileName { color: var(--cream); }
+.tileActs { display: flex; gap: 2px; flex-shrink: 0; margin: -2px -3px 0 0; }
+.iconBtn { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 0; -webkit-tap-highlight-color: transparent; }
+.iconBtn:hover { color: var(--cream); }
+.iconBtn:focus-visible { outline: 1px solid var(--teal); outline-offset: -1px; }
+.iconBtnDanger:hover { color: var(--err); }
+
+.tileVal { display: flex; align-items: baseline; gap: 4px; }
+.tileNum { font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--cream); line-height: 1; letter-spacing: -.01em; }
+.tileUnit { font-size: 11px; color: var(--muted); font-weight: 700; }
+
+.barRow { display: flex; align-items: center; gap: 8px; }
+.barGrow { flex: 1; min-width: 0; display: flex; }
+.tileMeta { font-size: 10px; color: var(--dim); letter-spacing: .02em; white-space: nowrap; }
+
+.delta { font-size: 10.5px; font-weight: 700; font-family: var(--font-mono); letter-spacing: .02em; white-space: nowrap; flex-shrink: 0; }
+.deltaGood { color: var(--teal); }
+.deltaBad  { color: var(--err); }
+.deltaEven { color: var(--muted); }
+
+/* No-PR tile: recessed, dashed, invites a first log */
+.tileNone { border-style: dashed; border-color: var(--dim); background: transparent; justify-content: center; gap: 8px; }
+.tileNone .tileName { color: var(--muted); }
+.noneBtn { align-self: flex-start; font-family: var(--font); font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--fam, var(--teal)); background: transparent;
+  border: 1px solid color-mix(in srgb, var(--fam, var(--teal)) 40%, var(--divider));
+  padding: 4px 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; -webkit-tap-highlight-color: transparent; }
+.noneBtn:hover { background: color-mix(in srgb, var(--fam, var(--teal)) 12%, transparent); }
+.noneBtn:focus-visible { outline: 1px solid var(--teal); outline-offset: 1px; }
+
+/* Benchmark tile — full-width, carries a prescription sub-line + a stopwatch value */
+.benchTile { grid-column: 1 / -1; }
+.benchTop { display: flex; align-items: baseline; gap: 8px; }
+.benchName { font-size: 13px; font-weight: 700; color: var(--cream); letter-spacing: .03em; flex-shrink: 0; }
+.tileNone .benchName { color: var(--muted); }
+.benchRx { flex: 1; font-size: 10.5px; color: var(--muted); line-height: 1.3; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.benchBottom { display: flex; align-items: baseline; gap: 10px; margin-top: 7px; }
+.benchTime { font-family: var(--font-mono); font-size: 24px; font-weight: 700; color: var(--fam, var(--gold)); line-height: 1; letter-spacing: .01em; }
+.benchTimeUnit { font-size: 10px; color: var(--muted); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 
 /* ── Picker ── */
 .pickerWrap  { margin: 28px auto; padding: 0 16px; }
@@ -291,9 +332,9 @@
   .msHint { font-size: 10px; } .msRow { font-size: 12px; } .msRowIcon { font-size: 13px; }
   .msRowPct { font-size: 11px; } .msRowStatus { font-size: 11px; } .goalSub { font-size: 11px; }
   .distLbl { font-size: 13px; } .distVal { font-size: 12px; }
-  .habCaret { font-size: 11px; } .habName { font-size: 14px; } .habCount { font-size: 12px; }
-  .habExName { font-size: 13px; } .habExArr { font-size: 11px; }
-  .habDetailVal { font-size: 13px; } .habDetailSub { font-size: 11px; }
+  .famName { font-size: 14px; } .famCovNum { font-size: 12px; } .tileName { font-size: 13px; }
+  .tileNum { font-size: 24px; } .benchName { font-size: 14px; } .benchTime { font-size: 26px; }
+  .prSearchInput { font-size: 13px; }
   .pickerTitle { font-size: 26px; } .pickerSub { font-size: 16px; }
   .pickerInput { font-size: 18px; } .pickerName { font-size: 18px; } .pickerEmpty { font-size: 16px; }
   .di { font-size: 16px; } .centerMsg { font-size: 16px; }

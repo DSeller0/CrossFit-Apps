@@ -367,6 +367,13 @@ const meRegistry = {
   'LPO':   ['Clean and Jerk', 'Snatch'],
   'Skill': ['Muscle-up', 'Handstand Push-up'],
   'For Time': ['Fran'],   // a WOD format — PR_SKIP must drop this whole block
+  // Benchmark carries a dedicated time-PR card (#87); entries may be objects with a
+  // description that renders as the tile's prescription sub-line.
+  'Benchmark': [
+    { name: 'Fran', description: '21-15-9 · Thrusters + Pull-ups' },
+    { name: 'Grace', description: '30 Clean & Jerks' },
+    { name: 'Murph', description: '1mi Run · 100 Pull · 200 Push · 300 Squat · 1mi Run' },
+  ],
 }
 const mePrs = [
   { name: 'Back Squat', type: 'load', unit: 'kg', target: 120, categories: ['Força'],
@@ -377,6 +384,11 @@ const mePrs = [
     results: [{ value: '60', date: '2026-06-20' }] },
   { name: 'Clean and Jerk', type: 'load', unit: 'kg', target: 100, categories: ['LPO'],
     results: [{ value: '70', date: '2026-07-01' }] },
+  // A benchmark PR is a completion time (type:'time'); faster is better.
+  { name: 'Fran', type: 'time', target: '3:30', categories: ['Benchmark'],
+    results: [{ value: '3:56', date: '2026-05-10' }, { value: '3:42', date: '2026-07-15' }] },
+  { name: 'Grace', type: 'time', categories: ['Benchmark'],
+    results: [{ value: '3:04', date: '2026-06-05' }, { value: '2:58', date: '2026-07-18' }] },
 ]
 
 // The three sheets are position:fixed overlays — they only tell the truth when they
@@ -427,13 +439,16 @@ function MeSheetHarness() {
 // PrSection owns its own open/closed state in me.html — mirror that here so the
 // gallery can actually exercise the two disclosure levels and their keyboard path.
 function PrSectionDemo(props) {
-  const [openBlock, setOpenBlock] = useState('Força')
-  const [openEx, setOpenEx] = useState('Força:Back Squat')
+  const [openBlocks, setOpenBlocks] = useState(() => new Set(['Força', 'Benchmark']))
+  const [prQuery, setPrQuery] = useState('')
+  const toggle = bt => setOpenBlocks(prev => {
+    const n = new Set(prev); n.has(bt) ? n.delete(bt) : n.add(bt); return n
+  })
   return (
     <PrSection
       registry={meRegistry} prs={mePrs}
-      openBlock={openBlock} setOpenBlock={b => { setOpenBlock(b); setOpenEx(null) }}
-      openEx={openEx} setOpenEx={setOpenEx}
+      openBlocks={openBlocks} setOpenBlock={toggle}
+      query={prQuery} onQuery={setPrQuery}
       onOpen={NOOP} onClear={NOOP}
       {...props}
     />
@@ -1326,15 +1341,15 @@ export const GROUPS = [
         id: 'prsection',
         label: 'PrSection',
         render: () => (
-          <Section title="PrSection" sub="src/public/me/PrSection.jsx — o quadro de PRs: bloco → exercício → detalhe. NÃO usa o AccordionCard (ver comentário no arquivo): estas são linhas densas dentro de um card, e a linha de exercício hospeda os próprios botões de ação, que não podem aninhar dentro de um header role='button'. O que ele adota é o contrato de interação — role/tabIndex/aria-expanded + onKey. Antes do #52 os dois níveis eram divs só de clique, sem caminho de teclado.">
-            <Case label="Força aberto · Back Squat expandido (com meta, delta positivo)">
+          <Section title="PrSection" sub="src/public/me/PrSection.jsx (#55/#87 · plans/38 Phase B) — o quadro de PRs como CARDS DE FAMÍLIA com uma grade de TILES, cada valor recorde visível num toque (antes: lista de duas dobras, dois toques para ver um valor). Reutiliza blkColor (cor de família = dado, igual em todo tema), TallyBar e prBest/prPct/prDelta. Benchmarks (#87) ganham um card de tempo próprio, lido de BENCHMARK_CAT. Página pública → cantos retos. Várias famílias abrem ao mesmo tempo (openBlocks é um Set) e a busca filtra por nome via normExName.">
+            <Case label="Força + Benchmarks abertos · tiles com meta/delta/tempo; Busca por nome">
               <PrSectionDemo />
             </Case>
-            <Case label="Sem nenhum PR (todo o quadro por preencher)">
-              <PrSection registry={meRegistry} prs={[]} openBlock="Força" setOpenBlock={NOOP} openEx={null} setOpenEx={NOOP} onOpen={NOOP} onClear={NOOP} />
+            <Case label="Sem nenhum PR (todo o quadro por preencher → tiles tracejados)">
+              <PrSection registry={meRegistry} prs={[]} openBlocks={new Set(['Força'])} setOpenBlock={NOOP} onOpen={NOOP} onClear={NOOP} />
             </Case>
             <Case label="Registro vazio → não renderiza nada">
-              <PrSection registry={{}} prs={mePrs} openBlock={null} setOpenBlock={NOOP} openEx={null} setOpenEx={NOOP} onOpen={NOOP} onClear={NOOP} />
+              <PrSection registry={{}} prs={mePrs} openBlocks={new Set()} setOpenBlock={NOOP} onOpen={NOOP} onClear={NOOP} />
             </Case>
           </Section>
         ),

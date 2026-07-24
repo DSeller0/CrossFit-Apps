@@ -47,8 +47,16 @@ export default function Me() {
   const [selAthlete, setSelAthlete] = useState(null)
   const [box] = useState(() => getBoxScope())   // per-box view scope (?box=)
   const [query, setQuery] = useState('')
-  const [openBlock, setOpenBlock] = useState(null)
-  const [openEx, setOpenEx] = useState(null)
+  // PR board (#87): several family cards can be open at once — a Set, not one id
+  // (same pattern as Criador WeekGrid's openIds). The tile grid is glanceable, so
+  // there is no longer a per-exercise second disclosure level.
+  const [openBlocks, setOpenBlocks] = useState(() => new Set())
+  const [prQuery, setPrQuery] = useState('')
+  const toggleBlock = bt => setOpenBlocks(prev => {
+    const next = new Set(prev)
+    next.has(bt) ? next.delete(bt) : next.add(bt)
+    return next
+  })
 
   // Exactly one sheet may be open: 'pr' | 'body' | 'clear' | null. Before #52 both
   // sheets rendered unconditionally at the same z-index and could stack.
@@ -455,10 +463,10 @@ export default function Me() {
                   <PrSection
                     prs={pd.prs}
                     registry={registry}
-                    openBlock={openBlock}
-                    setOpenBlock={b => { setOpenBlock(b); setOpenEx(null) }}
-                    openEx={openEx}
-                    setOpenEx={setOpenEx}
+                    openBlocks={openBlocks}
+                    setOpenBlock={toggleBlock}
+                    query={prQuery}
+                    onQuery={setPrQuery}
                     onOpen={openLogSheet}
                     onClear={askClear}
                   />
