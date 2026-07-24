@@ -1,0 +1,195 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — Exercícios D5 · Search-first / command-palette (#55/#87 · plans/38)</title>
+<style>
+  :root{
+    --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
+    --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
+    --red:#c83030;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+    --font:'Cinzel',Georgia,serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
+    --divider:#2a231c;--border:#2a231c;--accent:#4ac8c0;--accent-text:#000;--text:#f0e8d0;--err:#c83030;
+    --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--radius-sm:4px;--radius-md:6px;
+    --fWod:#d8a840;--fForca:#5090e0;--fGin:#4ac8c0;--fCond:#40b878;
+  }
+  html.theme-totk-light{
+    --bg:#ede8dc;--stone:#f5f1e8;--stone2:#e8e2d4;--div:#d4cab8;
+    --gold:#9a6c14;--gold2:#7a5410;--teal:#1c6860;--green:#1a6830;--red:#b83020;--cream:#1c1508;--sub:#503828;--muted:#7a6448;--dim:#a89070;
+    --font:'Cinzel',Georgia,serif;--divider:#d4cab8;--border:#d4cab8;--accent:#1c6860;--accent-text:#fff;--text:#1c1508;--err:#b83020;
+  }
+  html.theme-spirit-blossom{
+    --bg:#09070f;--stone:#100d1c;--stone2:#17122a;--div:#221638;
+    --gold:#e05490;--gold2:#c03870;--teal:#38c4d0;--green:#50d890;--red:#c82850;--cream:#ede4f8;--sub:#c4a0d0;--muted:#7d5090;--dim:#4a2d60;
+    --font:'Amarante',Georgia,serif;--divider:#221638;--border:#221638;--accent:#38c4d0;--accent-text:#09070f;--text:#ede4f8;--err:#c82850;
+  }
+  html.theme-spirit-blossom-light{
+    --bg:#f4eefb;--stone:#ffffff;--stone2:#f0e8f8;--div:#e2d4f0;
+    --gold:#c83070;--gold2:#a82058;--teal:#1490a0;--green:#28a064;--red:#c02040;--cream:#1a0828;--sub:#4a2460;--muted:#7840a0;--dim:#9070b0;
+    --font:'Amarante',Georgia,serif;--divider:#e2d4f0;--border:#e2d4f0;--accent:#1490a0;--accent-text:#fff;--text:#1a0828;--err:#c02040;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 22px 60px;background:var(--bg);color:var(--text);font-family:var(--font)}
+  h1{font-size:16px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 4px} h1 b{color:var(--gold)}
+  p.note{font-size:12.5px;color:var(--muted);margin:0 0 16px;font-family:Georgia,serif;max-width:1000px;line-height:1.6}
+  p.note b{color:var(--sub)} p.note code{font-family:var(--font-mono);color:var(--sub);font-size:11.5px}
+  .themebar{display:flex;gap:6px;margin:0 0 20px;flex-wrap:wrap}
+  .themebar button{font-family:var(--font);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 12px;background:var(--stone);color:var(--sub);border:1px solid var(--divider);cursor:pointer}
+  .themebar button:hover{color:var(--cream);border-color:var(--dim)}
+
+  .app{max-width:1140px;border:1px solid var(--divider);background:var(--stone);display:flex;flex-direction:column;height:660px;overflow:hidden}
+
+  /* Command bar — the dominant surface */
+  .cmdBar{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--divider);background:var(--stone2);flex-shrink:0}
+  .cmdSearch{flex:1;display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--dim);padding:11px 14px}
+  .cmdSearch .ic{font-size:16px;color:var(--accent)}
+  .cmdSearch input{flex:1;background:transparent;border:none;outline:none;color:var(--cream);font-family:var(--font);font-size:15px;letter-spacing:.02em}
+  .cmdSearch input::placeholder{color:var(--dim)}
+  .cmdSearch .kbd{font-family:var(--font-mono);font-size:10px;color:var(--muted);border:1px solid var(--divider);padding:2px 6px}
+  .cmdAdd{display:flex;align-items:center;gap:6px;padding:11px 16px;background:var(--accent);color:var(--accent-text);
+    border:none;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+
+  /* Filter rail (chips) — the demoted category list */
+  .filterRail{display:flex;align-items:center;gap:6px;padding:9px 16px;border-bottom:1px solid var(--divider);flex-wrap:wrap;flex-shrink:0}
+  .frLbl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+  .chip{font-size:10.5px;padding:4px 10px;border:1px solid color-mix(in srgb,var(--cc,var(--muted)) 45%,var(--divider));color:var(--cc,var(--sub));cursor:pointer;letter-spacing:.02em}
+  .chip.on{background:var(--cc,var(--teal));color:var(--bg);border-color:var(--cc,var(--teal));font-weight:700}
+  .chip.all{--cc:var(--cream)}
+
+  /* body: results (grouped) | detail */
+  .body{flex:1;display:grid;grid-template-columns:1fr 400px;gap:1px;background:var(--divider);overflow:hidden}
+  .results{background:var(--stone);overflow-y:auto}
+  .resHint{font-size:10px;color:var(--muted);padding:9px 16px 4px;letter-spacing:.02em}
+  .resHint b{color:var(--accent);font-family:var(--font-mono)}
+  .catGroup{margin-bottom:2px}
+  .catHead{display:flex;align-items:center;gap:8px;padding:8px 16px 5px;position:sticky;top:0;background:var(--stone);border-bottom:1px solid var(--divider)}
+  .catDot{width:8px;height:8px;border-radius:50%;background:var(--cc)}
+  .catName{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--cc)}
+  .catN{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+  .vgLine{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);padding:6px 16px 3px 24px}
+  .exRow{display:flex;align-items:center;gap:9px;padding:8px 16px 8px 24px;cursor:pointer;border-bottom:1px solid transparent}
+  .exRow:hover{background:var(--stone2)}
+  .exRow.active{background:color-mix(in srgb,var(--cc,var(--teal)) 12%,transparent);box-shadow:inset 3px 0 0 var(--cc,var(--teal))}
+  .exName{flex:1;font-size:13px;color:var(--sub)}
+  .exName .hl{color:var(--cream);font-weight:800;border-bottom:1px solid var(--accent)}
+  .exRow.active .exName{color:var(--cream);font-weight:700}
+  .exTag{font-size:9px;padding:2px 6px;border:1px solid color-mix(in srgb,var(--cc) 45%,var(--divider));color:var(--cc)}
+  .exVid{font-size:12px}.exVid.pub{color:var(--teal)}.exVid.un{color:var(--dim)}
+
+  /* detail */
+  .p3{background:var(--stone);display:flex;flex-direction:column;overflow:hidden;--fc:var(--fForca)}
+  .p3head{padding:11px 14px 0;flex-shrink:0}
+  .p3kicker{font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .p3body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:11px 16px;padding:12px 14px;align-content:start;overflow:hidden}
+  .field{display:flex;flex-direction:column;gap:4px;min-width:0}.field.span{grid-column:1 / -1}
+  .fLabel{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .inp{background:var(--stone2);border:1px solid var(--divider);color:var(--cream);font-family:var(--font);font-size:12px;padding:7px 9px;width:100%}
+  textarea.inp{resize:none;font-family:Georgia,serif}
+  .tags{display:flex;flex-wrap:wrap;gap:4px}
+  .tag{font-size:10px;padding:3px 7px;border:1px solid var(--dim);color:var(--sub);cursor:pointer}
+  .tag.on{background:var(--fc,var(--teal));color:var(--bg);border-color:var(--fc,var(--teal));font-weight:700}
+  .cargas{display:flex;align-items:center;gap:6px}.cargas .inp{width:56px}.cargas .times{color:var(--muted)}
+  .intens{display:flex;gap:5px;margin-top:5px}
+  .intPill{font-size:9.5px;padding:3px 8px;border:1px solid var(--divider);color:var(--muted)}
+  .intPill.on{border-color:var(--accent);color:var(--accent)}
+  .vidRow{display:flex;gap:6px}
+  .pubTog{font-size:9px;font-weight:800;padding:2px 7px;border:1px solid var(--teal);color:var(--teal);align-self:flex-start}
+  .p3foot{display:flex;gap:8px;padding:11px 14px;border-top:1px solid var(--divider);flex-shrink:0}
+  .save{flex:1;padding:9px;background:var(--accent);color:var(--accent-text);border:none;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+  .del{width:38px;background:transparent;border:1px solid var(--err);color:var(--err);cursor:pointer;font-size:14px}
+  .legend{font-size:11px;color:var(--dim);margin-top:12px;font-family:Georgia,serif;max-width:1000px;line-height:1.6}
+  .legend b{color:var(--sub)}
+</style>
+
+<body>
+<h1>Exercícios · <b>D5 — Busca em primeiro lugar</b></h1>
+<p class="note">
+  <b>#55 / #87 · plans/38 · Direção 5 de 5 (introduz um novo componente).</b> Inverte a hierarquia: a <b>busca é a
+  interação principal</b> — uma barra de comando grande no topo que filtra <b>todas as categorias de uma vez</b>. A lista de
+  categorias é rebaixada a um <b>trilho de filtros</b> (chips). Os resultados aparecem como <b>SearchResults</b> (novo componente):
+  agrupados por categoria → variação, com o trecho buscado <span style="color:var(--cream);border-bottom:1px solid var(--accent)">realçado</span>
+  e navegação por teclado. Digitou "squat" → só os agachamentos, de qualquer categoria. Detalhe em 2 colunas sem scroll à direita.
+  <b>Não construído.</b>
+</p>
+<div class="themebar">
+  <button onclick="document.documentElement.className='theme-totk-dark'">TotK Dark</button>
+  <button onclick="document.documentElement.className='theme-totk-light'">TotK Light</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom'">Spirit Blossom</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom-light'">SB Light</button>
+</div>
+
+<div class="app">
+  <!-- Command bar -->
+  <div class="cmdBar">
+    <div class="cmdSearch"><span class="ic">🔍</span><input value="squat" ><span class="kbd">↑↓ navegar · ⏎ abrir</span></div>
+    <button class="cmdAdd">+ Novo exercício</button>
+  </div>
+
+  <!-- Filter rail (demoted category list) -->
+  <div class="filterRail">
+    <span class="frLbl">Filtrar:</span>
+    <span class="chip all on">Todos</span>
+    <span class="chip" style="--cc:var(--fWod)">WOD</span>
+    <span class="chip" style="--cc:var(--fForca)">Força</span>
+    <span class="chip" style="--cc:var(--fForca)">LPO</span>
+    <span class="chip" style="--cc:var(--fForca)">Core</span>
+    <span class="chip" style="--cc:var(--fForca)">Acessórios</span>
+    <span class="chip" style="--cc:var(--fGin)">Skill</span>
+    <span class="chip" style="--cc:var(--fCond)">Cardio</span>
+    <span class="chip" style="--cc:var(--fCond)">Aquecimento</span>
+    <span class="chip" style="--cc:var(--fCond)">Mobilidade</span>
+  </div>
+
+  <!-- body -->
+  <div class="body">
+    <!-- SearchResults -->
+    <div class="results">
+      <div class="resHint"><b>7</b> resultados para "squat" em 2 categorias</div>
+
+      <div class="catGroup" style="--cc:var(--fForca)">
+        <div class="catHead"><span class="catDot"></span><span class="catName">Força</span><span class="catN">· 5</span></div>
+        <div class="vgLine">▸ Squat (5)</div>
+        <div class="exRow active"><span class="exName">Back <span class="hl">Squat</span></span><span class="exTag">Força</span><span class="exVid pub">🎥</span></div>
+        <div class="exRow"><span class="exName">Front <span class="hl">Squat</span></span><span class="exTag">Força</span><span class="exVid pub">🎥</span></div>
+        <div class="exRow"><span class="exName">Overhead <span class="hl">Squat</span></span><span class="exTag">Força</span><span class="exVid un">🎥</span></div>
+        <div class="exRow"><span class="exName">Box <span class="hl">Squat</span></span><span class="exTag">Força</span></div>
+        <div class="exRow"><span class="exName">Goblet <span class="hl">Squat</span></span><span class="exTag">Força</span></div>
+      </div>
+
+      <div class="catGroup" style="--cc:var(--fCond)">
+        <div class="catHead"><span class="catDot"></span><span class="catName">Aquecimento</span><span class="catN">· 2</span></div>
+        <div class="vgLine">▸ Squat (2)</div>
+        <div class="exRow"><span class="exName">Air <span class="hl">Squat</span></span><span class="exTag" style="--cc:var(--fCond)">Aquecimento</span></div>
+        <div class="exRow"><span class="exName">Jump <span class="hl">Squat</span></span><span class="exTag" style="--cc:var(--fCond)">Aquecimento</span></div>
+      </div>
+    </div>
+
+    <!-- detail -->
+    <div class="p3">
+      <div class="p3head"><span class="p3kicker">Exercício</span></div>
+      <div class="p3body">
+        <div class="field span"><span class="fLabel">Nome</span><input class="inp" value="Back Squat"></div>
+        <div class="field span"><span class="fLabel">Tipos</span>
+          <div class="tags"><span class="tag on">Força</span><span class="tag">LPO</span><span class="tag">Core</span><span class="tag">Acessórios</span><span class="tag">Skill</span></div>
+        </div>
+        <div class="field"><span class="fLabel">Cargas padrão</span>
+          <div class="cargas"><input class="inp" value="5"><span class="times">×</span><input class="inp" value="5"></div>
+          <div class="intens"><span class="intPill on">%1RM</span><span class="intPill">Gênero</span><span class="intPill">Progressão</span></div>
+        </div>
+        <div class="field"><span class="fLabel">Vídeo (YouTube)</span>
+          <div class="vidRow"><input class="inp" value="youtu.be/…" style="flex:1"></div><span class="pubTog">ON · publicado</span>
+        </div>
+        <div class="field"><span class="fLabel">Descrição</span><textarea class="inp" rows="2">Agachamento com a barra nas costas.</textarea></div>
+        <div class="field"><span class="fLabel">Músculo(s) alvo</span><input class="inp" value="Quadríceps, glúteos"></div>
+        <div class="field span"><span class="fLabel">Detalhe</span><textarea class="inp" rows="2">Joelhos alinhados; profundidade abaixo do paralelo.</textarea></div>
+      </div>
+      <div class="p3foot"><button class="save">Salvar</button><button class="del">🗑</button></div>
+    </div>
+  </div>
+</div>
+
+<p class="legend">
+  <b>Diferencial da D5:</b> a busca acha um exercício em qualquer categoria num toque — ideal quando o coach sabe o nome
+  mas não em que categoria o cadastrou. Custa a lição de "onde clico primeiro" (a coluna de categorias vira filtro, não
+  mais o índice) e um novo componente de resultados agrupados. O mais ousado dos cinco.
+</p>
+<script>if(!document.documentElement.className)document.documentElement.className='theme-totk-dark';</script>
