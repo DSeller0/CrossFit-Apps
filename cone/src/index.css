@@ -468,13 +468,14 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
   --lb-filter-text:#000000;
 }
 
-/* ── Zelda-themed scrollbars ── */
+/* ── Zelda-themed scrollbars — token-based so they track the active theme (was
+   frozen to totk-dark hex in all 4 themes); mirrors the themes.css block. ── */
 ::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:#1a1410;border-radius:3px}
-::-webkit-scrollbar-thumb{background:#3a3028;border-radius:3px;border:1px solid #4ac8c0}
-::-webkit-scrollbar-thumb:hover{background:#4ac8c0;border-color:#68d8a0}
-::-webkit-scrollbar-corner{background:#1a1410}
-*{scrollbar-width:thin;scrollbar-color:#3a3028 #1a1410}
+::-webkit-scrollbar-track{background:var(--stone);border-radius:3px}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:3px;border:1px solid var(--teal)}
+::-webkit-scrollbar-thumb:hover{background:var(--teal);border-color:var(--teal)}
+::-webkit-scrollbar-corner{background:var(--bg)}
+*{scrollbar-width:thin;scrollbar-color:var(--dim) var(--stone)}
 
 /* ── Login screen ── */
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg,#0d0b09);padding:20px}
