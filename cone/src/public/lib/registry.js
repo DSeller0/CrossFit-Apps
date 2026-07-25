@@ -167,6 +167,38 @@ export const ALIASES = {
   'pause bench press': 'Bench Press',
   'a swing': 'American KB Swing', 'kb american swing': 'American KB Swing',
   'kh oh walking': 'DUal KB Overhead Walking', 'dual kb oh walking': 'DUal KB Overhead Walking',
+  'oh walking 2kb': 'DUal KB Overhead Walking',
+
+  // #94 round 2 — spellings/variants of entries added by 94-round2-registry-additions.sql,
+  // plus the two the coach mapped onto existing English entries instead of registering.
+  'abs anilha': 'Plate Sit-up', 'abdominal com anilha': 'Plate Sit-up',
+  'prancha lat e': 'Side Plank', 'prancha lat d': 'Side Plank',
+  'prancha lateral e': 'Side Plank', 'prancha lateral d': 'Side Plank',
+  'abs medball': 'Abs Med Ball',
+  'lenhador caotic': 'Lenhador',
+  // Bare HSPU means the kipping version (coach's call — same logic as the bare Pull-up).
+  'handstand push up': 'Kipping HSPU', 'handstand push-up': 'Kipping HSPU',
+  'handstand hold wall': 'Handstand Hold', 'hsw hold': 'Handstand Hold',
+  'lsit argola': 'L-sit (rings)', 'l sit argola': 'L-sit (rings)', 'lsit': 'L-Sit',
+  'l sit barra': 'L-Sit Barra',
+  'wall walking': 'Wall Walk',
+  'tap shoulder': 'Shoulder Tap', 'wall shoulder taps': 'Shoulder Tap',
+  'push up hand release': 'Hand Release Push-up', 'push-up hand release': 'Hand Release Push-up',
+  'burpees box jump over': 'Burpee Box Jump Over',
+  'box jump step down': 'Box Jump Over', 'bbjo step down': 'Box Jump Over',
+  'burpees broad jump': 'Burpee Broad Jump', 'burpees to plate': 'Burpee to Plate',
+  'globet squat': 'Goblet Squat',
+  'remada low curvada': 'Barbell Row', 'remada curvada peg supinada': 'Barbell Row',
+  'bulgaro squat com': 'Bulgarian Split Squat',
+  'legless': 'Legless Rope Climb', 'rc': 'Rope Climb',
+  'wall sit hold': 'Wall Sit',
+  'db bench press inclinado': 'DB Bench Press',
+  'dual step box up': 'DB Step Box Up', 'step down kb': 'KB Step Down',
+  'kb leg over': 'KB Over Leg', 'over kb leg': 'KB Over Leg',
+  'low hang clean': 'Hang Clean', 'high squat clean': 'Clean',
+  // "S" = strict in the coach's shorthand.
+  's pull up': 'Strict Pull-up', 's pull-up': 'Strict Pull-up',
+  's t2b': 'Toes to Bar', 's hspu': 'Strict HSPU',
   // NOTE: "Pull Up" → "Pull-up" needs no alias — buildRegistryIndex derives the spaced
   // spelling of every hyphenated entry (see derivedKeys), which is self-maintaining.
 }

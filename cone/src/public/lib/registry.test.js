@@ -256,6 +256,49 @@ describe('#94 · slot letters, trailing tempo notes and qualifiers', () => {
   })
 })
 
+// #94 round 2 — the coach's decisions: which typed names map onto an EXISTING entry rather
+// than becoming a new one. The new entries themselves live in
+// docs/reviews/94-round2-registry-additions.sql; this asserts the mapping half.
+describe('#94 round 2 · decisions that map onto existing entries', () => {
+  const index = buildRegistryIndex({
+    Core: [{ name: 'Plate Sit-up' }, { name: 'Side Plank' }, { name: 'L-Sit' }],
+    Skill: [
+      { name: 'Kipping HSPU' }, { name: 'Strict HSPU' }, { name: 'L-sit (rings)' },
+      { name: 'Handstand Hold' }, { name: 'Strict Pull-up' }, { name: 'Rope Climb' },
+      { name: 'Legless Rope Climb' }, { name: 'Wall Walk' }, { name: 'Shoulder Tap' },
+      { name: 'Box Jump Over' }, { name: 'Burpee Box Jump Over' }, { name: 'Toes to Bar' },
+    ],
+    'Acessórios': [{ name: 'Barbell Row' }, { name: 'Bulgarian Split Squat' }, { name: 'Goblet Squat' }],
+    'Força': [{ name: 'DB Bench Press' }, { name: 'Wall Sit' }],
+  })
+
+  test.each([
+    // Coach: abs-with-a-plate IS the plate sit-up; prancha lat E/D are just left/right.
+    ['ABS ANILHA', 'Plate Sit-up'], ['Abdominal com Anilha', 'Plate Sit-up'],
+    ['Prancha lat E', 'Side Plank'], ['Prancha lat D', 'Side Plank'],
+    // Coach: a bare handstand push-up means the kipping one.
+    ['Handstand Push Up', 'Kipping HSPU'],
+    ['20\'\' Handstand Hold Wall', 'Handstand Hold'], ['30" HSW HOLD', 'Handstand Hold'],
+    // "S" is the coach's shorthand for strict.
+    ['HEAVY  S PULL UP', 'Strict Pull-up'], ['8 S T2B', 'Toes to Bar'],
+    // L-sit: argola (rings) is the existing entry, barra gets its own (in the SQL).
+    ['30” Lsit argola', 'L-sit (rings)'], ['20\'\' L Sit Argola', 'L-sit (rings)'],
+    // Spelling/plural variants of round-2 entries.
+    ['3 Wall walking', 'Wall Walk'], ['Tap Shoulder', 'Shoulder Tap'],
+    ['Wall Shoulder Taps', 'Shoulder Tap'],
+    ['12 Bbjo step down', 'Box Jump Over'], ['9-15-21 Box jump step down', 'Box Jump Over'],
+    ['Burpees box jump over', 'Burpee Box Jump Over'],
+    ['12 dB bench press inclinado', 'DB Bench Press'],
+    ['8 GLOBET Squat (Heels Elevated)', 'Goblet Squat'],
+    ['8 Remada low curvada', 'Barbell Row'], ['Remada curvada peg supinada', 'Barbell Row'],
+    ['BÚLGARO SQUAT COM (1 Anilha )', 'Bulgarian Split Squat'],
+    ['40” Wall Sit hold', 'Wall Sit'],
+    ['1 Legless', 'Legless Rope Climb'],
+  ])('%j → %j', (typed, canonical) => {
+    expect(resolveExercise(typed, index)?.name).toBe(canonical)
+  })
+})
+
 // #94 — new entries carry the coach's shorthand in parens ("Single Under (SU)"), and both
 // halves must resolve without a hand-written alias per entry.
 describe('#94 · "(SHORTHAND)" in an entry name is indexed automatically', () => {
@@ -329,7 +372,7 @@ describe('#94 · alias batch', () => {
     ['Remada Russa', 'Russian Row'], ['8 remada russa', 'Russian Row'],
     ['6 Remada curvada', 'Barbell Row'],
     ['10 bom dia', 'Good Morning'], ['12 martelo alt', 'Hammer Curl'], ['8 elevação lat', 'Lateral Raise'],
-    ['Prancha ventral', 'Plank'], ['Prancha lat D', null],
+    ['Prancha ventral', 'Plank'], ['Prancha lat D', 'Side Plank'], ['Prancha lat E', 'Side Plank'],
     // Hyphen vs space — normExName keeps hyphens, so both spellings need to work.
     ['Pull-up', 'Pull-up'], ['Pull-Up', 'Pull-up'], ['PULL UP', 'Pull-up'],
     ['15 PuLl Up', 'Pull-up'], ['25 Pull Up', 'Pull-up'],

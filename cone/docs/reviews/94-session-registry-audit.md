@@ -169,14 +169,34 @@ What's left in bucket 1 after the above, roughly in order of value:
 _Auto-generated 2026-07-25 — a miss is one distinct `normExName` key; ×N = occurrences._
 
 - **795** name occurrences across all sessions
-- **244** unresolved (**30.7%**)
-- **211** distinct misses
-- **0** dangling aliases ✅
+- **223** unresolved (**28.1%**)
+- **192** distinct misses
+- **19** dangling aliases — an alias whose target entry does not exist resolves to nothing. Any listed below
+that names an entry from `94-registry-additions.sql` clears once that SQL is applied to
+prod; anything else is a real typo to fix in `ALIASES`.
+- `'abs medball'` → **Abs Med Ball** _(no such entry)_
+- `'lenhador caotic'` → **Lenhador** _(no such entry)_
+- `'l sit barra'` → **L-Sit Barra** _(no such entry)_
+- `'wall walking'` → **Wall Walk** _(no such entry)_
+- `'tap shoulder'` → **Shoulder Tap** _(no such entry)_
+- `'wall shoulder taps'` → **Shoulder Tap** _(no such entry)_
+- `'push up hand release'` → **Hand Release Push-up** _(no such entry)_
+- `'push-up hand release'` → **Hand Release Push-up** _(no such entry)_
+- `'box jump step down'` → **Box Jump Over** _(no such entry)_
+- `'bbjo step down'` → **Box Jump Over** _(no such entry)_
+- `'burpees broad jump'` → **Burpee Broad Jump** _(no such entry)_
+- `'burpees to plate'` → **Burpee to Plate** _(no such entry)_
+- `'globet squat'` → **Goblet Squat** _(no such entry)_
+- `'wall sit hold'` → **Wall Sit** _(no such entry)_
+- `'db bench press inclinado'` → **DB Bench Press** _(no such entry)_
+- `'dual step box up'` → **DB Step Box Up** _(no such entry)_
+- `'step down kb'` → **KB Step Down** _(no such entry)_
+- `'kb leg over'` → **KB Over Leg** _(no such entry)_
+- `'over kb leg'` → **KB Over Leg** _(no such entry)_
 
-## 1 · Likely-registerable single movements (80) — the actionable list
+## 1 · Likely-registerable single movements (68) — the actionable list
 These are real movements the coach types that have no registry entry (or need an alias).
 - **ABS INFRA** · **Abs infra**  ×4
-- **ABS ANILHA** · **Abs anilha**  ×3
 - **DB Bench Press**  ×3
 - **KB Deadlift**  ×3
 - **KB OVER LEG** · **KB Over Leg**  ×2
@@ -188,7 +208,6 @@ These are real movements the coach types that have no registry entry (or need an
 - **Pike up row**  ×2
 - **Push-Up Hand Release** · **Push-up Hand Release**  ×2
 - **LENHADOR CAOTIC**  ×1
-- **HEAVY  S PULL UP**  ×1
 - **GORILA ROW**  ×1
 - **DUAL DB  SQUAT CLEAN**  ×1
 - **DB BENCH PRESS   (Wide)**  ×1
@@ -207,13 +226,10 @@ These are real movements the coach types that have no registry entry (or need an
 - **Dip Russo**  ×1
 - **Low High Pull**  ×1
 - **Hang Muscle**  ×1
-- **High  Squat Clean**  ×1
 - **Box Jump Over (Step Down)**  ×1
-- **OH WALKING 2KB**  ×1
 - **ELEVAÇÃO DE JOELHO 2 KB**  ×1
 - **HANG PULL**  ×1
 - **HANG POWER**  ×1
-- **BÚLGARO SQUAT COM (1 Anilha )**  ×1
 - **A 3 SNATCH PUSH PRESS (em cócoras)**  ×1
 - **C 3 SQUAT JERK**  ×1
 - **KB Step-up**  ×1
@@ -226,7 +242,6 @@ These are real movements the coach types that have no registry entry (or need an
 - **Hand Release Push-up**  ×1
 - **DB Hip Thruster**  ×1
 - **KB Box Step**  ×1
-- **Abdominal com Anilha**  ×1
 - **Shoulder Taps**  ×1
 - **Inchworm + Push Up**  ×1
 - **Wall Shoulder Taps**  ×1
@@ -236,27 +251,21 @@ These are real movements the coach types that have no registry entry (or need an
 - **Strict Chest-to-bar**  ×1
 - **Stiff Dual DB/KB**  ×1
 - **DB/KB Deadlift**  ×1
-- **Prancha lat E**  ×1
-- **Prancha lat D**  ×1
 - **Push up Hand Release**  ×1
 - **halo**  ×1
 - **Burpees to plate**  ×1
 - **Step Box**  ×1
 - **Burpees box step up**  ×1
 - **Push up**  ×1
-- **Handstand Push Up**  ×1
 - **Toes to Ring**  ×1
-- **LSit argola**  ×1
 - **Cycling Barbell**  ×1
 - **forward rools to suport**  ×1
 - **Back lever on rings**  ×1
 - **C&J 60/45**  ×1
 - **DB cossack Squat**  ×1
-- **Remada curvada peg supinada**  ×1
 - **Clean High Pull**  ×1
-- **Burpees box jump over**  ×1
 
-## 2 · Prescription leaked into the name (80)
+## 2 · Prescription leaked into the name (73)
 A leading count/distance ("800m Run", "15 GHD", "30 Wall Ball") — the movement is fine, the
 volume belongs in the reps/dist field. `stripVolumeNoise` only strips a leading bare count,
 not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
@@ -268,8 +277,6 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **30/30” Lenhador** · **30/30”  Lenhador**  ×2
 - **12 dB bench press inclinado**  ×2
 - **30" L SIT BARRA**  ×1
-- **30" HSW HOLD**  ×1
-- **20'' L Sit Argola**  ×1
 - **20''/20'' 1 KB OH Walking**  ×1
 - **8 STRICT PULL UP WIDE**  ×1
 - **15 ABS INFRA**  ×1
@@ -303,7 +310,6 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **2-4–6-8… DB Step Up**  ×1
 - **8/8 KB Step Down**  ×1
 - **5 C&J ubrok**  ×1
-- **15 low Hang clean**  ×1
 - **40” Wall Sit hold**  ×1
 - **8/8 Step Down KB 3” na descida**  ×1
 - **9-15-21 Box jump step down**  ×1
@@ -314,22 +320,18 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **5 dual DB strict press**  ×1
 - **15 Abs remador**  ×1
 - **30/30 Lenhador**  ×1
-- **8 Remada low curvada**  ×1
 - **3 Drop balance**  ×1
 - **3 tall Snatch**  ×1
 - **6 dip russo ou dip paralelo**  ×1
 - **3 Drop jerk**  ×1
 - **1 push jerk 2 split**  ×1
 - **20m Dead March**  ×1
-- **1 Legless**  ×1
 - **12 Bbjo step down**  ×1
 - **20 ponte unipodal**  ×1
-- **30” Lsit argola**  ×1
 - **1’ over KB leg**  ×1
 - **12 gorila row**  ×1
 - **30 DB Snatch alt**  ×1
 - **600m z3**  ×1
-- **20'' Handstand Hold Wall**  ×1
 - **20/20 Lenhador**  ×1
 - **10/10 KB Oblíquo**  ×1
 - **3 split jerk a cada 10”**  ×1

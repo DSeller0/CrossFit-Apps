@@ -133,11 +133,31 @@ Mostly positions in a complex that you also prescribe standalone.
 
 ---
 
-## What I need from you
+## Decisions taken (2026-07-25) — all batches accepted
 
-Answer the four questions in chat (or comment here) and I'll generate the round-2 SQL the
-same way as round 1 — idempotent, alphabetical, dry-run on the local stack first.
+| Question | Coach's call |
+|---|---|
+| Batch B — DB/KB load variants | **Register all of them** as separate entries (same rule as the Lunges) |
+| Batch A — Abs family | **ABS ANILHA → alias `Plate Sit-up`**, **Prancha lat E/D → alias `Side Plank`**; the rest become new pt-BR Core entries |
+| Bare "Handstand Push Up" | **→ `Kipping HSPU`** (same logic as the bare Pull-up) |
+| Batch D — Low Squat / Hang Power / Hang Muscle / Hang Pull | **Skip** — truncated complex notation, not standalone lifts |
 
-Expected end state if all batches are accepted: **~30.7% → roughly 12–15%** unresolved, with
-the remainder being genuine compound notation (bucket 3) and structural noise (bucket 4),
-which by design never resolve.
+Batches C and E followed the recommendations above.
+
+## ⏳ Action for the coach
+
+Run [`94-round2-registry-additions.sql`](./94-round2-registry-additions.sql) —
+*"#94 round 2 — add missing exercises to the registry (prod)"*. **71 entries** across 6
+categories. Idempotent, alphabetical, dry-run on the local stack (Core 35 · LPO 34 · Força 33
+· Acessórios 51 · Skill 41 · Cardio 19, unchanged on a second run).
+
+| | Unresolved |
+|---|---|
+| Round 1 close | 34.8% |
+| Round 2 code fixes | 30.7% |
+| Round 2 aliases (shipped) | **28.1%** |
+| **After this SQL** | **11.9%** (95 / 795) |
+
+**0 dangling aliases** after the additions. The ~95 that remain are bucket 3 (compound
+notation) and bucket 4 (structural noise), which by design never resolve — so 11.9% is
+effectively the floor without product changes to how compound lines are entered.
