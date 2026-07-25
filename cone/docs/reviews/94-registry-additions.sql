@@ -1,5 +1,7 @@
+-- #94 — add missing exercises to the registry (prod)
 -- ============================================================================
--- #94 · Add the missing exercises found by the prod session→registry audit
+-- ⚠️ Keep the title on LINE 1: the Supabase SQL editor autofills the snippet
+-- name from the first line, and a decorative divider there leaves it "Untitled".
 -- ============================================================================
 -- Run in the Supabase SQL editor (prod). Adds 22 entries across 4 categories,
 -- per the coach's decisions recorded in 94-session-registry-audit.md.

@@ -22,16 +22,18 @@ many lines as needed; put them anywhere above the auto-generated marker.
 |---|---|---|
 | Before | **58.5%** (453 / 775) | — |
 | After the resolver changes (R1·R2·R4, shipped in code) | **43.4%** | −15.1 pts |
-| After `94-registry-additions.sql` is applied to prod (R3) | **34.8%** | −8.6 pts |
+| After `94-registry-additions.sql` applied to prod (R3) ✅ **DONE 2026-07-25** | **34.8%** (277 / 795) | −8.6 pts |
 
-**→ Action for the coach: run [`94-registry-additions.sql`](./94-registry-additions.sql)**
-in the Supabase SQL editor. *"#94 · Add missing exercises to the registry"* — 22 entries
-across Cardio / Skill / Força / Acessórios. It is safe to re-run (dedups by name, prefers
-your existing row, never overwrites) and lands entries alphabetically. Verified end-to-end
-against the local stack, which held an identical registry: 13/23/20/21 → 18/27/24/31,
-unchanged on a second run.
+**Round 1 is complete and live.** Prod confirmed at Cardio 18 · Skill 27 · Força 24 ·
+Acessórios 31, and the audit re-run against live prod reports **0 dangling aliases ✅**.
+Bucket 1 fell 130 → 102 registerable movements, bucket 2 fell 179 → 106.
 
-Projected newly-resolved occurrences: Wall Ball ×15 · Devil Press ×9 · Lunge ×9 ·
+[`94-registry-additions.sql`](./94-registry-additions.sql) — *"#94 — add missing exercises
+to the registry (prod)"* — added 22 entries across Cardio / Skill / Força / Acessórios. It
+is safe to re-run (dedups by name, prefers the existing row, never overwrites) and lands
+entries alphabetically.
+
+Newly-resolved occurrences: Wall Ball ×15 · Devil Press ×9 · Lunge ×9 ·
 Pull-up ×7 · Burpee Box Jump Over ×6 · BOB ×5 · Single Under ×4 · Thruster ×3 · Sprawl ×3
 · Plate Thruster ×2 · Sprint, DB Thruster, Back Lunge, DB Lunge, S2OH ×1 — **68 total**.
 
@@ -167,45 +169,24 @@ What's left in bucket 1 after the above, roughly in order of value:
 _Auto-generated 2026-07-25 — a miss is one distinct `normExName` key; ×N = occurrences._
 
 - **795** name occurrences across all sessions
-- **345** unresolved (**43.4%**)
-- **278** distinct misses
-- **7** dangling aliases — an alias whose target entry does not exist resolves to nothing. Any listed below
-that names an entry from `94-registry-additions.sql` clears once that SQL is applied to
-prod; anything else is a real typo to fix in `ALIASES`.
-- `'devil's press'` → **Devil Press** _(no such entry)_
-- `'devils press'` → **Devil Press** _(no such entry)_
-- `'db devil press'` → **Devil Press** _(no such entry)_
-- `'wal ball'` → **Wall Ball** _(no such entry)_
-- `'burpee over bar'` → **Burpee Over the Bar (BOB)** _(no such entry)_
-- `'bar facing burpee'` → **Burpee Over the Bar (BOB)** _(no such entry)_
-- `'bbjo'` → **Burpee Box Jump Over** _(no such entry)_
+- **277** unresolved (**34.8%**)
+- **243** distinct misses
+- **0** dangling aliases ✅
 
-## 1 · Likely-registerable single movements (123) — the actionable list
+## 1 · Likely-registerable single movements (102) — the actionable list
 These are real movements the coach types that have no registry entry (or need an alias).
-- **Wall Ball**  ×9
-- **BURPEE BOX JUMP OVER** · **Burpee Box Jump Over**  ×6
-- **Lunge**  ×6
 - **ABS INFRA** · **Abs infra**  ×4
-- **Pull-up** · **Pull-Up**  ×4
 - **ABS ANILHA** · **Abs anilha**  ×3
 - **DB Bench Press**  ×3
 - **KB Deadlift**  ×3
 - **KB OVER LEG** · **KB Over Leg**  ×2
 - **JERK BALANCE** · **Jerk Balance**  ×2
-- **THRUSTER** · **Thruster**  ×2
-- **BoB** · **BOB**  ×2
 - **LOW SQUAT**  ×2
 - **Burpee Broad Jump**  ×2
-- **Devil Press** · **Devil press**  ×2
-- **DB Devil Press**  ×2
-- **Single Under (SU)**  ×2
 - **Snatch high pull** · **Snatch High Pull**  ×2
-- **Sprawl**  ×2
 - **Burpee to Plate**  ×2
 - **Pike up row**  ×2
 - **Push-Up Hand Release** · **Push-up Hand Release**  ×2
-- **Single Under**  ×2
-- **Burpee over the bar** · **Burpee Over the Bar**  ×2
 - **LENHADOR CAOTIC**  ×1
 - **HEAVY  S PULL UP**  ×1
 - **GORILA ROW**  ×1
@@ -228,7 +209,6 @@ These are real movements the coach types that have no registry entry (or need an
 - **Hang Muscle**  ×1
 - **High  Squat Clean**  ×1
 - **Box Jump Over (Step Down)**  ×1
-- **Sprint**  ×1
 - **Hollowrock**  ×1
 - **V ups Alt**  ×1
 - **Max RMU**  ×1
@@ -236,7 +216,6 @@ These are real movements the coach types that have no registry entry (or need an
 - **ELEVAÇÃO DE JOELHO 2 KB**  ×1
 - **HANG PULL**  ×1
 - **HANG POWER**  ×1
-- **PULL UP**  ×1
 - **BÚLGARO SQUAT COM (1 Anilha )**  ×1
 - **A- 3 SNATCH BALANCE**  ×1
 - **B- 2 Muscle Snatch**  ×1
@@ -253,13 +232,10 @@ These are real movements the coach types that have no registry entry (or need an
 - **Tap Shoulder**  ×1
 - **Box Jump Over**  ×1
 - **DB Hang Snatch**  ×1
-- **Bar Facing Burpee**  ×1
 - **Dual DB Push Press**  ×1
 - **Hand Release Push-up**  ×1
 - **MMII**  ×1
 - **MMSS**  ×1
-- **Back Lunge**  ×1
-- **Shoulder to Overhead**  ×1
 - **DB Hip Thruster**  ×1
 - **KB Box Step**  ×1
 - **Dual kb oh walking**  ×1
@@ -278,12 +254,9 @@ These are real movements the coach types that have no registry entry (or need an
 - **Push up Hand Release**  ×1
 - **halo**  ×1
 - **Burpees to plate**  ×1
-- **plate Thruster**  ×1
 - **Buy in**  ×1
-- **Wal Ball**  ×1
 - **Step Box**  ×1
 - **Row ou 1000m Run**  ×1
-- **Lunges**  ×1
 - **Burpees box step up**  ×1
 - **Push up**  ×1
 - **Buy out**  ×1
@@ -298,7 +271,6 @@ These are real movements the coach types that have no registry entry (or need an
 - **Max BMU**  ×1
 - **Mix**  ×1
 - **sets**  ×1
-- **DB lunges**  ×1
 - **Vups**  ×1
 - **DB cossack Squat**  ×1
 - **Remada curvada peg supinada**  ×1
@@ -306,14 +278,12 @@ These are real movements the coach types that have no registry entry (or need an
 - **Buy - in**  ×1
 - **Burpees box jump over**  ×1
 
-## 2 · Prescription leaked into the name (120)
+## 2 · Prescription leaked into the name (106)
 A leading count/distance ("800m Run", "15 GHD", "30 Wall Ball") — the movement is fine, the
 volume belongs in the reps/dist field. `stripVolumeNoise` only strips a leading bare count,
 not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **3 High box jump**  ×3
 - **10 DB Bench Press**  ×3
-- **30 Wall Ball** · **30 wall ball**  ×3
-- **Devil's Press**  ×3
 - **20 Burpees over the bar**  ×3
 - **8/8 LANDMINE PRESS** · **8/8 landmine press**  ×2
 - **20m DUAL KB OH WALKING** · **20m Dual KB oh Walking**  ×2
@@ -337,14 +307,11 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **5 SEATED STRICT PRESS (Barra)**  ×1
 - **20-15-10-5 Dual DB Snatch**  ×1
 - **10m Dead March**  ×1
-- **10 Sprawl**  ×1
 - **20 KB Deadlift**  ×1
 - **20 Burpees Broad Jump**  ×1
-- **20 WALL BALL**  ×1
 - **12 DRAGON FLY**  ×1
 - **10 DB Hang Snatch**  ×1
 - **8 DB OH Lunges**  ×1
-- **4 DB Thruster**  ×1
 - **30 SU Crossover**  ×1
 - **8 GLOBET Squat (Heels Elevated)**  ×1
 - **8/8  Single Leg Knee Extension**  ×1
@@ -356,18 +323,14 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **8 Nordic Hamstring CuRl**  ×1
 - **8 Rower  Hamstring Curl**  ×1
 - **30 DB Snatch**  ×1
-- **20 Devil press**  ×1
 - **10 GTOH**  ×1
-- **8 plate thruster**  ×1
 - **10 Step box**  ×1
-- **20 Lunges**  ×1
 - **20m Kh oh Walking**  ×1
 - **15 Abs medball**  ×1
 - **8 DB Lateral Raise**  ×1
 - **8 Upright Rows**  ×1
 - **8 Front Plate Raises**  ×1
 - **2-4-6-8-1o Ohs**  ×1
-- **2-4-6-8… Devil press**  ×1
 - **2-4–6-8… DB Step Up**  ×1
 - **8/8 KB Step Down**  ×1
 - **8 Romenian Deadlift**  ×1
@@ -380,8 +343,6 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **9-15-21 Box jump step down**  ×1
 - **40” Perdigueiro alternando**  ×1
 - **12 martelo alt**  ×1
-- **50 Wall Ball**  ×1
-- **50 Lunges**  ×1
 - **50m Burpees Broad Jump**  ×1
 - **4 RMU/ BMU**  ×1
 - **40” Prancha dinâmica**  ×1
@@ -399,7 +360,6 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **3 Drop jerk**  ×1
 - **3 split jerk (BNK)**  ×1
 - **1 push jerk 2 split**  ×1
-- **25 Pull Up**  ×1
 - **20m Dead March**  ×1
 - **1 Squat Celan**  ×1
 - **1 Legless**  ×1
@@ -415,13 +375,11 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **10/10 KB Oblíquo**  ×1
 - **3 Bench Press pausa 2” no início e no meio**  ×1
 - **3 split jerk a cada 10”**  ×1
-- **10 Thruster**  ×1
 - **4’ Row ( forte )**  ×1
 - **6 dip russo**  ×1
 - **8/8 KB cossack Squat**  ×1
 - **3 tall Celan**  ×1
 - **3 Hang Squat Celan**  ×1
-- **15 PuLl Up**  ×1
 - **8/8 KB Oh Lunges**  ×1
 - **10-8-6-4-2**  ×1
 - **60% Rm**  ×1
