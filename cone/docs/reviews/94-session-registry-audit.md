@@ -1,0 +1,369 @@
+# #94 · Session exercise names not in the registry (prod audit)
+
+Read-only scan of prod `sessions` exercise names against `exercise_registry` via
+`resolveExercise`/`normExName` (`lib/registry.js`). Point-in-time; regenerate with the
+audit script.
+
+- **775** name occurrences across all sessions
+- **453** unresolved (**58.5%**)
+- **343** distinct misses
+
+Buckets (a miss is one distinct `normExName` key; ×N = occurrences):
+
+## 1 · Likely-registerable single movements (130) — the actionable list
+These are real movements the coach types that have no registry entry (or need an alias).
+- **Wall Ball**  ×9
+- **BURPEE BOX JUMP OVER** · **Burpee Box Jump Over**  ×6
+- **Corrida**  ×6
+- **Lunge**  ×6
+- **ABS INFRA** · **Abs infra**  ×4
+- **Squat clean** · **Squat Clean**  ×4
+- **Pull-up** · **Pull-Up**  ×4
+- **Squat Snatch**  ×4
+- **ABS ANILHA** · **Abs anilha**  ×3
+- **DB Bench Press**  ×3
+- **KB Deadlift**  ×3
+- **Hang Squat Snatch**  ×3
+- **GHD**  ×2
+- **KB OVER LEG** · **KB Over Leg**  ×2
+- **JERK BALANCE** · **Jerk Balance**  ×2
+- **THRUSTER** · **Thruster**  ×2
+- **BoB** · **BOB**  ×2
+- **Remada Russa** · **remada Russa**  ×2
+- **LOW SQUAT**  ×2
+- **Burpee Broad Jump**  ×2
+- **DB Devil Press**  ×2
+- **Single Under (SU)**  ×2
+- **Snatch high pull** · **Snatch High Pull**  ×2
+- **Sprawl**  ×2
+- **Remador**  ×2
+- **Burpee to Plate**  ×2
+- **Pike up row**  ×2
+- **Push-Up Hand Release** · **Push-up Hand Release**  ×2
+- **Single Under**  ×2
+- **Burpee over the bar** · **Burpee Over the Bar**  ×2
+- **LENHADOR CAOTIC**  ×1
+- **HEAVY  S PULL UP**  ×1
+- **GORILA ROW**  ×1
+- **DUAL DB  SQUAT CLEAN**  ×1
+- **DB BENCH PRESS   (Wide)**  ×1
+- **SLED DRAG**  ×1
+- **SINGLE LEG**  ×1
+- **BURPEES BROAD JUMP**  ×1
+- **GHD HIPERTENSÃO**  ×1
+- **ARNOLD PRESS**  ×1
+- **FRONT RACK LUNGE**  ×1
+- **WALL WALKING**  ×1
+- **CLUSTER**  ×1
+- **BURPEE BMU**  ×1
+- **ABS KB UNILATERAL**  ×1
+- **RUSSIAN TWIST KB**  ×1
+- **DB STEP BOX UP**  ×1
+- **Dual DB Strict Press**  ×1
+- **Dip Russo**  ×1
+- **GHD Hiperextensao**  ×1
+- **Low High Pull**  ×1
+- **Hang Muscle**  ×1
+- **High  Squat Clean**  ×1
+- **Hang Squat Clean**  ×1
+- **Floor Squat Clean**  ×1
+- **Box Jump Over (Step Down)**  ×1
+- **Sprint**  ×1
+- **Hollowrock**  ×1
+- **V ups Alt**  ×1
+- **Max RMU**  ×1
+- **OH WALKING 2KB**  ×1
+- **ELEVAÇÃO DE JOELHO 2 KB**  ×1
+- **HANG PULL**  ×1
+- **HANG POWER**  ×1
+- **PULL UP**  ×1
+- **BÚLGARO SQUAT COM (1 Anilha )**  ×1
+- **A- 3 SNATCH BALANCE**  ×1
+- **B- 2 Muscle Snatch**  ×1
+- **A 3 SNATCH PUSH PRESS (em cócoras)**  ×1
+- **B 3 SNATCH BALANCE**  ×1
+- **C 3 SQUAT JERK**  ×1
+- **Bar Muscle Up Tentar sair da caixa ou barra baixa  5 tentativas**  ×1
+- **Kb American Swing**  ×1
+- **KB Step-up**  ×1
+- **Devil Press**  ×1
+- **Back squay**  ×1
+- **KB leg over**  ×1
+- **Max C&J**  ×1
+- **Push-up**  ×1
+- **Tap Shoulder**  ×1
+- **Box Jump Over**  ×1
+- **DB Hang Snatch**  ×1
+- **Bar Facing Burpee**  ×1
+- **Dual DB Push Press**  ×1
+- **Hand Release Push-up**  ×1
+- **MMII**  ×1
+- **MMSS**  ×1
+- **Back Lunge**  ×1
+- **Shoulder to Overhead**  ×1
+- **DB Hip Thruster**  ×1
+- **KB Box Step**  ×1
+- **Dual kb oh walking**  ×1
+- **Abdominal com Anilha**  ×1
+- **Shoulder Taps**  ×1
+- **Inchworm + Push Up**  ×1
+- **Wall Shoulder Taps**  ×1
+- **Deslocamento com Apoio**  ×1
+- **Scapular Pull-up**  ×1
+- **Kipping uma puxada**  ×1
+- **Strict Chest-to-bar**  ×1
+- **Stiff Dual DB/KB**  ×1
+- **DB/KB Deadlift**  ×1
+- **Prancha ventral**  ×1
+- **Prancha lat E**  ×1
+- **Prancha lat D**  ×1
+- **Push up Hand Release**  ×1
+- **halo**  ×1
+- **Burpees to plate**  ×1
+- **plate Thruster**  ×1
+- **Buy in**  ×1
+- **Wal Ball**  ×1
+- **Step Box**  ×1
+- **Row ou 1000m Run**  ×1
+- **Lunges**  ×1
+- **Burpees box step up**  ×1
+- **Push up**  ×1
+- **Buy out**  ×1
+- **Run ou 800m Row**  ×1
+- **Handstand Push Up**  ×1
+- **Toes to Ring**  ×1
+- **LSit argola**  ×1
+- **Remada curvada**  ×1
+- **Cycling Barbell**  ×1
+- **forward rools to suport**  ×1
+- **Back lever on rings**  ×1
+- **C&J 60/45**  ×1
+- **Max BMU**  ×1
+- **Mix**  ×1
+- **sets**  ×1
+- **DB lunges**  ×1
+
+## 2 · Prescription leaked into the name (179)
+A leading count/distance ("800m Run", "15 GHD", "30 Wall Ball") — the movement is fine, the
+volume belongs in the reps/dist field. `stripVolumeNoise` only strips a leading bare count,
+not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
+- **800m Run** · **800m run**  ×9
+- **15 GHD**  ×5
+- **8 Remada Russa** · **8 remada russa**  ×3
+- **3 High box jump**  ×3
+- **8/8 Búlgaro Squat**  ×3
+- **10 DB Bench Press**  ×3
+- **30 Wall Ball** · **30 wall ball**  ×3
+- **600m Run** · **600m run**  ×3
+- **300m run**  ×3
+- **Devil's Press**  ×3
+- **20 Burpees over the bar**  ×3
+- **12 GHD**  ×2
+- **8/8 LANDMINE PRESS** · **8/8 landmine press**  ×2
+- **20m DUAL KB OH WALKING** · **20m Dual KB oh Walking**  ×2
+- **200m Row**  ×2
+- **20 TOUCH HEEL** · **20 touch heel**  ×2
+- **7m HSW** · **7m Hsw**  ×2
+- **20 GHD Hiperextensão** · **20 GHD hiperextensão**  ×2
+- **800m Row**  ×2
+- **30/30” Lenhador** · **30/30”  Lenhador**  ×2
+- **1000m Row**  ×2
+- **12 dB bench press inclinado**  ×2
+- **200m run** · **200m Run**  ×2
+- **400m run**  ×2
+- **30" L SIT BARRA**  ×1
+- **PAUSE BENCH PRESS 3"**  ×1
+- **30" HSW HOLD**  ×1
+- **20'' L Sit Argola**  ×1
+- **20''/20'' 1 KB OH Walking**  ×1
+- **8 STRICT PULL UP WIDE**  ×1
+- **15/15 PALLOF PRESS**  ×1
+- **15 ABS INFRA**  ×1
+- **20 KB OBLÍQUO**  ×1
+- **PUSH JERK 2”**  ×1
+- **3 BENCH PRESS 2”**  ×1
+- **10m HSW / 4 WALL WALK**  ×1
+- **10 DUAL DB S2OH**  ×1
+- **8 DUAL STEP BOX UP**  ×1
+- **5 DIP RUSSO**  ×1
+- **5 SEATED STRICT PRESS (Barra)**  ×1
+- **20”/20” Side Plank**  ×1
+- **40” Hollow Hold**  ×1
+- **20-15-10-5 Deadlift**  ×1
+- **20-15-10-5 Dual DB Snatch**  ×1
+- **10m Dead March**  ×1
+- **10 Sprawl**  ×1
+- **100m Row**  ×1
+- **20 KB Deadlift**  ×1
+- **600m row**  ×1
+- **20 Burpees Broad Jump**  ×1
+- **20 WALL BALL**  ×1
+- **8 S T2B**  ×1
+- **12 DRAGON FLY**  ×1
+- **10-8-6-4-2 HANG POWER CLEAN**  ×1
+- **10-8-6-4-2 FRONT SQUAT**  ×1
+- **2-3-4-5… C2B**  ×1
+- **2-3-4-5…… Strict HSPU**  ×1
+- **10 DB Hang Snatch**  ×1
+- **8 DB OH Lunges**  ×1
+- **6 Hang Squat Clean**  ×1
+- **4 DB Thruster**  ×1
+- **30 SU Crossover**  ×1
+- **30M Farm carry**  ×1
+- **20 Heavy V-ups**  ×1
+- **8 GLOBET Squat (Heels Elevated)**  ×1
+- **8/8  Single Leg Knee Extension**  ×1
+- **10 Hummer Curl**  ×1
+- **8 Dumbbell Lat Pullover**  ×1
+- **3 SHOULDERS PRES**  ×1
+- **1 Legless/ 2 RC**  ×1
+- **12 cal row**  ×1
+- **3 Wall walking**  ×1
+- **30/30” Prancha lateral**  ×1
+- **8 Nordic Hamstring CuRl**  ×1
+- **8 Rower  Hamstring Curl**  ×1
+- **30 DB Snatch**  ×1
+- **20/ 16 RMU**  ×1
+- **20 Devil press**  ×1
+- **100m Run**  ×1
+- **10 GTOH**  ×1
+- **8 plate thruster**  ×1
+- **10 Step box**  ×1
+- **20 Lunges**  ×1
+- **20m Kh oh Walking**  ×1
+- **15 Abs medball**  ×1
+- **8 DB Lateral Raise**  ×1
+- **8 Upright Rows**  ×1
+- **8 Front Plate Raises**  ×1
+- **2-4-6-8-10 Hang Snatch**  ×1
+- **2-4-6-8-1o Ohs**  ×1
+- **8/10 cal bike**  ×1
+- **2-4-6-8… Devil press**  ×1
+- **2-4–6-8… DB Step Up**  ×1
+- **2-4-6-8… BMU**  ×1
+- **8/8 KB Step Down**  ×1
+- **8 Romenian Deadlift**  ×1
+- **5 C&J ubrok**  ×1
+- **15 low Hang clean**  ×1
+- **20’ z2 bike**  ×1
+- **20’ z1 Run**  ×1
+- **40” Wall Sit hold**  ×1
+- **8/8 Step Down KB 3” na descida**  ×1
+- **3 Front Squat 5” de pausa em baixo**  ×1
+- **2 split jerk 2” Dip 2” recepção**  ×1
+- **10M Hsw**  ×1
+- **21-15-9 S Hspu**  ×1
+- **9-15-21 Box jump step down**  ×1
+- **5k Run z2**  ×1
+- **40” Perdigueiro alternando**  ×1
+- **8 Strict Pull Up**  ×1
+- **12 martelo alt**  ×1
+- **50 Wall Ball**  ×1
+- **50 Lunges**  ×1
+- **500m Ski**  ×1
+- **100m Farm carry**  ×1
+- **40 cal bike**  ×1
+- **50m Burpees Broad Jump**  ×1
+- **4 RMU/ BMU**  ×1
+- **10m sled pull**  ×1
+- **10m sled push**  ×1
+- **40” Prancha dinâmica**  ×1
+- **5 Strict Pull Up supinada**  ×1
+- **6 Remada curvada**  ×1
+- **5 dual DB strict press**  ×1
+- **3 Snatch balance 2”**  ×1
+- **21-15-9 Hang power Snatch**  ×1
+- **21-15-9 C2B**  ×1
+- **15 A Swing**  ×1
+- **1’ Prancha Ventral**  ×1
+- **15 Abs remador**  ×1
+- **15 Vups**  ×1
+- **30/30 Lenhador**  ×1
+- **5 heavy Strict Pull Up**  ×1
+- **8 Remada low curvada**  ×1
+- **10/10 heavy búlgaro**  ×1
+- **3 Drop balance**  ×1
+- **3 tall Snatch**  ×1
+- **7200m Run**  ×1
+- **6 dip russo ou dip paralelo**  ×1
+- **3 Bench Press 3” pausa**  ×1
+- **3 Drop jerk**  ×1
+- **3 split jerk (BNK)**  ×1
+- **1 push jerk 2 split**  ×1
+- **25 Pull Up**  ×1
+- **30/30” prancha lat**  ×1
+- **20m Dead March**  ×1
+- **1 Squat Celan**  ×1
+- **1 Legless**  ×1
+- **12 Bbjo step down**  ×1
+- **8 Hang Squat clean**  ×1
+- **20 ponte unipodal**  ×1
+- **10 bom dia**  ×1
+- **30” Lsit argola**  ×1
+- **1’ over KB leg**  ×1
+- **12 gorila row**  ×1
+- **8 elevação lat**  ×1
+- **30 DB Snatch alt**  ×1
+- **600m z3**  ×1
+- **40” prancha**  ×1
+- **20'' Handstand Hold Wall**  ×1
+- **20/20 Lenhador**  ×1
+- **10/10 KB Oblíquo**  ×1
+- **3 Bench Press pausa 2” no início e no meio**  ×1
+- **3 split jerk a cada 10”**  ×1
+- **15/10 cal Row**  ×1
+- **10 Thruster**  ×1
+- **4’ Row ( forte )**  ×1
+- **6 dip russo**  ×1
+- **10 Strict Pull Up**  ×1
+- **8/8 KB cossack Squat**  ×1
+- **3 Deadlift déficit**  ×1
+- **3 tall Celan**  ×1
+- **3 Hang Squat Celan**  ×1
+- **2 Low Squat Clean**  ×1
+- **15 PuLl Up**  ×1
+- **30m sled pull**  ×1
+- **8/8 KB Oh Lunges**  ×1
+- **10-8-6-4-2**  ×1
+- **60% Rm**  ×1
+
+## 3 · Compound / complex notation ([object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]) — not single names
+"1 MUSCLE + 3 FRONT 3\"", "HIGH, HANG, FLOOR. (POWER)" — multi-movement prescriptions, not a
+single exercise. Registry-unfixable by design (noted in registry.js).
+- **DIP + EXTENSION**  ×2
+- **1 MUSCLE +  3 FRONT 3"**  ×1
+- **1 POWER C + 1 H SQUAT C**  ×1
+- **1 JERK + 1 SPLIT**  ×1
+- **2 SNATCH HIGH PULL+2 LOW SQUAT**  ×1
+- **1 HIGH HANG SQUAT+ 2 HANG SQUAT**  ×1
+- **3 SNATCH DEADLIFT+ 2 LOW HIGH PULL+1 HANG POWER**  ×1
+- **1 POWER +1 LOW POWER**  ×1
+- **1 SNATCH  PULL+ 1 LOW HIGH PULL+ 2  HANG MUSCLE**  ×1
+- **HIGH, HANG, FLOOR. (POWER)**  ×1
+- **1 DIP + EXTENSION + 1 PUSH JERK**  ×1
+- **Hang high pull + Muscle clean**  ×1
+- **1 Push Press + 2 Push jerk**  ×1
+- **Low Squat + 2 Hang power**  ×1
+- **High Hang + 1 Snatch**  ×1
+- **Hang Power Clean + 2 Push jerk**  ×1
+- **2x 2 Shoulders Press +1 push press**  ×1
+- **2x 1 Push Press + Power jerk**  ×1
+- **1 Snatch Pull + 2 Squat Snatch**  ×1
+- **2 Muscle clean + 2 Snatch balance**  ×1
+- **3 Clean Pull + 2 Hang High Pull**  ×1
+- **2 Power clean + 2 Hang Squat**  ×1
+- **3 High Pull + 2 Hang Muscle snatch**  ×1
+- **1 Power + 2 Hang power Snatch**  ×1
+- **1 Shoulders Press + 2 push prees + 3 Power jerk**  ×1
+- **1 Push jerk + 1 Split**  ×1
+
+## 4 · Structural noise (8) — shouldn't be exercise names
+"Rest", "Then", "Rounds", "Bloco …" — block/label text that leaked into a name field.
+- **Rest**  ×3
+- **Diversos**  ×2
+- **Then**  ×2
+- **Rounds** · **rounds**  ×2
+- **BLOCO POWER SNATCH**  ×1
+- **Bloco Squat Clean**  ×1
+- **Rest 2'**  ×1
+- **Rest 2' Andando**  ×1

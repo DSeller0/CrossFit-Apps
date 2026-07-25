@@ -1,0 +1,98 @@
+// #94 · Prod session→registry coverage audit. Read-only: lists every exercise name used
+// in a prod `sessions` block that doesn't resolve to an `exercise_registry` entry via
+// resolveExercise/normExName, bucketed (movements to register · prescription noise ·
+// compound notation · structural noise). Run from cone/:  node scripts/audit-session-registry.mjs
+// → rewrites docs/reviews/94-session-registry-audit.md. Uses .env.production (anon read).
+import { readFileSync, writeFileSync } from 'node:fs'
+import { createClient } from '@supabase/supabase-js'
+import { normExName, buildRegistryIndex, resolveExercise } from '../src/public/lib/registry.js'
+
+const env = readFileSync('./.env.production', 'utf8')
+const get = k => (env.match(new RegExp('^' + k + '=(.*)$', 'm')) || [])[1]?.trim()
+const sb = createClient(get('VITE_SUPABASE_URL'), get('VITE_SUPABASE_ANON_KEY'))
+
+const [{ data: sessRow }, { data: regRow }] = await Promise.all([
+  sb.from('sessions').select('value').eq('id', 1).maybeSingle(),
+  sb.from('exercise_registry').select('value').eq('id', 1).maybeSingle(),
+])
+const sessions = sessRow?.value || {}
+const index = buildRegistryIndex(regRow?.value || {})
+
+const names = []
+const pushName = n => { if (n && String(n).trim()) names.push(String(n).trim()) }
+function walk(node) {
+  if (Array.isArray(node)) return node.forEach(walk)
+  if (!node || typeof node !== 'object') return
+  const looksExercise = typeof node.name === 'string' &&
+    ('sets' in node || 'reps' in node || 'intensity' in node || 'isComplex' in node || 'complexMovements' in node || 'dist' in node)
+  if (looksExercise) {
+    if (!node.isComplex) pushName(node.name)
+    if (Array.isArray(node.complexMovements)) node.complexMovements.forEach(m => pushName(m?.name))
+  }
+  for (const k in node) if (k !== 'complexMovements') walk(node[k])
+}
+Object.values(sessions).forEach(day => (Array.isArray(day) ? day : []).forEach(sess => walk(sess.blocks)))
+
+const miss = new Map()
+let total = 0, missTotal = 0
+for (const raw of names) {
+  const key = normExName(raw); if (!key) continue
+  total++
+  if (resolveExercise(raw, index)) continue
+  missTotal++
+  const e = miss.get(key) || { count: 0, samples: new Set() }
+  e.count++; e.samples.add(raw); miss.set(key, e)
+}
+
+// Categorize each distinct miss.
+const NOISE = /^(rest|then|rounds?|diversos|bloco|amrap|emom|for time|descanso|obs|nota)\b/i
+const cat = raw => {
+  const t = raw.trim()
+  if (NOISE.test(t)) return 'noise'
+  if (/[+,]/.test(t) && /\b(power|hang|snatch|clean|jerk|pull|squat|muscle|dip|press)\b/i.test(t)) return 'complex'
+  if (/^\d|["”'′]|^\d+\s*(m|km|cal|reps?)\b/i.test(t) || /^\d+\/\d+/.test(t) || /^\d+m\b/i.test(t)) return 'prescription'
+  return 'movement'
+}
+const buckets = { movement: [], prescription: [], complex: [], noise: [] }
+for (const [key, e] of miss) {
+  const sample = [...e.samples][0]
+  buckets[cat(sample)].push({ key, count: e.count, samples: [...e.samples] })
+}
+Object.values(buckets).forEach(b => b.sort((a, z) => z.count - a.count))
+
+const fmt = b => b.map(r => `- **${r.samples.slice(0, 3).map(s => s).join('** · **')}**  ×${r.count}`).join('\n')
+const md = `# #94 · Session exercise names not in the registry (prod audit)
+
+Read-only scan of prod \`sessions\` exercise names against \`exercise_registry\` via
+\`resolveExercise\`/\`normExName\` (\`lib/registry.js\`). Point-in-time; regenerate with the
+audit script.
+
+- **${total}** name occurrences across all sessions
+- **${missTotal}** unresolved (**${(missTotal / total * 100).toFixed(1)}%**)
+- **${miss.size}** distinct misses
+
+Buckets (a miss is one distinct \`normExName\` key; ×N = occurrences):
+
+## 1 · Likely-registerable single movements (${buckets.movement.length}) — the actionable list
+These are real movements the coach types that have no registry entry (or need an alias).
+${fmt(buckets.movement)}
+
+## 2 · Prescription leaked into the name (${buckets.prescription.length})
+A leading count/distance ("800m Run", "15 GHD", "30 Wall Ball") — the movement is fine, the
+volume belongs in the reps/dist field. \`stripVolumeNoise\` only strips a leading bare count,
+not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
+${fmt(buckets.prescription)}
+
+## 3 · Compound / complex notation (${buckets.complex}) — not single names
+"1 MUSCLE + 3 FRONT 3\\"", "HIGH, HANG, FLOOR. (POWER)" — multi-movement prescriptions, not a
+single exercise. Registry-unfixable by design (noted in registry.js).
+${fmt(buckets.complex)}
+
+## 4 · Structural noise (${buckets.noise.length}) — shouldn't be exercise names
+"Rest", "Then", "Rounds", "Bloco …" — block/label text that leaked into a name field.
+${fmt(buckets.noise)}
+`
+writeFileSync('./docs/reviews/94-session-registry-audit.md', md)
+console.log(`total=${total} miss=${missTotal} (${(missTotal / total * 100).toFixed(1)}%) distinct=${miss.size}`)
+console.log(`movements=${buckets.movement.length} prescription=${buckets.prescription.length} complex=${buckets.complex.length} noise=${buckets.noise.length}`)
+console.log('wrote docs/reviews/94-session-registry-audit.md')
