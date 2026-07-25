@@ -1,8 +1,9 @@
 -- #94 — add missing exercises to the registry (prod)
 -- ============================================================================
--- Title on LINE 1 so it is easy to select and copy. NOTE: Supabase does NOT
--- autofill the snippet name from a comment — rename the snippet by hand,
--- pasting the line above, or it saves as "Untitled query".
+-- Title on LINE 1: Supabase auto-titles an "Untitled query" by sending the WHOLE
+-- query to an AI endpoint when you Run it, so a leading comment steers it to this
+-- exact name. It is unreliable though — if the snippet stays "Untitled query",
+-- just rename it by hand with the line above.
 -- ============================================================================
 -- Run in the Supabase SQL editor (prod). Adds 22 entries across 4 categories,
 -- per the coach's decisions recorded in 94-session-registry-audit.md.
