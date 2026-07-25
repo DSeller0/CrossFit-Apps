@@ -144,9 +144,9 @@ Mostly positions in a complex that you also prescribe standalone.
 
 Batches C and E followed the recommendations above.
 
-## ⏳ Action for the coach
+## ✅ Applied to prod 2026-07-25
 
-Run [`94-round2-registry-additions.sql`](./94-round2-registry-additions.sql) —
+[`94-round2-registry-additions.sql`](./94-round2-registry-additions.sql) —
 *"#94 round 2 — add missing exercises to the registry (prod)"*. **71 entries** across 6
 categories. Idempotent, alphabetical, dry-run on the local stack (Core 35 · LPO 34 · Força 33
 · Acessórios 51 · Skill 41 · Cardio 19, unchanged on a second run).
@@ -156,7 +156,7 @@ categories. Idempotent, alphabetical, dry-run on the local stack (Core 35 · LPO
 | Round 1 close | 34.8% |
 | Round 2 code fixes | 30.7% |
 | Round 2 aliases (shipped) | **28.1%** |
-| **After this SQL** | **11.9%** (95 / 795) |
+| **After this SQL** ✅ **confirmed live** | **11.9%** (95 / 795) |
 
 **0 dangling aliases** after the additions. The ~95 that remain are bucket 3 (compound
 notation) and bucket 4 (structural noise), which by design never resolve — so 11.9% is

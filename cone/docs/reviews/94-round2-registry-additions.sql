@@ -1,7 +1,8 @@
 -- #94 round 2 — add missing exercises to the registry (prod)
 -- ============================================================================
--- ⚠️ Keep the title on LINE 1: the Supabase SQL editor autofills the snippet
--- name from the first line, and a divider there leaves it "Untitled".
+-- Title on LINE 1 so it is easy to select and copy. NOTE: Supabase does NOT
+-- autofill the snippet name from a comment — rename the snippet by hand,
+-- pasting the line above, or it saves as "Untitled query".
 -- ============================================================================
 -- Run in the Supabase SQL editor (prod). Adds 71 entries across
 -- 6 categories, per the coach's round-2 decisions in 94-round2-decisions.md.

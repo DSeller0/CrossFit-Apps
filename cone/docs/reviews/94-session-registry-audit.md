@@ -16,26 +16,31 @@ The coach annotates with a blockquote **on top of** the recommendation it refers
 Renders as an indented callout in the VS Code preview, on GitHub, and in raw text. Add as
 many lines as needed; put them anywhere above the auto-generated marker.
 
-## Status — round 1 shipped (2026-07-25)
+## Status — CLOSED 2026-07-25 · 58.5% → 11.9%
 
-| | Unresolved | Δ |
+| Stage | Unresolved | Δ |
 |---|---|---|
 | Before | **58.5%** (453 / 775) | — |
-| After the resolver changes (R1·R2·R4, shipped in code) | **43.4%** | −15.1 pts |
-| After `94-registry-additions.sql` applied to prod (R3) ✅ **DONE 2026-07-25** | **34.8%** (277 / 795) | −8.6 pts |
+| Round 1 — resolver changes (R1·R2·R4) | 43.4% | −15.1 |
+| Round 1 — `94-registry-additions.sql` (22 entries) | 34.8% | −8.6 |
+| Round 2 — code fixes (slot letters · tempo notes · parens · alt · misspellings) | 30.7% | −4.1 |
+| Round 2 — decision aliases | 28.1% | −2.6 |
+| Round 2 — `94-round2-registry-additions.sql` (71 entries) | **11.9%** (95 / 795) | −16.2 |
 
-**Round 1 is complete and live.** Prod confirmed at Cardio 18 · Skill 27 · Força 24 ·
-Acessórios 31, and the audit re-run against live prod reports **0 dangling aliases ✅**.
-Bucket 1 fell 130 → 102 registerable movements, bucket 2 fell 179 → 106.
+**Both rounds are complete and live on prod**, verified by re-running the audit against live
+data: **0 dangling aliases ✅**. Bucket 1 fell **130 → 16** and bucket 2 **179 → 19**.
 
-[`94-registry-additions.sql`](./94-registry-additions.sql) — *"#94 — add missing exercises
-to the registry (prod)"* — added 22 entries across Cardio / Skill / Força / Acessórios. It
-is safe to re-run (dedups by name, prefers the existing row, never overwrites) and lands
-entries alphabetically.
+**11.9% is effectively the floor.** Of the 95 remaining occurrences, 26 are bucket 3
+(compound notation) and 25 are bucket 4 (structural noise) — both unresolvable *by design*.
+The 16 left in bucket 1 are the fragments we deliberately skipped (`LOW SQUAT`, `Hang Power`,
+`Hang Muscle`, `Hang Pull`, `Low High Pull` — positions inside a complex, not standalone
+lifts) plus one-off singles (`halo`, `Burpee BMU`, `Back lever on rings`, `Deslocamento com
+Apoio`, `forward rools to suport`, `Kipping uma puxada`, `Inchworm + Push Up`, `Single Leg`,
+`Burpees box step up`) and three that aren't movements at all (`Cycling Barbell`,
+`C&J 60/45`). Going further means changing how compound lines are *entered* (#92's text
+parser already flags them `complex-detected`), not growing the registry.
 
-Newly-resolved occurrences: Wall Ball ×15 · Devil Press ×9 · Lunge ×9 ·
-Pull-up ×7 · Burpee Box Jump Over ×6 · BOB ×5 · Single Under ×4 · Thruster ×3 · Sprawl ×3
-· Plate Thruster ×2 · Sprint, DB Thruster, Back Lunge, DB Lunge, S2OH ×1 — **68 total**.
+Round-2 decisions and the batch tables: [`94-round2-decisions.md`](./94-round2-decisions.md).
 
 ### Answers to the two questions in the comments
 
@@ -169,177 +174,50 @@ What's left in bucket 1 after the above, roughly in order of value:
 _Auto-generated 2026-07-25 — a miss is one distinct `normExName` key; ×N = occurrences._
 
 - **795** name occurrences across all sessions
-- **223** unresolved (**28.1%**)
-- **192** distinct misses
-- **19** dangling aliases — an alias whose target entry does not exist resolves to nothing. Any listed below
-that names an entry from `94-registry-additions.sql` clears once that SQL is applied to
-prod; anything else is a real typo to fix in `ALIASES`.
-- `'abs medball'` → **Abs Med Ball** _(no such entry)_
-- `'lenhador caotic'` → **Lenhador** _(no such entry)_
-- `'l sit barra'` → **L-Sit Barra** _(no such entry)_
-- `'wall walking'` → **Wall Walk** _(no such entry)_
-- `'tap shoulder'` → **Shoulder Tap** _(no such entry)_
-- `'wall shoulder taps'` → **Shoulder Tap** _(no such entry)_
-- `'push up hand release'` → **Hand Release Push-up** _(no such entry)_
-- `'push-up hand release'` → **Hand Release Push-up** _(no such entry)_
-- `'box jump step down'` → **Box Jump Over** _(no such entry)_
-- `'bbjo step down'` → **Box Jump Over** _(no such entry)_
-- `'burpees broad jump'` → **Burpee Broad Jump** _(no such entry)_
-- `'burpees to plate'` → **Burpee to Plate** _(no such entry)_
-- `'globet squat'` → **Goblet Squat** _(no such entry)_
-- `'wall sit hold'` → **Wall Sit** _(no such entry)_
-- `'db bench press inclinado'` → **DB Bench Press** _(no such entry)_
-- `'dual step box up'` → **DB Step Box Up** _(no such entry)_
-- `'step down kb'` → **KB Step Down** _(no such entry)_
-- `'kb leg over'` → **KB Over Leg** _(no such entry)_
-- `'over kb leg'` → **KB Over Leg** _(no such entry)_
+- **95** unresolved (**11.9%**)
+- **86** distinct misses
+- **0** dangling aliases ✅
 
-## 1 · Likely-registerable single movements (68) — the actionable list
+## 1 · Likely-registerable single movements (16) — the actionable list
 These are real movements the coach types that have no registry entry (or need an alias).
-- **ABS INFRA** · **Abs infra**  ×4
-- **DB Bench Press**  ×3
-- **KB Deadlift**  ×3
-- **KB OVER LEG** · **KB Over Leg**  ×2
-- **JERK BALANCE** · **Jerk Balance**  ×2
 - **LOW SQUAT**  ×2
-- **Burpee Broad Jump**  ×2
-- **Snatch high pull** · **Snatch High Pull**  ×2
-- **Burpee to Plate**  ×2
-- **Pike up row**  ×2
-- **Push-Up Hand Release** · **Push-up Hand Release**  ×2
-- **LENHADOR CAOTIC**  ×1
-- **GORILA ROW**  ×1
-- **DUAL DB  SQUAT CLEAN**  ×1
-- **DB BENCH PRESS   (Wide)**  ×1
-- **SLED DRAG**  ×1
 - **SINGLE LEG**  ×1
-- **BURPEES BROAD JUMP**  ×1
-- **ARNOLD PRESS**  ×1
-- **FRONT RACK LUNGE**  ×1
-- **WALL WALKING**  ×1
-- **CLUSTER**  ×1
 - **BURPEE BMU**  ×1
-- **ABS KB UNILATERAL**  ×1
-- **RUSSIAN TWIST KB**  ×1
-- **DB STEP BOX UP**  ×1
-- **Dual DB Strict Press**  ×1
-- **Dip Russo**  ×1
 - **Low High Pull**  ×1
 - **Hang Muscle**  ×1
-- **Box Jump Over (Step Down)**  ×1
-- **ELEVAÇÃO DE JOELHO 2 KB**  ×1
 - **HANG PULL**  ×1
 - **HANG POWER**  ×1
-- **A 3 SNATCH PUSH PRESS (em cócoras)**  ×1
-- **C 3 SQUAT JERK**  ×1
-- **KB Step-up**  ×1
-- **KB leg over**  ×1
-- **Push-up**  ×1
-- **Tap Shoulder**  ×1
-- **Box Jump Over**  ×1
-- **DB Hang Snatch**  ×1
-- **Dual DB Push Press**  ×1
-- **Hand Release Push-up**  ×1
-- **DB Hip Thruster**  ×1
-- **KB Box Step**  ×1
-- **Shoulder Taps**  ×1
 - **Inchworm + Push Up**  ×1
-- **Wall Shoulder Taps**  ×1
 - **Deslocamento com Apoio**  ×1
-- **Scapular Pull-up**  ×1
 - **Kipping uma puxada**  ×1
-- **Strict Chest-to-bar**  ×1
-- **Stiff Dual DB/KB**  ×1
-- **DB/KB Deadlift**  ×1
-- **Push up Hand Release**  ×1
 - **halo**  ×1
-- **Burpees to plate**  ×1
-- **Step Box**  ×1
 - **Burpees box step up**  ×1
-- **Push up**  ×1
-- **Toes to Ring**  ×1
 - **Cycling Barbell**  ×1
 - **forward rools to suport**  ×1
 - **Back lever on rings**  ×1
 - **C&J 60/45**  ×1
-- **DB cossack Squat**  ×1
-- **Clean High Pull**  ×1
 
-## 2 · Prescription leaked into the name (73)
+## 2 · Prescription leaked into the name (19)
 A leading count/distance ("800m Run", "15 GHD", "30 Wall Ball") — the movement is fine, the
 volume belongs in the reps/dist field. `stripVolumeNoise` only strips a leading bare count,
 not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
-- **3 High box jump**  ×3
-- **10 DB Bench Press**  ×3
 - **20 Burpees over the bar**  ×3
-- **8/8 LANDMINE PRESS** · **8/8 landmine press**  ×2
-- **20 TOUCH HEEL** · **20 touch heel**  ×2
-- **30/30” Lenhador** · **30/30”  Lenhador**  ×2
-- **12 dB bench press inclinado**  ×2
-- **30" L SIT BARRA**  ×1
 - **20''/20'' 1 KB OH Walking**  ×1
 - **8 STRICT PULL UP WIDE**  ×1
-- **15 ABS INFRA**  ×1
-- **20 KB OBLÍQUO**  ×1
 - **10m HSW / 4 WALL WALK**  ×1
 - **10 DUAL DB S2OH**  ×1
-- **8 DUAL STEP BOX UP**  ×1
-- **5 DIP RUSSO**  ×1
 - **5 SEATED STRICT PRESS (Barra)**  ×1
-- **20-15-10-5 Dual DB Snatch**  ×1
-- **10m Dead March**  ×1
-- **20 KB Deadlift**  ×1
-- **20 Burpees Broad Jump**  ×1
-- **10 DB Hang Snatch**  ×1
-- **8 DB OH Lunges**  ×1
 - **30 SU Crossover**  ×1
-- **8 GLOBET Squat (Heels Elevated)**  ×1
-- **8/8  Single Leg Knee Extension**  ×1
-- **8 Dumbbell Lat Pullover**  ×1
 - **1 Legless/ 2 RC**  ×1
-- **3 Wall walking**  ×1
-- **8 Rower  Hamstring Curl**  ×1
-- **30 DB Snatch**  ×1
-- **10 GTOH**  ×1
-- **10 Step box**  ×1
-- **15 Abs medball**  ×1
-- **8 DB Lateral Raise**  ×1
-- **8 Upright Rows**  ×1
-- **8 Front Plate Raises**  ×1
 - **2-4-6-8-1o Ohs**  ×1
 - **2-4–6-8… DB Step Up**  ×1
-- **8/8 KB Step Down**  ×1
 - **5 C&J ubrok**  ×1
-- **40” Wall Sit hold**  ×1
-- **8/8 Step Down KB 3” na descida**  ×1
-- **9-15-21 Box jump step down**  ×1
-- **40” Perdigueiro alternando**  ×1
-- **50m Burpees Broad Jump**  ×1
 - **4 RMU/ BMU**  ×1
-- **40” Prancha dinâmica**  ×1
-- **5 dual DB strict press**  ×1
-- **15 Abs remador**  ×1
-- **30/30 Lenhador**  ×1
-- **3 Drop balance**  ×1
-- **3 tall Snatch**  ×1
 - **6 dip russo ou dip paralelo**  ×1
-- **3 Drop jerk**  ×1
 - **1 push jerk 2 split**  ×1
-- **20m Dead March**  ×1
-- **12 Bbjo step down**  ×1
-- **20 ponte unipodal**  ×1
-- **1’ over KB leg**  ×1
-- **12 gorila row**  ×1
-- **30 DB Snatch alt**  ×1
 - **600m z3**  ×1
-- **20/20 Lenhador**  ×1
-- **10/10 KB Oblíquo**  ×1
 - **3 split jerk a cada 10”**  ×1
-- **6 dip russo**  ×1
-- **8/8 KB cossack Squat**  ×1
 - **3 tall Celan**  ×1
-- **8/8 KB Oh Lunges**  ×1
-- **20/20 lenhador caotic**  ×1
 - **8/8 OH Lunges unilateral**  ×1
 - **Low Power clean 2" entrada**  ×1
 
