@@ -377,7 +377,7 @@ describe('warnings', () => {
     const seen = new Map(week.flatMap(d => d.warnings).map(w => [w.kind, w]))
     parseBlock('For Time\n70/75/80%').warnings.forEach(w => seen.set(w.kind, w))
     parseBlock('Skill\n3 sets cada letra\n20" Hold').warnings.forEach(w => seen.set(w.kind, w))
-    const reg = { Cardio: [{ name: 'Corrida' }] }
+    const reg = { Cardio: [{ name: 'Run' }] }
     parseBlock('For Time\n10 Movimento Inventado', { registry: reg }).warnings.forEach(w => seen.set(w.kind, w))
 
     expect([...seen.keys()].sort()).toEqual(
@@ -389,7 +389,7 @@ describe('warnings', () => {
   })
 
   test('a name the registry knows produces no unknown-exercise warning', () => {
-    const reg = { Cardio: [{ name: 'Corrida' }] }
+    const reg = { Cardio: [{ name: 'Run' }] }
     const { warnings } = parseBlock('For Time\n400m Run', { registry: reg })
     expect(warnings).toEqual([])
   })

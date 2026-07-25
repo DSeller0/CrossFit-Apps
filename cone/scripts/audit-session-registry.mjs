@@ -5,7 +5,7 @@
 // → rewrites docs/reviews/94-session-registry-audit.md. Uses .env.production (anon read).
 import { readFileSync, writeFileSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
-import { normExName, buildRegistryIndex, resolveExercise } from '../src/public/lib/registry.js'
+import { normExName, buildRegistryIndex, resolveExercise, ALIASES } from '../src/public/lib/registry.js'
 
 const env = readFileSync('./.env.production', 'utf8')
 const get = k => (env.match(new RegExp('^' + k + '=(.*)$', 'm')) || [])[1]?.trim()
@@ -80,6 +80,14 @@ try {
   if (i !== -1) head = existing.slice(0, i)
 } catch { /* first run — use defaultHead */ }
 
+// Every ALIASES value must name an entry that actually exists — a value pointing at a
+// missing entry is a dangling pointer that silently resolves to nothing. This is checked
+// against LIVE prod (a unit test can't see the real registry), which is how #94 caught
+// 'run'/'sprint' → "Corrida", an entry the registry never had.
+const dangling = Object.entries(ALIASES)
+  .filter(([, target]) => !index.has(normExName(target)))
+  .map(([key, target]) => `- \`'${key}'\` → **${target}** _(no such entry)_`)
+
 const data = `${SENTINEL}
 
 _Auto-generated ${new Date().toISOString().slice(0, 10)} — a miss is one distinct \`normExName\` key; ×N = occurrences._
@@ -87,6 +95,9 @@ _Auto-generated ${new Date().toISOString().slice(0, 10)} — a miss is one disti
 - **${total}** name occurrences across all sessions
 - **${missTotal}** unresolved (**${(missTotal / total * 100).toFixed(1)}%**)
 - **${miss.size}** distinct misses
+- **${dangling.length}** dangling aliases${dangling.length
+  ? ` — an alias whose target entry does not exist resolves to nothing. Any listed below\nthat names an entry from \`94-registry-additions.sql\` clears once that SQL is applied to\nprod; anything else is a real typo to fix in \`ALIASES\`.\n${dangling.join('\n')}`
+  : ' ✅'}
 
 ## 1 · Likely-registerable single movements (${buckets.movement.length}) — the actionable list
 These are real movements the coach types that have no registry entry (or need an alias).

@@ -14,11 +14,53 @@ export function normExName(name) {
     .toLowerCase().trim().replace(/\s+/g, ' ')
 }
 
-// A leading rep/time/distance count ("10' BIKE", "800m Run") or a trailing heart-rate
-// zone ("Run Z1") is prescription volume that leaked into the name field — strip it
-// before matching so the bare movement name underneath still resolves.
+// Prescription volume that leaked into the name field — strip it before matching so the
+// bare movement name underneath still resolves. #94's prod audit found this is the single
+// biggest miss bucket (179 of 453 unresolved occurrences), so this peels far more than the
+// original "leading bare count": distances ("800m Run"), durations ("40\" Hollow Hold",
+// "1' Prancha"), rep schemes ("21-15-9 C2B", "2-4-6-8… BMU"), UNILATERAL per-side schemes
+// ("8/8 Búlgaro Squat" = 8 each leg, "10/10", "20''/20''"), calorie counts ("12 cal row"),
+// heart-rate zones ("20' z2 bike", "Run Z1") and the coach's "heavy" qualifier.
+//
+// A unit letter must not be followed by another letter — otherwise the "s" in "5 Strict
+// Pull Up" reads as a seconds unit and the name is mangled to "trict pull up".
+const LEADING_VOLUME = /^(?:heavy(?![a-z])|z\d+|\d+(?:[.,]\d+)?\s*(?:(?:km|kg|cal|min|k|m|s|x)(?![a-z]))?)\s*['"’”′″]*\s*[-/…,.]*\s*/
 function stripVolumeNoise(key) {
-  return key.replace(/^\d+['"’′]*\s*/, '').replace(/\s*z\d+$/, '').trim()
+  let out = key
+  // Iterate: a rep scheme is several volume tokens in a row ("21-15-9 " = 3 passes).
+  for (let i = 0; i < 12 && out; i++) {
+    const next = out.replace(LEADING_VOLUME, '')
+    if (next === out) break
+    out = next
+  }
+  return out.replace(/\s*z\d+$/, '').trim()
+}
+
+// A trailing "(…)" in a registry name is either a DISAMBIGUATOR ("Remo (Ergômetro)",
+// "L-sit (rings)") or the coach's SHORTHAND ("Single Under (SU)", "Burpee Over the Bar
+// (BOB)") — the convention #94 settled on for new entries. Both halves must resolve, so
+// an entry is also indexed under its base name and, when the parenthetical looks like a
+// shorthand, under the shorthand alone. Shorthand = a short all-caps token, which is what
+// separates "(SU)"/"(S2OH)"/"(BOB)" from "(Ergômetro)"/"(banded)"/"(Assault/Echo)" —
+// so no per-entry upkeep is needed as the coach adds more.
+const PAREN = /^(.*?)\s*\(([^)]+)\)\s*$/
+const SHORTHAND = /^[A-Z0-9&/+-]{2,6}$/
+function derivedKeys(name) {
+  const keys = []
+  const add = k => { if (k && !keys.includes(k)) keys.push(k) }
+
+  const m = String(name).match(PAREN)
+  if (m) {
+    const [, base, inner] = m
+    if (base.trim()) add(normExName(base))
+    if (SHORTHAND.test(inner.trim())) add(normExName(inner))
+  }
+
+  // "Strict Pull-up" ↔ "Strict Pull Up". normExName KEEPS hyphens on purpose (exerciseGroups'
+  // rootGroup tokenizes on them), but the coach types the spaced spelling about as often, so
+  // every hyphenated entry also answers to it — one rule instead of an alias per name.
+  ;[normExName(name), ...keys].forEach(k => { if (k.includes('-')) add(k.replace(/-/g, ' ')) })
+  return keys
 }
 
 // Shorthand / pt-BR variant → canonical registry name. Authored from a real diff of
@@ -28,6 +70,11 @@ function stripVolumeNoise(key) {
 // prescription notation ("1 MUSCLE + 3 FRONT 3\"", "A- 3 SNATCH BALANCE") that isn't a
 // single exercise name and would need real product changes (not aliasing) to capture.
 // Extend here as new misses turn up — never at a call site.
+//
+// ⚠️ Every VALUE must be an EXACT existing registry entry name. A value naming an entry
+// that doesn't exist is a dangling pointer that silently resolves to nothing — #94 found
+// 'run'/'sprint' both pointing at a "Corrida" entry the registry has never had (the real
+// Cardio entry is "Run"), so the coach's actual pt-BR word missed entirely.
 export const ALIASES = {
   'bmu': 'Bar Muscle-up',
   'rmu': 'Ring Muscle-up', 'ring mu': 'Ring Muscle-up',
@@ -37,8 +84,8 @@ export const ALIASES = {
   'hspu': 'Strict HSPU',
   'ohs': 'Overhead Squat',
   'c&j': 'Clean & Jerk',
-  'run': 'Corrida', 'sprint': 'Corrida',
-  'row': 'Remo (Ergômetro)',
+  'corrida': 'Run',
+  'row': 'Remo (Ergômetro)', 'remador': 'Remo (Ergômetro)',
   'bike': 'Bike (Assault/Echo)',
   'ski': 'Ski Erg',
   'pistol': 'Pistol Squat', 'pistols': 'Pistol Squat',
@@ -58,6 +105,36 @@ export const ALIASES = {
   'bulgaro squat': 'Bulgarian Split Squat',
   'hip thruster': 'Hip Thrust',
   'flexao nordica': 'Nordic Curl',
+
+  // #94 batch (2026-07-25). A "squat" clean/snatch IS the full lift — the registry names
+  // it plain, the coach spells the receiving position out.
+  'squat clean': 'Clean', 'floor squat clean': 'Clean', 'low squat clean': 'Clean',
+  'hang squat clean': 'Hang Clean', 'high hang squat clean': 'Hang Clean',
+  'squat snatch': 'Snatch',
+  'hang squat snatch': 'Hang Snatch',
+  // pt-BR word order ("Deadlift déficit") + feminine/bare forms of aliases already here.
+  'deadlift deficit': 'Deadlift',
+  'bulgaro': 'Bulgarian Split Squat',
+  'strict pull up supinada': 'Strict Pull-up', 'strict pull-up supinada': 'Strict Pull-up',
+  // Bare "GHD" is the sit-up in this gym's usage; the extension is spelled out.
+  'ghd': 'GHD Sit-up',
+  'ghd hiperextensao': 'GHD Back Extension', 'ghd hipertensao': 'GHD Back Extension',
+  // pt-BR the coach actually types.
+  'remada russa': 'Russian Row', 'remada curvada': 'Barbell Row',
+  'prancha ventral': 'Plank', 'prancha lat': 'Side Plank',
+  'bom dia': 'Good Morning',
+  'martelo': 'Hammer Curl',
+  'elevacao lat': 'Lateral Raise',
+  // Spellings of the new #94 entries. "Devil Press" is by definition a dumbbell movement,
+  // so "DB Devil Press"/"Devil's Press" are spellings of ONE exercise, not load variants.
+  "devil's press": 'Devil Press', 'devils press': 'Devil Press', 'db devil press': 'Devil Press',
+  'wal ball': 'Wall Ball',
+  // ("burpee over the bar" itself needs no alias — it's the derived base name of the entry.)
+  'burpee over bar': 'Burpee Over the Bar (BOB)',
+  'bar facing burpee': 'Burpee Over the Bar (BOB)',
+  'bbjo': 'Burpee Box Jump Over',
+  // NOTE: "Pull Up" → "Pull-up" needs no alias — buildRegistryIndex derives the spaced
+  // spelling of every hyphenated entry (see derivedKeys), which is self-maintaining.
 }
 
 // Map<normKey, entry> flattened across every block family — entry gets a `categories`
@@ -67,16 +144,32 @@ export const ALIASES = {
 export function buildRegistryIndex(registry) {
   const index = new Map()
   if (!registry || typeof registry !== 'object') return index
+
+  const flat = []
   Object.entries(registry).forEach(([family, list]) => {
     (Array.isArray(list) ? list : []).forEach(raw => {
       const name = typeof raw === 'string' ? raw : raw?.name
-      if (!name) return
-      const key = normExName(name)
-      const existing = index.get(key)
-      if (existing) { if (!existing.categories.includes(family)) existing.categories.push(family) }
-      else index.set(key, { ...(typeof raw === 'string' ? { name: raw } : raw), categories: [family] })
+      if (name) flat.push([family, name, raw])
     })
   })
+
+  // Pass 1 — real entry names. Two passes (not one) so a name DERIVED from one entry can
+  // never shadow another entry's actual name: every real name is in the map first.
+  flat.forEach(([family, name, raw]) => {
+    const key = normExName(name)
+    const existing = index.get(key)
+    if (existing) { if (!existing.categories.includes(family)) existing.categories.push(family) }
+    else index.set(key, { ...(typeof raw === 'string' ? { name: raw } : raw), categories: [family] })
+  })
+
+  // Pass 2 — base-name / shorthand keys point at the SAME entry object (so `categories`
+  // stays shared and correct); first one wins, and a real name is never overwritten.
+  flat.forEach(([, name]) => {
+    const entry = index.get(normExName(name))
+    if (!entry) return
+    derivedKeys(name).forEach(k => { if (!index.has(k)) index.set(k, entry) })
+  })
+
   return index
 }
 
@@ -95,5 +188,21 @@ export function resolveExercise(name, registryOrIndex) {
   const index = registryOrIndex instanceof Map ? registryOrIndex : buildRegistryIndex(registryOrIndex)
   const key = normExName(name)
   if (!key) return null
-  return lookup(index, key) || lookup(index, stripVolumeNoise(key))
+
+  // Candidate spellings, strongest signal first — the exact name always wins, and each
+  // fallback only runs if everything before it missed.
+  const forms = [key, stripVolumeNoise(key)]
+  // Hyphens both ways: the index carries the spaced form of a hyphenated ENTRY
+  // (derivedKeys); this is the mirror case, a hyphenated spelling of a spaced entry.
+  forms.forEach(k => { if (k.includes('-')) forms.push(k.replace(/-/g, ' ')) })
+  // Last resort — a plain plural ("Lunges", "Burpees", "Upright Rows", "V-ups"). The
+  // "[^s]s" guard means a word already ending in "ss" is left alone, so "Press" is never
+  // mangled into "Pres".
+  forms.slice().forEach(k => { if (/[^s]s$/.test(k)) forms.push(k.slice(0, -1)) })
+
+  for (const form of forms) {
+    const hit = lookup(index, form)
+    if (hit) return hit
+  }
+  return null
 }

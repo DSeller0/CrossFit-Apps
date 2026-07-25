@@ -30,7 +30,7 @@ describe('buildRegistryIndex + resolveExercise', () => {
   const registry = {
     LPO: [{ name: 'Bar Muscle-up' }, { name: 'Clean & Jerk' }],
     Skill: [{ name: 'Toes to Bar', videoUrl: 'https://youtu.be/x' }],
-    Cardio: [{ name: 'Corrida' }, { name: 'Bike (Assault/Echo)' }],
+    Cardio: [{ name: 'Run' }, { name: 'Bike (Assault/Echo)' }],
     Força: [{ name: 'Deadlift', defaults: { sets: 5, reps: '5' } }],
   }
 
@@ -46,21 +46,22 @@ describe('buildRegistryIndex + resolveExercise', () => {
   })
 
   test('pt-BR / English machine-name alias resolves', () => {
-    expect(resolveExercise('Run', registry)?.name).toBe('Corrida')
+    expect(resolveExercise('Corrida', registry)?.name).toBe('Run')
     expect(resolveExercise('ROW', buildRegistryIndex({ Cardio: [{ name: 'Remo (Ergômetro)' }] }))?.name).toBe('Remo (Ergômetro)')
   })
 
   test('leading volume prefix stripped before alias lookup', () => {
     expect(resolveExercise("10' BIKE", registry)?.name).toBe('Bike (Assault/Echo)')
-    expect(resolveExercise("10' Run", registry)?.name).toBe('Corrida')
+    expect(resolveExercise("10' Run", registry)?.name).toBe('Run')
   })
 
-  test('unrelated leading number does not accidentally resolve', () => {
+  test('stripping a leading count never INVENTS a match', () => {
     expect(resolveExercise('12 GHD', registry)).toBeNull()
+    expect(resolveExercise('800m Nonsense Movement', registry)).toBeNull()
   })
 
   test('trailing zone suffix stripped before alias lookup', () => {
-    expect(resolveExercise('Run Z1', registry)?.name).toBe('Corrida')
+    expect(resolveExercise('Run Z1', registry)?.name).toBe('Run')
   })
 
   test('resolved entry carries every category it appears under', () => {
@@ -107,7 +108,7 @@ describe('real prod shorthand/pt-BR fixture table', () => {
       { name: 'Toes to Bar' }, { name: 'Chest-to-Bar' }, { name: 'Strict HSPU' },
       { name: 'Handstand Walk' }, { name: 'Nordic Curl' }, { name: 'Pistol Squat' },
     ],
-    Cardio: [{ name: 'Corrida' }, { name: 'Remo (Ergômetro)' }, { name: 'Bike (Assault/Echo)' }, { name: 'Ski Erg' }],
+    Cardio: [{ name: 'Run' }, { name: 'Remo (Ergômetro)' }, { name: 'Bike (Assault/Echo)' }, { name: 'Ski Erg' }],
     Força: [
       { name: 'Overhead Squat' }, { name: 'Double Under' }, { name: 'Strict Pull-up' },
       { name: 'Plank' }, { name: 'Side Plank' }, { name: 'Barbell Row' }, { name: 'Bicep Curl' },
@@ -127,7 +128,8 @@ describe('real prod shorthand/pt-BR fixture table', () => {
     ['DU ', 'Double Under'], ['DU', 'Double Under'], ['50 DU ', 'Double Under'],
     ['OHS ', 'Overhead Squat'], ['OHS', 'Overhead Squat'],
     [' C&J ', 'Clean & Jerk'], ['C&J', 'Clean & Jerk'],
-    ['Run', 'Corrida'], ['RUN', 'Corrida'], ['Run ', 'Corrida'], ["20' Run", 'Corrida'], ['Run Z1', 'Corrida'],
+    ['Run', 'Run'], ['RUN', 'Run'], ['Run ', 'Run'], ["20' Run", 'Run'], ['Run Z1', 'Run'],
+    ['Corrida', 'Run'], ['CORRIDA ', 'Run'],
     ['Row', 'Remo (Ergômetro)'], ['ROW', 'Remo (Ergômetro)'], ['ROW ', 'Remo (Ergômetro)'],
     ["10' BIKE ", 'Bike (Assault/Echo)'], ["10' BIKE", 'Bike (Assault/Echo)'],
     ["10' SKI", 'Ski Erg'], ['Ski', 'Ski Erg'], ['SKI ', 'Ski Erg'],
@@ -149,5 +151,141 @@ describe('real prod shorthand/pt-BR fixture table', () => {
 
   test.each(cases)('%j resolves to %j', (typed, canonical) => {
     expect(resolveExercise(typed, index)?.name).toBe(canonical)
+  })
+})
+
+// #94 (2026-07-25) — the prod audit's second bucket was 179 unresolved occurrences that
+// were only ever "movement name with the prescription glued to the front". Every `typed`
+// string below is verbatim from that report.
+describe('#94 · leading prescription volume is peeled off', () => {
+  const index = buildRegistryIndex({
+    Cardio: [
+      { name: 'Run' }, { name: 'Remo (Ergômetro)' }, { name: 'Bike (Assault/Echo)' },
+      { name: 'Ski Erg' }, { name: "Farmer's Carry" }, { name: 'Sled Pull' }, { name: 'Wall Ball' },
+    ],
+    Core: [{ name: 'Hollow Hold' }, { name: 'GHD Sit-up' }, { name: 'Plank' }, { name: 'Side Plank' }],
+    Skill: [{ name: 'Chest-to-Bar' }, { name: 'Bar Muscle-up' }, { name: 'Strict Pull-up' }, { name: 'Strict HSPU' }],
+    Força: [
+      { name: 'Bulgarian Split Squat' }, { name: 'Deadlift' }, { name: 'Front Squat' },
+      { name: 'Thruster' }, { name: 'DB Thruster' },
+    ],
+  })
+
+  const cases = [
+    ['800m Run', 'Run'], ['600m run', 'Run'], ['100m Run', 'Run'], ['7200m Run', 'Run'],
+    ['5k Run z2', 'Run'], ["20’ z1 Run", 'Run'],
+    ['200m Row', 'Remo (Ergômetro)'], ['1000m Row', 'Remo (Ergômetro)'],
+    ['12 cal row', 'Remo (Ergômetro)'], ['15/10 cal Row', 'Remo (Ergômetro)'],
+    ['40 cal bike', 'Bike (Assault/Echo)'], ["20’ z2 bike", 'Bike (Assault/Echo)'],
+    ['8/10 cal bike', 'Bike (Assault/Echo)'],
+    ['500m Ski', 'Ski Erg'],
+    ['30M Farm carry', "Farmer's Carry"], ['100m Farm carry', "Farmer's Carry"],
+    ['10m sled pull', 'Sled Pull'], ['30m sled pull', 'Sled Pull'],
+    ['50 Wall Ball', 'Wall Ball'], ['30 wall ball', 'Wall Ball'], ['20 WALL BALL', 'Wall Ball'],
+    ['40” Hollow Hold', 'Hollow Hold'],
+    ['15 GHD', 'GHD Sit-up'], ['12 GHD', 'GHD Sit-up'],
+    ['1’ Prancha Ventral', 'Plank'], ['40” prancha', 'Plank'],
+    ['30/30” prancha lat', 'Side Plank'], ['30/30” Prancha lateral', 'Side Plank'],
+    ['21-15-9 C2B', 'Chest-to-Bar'], ['2-3-4-5… C2B', 'Chest-to-Bar'],
+    ['2-4-6-8… BMU', 'Bar Muscle-up'],
+    ['2-3-4-5…… Strict HSPU', 'Strict HSPU'], ['21-15-9 S Hspu', 'Strict HSPU'],
+    ['8/8 Búlgaro Squat', 'Bulgarian Split Squat'], ['10/10 heavy búlgaro', 'Bulgarian Split Squat'],
+    ['20-15-10-5 Deadlift', 'Deadlift'], ['3 Deadlift déficit', 'Deadlift'],
+    ['10-8-6-4-2 FRONT SQUAT', 'Front Squat'],
+    // Load variants are their own entries (coach's call), so DB Thruster ≠ Thruster.
+    ['10 Thruster', 'Thruster'], ['4 DB Thruster', 'DB Thruster'],
+    // The unit letter must not eat a real word: "5 s|trict…" would mangle the name.
+    ['5 Strict Pull Up supinada', 'Strict Pull-up'], ['8 Strict Pull Up', 'Strict Pull-up'],
+    ['10 Strict Pull Up', 'Strict Pull-up'],
+  ]
+  test.each(cases)('%j resolves to %j', (typed, canonical) => {
+    expect(resolveExercise(typed, index)?.name).toBe(canonical)
+  })
+
+  test('a bare rep scheme with no movement resolves to nothing', () => {
+    expect(resolveExercise('10-8-6-4-2', index)).toBeNull()
+    expect(resolveExercise('600m z3', index)).toBeNull()
+  })
+})
+
+// #94 — new entries carry the coach's shorthand in parens ("Single Under (SU)"), and both
+// halves must resolve without a hand-written alias per entry.
+describe('#94 · "(SHORTHAND)" in an entry name is indexed automatically', () => {
+  const index = buildRegistryIndex({
+    Skill: [{ name: 'Single Under (SU)' }, { name: 'Burpee Over the Bar (BOB)' }],
+    Força: [{ name: 'Shoulder to Overhead (S2OH)' }],
+    Cardio: [{ name: 'Remo (Ergômetro)' }, { name: 'Bike (Assault/Echo)' }],
+    Mobilidade: [{ name: 'Hip Distraction (banded)' }],
+  })
+
+  test.each([
+    ['SU', 'Single Under (SU)'], ['Single Under', 'Single Under (SU)'],
+    ['single under (su)', 'Single Under (SU)'], ['30 SU Crossover', null],
+    ['BOB', 'Burpee Over the Bar (BOB)'], ['BoB', 'Burpee Over the Bar (BOB)'],
+    ['Burpee Over the Bar', 'Burpee Over the Bar (BOB)'],
+    ['S2OH', 'Shoulder to Overhead (S2OH)'],
+    ['Shoulder to Overhead', 'Shoulder to Overhead (S2OH)'],
+    // A load variant is its own entry, so it must NOT collapse onto the base movement.
+    ['10 DUAL DB S2OH', null],
+  ])('%j → %j', (typed, canonical) => {
+    expect(resolveExercise(typed, index)?.name ?? null).toBe(canonical)
+  })
+
+  test('a disambiguator paren is NOT treated as a shorthand key', () => {
+    // The base name resolves…
+    expect(resolveExercise('Remo', index)?.name).toBe('Remo (Ergômetro)')
+    expect(resolveExercise('Hip Distraction', index)?.name).toBe('Hip Distraction (banded)')
+    // …but the parenthetical itself is not a lookup key (it isn't a shorthand).
+    expect(resolveExercise('Ergômetro', index)).toBeNull()
+    expect(resolveExercise('banded', index)).toBeNull()
+    expect(resolveExercise('Assault/Echo', index)).toBeNull()
+  })
+
+  test('a derived base name never shadows a real entry of that name', () => {
+    const shadow = buildRegistryIndex({
+      LPO: [{ name: 'Snatch', notes: 'the real one' }, { name: 'Snatch (Power)' }],
+    })
+    expect(resolveExercise('Snatch', shadow)?.notes).toBe('the real one')
+  })
+
+  test('derived keys share the entry object, so categories stay correct', () => {
+    const multi = buildRegistryIndex({
+      Skill: [{ name: 'Single Under (SU)' }],
+      Cardio: [{ name: 'Single Under (SU)' }],
+    })
+    expect(resolveExercise('SU', multi)?.categories).toEqual(['Skill', 'Cardio'])
+  })
+})
+
+// #94 — the alias batch the coach signed off on.
+describe('#94 · alias batch', () => {
+  const index = buildRegistryIndex({
+    LPO: [{ name: 'Clean' }, { name: 'Hang Clean' }, { name: 'Snatch' }, { name: 'Hang Snatch' }],
+    Core: [{ name: 'GHD Sit-up' }, { name: 'GHD Back Extension' }, { name: 'Plank' }, { name: 'Side Plank' }],
+    Cardio: [{ name: 'Run' }, { name: 'Remo (Ergômetro)' }],
+    Skill: [{ name: 'Pull-up' }],
+    Acessórios: [{ name: 'Russian Row' }, { name: 'Barbell Row' }, { name: 'Hammer Curl' }, { name: 'Lateral Raise' }],
+    Força: [{ name: 'Good Morning' }],
+  })
+
+  test.each([
+    // A "squat" clean/snatch is the full lift.
+    ['Squat Clean', 'Clean'], ['squat clean', 'Clean'], ['Floor Squat Clean', 'Clean'],
+    ['2 Low Squat Clean', 'Clean'], ['6 Hang Squat Clean', 'Hang Clean'],
+    ['Squat Snatch', 'Snatch'], ['Hang Squat Snatch', 'Hang Snatch'],
+    // GHD.
+    ['GHD', 'GHD Sit-up'], ['20 GHD Hiperextensão', 'GHD Back Extension'],
+    ['GHD HIPERTENSÃO', 'GHD Back Extension'],
+    // pt-BR.
+    ['Corrida', 'Run'], ['Remador', 'Remo (Ergômetro)'], ['15 Abs remador', null],
+    ['Remada Russa', 'Russian Row'], ['8 remada russa', 'Russian Row'],
+    ['6 Remada curvada', 'Barbell Row'],
+    ['10 bom dia', 'Good Morning'], ['12 martelo alt', null], ['8 elevação lat', 'Lateral Raise'],
+    ['Prancha ventral', 'Plank'], ['Prancha lat D', null],
+    // Hyphen vs space — normExName keeps hyphens, so both spellings need to work.
+    ['Pull-up', 'Pull-up'], ['Pull-Up', 'Pull-up'], ['PULL UP', 'Pull-up'],
+    ['15 PuLl Up', 'Pull-up'], ['25 Pull Up', 'Pull-up'],
+  ])('%j → %j', (typed, canonical) => {
+    expect(resolveExercise(typed, index)?.name ?? null).toBe(canonical)
   })
 })
