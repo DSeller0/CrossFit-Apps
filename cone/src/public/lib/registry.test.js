@@ -208,6 +208,54 @@ describe('#94 · leading prescription volume is peeled off', () => {
   })
 })
 
+// #94 round 2 — the other three places prescription hides: a lettered block's slot letter,
+// a tempo/pause note glued to the end, and a trailing qualifier. All strings are verbatim
+// from the report.
+describe('#94 · slot letters, trailing tempo notes and qualifiers', () => {
+  const index = buildRegistryIndex({
+    LPO: [{ name: 'Snatch Balance' }, { name: 'Muscle Snatch' }, { name: 'Clean' }, { name: 'Hang Clean' }],
+    Força: [{ name: 'Bench Press' }, { name: 'Split Jerk' }, { name: 'Push Jerk' }, { name: 'Front Squat' }, { name: 'Back Squat' }],
+    Cardio: [{ name: 'Remo (Ergômetro)' }],
+    Core: [{ name: 'V-up' }, { name: 'Hollow Rock' }, { name: 'Dragon Flag' }, { name: 'American KB Swing' }],
+    Acessórios: [{ name: 'Hammer Curl' }, { name: 'Nordic Curl' }, { name: 'Romanian Deadlift' }],
+  })
+
+  test.each([
+    // Slot letter from a lettered block.
+    ['A- 3 SNATCH BALANCE', 'Snatch Balance'], ['B 3 SNATCH BALANCE', 'Snatch Balance'],
+    ['B- 2 Muscle Snatch', 'Muscle Snatch'],
+    // Tempo / pause note glued to the end.
+    ['3 Bench Press 3” pausa', 'Bench Press'], ['PAUSE BENCH PRESS 3"', 'Bench Press'],
+    ['3 Bench Press pausa 2” no início e no meio', 'Bench Press'],
+    ['3 Snatch balance 2”', 'Snatch Balance'], ['PUSH JERK 2”', 'Push Jerk'],
+    ['2 split jerk 2” Dip 2” recepção', 'Split Jerk'],
+    ['3 Front Squat 5” de pausa em baixo', 'Front Squat'],
+    ['Squat clean 30" entre as reps', 'Clean'],
+    // Trailing qualifier in parens.
+    ['3 split jerk (BNK)', 'Split Jerk'], ['4’ Row ( forte )', 'Remo (Ergômetro)'],
+    // Alternating-sides suffix.
+    ['12 martelo alt', 'Hammer Curl'], ['15 Vups', 'V-up'], ['V ups Alt', 'V-up'],
+    // Misspellings of existing entries.
+    ['Back squay', 'Back Squat'], ['Hollowrock', 'Hollow Rock'],
+    ['8 Romenian Deadlift', 'Romanian Deadlift'], ['10 Hummer Curl', 'Hammer Curl'],
+    ['8 Nordic Hamstring CuRl', 'Nordic Curl'], ['12 DRAGON FLY', 'Dragon Flag'],
+    ['1 Squat Celan', 'Clean'], ['3 Hang Squat Celan', 'Hang Clean'],
+    ['15 A Swing', 'American KB Swing'],
+  ])('%j → %j', (typed, canonical) => {
+    expect(resolveExercise(typed, index)?.name).toBe(canonical)
+  })
+
+  test('a real entry whose own name ends in "(…)" still matches before any stripping', () => {
+    const parens = buildRegistryIndex({ Mobilidade: [{ name: 'Hip Distraction (banded)' }] })
+    expect(resolveExercise('Hip Distraction (banded)', parens)?.name).toBe('Hip Distraction (banded)')
+  })
+
+  test('an interval line is not mistaken for a slot letter', () => {
+    // "A cada 3'" = "every 3 minutes" — the A must survive, so nothing resolves.
+    expect(resolveExercise("A cada 3'", index)).toBeNull()
+  })
+})
+
 // #94 — new entries carry the coach's shorthand in parens ("Single Under (SU)"), and both
 // halves must resolve without a hand-written alias per entry.
 describe('#94 · "(SHORTHAND)" in an entry name is indexed automatically', () => {
@@ -280,7 +328,7 @@ describe('#94 · alias batch', () => {
     ['Corrida', 'Run'], ['Remador', 'Remo (Ergômetro)'], ['15 Abs remador', null],
     ['Remada Russa', 'Russian Row'], ['8 remada russa', 'Russian Row'],
     ['6 Remada curvada', 'Barbell Row'],
-    ['10 bom dia', 'Good Morning'], ['12 martelo alt', null], ['8 elevação lat', 'Lateral Raise'],
+    ['10 bom dia', 'Good Morning'], ['12 martelo alt', 'Hammer Curl'], ['8 elevação lat', 'Lateral Raise'],
     ['Prancha ventral', 'Plank'], ['Prancha lat D', null],
     // Hyphen vs space — normExName keeps hyphens, so both spellings need to work.
     ['Pull-up', 'Pull-up'], ['Pull-Up', 'Pull-up'], ['PULL UP', 'Pull-up'],

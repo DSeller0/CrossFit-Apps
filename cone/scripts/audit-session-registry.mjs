@@ -45,7 +45,19 @@ for (const raw of names) {
 }
 
 // Categorize each distinct miss.
-const NOISE = /^(rest|then|rounds?|diversos|bloco|amrap|emom|for time|descanso|obs|nota)\b/i
+// Block/label text that leaked into a name field. Beyond the obvious "Rest"/"Then", this
+// also catches prescription-shaped lines that are NOT a movement: a max-effort marker
+// ("Max C&J"), an either/or ("Row ou 1000m Run"), a bare load/percentage ("60% Rm",
+// "80/85/90") and pt-BR block labels ("MMII" = lower body, "Buy in"/"Buy out"). They used
+// to land in bucket 1 and read as "register me", which they are not.
+const NOISE = new RegExp([
+  '^(rest|then|rounds?|diversos|bloco|amrap|emom|for time|descanso|obs|nota)\\b',
+  '^(mmii|mmss|mix|sets?|buy\\s*-?\\s*(in|out))\\b',
+  '^max\\b',                       // "Max C&J", "Max BMU", "Max RMU"
+  '\\b(ou)\\b.*\\d',                // "Row ou 1000m Run", "Run ou 800m Row"
+  '^\\d+\\s*%',                     // "60% Rm"
+  '^[\\d/\\-]+$',                   // "80/85/90", "10-8-6-4-2"
+].join('|'), 'i')
 const cat = raw => {
   const t = raw.trim()
   if (NOISE.test(t)) return 'noise'

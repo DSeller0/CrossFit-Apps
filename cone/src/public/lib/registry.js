@@ -25,15 +25,34 @@ export function normExName(name) {
 // A unit letter must not be followed by another letter — otherwise the "s" in "5 Strict
 // Pull Up" reads as a seconds unit and the name is mangled to "trict pull up".
 const LEADING_VOLUME = /^(?:heavy(?![a-z])|z\d+|\d+(?:[.,]\d+)?\s*(?:(?:km|kg|cal|min|k|m|s|x)(?![a-z]))?)\s*['"’”′″]*\s*[-/…,.]*\s*/
+// A slot letter from a lettered block ("A- 3 Snatch Balance", "C 3 Squat Jerk"). Only
+// stripped when a NUMBER follows, so the interval "A cada 3'" is never mistaken for one.
+const SLOT = /^[a-e][-).]?\s+(?=\d)/
+// A tempo/pause note glued to the end ("Bench Press 3\" pausa", "Squat clean 30\" entre as
+// reps"): everything from the tempo mark on is coaching detail, not the movement.
+const TRAILING_NOTE = /\s*\d+\s*['"’”′″].*$/
+// A trailing qualifier in parens ("Row ( forte )", "Split Jerk (BNK)", "Box Jump Over
+// (Step Down)"). Safe as a FALLBACK only — resolveExercise tries the exact key first, so
+// a real entry like "Hip Distraction (banded)" still matches before this ever runs.
+const TRAILING_PAREN = /\s*\([^)]*\)\s*$/
+// Alternating-sides suffix ("DB Snatch alt", "Perdigueiro alternando", "V ups Alt") and a
+// dangling "pausa" left behind once its tempo mark is stripped ("Bench Press pausa 2\" …").
+const TRAILING_ALT = /\s+(?:alt|alternad[oa]s?|alternando|pausa|pause)$/
+
 function stripVolumeNoise(key) {
-  let out = key
+  let out = key.replace(SLOT, '')
   // Iterate: a rep scheme is several volume tokens in a row ("21-15-9 " = 3 passes).
   for (let i = 0; i < 12 && out; i++) {
     const next = out.replace(LEADING_VOLUME, '')
     if (next === out) break
     out = next
   }
-  return out.replace(/\s*z\d+$/, '').trim()
+  return out
+    .replace(/\s*z\d+$/, '')
+    .replace(TRAILING_NOTE, '')
+    .replace(TRAILING_PAREN, '')
+    .replace(TRAILING_ALT, '')
+    .trim()
 }
 
 // A trailing "(…)" in a registry name is either a DISAMBIGUATOR ("Remo (Ergômetro)",
@@ -133,6 +152,21 @@ export const ALIASES = {
   'burpee over bar': 'Burpee Over the Bar (BOB)',
   'bar facing burpee': 'Burpee Over the Bar (BOB)',
   'bbjo': 'Burpee Box Jump Over',
+
+  // #94 round 2 — plain misspellings of entries that already exist. Match-only, so the
+  // coach's spelling stays on screen; only the lookup key is corrected.
+  'back squay': 'Back Squat',
+  'hollowrock': 'Hollow Rock',
+  'vup': 'V-up', 'vups': 'V-up',   // run-together spellings the hyphen rule can't reach
+  'romenian deadlift': 'Romanian Deadlift',
+  'hummer curl': 'Hammer Curl',
+  'nordic hamstring curl': 'Nordic Curl',
+  'dragon fly': 'Dragon Flag',
+  'celan': 'Clean', 'squat celan': 'Clean', 'hang squat celan': 'Hang Clean',
+  'shoulders press': 'Strict Press', 'shoulders pres': 'Strict Press',
+  'pause bench press': 'Bench Press',
+  'a swing': 'American KB Swing', 'kb american swing': 'American KB Swing',
+  'kh oh walking': 'DUal KB Overhead Walking', 'dual kb oh walking': 'DUal KB Overhead Walking',
   // NOTE: "Pull Up" → "Pull-up" needs no alias — buildRegistryIndex derives the spaced
   // spelling of every hyphenated entry (see derivedKeys), which is self-maintaining.
 }

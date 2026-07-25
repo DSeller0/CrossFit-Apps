@@ -169,11 +169,11 @@ What's left in bucket 1 after the above, roughly in order of value:
 _Auto-generated 2026-07-25 — a miss is one distinct `normExName` key; ×N = occurrences._
 
 - **795** name occurrences across all sessions
-- **277** unresolved (**34.8%**)
-- **243** distinct misses
+- **244** unresolved (**30.7%**)
+- **211** distinct misses
 - **0** dangling aliases ✅
 
-## 1 · Likely-registerable single movements (102) — the actionable list
+## 1 · Likely-registerable single movements (80) — the actionable list
 These are real movements the coach types that have no registry entry (or need an alias).
 - **ABS INFRA** · **Abs infra**  ×4
 - **ABS ANILHA** · **Abs anilha**  ×3
@@ -209,36 +209,23 @@ These are real movements the coach types that have no registry entry (or need an
 - **Hang Muscle**  ×1
 - **High  Squat Clean**  ×1
 - **Box Jump Over (Step Down)**  ×1
-- **Hollowrock**  ×1
-- **V ups Alt**  ×1
-- **Max RMU**  ×1
 - **OH WALKING 2KB**  ×1
 - **ELEVAÇÃO DE JOELHO 2 KB**  ×1
 - **HANG PULL**  ×1
 - **HANG POWER**  ×1
 - **BÚLGARO SQUAT COM (1 Anilha )**  ×1
-- **A- 3 SNATCH BALANCE**  ×1
-- **B- 2 Muscle Snatch**  ×1
 - **A 3 SNATCH PUSH PRESS (em cócoras)**  ×1
-- **B 3 SNATCH BALANCE**  ×1
 - **C 3 SQUAT JERK**  ×1
-- **Bar Muscle Up Tentar sair da caixa ou barra baixa  5 tentativas**  ×1
-- **Kb American Swing**  ×1
 - **KB Step-up**  ×1
-- **Back squay**  ×1
 - **KB leg over**  ×1
-- **Max C&J**  ×1
 - **Push-up**  ×1
 - **Tap Shoulder**  ×1
 - **Box Jump Over**  ×1
 - **DB Hang Snatch**  ×1
 - **Dual DB Push Press**  ×1
 - **Hand Release Push-up**  ×1
-- **MMII**  ×1
-- **MMSS**  ×1
 - **DB Hip Thruster**  ×1
 - **KB Box Step**  ×1
-- **Dual kb oh walking**  ×1
 - **Abdominal com Anilha**  ×1
 - **Shoulder Taps**  ×1
 - **Inchworm + Push Up**  ×1
@@ -254,13 +241,9 @@ These are real movements the coach types that have no registry entry (or need an
 - **Push up Hand Release**  ×1
 - **halo**  ×1
 - **Burpees to plate**  ×1
-- **Buy in**  ×1
 - **Step Box**  ×1
-- **Row ou 1000m Run**  ×1
 - **Burpees box step up**  ×1
 - **Push up**  ×1
-- **Buy out**  ×1
-- **Run ou 800m Row**  ×1
 - **Handstand Push Up**  ×1
 - **Toes to Ring**  ×1
 - **LSit argola**  ×1
@@ -268,17 +251,12 @@ These are real movements the coach types that have no registry entry (or need an
 - **forward rools to suport**  ×1
 - **Back lever on rings**  ×1
 - **C&J 60/45**  ×1
-- **Max BMU**  ×1
-- **Mix**  ×1
-- **sets**  ×1
-- **Vups**  ×1
 - **DB cossack Squat**  ×1
 - **Remada curvada peg supinada**  ×1
 - **Clean High Pull**  ×1
-- **Buy - in**  ×1
 - **Burpees box jump over**  ×1
 
-## 2 · Prescription leaked into the name (106)
+## 2 · Prescription leaked into the name (80)
 A leading count/distance ("800m Run", "15 GHD", "30 Wall Ball") — the movement is fine, the
 volume belongs in the reps/dist field. `stripVolumeNoise` only strips a leading bare count,
 not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
@@ -286,20 +264,16 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **10 DB Bench Press**  ×3
 - **20 Burpees over the bar**  ×3
 - **8/8 LANDMINE PRESS** · **8/8 landmine press**  ×2
-- **20m DUAL KB OH WALKING** · **20m Dual KB oh Walking**  ×2
 - **20 TOUCH HEEL** · **20 touch heel**  ×2
 - **30/30” Lenhador** · **30/30”  Lenhador**  ×2
 - **12 dB bench press inclinado**  ×2
 - **30" L SIT BARRA**  ×1
-- **PAUSE BENCH PRESS 3"**  ×1
 - **30" HSW HOLD**  ×1
 - **20'' L Sit Argola**  ×1
 - **20''/20'' 1 KB OH Walking**  ×1
 - **8 STRICT PULL UP WIDE**  ×1
 - **15 ABS INFRA**  ×1
 - **20 KB OBLÍQUO**  ×1
-- **PUSH JERK 2”**  ×1
-- **3 BENCH PRESS 2”**  ×1
 - **10m HSW / 4 WALL WALK**  ×1
 - **10 DUAL DB S2OH**  ×1
 - **8 DUAL STEP BOX UP**  ×1
@@ -309,23 +283,18 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **10m Dead March**  ×1
 - **20 KB Deadlift**  ×1
 - **20 Burpees Broad Jump**  ×1
-- **12 DRAGON FLY**  ×1
 - **10 DB Hang Snatch**  ×1
 - **8 DB OH Lunges**  ×1
 - **30 SU Crossover**  ×1
 - **8 GLOBET Squat (Heels Elevated)**  ×1
 - **8/8  Single Leg Knee Extension**  ×1
-- **10 Hummer Curl**  ×1
 - **8 Dumbbell Lat Pullover**  ×1
-- **3 SHOULDERS PRES**  ×1
 - **1 Legless/ 2 RC**  ×1
 - **3 Wall walking**  ×1
-- **8 Nordic Hamstring CuRl**  ×1
 - **8 Rower  Hamstring Curl**  ×1
 - **30 DB Snatch**  ×1
 - **10 GTOH**  ×1
 - **10 Step box**  ×1
-- **20m Kh oh Walking**  ×1
 - **15 Abs medball**  ×1
 - **8 DB Lateral Raise**  ×1
 - **8 Upright Rows**  ×1
@@ -333,35 +302,25 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **2-4-6-8-1o Ohs**  ×1
 - **2-4–6-8… DB Step Up**  ×1
 - **8/8 KB Step Down**  ×1
-- **8 Romenian Deadlift**  ×1
 - **5 C&J ubrok**  ×1
 - **15 low Hang clean**  ×1
 - **40” Wall Sit hold**  ×1
 - **8/8 Step Down KB 3” na descida**  ×1
-- **3 Front Squat 5” de pausa em baixo**  ×1
-- **2 split jerk 2” Dip 2” recepção**  ×1
 - **9-15-21 Box jump step down**  ×1
 - **40” Perdigueiro alternando**  ×1
-- **12 martelo alt**  ×1
 - **50m Burpees Broad Jump**  ×1
 - **4 RMU/ BMU**  ×1
 - **40” Prancha dinâmica**  ×1
 - **5 dual DB strict press**  ×1
-- **3 Snatch balance 2”**  ×1
-- **15 A Swing**  ×1
 - **15 Abs remador**  ×1
-- **15 Vups**  ×1
 - **30/30 Lenhador**  ×1
 - **8 Remada low curvada**  ×1
 - **3 Drop balance**  ×1
 - **3 tall Snatch**  ×1
 - **6 dip russo ou dip paralelo**  ×1
-- **3 Bench Press 3” pausa**  ×1
 - **3 Drop jerk**  ×1
-- **3 split jerk (BNK)**  ×1
 - **1 push jerk 2 split**  ×1
 - **20m Dead March**  ×1
-- **1 Squat Celan**  ×1
 - **1 Legless**  ×1
 - **12 Bbjo step down**  ×1
 - **20 ponte unipodal**  ×1
@@ -373,21 +332,14 @@ not "800m"/"200m Row". Fixable by extending the strip, not by registering these.
 - **20'' Handstand Hold Wall**  ×1
 - **20/20 Lenhador**  ×1
 - **10/10 KB Oblíquo**  ×1
-- **3 Bench Press pausa 2” no início e no meio**  ×1
 - **3 split jerk a cada 10”**  ×1
-- **4’ Row ( forte )**  ×1
 - **6 dip russo**  ×1
 - **8/8 KB cossack Squat**  ×1
 - **3 tall Celan**  ×1
-- **3 Hang Squat Celan**  ×1
 - **8/8 KB Oh Lunges**  ×1
-- **10-8-6-4-2**  ×1
-- **60% Rm**  ×1
 - **20/20 lenhador caotic**  ×1
 - **8/8 OH Lunges unilateral**  ×1
 - **Low Power clean 2" entrada**  ×1
-- **80/85/90**  ×1
-- **Squat clean 30" entre as reps**  ×1
 
 ## 3 · Compound / complex notation (26) — not single names
 "1 MUSCLE + 3 FRONT 3\"", "HIGH, HANG, FLOOR. (POWER)" — multi-movement prescriptions, not a
@@ -419,7 +371,7 @@ single exercise. Registry-unfixable by design (noted in registry.js).
 - **1 Shoulders Press + 2 push prees + 3 Power jerk**  ×1
 - **1 Push jerk + 1 Split**  ×1
 
-## 4 · Structural noise (9) — shouldn't be exercise names
+## 4 · Structural noise (25) — shouldn't be exercise names
 "Rest", "Then", "Rounds", "Bloco …" — block/label text that leaked into a name field.
 - **Rest**  ×3
 - **Diversos**  ×2
@@ -429,4 +381,20 @@ single exercise. Registry-unfixable by design (noted in registry.js).
 - **Bloco Squat Clean**  ×1
 - **Rest 2'**  ×1
 - **Rest 2' Andando**  ×1
+- **Max RMU**  ×1
+- **Bar Muscle Up Tentar sair da caixa ou barra baixa  5 tentativas**  ×1
+- **Max C&J**  ×1
+- **MMII**  ×1
+- **MMSS**  ×1
+- **Buy in**  ×1
+- **Row ou 1000m Run**  ×1
+- **Buy out**  ×1
+- **Run ou 800m Row**  ×1
+- **10-8-6-4-2**  ×1
+- **60% Rm**  ×1
+- **Max BMU**  ×1
+- **Mix**  ×1
+- **sets**  ×1
+- **80/85/90**  ×1
+- **Buy - in**  ×1
 - **Amrap**  ×1
