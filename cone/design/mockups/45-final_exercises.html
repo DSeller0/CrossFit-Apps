@@ -1,0 +1,255 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — Exercícios 45 · Final selection (D1 categorias + D2 cards + D4 detalhe)</title>
+<style>
+  :root{
+    --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
+    --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
+    --red:#c83030;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+    --font:'Cinzel',Georgia,serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
+    --divider:#2a231c;--border:#2a231c;--accent:#4ac8c0;--accent-text:#000;--text:#f0e8d0;--err:#c83030;
+    --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--radius-sm:4px;--radius-md:6px;
+    --fWod:#d8a840;--fForca:#5090e0;--fGin:#4ac8c0;--fCond:#40b878;
+  }
+  html.theme-totk-light{
+    --bg:#ede8dc;--stone:#f5f1e8;--stone2:#e8e2d4;--div:#d4cab8;
+    --gold:#9a6c14;--gold2:#7a5410;--teal:#1c6860;--green:#1a6830;--red:#b83020;--cream:#1c1508;--sub:#503828;--muted:#7a6448;--dim:#a89070;
+    --font:'Cinzel',Georgia,serif;--divider:#d4cab8;--border:#d4cab8;--accent:#1c6860;--accent-text:#fff;--text:#1c1508;--err:#b83020;
+  }
+  html.theme-spirit-blossom{
+    --bg:#09070f;--stone:#100d1c;--stone2:#17122a;--div:#221638;
+    --gold:#e05490;--gold2:#c03870;--teal:#38c4d0;--green:#50d890;--red:#c82850;--cream:#ede4f8;--sub:#c4a0d0;--muted:#7d5090;--dim:#4a2d60;
+    --font:'Amarante',Georgia,serif;--divider:#221638;--border:#221638;--accent:#38c4d0;--accent-text:#09070f;--text:#ede4f8;--err:#c82850;
+  }
+  html.theme-spirit-blossom-light{
+    --bg:#f4eefb;--stone:#ffffff;--stone2:#f0e8f8;--div:#e2d4f0;
+    --gold:#c83070;--gold2:#a82058;--teal:#1490a0;--green:#28a064;--red:#c02040;--cream:#1a0828;--sub:#4a2460;--muted:#7840a0;--dim:#9070b0;
+    --font:'Amarante',Georgia,serif;--divider:#e2d4f0;--border:#e2d4f0;--accent:#1490a0;--accent-text:#fff;--text:#1a0828;--err:#c02040;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 22px 60px;background:var(--bg);color:var(--text);font-family:var(--font)}
+  h1{font-size:16px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 4px} h1 b{color:var(--gold)}
+  p.note{font-size:12.5px;color:var(--muted);margin:0 0 16px;font-family:Georgia,serif;max-width:1000px;line-height:1.6}
+  p.note b{color:var(--sub)} p.note code{font-family:var(--font-mono);color:var(--sub);font-size:11.5px}
+  .themebar{display:flex;gap:6px;margin:0 0 20px;flex-wrap:wrap}
+  .themebar button{font-family:var(--font);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 12px;background:var(--stone);color:var(--sub);border:1px solid var(--divider);cursor:pointer}
+  .themebar button:hover{color:var(--cream);border-color:var(--dim)}
+
+  .app{display:grid;grid-template-columns:236px 360px 1fr;gap:1px;background:var(--divider);
+    border:1px solid var(--divider);max-width:1180px;height:660px;overflow:hidden}
+  .pane{background:var(--stone);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+  .paneLbl{font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    padding:11px 13px 8px;border-bottom:1px solid var(--divider);flex-shrink:0}
+
+  /* ── Pane 1 (D1) — family accordion ── */
+  .p1scroll{overflow-y:auto;padding:6px}
+  .todosRow{display:flex;align-items:center;gap:9px;padding:9px 10px;background:var(--stone2);border:1px solid var(--divider);cursor:pointer;margin-bottom:8px}
+  .todosName{flex:1;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--cream)}
+  .todosCount{font-size:11px;font-weight:700;color:var(--muted);font-family:var(--font-mono)}
+  .fam{margin-bottom:4px;border-left:2px solid var(--fc,var(--teal))}
+  .famHead{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;user-select:none;background:var(--stone2)}
+  .famChev{font-size:9px;color:var(--dim);width:9px}
+  .famName{flex:1;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--fc)}
+  .famCount{font-size:10px;font-weight:700;color:var(--muted);font-family:var(--font-mono)}
+  .catRow{display:flex;align-items:flex-start;gap:8px;padding:7px 10px 8px 20px;cursor:pointer}
+  .catRow:hover{background:var(--stone2)}
+  .catRow.sel{background:color-mix(in srgb,var(--fc) 14%,transparent);box-shadow:inset 2px 0 0 var(--fc)}
+  .catDot{width:7px;height:7px;border-radius:50%;background:var(--fc);flex-shrink:0;margin-top:4px}
+  .catBody{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+  .catTop{display:flex;align-items:baseline;gap:8px}
+  .catName{flex:1;font-size:12px;color:var(--sub)}
+  .catRow.sel .catName{color:var(--cream);font-weight:700}
+  .catCount{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+  .catBar{display:flex;align-items:center;gap:7px}
+  .catPct{font-size:9.5px;color:var(--muted);font-family:var(--font-mono);flex-shrink:0;width:26px;text-align:right}
+  .tally{display:flex;gap:2px;flex:1;height:4px}
+  .tblk{flex:1;background:var(--divider)}
+  .tblk.on{background:var(--fc,var(--teal))}
+
+  /* ── Pane 2 (D2) — card grid ── */
+  .stickyHead{position:sticky;top:0;z-index:2;background:var(--stone);border-bottom:1px solid var(--divider);padding:9px 11px;flex-shrink:0}
+  .p2title{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .p2dot{width:8px;height:8px;border-radius:50%;background:var(--fc,var(--teal))}
+  .p2name{flex:1;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--fc,var(--cream))}
+  .p2count{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+  .searchBox{display:flex;align-items:center;gap:7px;background:var(--stone2);border:1px solid var(--divider);padding:7px 9px;margin-bottom:7px}
+  .searchBox .ic{color:var(--dim);font-size:12px}
+  .searchBox input{flex:1;background:transparent;border:none;outline:none;color:var(--cream);font-family:var(--font);font-size:12px}
+  .searchBox input::placeholder{color:var(--dim)}
+  .addBtn{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;background:transparent;
+    border:1px solid var(--accent);color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+  .addBtn:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+  .p2scroll{overflow-y:auto;padding:9px}
+  .vgLbl{font-size:9px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin:2px 0 6px;text-transform:uppercase}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .exCard{background:var(--stone2);border:1px solid var(--divider);border-top:2px solid var(--fc,var(--teal));padding:9px 10px;cursor:pointer;display:flex;flex-direction:column;gap:7px;min-height:76px}
+  .exCard:hover{border-color:var(--dim)}
+  .exCard.active{border-color:var(--fc,var(--teal));box-shadow:0 0 0 1px var(--fc,var(--teal))}
+  .exCardName{font-size:12px;font-weight:700;color:var(--cream);line-height:1.2}
+  .chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
+  .chip{font-size:9px;padding:2px 5px;border:1px solid color-mix(in srgb,var(--cc) 50%,var(--divider));color:var(--cc)}
+  .cIcons{display:flex;gap:5px;align-items:center;margin-top:auto}
+  .cIco{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--dim);flex-shrink:0}
+  .cIco.on{color:var(--mcOn)}
+  .cIco.ic-c{--mcOn:var(--gold)} .cIco.ic-v{--mcOn:var(--teal)} .cIco.ic-d{--mcOn:var(--sub)} .cIco.ic-m{--mcOn:var(--fCond)} .cIco.ic-t{--mcOn:var(--fForca)}
+
+  /* ── Pane 3 (D4) — detail with completeness ── */
+  .p3{display:flex;flex-direction:column;height:100%}
+  .p3head{padding:11px 14px 0;display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .p3kicker{font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .p3complete{display:flex;align-items:center;gap:5px;margin-left:auto;font-size:9px;color:var(--muted);letter-spacing:.04em}
+  .p3complete .cIco{width:10px;height:10px}
+  .p3body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:11px 16px;padding:12px 14px;align-content:start;overflow:hidden}
+  .field{display:flex;flex-direction:column;gap:4px;min-width:0}.field.span{grid-column:1 / -1}
+  .fLabel{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .fLabel .cIco{width:11px;height:11px}
+  .inp{background:var(--stone2);border:1px solid var(--divider);color:var(--cream);font-family:var(--font);font-size:12px;padding:7px 9px;width:100%}
+  textarea.inp{resize:none;font-family:Georgia,serif}
+  .tags{display:flex;flex-wrap:wrap;gap:4px}
+  .tag{font-size:10px;padding:3px 7px;border:1px solid var(--dim);color:var(--sub);cursor:pointer}
+  .tag.on{background:var(--fc,var(--teal));color:var(--bg);border-color:var(--fc,var(--teal));font-weight:700}
+  .cargas{display:flex;align-items:center;gap:6px}.cargas .inp{width:56px}.cargas .times{color:var(--muted)}
+  .intens{display:flex;gap:5px;margin-top:5px}
+  .intPill{font-size:9.5px;padding:3px 8px;border:1px solid var(--divider);color:var(--muted)}
+  .intPill.on{border-color:var(--accent);color:var(--accent)}
+  .vidRow{display:flex;gap:6px}
+  .pubTog{font-size:9px;font-weight:800;padding:2px 7px;border:1px solid var(--teal);color:var(--teal);align-self:flex-start}
+  .p3foot{display:flex;gap:8px;padding:11px 14px;border-top:1px solid var(--divider);flex-shrink:0}
+  .save{flex:1;padding:9px;background:var(--accent);color:var(--accent-text);border:none;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+  .del{width:38px;background:transparent;border:1px solid var(--err);color:var(--err);cursor:pointer;font-size:14px}
+
+  .legend{font-size:11px;color:var(--dim);margin-top:12px;font-family:Georgia,serif;max-width:1000px;line-height:1.6}
+  .legend b{color:var(--sub)}
+</style>
+
+<body>
+<h1>Exercícios · <b>45 — Seleção final (assembly)</b></h1>
+<p class="note">
+  <b>#55 / #87 · plans/38 · Composição a partir de D1/D2/D4 (mockups 40–44).</b>
+  <b>Pane 1</b> das categorias por família em acordeão (<code>40-d1</code>).
+  <b>Pane 2</b> a grade de cards (<code>41-d2</code>).
+  <b>Pane 3</b> o detalhe com completude por campo (<code>43-d4</code>).
+  Ponto de partida para ajustes — ainda não construído.
+</p>
+
+<div class="themebar">
+  <button onclick="document.documentElement.className='theme-totk-dark'">TotK Dark</button>
+  <button onclick="document.documentElement.className='theme-totk-light'">TotK Light</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom'">Spirit Blossom</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom-light'">SB Light</button>
+</div>
+
+<svg style="display:none">
+  <symbol id="ic-cargas" viewBox="0 0 24 24"><path d="M4 9v6M7 6v12M17 6v12M20 9v6M7 12h10"/></symbol>
+  <symbol id="ic-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></symbol>
+  <symbol id="ic-desc" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/></symbol>
+  <symbol id="ic-musc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="ic-det" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+</svg>
+
+<div class="app">
+
+  <!-- ══ PANE 1 (D1) — family accordion ══ -->
+  <div class="pane">
+    <div class="paneLbl">Categorias · por família</div>
+    <div class="p1scroll">
+      <div class="todosRow"><span class="todosName">▤ Todos</span><span class="todosCount">155</span></div>
+
+      <div class="fam" style="--fc:var(--fWod)">
+        <div class="famHead"><span class="famChev">▸</span><span class="famName">WOD</span><span class="famCount">8</span></div>
+      </div>
+
+      <div class="fam" style="--fc:var(--fForca)">
+        <div class="famHead"><span class="famChev">▾</span><span class="famName">Força</span><span class="famCount">83</span></div>
+        <div class="catRow sel"><span class="catDot"></span><div class="catBody">
+          <div class="catTop"><span class="catName">Força</span><span class="catCount">40</span></div>
+          <div class="catBar"><span class="tally"><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i></span><span class="catPct">70%</span></div>
+        </div></div>
+        <div class="catRow"><span class="catDot"></span><div class="catBody">
+          <div class="catTop"><span class="catName">LPO</span><span class="catCount">12</span></div>
+          <div class="catBar"><span class="tally"><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk"></i><i class="tblk"></i></span><span class="catPct">80%</span></div>
+        </div></div>
+        <div class="catRow"><span class="catDot"></span><div class="catBody">
+          <div class="catTop"><span class="catName">Core</span><span class="catCount">18</span></div>
+          <div class="catBar"><span class="tally"><i class="tblk on"></i><i class="tblk on"></i><i class="tblk on"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i></span><span class="catPct">30%</span></div>
+        </div></div>
+        <div class="catRow"><span class="catDot"></span><div class="catBody">
+          <div class="catTop"><span class="catName">Acessórios</span><span class="catCount">13</span></div>
+          <div class="catBar"><span class="tally"><i class="tblk on"></i><i class="tblk on"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i><i class="tblk"></i></span><span class="catPct">20%</span></div>
+        </div></div>
+      </div>
+
+      <div class="fam" style="--fc:var(--fGin)">
+        <div class="famHead"><span class="famChev">▸</span><span class="famName">Ginástica</span><span class="famCount">23</span></div>
+      </div>
+
+      <div class="fam" style="--fc:var(--fCond)">
+        <div class="famHead"><span class="famChev">▸</span><span class="famName">Condicionamento</span><span class="famCount">51</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANE 2 (D2) — card grid ══ -->
+  <div class="pane" style="--fc:var(--fForca)">
+    <div class="stickyHead">
+      <div class="p2title"><span class="p2dot"></span><span class="p2name">Força</span><span class="p2count">40</span></div>
+      <div class="searchBox"><span class="ic">🔍</span><input placeholder="Buscar exercício…"></div>
+      <button class="addBtn">+ Adicionar exercício</button>
+    </div>
+    <div class="p2scroll">
+      <div class="vgLbl">▾ Squat (10)</div>
+      <div class="grid">
+        <div class="exCard active"><span class="exCardName">Back Squat</span><div class="cIcons"><svg class="cIco ic-c on"><use href="#ic-cargas"></use></svg><svg class="cIco ic-v on"><use href="#ic-video"></use></svg><svg class="cIco ic-d on"><use href="#ic-desc"></use></svg><svg class="cIco ic-m on"><use href="#ic-musc"></use></svg><svg class="cIco ic-t on"><use href="#ic-det"></use></svg></div><div class="chips"><span class="chip" style="--cc:var(--fForca)">Força</span></div></div>
+        <div class="exCard"><span class="exCardName">Front Squat</span><div class="cIcons"><svg class="cIco ic-c"><use href="#ic-cargas"></use></svg><svg class="cIco ic-v on"><use href="#ic-video"></use></svg><svg class="cIco ic-d on"><use href="#ic-desc"></use></svg><svg class="cIco ic-m"><use href="#ic-musc"></use></svg><svg class="cIco ic-t"><use href="#ic-det"></use></svg></div><div class="chips"><span class="chip" style="--cc:var(--fForca)">Força</span><span class="chip" style="--cc:var(--fWod)">LPO</span></div></div>
+        <div class="exCard"><span class="exCardName">Overhead Squat</span><div class="cIcons"><svg class="cIco ic-c"><use href="#ic-cargas"></use></svg><svg class="cIco ic-v"><use href="#ic-video"></use></svg><svg class="cIco ic-d on"><use href="#ic-desc"></use></svg><svg class="cIco ic-m"><use href="#ic-musc"></use></svg><svg class="cIco ic-t"><use href="#ic-det"></use></svg></div><div class="chips"><span class="chip" style="--cc:var(--fForca)">Força</span></div></div>
+        <div class="exCard"><span class="exCardName">Goblet Squat</span><div class="cIcons"><svg class="cIco ic-c"><use href="#ic-cargas"></use></svg><svg class="cIco ic-v"><use href="#ic-video"></use></svg><svg class="cIco ic-d"><use href="#ic-desc"></use></svg><svg class="cIco ic-m"><use href="#ic-musc"></use></svg><svg class="cIco ic-t"><use href="#ic-det"></use></svg></div><div class="chips"><span class="chip" style="--cc:var(--fForca)">Força</span></div></div>
+      </div>
+      <div class="vgLbl">▾ Deadlift (6)</div>
+      <div class="grid">
+        <div class="exCard"><span class="exCardName">Deadlift</span><div class="cIcons"><svg class="cIco ic-c on"><use href="#ic-cargas"></use></svg><svg class="cIco ic-v on"><use href="#ic-video"></use></svg><svg class="cIco ic-d on"><use href="#ic-desc"></use></svg><svg class="cIco ic-m on"><use href="#ic-musc"></use></svg><svg class="cIco ic-t"><use href="#ic-det"></use></svg></div><div class="chips"><span class="chip" style="--cc:var(--fForca)">Força</span></div></div>
+        <div class="exCard"><span class="exCardName">Romanian Deadlift</span><div class="cIcons"><svg class="cIco ic-c"><use href="#ic-cargas"></use></svg><svg class="cIco ic-v"><use href="#ic-video"></use></svg><svg class="cIco ic-d"><use href="#ic-desc"></use></svg><svg class="cIco ic-m"><use href="#ic-musc"></use></svg><svg class="cIco ic-t"><use href="#ic-det"></use></svg></div><div class="chips"><span class="chip" style="--cc:var(--fForca)">Força</span></div></div>
+        <div class="exCard"><span class="exCardName">Snatch Deadlift</span><div class="cIcons"><svg class="cIco ic-c"><use href="#ic-cargas"></use></svg><svg class="cIco ic-v"><use href="#ic-video"></use></svg><svg class="cIco ic-d"><use href="#ic-desc"></use></svg><svg class="cIco ic-m"><use href="#ic-musc"></use></svg><svg class="cIco ic-t"><use href="#ic-det"></use></svg></div><div class="chips"><span class="chip" style="--cc:var(--fForca)">Força</span></div></div>
+      </div>
+      <div class="vgLbl">· Avulsos</div>
+      <div class="grid">
+        <div class="exCard"><span class="exCardName">Good Morning</span><div class="cIcons"><svg class="cIco ic-c"><use href="#ic-cargas"></use></svg><svg class="cIco ic-v"><use href="#ic-video"></use></svg><svg class="cIco ic-d"><use href="#ic-desc"></use></svg><svg class="cIco ic-m"><use href="#ic-musc"></use></svg><svg class="cIco ic-t"><use href="#ic-det"></use></svg></div><div class="chips"><span class="chip" style="--cc:var(--fForca)">Força</span></div></div>
+        <div class="exCard"><span class="exCardName">Hip Thrust</span><div class="cIcons"><svg class="cIco ic-c on"><use href="#ic-cargas"></use></svg><svg class="cIco ic-v"><use href="#ic-video"></use></svg><svg class="cIco ic-d on"><use href="#ic-desc"></use></svg><svg class="cIco ic-m"><use href="#ic-musc"></use></svg><svg class="cIco ic-t"><use href="#ic-det"></use></svg></div><div class="chips"><span class="chip" style="--cc:var(--fForca)">Força</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANE 3 (D4) — detail with completeness ══ -->
+  <div class="pane" style="--fc:var(--fForca)">
+    <div class="p3">
+      <div class="p3head"><span class="p3kicker">Exercício</span>
+        <span class="p3complete">completo <span class="cIcons"><svg class="cIco ic-c on"><use href="#ic-cargas"></use></svg><svg class="cIco ic-v on"><use href="#ic-video"></use></svg><svg class="cIco ic-d on"><use href="#ic-desc"></use></svg><svg class="cIco ic-m on"><use href="#ic-musc"></use></svg><svg class="cIco ic-t on"><use href="#ic-det"></use></svg></span></span>
+      </div>
+      <div class="p3body">
+        <div class="field span"><span class="fLabel">Nome</span><input class="inp" value="Back Squat"></div>
+        <div class="field span"><span class="fLabel">Tipos</span>
+          <div class="tags"><span class="tag on">Força</span><span class="tag">LPO</span><span class="tag">Core</span><span class="tag">Acessórios</span><span class="tag">Skill</span></div>
+        </div>
+        <div class="field"><span class="fLabel"><svg class="cIco ic-c on"><use href="#ic-cargas"></use></svg>Cargas padrão</span>
+          <div class="cargas"><input class="inp" value="5"><span class="times">×</span><input class="inp" value="5"></div>
+          <div class="intens"><span class="intPill on">%1RM</span><span class="intPill">Gênero</span><span class="intPill">Progressão</span></div>
+        </div>
+        <div class="field"><span class="fLabel"><svg class="cIco ic-v on"><use href="#ic-video"></use></svg>Vídeo (YouTube)</span>
+          <div class="vidRow"><input class="inp" value="youtu.be/…" style="flex:1"></div><span class="pubTog">ON · publicado</span>
+        </div>
+        <div class="field"><span class="fLabel"><svg class="cIco ic-d on"><use href="#ic-desc"></use></svg>Descrição</span><textarea class="inp" rows="2">Agachamento com a barra nas costas.</textarea></div>
+        <div class="field"><span class="fLabel"><svg class="cIco ic-m on"><use href="#ic-musc"></use></svg>Músculo(s) alvo</span><input class="inp" value="Quadríceps, glúteos"></div>
+        <div class="field span"><span class="fLabel"><svg class="cIco ic-t on"><use href="#ic-det"></use></svg>Detalhe</span><textarea class="inp" rows="2">Joelhos alinhados; profundidade abaixo do paralelo.</textarea></div>
+      </div>
+      <div class="p3foot"><button class="save">Salvar</button><button class="del">🗑</button></div>
+    </div>
+  </div>
+
+</div>
+
+<p class="legend">
+  <b>Montagem:</b> categorias em acordeão por família (D1) · exercícios em grade de cards (D2) · detalhe com
+  completude por campo (D4). Próximo passo: ajustar o que não encaixar entre as três direções.
+</p>
+
+<script>if(!document.documentElement.className)document.documentElement.className='theme-totk-dark';</script>
