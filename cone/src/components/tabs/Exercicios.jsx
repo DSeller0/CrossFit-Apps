@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
-import { loadRegistry, saveRegistry } from '../../utils/storage';
+import { saveRegistry } from '../../utils/storage';
 import { normExName } from '../../public/lib/registry.js';
+import { BLOCK_ORDER, getExName, sortCat, initRegistry } from './exerciciosHelpers.js';
 import { FAMILY_GROUPS, familyOf, groupByRoot, completeness } from '../../public/lib/exerciseGroups.js';
 import { APP_CONFIG } from '../../utils/config';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -10,18 +11,6 @@ import Button from '../ui/Button';
 import Input from '../ui/Input';
 import ConfirmReview from '../../public/shared/ConfirmReview';
 import s from './Exercicios.module.css';
-
-const BLOCK_ORDER = [
-  'HIIT','MetCon','EMOM','For Time','AMRAP',
-  'Estações','Força','LPO','Core','Acessórios',
-  'Aquecimento','Skill','Cardio','Mobilidade','Benchmark',
-];
-
-const getExName = ex => typeof ex === 'string' ? ex : (ex?.name || '');
-// Alphabetical-within-category is the canonical stored order (#87) — the registry is a
-// lookup catalog, not an ordered playlist, so insertion order + a manual A→Z button /
-// drag-reorder are retired. Every mutation re-sorts the touched category here.
-const sortCat = arr => [...arr].sort((a, b) => getExName(a).localeCompare(getExName(b), 'pt'));
 
 const famColorOf = cat => familyOf(cat)?.color || 'var(--muted)';
 // % of a category's exercises that carry a video URL (any) — the Pane-1 coverage bar.
@@ -62,31 +51,6 @@ const extractYouTubeId = url => {
   return m ? m[1] : null;
 };
 
-// ── Registry init ─────────────────────────────────────────────────────────────
-function initRegistry() {
-  const migrateEx = ex => typeof ex === 'string' ? { name: ex } : ex;
-  const existing  = loadRegistry();
-  if (existing && typeof existing === 'object') {
-    const reg = {};
-    let needsSave = false;
-    BLOCK_ORDER.forEach(n => {
-      if (!existing[n]) { reg[n] = []; needsSave = true; return; }
-      const raw      = Array.isArray(existing[n]) ? existing[n] : [];
-      if (raw.some(e => typeof e === 'string')) needsSave = true;
-      const migrated = raw.map(migrateEx);
-      const sorted   = sortCat(migrated);
-      if (sorted.some((e, i) => e !== migrated[i])) needsSave = true;
-      reg[n] = sorted;
-    });
-    if (needsSave) saveRegistry(reg);
-    return reg;
-  }
-  const reg = {};
-  BLOCK_ORDER.forEach(n => { reg[n] = []; });
-  saveRegistry(reg);
-  return reg;
-}
-
 // Per-field before→after diff for the save-summary modal (#2h). A create (orig === null)
 // reads every filled field as "Criado". Pure — takes the original + new exercise objects
 // plus their category lists (Tipos aren't stored on the object, they're which categories
@@ -126,7 +90,13 @@ function diffExercise(orig, origBlocks, next, nextBlocks) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function ExerciciosTab() {
-  const [registry, setRegistryState] = useState(() => initRegistry());
+  // initRegistry() only reads + migrates in memory; the write decision stays here,
+  // at the call site, so a load with nothing to migrate performs zero writes (#109).
+  const [registry, setRegistryState] = useState(() => {
+    const { registry: reg, needsSave } = initRegistry();
+    if (needsSave) saveRegistry(reg);
+    return reg;
+  });
   const [selBlock, setSelBlock]       = useState(null);
   const [pane,     setPane]           = useState(0);
   const [search,   setSearch]         = useState('');

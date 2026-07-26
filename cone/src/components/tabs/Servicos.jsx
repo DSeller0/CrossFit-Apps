@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import QRCode from 'qrcode';
 import { loadAthletes, loadLocations, saveLocations, loadCoach, saveCoach, uid } from '../../utils/storage';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -260,11 +260,19 @@ export default function ServicosTab() {
   const [expandedLoc, setExpandedLoc] = useState(null);
   const [qrLoc, setQrLoc] = useState(null);
 
-  const athletes = loadAthletes();
+  const athletes = useMemo(() => loadAthletes(), []);
   const isMobile = useIsMobile();
 
-  useEffect(() => { saveLocations(locs); }, [locs]);
-  useEffect(() => { saveCoach(coach); }, [coach]);
+  // Coach profile persists on its own debounced effect (many small field writes from
+  // CoachProfileForm) rather than from a mutator per field. Skips the mount run so
+  // merely opening the tab doesn't re-upsert `coach_profile` (#109) — the same disease
+  // #76 fixed for `results_v2`, which cost a migration (`0007`) to undo.
+  const coachMounted = useRef(false);
+  useEffect(() => {
+    if (!coachMounted.current) { coachMounted.current = true; return; }
+    const t = setTimeout(() => saveCoach(coach), 500);
+    return () => clearTimeout(t);
+  }, [coach]);
 
   const setF = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -280,30 +288,37 @@ export default function ServicosTab() {
     setShowForm(true);
   };
 
+  // Locations persist from each mutator directly (not a `useEffect` on `locs`) so that
+  // merely opening the tab performs zero writes — an effect keyed on state re-fires on
+  // mount, which was upserting the whole `locations` blob on every load (#109).
   const saveLoc = () => {
     if (!form.name.trim()) return;
-    if (editId) {
-      setLocs(ls => ls.map(l => l.id === editId ? { ...l, ...form, rate: Number(form.rate) || 0 } : l));
-    } else {
-      setLocs(ls => [...ls, { ...form, id: uid(), rate: Number(form.rate) || 0, athleteIds: [] }]);
-    }
+    const next = editId
+      ? locs.map(l => l.id === editId ? { ...l, ...form, rate: Number(form.rate) || 0 } : l)
+      : [...locs, { ...form, id: uid(), rate: Number(form.rate) || 0, athleteIds: [] }];
+    setLocs(next);
+    saveLocations(next);
     setShowForm(false);
     setEditId(null);
     setForm({ name: '', type: 'box', color: '#4ac8c0', rate: '', rateUnit: 'per_session', currency: 'R$', coachName: '' });
   };
 
   const deleteLoc = id => {
-    setLocs(ls => ls.filter(l => l.id !== id));
+    const next = locs.filter(l => l.id !== id);
+    setLocs(next);
+    saveLocations(next);
     if (selLoc === id) setSelLoc(null);
     setConfirmDel(null);
   };
 
   const toggleAthlete = (locId, athId) => {
-    setLocs(ls => ls.map(l => {
+    const next = locs.map(l => {
       if (l.id !== locId) return l;
       const ids = l.athleteIds || [];
       return { ...l, athleteIds: ids.includes(athId) ? ids.filter(x => x !== athId) : [...ids, athId] };
-    }));
+    });
+    setLocs(next);
+    saveLocations(next);
   };
 
   const sel = locs.find(l => l.id === selLoc) || null;
