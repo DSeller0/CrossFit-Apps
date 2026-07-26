@@ -25,7 +25,7 @@ const ServicosTab   = lazy(() => import('./components/tabs/Servicos'));
 const ResultadosTab = lazy(() => import('./components/tabs/Resultados'));
 const ConfigTab     = lazy(() => import('./components/tabs/Config'));
 const PublicadorTab = lazy(() => import('./components/tabs/Publicador'));
-const AgendaView    = lazy(() => import('./components/tabs/Publicador').then(m => ({ default: m.AgendaView })));
+const AgendaView    = lazy(() => import('./components/tabs/publicador/AgendaView').then(m => ({ default: m.AgendaView })));
 const TvControllerTab = lazy(() => import('./components/tabs/TvController'));
 
 

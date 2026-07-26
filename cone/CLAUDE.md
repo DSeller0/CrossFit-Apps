@@ -191,6 +191,18 @@ Entry: `src/App.jsx`. All tabs lazy-loaded with `React.lazy()`:
 Criador, Atletas, Exercícios, Serviços, Resultados, Agenda, Publicador, Configurações, TvController.  
 Providers: `AuthContext` (session), `SyncContext` (sessions + events + Supabase sync).
 
+**Publicador (#25 · plans/39, pure move — no behavior change)** —
+`src/components/tabs/Publicador.jsx` is the `SchedulePublisher` shell only (~660 lines); the rest
+lives in `src/components/tabs/publicador/`: `exportHelpers.js` (pure formatters + the `useSpeech`
+hook), `MicButton.jsx`, `exportViews.jsx` (`DailyExportView`/`WeeklyExportView`/
+`WeeklyCalendarExportView`/`CalendarExportView`), `mobileExportViews.jsx` (the mobile export
+views), `events.jsx` (`EventFormInner` + `ReportModal`), and **`AgendaView.jsx`** — the file
+**#59**'s Agenda design pass will own. `App.jsx` lazy-loads `AgendaView` straight from
+`publicador/AgendaView`, not through `Publicador.jsx`, so opening Agenda no longer drags in the
+export/PDF graph (`jspdf`/`html2canvas`/`qrcode` stay Publicador-only chunks — verified via
+`npm run build` chunk list). Still **`React.createElement`, not JSX** — kept that way on purpose
+so #59's eventual rewrite is the first JSX pass over this markup, not a second one.
+
 ---
 
 ## Supabase clients — CRITICAL
@@ -261,7 +273,7 @@ updated_at           BIGINT
 
 ⚠️ **Shared components must not depend on the `ti` icon webfont.** `results.html`/`schedule.html`/`gallery.html` load it; **`leaderboard.html` does not** (it uses `@tabler/icons-react`). Icons in `shared/` come from `@tabler/icons-react` — a `ti` class there silently renders nothing on the leaderboard.
 
-**Shared rendering:** `src/public/shared/ExerciseList.jsx` is the shared (read-only, compact) exercise-row component — TV uses it for both paths. Schedule.jsx still renders its own *interactive* markup (`ExRow`: check-off/rounds, RM chip+calc, Demo, progression-step expansion) — full markup adoption stays open under #17, deprioritized 2026-07-05: TV's big-font wall-display CSS and Schedule's dense pill/checkbox interaction model diverge enough that unifying markup would mean a new CSS variant for no visible change, on a page used live at the gym. `exVolStr`/`fmtIntensity` are **canonical-only** in `src/public/lib/wod.js` — #37 deleted the diverged local copies in `Schedule.jsx`/`Publicador.jsx`/`Resultados.jsx`; all re-import from `wod.js`. Progression-step grouping (`steps → {reps,loads}[]`) is canonical for `Schedule.jsx`'s own 4 call sites via `groupProgressionSteps()` in `wod.js` (2026-07-05) — **not yet cross-file canonical**: `Publicador.jsx`'s `buildProgressionLines()` still hand-rolls the same grouping independently (keyed on `reps`+`unit`, not just `reps`), so a grouping-semantics fix applied only to `wod.js` won't reach the printed/exported WOD view (tracked under #45). Estações: TV intentionally flattens stations into one exercise list (glanceable wall display) while Schedule renders full station structure (canonical detailed view) — a recorded decision, not drift (see BACKLOG.md "Decisions recorded").
+**Shared rendering:** `src/public/shared/ExerciseList.jsx` is the shared (read-only, compact) exercise-row component — TV uses it for both paths. Schedule.jsx still renders its own *interactive* markup (`ExRow`: check-off/rounds, RM chip+calc, Demo, progression-step expansion) — full markup adoption stays open under #17, deprioritized 2026-07-05: TV's big-font wall-display CSS and Schedule's dense pill/checkbox interaction model diverge enough that unifying markup would mean a new CSS variant for no visible change, on a page used live at the gym. `exVolStr`/`fmtIntensity` are **canonical-only** in `src/public/lib/wod.js` — #37 deleted the diverged local copies in `Schedule.jsx`/`Publicador.jsx`/`Resultados.jsx`; all re-import from `wod.js`. Progression-step grouping (`steps → {reps,loads}[]`) is canonical for `Schedule.jsx`'s own 4 call sites via `groupProgressionSteps()` in `wod.js` (2026-07-05) — **not yet cross-file canonical**: `publicador/exportHelpers.js`'s `buildProgressionLines()` still hand-rolls the same grouping independently (keyed on `reps`+`unit`, not just `reps`), so a grouping-semantics fix applied only to `wod.js` won't reach the printed/exported WOD view (tracked under #45). Estações: TV intentionally flattens stations into one exercise list (glanceable wall display) while Schedule renders full station structure (canonical detailed view) — a recorded decision, not drift (see BACKLOG.md "Decisions recorded").
 
 ---
 
