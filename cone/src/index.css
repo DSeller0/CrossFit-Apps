@@ -3,7 +3,16 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 :root{--theme-accent:var(--accent,#4ac8c0);--theme-accent-text:var(--accent-text,#000);--export-font:'Arial Black',Arial,sans-serif}
 #root{max-width:1440px;margin:0 auto}
 
-/* chrome */
+/* ── #99 bucket triage (plans/40) ──────────────────────────────────────────
+   Every rule below is tagged GLOBAL or TAB-OWNED. GLOBAL = real app chrome,
+   shared across every tab; its hex/radius literals are tokenised. TAB-OWNED =
+   still lives here only because that tab hasn't done its module-CSS pass yet
+   (marked "→ moves to <Tab>.module.css in #NN") — left as-is, not tokenised,
+   since it deletes outright the day that tab adopts a module. Proven-dead
+   rules (grepped for zero consumers in src) are removed outright rather
+   than tagged. ── */
+
+/* chrome — GLOBAL */
 .topbar{background:var(--stone,#161210);border-bottom:1px solid var(--divider,#2a231c);padding:9px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:100}
 .topbar-title{font-size:15px;font-weight:700;color:var(--cream,#f0e8d0);white-space:nowrap}
 .topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -20,29 +29,34 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 /* Where a tab's own sticky content has to start, i.e. the bottom of the app chrome.
    Two values because the chrome itself has two layouts: below 768px the topbar sits
    above a 49px tab bar pinned at 44; at 768px and up the tab bar is display:none and
-   the sidebar takes over, leaving only the 49px topbar. Hardcoding 88px — which is
-   what .ql-sess-bar and .sync-conflict-banner still do — is right for the narrow
-   layout and 39px too low for the wide one, where it pushes the sticky block down
-   over the content that follows it. Override lives with the layout switch below. */
+   the sidebar takes over, leaving only the 49px topbar. Hardcoding 88px — which
+   .sync-conflict-banner and Resultados' .rp-sticktop still do — is right for the
+   narrow layout and 39px too low for the wide one, where it pushes the sticky
+   block down over the content that follows it. Both get a top:44px override in
+   the ≥768px layout switch below, so this is only a narrow-layout concern. */
 :root{--spa-sticky-top:93px}
 .tab3{padding:11px 18px;font-size:13px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted,#806850);font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;transition:color .15s}
 .tab3.on{color:var(--cream,#f0e8d0);border-bottom-color:var(--cream,#f0e8d0)}
 .tab3:hover:not(.on){color:var(--sub,#c8b090)}
 .pane{padding:14px}
 
-/* ── Themed panes — Resultados + Publicador ── */
+/* ── Themed panes — Resultados (#57) + Publicador/Agenda (#59) — TAB-OWNED.
+   Pruned 2026-07-26 (#99): the .log-block-title/.pub-section-title, .kpi-val,
+   .athlete-chip.active, .rpe-hp-slider thumb, .sc-card.drag-over-session/
+   .blk-wrap.drag-over and bare `a` rules were dead (grepped zero consumers —
+   the current Resultados/Publicador markup never renders those classes) and
+   the .res-pane half of the input[type=range] rule was too (no range input
+   in Resultados; Publicador's export-scale sliders set accent-color inline). ── */
 .res-pane .b.bp,.pub-pane .b.bp{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
 .res-pane .b.bsec,.pub-pane .b.bsec{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
 .res-pane .res-tab.on,.pub-pane .pvt.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
-.res-pane .log-block-title,.pub-pane .pub-section-title{color:var(--theme-accent)}
-.res-pane .kpi-val{color:var(--theme-accent)}
-.res-pane .athlete-chip.active{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
-.res-pane .rpe-hp-slider::-webkit-slider-thumb,.pub-pane .rpe-hp-slider::-webkit-slider-thumb{background:var(--theme-accent)}
-.res-pane input[type=range],.pub-pane input[type=range]{accent-color:var(--theme-accent)}
-.res-pane .sc-card.drag-over-session,.pub-pane .blk-wrap.drag-over{border-color:var(--theme-accent)}
-.res-pane a,.pub-pane a{color:var(--theme-accent)}
+.pub-pane input[type=range]{accent-color:var(--theme-accent)}
 
-/* form */
+/* ── form + buttons — TAB-OWNED (shared, pending C1–C5). Pre-C0 zoo: every
+   class below is still live (Atletas/Resultados/Publicador/Servicos have no
+   module.css yet), but Button/Input/Card (#54/C0) exist to replace it
+   page-by-page. Not tokenised — a tab's C1–C5 pass deletes its share of this
+   zoo outright, so tokenising it now is work thrown away. ── */
 .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:3px;display:block}
 .fg{display:flex;flex-direction:column;gap:3px}
 .fg input,.fg select,.fg textarea{font-family:inherit;font-size:16px;border:1px solid var(--divider,#2a231c);border-radius:6px;padding:9px 11px;background:var(--bg,#0d0b09);color:var(--text,#f0e8d0);outline:none;width:100%;-webkit-appearance:none;appearance:none;transition:border-color .15s}
@@ -67,53 +81,57 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .bsec{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
 .bsec:hover{background:#c86010}
 
-/* session card */
+/* session card → moves to Resultados.module.css in #57. (The section map's
+   "nominally Criador-owned" guess was wrong — grepped 2026-07-26: sc-card/
+   sc-hdr/sc-title are used only by Resultados.jsx, Criador's week-grid cards
+   are .wg-sc, below.) */
 .sc-card{background:var(--stone2,#1e1a16);border:1px solid var(--divider,#2a231c);border-radius:10px;padding:16px;margin-bottom:12px}
 .sc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .sc-title{font-size:14px;font-weight:700;color:var(--cream,#f0e8d0)}
 
-/* block */
+/* block → moves to Criador's criador.module.css in #58 (BlockEditor.jsx) */
 .blk-wrap{border-radius:8px;overflow:hidden;border:1px solid var(--divider,#2a231c);margin-bottom:10px}
 .blk-bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:9px 12px}
-.blk-sel{font-family:inherit;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;border:none;border-radius:4px;padding:5px 26px 5px 9px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='currentColor' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;outline:none;cursor:pointer}
-.blk-mini-input{font-family:inherit;font-size:12px;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:4px 6px;background:rgba(0,0,0,.3);color:inherit;outline:none;width:50px;-webkit-appearance:none;text-align:center}
-.blk-mini-lbl{font-size:10px;color:var(--muted);white-space:nowrap}
-.blk-zone-sel{font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.05em;border:1px solid rgba(255,255,255,.15);border-radius:4px;padding:4px 22px 4px 7px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' stroke='currentColor' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;outline:none;cursor:pointer;color:inherit}
 .blk-body{background:var(--bg,#0d0b09);padding:12px 14px}
-.blk-idx{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.04em;white-space:nowrap}
 .blk-spacer{flex:1}
 
-/* block colours — RED family: WOD, HIIT, MetCon */
-.bt-wd .blk-bar{background:#1c0808}.bt-wd .blk-sel{background:#2e1010;color:#d04848}.bt-wd .blk-zone-sel{background:#1c0808}
-.bt-hi .blk-bar{background:#1e0a0a}.bt-hi .blk-sel{background:#321010;color:#e05848}.bt-hi .blk-zone-sel{background:#1e0a0a}
-.bt-mc .blk-bar{background:#1a0808}.bt-mc .blk-sel{background:#2e0e0e;color:#c84040}.bt-mc .blk-zone-sel{background:#1a0808}
+/* block colours — data colours (#15-exempt), TAB-OWNED → Criador #58.
+   Pruned 2026-07-26 (#99): .blk-sel/.blk-zone-sel and their per-family
+   sub-rules were dead — BlockEditor.jsx never renders those classes (the
+   type badge is .blk-type-chip now); only the .blk-bar background survives
+   per family. RED family: WOD, HIIT, MetCon */
+.bt-wd .blk-bar{background:#1c0808}
+.bt-hi .blk-bar{background:#1e0a0a}
+.bt-mc .blk-bar{background:#1a0808}
 /* block colours — AMBER family: EMOM, For Time, AMRAP, Estações */
-.bt-em .blk-bar{background:#1c1000}.bt-em .blk-sel{background:#2e1e08;color:#d07828}.bt-em .blk-zone-sel{background:#1c1000}
-.bt-ft .blk-bar{background:#1a0e00}.bt-ft .blk-sel{background:#2c1808;color:#c86828}.bt-ft .blk-zone-sel{background:#1a0e00}
-.bt-am .blk-bar{background:#1e1400}.bt-am .blk-sel{background:#302000;color:#e09830}.bt-am .blk-zone-sel{background:#1e1400}
-.bt-es .blk-bar{background:#1a1200}.bt-es .blk-sel{background:#2c1e00;color:#c8a030}.bt-es .blk-zone-sel{background:#1a1200}
+.bt-em .blk-bar{background:#1c1000}
+.bt-ft .blk-bar{background:#1a0e00}
+.bt-am .blk-bar{background:#1e1400}
+.bt-es .blk-bar{background:#1a1200}
 /* block colours — BLUE family: Força, LPO, Core, Acessórios */
-.bt-st .blk-bar{background:#0e1a32}.bt-st .blk-sel{background:#162240;color:#5090e0}.bt-st .blk-zone-sel{background:#0e1a32}
-.bt-lp .blk-bar{background:#060e20}.bt-lp .blk-sel{background:#0e1e38;color:#4070c0}.bt-lp .blk-zone-sel{background:#060e20}
-.bt-co .blk-bar{background:#0a1428}.bt-co .blk-sel{background:#122038;color:#6090d8}.bt-co .blk-zone-sel{background:#0a1428}
-.bt-ac .blk-bar{background:#061020}.bt-ac .blk-sel{background:#0e1c30;color:#4878b8}.bt-ac .blk-zone-sel{background:#061020}
+.bt-st .blk-bar{background:#0e1a32}
+.bt-lp .blk-bar{background:#060e20}
+.bt-co .blk-bar{background:#0a1428}
+.bt-ac .blk-bar{background:#061020}
 /* block colours — GREEN family: Aquecimento, Skill, Cardio, Mobilidade */
-.bt-wu .blk-bar{background:#1c2a10}.bt-wu .blk-sel{background:#253318;color:#80c040}.bt-wu .blk-zone-sel{background:#1c2a10}
-.bt-sk .blk-bar{background:#081e1c}.bt-sk .blk-sel{background:#102e2a;color:#4ac8c0}.bt-sk .blk-zone-sel{background:#081e1c}
-.bt-ca .blk-bar{background:#0c1e14}.bt-ca .blk-sel{background:#162c20;color:#40b878}.bt-ca .blk-zone-sel{background:#0c1e14}
-.bt-mo .blk-bar{background:#081a10}.bt-mo .blk-sel{background:#102a1a;color:#30a868}.bt-mo .blk-zone-sel{background:#081a10}
+.bt-wu .blk-bar{background:#1c2a10}
+.bt-sk .blk-bar{background:#081e1c}
+.bt-ca .blk-bar{background:#0c1e14}
+.bt-mo .blk-bar{background:#081a10}
 /* block colours — NEUTRAL */
-.bt-re .blk-bar{background:#161616}.bt-re .blk-sel{background:#222;color:#666}.bt-re .blk-zone-sel{background:#161616}
+.bt-re .blk-bar{background:#161616}
 /* block colours — GOLD: Benchmark */
-.bt-bm .blk-bar{background:#1a1200}.bt-bm .blk-sel{background:#2c2000;color:#d8a840}.bt-bm .blk-zone-sel{background:#1a1200}
+.bt-bm .blk-bar{background:#1a1200}
 
-/* exercise */
-.ex-card{background:var(--stone,#161210);border:1px solid var(--divider,#2a231c);border-radius:6px;padding:10px;margin-bottom:8px}
-.ex-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.ex-num{font-size:10px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+/* exercise — .ex-card/.ex-card-hdr/.ex-num pruned 2026-07-26 (#99): dead, superseded
+   by Button/Card (comment in Card.jsx/Gallery.jsx is the only trace left). .ex-row's
+   old grid rule stays — TAB-OWNED → Criador #58 — it still cascades into the "new
+   compact design" .ex-row further down (only display/grid-template-columns are
+   overridden there; gap/margin-bottom fall through from here). Don't consolidate now. */
 .ex-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;margin-bottom:8px}
 
-/* intensity */
+/* intensity — shared component (IntensityInput.jsx), TAB-OWNED → Criador #58 +
+   Exercícios #55/#87 (both render it; neither has migrated this piece to a module) */
 .int-block{background:var(--bg,#0d0b09);border:1px solid var(--divider,#2a231c);border-radius:6px;padding:10px 11px;margin-top:8px}
 .int-tabs{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap}
 .itb{font-family:inherit;font-size:11px;padding:5px 10px;border-radius:4px;border:1px solid var(--divider);background:var(--stone);color:var(--muted);cursor:pointer;min-height:30px;transition:all .12s;-webkit-tap-highlight-color:transparent}
@@ -126,7 +144,7 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .unit-row{display:flex;gap:8px;align-items:flex-end}
 .unit-row .fg:first-child{flex:1}
 
-/* add block */
+/* add block — TAB-OWNED → Criador #58 */
 .add-blk-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:8px;border:1.5px dashed var(--dim);background:transparent;color:var(--muted);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin-bottom:12px}
 .add-blk-btn:hover{border-color:var(--muted);color:var(--sub);background:var(--stone)}
 .insert-blk-btn{display:flex;align-items:center;justify-content:center;width:100%;height:20px;background:transparent;border:none;cursor:pointer;position:relative;color:var(--dim);opacity:0;transition:opacity .15s;padding:0;margin:-5px 0;z-index:1}
@@ -136,7 +154,12 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .insert-blk-btn i{position:relative;z-index:1;background:var(--stone);padding:2px 5px;border-radius:10px;font-size:10px;border:1px solid var(--dim);line-height:1.4}
 .insert-blk-btn:hover i{border-color:var(--theme-accent);color:var(--theme-accent)}
 
-/* week overview */
+/* week overview — TAB-OWNED → Criador #58 (the desktop 7-column card grid,
+   WeekGrid.jsx — the collapsed day-strip case reuses the index's own rail.jsx
+   instead, on rail.module.css, so it doesn't touch these). Pruned 2026-07-26
+   (#99): .alvo-wrap/.alvo-dot/.confirm-overlay/.confirm-box/.confirm-msg/
+   .confirm-btns/.hint-txt/.wg-ex were dead — ConfirmReview (#54/C0) replaced
+   the confirm-* dialog shell and the rest have no consumer left. */
 .week-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:12px;padding-bottom:4px}
 .week-grid{display:grid;grid-template-columns:repeat(7,minmax(200px,1fr));gap:1px;background:var(--divider,#2a231c);border-radius:8px;overflow:hidden;border:1px solid var(--divider,#2a231c);min-width:1400px}
 .wg-col{background:var(--stone,#161210)}
@@ -149,22 +172,15 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .wg-sc.wg-saved{animation:wg-flash 1.8s ease-out forwards}
 .wg-sc-name{font-size:12px;font-weight:600;color:var(--cream);margin-bottom:5px;line-height:1.3}
 .wg-pill{display:inline-flex;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;margin:0 2px 2px 0}
-.wg-ex{font-size:10px;color:var(--dim);margin-top:2px;line-height:1.4}
 .wg-add{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:var(--dim);padding:7px;margin:2px 6px;border:1px dashed var(--divider);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;flex:1;background:transparent;font-family:inherit}
 .wg-add-row{display:flex;gap:4px;margin:4px 6px}
 .wg-copy{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;color:var(--dim);padding:7px;border:1px dashed var(--divider);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;flex:1;background:transparent;font-family:inherit}
 .wg-copy:hover{color:var(--gold);border-color:var(--gold)}
-.alvo-wrap{display:flex;gap:4px;align-items:center}
-.alvo-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px}
-.confirm-box{background:var(--stone2);border:1px solid var(--divider);border-radius:10px;padding:22px;max-width:360px;width:100%}
-.confirm-msg{font-size:14px;color:var(--cream);line-height:1.6;margin-bottom:16px}
-.confirm-btns{display:flex;gap:8px;justify-content:flex-end}
 .wg-add:hover{color:var(--sub);border-color:var(--dim)}
 .wg-add:focus-visible,.wg-copy:focus-visible,.wg-sc:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.hint-txt{font-size:11px;color:var(--dim);margin-bottom:8px}
 
-/* pill colours — RED family */
+/* pill colours — data colours (#15-exempt), TAB-OWNED → shared between Criador's
+   TemplatesModal.jsx (#58) and Publicador's exportViews.jsx (#59) — RED family */
 .p-wd{background:#2e1010;color:#d04848;border:1px solid #501a1a}
 .p-hi{background:#321010;color:#e05848;border:1px solid #581a1a}
 .p-mc{background:#2e0e0e;color:#c84040;border:1px solid #4a1414}
@@ -188,7 +204,7 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 /* pill colours — GOLD: Benchmark */
 .p-bm{background:#2c2000;color:#d8a840;border:1px solid #4a3800}
 
-/* ── publisher controls ── */
+/* ── publisher controls — TAB-OWNED → Publicador/Agenda #59 ── */
 .agenda-wrap{height:600px}
 .agenda-pane-backdrop{display:none}
 .agenda-filter-btn{white-space:nowrap}
@@ -235,7 +251,9 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .pvt{font-family:inherit;font-size:12px;padding:7px 14px;border-radius:5px;border:1px solid var(--divider);background:transparent;color:var(--sub);cursor:pointer;transition:all .12s}
 .pvt.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
 
-/* ── daily view — Eagles TV style ── */
+/* ── daily view — Eagles TV style — TAB-OWNED → Publicador #59 (exportViews.jsx).
+   Fixed black/white export theme by design, not the 4 living themes — its hex
+   is a separate deliberate brand, not a GLOBAL tokenisation candidate. ── */
 .dv-wrap{background:#000;color:#fff;width:1920px;height:1080px;display:flex;flex-direction:column;overflow:hidden;font-family:var(--export-font)}
 .dv-topbar{background:#0a0a0a;display:flex;align-items:center;justify-content:space-between;padding:14px 36px;border-bottom:2px solid #1a1a1a;flex-shrink:0}
 .dv-top-left{display:flex;align-items:center;gap:18px}
@@ -266,7 +284,8 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .dv-preview-wrap{width:100%;overflow:hidden;border-radius:8px;background:#000;position:relative}
 .dv-preview-inner{transform-origin:top left;width:1920px}
 
-/* ── weekly view ── */
+/* ── weekly view — TAB-OWNED → Publicador #59 (exportViews.jsx), same fixed
+   export theme as daily view above ── */
 .weekly-wrap{background:#000;color:#fff;border-radius:0;width:1920px;overflow:hidden}
 .wk-header{background:#0a0a0a;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #1a1a1a}
 .wk-title{font-size:22px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.08em;font-family:var(--export-font)}
@@ -286,40 +305,35 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .empty2{text-align:center;padding:3rem;color:var(--muted);font-size:13px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── Resultados tab ── */
-.res-card{background:var(--stone2);border:1px solid var(--divider);border-radius:10px;padding:14px;margin-bottom:12px}
-.res-section{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--divider)}
-.res-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-.res-section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
-.athlete-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;border:1px solid var(--divider);background:var(--stone);cursor:pointer;font-size:13px;color:var(--cream);transition:all .12s;-webkit-tap-highlight-color:transparent;margin:3px}
-.athlete-chip.active{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:700}
-.athlete-chip:hover:not(.active){border-color:var(--dim);color:var(--cream)}
-.rpe-track{display:flex;gap:4px;flex-wrap:wrap}
-.rpe-btn{width:36px;height:36px;border-radius:5px;border:1px solid var(--divider);background:var(--stone);color:var(--sub);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;font-family:inherit;-webkit-tap-highlight-color:transparent}
-.rpe-btn.active{color:#000;font-weight:900;border-color:transparent}
-.scale-row{display:flex;gap:6px;flex-wrap:wrap}
-.scale-btn{padding:7px 14px;border-radius:5px;border:1px solid var(--divider);background:var(--stone);color:var(--sub);font-size:12px;font-weight:700;cursor:pointer;transition:all .12s;font-family:inherit}
-.scale-btn.active{background:var(--cream);color:var(--bg);border-color:var(--cream)}
-.scale-btn:hover:not(.active){border-color:var(--dim);color:var(--cream)}
-.res-block{background:var(--bg);border:1px solid var(--divider);border-radius:8px;padding:12px;margin-bottom:8px}
-.res-block-hdr{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+/* ── Resultados tab (#57) — TAB-OWNED. Pruned 2026-07-26 (#99): .res-card/
+   .res-section/.res-section-title/.athlete-chip(+variants)/.rpe-track/
+   .rpe-btn(+.active)/.scale-row/.scale-btn(+variants)/.res-block/
+   .res-block-hdr/.mini-bar(+fill)/.athlete-row/.attendance-dot/
+   .history-entry/.tag(+rx/inter/sc/adap) were all dead — grepped zero
+   consumers, this tab's current markup uses KpiCard/level-badge/scale-badge/
+   history-row instead (below, in the "Results tab" section — same tab, an
+   older CSS pass under a different name). .kpi-val was dead too (the
+   .kpi-value used today lives only in that later section); .kpi-grid/
+   .kpi-card/.kpi-label/.kpi-sub stay — both this definition and the later
+   one apply via cascade (overlapping, not shadowed: e.g. .kpi-label's
+   margin-top here isn't re-set there). Don't consolidate now, that's #57's call. ── */
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px}
 .kpi-card{background:var(--bg);border:1px solid var(--divider);border-radius:8px;padding:12px}
-.kpi-val{font-size:28px;font-weight:900;color:var(--theme-accent);font-family:var(--export-font);line-height:1}
 .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
 .kpi-sub{font-size:12px;color:var(--sub);margin-top:3px}
-.mini-bar{height:6px;background:var(--divider);border-radius:3px;margin-top:6px;overflow:hidden}
-.mini-bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
-.athlete-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--divider)}
-.athlete-row:last-child{border-bottom:none}
-.attendance-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.history-entry{background:var(--bg);border:1px solid var(--divider);border-radius:6px;padding:10px 12px;margin-bottom:6px}
-.tag{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
-.tag-rx{background:#162240;color:#5090e0;border:1px solid #1e3870}
-.tag-inter{background:#162c20;color:#40b878;border:1px solid #1e5030}
-.tag-sc{background:#261640;color:#9070d8;border:1px solid #4a2880}
-.tag-adap{background:#3a1414;color:#e06848;border:1px solid #601e1e}
 
+/* Grab-bag, all TAB-OWNED, no header comment of their own in the original —
+   mic-pulse: Publicador's MicButton (#59). drag-handle/ex-suggestion/ex-input:
+   shared Criador ExerciseCombobox (#58) + Atletas (#56's neighbour, no plan
+   number of its own). collapse-btn/blk-collapsed/collapse-all-row/-btn/blk-body-drag/
+   blk-ex-chip(+name): Criador BlockEditor (#58). settings- shell: shared modal,
+   Publicador (#59) + Atletas. Pruned 2026-07-26 (#99): .blk-wrap.drag-over/
+   .ex-card.drag-over/.sc-card.drag-over-session were dead (no component ever
+   adds a literal "drag-over"/"drag-over-session" class to those elements —
+   Criador's block reorder uses an inline outline style instead, and the week-
+   grid's own drag-over toggle targets .wg-sc, which has no matching rule).
+   .settings-body/.settings-col-title/.settings-title were dead too (the 2-col
+   layout + section title styling that shell variant never got adopted). ── */
 @keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,120,32,.5)}50%{box-shadow:0 0 0 6px rgba(232,120,32,0)}}
 .drag-handle{cursor:grab;color:var(--dim);padding:0 6px;display:flex;align-items:center;font-size:16px;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:color .12s}
 .drag-handle:hover{color:var(--muted)}
@@ -340,9 +354,6 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .blk-body-drag:active{cursor:grabbing;color:#4ac8c0}
 .blk-ex-chip{font-size:10px;color:var(--dim);background:var(--bg);border:1px solid var(--divider);border-radius:4px;padding:2px 7px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0}
 .blk-ex-chip-name{max-width:90px;overflow:hidden;text-overflow:ellipsis}
-.blk-wrap.drag-over{border-color:var(--gold);box-shadow:0 0 0 2px rgba(232,120,32,.3)}
-.ex-card.drag-over{border-color:var(--gold)}
-.sc-card.drag-over-session{border-color:var(--gold);box-shadow:0 0 0 2px rgba(232,120,32,.2)}
 .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;pointer-events:all}
 .settings-modal{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--stone2,#1e1a16);border:1px solid var(--divider,#2a231c);border-radius:12px;width:820px;max-width:96vw;max-height:88vh;overflow-y:auto;z-index:501;pointer-events:all;box-shadow:0 8px 40px rgba(0,0,0,.8)}
 .settings-drag-hdr{padding:12px 16px;background:var(--stone,#161210);border-bottom:1px solid var(--divider,#2a231c);border-radius:12px 12px 0 0;display:flex;align-items:center;gap:8px;cursor:grab;user-select:none}
@@ -356,8 +367,6 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
   .settings-drag-hdr{cursor:default;border-radius:0}
   .settings-sheet-pill{display:flex}
 }
-.settings-body{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.settings-col-title{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--divider)}
 .settings-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .settings-row:last-child{margin-bottom:0}
 .settings-lbl{font-size:11px;color:var(--sub);flex:1}
@@ -367,18 +376,19 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .color-input{font-family:inherit;font-size:12px;border:1px solid var(--divider);border-radius:4px;padding:4px 7px;background:var(--stone);color:var(--cream);outline:none;width:86px}
 .color-input:focus{border-color:var(--dim)}
 input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:none}
-.settings-title{font-size:15px;font-weight:700;color:var(--cream);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+/* .settings-body/.settings-col-title/.settings-title pruned above with the rest
+   of the dead settings-shell variants (see the grab-bag comment). */
 
-
+/* prog-table — shared component (IntensityInput.jsx), TAB-OWNED → Criador #58 +
+   Exercícios #55/#87, same as "intensity" above */
 .prog-table{width:100%;border-collapse:collapse;margin-top:6px}
 .prog-table th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:4px 6px;text-align:left;border-bottom:1px solid var(--divider);font-weight:600}
 .prog-table td{padding:4px 6px;border-bottom:1px solid var(--divider)}
 .prog-table input{width:100%;font-family:inherit;font-size:12px;background:transparent;border:none;border-bottom:1px solid var(--divider);color:var(--cream);outline:none;padding:2px 0;text-align:center}
 .prog-table input:focus{border-bottom-color:var(--gold)}
 .prog-table tr:last-child td{border-bottom:none}
-.prog-add-btn{font-family:inherit;font-size:11px;color:var(--muted);background:transparent;border:1px dashed var(--divider);border-radius:4px;padding:4px 10px;cursor:pointer;margin-top:6px;width:100%;transition:all .12s}
-.prog-add-btn:hover{color:var(--gold);border-color:var(--gold)}
-.ladder-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:#1a2a1a;color:#60a840;border:1px solid #2a5020;text-transform:uppercase;letter-spacing:.05em}
+/* .prog-add-btn/.ladder-badge pruned 2026-07-26 (#99): dead — the progression
+   table's "add step" control is a <Button> (#54/C0) now, not this class. */
 
 @media(max-width:600px){
   .pane{padding:10px}.sc-card{padding:12px}
@@ -387,19 +397,22 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
   .topbar{padding:10px 12px}.tab3{padding:10px 13px;font-size:12px}
 }
 
-/* ── Results tab ── */
+/* ── "Results tab" — actually Resultados #57 too, TAB-OWNED. The section map
+   inherited from the old public results.html naming, but grepped 2026-07-26
+   (#99): every surviving class here (kpi-value, level-badge, scale-badge,
+   presence-dot, sparkline, history-row, empty-state…) is used only by
+   Resultados.jsx — public results.html has its own Results.module.css.
+   Pruned: .athlete-card/.athlete-name/.athlete-meta/.rpe-display/
+   .rpe-bar-wrap/.rpe-bar/.log-block-section/.log-block-title/.rpe-slider/
+   .rpe-hp-* were dead (zero consumers anywhere in src/). ── */
 .res-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
 .res-tab{font-family:inherit;font-size:12px;padding:6px 14px;border-radius:5px;border:1px solid var(--divider);background:transparent;color:var(--sub);cursor:pointer;transition:all .12s}
 .res-tab.on{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700}
-.athlete-card{background:var(--stone2);border:1px solid var(--divider);border-radius:8px;padding:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.athlete-name{font-size:14px;font-weight:600;color:var(--cream)}
-.athlete-meta{font-size:11px;color:var(--muted);margin-top:2px}
 .level-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em}
 .lv-ini{background:#1a2e14;color:#60a840;border:1px solid #3a5820}
 .lv-int{background:#162240;color:#5090e0;border:1px solid #1e3870}
 .lv-adv{background:#2a1a04;color:#e0a030;border:1px solid #604010}
 .lv-comp{background:#3a1010;color:#e05050;border:1px solid #601818}
-.rpe-display{font-size:13px;font-weight:700;color:#f5c842}
 .scale-badge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase}
 .sc-rx{background:#1a3a10;color:#60a840;border:1px solid #2a5018}
 .sc-inter{background:#1a2a3a;color:#4a90d0;border:1px solid #1a3a5a}
@@ -413,19 +426,6 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .kpi-good{color:#60a840}
 .kpi-warn{color:#e0a030}
 .kpi-bad{color:#e05050}
-.rpe-bar-wrap{height:6px;background:var(--stone);border-radius:3px;margin-top:6px;overflow:hidden}
-.rpe-bar{height:100%;border-radius:3px;transition:width .3s}
-.log-block-section{background:var(--stone);border:1px solid var(--divider);border-radius:6px;padding:12px;margin-bottom:10px}
-.log-block-title{font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
-.rpe-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--divider);outline:none;accent-color:var(--gold)}
-.rpe-hp-row{display:flex;align-items:center;gap:6px;width:100%}
-.rpe-hp-val{font-size:13px;font-weight:900;color:var(--gold);min-width:18px;text-align:center;flex-shrink:0}
-.rpe-hp-blocks{display:flex;gap:3px;flex:1;height:18px}
-.rpe-hp-block{flex:1;border-radius:3px;background:var(--stone);border:1px solid var(--divider);transition:background .15s}
-.rpe-hp-block.active{border-color:transparent}
-.rpe-hp-btn{font-family:inherit;font-size:16px;font-weight:700;width:26px;height:26px;border-radius:4px;border:1px solid var(--divider);background:transparent;color:var(--sub);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;line-height:1}
-.rpe-hp-btn:hover{border-color:var(--gold);color:var(--gold)}
-.rpe-hp-label{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:4px}
 .kpi-value.kpi-good{color:#60a840}
 .kpi-value.kpi-warn{color:#e0a030}
 .kpi-value.kpi-bad{color:#e05050}
@@ -440,33 +440,10 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .history-row:last-child{border-bottom:none}
 .empty-state{text-align:center;padding:2rem;color:var(--muted);font-size:13px}
 
-/* ── Leaderboard ── */
-.lb-empty{text-align:center;padding:2rem;color:#333;font-family:var(--export-font);font-size:13px}
-
-/* ── Leaderboard colour variables ── */
-:root{
-  --lb-bg:#000000;
-  --lb-row-alt:#020809;
-  --lb-p1-bg:rgba(255,215,0,0.06);
-  --lb-p2-bg:rgba(192,192,192,0.05);
-  --lb-p3-bg:rgba(205,127,50,0.05);
-  --lb-divider:#0d1e1e;
-  --lb-hdr-bg:#000000;
-  --lb-hdr-border:#00b8d4;
-  --lb-hdr-title:#ffffff;
-  --lb-hdr-sub:#00b8d4;
-  --lb-rank:#333333;
-  --lb-p1:#ffd700;
-  --lb-p2:#c0c0c0;
-  --lb-p3:#cd7f32;
-  --lb-name:#ffffff;
-  --lb-scale-text:#00b8d4;
-  --lb-scale-bg:rgba(0,184,212,0.1);
-  --lb-scale-border:#00b8d4;
-  --lb-perf:#ffffff;
-  --lb-filter-bg:#00b8d4;
-  --lb-filter-text:#000000;
-}
+/* ── Leaderboard — pruned entirely 2026-07-26 (#99): dead. .lb-empty and every
+   --lb-* variable had zero consumers in src/ — the SPA has no Leaderboard tab
+   (it's a public-only page, on its own Leaderboard.module.css); this was
+   leftover from before that split. ── */
 
 /* ── Zelda-themed scrollbars — token-based so they track the active theme (was
    frozen to totk-dark hex in all 4 themes); mirrors the themes.css block. ── */
@@ -477,7 +454,14 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 ::-webkit-scrollbar-corner{background:var(--bg)}
 *{scrollbar-width:thin;scrollbar-color:var(--dim) var(--stone)}
 
-/* ── Login screen ── */
+/* ── Login screen — GLOBAL. Tokenised 2026-07-26 (#99): three border-radius:6px
+   literals → var(--radius-md) (exact match); .login-btn's color:#000 → the
+   already-aliased var(--theme-accent-text) (exact match against totk-dark's
+   --accent-text:#000, and semantically the same "text on the accent-colored
+   button" use that alias exists for). .login-error's #e05050 and
+   .login-box/.login-logo/.login-otp-input's 12px/16px/7px radii don't match
+   any of the 30 tokens or --radius-sm/md exactly — left as judgment calls,
+   not forced. ── */
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg,#0d0b09);padding:20px}
 .login-box{background:var(--stone,#161210);border:1px solid var(--divider,#2a231c);border-radius:12px;padding:40px 36px;width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center;gap:10px}
 .login-logo{width:64px;height:64px;background:var(--bg,#0d0b09);border:1px solid var(--divider,#2a231c);border-radius:16px;display:flex;align-items:center;justify-content:center}
@@ -485,10 +469,10 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .login-sub{font-size:13px;color:var(--muted);margin-bottom:8px}
 .login-form{width:100%;display:flex;flex-direction:column;gap:10px}
 .login-label{font-size:12px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.07em}
-.login-input{width:100%;font-family:inherit;font-size:14px;padding:10px 12px;border-radius:6px;border:1px solid var(--divider);background:var(--stone);color:var(--cream);outline:none;transition:border-color .15s}
+.login-input{width:100%;font-family:inherit;font-size:14px;padding:10px 12px;border-radius:var(--radius-md);border:1px solid var(--divider);background:var(--stone);color:var(--cream);outline:none;transition:border-color .15s}
 .login-input:focus{border-color:var(--theme-accent,#00b8d4)}
 .login-error{font-size:12px;color:#e05050;display:flex;align-items:center;gap:5px}
-.login-btn{width:100%;font-family:inherit;font-size:14px;font-weight:700;padding:11px;border-radius:6px;border:none;background:var(--theme-accent,#00b8d4);color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .15s;margin-top:4px}
+.login-btn{width:100%;font-family:inherit;font-size:14px;font-weight:700;padding:11px;border-radius:var(--radius-md);border:none;background:var(--theme-accent,#00b8d4);color:var(--theme-accent-text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .15s;margin-top:4px}
 .login-btn:hover{opacity:.88}
 .login-btn:disabled{opacity:.5;cursor:not-allowed}
 .login-hint{font-size:11px;color:var(--muted);text-align:center;line-height:1.5}
@@ -498,7 +482,7 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .login-sent-hint{font-size:12px;color:var(--muted);line-height:1.5;margin-top:4px}
 .login-resend{font-family:inherit;font-size:12px;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;margin-top:8px}
 .login-resend:hover{color:var(--sub)}
-.login-sent-mini{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);margin-bottom:14px;padding:10px;background:var(--stone);border-radius:6px;border:1px solid var(--divider)}
+.login-sent-mini{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);margin-bottom:14px;padding:10px;background:var(--stone);border-radius:var(--radius-md);border:1px solid var(--divider)}
 .login-sent-mini strong{color:var(--cream)}
 .login-otp-row{display:flex;gap:5px;justify-content:center;margin-bottom:14px}
 .login-otp-input{width:32px;height:46px;text-align:center;font-family:inherit;font-size:18px;font-weight:700;color:var(--cream);background:var(--stone);border:2px solid var(--divider);border-radius:7px;outline:none;caret-color:transparent;-webkit-appearance:none;appearance:none}
@@ -506,103 +490,13 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{display:inline-block;animation:spin .8s linear infinite}
 
-/* ── Quick Log tab ── */
-.ql-wrap{max-width:640px;margin:0 auto;padding:0 0 80px}
-.ql-sess-bar{
-  background:var(--stone);border-bottom:1px solid var(--divider);
-  padding:12px 14px;display:flex;align-items:center;
-  justify-content:space-between;gap:10px;
-  position:sticky;top:88px;z-index:50;
-}
-.ql-sess-left{display:flex;flex-direction:column;gap:2px;min-width:0}
-.ql-sess-name{font-size:14px;font-weight:700;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ql-logged-count{font-size:11px;color:var(--muted)}
-.ql-sess-controls{display:flex;gap:6px;flex-shrink:0}
-.ql-sel{
-  font-family:inherit;font-size:12px;padding:6px 24px 6px 9px;
-  border-radius:5px;border:1px solid var(--divider);background:var(--stone);color:var(--cream);
-  outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 7px center;max-width:140px;
-}
-.ql-flash{
-  margin:10px 14px 0;padding:10px 14px;
-  background:#0e2010;border:1px solid #2a6030;border-radius:7px;
-  font-size:13px;color:#60c850;display:flex;align-items:center;gap:7px;
-}
-.ql-section-label{
-  font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;
-  letter-spacing:.08em;padding:14px 14px 6px;
-}
-.ql-athlete-grid{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:8px;padding:0 14px;
-}
-.ql-ath-btn{
-  display:flex;align-items:center;gap:8px;
-  padding:12px 12px;border-radius:8px;
-  border:1px solid var(--divider);background:var(--stone2);
-  font-family:inherit;font-size:13px;font-weight:600;color:var(--cream);
-  cursor:pointer;text-align:left;min-height:48px;
-  transition:all .12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
-}
-.ql-ath-btn:hover{border-color:var(--dim);color:var(--cream)}
-.ql-ath-btn.sel{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:700}
-.ql-ath-btn.logged:not(.sel){color:var(--dim);border-color:var(--divider)}
-.ql-ath-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.ql-ath-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ql-ath-check{margin-left:auto;font-size:12px;color:#60a840;flex-shrink:0}
-.ql-perf{padding:14px}
-.ql-block-card{
-  background:var(--stone2);border:1px solid var(--divider);border-radius:10px;
-  padding:14px;margin-bottom:10px;
-}
-.ql-block-label{font-size:12px;font-weight:900;color:var(--theme-accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
-.ql-scale-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.ql-scale-btn{
-  flex:1;min-width:0;padding:9px 4px;border-radius:6px;
-  border:1px solid var(--divider);background:var(--stone);
-  font-family:inherit;font-size:12px;font-weight:700;color:var(--sub);
-  cursor:pointer;transition:all .12s;text-align:center;
-  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
-}
-.ql-scale-btn:hover{border-color:var(--dim);color:var(--cream)}
-.ql-scale-btn.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
-.ql-perf-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.ql-perf-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;flex-shrink:0}
-.ql-perf-input{
-  font-family:inherit;font-size:18px;font-weight:700;
-  padding:8px 10px;border-radius:6px;
-  border:1px solid var(--divider);background:var(--stone);color:var(--cream);
-  outline:none;width:100%;text-align:center;
-  -webkit-appearance:none;appearance:none;
-}
-.ql-perf-input:focus{border-color:var(--dim)}
-.ql-perf-input.sm{width:72px;flex-shrink:0}
-.ql-rpe-row{display:flex;align-items:center;gap:8px}
-.ql-rpe-lbl{font-size:12px;font-weight:700;color:var(--gold);min-width:44px;flex-shrink:0}
-.ql-rpe-bar{display:flex;gap:3px;flex:1;height:20px}
-.ql-rpe-seg{flex:1;border-radius:3px;background:var(--stone);border:1px solid var(--divider);cursor:pointer;transition:background .1s;-webkit-tap-highlight-color:transparent}
-.ql-rpe-seg.on{border-color:transparent}
-.ql-submit{
-  width:100%;padding:14px;margin-top:4px;border-radius:9px;border:none;
-  background:var(--theme-accent);color:var(--theme-accent-text);
-  font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  letter-spacing:.04em;transition:opacity .15s;
-  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
-}
-.ql-submit:hover{opacity:.88}
-.ql-no-wod{font-size:13px;color:var(--muted);text-align:center;padding:16px 0 12px}
-.ql-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
-@media(max-width:400px){
-  .ql-athlete-grid{grid-template-columns:1fr}
-  .ql-scale-btn{font-size:11px}
-}
+/* ── Quick Log tab — pruned entirely 2026-07-26 (#99): dead. Every .ql-* class
+   had zero consumers in src/ — the tab this styled has been retired and
+   nothing else in the SPA renders these classes. ── */
 
 /* Config tab styles moved to Config.module.css (#55/C1). */
 
-/* ── Sync / conflict ─────────────────────────────────────────────────────── */
+/* ── Sync / conflict — GLOBAL (app-wide sync state, not owned by one tab) ── */
 .tb-btn.tb-sync-warn{border-color:#7a4a10;color:#e87820;animation:sync-pulse 2s ease-in-out infinite}
 @keyframes sync-pulse{0%,100%{opacity:1}50%{opacity:.6}}
 .sync-conflict-banner{
@@ -619,7 +513,11 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 }
 .sync-conflict-btn:hover{background:#a06010}
 
-/* ── Criador redesign ─────────────────────────────────────────────────────── */
+/* ── Criador redesign — TAB-OWNED → Criador #58, through the end of this block
+   (Block type picker · benchmark list · block bar/body · exercise row ·
+   complex sets · Estações · mobile exercise sheet). The Registro 3-panel,
+   Publicador mobile and SPA sidebar sections further down are NOT Criador's —
+   each carries its own ownership marker where it starts. ── */
 
 /* Block type picker modal */
 .btp-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:2200;display:flex;align-items:center;justify-content:center;padding:16px}
@@ -781,7 +679,15 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 /* wg-sc-name flex tweak for new delete-in-header layout */
 .wg-sc-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* ── Registro 3-panel (TotK warm-dark) ── */
+/* ── Registro 3-panel (TotK warm-dark) — TAB-OWNED → Resultados #57 (primary;
+   also used by a slice of Atletas + AgendaView). Pre-existing bug, NOT fixed
+   here: its hex is frozen to totk-dark's values (#2a231c=--divider,
+   #f0e8d0=--cream, #806850=--muted, etc.) rather than var()s, so it only
+   renders correctly in that one theme — same class of bug as TallyBar/TV-ring/
+   scrollbars elsewhere in this file, just not yet caught by a theme switch.
+   Left alone per the TAB-OWNED rule (tokenising work Resultados' own pass
+   would immediately delete) — flagging it here so #57 inherits the fix, not
+   just the move. ── */
 .rp-layout{display:grid;grid-template-columns:260px 220px 1fr;margin:0 -14px -14px;border-top:1px solid #2a231c;align-items:start}
 .rp-p1{border-right:1px solid #2a231c}
 .rp-p2{border-right:1px solid #2a231c}
@@ -843,7 +749,9 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .rp-mobile-back{display:none;align-items:center;gap:6px;padding:8px 12px;font-size:11px;color:#806850;cursor:pointer;background:#0d0b09;border-bottom:1px solid #2a231c;font-family:inherit;border:none;width:100%;text-align:left;text-transform:uppercase;letter-spacing:.05em}
 @media(max-width:800px){.rp-mobile-back{display:flex}}
 
-/* ── Publicador mobile ── */
+/* ── Publicador mobile — TAB-OWNED → Publicador/Agenda #59 (AgendaView.jsx).
+   Same frozen-to-totk-dark hex caveat as Registro 3-panel above — not fixed
+   here, flagged for #59. ── */
 .pub-mobile-hdr{border-bottom:1px solid #2a231c}
 .pub-mobile-meta{display:flex;align-items:center;gap:6px;padding:5px 10px;flex-wrap:wrap;border-top:1px solid #1e1a16}
 .pub-day-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid #161210;cursor:pointer;transition:background .12s;min-height:46px}
@@ -860,7 +768,8 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .pub-chip-aula{color:#c8b090;background:rgba(200,176,144,.06);border:1px solid #2a231c}
 .pub-chip-pers{color:#d8a840;background:rgba(216,168,64,.08);border:1px solid rgba(216,168,64,.25)}
 
-/* ── SPA Desktop Sidebar ── */
+/* ── SPA Desktop Sidebar — GLOBAL (app chrome, not owned by one tab). Already
+   fully var()-based (var(--x,#hex) fallbacks only) — nothing to tokenise. ── */
 .spa-sidebar{display:none;position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--stone,#161210);border-right:1px solid var(--divider,#2a231c);flex-direction:column;z-index:200;overflow:hidden}
 .spa-sb-brand{padding:14px 16px;min-height:52px;display:flex;flex-direction:column;justify-content:center;gap:3px;position:relative;flex-shrink:0}
 .spa-sb-brand::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(to right,var(--divider,#2a231c) 65%,transparent)}
@@ -887,6 +796,5 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
   .tab-bar{display:none}
   .tb-inicio{display:none}
   .sync-conflict-banner{top:44px}
-  .ql-sess-bar{top:44px}
   .rp-sticktop{top:44px}
 }
