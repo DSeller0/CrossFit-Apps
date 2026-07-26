@@ -150,7 +150,7 @@ export function DayRanking({ wodLabel, wodMeta, rows, href, empty }) {
 // ── Box warnings ────────────────────────────────────────────────────────────
 function fmtWarnDate(date) {
   if (!date) return ''
-  const [y, m, d] = date.split('-').map(Number)
+  const [, m, d] = date.split('-').map(Number)
   return `${d} ${MONTH_PT_SHORT[m - 1].toLowerCase()}`
 }
 function warnParts(message) {

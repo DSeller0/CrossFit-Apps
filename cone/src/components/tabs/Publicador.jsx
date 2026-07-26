@@ -11,7 +11,7 @@ import { DailyExportView, WeeklyExportView, WeeklyCalendarExportView, CalendarEx
 import { MobileEaglesExportView, MobileMegaManExportView, MobileWeeklyExportView } from './publicador/mobileExportViews';
 
 // ── SchedulePublisher (default export) ───────────────────────────────────────
-function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSession, onLogResult }) {
+function SchedulePublisher({ sessions }) {
   const exportDailyRef = useRef();
   const exportWeeklyRef = useRef();
   const exportCalendarRef = useRef();
@@ -244,7 +244,6 @@ function SchedulePublisher({ sessions, events, setEvents, athletes, onEditSessio
   const filteredSessions = filterAthlete
     ? Object.fromEntries(Object.entries(sessions).map(([k, v]) => [k, v.filter(s => matchesAthlete(s, filterAthlete.name))]))
     : sessions;
-  const allSessionDates = Object.keys(filteredSessions).filter(k => filteredSessions[k]?.length > 0).sort();
 
   if (!hasAny) return React.createElement('div', { className: 'empty2' },
     React.createElement('i', { className: 'ti ti-calendar', style: { fontSize: '32px', display: 'block', marginBottom: '10px', color: '#444' }, 'aria-hidden': 'true' }),

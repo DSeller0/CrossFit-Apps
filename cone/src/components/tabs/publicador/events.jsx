@@ -220,7 +220,7 @@ export function ReportModal({ events, sessions, onClose }) {
     try {
       const QRCode = (await import('qrcode')).default;
       return await QRCode.toDataURL(text, { width: size, margin: 1, errorCorrectionLevel: 'M' });
-    } catch (e) { return null; }
+    } catch { return null; }
   }
 
   async function generatePDF() {

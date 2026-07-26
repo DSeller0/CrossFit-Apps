@@ -3,7 +3,7 @@ import s from './Timer.module.css'
 import Nav from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import BlockTypePicker from './BlockTypePicker.jsx'
-import { BENCHMARK_GIRLS, BENCHMARK_HEROES, benchmarkToTimerExes } from '../lib/benchmarks.js'
+import { benchmarkToTimerExes } from '../lib/benchmarks.js'
 import { fmtSecs, isTimeBlock, MODE_LBL, maskMMSS } from '../lib/wod.js'
 import { fmtDate } from '../lib/week.js'
 
@@ -26,11 +26,11 @@ function exLabel(ex) {
 function loadHist() { try { return JSON.parse(localStorage.getItem(K_HIST) || '[]') } catch { return [] } }
 function pushHist(entry) {
   const h = [entry, ...loadHist()].slice(0, 3)
-  try { localStorage.setItem(K_HIST, JSON.stringify(h)) } catch {}
+  try { localStorage.setItem(K_HIST, JSON.stringify(h)) } catch { /* ignore */ }
 }
 function dropHist(i) {
   const h = loadHist(); h.splice(i, 1)
-  try { localStorage.setItem(K_HIST, JSON.stringify(h)) } catch {}
+  try { localStorage.setItem(K_HIST, JSON.stringify(h)) } catch { /* ignore */ }
 }
 
 const DEFAULT_CFG = {
@@ -44,7 +44,7 @@ function loadSaved() {
   try {
     const sv = JSON.parse(localStorage.getItem(K_STATE) || 'null')
     if (sv?.cfg && (sv.status === 'running' || sv.status === 'paused')) return sv
-  } catch {}
+  } catch { /* ignore */ }
   return null
 }
 function loadSavedCfg() { try { return JSON.parse(localStorage.getItem(K_CFG) || 'null') } catch { return null } }
@@ -108,7 +108,7 @@ export default function Timer() {
     sb.from('settings').select('value').eq('id', 1).maybeSingle()
       .then(({ data }) => { if (data?.value?.gymName) setGymName(data.value.gymName) })
       .catch(() => {})
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   // ── Computed helpers ─────────────────────────────────────────────────────
   function capSecs(c) { return ((c ?? cfgRef.current)?.timeCap ?? 0) * 60 }
@@ -170,7 +170,7 @@ export default function Timer() {
   // ── Wake Lock ────────────────────────────────────────────────────────────
   async function acquireWL() {
     if (!('wakeLock' in navigator)) return
-    try { wakeLockRef.current = await navigator.wakeLock.request('screen') } catch {}
+    try { wakeLockRef.current = await navigator.wakeLock.request('screen') } catch { /* ignore */ }
   }
   function releaseWL() {
     if (wakeLockRef.current) { wakeLockRef.current.release(); wakeLockRef.current = null }
@@ -184,7 +184,7 @@ export default function Timer() {
         startEpoch: startEpoch.current, pausedMs: pausedMs.current,
         pauseStart: pauseStart.current, splits: splitsRef.current, finalSecs: finSecsRef.current
       }))
-    } catch {}
+    } catch { /* ignore */ }
   }
 
   // ── Tick ─────────────────────────────────────────────────────────────────
@@ -358,7 +358,7 @@ export default function Timer() {
       goal: form.goal?.trim() || '',
       countdown: form.countdown ?? true,
     }
-    try { localStorage.setItem(K_CFG, JSON.stringify(newCfg)) } catch {}
+    try { localStorage.setItem(K_CFG, JSON.stringify(newCfg)) } catch { /* ignore */ }
     cfgRef.current = newCfg
     statusRef.current = 'ready'
     setCfg(newCfg); setStatus('ready')
@@ -379,7 +379,7 @@ export default function Timer() {
       stopTick(); releaseWL()
       if (getreadyRef.current) { clearInterval(getreadyRef.current); getreadyRef.current = null }
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   // ── Render values ────────────────────────────────────────────────────────
   const e      = elapsedRaw()
@@ -426,7 +426,7 @@ export default function Timer() {
   }
 
   function renderClock() {
-    let lbl = '', roundJsx = null
+    let lbl, roundJsx = null
     if (bt === 'EMOM') {
       const min = Math.floor(e / 60), total = cfg.timeCap || 0
       lbl = isPaused ? 'pausado' : 'até o próximo'

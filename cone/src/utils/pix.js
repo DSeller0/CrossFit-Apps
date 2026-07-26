@@ -11,7 +11,7 @@ function crc16Pix(str) {
 
 const pixClean = s => (s || '').normalize('NFD')
   .replace(/[\u0300-\u036F]/g, '')
-  .replace(/[^a-zA-Z0-9 @._\-+\/]/g, '')
+  .replace(/[^a-zA-Z0-9 @._\-+/]/g, '')
   .trim();
 
 export function buildPixPayload({ pixKey, merchantName, merchantCity, amount, description, txid }) {
@@ -20,10 +20,10 @@ export function buildPixPayload({ pixKey, merchantName, merchantCity, amount, de
 
   // Normalise phone key
   let key = (pixKey || '').trim();
-  if (/^[\+\d\s\(\)\-]+$/.test(key) && !key.includes('@') && !key.includes('.')) {
+  if (/^[+\d\s()-]+$/.test(key) && !key.includes('@') && !key.includes('.')) {
     const digits = key.replace(/\D/g, '');
     if (key.startsWith('+55')) {
-      key = key.replace(/[\s\(\)\-]/g, '');
+      key = key.replace(/[\s()-]/g, '');
     } else if (digits.startsWith('55') && digits.length === 13) {
       key = '+' + digits;
     } else if (digits.length >= 10) {

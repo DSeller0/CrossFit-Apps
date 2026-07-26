@@ -92,7 +92,7 @@ export default function Schedule() {
 
   useEffect(()=>{
     registerSW()
-    try{const s=localStorage.getItem('sched_rounds');if(s)setRoundState(JSON.parse(s))}catch(e){}
+    try{const s=localStorage.getItem('sched_rounds');if(s)setRoundState(JSON.parse(s))}catch{/* ignore */}
     load()
     const onShow=e=>{if(e.persisted)load()}
     window.addEventListener('pageshow',onShow)
@@ -155,7 +155,7 @@ export default function Schedule() {
           const cfg=await cfgRes.json()
           if(cfg.scheduleTitle||cfg.appTitle)document.title=cfg.scheduleTitle||cfg.appTitle
           if(cfg.restDayLabel)restLbl=cfg.restDayLabel
-        }catch(e){}
+        }catch{/* ignore */}
       }
 
       demoMapRef.current=buildRegistryIndex(erD)
@@ -219,7 +219,7 @@ export default function Schedule() {
     setRoundState(prev=>{
       const cur=prev[`${blId}|${exId}`]||0,next={...prev,[`${blId}|${exId}`]:cur>=total?0:cur+1}
       if(next[`${blId}|${exId}`]===0)delete next[`${blId}|${exId}`]
-      try{localStorage.setItem('sched_rounds',JSON.stringify(next))}catch(e){}
+      try{localStorage.setItem('sched_rounds',JSON.stringify(next))}catch{/* ignore */}
       return next
     })
   }
@@ -227,7 +227,7 @@ export default function Schedule() {
   function resetRound(blId,exId){
     setRoundState(prev=>{
       const next={...prev};delete next[`${blId}|${exId}`]
-      try{localStorage.setItem('sched_rounds',JSON.stringify(next))}catch(e){}
+      try{localStorage.setItem('sched_rounds',JSON.stringify(next))}catch{/* ignore */}
       return next
     })
   }
@@ -266,7 +266,7 @@ export default function Schedule() {
 
   function changeAth(val){
     setSelAth(val)
-    try{localStorage.setItem('cone_athlete_filter',val)}catch(e){}
+    try{localStorage.setItem('cone_athlete_filter',val)}catch{/* ignore */}
     setExpanded(new Set());setRmEditKey(null);setDeskRegBl(null)
     const newAuto=autofillRm(sessions,athletes,val,goalsRef.current)
     setRmValues(prev=>{
@@ -278,7 +278,7 @@ export default function Schedule() {
   function changeWeek(dir){
     setWeekOffset(w=>w+dir);setExpanded(new Set());setChecked(new Set())
     setRoundState({});setRmEditKey(null);setSelSess(null);setDeskRegBl(null)
-    try{localStorage.removeItem('sched_rounds')}catch(e){}
+    try{localStorage.removeItem('sched_rounds')}catch{/* ignore */}
   }
 
   function openTimer(bl,sess,dateKey){
@@ -293,7 +293,7 @@ export default function Schedule() {
       exercises=(bl.exercises||[]).filter(e=>e.name||e.isComplex).map(e=>({name:e.isComplex?(e.name||(e.complexMovements||[]).map(m=>m.name).filter(Boolean).join(' + ')):e.name,sets:e.sets,reps:e.reps}))
     }
     const config={blockType:bl.type||bl.label,blockLabel:(bl.label&&bl.label!==bl.type&&bl.label!=='-')?bl.label:(bl.label||bl.type||'WOD'),timeCap:bl.duration?parseInt(bl.duration):null,rounds:bl.rounds||bl.stationRepeat||null,exercises,sessionId:sess.id,sessionDate:dateKey,athleteId:ath?.id||null,blockId:bl.id,stationTime,transitionTime,countdown:true}
-    try{localStorage.setItem('timer_config',JSON.stringify(config));localStorage.removeItem('timer_state')}catch(e){}
+    try{localStorage.setItem('timer_config',JSON.stringify(config));localStorage.removeItem('timer_state')}catch{/* ignore */}
     location.href='timer.html?src=sched'
   }
 

@@ -173,7 +173,7 @@ export function WeeklyExportView({ sessions, label, year, month, onDayClick }) {
 }
 
 // ── WeeklyCalendarExportView — 1920×1080 single week Mon-Fri ─────────────────
-export function WeeklyCalendarExportView({ sessions, label, year, month, gymName, logoDataUrl, logoScale, fontScale, weekDates, wkColors }) {
+export function WeeklyCalendarExportView({ sessions, label, month, gymName, logoDataUrl, logoScale, fontScale, weekDates, wkColors }) {
   const wk = wkColors || {};
   const ls = logoScale || 1;
   const fs = fontScale || 1;

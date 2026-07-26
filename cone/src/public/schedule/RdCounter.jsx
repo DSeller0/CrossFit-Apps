@@ -3,7 +3,7 @@ import styles from './Schedule.module.css'
 import { onKey } from './scheduleHelpers.js'
 
 // ── Round Counter ─────────────────────────────────────────────────────────────
-export default function RdCounter({blId,exId,total,cur,onAdvance,onReset}) {
+export default function RdCounter({total,cur,onAdvance,onReset}) {
   const pressRef=useRef(null),didLongRef=useRef(false),touchHandledRef=useRef(false)
   const isDone=cur>=total,isActive=cur>0&&!isDone
   function onTouchStart(){

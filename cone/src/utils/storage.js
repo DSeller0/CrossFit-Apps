@@ -96,51 +96,51 @@ export const loadLS = () => {
     return parsed;
   } catch { return {}; }
 };
-export const saveLS = d => { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch {} markSessionsSaved(); dbSaveSessions(d); };
+export const saveLS = d => { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } markSessionsSaved(); dbSaveSessions(d); };
 
 // ── Athletes ──────────────────────────────────────────────────────────────────
 export const loadAthletes  = () => { try { const d = localStorage.getItem(LS_ATHLETES);  return d ? JSON.parse(d) : []; } catch { return []; } };
-export const saveAthletes  = d => { try { localStorage.setItem(LS_ATHLETES, JSON.stringify(d)); } catch {} dbSaveAthletes(d); };
+export const saveAthletes  = d => { try { localStorage.setItem(LS_ATHLETES, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveAthletes(d); };
 
 // ── Results ───────────────────────────────────────────────────────────────────
 export const loadResults   = () => { try { const d = localStorage.getItem(LS_RESULTS); const p = d ? JSON.parse(d) : []; return Array.isArray(p) ? p : []; } catch { return []; } };
 // Cache to localStorage only — no Supabase write. Used by the startup pull so a
 // *read* never re-upserts (#76): saveResults → dbSaveResults stamps updated_at on
 // every row, so pulling on each SPA load was rewriting all provenance timestamps.
-export const cacheResultsLS = d => { try { localStorage.setItem(LS_RESULTS, JSON.stringify(d)); } catch {} };
+export const cacheResultsLS = d => { try { localStorage.setItem(LS_RESULTS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } };
 export const saveResults   = d => { cacheResultsLS(d); dbSaveResults(d); };
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 export const loadSettings  = () => { try { const d = localStorage.getItem(LS_SETTINGS);  return d ? JSON.parse(d) : {}; } catch { return {}; } };
-export const saveSettings  = d => { try { localStorage.setItem(LS_SETTINGS, JSON.stringify(d)); } catch {} dbSaveSettings(d); };
+export const saveSettings  = d => { try { localStorage.setItem(LS_SETTINGS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveSettings(d); };
 
 // ── Exercise registry ─────────────────────────────────────────────────────────
 export const loadRegistry  = () => { try { const d = localStorage.getItem(LS_REGISTRY);  return d ? JSON.parse(d) : null; } catch { return null; } };
-export const saveRegistry  = d => { try { localStorage.setItem(LS_REGISTRY, JSON.stringify(d)); } catch {} dbSaveRegistry(d); };
+export const saveRegistry  = d => { try { localStorage.setItem(LS_REGISTRY, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveRegistry(d); };
 
 // ── Goals & PRs ───────────────────────────────────────────────────────────────
 export const loadGoalsData = () => { try { const d = localStorage.getItem(LS_GOALS); return d ? JSON.parse(d) : { athleteGoals: {}, prs: {} }; } catch { return { athleteGoals: {}, prs: {} }; } };
-export const saveGoalsData = d => { try { localStorage.setItem(LS_GOALS, JSON.stringify(d)); } catch {} dbSaveGoalsData(d); };
+export const saveGoalsData = d => { try { localStorage.setItem(LS_GOALS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveGoalsData(d); };
 
 // ── Events (agenda) ───────────────────────────────────────────────────────────
 export const loadEvents    = () => { try { const d = localStorage.getItem(LS_EVENTS);    return d ? JSON.parse(d) : {}; } catch { return {}; } };
-export const saveEvents    = d => { try { localStorage.setItem(LS_EVENTS, JSON.stringify(d)); } catch {} dbSaveEvents(d); };
+export const saveEvents    = d => { try { localStorage.setItem(LS_EVENTS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveEvents(d); };
 
 // ── Locations / services ──────────────────────────────────────────────────────
 export const loadLocations = () => { try { const d = localStorage.getItem(LS_LOCATIONS); return d ? JSON.parse(d) : []; } catch { return []; } };
-export const saveLocations = d => { try { localStorage.setItem(LS_LOCATIONS, JSON.stringify(d)); } catch {} dbSaveLocations(d); };
+export const saveLocations = d => { try { localStorage.setItem(LS_LOCATIONS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveLocations(d); };
 
 // ── Coach profile ─────────────────────────────────────────────────────────────
 export const loadCoach     = () => { try { const d = localStorage.getItem(LS_COACH); return d ? JSON.parse(d) : { name: '', contact: '', phone: '' }; } catch { return { name: '', contact: '', phone: '' }; } };
-export const saveCoach     = d => { try { localStorage.setItem(LS_COACH, JSON.stringify(d)); } catch {} dbSaveCoach(d); };
+export const saveCoach     = d => { try { localStorage.setItem(LS_COACH, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveCoach(d); };
 
 // ── Leaderboard colours ───────────────────────────────────────────────────────
 export const loadLBColors  = () => { try { const d = localStorage.getItem(LS_LB_COLORS); return d ? JSON.parse(d) : {}; } catch { return {}; } };
-export const saveLBColors  = d => { try { localStorage.setItem(LS_LB_COLORS, JSON.stringify(d)); } catch {} dbSaveLBColors(d); };
+export const saveLBColors  = d => { try { localStorage.setItem(LS_LB_COLORS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveLBColors(d); };
 
 // ── Session templates ─────────────────────────────────────────────────────────
 export const loadTemplates = () => { try { const d = localStorage.getItem(LS_TEMPLATES); return d ? JSON.parse(d) : []; } catch { return []; } };
-export const saveTemplates = d => { try { localStorage.setItem(LS_TEMPLATES, JSON.stringify(d)); } catch {} dbSaveTemplates(d); };
+export const saveTemplates = d => { try { localStorage.setItem(LS_TEMPLATES, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveTemplates(d); };
 
 // ── Pull all data from Supabase into localStorage ─────────────────────────────
 // Called once on app startup. Returns an object with the fresh data so App.jsx

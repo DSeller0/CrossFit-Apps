@@ -765,7 +765,7 @@ function LeaderboardView({ athletes, sessions, results }) {
     const html2canvas=(await import('html2canvas')).default;
     const cv=await html2canvas(el,{scale:APP_CONFIG.exportScale||2,backgroundColor:LB_IMG.bg,useCORS:true,logging:false,width:1080,height:el.scrollHeight,windowWidth:1080});
     const a=document.createElement('a');
-    const lbl=selObj?`${selObj.dt}-${selObj.blLabel}-${scaleFilter}`.replace(/[^a-zA-Z0-9\-]/g,'-').toLowerCase():'leaderboard';
+    const lbl=selObj?`${selObj.dt}-${selObj.blLabel}-${scaleFilter}`.replace(/[^a-zA-Z0-9-]/g,'-').toLowerCase():'leaderboard';
     a.download=`eagles-leaderboard-${lbl}.png`; a.href=cv.toDataURL('image/png'); a.click();
   };
 

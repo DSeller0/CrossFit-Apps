@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  FAMILY_GROUPS, ALL_CATEGORIES, familyOf, ROOTS, rootGroup, groupByRoot, completeness,
+  FAMILY_GROUPS, ALL_CATEGORIES, familyOf, rootGroup, groupByRoot, completeness,
 } from './exerciseGroups.js'
 
 // The 15 registry categories (Exercicios.jsx BLOCK_ORDER) — the family map must cover
@@ -67,8 +67,6 @@ describe('rootGroup — rightmost-token, longest-wins', () => {
 })
 
 describe('groupByRoot — real prod categories', () => {
-  const names = arr => arr.map(g => g.root + ':' + g.items.length)
-
   it('Força → Squat(7) · Deadlift(4) · Jerk(2) · Press(3), 4 singles', () => {
     const forca = [
       'Back Squat', 'Barbell Row', 'Bench Press', 'Box Squat', 'Bulgarian Split Squat',

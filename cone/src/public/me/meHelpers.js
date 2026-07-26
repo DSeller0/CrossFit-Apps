@@ -93,7 +93,7 @@ export function buildEvents(prs, goals) {
     if (!pr.results || pr.results.length < 2) return
     const sorted = [...pr.results].sort((a,b) => new Date(a.date) - new Date(b.date))
     const last = sorted[sorted.length-1], prev = sorted[sorted.length-2]
-    let good = false, delta = ''
+    let good, delta = ''
     if (pr.type === 'time') {
       const d = toSecs(prev.value) - toSecs(last.value)
       good = d > 0

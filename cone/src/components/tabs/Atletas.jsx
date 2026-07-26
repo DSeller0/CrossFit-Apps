@@ -395,7 +395,7 @@ function GoalConfigPanel({ goal, onSave, onCancel }) {
 }
 
 // ── AtletasTab ────────────────────────────────────────────────────────────────
-export default function AtletasTab({ sessions, results, onEditSession, onLogResult }) {
+export default function AtletasTab({ sessions, results }) {
   const [athletes, setAthletes]         = useState(loadAthletes);
   const [goalsData, setGoalsData]       = useState(loadGoalsData);
   const [selAthlete, setSelAthlete]     = useState(null);

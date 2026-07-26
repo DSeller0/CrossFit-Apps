@@ -8,7 +8,7 @@ import {
   loadSettings, saveSettings,
   loadGoalsData, saveGoalsData,
   loadRegistry, saveRegistry,
-  loadEvents, saveEvents,
+  loadEvents,
   loadLocations, saveLocations,
   loadCoach, saveCoach,
   loadLBColors,
@@ -131,7 +131,7 @@ export default function App() {
             if (!Object.keys(existingLb).length) {
               localStorage.setItem('eagles_lb_colors_v1', JSON.stringify(cfg.lbColors));
             }
-          } catch {}
+          } catch { /* ignore */ }
         }
       });
   }, [configLoaded]);

@@ -350,9 +350,14 @@ Always check these before reimplementing a formatting or date utility. `src/util
 - Dev: `supabase start` (once per Docker session) then `npm run dev` inside `cone/` — talks to the local stack, never prod
 - Build: `npm run build` → `dist/`
 - Tests: `npm test` (530 tests across 14 files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js, useClassTracking.test.js, goals.test.js, meHelpers.test.js, boxScope.test.js, entries.test.js, storage.test.js, registry.test.js, blockModel.test.js, textFormat.test.js, exerciseGroups.test.js)
-- CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder)
+- Lint: `npm run lint` (`eslint.config.js`) — gated in CI (below); floor is the react-hooks correctness cluster (#108), downgraded to `warn` so it still prints and ratchets rather than going silent
+- CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder); also runs `npm test` then `npm run lint` (plans/43, #32) — a lint regression fails the build same as a test failure
 
 **Chunk hash 404 (GitHub Pages limitation):** After every CI deploy, lazy-loaded chunk filenames change. Old hashes 404 until users hard-refresh (Ctrl+Shift+R). GitHub Pages cannot set `Cache-Control: no-cache`. This is structural — do not re-diagnose, just document and tell the user to hard-refresh.
+
+**`react-refresh/only-export-components` policy (#32/plans/43, 2026-07-26):** two exemptions, both in `eslint.config.js`, not a blanket disable — a new file that trips this rule outside these two carve-outs is a real finding, not noise.
+- **`src/public/gallery/**` has the rule off entirely.** It's excluded from `vite.public.config.js`'s `input`, so it is never built or deployed — Fast Refresh correctness there protects nothing, and every gallery group file intentionally pairs its exported items with the fixtures/constants they render.
+- **Five production files keep the rule on, but with a per-file `allowExportNames` allowlist** (`AuthContext.jsx`→`useAuth`, `SyncContext.jsx`→`useSync`, `Nav.jsx`→`isNavHidden`, `rail.jsx`→`dayTitle`, `ScaleFilter.jsx`→`FILTER_SCALES`): each pairs one component with exactly one small, stable non-component export that has no other natural home — splitting five two-line exports into five new files costs more than the rule protects. Anything else added to these files still gets flagged.
 
 **Always commit + push after completing changes** (user requirement).
 

@@ -103,7 +103,7 @@ export default function Index() {
     if (status !== 'ok') return
     const id = setInterval(refreshResults, 30000)
     return () => clearInterval(id)
-  }, [status]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [status])
 
   // pageshow (bfcache back-nav)
   useEffect(() => {

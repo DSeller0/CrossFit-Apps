@@ -8,7 +8,7 @@ import Button from '../../ui/Button.jsx';
 import cr from './criador.module.css';
 
 // ── ExerciseRow ───────────────────────────────────────────────────────────────
-export function ExerciseRow({ ex, blockLabel, blockType, ladderMode, onToggleLadder, onUpdate, onDelete, canDelete, dragIdx, setDragIdx, dragOverIdx, setDragOverIdx, myIdx }) {
+export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdate, onDelete, canDelete, dragIdx, dragOverIdx, setDragOverIdx, myIdx }) {
   const [showDetail, setShowDetail] = useState(false);
   const isMobile = useIsMobile();
 

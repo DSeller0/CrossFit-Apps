@@ -194,7 +194,7 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
         evs.length === 0 && gymSessions.length === 0 && React.createElement('div', { style: { color: '#3a3028', fontSize: '12px', fontStyle: 'italic', padding: '20px 0 0' } }, 'Sem eventos. Use os botões acima para adicionar.'),
         evs.length > 0 && React.createElement('div', { style: { marginBottom: '6px' } },
           React.createElement('div', { style: { fontSize: '10px', color: '#554a3a', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '8px' } }, 'Agenda'),
-          evs.map((ev, ei) => {
+          evs.map((ev) => {
             const isPers = ev.type === 'personal';
             const done = evStatus(ev) === 'completed';
             const borderCol = isPers ? '#d8a840' : 'var(--theme-accent)';

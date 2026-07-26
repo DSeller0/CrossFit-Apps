@@ -94,7 +94,7 @@ export default function Results() {
       const stD = stR.data?.value || {}
       setSessions(sD); setAthletes(aD); setResults(rD)
       setGymName(stD.gymName || 'Cone')
-      if (lockedId) { setSelAth(lockedId); try { localStorage.setItem('cone_athlete_filter', lockedId) } catch (e) { /* ignore */ } }
+      if (lockedId) { setSelAth(lockedId); try { localStorage.setItem('cone_athlete_filter', lockedId) } catch { /* ignore */ } }
       setStatus('ok')
 
       // ?session= deep-link. It used to set only the mobile `expanded` set, so a
@@ -152,7 +152,7 @@ export default function Results() {
   }
   function changeWeek(dir) { setWeekOffset(w => w + dir); setExpanded(new Set()); setLbTarget(null); didAutoSelect.current = false }
   function changeAth(val) {
-    setSelAth(val); try { localStorage.setItem('cone_athlete_filter', val) } catch (e) { /* ignore */ }
+    setSelAth(val); try { localStorage.setItem('cone_athlete_filter', val) } catch { /* ignore */ }
     setLbTarget(null); setEditing(new Set())
   }
   function toggleSess(sid) {

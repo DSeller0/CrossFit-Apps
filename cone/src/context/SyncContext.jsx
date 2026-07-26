@@ -40,7 +40,7 @@ export function SyncProvider({ children }) {
         if (remoteTs && localTs && remoteTs > localTs) {
           setSyncState(s => s === 'syncing' || s === 'synced' ? s : 'conflict');
         }
-      } catch {}
+      } catch { /* ignore */ }
     };
     const id = setInterval(check, 30000);
     return () => clearInterval(id);

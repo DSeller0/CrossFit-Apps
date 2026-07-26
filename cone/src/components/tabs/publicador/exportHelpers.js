@@ -4,7 +4,7 @@ import { monthGridCells } from '../../../public/lib/week.js';
 import { toISO } from '../../../utils/storage';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-export const pixClean = s => (s || '').normalize('NFD').replace(/[\u0300-\u036F]/g, '').replace(/[^a-zA-Z0-9 @._\-+\/]/g, '').trim();
+export const pixClean = s => (s || '').normalize('NFD').replace(/[\u0300-\u036F]/g, '').replace(/[^a-zA-Z0-9 @._\-+/]/g, '').trim();
 
 export function buildProgressionLines(ex) {
   const steps = ex.intensity?.steps || [];

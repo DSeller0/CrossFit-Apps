@@ -21,7 +21,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
       meta && React.createElement('div', { style: { fontSize: mfs(12, f), color: col.blockMeta || '#00b8d4', fontWeight: 700, textTransform: 'uppercase', marginTop: mfs(2, f), fontFamily: GF() } }, meta)
     ),
     React.createElement('div', { style: { background: blockBg, padding: `${Math.round(4 * f)}px ${pad}px ${Math.round(14 * f)}px` } },
-      (bl.exercises || []).filter(e => e.name || e.isComplex).map((ex, ei) => {
+      (bl.exercises || []).filter(e => e.name || e.isComplex).map((ex) => {
         if (ex.isComplex) {
           const movs = ex.complexMovements || [];
           return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(6 * f)}px 0`, borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}` } },
@@ -99,7 +99,7 @@ function MobileBlockB({ bl, fs, colors }) {
       meta && React.createElement('span', { style: { fontSize: mfs(12, f), fontWeight: 900, color: col.blockMetaText || '#000', background: col.blockMetaBg || '#00b8d4', padding: `${Math.round(3 * f)}px ${Math.round(10 * f)}px`, borderRadius: '2px', fontFamily: GF(), whiteSpace: 'nowrap' } }, meta)
     ),
     React.createElement('div', { style: { background: APP_CONFIG.mobileMegaManBg || '#000', padding: `${Math.round(8 * f)}px ${pad}px ${Math.round(14 * f)}px` } },
-      (bl.exercises || []).filter(e => e.name || e.isComplex).map((ex, ei) => {
+      (bl.exercises || []).filter(e => e.name || e.isComplex).map((ex) => {
         if (ex.isComplex) {
           const movs = ex.complexMovements || [];
           return React.createElement('div', { key: ex.id, style: { padding: `${Math.round(6 * f)}px 0`, borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}` } },
@@ -163,7 +163,7 @@ export function MobileMegaManExportView({ sessions, selectedDate, currentWeekDat
 }
 
 // ── MobileWeeklySingleDay ─────────────────────────────────────────────────────
-function MobileWeeklySingleDay({ date, sessions, f, col, variant }) {
+function MobileWeeklySingleDay({ date, sessions, f, variant }) {
   const dateKey = toISO(date);
   const s = (sessions[dateKey] || [])[0] || null;
   const dow = DAY_PT[date.getDay()];
