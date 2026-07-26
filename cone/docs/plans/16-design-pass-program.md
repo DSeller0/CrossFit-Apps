@@ -7,19 +7,26 @@ Feature-complete app; goal is the "Common" theme (#43) to show Cone beyond the c
 
 ## Session bundles (order of execution)
 
-| # | Bundle | Size | Content beyond fold-ins |
-|---|---|---|---|
-| B1 | schedule.html | L | Desktop card dead-zones, chip palette, sheet consistency; after #49 fix ships. Re-drive desktop-reg entry. |
-| B2 | results.html + leaderboard.html | M | Auto-select today/latest WOD (both), collapsed-card info density, re-log policy decision, cyan→teal |
-| B3 | me.html + athletes.html | M | First-visit picker layout; **decide: retheme athletes.html or retire into me/leaderboard**; "Scale"/"RPE" pt-BR |
-| B4 | index.html + timer.html + tv.html + recover.html | M | index desktop width, icon-language decision (emoji vs Tabler) applied to Nav, tv font-scale idea, radius squares |
-| C0 | SPA design standard | M | Card/button/input/spacing standard from theme tokens; button hierarchy (primary/secondary/destructive/ghost); confirm-modal policy; masked mm:ss input component (#35 absorbed); mockup cards in `cone/design/` — **gates C1–C5** |
-| C1 | Exercícios + Configurações + Agenda | M | Apply standard; remove "Salvar config.json"; Agenda chip legibility |
-| C2 | Atletas + Serviços | M | Apply standard; empty states; Serviços pane overflow; reserve #39 card slot |
-| C3 | Resultados (SPA) | M | Apply standard; 51 hex |
-| C4 | Criador | L | **#26 decomposition first (same or preceding session)**, then standard + header/destructive-action rework |
-| C5 | Publicador | L | **#25 decomposition first**, then standard; JULY→pt-BR export fix; dedupe "Mobile Semanal" labels; classify jsPDF hex as exempt |
-| — | #43 themes | L | Only after B/C: token-clean codebase, verified under 4 themes per page |
+*Shipped-state column added 2026-07-26 — this table had never been updated as sessions landed, so it still
+carried prerequisites that were long satisfied and an Agenda assignment that moved 4 days after it was written.*
+
+| # | Bundle | Item | Size | State | Content beyond fold-ins |
+|---|---|---|---|---|---|
+| B1 | schedule.html | #50 | L | ✅ [plans/18](./18-design-b1-schedule.md) | Desktop card dead-zones, chip palette, sheet consistency; after #49 fix ships. Re-drive desktop-reg entry. |
+| B2 | results.html + leaderboard.html | #51 | M | ✅ [plans/20](./20-design-b2-results-leaderboard.md) | Auto-select today/latest WOD (both), collapsed-card info density, re-log policy decision, cyan→teal |
+| B3 | me.html + athletes.html | #52 | M | ✅ [plans/21](./21-design-b3-me-athletes.md) | First-visit picker layout; **decided: athletes.html RETIRED to a redirect stub**; "Scale"/"RPE" pt-BR |
+| B4 | index.html + timer.html + tv.html + recover.html | #53 | M→L | ✅ [plans/31](./31-design-b4-public-finale.md) | index desktop width, icon-language decision (emoji vs Tabler) applied to Nav, tv font-scale idea, radius squares |
+| C0 | SPA design standard | #54 | M | ✅ [plans/33](./33-design-c0-spa-standard.md) | Card/button/input/spacing standard from theme tokens; button hierarchy; confirm-modal policy; masked mm:ss input (#35 absorbed) — **gates C1–C5** |
+| C1 | Exercícios + Configurações | #55/#87 | M→L | ✅ [plans/38](./38-design-c1-exercicios-config.md) | Apply standard; remove "Salvar config.json". **Agenda moved OFF this bundle to C5 on 2026-07-22** — it is `AgendaView`, which C5 restructures, so design-passing it here then immediately restructuring it was wasted work. |
+| C2 | Atletas + Serviços | #56 | M→L | ⏳ open | Apply standard; empty states; Serviços pane overflow; reserve #39 card slot. **Now also absorbs the Serviços → Afiliados restructure** ([plans/42](./42-afiliados-direction.md)). ⚠️ [plans/45](./45-effect-write-sweep.md) touches `Servicos.jsx` first. |
+| C3 | Resultados (SPA) | #57 | M | ⏳ open | Apply standard; 51 hex. ⚠️ **[plans/44](./44-resultados-decomposition.md) runs first** — 912 raw lines. |
+| C4 | Criador | #58 | L | ✅ [plans/37](./37-design-c4-criador.md) | #26 decomposition ([plans/35](./35-criador-decomposition.md)) + #92 text mode ([plans/36](./36-criador-text-mode.md)) ran first, as required. Standard + the 2026-07-21 layout brief. |
+| C5 | Publicador **+ Agenda** | #59 | L | ⏳ open | ✅ **#25 decomposition prerequisite SATISFIED** ([plans/39](./39-publicador-decomposition.md), `e957b57`) — this now inherits `publicador/AgendaView.jsx` (408 raw) instead of 838 lines buried in 2125. Then standard; `createElement`→JSX; JULY→pt-BR export fix; dedupe "Mobile Semanal" labels; classify jsPDF hex as exempt. |
+| — | #43 themes | #43 | L | ⏳ open | Only after B/C: token-clean codebase, verified under 4 themes per page |
+
+**All three remaining C-sessions are held behind the housekeeping pass** ([plans/43](./43-lint-floor-ci-gate.md)
+→ [44](./44-resultados-decomposition.md) → [45](./45-effect-write-sweep.md)) on the user's standing call
+that code health precedes design and feature work. None of the three is blocked *technically* any more.
 
 ## Rules for every session
 1. **Two lanes (WORKFLOW "Design work")** — this rule used to read "mockup-first: ASCII → `cone/design/` card → DesignSync → approval → implement", which the 2026-07-10 process reform (plans/19) superseded; plans/20 and plans/21 had already overridden it locally. Every remaining **B session and C1–C5 is Lane A**: the surfaces exist, so work **gallery-first — no static mockup**. Adjust the real component → all states in the gallery across 4 themes + both widths → `npm run design:cards` + sync → **stop at the approval gate**. Only **C0** (defines a net-new standard) and **#43** (net-new themes) are Lane B, i.e. actually mockup-first.

@@ -1,5 +1,7 @@
 # 41 — #74 · Gallery decomposition (no behavior change)
 
+> ✅ Done: `144a45b` · 2026-07-26 — see BACKLOG.md
+>
 > Planned 2026-07-26 from the [full review pass](../reviews/2026-07-26.md).
 > Run order: [39 Publicador](./39-publicador-decomposition.md) → [40 index.css triage](./40-index-css-triage.md) → **41 (this)**.
 > Last of the three code-debt items held in front of the Serviços (#56) and Agenda (#59)

@@ -1,5 +1,7 @@
 # 39 — #25 · Publicador decomposition (no behavior change)
 
+> ✅ Done: `e957b57` · 2026-07-26 — see BACKLOG.md
+>
 > Planned 2026-07-26 from the [full review pass](../reviews/2026-07-26.md).
 > Run order: **39 (this)** → [40 index.css triage](./40-index-css-triage.md) → [41 gallery decomposition](./41-gallery-decomposition.md).
 > The Serviços (#56 / C2) and Agenda (#59 / C5) **design passes are deliberately held**

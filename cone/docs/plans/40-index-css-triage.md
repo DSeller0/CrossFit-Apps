@@ -1,5 +1,7 @@
 # 40 — #99 · index.css triage (dead / tab-owned / global)
 
+> ✅ Done: `c56ff2c` · 2026-07-26 — see BACKLOG.md
+>
 > Planned 2026-07-26 from the [full review pass](../reviews/2026-07-26.md).
 > Run order: [39 Publicador](./39-publicador-decomposition.md) → **40 (this)** → [41 gallery](./41-gallery-decomposition.md).
 > Absorbs the CSS half of **#73**. The Serviços (#56) and Agenda (#59) design passes are held

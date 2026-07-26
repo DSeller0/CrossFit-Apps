@@ -41,7 +41,7 @@ Living inventory of every user-facing capability: where it lives, who consumes i
 | Publish/visibility (`session.public`), per-athlete sessions (`mainTraining`) | Criador | `sessions` | core / personal-training = Pro |
 | Athlete CRUD, levels, colors, PR/goal editing | Atletas | `athletes`, `goals_data` | core |
 | (#39 planned: per-athlete adaptations) | Atletas | `goals_data.adaptations` | Gate: Pro |
-| Exercise registry CRUD (146 entries: categories, video, defaults) | Exercícios | `exercise_registry` | core |
+| Exercise registry CRUD (**248** entries after #94's two rounds of prod additions — measured live 2026-07-26, see #96; the old "146" predated them: categories, video, defaults) | Exercícios | `exercise_registry` | core |
 | Coach profile + Pix payment config | Serviços | `coach_profile` | Gate: business |
 | Locations ("boxes") w/ hourly rates + per-local athletes | Serviços | `locations` | Gate: business |
 | Result registration for any athlete; Histórico/KPIs; leaderboard | Resultados | `results_v2` | core / KPIs = Pro |

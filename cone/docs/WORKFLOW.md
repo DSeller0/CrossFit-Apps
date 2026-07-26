@@ -47,6 +47,10 @@ New bug or feature → add a row to **Icebox**. Batch trivial ones; don't spin a
 
 **Docs are part of Done.** Shipping an item includes correcting any `CLAUDE.md` note or `BACKLOG.md` row the change invalidated. Stale docs cost every future session.
 
+⚠️ **This rule and ritual steps 4–5 were skipped three sessions running** (plans/39, 40, 41 — 2026-07-26). The board then claimed three shipped items were still Ready, In Progress pointed at a closed plan, and no Done entries existed. Cleaning that up cost a whole session. Steps 4–5 are ~5 minutes at the end of the session that has the context; they are not optional.
+
+**Build artifacts are part of Done too.** If a change touches `themes.css`, `index.css`, or any component the gallery renders, finish with **`npm run design:cards`** and commit the regenerated cards. plans/40 dropped `--lb-font` from `themes.css` and left all **9** design cards carrying the deleted token, because the cards inline `themes.css` at generation time. They are a build artifact — **never hand-edit one**; change the source and re-run.
+
 ## Review cadence
 
 The backlog gets *refilled* by running **`/app-review`** (portable skill in `~/.claude/skills/app-review/`) — a 9-dimension audit (UX walk, design consistency, code quality, architecture/contracts, security, performance, accessibility, testing/gates, docs hygiene) whose output is a dated report in `docs/reviews/` plus triaged Icebox rows. The review never changes code.
