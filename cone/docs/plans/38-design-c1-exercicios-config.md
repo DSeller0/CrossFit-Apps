@@ -1,12 +1,21 @@
 # 38 — #55 · Design pass C1 — Exercícios + Configurações (+ #87 registry & PR board)
 
-> 🟡 **Phase A shipped 2026-07-23 · `cab19c8`** — Exercícios + Configurações adopt C0
-> (Button/Input/ConfirmReview), the frozen totk-dark palette is gone, "Salvar
-> config.json" removed, native-button a11y, and #87's search + alphabetical-canonical
-> registry ordering (drag-reorder + A→Z retired). Live-verified 4 themes × 2 widths.
-> **Phase B (PR board → sub-cards) mockup synced to Claude Design**
-> (`design/mockups/38-me-pr-board-subcards.html`) — **STOPPED at the approval gate; the
-> `PrSection.jsx` build is post-approval.**
+> ✅ Done: `cab19c8` → `63d8394` → `3bf5bae` → `3b6a826` → `118f786` · 2026-07-26 — see BACKLOG.md
+
+> **All phases shipped.** Phase A `cab19c8` (Exercícios + Configurações adopt C0 —
+> Button/Input/ConfirmReview, the frozen totk-dark palette gone, "Salvar config.json"
+> removed, native-button a11y, and #87's search + alphabetical-canonical registry
+> ordering with drag-reorder + A→Z retired), scrollbar tokenize `63d8394`, Phase B
+> `3bf5bae` (me.html PR board → family cards + tiles + the #87 benchmark time-PR card),
+> direction mockups D1–D5 `3b6a826`, and the **Exercícios rework** `118f786` (mockup 45 —
+> family accordion/flat list, variation sub-groups, completeness indicator, new
+> `src/public/lib/exerciseGroups.js` + 15 tests). Live-verified 4 themes × 2 widths.
+>
+> Follow-ups the [2026-07-26 review](../reviews/2026-07-26.md) raised on this work — none
+> blocking, all filed: **#96** (the 3-pane proportions at 1280 and the empty-by-design WOD
+> categories filling the first phone screen), **#98** (the category taxonomy forked a third
+> way — `BLOCK_ORDER` vs `ALL_CATEGORIES`), **#101** (no tests for the tab's own helpers;
+> `initRegistry` writes during load).
 
 > C1 in the [design-pass program](./16-design-pass-program.md). Adopts the
 > [C0 standard](./33-design-c0-spa-standard.md) (shipped 2026-07-19) on two SPA tabs
