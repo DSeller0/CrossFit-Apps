@@ -1,1 +1,21 @@
 public-dist/
+
+# ── Build caches ──────────────────────────────────────────────────────────────
+# Vite's dep cache for the PUBLIC-pages config. That config sets `root` to the
+# repo root (see cone/vite.public.config.js), so its cache lands here rather than
+# under cone/ — which is why cone/.gitignore never caught it. ~17 MB.
+.vite/
+
+# ── Local session scratch ─────────────────────────────────────────────────────
+# Playwright MCP artifacts: console logs + page snapshots written while driving
+# the app in a browser. Regenerated on every run.
+cone/.playwright-mcp/
+
+# Supabase Studio's auto-saved "Untitled query NNN.sql" snippets.
+cone/supabase/snippets/
+
+# ── Audit scratch — REAL PROD DATA, never commit (#100) ───────────────────────
+# Pulled down while auditing prod (e.g. scripts/audit-session-registry.mjs).
+# rv2.json holds results_v2 rows keyed by athlete_id; ath.json an athletes blob.
+cone/ath.json
+cone/rv2.json
