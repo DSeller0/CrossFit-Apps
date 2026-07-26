@@ -1,5 +1,7 @@
 # 43 — #32-A · Lint floor + CI gate
 
+> ✅ Done: `bc3dcea` · 2026-07-26 — see BACKLOG.md
+
 > Planned 2026-07-26 from the housekeeping pass. Run order: **43 (this)** →
 > [44 Resultados decomposition](./44-resultados-decomposition.md) →
 > [45 effect-write sweep](./45-effect-write-sweep.md).
