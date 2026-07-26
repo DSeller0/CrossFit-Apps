@@ -24,10 +24,10 @@ carried prerequisites that were long satisfied and an Agenda assignment that mov
 | C5 | Publicador **+ Agenda** | #59 | L | ⏳ open | ✅ **#25 decomposition prerequisite SATISFIED** ([plans/39](./39-publicador-decomposition.md), `e957b57`) — this now inherits `publicador/AgendaView.jsx` (408 raw) instead of 838 lines buried in 2125. Then standard; `createElement`→JSX; JULY→pt-BR export fix; dedupe "Mobile Semanal" labels; classify jsPDF hex as exempt. |
 | — | #43 themes | #43 | L | ⏳ open | Only after B/C: token-clean codebase, verified under 4 themes per page |
 
-**All three remaining C-sessions are held behind the housekeeping pass** ([plans/43](./43-lint-floor-ci-gate.md)
-and [44](./44-resultados-decomposition.md), both shipped 2026-07-26 → [45](./45-effect-write-sweep.md), still open)
-on the user's standing call that code health precedes design and feature work. None of the three is blocked
-*technically* any more.
+**The housekeeping pass that held back all three remaining C-sessions is now fully shipped**
+([43](./43-lint-floor-ci-gate.md), [44](./44-resultados-decomposition.md), [45](./45-effect-write-sweep.md) —
+all 2026-07-26). None of the three C-sessions is blocked technically or by the user's code-health-first call
+any more; nothing has been picked from Ready yet.
 
 ## Rules for every session
 1. **Two lanes (WORKFLOW "Design work")** — this rule used to read "mockup-first: ASCII → `cone/design/` card → DesignSync → approval → implement", which the 2026-07-10 process reform (plans/19) superseded; plans/20 and plans/21 had already overridden it locally. Every remaining **B session and C1–C5 is Lane A**: the surfaces exist, so work **gallery-first — no static mockup**. Adjust the real component → all states in the gallery across 4 themes + both widths → `npm run design:cards` + sync → **stop at the approval gate**. Only **C0** (defines a net-new standard) and **#43** (net-new themes) are Lane B, i.e. actually mockup-first.

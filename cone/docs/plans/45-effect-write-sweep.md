@@ -1,5 +1,8 @@
 # 45 — #109 · Effect-write sweep (read paths that write)
 
+> ✅ Done: `32063e9` · 2026-07-26 — see BACKLOG.md. Also fully closes #101. Surfaced a bigger,
+> unscoped instance of the same class in `SyncContext.jsx` — filed as #111, not fixed here.
+
 > Planned 2026-07-26 from the housekeeping pass. Run order:
 > [43 lint floor + CI gate](./43-lint-floor-ci-gate.md) →
 > [44 Resultados decomposition](./44-resultados-decomposition.md) → **45 (this)**.
