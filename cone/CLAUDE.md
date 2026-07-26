@@ -336,7 +336,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 
 - Dev: `supabase start` (once per Docker session) then `npm run dev` inside `cone/` — talks to the local stack, never prod
 - Build: `npm run build` → `dist/`
-- Tests: `npm test` (478 tests across 14 files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js, useClassTracking.test.js, goals.test.js, meHelpers.test.js, boxScope.test.js, entries.test.js, storage.test.js, registry.test.js, blockModel.test.js, textFormat.test.js, exerciseGroups.test.js)
+- Tests: `npm test` (530 tests across 14 files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js, useClassTracking.test.js, goals.test.js, meHelpers.test.js, boxScope.test.js, entries.test.js, storage.test.js, registry.test.js, blockModel.test.js, textFormat.test.js, exerciseGroups.test.js)
 - CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder)
 
 **Chunk hash 404 (GitHub Pages limitation):** After every CI deploy, lazy-loaded chunk filenames change. Old hashes 404 until users hard-refresh (Ctrl+Shift+R). GitHub Pages cannot set `Cache-Control: no-cache`. This is structural — do not re-diagnose, just document and tell the user to hard-refresh.
