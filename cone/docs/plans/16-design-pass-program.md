@@ -19,14 +19,15 @@ carried prerequisites that were long satisfied and an Agenda assignment that mov
 | C0 | SPA design standard | #54 | M | ✅ [plans/33](./33-design-c0-spa-standard.md) | Card/button/input/spacing standard from theme tokens; button hierarchy; confirm-modal policy; masked mm:ss input (#35 absorbed) — **gates C1–C5** |
 | C1 | Exercícios + Configurações | #55/#87 | M→L | ✅ [plans/38](./38-design-c1-exercicios-config.md) | Apply standard; remove "Salvar config.json". **Agenda moved OFF this bundle to C5 on 2026-07-22** — it is `AgendaView`, which C5 restructures, so design-passing it here then immediately restructuring it was wasted work. |
 | C2 | Atletas + Serviços | #56 | M→L | ⏳ open | Apply standard; empty states; Serviços pane overflow; reserve #39 card slot. **Now also absorbs the Serviços → Afiliados restructure** ([plans/42](./42-afiliados-direction.md)). ⚠️ [plans/45](./45-effect-write-sweep.md) touches `Servicos.jsx` first. |
-| C3 | Resultados (SPA) | #57 | M | ⏳ open | Apply standard; 51 hex. ⚠️ **[plans/44](./44-resultados-decomposition.md) runs first** — 912 raw lines. |
+| C3 | Resultados (SPA) | #57 | M | ⏳ open | Apply standard; 51 hex. ✅ **[plans/44](./44-resultados-decomposition.md) shipped 2026-07-26** — `Resultados.jsx` 912 → 27-line shell over `resultados/`. |
 | C4 | Criador | #58 | L | ✅ [plans/37](./37-design-c4-criador.md) | #26 decomposition ([plans/35](./35-criador-decomposition.md)) + #92 text mode ([plans/36](./36-criador-text-mode.md)) ran first, as required. Standard + the 2026-07-21 layout brief. |
 | C5 | Publicador **+ Agenda** | #59 | L | ⏳ open | ✅ **#25 decomposition prerequisite SATISFIED** ([plans/39](./39-publicador-decomposition.md), `e957b57`) — this now inherits `publicador/AgendaView.jsx` (408 raw) instead of 838 lines buried in 2125. Then standard; `createElement`→JSX; JULY→pt-BR export fix; dedupe "Mobile Semanal" labels; classify jsPDF hex as exempt. |
 | — | #43 themes | #43 | L | ⏳ open | Only after B/C: token-clean codebase, verified under 4 themes per page |
 
 **All three remaining C-sessions are held behind the housekeeping pass** ([plans/43](./43-lint-floor-ci-gate.md)
-→ [44](./44-resultados-decomposition.md) → [45](./45-effect-write-sweep.md)) on the user's standing call
-that code health precedes design and feature work. None of the three is blocked *technically* any more.
+and [44](./44-resultados-decomposition.md), both shipped 2026-07-26 → [45](./45-effect-write-sweep.md), still open)
+on the user's standing call that code health precedes design and feature work. None of the three is blocked
+*technically* any more.
 
 ## Rules for every session
 1. **Two lanes (WORKFLOW "Design work")** — this rule used to read "mockup-first: ASCII → `cone/design/` card → DesignSync → approval → implement", which the 2026-07-10 process reform (plans/19) superseded; plans/20 and plans/21 had already overridden it locally. Every remaining **B session and C1–C5 is Lane A**: the surfaces exist, so work **gallery-first — no static mockup**. Adjust the real component → all states in the gallery across 4 themes + both widths → `npm run design:cards` + sync → **stop at the approval gate**. Only **C0** (defines a net-new standard) and **#43** (net-new themes) are Lane B, i.e. actually mockup-first.

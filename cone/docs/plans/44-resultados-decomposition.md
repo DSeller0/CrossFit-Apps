@@ -1,5 +1,7 @@
 # 44 — #74-B · `Resultados.jsx` decomposition (no behavior change)
 
+> ✅ Done: `53e6521` · 2026-07-26 — see BACKLOG.md. `Criador.jsx` deferred, not folded in — see #74-C.
+
 > Planned 2026-07-26 from the housekeeping pass. Run order:
 > [43 lint floor + CI gate](./43-lint-floor-ci-gate.md) → **44 (this)** →
 > [45 effect-write sweep](./45-effect-write-sweep.md).
