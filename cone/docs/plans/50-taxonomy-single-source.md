@@ -1,5 +1,7 @@
 # 50 — #98 · One source for the 15-category taxonomy
 
+> ✅ Done: `f936a87` · 2026-07-27 — see BACKLOG.md
+
 > Planned 2026-07-27, **Tier 2** of the housekeeping program. Run order:
 > [49 prettier baseline](./49-prettier-format-baseline.md) → **50 (this)** →
 > [51 react-hooks triage](./51-react-hooks-triage.md).
