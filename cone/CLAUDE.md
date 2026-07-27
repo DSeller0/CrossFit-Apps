@@ -353,7 +353,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 
 - Dev: `supabase start` (once per Docker session) then `npm run dev` inside `cone/` — talks to the local stack, never prod
 - Build: `npm run build` → `dist/`
-- Tests: `npm test` (530 tests across 14 files: wod.test.js, week.test.js, pix.test.js, resultMappers.test.js, useClassTracking.test.js, goals.test.js, meHelpers.test.js, boxScope.test.js, entries.test.js, storage.test.js, registry.test.js, blockModel.test.js, textFormat.test.js, exerciseGroups.test.js)
+- Tests: `npm test` (**580 tests across 17 files**, re-measured 2026-07-27 — the previous "530 / 14" was stale: wod, week, sessions, goals, registry, boxScope, exerciseGroups (`public/lib/`) · entries (`public/`) · meHelpers (`public/me/`) · pix, resultMappers, storage (`utils/`) · blockModel, textFormat (`criador/`) · exerciciosHelpers, resultadosHelpers (`components/tabs/`) · useClassTracking (`hooks/`))
 - Lint: `npm run lint` (`eslint.config.js`) — gated in CI (below); floor is the react-hooks correctness cluster (#108), downgraded to `warn` so it still prints and ratchets rather than going silent
 - CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder); also runs `npm test` then `npm run lint` (plans/43, #32) — a lint regression fails the build same as a test failure
 
