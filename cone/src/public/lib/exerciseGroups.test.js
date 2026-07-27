@@ -8,8 +8,9 @@ import {
   completeness,
 } from './exerciseGroups.js'
 
-// The 15 registry categories (Exercicios.jsx BLOCK_ORDER) — the family map must cover
-// each exactly once. Duplicated here as a fixed contract so the test stays client-free.
+// The 15 registry categories (exerciciosHelpers.js BLOCK_ORDER, itself a re-export of
+// ALL_CATEGORIES below — #98) — the family map must cover each exactly once. Duplicated
+// here as a fixed contract so the test stays client-free.
 const CATEGORIES = [
   'HIIT',
   'MetCon',

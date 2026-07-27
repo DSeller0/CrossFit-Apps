@@ -6,7 +6,18 @@ import {
   blockSummary,
   stationsCapStr,
   loadBadgeStr,
+  TYPE_CONFIG,
 } from './blockModel.js'
+import { ALL_CATEGORIES } from '../../../public/lib/exerciseGroups.js'
+
+// #98 — TYPE_CONFIG is hand-authored (per-type icon/colour/desc), not derived from
+// ALL_CATEGORIES, so a new category can silently fall through to the grey
+// DEFAULT_TYPE_CFG ("Bloco livre") in TypePicker. This guards that it never does.
+describe('TYPE_CONFIG', () => {
+  test('has an entry for every registry category', () => {
+    expect(new Set(Object.keys(TYPE_CONFIG))).toEqual(new Set(ALL_CATEGORIES))
+  })
+})
 
 describe('materializeEx', () => {
   const reg = {

@@ -1,3 +1,5 @@
+import { ALL_CATEGORIES } from '../public/lib/exerciseGroups.js'
+
 export { DAY_PT as DSHORT } from '../public/lib/week.js'
 
 export const APP_CONFIG = {
@@ -12,24 +14,7 @@ export const APP_CONFIG = {
   athleteLevels: ['Iniciante', 'Intermediário', 'Avançado', 'Competidor'],
   athleteGoals: ['Saúde geral', 'Força', 'Condicionamento', 'Competição'],
   blockColors: {},
-  blockNames: [
-    '-',
-    'HIIT',
-    'MetCon',
-    'EMOM',
-    'For Time',
-    'AMRAP',
-    'Estações',
-    'Força',
-    'LPO',
-    'Core',
-    'Acessórios',
-    'Aquecimento',
-    'Skill',
-    'Cardio',
-    'Mobilidade',
-    'Benchmark',
-  ],
+  blockNames: ['-', ...ALL_CATEGORIES],
   appTitle: 'Cone — Treinos',
   appDescription: 'Criador e publicador de treinos Cone',
   scheduleTitle: 'Cone — Treinos',
@@ -126,7 +111,7 @@ export const PLC = {
   Benchmark: 'p-bm',
 }
 
-const ECOL_BASE = {
+export const ECOL_BASE = {
   // Red family
   WOD: { text: '#d04848', bg: '#1c0808' },
   HIIT: { text: '#e05848', bg: '#1e0a0a' },

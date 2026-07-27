@@ -22,7 +22,7 @@ export function isWodBlock(bl) {
 // both hand-rolled this identically before consolidation.
 export const TIMER_TYPES = ['For Time', 'AMRAP', 'EMOM', 'Benchmark']
 
-const BLOCK_FAMILY = {
+export const BLOCK_FAMILY = {
   WOD: 'red',
   HIIT: 'red',
   MetCon: 'red',

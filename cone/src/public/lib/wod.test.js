@@ -9,7 +9,18 @@ import {
   perfStr,
   groupProgressionSteps,
   goalStr,
+  BLOCK_FAMILY,
 } from './wod.js'
+import { ALL_CATEGORIES } from './exerciseGroups.js'
+
+// #98 — BLOCK_FAMILY is a hand-authored presentation map (block color family), not
+// derived from ALL_CATEGORIES. It legitimately carries a 16th key, 'WOD' (a block
+// *label*, not a registry category), so this asserts coverage, not exact key equality.
+describe('BLOCK_FAMILY', () => {
+  test('covers every registry category', () => {
+    ALL_CATEGORIES.forEach(c => expect(BLOCK_FAMILY).toHaveProperty(c))
+  })
+})
 
 describe('blkLabel', () => {
   test('label and type differ → label · type', () => {
