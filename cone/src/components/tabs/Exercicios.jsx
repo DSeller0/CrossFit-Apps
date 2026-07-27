@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { saveRegistry } from '../../utils/storage'
 import { normExName } from '../../public/lib/registry.js'
 import { BLOCK_ORDER, getExName, sortCat, initRegistry } from './exerciciosHelpers.js'
@@ -144,15 +144,20 @@ export default function ExerciciosTab() {
     return Object.values(map).sort((a, b) => getExName(a).localeCompare(getExName(b), 'pt'))
   }, [registry])
 
-  const matchesSearch = ex => {
-    const q = normExName(search)
-    return !q || normExName(getExName(ex)).includes(q)
-  }
+  // useCallback so the two memos below can depend on the predicate itself rather than
+  // on `search` behind its back — same recompute cadence, honest deps array.
+  const matchesSearch = useCallback(
+    ex => {
+      const q = normExName(search)
+      return !q || normExName(getExName(ex)).includes(q)
+    },
+    [search],
+  )
 
   // Category-selected list (alpha-canonical already), search-filtered.
   const visibleExs = useMemo(
     () => (selBlock === null ? allEx : registry[selBlock] || []).filter(matchesSearch),
-    [registry, selBlock, allEx, search],
+    [registry, selBlock, allEx, matchesSearch],
   )
 
   // Todos view: one section per category (an exercise shows under each of its categories,
@@ -166,7 +171,7 @@ export default function ExerciciosTab() {
         exs: (registry[cat] || []).filter(matchesSearch),
       }))
       .filter(sec => sec.exs.length)
-  }, [registry, selBlock, search])
+  }, [registry, selBlock, matchesSearch])
 
   // ── Navigation ──────────────────────────────────────────────────────────────
   const goToType = block => {
@@ -919,7 +924,11 @@ export default function ExerciciosTab() {
     </ConfirmReview>
   )
 
-  const Footer = () => (
+  // An element, not a component — same shape as VideoModal/SaveModal/DeleteConfirm above.
+  // Declared as `const Footer = () => …` and used as `<Footer />` it was a component
+  // re-created every render, so React remounted its subtree each time (react-hooks/
+  // static-components). Nothing here holds state, but the mobile back button below did.
+  const Footer = (
     <div className={s.footer}>
       <span className={s.footerCount}>
         {BLOCK_ORDER.length} tipos · {allEx.length} exercícios
@@ -929,7 +938,9 @@ export default function ExerciciosTab() {
 
   // ── Mobile layout (drilldown) ────────────────────────────────────────────────
   if (isMobile) {
-    const BackBtn = ({ label }) => (
+    // A render helper called as a function, not a component rendered as <BackBtn/> —
+    // see the Footer note above.
+    const backBtn = label => (
       <button type="button" className={s.backBtn} onClick={goBack}>
         <i className="ti ti-chevron-left" /> {label}
       </button>
@@ -939,17 +950,17 @@ export default function ExerciciosTab() {
         {pane === 0 && renderPane1()}
         {pane === 1 && (
           <div className={s.mobilePane}>
-            <BackBtn label="Categorias" />
+            {backBtn('Categorias')}
             {renderPane2()}
           </div>
         )}
         {pane === 2 && (
           <div className={s.mobilePane}>
-            <BackBtn label={selBlock || 'Todos'} />
+            {backBtn(selBlock || 'Todos')}
             {renderPane3()}
           </div>
         )}
-        <Footer />
+        {Footer}
         {VideoModal}
         {SaveModal}
         {DeleteConfirm}
@@ -963,7 +974,7 @@ export default function ExerciciosTab() {
       <div className={s.col1}>{renderPane1()}</div>
       <div className={s.col2}>{renderPane2()}</div>
       <div className={s.col3}>{renderPane3()}</div>
-      <Footer />
+      {Footer}
       {VideoModal}
       {SaveModal}
       {DeleteConfirm}
