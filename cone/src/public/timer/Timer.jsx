@@ -132,10 +132,27 @@ export default function Timer() {
   const cfgRef = useRef(cfg)
   const splitsRef = useRef(splits)
   const finSecsRef = useRef(finalSecs)
+
+  // ⚠️ These four are NOT a plain latest-ref mirror, and that is why they are suppressed
+  // rather than moved into an effect (#108, plans/51 batch 5). They are the timer's
+  // authoritative, synchronously-written state:
+  //   · every action handler writes the ref BEFORE the matching setState — see
+  //     startTimer/pauseTimer/resumeTimer/doFinishRaw (`statusRef.current = 'running'`
+  //     then `setStatus('running')`), so the ref is correct the instant the click returns;
+  //   · the 250ms tick reads them and pushes nothing into React but `forceUpdate()`;
+  //   · the render body reads them too — `const e = elapsedRaw()` near the bottom
+  //     recomputes elapsed from these refs on every frame.
+  // The rule is right in principle: a render React discards would still have written them.
+  // But the mechanical fix (write from an effect) lands the value one frame AFTER the
+  // render that reads it, on a clock projected on the gym wall mid-class. The real fix is
+  // to pick ONE source of truth for the clock instead of keeping refs and state in step by
+  // hand — a rewrite of this component's state model, not a lint cleanup. Filed, not done.
+  /* eslint-disable react-hooks/refs */
   statusRef.current = status
   cfgRef.current = cfg
   splitsRef.current = splits
   finSecsRef.current = finalSecs
+  /* eslint-enable react-hooks/refs */
 
   // "Latest ref" pattern: tick function always reads newest version
   const tickFnRef = useRef(null)
@@ -161,6 +178,10 @@ export default function Timer() {
     const st = statusRef.current
     if (st === 'ready' || st === 'cfg' || st === 'getready') return 0
     if (st === 'finished') return finSecsRef.current
+    // Reading the wall clock IS this function — it is a stopwatch, and it is called from
+    // the render body on purpose (the 250ms tick only calls forceUpdate; the elapsed value
+    // is derived fresh each frame rather than round-tripped through state).
+    // eslint-disable-next-line react-hooks/purity
     const now = st === 'paused' ? pauseStart.current : Date.now()
     return Math.max(0, (now - startEpoch.current - pausedMs.current) / 1000)
   }
@@ -273,6 +294,10 @@ export default function Timer() {
     }
   }
 
+  // Latest-ref for the interval (declared above). Same reasoning as the statusRef/cfgRef
+  // block near the top of this component — the interval must call the newest closure, and
+  // the write has to land in the render that created it, not one frame later.
+  // eslint-disable-next-line react-hooks/refs
   tickFnRef.current = () => {
     if (statusRef.current !== 'running') return
     const c = cfgRef.current,
@@ -317,6 +342,9 @@ export default function Timer() {
       totalSecs: fe,
       splits: currentSplits,
       date: new Date().toISOString().slice(0, 10),
+      // doFinishRaw runs from the tick / the Finalizar button, never during render — the
+      // rule flags any Date.now() reachable from a component-scoped function.
+      // eslint-disable-next-line react-hooks/purity
       timestamp: Date.now(),
     })
     localStorage.removeItem(K_STATE)
@@ -330,6 +358,8 @@ export default function Timer() {
 
   // ── Actions ──────────────────────────────────────────────────────────────
   function startTimer() {
+    // Click handler, not render — see the note in doFinishRaw.
+    // eslint-disable-next-line react-hooks/purity
     startEpoch.current = Date.now()
     pausedMs.current = 0
     pauseStart.current = 0
@@ -378,6 +408,8 @@ export default function Timer() {
 
   function pauseTimer() {
     if (statusRef.current !== 'running') return
+    // Click handler, not render — see the note in doFinishRaw.
+    // eslint-disable-next-line react-hooks/purity
     pauseStart.current = Date.now()
     stopTick()
     statusRef.current = 'paused'
@@ -386,6 +418,8 @@ export default function Timer() {
   }
   function resumeTimer() {
     if (statusRef.current !== 'paused') return
+    // Click handler, not render — see the note in doFinishRaw.
+    // eslint-disable-next-line react-hooks/purity
     pausedMs.current += Date.now() - pauseStart.current
     pauseStart.current = 0
     statusRef.current = 'running'
@@ -531,9 +565,14 @@ export default function Timer() {
   }, [])
 
   // ── Render values ────────────────────────────────────────────────────────
+  // These three read the authoritative refs during render, by design — see the block note
+  // at the top of the component. This is what makes the displayed time correct on the very
+  // frame a handler changes the timer's state.
+  /* eslint-disable react-hooks/refs */
   const e = elapsedRaw()
   const bt = cfg.blockType
   const cap = capSecs(cfg)
+  /* eslint-enable react-hooks/refs */
   const isPaused = status === 'paused'
   const exes = cfg.exercises || []
 
@@ -548,6 +587,8 @@ export default function Timer() {
   }
   const disp = getDisplay()
 
+  // Reaches capSecs() -> cfgRef during render; same design note as above.
+  // eslint-disable-next-line react-hooks/refs
   const progress = ringProgressRaw(e, cfg)
   const rOffset = +(RING_C * (1 - progress)).toFixed(1)
   const rColor = isPaused ? 'var(--dim)' : ringColor_s()
