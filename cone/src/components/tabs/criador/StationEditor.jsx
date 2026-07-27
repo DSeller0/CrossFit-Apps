@@ -181,7 +181,7 @@ export function StationEditor({ block, onUpdate }) {
                   }
                   onDelete={() => delStationEx(si, ex.id)}
                   canDelete={(st.exercises || []).length > 1}
-                  dragIdx={noopDragRef}
+                  dragIdxRef={noopDragRef}
                   setDragIdx={() => {}}
                   dragOverIdx={null}
                   setDragOverIdx={() => {}}

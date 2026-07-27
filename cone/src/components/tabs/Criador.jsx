@@ -500,7 +500,12 @@ function TrainingCreator({
     })
   }
 
-  const dragBlkIdx = useRef(null)
+  // Named *Ref because eslint-plugin-react-hooks identifies refs by that suffix: passed
+  // down as a prop, an unsuffixed ref reads to the rule as a plain (immutable) prop and
+  // every `.current =` in a child's drag handler trips react-hooks/immutability. Writing
+  // a ref from an event handler is correct — drag state must be readable synchronously in
+  // `drop` and must not re-render on every dragover — so the name is the fix, not a disable.
+  const dragBlkIdxRef = useRef(null)
   const [dragOverBlkIdx, setDragOverBlkIdx] = useState(null)
   const reorderBlocks = (fromIdx, toIdx) => {
     if (fromIdx === toIdx || fromIdx === null || toIdx === null) return
@@ -1071,7 +1076,7 @@ function TrainingCreator({
                           onToggleCollapse={() =>
                             setCollapsedBlocks(p => ({ ...p, [bl.id]: !p[bl.id] }))
                           }
-                          dragBlkIdx={dragBlkIdx}
+                          dragBlkIdxRef={dragBlkIdxRef}
                           dragOverBlkIdx={dragOverBlkIdx}
                           setDragOverBlkIdx={setDragOverBlkIdx}
                           reorderBlocks={reorderBlocks}

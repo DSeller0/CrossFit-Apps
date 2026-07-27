@@ -21,7 +21,8 @@ export function ExerciseRow({
   onUpdate,
   onDelete,
   canDelete,
-  dragIdx,
+  // *Ref suffix — see the note on Criador's dragBlkIdxRef.
+  dragIdxRef,
   dragOverIdx,
   setDragOverIdx,
   myIdx,
@@ -212,9 +213,9 @@ export function ExerciseRow({
       onDrop={e => {
         e.preventDefault()
         setDragOverIdx(null)
-        if (dragIdx.current !== null && dragIdx.current !== myIdx) {
-          onUpdate(null, dragIdx.current, myIdx)
-          dragIdx.current = null
+        if (dragIdxRef.current !== null && dragIdxRef.current !== myIdx) {
+          onUpdate(null, dragIdxRef.current, myIdx)
+          dragIdxRef.current = null
         }
       }}
     >
@@ -230,12 +231,12 @@ export function ExerciseRow({
           draggable
           onDragStart={e => {
             e.stopPropagation()
-            dragIdx.current = myIdx
+            dragIdxRef.current = myIdx
             e.dataTransfer.effectAllowed = 'move'
             e.dataTransfer.setData('text/plain', String(myIdx))
           }}
           onDragEnd={() => {
-            dragIdx.current = null
+            dragIdxRef.current = null
             setDragOverIdx(null)
           }}
         />

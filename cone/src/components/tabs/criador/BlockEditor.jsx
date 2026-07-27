@@ -25,7 +25,7 @@ export function BlockEditor({
   onCopy,
   collapsed,
   onToggleCollapse,
-  dragBlkIdx,
+  dragBlkIdxRef,
   dragOverBlkIdx,
   setDragOverBlkIdx,
   reorderBlocks,
@@ -37,7 +37,8 @@ export function BlockEditor({
   const [bmSaveFlash, setBmSaveFlash] = useState(false)
   const [textMode, setTextMode] = useState(false)
   const [pendingDelEx, setPendingDelEx] = useState(null)
-  const dragExIdx = useRef(null)
+  // *Ref suffix for the same reason as Criador's dragBlkIdxRef — see the note there.
+  const dragExIdxRef = useRef(null)
   const [dragOverExIdx, setDragOverExIdx] = useState(null)
 
   const cfg = getTypeCfg(block.type)
@@ -145,7 +146,7 @@ export function BlockEditor({
       }}
       onDragOver={e => {
         e.preventDefault()
-        if (dragBlkIdx?.current !== null && dragBlkIdx?.current !== blockIdx)
+        if (dragBlkIdxRef?.current !== null && dragBlkIdxRef?.current !== blockIdx)
           setDragOverBlkIdx?.(blockIdx)
       }}
       onDragLeave={e => {
@@ -153,11 +154,11 @@ export function BlockEditor({
       }}
       onDrop={e => {
         e.preventDefault()
-        const from = dragBlkIdx?.current
+        const from = dragBlkIdxRef?.current
         setDragOverBlkIdx?.(null)
         if (from !== null && from !== undefined && from !== blockIdx)
           reorderBlocks?.(from, blockIdx)
-        if (dragBlkIdx) dragBlkIdx.current = null
+        if (dragBlkIdxRef) dragBlkIdxRef.current = null
       }}
     >
       {/* ── Collapsed bar ── */}
@@ -171,12 +172,12 @@ export function BlockEditor({
           onKeyDown={moveByKey}
           draggable
           onDragStart={e => {
-            if (dragBlkIdx) dragBlkIdx.current = blockIdx
+            if (dragBlkIdxRef) dragBlkIdxRef.current = blockIdx
             e.dataTransfer.effectAllowed = 'move'
             e.dataTransfer.setData('text/plain', String(blockIdx))
           }}
           onDragEnd={() => {
-            if (dragBlkIdx) dragBlkIdx.current = null
+            if (dragBlkIdxRef) dragBlkIdxRef.current = null
             setDragOverBlkIdx?.(null)
           }}
         >
@@ -365,12 +366,12 @@ export function BlockEditor({
                   onKeyDown={moveByKey}
                   draggable
                   onDragStart={e => {
-                    if (dragBlkIdx) dragBlkIdx.current = blockIdx
+                    if (dragBlkIdxRef) dragBlkIdxRef.current = blockIdx
                     e.dataTransfer.effectAllowed = 'move'
                     e.dataTransfer.setData('text/plain', String(blockIdx))
                   }}
                   onDragEnd={() => {
-                    if (dragBlkIdx) dragBlkIdx.current = null
+                    if (dragBlkIdxRef) dragBlkIdxRef.current = null
                     setDragOverBlkIdx?.(null)
                   }}
                 >
@@ -471,7 +472,7 @@ export function BlockEditor({
                             onUpdate={handleExUpdate}
                             onDelete={() => delEx(ex.id)}
                             canDelete={block.exercises.length > 1}
-                            dragIdx={dragExIdx}
+                            dragIdxRef={dragExIdxRef}
                             setDragIdx={() => {}}
                             dragOverIdx={dragOverExIdx}
                             setDragOverIdx={setDragOverExIdx}

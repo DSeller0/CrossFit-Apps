@@ -195,6 +195,9 @@ export default function Schedule() {
       if (cfgRes?.ok) {
         try {
           const cfg = await cfgRes.json()
+          // Setting the tab title has no method form — the property assignment is the
+          // whole API — and this runs inside an async config fetch, not during render.
+          // eslint-disable-next-line react-hooks/immutability
           if (cfg.scheduleTitle || cfg.appTitle) document.title = cfg.scheduleTitle || cfg.appTitle
           if (cfg.restDayLabel) restLbl = cfg.restDayLabel
         } catch {
@@ -466,7 +469,10 @@ export default function Schedule() {
     } catch {
       /* ignore */
     }
-    location.href = 'timer.html?src=sched'
+    // location.assign(), not `location.href =` — identical navigation (both push a
+    // history entry), but a method call rather than an assignment to a browser global,
+    // which react-hooks/immutability treats as an unmodifiable value.
+    location.assign('timer.html?src=sched')
   }
 
   function doOpenLog(sess, dateKey, aths, athId, prefill = null, onlyBlockId = null) {

@@ -445,13 +445,17 @@ export default function Timer() {
     const h = loadHist(),
       e = h[i]
     if (!e) return
-    location.href = buildScheduleUrl(
-      e.sessionId,
-      e.sessionDate,
-      e.blockId,
-      e.athleteId,
-      e.totalTime,
-      e.splits?.length || '',
+    // location.assign(), not `location.href =` — identical navigation, but a method call
+    // rather than an assignment to a browser global (react-hooks/immutability).
+    location.assign(
+      buildScheduleUrl(
+        e.sessionId,
+        e.sessionDate,
+        e.blockId,
+        e.athleteId,
+        e.totalTime,
+        e.splits?.length || '',
+      ),
     )
   }
 

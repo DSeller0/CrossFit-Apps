@@ -240,7 +240,11 @@ export default function TvController({ sessions: propSessions }) {
   }
 
   async function handleStartTimer() {
-    rotation.rotationCountRef.current = 0
+    // Destructured so the rule sees a *Ref-suffixed binding: reached as
+    // `rotation.rotationCountRef` it flags `rotation` (the hook's return object) as an
+    // unmodifiable value. Same naming fix as Criador's dragBlkIdxRef.
+    const { rotationCountRef } = rotation
+    rotationCountRef.current = 0
     await timer.startTimer()
   }
   async function handleResetTimer() {
