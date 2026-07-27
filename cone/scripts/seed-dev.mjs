@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Run from cone/: node scripts/seed-dev.mjs
-// Snapshots prod's 11 KV-blob tables + results_v2 into the local Supabase stack
+// Snapshots prod's 10 KV-blob tables + results_v2 into the local Supabase stack
 // (supabase start). Read-only against prod (anon key); writes locally via the
 // service-role key so RLS doesn't get in the way. allowed_emails is already
 // seeded by supabase/migrations/0001_init.sql on every fresh `supabase start`.
@@ -28,7 +28,6 @@ function readEnv(file) {
 const BLOB_TABLES = [
   'sessions',
   'athletes',
-  'results',
   'events',
   'locations',
   'coach_profile',

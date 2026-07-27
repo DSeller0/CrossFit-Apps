@@ -16,10 +16,10 @@ vi.mock('./supabase', () => {
   const names = [
     'dbSaveSessions', 'dbSaveAthletes', 'dbSaveResults', 'dbSaveEvents',
     'dbSaveLocations', 'dbSaveCoach', 'dbSaveSettings', 'dbSaveRegistry',
-    'dbSaveGoalsData', 'dbSaveLBColors', 'dbSaveTemplates',
+    'dbSaveGoalsData', 'dbSaveTemplates',
     'dbLoadSessions', 'dbLoadAthletes', 'dbLoadResults', 'dbLoadEvents',
     'dbLoadLocations', 'dbLoadCoach', 'dbLoadSettings', 'dbLoadRegistry',
-    'dbLoadGoalsData', 'dbLoadLBColors', 'dbLoadTemplates', 'dbGetUpdatedAt',
+    'dbLoadGoalsData', 'dbLoadTemplates', 'dbGetUpdatedAt',
   ]
   return Object.fromEntries(names.map(n => [n, vi.fn()]))
 })
@@ -36,7 +36,6 @@ import {
   cacheSettingsLS, saveSettings, LS_SETTINGS,
   cacheRegistryLS, saveRegistry, LS_REGISTRY,
   cacheGoalsDataLS, saveGoalsData, LS_GOALS,
-  cacheLBColorsLS, saveLBColors, LS_LB_COLORS,
   cacheTemplatesLS, saveTemplates, LS_TEMPLATES,
 } from './storage.js'
 
@@ -55,7 +54,7 @@ function memLocalStorage() {
 const ALL_DB_SAVE_NAMES = [
   'dbSaveSessions', 'dbSaveAthletes', 'dbSaveResults', 'dbSaveEvents',
   'dbSaveLocations', 'dbSaveCoach', 'dbSaveSettings', 'dbSaveRegistry',
-  'dbSaveGoalsData', 'dbSaveLBColors', 'dbSaveTemplates',
+  'dbSaveGoalsData', 'dbSaveTemplates',
 ]
 const expectNoDbSaveCalls = () => {
   ALL_DB_SAVE_NAMES.forEach(name => expect(db[name]).not.toHaveBeenCalled())
@@ -77,7 +76,6 @@ describe('syncFromSupabase — pull never re-upserts anything it read (#76, #111
     db.dbLoadSettings.mockResolvedValue({ gymName: 'Box' })
     db.dbLoadRegistry.mockResolvedValue({ WOD: [] })
     db.dbLoadGoalsData.mockResolvedValue({ athleteGoals: {}, prs: {} })
-    db.dbLoadLBColors.mockResolvedValue({ a1: '#fff' })
     db.dbLoadTemplates.mockResolvedValue([{ id: 't1' }])
     db.dbGetUpdatedAt.mockResolvedValue('2026-07-27T10:00:00.000Z')
 
@@ -95,7 +93,6 @@ describe('syncFromSupabase — pull never re-upserts anything it read (#76, #111
     expect(JSON.parse(globalThis.localStorage.getItem(LS_SETTINGS))).toEqual({ gymName: 'Box' })
     expect(JSON.parse(globalThis.localStorage.getItem(LS_REGISTRY))).toEqual({ WOD: [] })
     expect(JSON.parse(globalThis.localStorage.getItem(LS_GOALS))).toEqual({ athleteGoals: {}, prs: {} })
-    expect(JSON.parse(globalThis.localStorage.getItem(LS_LB_COLORS))).toEqual({ a1: '#fff' })
     expect(JSON.parse(globalThis.localStorage.getItem(LS_TEMPLATES))).toEqual([{ id: 't1' }])
 
     // _sessionsTs comes straight from the real remote updated_at, not a provisional stamp.
@@ -112,7 +109,6 @@ describe('syncFromSupabase — pull never re-upserts anything it read (#76, #111
     db.dbLoadSettings.mockResolvedValue(null)
     db.dbLoadRegistry.mockResolvedValue(null)
     db.dbLoadGoalsData.mockResolvedValue(null)
-    db.dbLoadLBColors.mockResolvedValue(null)
     db.dbLoadTemplates.mockResolvedValue(null)
     db.dbGetUpdatedAt.mockResolvedValue(null)
 
@@ -146,7 +142,6 @@ describe('cache-only writers — localStorage only, never dbSave* (#111)', () =>
     ['cacheSettingsLS', cacheSettingsLS, LS_SETTINGS, { gymName: 'Box' }, 'dbSaveSettings'],
     ['cacheRegistryLS', cacheRegistryLS, LS_REGISTRY, { WOD: [] }, 'dbSaveRegistry'],
     ['cacheGoalsDataLS', cacheGoalsDataLS, LS_GOALS, { athleteGoals: {}, prs: {} }, 'dbSaveGoalsData'],
-    ['cacheLBColorsLS', cacheLBColorsLS, LS_LB_COLORS, { a1: '#fff' }, 'dbSaveLBColors'],
     ['cacheTemplatesLS', cacheTemplatesLS, LS_TEMPLATES, [{ id: 't1' }], 'dbSaveTemplates'],
   ])('%s writes localStorage but never calls %s', (_name, cacheFn, key, data, dbSaveName) => {
     cacheFn(data)
@@ -166,7 +161,6 @@ describe('save* — genuine writes are unchanged: cache AND upsert', () => {
     ['saveSettings', saveSettings, LS_SETTINGS, { gymName: 'Box' }, 'dbSaveSettings'],
     ['saveRegistry', saveRegistry, LS_REGISTRY, { WOD: [] }, 'dbSaveRegistry'],
     ['saveGoalsData', saveGoalsData, LS_GOALS, { athleteGoals: {}, prs: {} }, 'dbSaveGoalsData'],
-    ['saveLBColors', saveLBColors, LS_LB_COLORS, { a1: '#fff' }, 'dbSaveLBColors'],
     ['saveTemplates', saveTemplates, LS_TEMPLATES, [{ id: 't1' }], 'dbSaveTemplates'],
   ])('%s still caches AND calls %s exactly once', (_name, saveFn, key, data, dbSaveName) => {
     saveFn(data)

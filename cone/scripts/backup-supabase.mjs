@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Run from cone/: node scripts/backup-supabase.mjs
-// Dumps all 11 Supabase KV-blob tables to cone/backups/<timestamp>/
+// Dumps all 10 Supabase KV-blob tables to cone/backups/<timestamp>/
 // Backups are local-only (.gitignore prevents commit of personal data).
 
 import { createClient } from '@supabase/supabase-js';
@@ -24,7 +24,6 @@ function readEnv() {
 const TABLES = [
   'sessions',
   'athletes',
-  'results',
   'events',
   'locations',
   'coach_profile',

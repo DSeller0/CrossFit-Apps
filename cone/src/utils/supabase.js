@@ -7,7 +7,7 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
 export const supabase = createClient(url, key);
 
 // ── Generic key-value helpers (single-row tables) ─────────────────────────────
-// Used for: settings, exercise_registry, goals_data, lb_colors, coach_profile
+// Used for: settings, exercise_registry, goals_data, coach_profile
 
 export async function dbLoad(table) {
   const { data, error } = await supabase
@@ -123,16 +123,6 @@ export async function dbLoadGoalsData() {
 
 export async function dbSaveGoalsData(goalsData) {
   return dbSave('goals_data', goalsData);
-}
-
-// ── Leaderboard colours ───────────────────────────────────────────────────────
-
-export async function dbLoadLBColors() {
-  return dbLoad('lb_colors');
-}
-
-export async function dbSaveLBColors(colors) {
-  return dbSave('lb_colors', colors);
 }
 
 // ── Session templates ─────────────────────────────────────────────────────────

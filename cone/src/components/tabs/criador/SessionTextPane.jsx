@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ExerciseList } from '../../../public/shared/ExerciseList.jsx';
-import { blkColor } from '../../../public/lib/wod.js';
+import { blkColor, blkMeta } from '../../../public/lib/wod.js';
 import { parseSession, serializeSession, serializeGoal, blockLineStarts } from './textFormat.js';
 import { getTypeCfg } from './blockModel.js';
 import s from './textMode.module.css';
@@ -20,7 +20,7 @@ function PreviewBlock({ block, onPickType }) {
   const cfg = getTypeCfg(block.type);
   const color = blkColor(block);
   const label = block.label && block.label !== block.type ? block.label : '';
-  const meta = [block.rounds && `${block.rounds} rounds`, block.duration && `CAP ${block.duration}'`].filter(Boolean).join(' · ');
+  const meta = blkMeta(block);
   const goal = serializeGoal(block.goal);
 
   return (

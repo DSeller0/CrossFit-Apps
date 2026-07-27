@@ -11,7 +11,6 @@ import {
   loadEvents,
   loadLocations, saveLocations,
   loadCoach, saveCoach,
-  loadLBColors,
   toISO,
 } from './utils/storage';
 import { supabase } from './utils/supabase';
@@ -125,14 +124,6 @@ export default function App() {
           saveSettings(merged);
           if (!hasStoredColours || colourChanged) { window.location.reload(); return; }
         }
-        if (cfg.lbColors && typeof cfg.lbColors === 'object') {
-          try {
-            const existingLb = JSON.parse(localStorage.getItem('eagles_lb_colors_v1') || '{}');
-            if (!Object.keys(existingLb).length) {
-              localStorage.setItem('eagles_lb_colors_v1', JSON.stringify(cfg.lbColors));
-            }
-          } catch { /* ignore */ }
-        }
       });
   }, [configLoaded]);
 
@@ -170,7 +161,6 @@ export default function App() {
       exportedAt: new Date().toISOString(),
       sessions,
       settings:         loadSettings(),
-      lbColors:         loadLBColors(),
       results:          loadResults(),
       athletes:         loadAthletes(),
       exerciseRegistry: loadRegistry() || {},

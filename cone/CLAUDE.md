@@ -27,6 +27,8 @@ Each page is a self-contained HTML file. Most use a React component mounted at `
 
 **Page whitelist** — the HTML entry list lives in `cone/vite.public.config.js` (`rollupOptions.input`, 9 pages). Every new public HTML page must be added there or it isn't built and 404s live. (`deploy.yml` at the repo root copies `public-dist/` wholesale — no whitelist there anymore.) The HTML entry files and `themes.css` live at the **repo root** (`CrossFit-Apps/`), not inside `cone/` — the public Vite config sets `root: '..'`.
 
+**Never-built legacy HTML (plans/48, 2026-07-27)** — of 33 tracked root `.html` files, 18 (old design mockups, `athletes_v1/v2.html`, `me-a/b/c.html`, `designer.html`) were zero-consumer and deleted; the 4 `schedule_builder_*` variants moved to `legacy/` (kept for the `exerciseRows` reference above, not deployed). **`log.html` looks the same — untracked from `vite.public.config.js`'s input, never built — but is NOT dead:** `Publicador.jsx`'s `PresenterView` builds a live share URL (`_presenterLogUrl`) pointing at it. Since only `public-dist/`'s 9 built pages actually deploy, that URL 404s on the real site today — a pre-existing bug, not introduced here, filed as #113 and deliberately not fixed by this sweep (deletion-only).
+
 ### Criador layout (#58 / plans/37)
 
 **The page opens on the week grid, not on a form.** `Criador.jsx` is the container;
@@ -325,7 +327,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 
 *Scales* (`SCALE_COL` / `scaleColor()`, `lib/wod.js` — canonical since #51): RX teal · Inter orange · SC violet · Adaptado warm-grey, plus one fallback grey. This reconciled two diverged copies (`Results.jsx` had Inter orange, `Athletes.jsx` had it gold; Results' red Adaptado collided with the RED block family and misread as an error). **All public pages are on it since #52** — `me.html` was a *third* copy that painted SC orange and Inter blue (the same result showed a different-colored badge depending on which page you opened), and `athletes.html`'s copy retired with the page. `scaleLabel()`/`SCALE_SHORT` gives the short form ("Adaptado" → "Adap") for tight aligned columns.
 
-⚠️ **`exerciseRows` is a dead write path** (audited #52). It's read in 4 places — `deriveScale()` among them — but **written by nothing** in `cone/src`; only the retired root-level `schedule_builder_pt.html` ever wrote it. So `deriveScale(blk)` always falls through to the flat `blk.scale` on any row the current app produced, and **no per-exercise scale or load is captured anywhere**. Reviving it is the keystone of [plans/22](./docs/plans/22-athlete-character-stats.md). Do not assume a block carries per-exercise data.
+⚠️ **`exerciseRows` is a dead write path** (audited #52). It's read in 4 places — `deriveScale()` among them — but **written by nothing** in `cone/src`; only the retired `legacy/schedule_builder_pt.html` (moved out of the root by plans/48, kept as a reference — see below) ever wrote it. So `deriveScale(blk)` always falls through to the flat `blk.scale` on any row the current app produced, and **no per-exercise scale or load is captured anywhere**. Reviving it is the keystone of [plans/22](./docs/plans/22-athlete-character-stats.md). Do not assume a block carries per-exercise data.
 
 **`--podium-1/2/3`** (themes.css, all 4 themes): medal colors, tuned per palette. Row tints derive from them via `color-mix()` at the call site — 3 tokens, not 6.
 

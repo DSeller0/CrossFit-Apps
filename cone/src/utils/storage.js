@@ -5,10 +5,10 @@ import { getTargets, matchesAthlete, normalizeSessionIds } from '../public/lib/s
 import {
   dbSaveSessions, dbSaveAthletes, dbSaveResults, dbSaveEvents,
   dbSaveLocations, dbSaveCoach, dbSaveSettings, dbSaveRegistry,
-  dbSaveGoalsData, dbSaveLBColors, dbSaveTemplates,
+  dbSaveGoalsData, dbSaveTemplates,
   dbLoadSessions, dbLoadAthletes, dbLoadResults, dbLoadEvents,
   dbLoadLocations, dbLoadCoach, dbLoadSettings, dbLoadRegistry,
-  dbLoadGoalsData, dbLoadLBColors, dbLoadTemplates,
+  dbLoadGoalsData, dbLoadTemplates,
   dbGetUpdatedAt,
 } from './supabase';
 
@@ -34,7 +34,6 @@ export const LS_GOALS     = 'cone_goals_v1';
 export const LS_EVENTS    = 'cone_events_v1';
 export const LS_LOCATIONS = 'cone_locations_v1';
 export const LS_COACH     = 'cone_coach_v1';
-export const LS_LB_COLORS = 'cone_lb_colors_v1';
 export const LS_TEMPLATES = 'cone_templates_v1';
 
 // One-time shim: copy old eagles_*/gym_v9 keys to cone_* equivalents.
@@ -50,7 +49,6 @@ export const LS_TEMPLATES = 'cone_templates_v1';
     ['eagles_events_v1',         'cone_events_v1'],
     ['eagles_locations_v1',      'cone_locations_v1'],
     ['eagles_coach_v1',          'cone_coach_v1'],
-    ['eagles_lb_colors_v1',      'cone_lb_colors_v1'],
   ];
   try {
     renames.forEach(([oldKey, newKey]) => {
@@ -144,11 +142,6 @@ export const loadCoach     = () => { try { const d = localStorage.getItem(LS_COA
 export const cacheCoachLS = d => cacheLS(LS_COACH, d);
 export const saveCoach     = d => { cacheCoachLS(d); dbSaveCoach(d); };
 
-// ── Leaderboard colours ───────────────────────────────────────────────────────
-export const loadLBColors  = () => { try { const d = localStorage.getItem(LS_LB_COLORS); return d ? JSON.parse(d) : {}; } catch { return {}; } };
-export const cacheLBColorsLS = d => cacheLS(LS_LB_COLORS, d);
-export const saveLBColors  = d => { cacheLBColorsLS(d); dbSaveLBColors(d); };
-
 // ── Session templates ─────────────────────────────────────────────────────────
 export const loadTemplates = () => { try { const d = localStorage.getItem(LS_TEMPLATES); return d ? JSON.parse(d) : []; } catch { return []; } };
 export const cacheTemplatesLS = d => cacheLS(LS_TEMPLATES, d);
@@ -158,11 +151,11 @@ export const saveTemplates = d => { cacheTemplatesLS(d); dbSaveTemplates(d); };
 // Called once on app startup. Returns an object with the fresh data so App.jsx
 // can update React state without a reload.
 export async function syncFromSupabase() {
-  const [sessions, athletes, results, events, locations, coach, settings, registry, goalsData, lbColors, templates, sessionsTs] =
+  const [sessions, athletes, results, events, locations, coach, settings, registry, goalsData, templates, sessionsTs] =
     await Promise.all([
       dbLoadSessions(), dbLoadAthletes(), dbLoadResults(), dbLoadEvents(),
       dbLoadLocations(), dbLoadCoach(), dbLoadSettings(), dbLoadRegistry(),
-      dbLoadGoalsData(), dbLoadLBColors(), dbLoadTemplates(),
+      dbLoadGoalsData(), dbLoadTemplates(),
       dbGetUpdatedAt('sessions'),
     ]);
 
@@ -188,7 +181,6 @@ export async function syncFromSupabase() {
   if (settings && typeof settings === 'object'){ cacheSettingsLS(settings); out.settings = settings; }
   if (registry && typeof registry === 'object'){ cacheRegistryLS(registry); out.registry = registry; }
   if (goalsData && typeof goalsData === 'object') { cacheGoalsDataLS(goalsData); out.goalsData = goalsData; }
-  if (lbColors && typeof lbColors === 'object')   { cacheLBColorsLS(lbColors);   out.lbColors  = lbColors;  }
   if (Array.isArray(templates))                   { cacheTemplatesLS(templates); out.templates = templates; }
 
   // The pull no longer calls saveLS, so there's no provisional stamp to
