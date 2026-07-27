@@ -11,9 +11,13 @@ export default function ScaleFilter({ value = 'Todos', onChange, className = '' 
   return (
     <div className={`${s.row} ${className}`} role="group" aria-label="Filtrar por escala">
       {FILTER_SCALES.map(sc => (
-        <button key={sc} type="button" aria-pressed={value === sc}
+        <button
+          key={sc}
+          type="button"
+          aria-pressed={value === sc}
           className={`${s.pill}${value === sc ? ' ' + s.pillOn : ''}`}
-          onClick={() => onChange(sc)}>
+          onClick={() => onChange(sc)}
+        >
           {sc}
         </button>
       ))}

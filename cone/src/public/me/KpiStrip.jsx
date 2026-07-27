@@ -15,18 +15,26 @@ export default function KpiStrip({ pd }) {
         <div className={styles.kpiV}>{pd.streak > 0 ? pd.streak + ' 🔥' : pd.streak}</div>
         <div className={styles.kpiL}>Sequência</div>
         <div className={styles.kpiSub}>
-          {pd.maxStreak > pd.streak ? 'recorde: ' + pd.maxStreak + ' dias' : pd.streak > 0 ? 'recorde atual' : 'sem sequência'}
+          {pd.maxStreak > pd.streak
+            ? 'recorde: ' + pd.maxStreak + ' dias'
+            : pd.streak > 0
+              ? 'recorde atual'
+              : 'sem sequência'}
         </div>
       </div>
 
       <div className={styles.kpi}>
         <div className={`${styles.kpiV} ${styles.kpiVTeal}`}>{pd.totalPrs}</div>
         <div className={styles.kpiL}>PRs</div>
-        <div className={styles.kpiSub}>{pd.prsThisMon > 0 ? pd.prsThisMon + ' este mês' : 'nenhum este mês'}</div>
+        <div className={styles.kpiSub}>
+          {pd.prsThisMon > 0 ? pd.prsThisMon + ' este mês' : 'nenhum este mês'}
+        </div>
       </div>
 
       <div className={styles.kpi}>
-        <div className={`${styles.kpiV} ${styles.kpiVSub}`}>{pd.rxRate !== null ? pd.rxRate + '%' : '—'}</div>
+        <div className={`${styles.kpiV} ${styles.kpiVSub}`}>
+          {pd.rxRate !== null ? pd.rxRate + '%' : '—'}
+        </div>
         <div className={styles.kpiL}>Taxa RX</div>
         <div className={styles.kpiSub}>
           {pd.rxRate === null ? 'Registre um WOD' : `RX em ${pd.rxCount} de ${pd.rxTotal} WODs`}

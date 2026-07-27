@@ -31,7 +31,9 @@ export default function MobileFrame({ theme, width = 390, children }) {
   useEffect(() => {
     if (!mountNode) return
     const iframe = iframeRef.current
-    const resize = () => { iframe.style.height = mountNode.scrollHeight + 'px' }
+    const resize = () => {
+      iframe.style.height = mountNode.scrollHeight + 'px'
+    }
     resize()
     const ro = new ResizeObserver(resize)
     ro.observe(mountNode)
@@ -39,8 +41,12 @@ export default function MobileFrame({ theme, width = 390, children }) {
   }, [mountNode, children])
 
   return (
-    <iframe ref={iframeRef} title="Mobile preview" scrolling="no"
-      style={{ width, border: 'none', display: 'block', background: 'var(--bg)' }}>
+    <iframe
+      ref={iframeRef}
+      title="Mobile preview"
+      scrolling="no"
+      style={{ width, border: 'none', display: 'block', background: 'var(--bg)' }}
+    >
       {mountNode && createPortal(children, mountNode)}
     </iframe>
   )

@@ -24,13 +24,23 @@ export default function Button({
   ...rest
 }) {
   if (iconOnly && !rest['aria-label'] && !rest.title && import.meta.env?.DEV) {
-    console.warn('Button: iconOnly requires an `aria-label` (or `title`) — the icon has no text for assistive tech.')
+    console.warn(
+      'Button: iconOnly requires an `aria-label` (or `title`) — the icon has no text for assistive tech.',
+    )
   }
   const cls = [
-    s.btn, s[variant], s[size],
+    s.btn,
+    s[variant],
+    s[size],
     iconOnly ? s.iconOnly : '',
     full ? s.full : '',
     className,
-  ].filter(Boolean).join(' ')
-  return <button type={type} className={cls} {...rest}>{children}</button>
+  ]
+    .filter(Boolean)
+    .join(' ')
+  return (
+    <button type={type} className={cls} {...rest}>
+      {children}
+    </button>
+  )
 }

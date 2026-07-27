@@ -1,5 +1,15 @@
 import { describe, test, expect } from 'vitest'
-import { blkLabel, exVolStr, toSecs, fmtSecs, maskMMSS, rankResults, perfStr, groupProgressionSteps, goalStr } from './wod.js'
+import {
+  blkLabel,
+  exVolStr,
+  toSecs,
+  fmtSecs,
+  maskMMSS,
+  rankResults,
+  perfStr,
+  groupProgressionSteps,
+  goalStr,
+} from './wod.js'
 
 describe('blkLabel', () => {
   test('label and type differ → label · type', () => {
@@ -33,10 +43,17 @@ describe('exVolStr', () => {
     expect(exVolStr({ sets: 3, reps: '5,4,3' })).toBe('3×5-4-3')
   })
   test('cardio mode → value + unit', () => {
-    expect(exVolStr({ name: 'Run', intensity: { mode: 'cardio', cardioVal: '400', cardioUnit: 'm' } })).toBe('400m')
+    expect(
+      exVolStr({ name: 'Run', intensity: { mode: 'cardio', cardioVal: '400', cardioUnit: 'm' } }),
+    ).toBe('400m')
   })
   test('cardio: value already in name → empty string', () => {
-    expect(exVolStr({ name: '400m Run', intensity: { mode: 'cardio', cardioVal: '400', cardioUnit: 'm' } })).toBe('')
+    expect(
+      exVolStr({
+        name: '400m Run',
+        intensity: { mode: 'cardio', cardioVal: '400', cardioUnit: 'm' },
+      }),
+    ).toBe('')
   })
   test('cardio: missing value → empty string', () => {
     expect(exVolStr({ name: 'Run', intensity: { mode: 'cardio', cardioVal: '' } })).toBe('')
@@ -54,12 +71,25 @@ describe('exVolStr', () => {
     expect(exVolStr({ dist: '20', distUnit: 'cal' })).toBe('20cal')
   })
   test('dist takes precedence over legacy cardio intensity', () => {
-    expect(exVolStr({ dist: '100', distUnit: 'm', intensity: { mode: 'cardio', cardioVal: '400', cardioUnit: 'm' } })).toBe('100m')
+    expect(
+      exVolStr({
+        dist: '100',
+        distUnit: 'm',
+        intensity: { mode: 'cardio', cardioVal: '400', cardioUnit: 'm' },
+      }),
+    ).toBe('100m')
   })
   test('progression, no ex.reps, uniform step reps → sets×reps', () => {
-    const ex = { intensity: { mode: 'progression', steps: [
-      { reps: '5', load: '60' }, { reps: '5', load: '70' }, { reps: '5', load: '80' },
-    ] } }
+    const ex = {
+      intensity: {
+        mode: 'progression',
+        steps: [
+          { reps: '5', load: '60' },
+          { reps: '5', load: '70' },
+          { reps: '5', load: '80' },
+        ],
+      },
+    }
     expect(exVolStr(ex)).toBe('3×5')
   })
   test('progression, no ex.reps, single step → reps only (no sets prefix)', () => {
@@ -67,16 +97,28 @@ describe('exVolStr', () => {
     expect(exVolStr(ex)).toBe('5')
   })
   test('progression, no ex.reps, ladder reps → dash-joined', () => {
-    const ex = { intensity: { mode: 'progression', steps: [
-      { reps: '5', load: '60' }, { reps: '3', load: '70' }, { reps: '1', load: '80' },
-    ] } }
+    const ex = {
+      intensity: {
+        mode: 'progression',
+        steps: [
+          { reps: '5', load: '60' },
+          { reps: '3', load: '70' },
+          { reps: '1', load: '80' },
+        ],
+      },
+    }
     expect(exVolStr(ex)).toBe('5-3-1')
   })
   test('progression, no ex.reps, no steps → empty string', () => {
     expect(exVolStr({ intensity: { mode: 'progression' } })).toBe('')
   })
   test('progression with ex.reps set → ex.reps wins (unchanged path)', () => {
-    expect(exVolStr({ reps: '10', intensity: { mode: 'progression', steps: [{ reps: '5', load: '60' }] } })).toBe('10')
+    expect(
+      exVolStr({
+        reps: '10',
+        intensity: { mode: 'progression', steps: [{ reps: '5', load: '60' }] },
+      }),
+    ).toBe('10')
   })
 })
 
@@ -86,18 +128,29 @@ describe('groupProgressionSteps', () => {
     expect(groupProgressionSteps({})).toEqual([])
   })
   test('distinct reps per step → one group per reps value, in first-seen order', () => {
-    const ex = { intensity: { steps: [
-      { reps: '4', load: '50' }, { reps: '2', load: '80' },
-    ] } }
+    const ex = {
+      intensity: {
+        steps: [
+          { reps: '4', load: '50' },
+          { reps: '2', load: '80' },
+        ],
+      },
+    }
     expect(groupProgressionSteps(ex)).toEqual([
       { reps: '4', loads: ['50'] },
       { reps: '2', loads: ['80'] },
     ])
   })
   test('shared reps across steps → loads accumulate onto one group', () => {
-    const ex = { intensity: { steps: [
-      { reps: '2', load: '60' }, { reps: '2', load: '70' }, { reps: '2', load: '80' },
-    ] } }
+    const ex = {
+      intensity: {
+        steps: [
+          { reps: '2', load: '60' },
+          { reps: '2', load: '70' },
+          { reps: '2', load: '80' },
+        ],
+      },
+    }
     expect(groupProgressionSteps(ex)).toEqual([{ reps: '2', loads: ['60', '70', '80'] }])
   })
   test('step with no reps falls back to ex.reps', () => {
@@ -142,10 +195,14 @@ describe('maskMMSS', () => {
   test('two digits (minutes being typed)', () => expect(maskMMSS('12')).toBe('12'))
   test('three digits fill seconds from the right', () => expect(maskMMSS('123')).toBe('1:23'))
   test('four digits → MM:SS', () => expect(maskMMSS('1234')).toBe('12:34'))
-  test('re-masking an already-masked value is stable', () => expect(maskMMSS('12:34')).toBe('12:34'))
+  test('re-masking an already-masked value is stable', () =>
+    expect(maskMMSS('12:34')).toBe('12:34'))
   test('caps at 4 digits (99:99 ceiling)', () => expect(maskMMSS('12345')).toBe('12:34'))
   test('strips non-digits', () => expect(maskMMSS('a1b2c3')).toBe('1:23'))
-  test('null/undefined → empty', () => { expect(maskMMSS(null)).toBe(''); expect(maskMMSS(undefined)).toBe('') })
+  test('null/undefined → empty', () => {
+    expect(maskMMSS(null)).toBe('')
+    expect(maskMMSS(undefined)).toBe('')
+  })
   test('does not validate — 999 → 9:99', () => expect(maskMMSS('9:99')).toBe('9:99'))
 })
 

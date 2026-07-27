@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import styles from './Me.module.css'
 
-const FOCUSABLE = 'button:not([disabled]),[href],input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])'
+const FOCUSABLE =
+  'button:not([disabled]),[href],input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])'
 
 // The bottom-sheet / centered-modal shell behind both of me.html's sheets (PR log,
 // body metrics). Before #52 each hand-rolled its own overlay and neither was a real
@@ -26,13 +27,23 @@ export default function Sheet({ open, onClose, titleId, initialFocus, children }
     const t = setTimeout(() => target?.focus(), 320)
 
     function onKeyDown(e) {
-      if (e.key === 'Escape') { e.stopPropagation(); onClose(); return }
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        onClose()
+        return
+      }
       if (e.key !== 'Tab') return
       const f = [...node.querySelectorAll(FOCUSABLE)]
       if (!f.length) return
-      const first = f[0], last = f[f.length - 1]
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+      const first = f[0],
+        last = f[f.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     document.addEventListener('keydown', onKeyDown)
     return () => {

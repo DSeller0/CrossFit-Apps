@@ -1,7 +1,8 @@
 export function registerSW() {
   if (!('serviceWorker' in navigator)) return
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
+    navigator.serviceWorker
+      .register('./sw.js')
       .then(reg => {
         reg.addEventListener('updatefound', () => {
           const sw = reg.installing

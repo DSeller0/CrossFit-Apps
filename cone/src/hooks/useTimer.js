@@ -2,14 +2,17 @@ import { useState } from 'react'
 import { TIMER_TYPES } from '../public/lib/wod.js'
 
 export function useTimer({ tv, tvRef, push }) {
-  const [timerType,  setTimerType]  = useState('For Time')
-  const [timerCap,   setTimerCap]   = useState(20)
+  const [timerType, setTimerType] = useState('For Time')
+  const [timerCap, setTimerCap] = useState(20)
   const [timerBlkId, setTimerBlkId] = useState(null)
 
   async function startTimer() {
     await push({
-      slide: 'timer', timer_type: timerType, timer_cap_secs: timerCap * 60,
-      timer_block_id: timerBlkId, timer_started_at: Date.now(),
+      slide: 'timer',
+      timer_type: timerType,
+      timer_cap_secs: timerCap * 60,
+      timer_block_id: timerBlkId,
+      timer_started_at: Date.now(),
       timer_paused_elapsed: tv?.timer_paused_elapsed ?? 0,
     })
   }
@@ -38,7 +41,8 @@ export function useTimer({ tv, tvRef, push }) {
   function elapsedSecs() {
     const t = tvRef.current
     if (!t) return 0
-    if (t.timer_started_at) return Math.floor((Date.now() - t.timer_started_at) / 1000 + (t.timer_paused_elapsed ?? 0))
+    if (t.timer_started_at)
+      return Math.floor((Date.now() - t.timer_started_at) / 1000 + (t.timer_paused_elapsed ?? 0))
     return t.timer_paused_elapsed ?? 0
   }
 
@@ -50,7 +54,17 @@ export function useTimer({ tv, tvRef, push }) {
   }
 
   return {
-    timerType, setTimerType, timerCap, setTimerCap, timerBlkId, setTimerBlkId,
-    startTimer, pauseTimer, resetTimer, selectBlock, elapsedSecs, currentTimerBlock,
+    timerType,
+    setTimerType,
+    timerCap,
+    setTimerCap,
+    timerBlkId,
+    setTimerBlkId,
+    startTimer,
+    pauseTimer,
+    resetTimer,
+    selectBlock,
+    elapsedSecs,
+    currentTimerBlock,
   }
 }

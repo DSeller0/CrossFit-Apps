@@ -9,5 +9,5 @@ import Gallery from './Gallery.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Gallery />
-  </StrictMode>
+  </StrictMode>,
 )

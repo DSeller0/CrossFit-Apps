@@ -4,7 +4,9 @@ export default function Header({ brand = 'CONE', sub, backHref, backTitle }) {
   return (
     <header className={s.hdr}>
       {backHref && (
-        <a className={s.back} href={backHref} title={backTitle}>←</a>
+        <a className={s.back} href={backHref} title={backTitle}>
+          ←
+        </a>
       )}
       <div className={s.rule}>
         <div className={s.line} />

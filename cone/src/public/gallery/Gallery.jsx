@@ -37,7 +37,11 @@ export default function Gallery() {
   function changeTheme(v) {
     setTheme(v)
     document.documentElement.className = 'theme-' + v
-    try { localStorage.setItem('cone_theme', v) } catch { /* ignore */ }
+    try {
+      localStorage.setItem('cone_theme', v)
+    } catch {
+      /* ignore */
+    }
   }
 
   const selected = ALL_ITEMS.find(i => i.id === selectedId) || ALL_ITEMS[0]
@@ -45,17 +49,33 @@ export default function Gallery() {
   return (
     <div className={s.root}>
       <header className={s.bar}>
-        <div className={s.barTitle}>Galeria de componentes <span className={s.barDev}>dev</span></div>
+        <div className={s.barTitle}>
+          Galeria de componentes <span className={s.barDev}>dev</span>
+        </div>
         <div className={s.barCtrls}>
           <label className={s.ctrl}>
             <span className={s.ctrlLbl}>Tema</span>
             <select className={s.select} value={theme} onChange={e => changeTheme(e.target.value)}>
-              {THEMES.map(t => <option key={t.v} value={t.v}>{t.label}</option>)}
+              {THEMES.map(t => (
+                <option key={t.v} value={t.v}>
+                  {t.label}
+                </option>
+              ))}
             </select>
           </label>
           <div className={s.wToggle} role="group" aria-label="Largura do palco">
-            <button className={`${s.wBtn}${w === 'mobile' ? ' ' + s.wBtnOn : ''}`} onClick={() => setW('mobile')}>390</button>
-            <button className={`${s.wBtn}${w === 'full' ? ' ' + s.wBtnOn : ''}`} onClick={() => setW('full')}>Full</button>
+            <button
+              className={`${s.wBtn}${w === 'mobile' ? ' ' + s.wBtnOn : ''}`}
+              onClick={() => setW('mobile')}
+            >
+              390
+            </button>
+            <button
+              className={`${s.wBtn}${w === 'full' ? ' ' + s.wBtnOn : ''}`}
+              onClick={() => setW('full')}
+            >
+              Full
+            </button>
           </div>
         </div>
       </header>
@@ -66,9 +86,12 @@ export default function Gallery() {
             <div key={g.group} className={s.sidebarGroup}>
               <div className={s.sidebarGroupTitle}>{g.group}</div>
               {g.items.map(item => (
-                <button key={item.id} type="button"
+                <button
+                  key={item.id}
+                  type="button"
                   className={`${s.sidebarItem}${selectedId === item.id ? ' ' + s.sidebarItemOn : ''}`}
-                  onClick={() => setSelectedId(item.id)}>
+                  onClick={() => setSelectedId(item.id)}
+                >
                   {item.label}
                 </button>
               ))}
@@ -83,9 +106,7 @@ export default function Gallery() {
               <div className={s.stage}>{selected ? selected.render() : null}</div>
             </MobileFrame>
           ) : (
-            <div className={s.stage}>
-              {selected ? selected.render() : null}
-            </div>
+            <div className={s.stage}>{selected ? selected.render() : null}</div>
           )}
         </main>
       </div>

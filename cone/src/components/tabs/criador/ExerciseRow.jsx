@@ -1,96 +1,150 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useIsMobile } from '../../../hooks/useIsMobile';
-import { loadRegistry } from '../../../utils/storage';
-import IntensityInput from '../../shared/IntensityInput';
-import { ExerciseCombobox } from './ExerciseCombobox';
-import { emptyMovement, isCardioRegistered, getRegistryDefaults, loadBadgeStr } from './blockModel.js';
-import Button from '../../ui/Button.jsx';
-import cr from './criador.module.css';
+import { useState, useEffect, useMemo } from 'react'
+import { useIsMobile } from '../../../hooks/useIsMobile'
+import { loadRegistry } from '../../../utils/storage'
+import IntensityInput from '../../shared/IntensityInput'
+import { ExerciseCombobox } from './ExerciseCombobox'
+import {
+  emptyMovement,
+  isCardioRegistered,
+  getRegistryDefaults,
+  loadBadgeStr,
+} from './blockModel.js'
+import Button from '../../ui/Button.jsx'
+import cr from './criador.module.css'
 
 // ── ExerciseRow ───────────────────────────────────────────────────────────────
-export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdate, onDelete, canDelete, dragIdx, dragOverIdx, setDragOverIdx, myIdx }) {
-  const [showDetail, setShowDetail] = useState(false);
-  const isMobile = useIsMobile();
+export function ExerciseRow({
+  ex,
+  blockType,
+  ladderMode,
+  onToggleLadder,
+  onUpdate,
+  onDelete,
+  canDelete,
+  dragIdx,
+  dragOverIdx,
+  setDragOverIdx,
+  myIdx,
+}) {
+  const [showDetail, setShowDetail] = useState(false)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     if (isMobile && showDetail) {
-      document.body.style.overflow = 'hidden';
-      return () => { document.body.style.overflow = ''; };
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = ''
+      }
     }
-  }, [isMobile, showDetail]);
+  }, [isMobile, showDetail])
 
-  const upd = (field, val) => onUpdate({ ...ex, [field]: val });
+  const upd = (field, val) => onUpdate({ ...ex, [field]: val })
 
-  const isComplex  = !!ex.isComplex;
-  const movements  = ex.complexMovements || [];
-  const notation   = movements.map(m => m.reps || '?').join('+');
+  const isComplex = !!ex.isComplex
+  const movements = ex.complexMovements || []
+  const notation = movements.map(m => m.reps || '?').join('+')
 
-  const registryCardio = useMemo(() => isCardioRegistered(ex.name, loadRegistry()), [ex.name]);
-  const regDefaults = useMemo(() => getRegistryDefaults(ex.name, loadRegistry()), [ex.name]);
-  const [distOverride, setDistOverride] = useState(() => ex.dist ? true : (ex.reps ? false : undefined));
-  const isDistMode = distOverride ?? registryCardio;
+  const registryCardio = useMemo(() => isCardioRegistered(ex.name, loadRegistry()), [ex.name])
+  const regDefaults = useMemo(() => getRegistryDefaults(ex.name, loadRegistry()), [ex.name])
+  const [distOverride, setDistOverride] = useState(() =>
+    ex.dist ? true : ex.reps ? false : undefined,
+  )
+  const isDistMode = distOverride ?? registryCardio
   const toggleDistMode = () => {
-    if (isDistMode) { setDistOverride(false); onUpdate({ ...ex, dist: '', distUnit: 'm' }); }
-    else setDistOverride(true);
-  };
+    if (isDistMode) {
+      setDistOverride(false)
+      onUpdate({ ...ex, dist: '', distUnit: 'm' })
+    } else setDistOverride(true)
+  }
 
   const toggleComplex = () => {
     if (!isComplex) {
-      const numSets = parseInt(ex.sets) || 3;
+      const numSets = parseInt(ex.sets) || 3
       onUpdate({
         ...ex,
         isComplex: true,
         complexMovements: [emptyMovement(), emptyMovement()],
         // Default to progression so load steps are ready to fill in
-        intensity: (!ex.intensity || ex.intensity.mode === 'none')
-          ? { mode: 'progression', steps: Array.from({ length: numSets }, () => ({ reps: '', load: '', unit: '% do RM' })) }
-          : ex.intensity,
-      });
+        intensity:
+          !ex.intensity || ex.intensity.mode === 'none'
+            ? {
+                mode: 'progression',
+                steps: Array.from({ length: numSets }, () => ({
+                  reps: '',
+                  load: '',
+                  unit: '% do RM',
+                })),
+              }
+            : ex.intensity,
+      })
     } else {
-      onUpdate({ ...ex, isComplex: false, complexMovements: [] });
+      onUpdate({ ...ex, isComplex: false, complexMovements: [] })
     }
-  };
+  }
 
   // Keyboard equivalent of the drag handle (#14). `onUpdate(null, from, to)` is the
   // reorder channel the drop handler already uses.
   const moveByKey = e => {
-    const to = e.key === 'ArrowUp' ? myIdx - 1 : e.key === 'ArrowDown' ? myIdx + 1 : null;
-    if (to === null || to < 0) return;
-    e.preventDefault();
-    onUpdate(null, myIdx, to);
-  };
+    const to = e.key === 'ArrowUp' ? myIdx - 1 : e.key === 'ArrowDown' ? myIdx + 1 : null
+    if (to === null || to < 0) return
+    e.preventDefault()
+    onUpdate(null, myIdx, to)
+  }
 
   const updMovement = (mi, field, val) =>
-    upd('complexMovements', movements.map((m, i) => i === mi ? { ...m, [field]: val } : m));
-  const addMovement = () => upd('complexMovements', [...movements, emptyMovement()]);
-  const delMovement = mi => upd('complexMovements', movements.filter((_, i) => i !== mi));
+    upd(
+      'complexMovements',
+      movements.map((m, i) => (i === mi ? { ...m, [field]: val } : m)),
+    )
+  const addMovement = () => upd('complexMovements', [...movements, emptyMovement()])
+  const delMovement = mi =>
+    upd(
+      'complexMovements',
+      movements.filter((_, i) => i !== mi),
+    )
 
   const renderDetailBody = () => (
     <>
       <div className="ex-mode-row">
-        <button type="button" className={`ex-mode-btn${isComplex ? ' on' : ''}`} onClick={toggleComplex}>
+        <button
+          type="button"
+          className={`ex-mode-btn${isComplex ? ' on' : ''}`}
+          onClick={toggleComplex}
+        >
           Complexo
         </button>
-        <button type="button" className={`ex-mode-btn${ladderMode ? ' on' : ''}`} onClick={() => onToggleLadder?.()}>
+        <button
+          type="button"
+          className={`ex-mode-btn${ladderMode ? ' on' : ''}`}
+          onClick={() => onToggleLadder?.()}
+        >
           Escada
         </button>
       </div>
 
       {isComplex && (
         <div className="ex-complex-body">
-          <span className="lbl" style={{ marginBottom: 8 }}>Movimentos</span>
+          <span className="lbl" style={{ marginBottom: 8 }}>
+            Movimentos
+          </span>
           {movements.map((mv, mi) => (
             /* Reps THEN name — the order every render surface already uses
                (ExerciseList emits mvReps before mvName), and the order the coach
                reads a complex in: "3 clean + 2 jerk", not "clean × 3". */
             <div key={mv.id} className="ex-movement-row">
               <input
-                type="text" inputMode="numeric" className="ex-qty-input"
-                value={mv.reps} placeholder="?" title="Reps deste movimento"
+                type="text"
+                inputMode="numeric"
+                className="ex-qty-input"
+                value={mv.reps}
+                placeholder="?"
+                title="Reps deste movimento"
                 aria-label={`Reps do movimento ${mi + 1}`}
                 onChange={e => updMovement(mi, 'reps', e.target.value)}
               />
-              <span className="ex-qty-sep" style={{ flexShrink: 0 }}>×</span>
+              <span className="ex-qty-sep" style={{ flexShrink: 0 }}>
+                ×
+              </span>
               <ExerciseCombobox
                 value={mv.name}
                 onChange={v => updMovement(mi, 'name', v)}
@@ -98,8 +152,13 @@ export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdat
                 placeholder={`Movimento ${mi + 1}`}
               />
               {movements.length > 1 && (
-                <Button size="xs" iconOnly variant="destructive"
-                  aria-label={`Remover movimento ${mi + 1}`} onClick={() => delMovement(mi)}>
+                <Button
+                  size="xs"
+                  iconOnly
+                  variant="destructive"
+                  aria-label={`Remover movimento ${mi + 1}`}
+                  onClick={() => delMovement(mi)}
+                >
                   <i className="ti ti-x" />
                 </Button>
               )}
@@ -140,82 +199,129 @@ export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdat
         />
       </div>
     </>
-  );
+  )
 
   return (
     <div
       className={`ex-row${dragOverIdx === myIdx ? ' ex-row-drag-over' : ''}`}
-      onDragOver={e => { e.preventDefault(); setDragOverIdx(myIdx); }}
+      onDragOver={e => {
+        e.preventDefault()
+        setDragOverIdx(myIdx)
+      }}
       onDragLeave={() => setDragOverIdx(null)}
-      onDrop={e => { e.preventDefault(); setDragOverIdx(null); if (dragIdx.current !== null && dragIdx.current !== myIdx) { onUpdate(null, dragIdx.current, myIdx); dragIdx.current = null; } }}
+      onDrop={e => {
+        e.preventDefault()
+        setDragOverIdx(null)
+        if (dragIdx.current !== null && dragIdx.current !== myIdx) {
+          onUpdate(null, dragIdx.current, myIdx)
+          dragIdx.current = null
+        }
+      }}
     >
       {/* ── Main row ── */}
       <div className="ex-row-main">
         <i
           className="ti ti-grip-vertical ex-drag"
-          role="button" tabIndex={0}
+          role="button"
+          tabIndex={0}
           aria-label={`Mover exercício ${myIdx + 1} — setas ↑ ↓`}
           title="Arrastar exercício (ou ↑ ↓ pelo teclado)"
           onKeyDown={moveByKey}
           draggable
-          onDragStart={e => { e.stopPropagation(); dragIdx.current = myIdx; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(myIdx)); }}
-          onDragEnd={() => { dragIdx.current = null; setDragOverIdx(null); }}
+          onDragStart={e => {
+            e.stopPropagation()
+            dragIdx.current = myIdx
+            e.dataTransfer.effectAllowed = 'move'
+            e.dataTransfer.setData('text/plain', String(myIdx))
+          }}
+          onDragEnd={() => {
+            dragIdx.current = null
+            setDragOverIdx(null)
+          }}
         />
 
         {/* Qty — desktop only; on mobile it moves to the bottom sheet */}
-        {!isMobile && (isComplex ? (
-          <span className="ex-complex-badge" title="Séries × notação do complexo">
-            <input
-              type="text" inputMode="numeric" className="ex-qty-input"
-              value={ex.sets} placeholder="?" title="Séries" aria-label="Séries"
-              onChange={e => upd('sets', e.target.value)}
-              style={{ marginRight: 3 }}
-            />
-            <span className="ex-qty-sep">×</span>
-            <span className="ex-complex-notation">{notation || '…'}</span>
-          </span>
-        ) : (
-          <div className="ex-qty">
-            <input
-              type="text" inputMode="numeric" className="ex-qty-input"
-              value={ex.sets} placeholder={regDefaults?.sets || '—'} title="Séries" aria-label="Séries"
-              onChange={e => upd('sets', e.target.value)}
-            />
-            <span className="ex-qty-sep">×</span>
-            {isDistMode ? (
-              <>
-                <input
-                  type="text" inputMode="numeric" className="ex-qty-input"
-                  value={ex.dist} placeholder={regDefaults?.dist || '100'} title="Distância/Calorias"
-                  aria-label="Distância ou calorias"
-                  onChange={e => upd('dist', e.target.value)}
-                />
-                <select className="ex-unit-sel" value={ex.distUnit || 'm'} title="Unidade" aria-label="Unidade"
-                  onChange={e => upd('distUnit', e.target.value)}>
-                  <option value="m">m</option><option value="cal">cal</option>
-                </select>
-              </>
-            ) : (
-              /* Reps takes free text ("15,12,9" in escada mode), so inputMode is
-                 numeric but the type stays text — a number input would eat the commas. */
+        {!isMobile &&
+          (isComplex ? (
+            <span className="ex-complex-badge" title="Séries × notação do complexo">
               <input
-                type="text" inputMode="numeric" className="ex-qty-input ex-qty-reps"
-                value={ex.reps} placeholder={ladderMode ? '15,12,9' : (regDefaults?.reps || '—')}
-                /* The value in the tooltip, not just the field name: a long ladder
+                type="text"
+                inputMode="numeric"
+                className="ex-qty-input"
+                value={ex.sets}
+                placeholder="?"
+                title="Séries"
+                aria-label="Séries"
+                onChange={e => upd('sets', e.target.value)}
+                style={{ marginRight: 3 }}
+              />
+              <span className="ex-qty-sep">×</span>
+              <span className="ex-complex-notation">{notation || '…'}</span>
+            </span>
+          ) : (
+            <div className="ex-qty">
+              <input
+                type="text"
+                inputMode="numeric"
+                className="ex-qty-input"
+                value={ex.sets}
+                placeholder={regDefaults?.sets || '—'}
+                title="Séries"
+                aria-label="Séries"
+                onChange={e => upd('sets', e.target.value)}
+              />
+              <span className="ex-qty-sep">×</span>
+              {isDistMode ? (
+                <>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    className="ex-qty-input"
+                    value={ex.dist}
+                    placeholder={regDefaults?.dist || '100'}
+                    title="Distância/Calorias"
+                    aria-label="Distância ou calorias"
+                    onChange={e => upd('dist', e.target.value)}
+                  />
+                  <select
+                    className="ex-unit-sel"
+                    value={ex.distUnit || 'm'}
+                    title="Unidade"
+                    aria-label="Unidade"
+                    onChange={e => upd('distUnit', e.target.value)}
+                  >
+                    <option value="m">m</option>
+                    <option value="cal">cal</option>
+                  </select>
+                </>
+              ) : (
+                /* Reps takes free text ("15,12,9" in escada mode), so inputMode is
+                 numeric but the type stays text — a number input would eat the commas. */
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="ex-qty-input ex-qty-reps"
+                  value={ex.reps}
+                  placeholder={ladderMode ? '15,12,9' : regDefaults?.reps || '—'}
+                  /* The value in the tooltip, not just the field name: a long ladder
                    ("10-9-8-7-6-5-4-3-2-1") outruns even the wider box, and hovering
                    is the only way to read it back without focusing and scrolling. */
-                title={ex.reps ? `Reps: ${ex.reps}` : 'Reps'}
-                aria-label="Reps"
-                onChange={e => upd('reps', e.target.value)}
-              />
-            )}
-            <button type="button" className={`ex-dist-toggle${isDistMode ? ' on' : ''}`} onClick={toggleDistMode}
-              aria-label={isDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}
-              title={isDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}>
-              <i className={`ti ${isDistMode ? 'ti-repeat' : 'ti-ruler-2'}`} />
-            </button>
-          </div>
-        ))}
+                  title={ex.reps ? `Reps: ${ex.reps}` : 'Reps'}
+                  aria-label="Reps"
+                  onChange={e => upd('reps', e.target.value)}
+                />
+              )}
+              <button
+                type="button"
+                className={`ex-dist-toggle${isDistMode ? ' on' : ''}`}
+                onClick={toggleDistMode}
+                aria-label={isDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}
+                title={isDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}
+              >
+                <i className={`ti ${isDistMode ? 'ti-repeat' : 'ti-ruler-2'}`} />
+              </button>
+            </div>
+          ))}
 
         {/* On mobile the name is a TAP TARGET, not a field: the real combobox lives
             in the sheet below Séries/Reps where its dropdown has room. Tapping the
@@ -223,9 +329,13 @@ export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdat
             reached for first. */}
         {isMobile ? (
           <button type="button" className={cr.nameTap} onClick={() => setShowDetail(true)}>
-            {ex.name?.trim()
-              ? ex.name
-              : <span className={cr.nameTapPh}>{isComplex ? 'Nome do complexo' : 'Nome do exercício'}</span>}
+            {ex.name?.trim() ? (
+              ex.name
+            ) : (
+              <span className={cr.nameTapPh}>
+                {isComplex ? 'Nome do complexo' : 'Nome do exercício'}
+              </span>
+            )}
           </button>
         ) : isComplex ? (
           <input
@@ -244,7 +354,10 @@ export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdat
           />
         )}
 
-        {(() => { const b = loadBadgeStr(ex); return b && !showDetail ? <span className="ex-load-badge">{b}</span> : null; })()}
+        {(() => {
+          const b = loadBadgeStr(ex)
+          return b && !showDetail ? <span className="ex-load-badge">{b}</span> : null
+        })()}
 
         <button
           type="button"
@@ -257,19 +370,21 @@ export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdat
           <i className={`ti ${isComplex ? 'ti-circles-relation' : 'ti-settings'}`} />
         </button>
         {canDelete && (
-          <Button size="xs" iconOnly variant="destructive" className="ex-del"
-            aria-label={`Remover ${ex.name?.trim() || 'exercício'}`} onClick={onDelete}>
+          <Button
+            size="xs"
+            iconOnly
+            variant="destructive"
+            className="ex-del"
+            aria-label={`Remover ${ex.name?.trim() || 'exercício'}`}
+            onClick={onDelete}
+          >
             <i className="ti ti-x" />
           </Button>
         )}
       </div>
 
       {/* ── Detail: inline expand (desktop) ── */}
-      {!isMobile && showDetail && (
-        <div className="ex-detail">
-          {renderDetailBody()}
-        </div>
-      )}
+      {!isMobile && showDetail && <div className="ex-detail">{renderDetailBody()}</div>}
 
       {/* ── Detail: bottom sheet (mobile) ── */}
       {isMobile && showDetail && (
@@ -287,15 +402,22 @@ export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdat
                   <>
                     <div className="sheet-qty-field">
                       <input
-                        type="text" inputMode="numeric" className="sheet-qty-input"
-                        value={ex.sets} placeholder="?" title="Séries" aria-label="Séries"
+                        type="text"
+                        inputMode="numeric"
+                        className="sheet-qty-input"
+                        value={ex.sets}
+                        placeholder="?"
+                        title="Séries"
+                        aria-label="Séries"
                         onChange={e => upd('sets', e.target.value)}
                       />
                       <span className="sheet-qty-lbl">Séries</span>
                     </div>
                     <span className="ex-qty-sep sheet-qty-sep-lg">×</span>
                     <div className="sheet-qty-field">
-                      <span className="ex-complex-notation sheet-notation-lg">{notation || '…'}</span>
+                      <span className="ex-complex-notation sheet-notation-lg">
+                        {notation || '…'}
+                      </span>
                       <span className="sheet-qty-lbl">Notação</span>
                     </div>
                   </>
@@ -303,8 +425,13 @@ export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdat
                   <>
                     <div className="sheet-qty-field">
                       <input
-                        type="text" inputMode="numeric" className="sheet-qty-input"
-                        value={ex.sets} placeholder={regDefaults?.sets || '—'} title="Séries" aria-label="Séries"
+                        type="text"
+                        inputMode="numeric"
+                        className="sheet-qty-input"
+                        value={ex.sets}
+                        placeholder={regDefaults?.sets || '—'}
+                        title="Séries"
+                        aria-label="Séries"
                         onChange={e => upd('sets', e.target.value)}
                       />
                       <span className="sheet-qty-lbl">Séries</span>
@@ -318,13 +445,24 @@ export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdat
                             the input instead of beside it. */}
                         <div className={cr.sheetDistInline}>
                           <input
-                            type="text" inputMode="numeric" className="sheet-qty-input" style={{ width: 90 }}
-                            value={ex.dist} placeholder={regDefaults?.dist || '100'} title="Distância/Calorias" aria-label="Distância ou calorias"
+                            type="text"
+                            inputMode="numeric"
+                            className="sheet-qty-input"
+                            style={{ width: 90 }}
+                            value={ex.dist}
+                            placeholder={regDefaults?.dist || '100'}
+                            title="Distância/Calorias"
+                            aria-label="Distância ou calorias"
                             onChange={e => upd('dist', e.target.value)}
                           />
-                          <select className="ex-unit-sel" value={ex.distUnit || 'm'} title="Unidade"
-                            onChange={e => upd('distUnit', e.target.value)}>
-                            <option value="m">m</option><option value="cal">cal</option>
+                          <select
+                            className="ex-unit-sel"
+                            value={ex.distUnit || 'm'}
+                            title="Unidade"
+                            onChange={e => upd('distUnit', e.target.value)}
+                          >
+                            <option value="m">m</option>
+                            <option value="cal">cal</option>
                           </select>
                         </div>
                         <span className="sheet-qty-lbl">Distância</span>
@@ -332,17 +470,25 @@ export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdat
                     ) : (
                       <div className="sheet-qty-field">
                         <input
-                          type="text" inputMode="numeric" className="sheet-qty-input sheet-qty-reps"
-                          value={ex.reps} placeholder={ladderMode ? '15,12,9' : (regDefaults?.reps || '—')}
-                          title={ex.reps ? `Reps: ${ex.reps}` : 'Reps'} aria-label="Reps"
+                          type="text"
+                          inputMode="numeric"
+                          className="sheet-qty-input sheet-qty-reps"
+                          value={ex.reps}
+                          placeholder={ladderMode ? '15,12,9' : regDefaults?.reps || '—'}
+                          title={ex.reps ? `Reps: ${ex.reps}` : 'Reps'}
+                          aria-label="Reps"
                           onChange={e => upd('reps', e.target.value)}
                         />
                         <span className="sheet-qty-lbl">Reps</span>
                       </div>
                     )}
-                    <button type="button" className={`ex-dist-toggle${isDistMode ? ' on' : ''}`} onClick={toggleDistMode}
+                    <button
+                      type="button"
+                      className={`ex-dist-toggle${isDistMode ? ' on' : ''}`}
+                      onClick={toggleDistMode}
                       aria-label={isDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}
-                      title={isDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}>
+                      title={isDistMode ? 'Usar Séries×Reps' : 'Usar Distância/Calorias'}
+                    >
                       <i className={`ti ${isDistMode ? 'ti-repeat' : 'ti-ruler-2'}`} />
                     </button>
                   </>
@@ -381,5 +527,5 @@ export function ExerciseRow({ ex, blockType, ladderMode, onToggleLadder, onUpdat
         </div>
       )}
     </div>
-  );
+  )
 }

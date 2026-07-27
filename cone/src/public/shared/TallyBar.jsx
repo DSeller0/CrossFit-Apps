@@ -26,8 +26,8 @@ const UNITS = 10
 export default function TallyBar({
   pct = 0,
   color = 'var(--teal)',
-  size = 'md',          // 'sm' (5px) | 'md' (7px) | 'lg' (14px)
-  ticks = null,         // [{ pct, state: 'hit' | 'next' | 'future' }]
+  size = 'md', // 'sm' (5px) | 'md' (7px) | 'lg' (14px)
+  ticks = null, // [{ pct, state: 'hit' | 'next' | 'future' }]
   grow = false,
   className = '',
 }) {
@@ -38,17 +38,25 @@ export default function TallyBar({
   const partial = full < BLOCKS ? Math.round(clamped - full * BLOCKS) : 0
 
   return (
-    <div className={`${s.bar} ${s[size]}${grow ? ' ' + s.grow : ''} ${className}`} role="presentation">
+    <div
+      className={`${s.bar} ${s[size]}${grow ? ' ' + s.grow : ''} ${className}`}
+      role="presentation"
+    >
       {Array.from({ length: BLOCKS }, (_, i) => {
         if (i < full) {
-          return <span key={i} className={`${s.block} ${s.blockFull}`} style={{ background: color }} />
+          return (
+            <span key={i} className={`${s.block} ${s.blockFull}`} style={{ background: color }} />
+          )
         }
         if (i === full && partial > 0) {
           return (
             <span key={i} className={`${s.block} ${s.blockPartial}`}>
               {Array.from({ length: UNITS }, (_, u) => (
-                <span key={u} className={`${s.unit}${u < partial ? ' ' + s.unitOn : ''}`}
-                  style={u < partial ? { background: color } : undefined} />
+                <span
+                  key={u}
+                  className={`${s.unit}${u < partial ? ' ' + s.unitOn : ''}`}
+                  style={u < partial ? { background: color } : undefined}
+                />
               ))}
             </span>
           )

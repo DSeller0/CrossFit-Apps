@@ -90,7 +90,9 @@ describe('resultToRow', () => {
   })
 
   test('loggedByAthlete coerced to boolean', () => {
-    expect(resultToRow({ ...sampleResult, loggedByAthlete: undefined }).logged_by_athlete).toBe(false)
+    expect(resultToRow({ ...sampleResult, loggedByAthlete: undefined }).logged_by_athlete).toBe(
+      false,
+    )
   })
 
   test('includes updated_at ISO timestamp', () => {
@@ -112,7 +114,7 @@ describe('resultToRow', () => {
 describe('round-trip: rowToResult → resultToRow', () => {
   test('preserves all core fields', () => {
     const result = rowToResult(sampleRow)
-    const row    = resultToRow(result)
+    const row = resultToRow(result)
     expect(row.id).toBe(sampleRow.id)
     expect(row.date).toBe(sampleRow.date)
     expect(row.athlete_id).toBe(sampleRow.athlete_id)

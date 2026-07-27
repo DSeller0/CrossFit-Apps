@@ -27,7 +27,11 @@ export default function MaskedTimeInput({
   const describedBy = error || hint ? msgId : undefined
   return (
     <div className={`${s.field} ${className}`.trim()}>
-      {label && <label htmlFor={fieldId} className={s.label}>{label}</label>}
+      {label && (
+        <label htmlFor={fieldId} className={s.label}>
+          {label}
+        </label>
+      )}
       <input
         id={fieldId}
         className={`${s.control}${error ? ' ' + s.errored : ''}`}
@@ -40,9 +44,17 @@ export default function MaskedTimeInput({
         aria-describedby={describedBy}
         {...rest}
       />
-      {error
-        ? <span id={msgId} className={s.error}>{error}</span>
-        : hint && <span id={msgId} className={s.hint}>{hint}</span>}
+      {error ? (
+        <span id={msgId} className={s.error}>
+          {error}
+        </span>
+      ) : (
+        hint && (
+          <span id={msgId} className={s.hint}>
+            {hint}
+          </span>
+        )
+      )}
     </div>
   )
 }

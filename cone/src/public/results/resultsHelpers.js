@@ -1,4 +1,12 @@
-import { toSecs, fmtSecs, rankResults, perfStr, deriveScale, isTimeBlock, blkMeta } from '../lib/wod.js'
+import {
+  toSecs,
+  fmtSecs,
+  rankResults,
+  perfStr,
+  deriveScale,
+  isTimeBlock,
+  blkMeta,
+} from '../lib/wod.js'
 import { sessName } from '../lib/sessions.js'
 
 // Shared by Results.jsx and its extracted results/ components (#51) — one
@@ -9,9 +17,17 @@ import { sessName } from '../lib/sessions.js'
 // never touched the form still recorded RX at RPE 7, so neither field carried
 // real information. The submit buttons (LogForm) stay disabled until both are
 // explicitly tapped.
-export const DEF_INP = () => ({ rpe: null, scale: null, perfTime: '', perfRounds: '', perfReps: '' })
+export const DEF_INP = () => ({
+  rpe: null,
+  scale: null,
+  perfTime: '',
+  perfRounds: '',
+  perfReps: '',
+})
 
-export function inputKey(sid, bid) { return `${sid}:${bid}` }
+export function inputKey(sid, bid) {
+  return `${sid}:${bid}`
+}
 
 // blkMeta/sessName went app-wide in #84 — re-exported here so this folder's
 // existing consumers (Results.jsx, SessionCard.jsx, WodSummary.jsx) stay
@@ -27,7 +43,14 @@ export function blockEntries(results, athletes, sid, bid) {
       const br = (r.blocks || []).find(b => b.blockId === bid)
       if (!br) return null
       const ath = (athletes || []).find(a => String(a.id) === String(r.athleteId))
-      return { ...br, id: r.id, athleteId: String(r.athleteId), name: ath?.name || '?', color: ath?.color, scale: deriveScale(br) }
+      return {
+        ...br,
+        id: r.id,
+        athleteId: String(r.athleteId),
+        name: ath?.name || '?',
+        color: ath?.color,
+        scale: deriveScale(br),
+      }
     })
     .filter(Boolean)
 }
@@ -37,33 +60,59 @@ export function blockEntries(results, athletes, sid, bid) {
 // ~90%-identical calcKPIs/calcExtKpis that had drifted on their DNF handling.
 export function calcKpis(entries, btype, variant = 'compact') {
   const count = entries.length
-  const base  = { count: 0, avgRpe: null, perfKpi: null, rxPct: null, avgSecs: 0, rxPctStr: '—', interPct: '—', scPct: '—' }
+  const base = {
+    count: 0,
+    avgRpe: null,
+    perfKpi: null,
+    rxPct: null,
+    avgSecs: 0,
+    rxPctStr: '—',
+    interPct: '—',
+    scPct: '—',
+  }
   if (!count) return base
 
   // Average over the athletes who actually logged an RPE. Both pre-#51
   // calculators summed `Number(b.rpe)||0` and divided by the FULL count, so a
   // single athlete with no RPE dragged the whole gym's average toward zero.
-  const rpes   = entries.map(b => Number(b.rpe)).filter(n => n > 0)
+  const rpes = entries.map(b => Number(b.rpe)).filter(n => n > 0)
   const avgRpe = rpes.length ? (rpes.reduce((a, b) => a + b, 0) / rpes.length).toFixed(1) : null
   const scales = entries.map(b => b.scale).filter(s => s && s !== '-')
-  const pctOf  = sc => scales.length ? Math.round(scales.filter(s => s === sc).length / scales.length * 100) : null
+  const pctOf = sc =>
+    scales.length ? Math.round((scales.filter(s => s === sc).length / scales.length) * 100) : null
 
-  let perfKpi = null, avgSecs = 0
+  let perfKpi = null,
+    avgSecs = 0
   if (isTimeBlock(btype)) {
-    const times = entries.map(b => b.perfTime).filter(Boolean).map(toSecs).filter(t => t > 0 && t < Infinity)
+    const times = entries
+      .map(b => b.perfTime)
+      .filter(Boolean)
+      .map(toSecs)
+      .filter(t => t > 0 && t < Infinity)
     if (times.length) {
       avgSecs = times.reduce((a, b) => a + b, 0) / times.length
       perfKpi = fmtSecs(Math.round(avgSecs))
     }
   } else {
     const rounds = entries.map(b => parseInt(b.perfRounds) || 0).filter(r => r > 0)
-    if (rounds.length) perfKpi = (rounds.reduce((a, b) => a + b, 0) / rounds.length).toFixed(1) + ' rds'
+    if (rounds.length)
+      perfKpi = (rounds.reduce((a, b) => a + b, 0) / rounds.length).toFixed(1) + ' rds'
   }
 
   const rxPct = pctOf('RX')
-  const str   = n => n === null ? '—' : n + '%'
+  const str = n => (n === null ? '—' : n + '%')
   if (variant === 'compact') return { ...base, count, avgRpe, perfKpi, rxPct, avgSecs }
-  return { ...base, count, avgRpe, perfKpi, rxPct, avgSecs, rxPctStr: str(rxPct), interPct: str(pctOf('Inter')), scPct: str(pctOf('SC')) }
+  return {
+    ...base,
+    count,
+    avgRpe,
+    perfKpi,
+    rxPct,
+    avgSecs,
+    rxPctStr: str(rxPct),
+    interPct: str(pctOf('Inter')),
+    scPct: str(pctOf('SC')),
+  }
 }
 
 // Collapsed-card summary (#51 — the SugarWOD-whiteboard density fix): how many
@@ -71,11 +120,11 @@ export function calcKpis(entries, btype, variant = 'compact') {
 export function cardSummary(entries, btype, selAth) {
   const ranked = rankResults(entries, btype)
   const leader = ranked[0] || null
-  const own    = selAth ? ranked.find(e => String(e.athleteId) === String(selAth)) : null
+  const own = selAth ? ranked.find(e => String(e.athleteId) === String(selAth)) : null
   return {
-    count:      ranked.length,
+    count: ranked.length,
     leaderName: leader?.name || '',
     leaderPerf: leader ? perfStr(leader, btype) : '',
-    ownPerf:    own ? perfStr(own, btype) : '',
+    ownPerf: own ? perfStr(own, btype) : '',
   }
 }

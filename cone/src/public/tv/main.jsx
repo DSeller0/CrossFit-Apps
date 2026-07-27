@@ -4,5 +4,7 @@ import '../../fonts.js'
 import TV from './TV.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode><TV /></StrictMode>
+  <StrictMode>
+    <TV />
+  </StrictMode>,
 )

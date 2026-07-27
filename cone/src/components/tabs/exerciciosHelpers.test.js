@@ -12,7 +12,9 @@ import { initRegistry, BLOCK_ORDER, sortCat, getExName } from './exerciciosHelpe
 const emptyReg = () => Object.fromEntries(BLOCK_ORDER.map(n => [n, []]))
 
 describe('initRegistry', () => {
-  beforeEach(() => { loadRegistry.mockReset() })
+  beforeEach(() => {
+    loadRegistry.mockReset()
+  })
 
   it('needsSave is false for an already-migrated, already-sorted registry (zero writes on a normal load)', () => {
     const reg = emptyReg()
@@ -65,6 +67,9 @@ describe('initRegistry', () => {
 
 describe('sortCat / getExName', () => {
   it('sorts a mix of string and object entries by name, pt locale', () => {
-    expect(sortCat(['Zumba', { name: 'Agachamento' }]).map(getExName)).toEqual(['Agachamento', 'Zumba'])
+    expect(sortCat(['Zumba', { name: 'Agachamento' }]).map(getExName)).toEqual([
+      'Agachamento',
+      'Zumba',
+    ])
   })
 })

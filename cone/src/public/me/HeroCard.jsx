@@ -25,15 +25,26 @@ export default function HeroCard({ athlete, pd, onOpenBody, onSwitch }) {
       <div className={styles.heroRow}>
         <div
           className={`${styles.av} ${styles.avLg}`}
-          style={{ background: `linear-gradient(145deg,${pd.color}22,${pd.color}08)`, borderColor: pd.color }}
+          style={{
+            background: `linear-gradient(145deg,${pd.color}22,${pd.color}08)`,
+            borderColor: pd.color,
+          }}
           aria-hidden="true"
         >
           <span style={{ color: pd.color }}>{initials(athlete.name)}</span>
         </div>
         <div className={styles.heroInfo}>
           <h1 className={styles.pname}>{athlete.name}</h1>
-          {athlete.level && <div className={styles.ptier} style={{ color: pd.color }}>{athlete.level}</div>}
-          {pd.sinceStr && <div className={styles.psub}>desde {pd.sinceStr} · {pd.days} dias</div>}
+          {athlete.level && (
+            <div className={styles.ptier} style={{ color: pd.color }}>
+              {athlete.level}
+            </div>
+          )}
+          {pd.sinceStr && (
+            <div className={styles.psub}>
+              desde {pd.sinceStr} · {pd.days} dias
+            </div>
+          )}
         </div>
         <div className={styles.heroActions}>
           <button className={styles.heroBtn} onClick={onOpenBody}>
@@ -51,7 +62,11 @@ export default function HeroCard({ athlete, pd, onOpenBody, onSwitch }) {
 
       <div className={styles.hearts}>
         {pd.hearts.map((h, i) => (
-          <span key={i} className={`${styles.h} ${h === 'full' ? styles.hf : h === 'today' ? styles.ht : styles.he}`} aria-hidden="true">
+          <span
+            key={i}
+            className={`${styles.h} ${h === 'full' ? styles.hf : h === 'today' ? styles.ht : styles.he}`}
+            aria-hidden="true"
+          >
             {h === 'empty' ? '♡' : '♥'}
           </span>
         ))}

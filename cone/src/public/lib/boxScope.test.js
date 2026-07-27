@@ -55,18 +55,27 @@ describe('sessionBoxIds', () => {
 // getBoxScope resolves the URL param and the sticky localStorage fallback.
 describe('getBoxScope', () => {
   let store
-  const setSearch = q => { globalThis.window = { location: { search: q } } }
+  const setSearch = q => {
+    globalThis.window = { location: { search: q } }
+  }
 
   beforeEach(() => {
     store = {}
     globalThis.localStorage = {
       getItem: k => (k in store ? store[k] : null),
-      setItem: (k, v) => { store[k] = String(v) },
-      removeItem: k => { delete store[k] },
+      setItem: (k, v) => {
+        store[k] = String(v)
+      },
+      removeItem: k => {
+        delete store[k]
+      },
     }
     setSearch('')
   })
-  afterEach(() => { delete globalThis.window; delete globalThis.localStorage })
+  afterEach(() => {
+    delete globalThis.window
+    delete globalThis.localStorage
+  })
 
   it('reads ?box= and persists it as the sticky scope', () => {
     setSearch('?box=box-01')

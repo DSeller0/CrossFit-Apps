@@ -1,5 +1,13 @@
 import { useState, Fragment } from 'react'
-import { IconHome, IconTrophy, IconChartBar, IconUser, IconCalendar, IconClock, IconSettings } from '@tabler/icons-react'
+import {
+  IconHome,
+  IconTrophy,
+  IconChartBar,
+  IconUser,
+  IconCalendar,
+  IconClock,
+  IconSettings,
+} from '@tabler/icons-react'
 import s from './Nav.module.css'
 
 export function isNavHidden() {
@@ -9,12 +17,54 @@ export function isNavHidden() {
 // Icons are @tabler/icons-react (inline SVG, stroke:currentColor → tint with the theme).
 // NOT the `ti` webfont: leaderboard.html doesn't load it and Nav is shared by every page (#53).
 const TABS = [
-  { key: 'index',       href: 'index.html',       Icon: IconHome,     label: 'Início',     lockable: false, desktopOnly: false },
-  { key: 'leaderboard', href: 'leaderboard.html', Icon: IconTrophy,   label: 'Ranking',    lockable: false, desktopOnly: false },
-  { key: 'results',     href: 'results.html',     Icon: IconChartBar, label: 'Resultados', lockable: true,  desktopOnly: false },
-  { key: 'me',          href: 'me.html',          Icon: IconUser,     label: 'Perfil',     lockable: true,  desktopOnly: false },
-  { key: 'schedule',    href: 'schedule.html',    Icon: IconCalendar, label: 'Agenda',     lockable: true,  desktopOnly: false },
-  { key: 'timer',       href: 'timer.html',       Icon: IconClock,    label: 'Timer',      lockable: false, desktopOnly: true  },
+  {
+    key: 'index',
+    href: 'index.html',
+    Icon: IconHome,
+    label: 'Início',
+    lockable: false,
+    desktopOnly: false,
+  },
+  {
+    key: 'leaderboard',
+    href: 'leaderboard.html',
+    Icon: IconTrophy,
+    label: 'Ranking',
+    lockable: false,
+    desktopOnly: false,
+  },
+  {
+    key: 'results',
+    href: 'results.html',
+    Icon: IconChartBar,
+    label: 'Resultados',
+    lockable: true,
+    desktopOnly: false,
+  },
+  {
+    key: 'me',
+    href: 'me.html',
+    Icon: IconUser,
+    label: 'Perfil',
+    lockable: true,
+    desktopOnly: false,
+  },
+  {
+    key: 'schedule',
+    href: 'schedule.html',
+    Icon: IconCalendar,
+    label: 'Agenda',
+    lockable: true,
+    desktopOnly: false,
+  },
+  {
+    key: 'timer',
+    href: 'timer.html',
+    Icon: IconClock,
+    label: 'Timer',
+    lockable: false,
+    desktopOnly: true,
+  },
 ]
 
 export default function Nav({ active, lockedId, gymName = '', box = null }) {
@@ -73,7 +123,10 @@ export default function Nav({ active, lockedId, gymName = '', box = null }) {
             return (
               <Fragment key={tab.key}>
                 {i > 0 && <div className={s.sep} />}
-                <a className={`${s.btn}${tab.key === active ? ' ' + s.active : ''}${tab.desktopOnly ? ' ' + s.desktopTab : ''}`} href={href}>
+                <a
+                  className={`${s.btn}${tab.key === active ? ' ' + s.active : ''}${tab.desktopOnly ? ' ' + s.desktopTab : ''}`}
+                  href={href}
+                >
                   <tab.Icon className={s.ic} />
                   <span>{tab.label}</span>
                 </a>

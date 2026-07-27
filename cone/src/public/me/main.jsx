@@ -6,5 +6,5 @@ import Me from './Me.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Me />
-  </StrictMode>
+  </StrictMode>,
 )

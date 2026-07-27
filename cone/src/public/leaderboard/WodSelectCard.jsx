@@ -9,9 +9,14 @@ import { onKey } from '../schedule/scheduleHelpers.js'
 // w: { key, label, sessName, dt, count }
 export default function WodSelectCard({ w, selected = false, onSelect }) {
   return (
-    <div className={`${s.wodCard}${selected ? ' ' + s.wodCardSel : ''}`}
-      role="button" tabIndex={0} aria-pressed={selected}
-      onClick={() => onSelect(w.key)} onKeyDown={onKey(() => onSelect(w.key))}>
+    <div
+      className={`${s.wodCard}${selected ? ' ' + s.wodCardSel : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      onClick={() => onSelect(w.key)}
+      onKeyDown={onKey(() => onSelect(w.key))}
+    >
       <div className={s.wodCardHdr}>
         <span className={s.wodDot} />
         <span className={s.wodName}>{w.sessName || w.label}</span>
@@ -19,7 +24,11 @@ export default function WodSelectCard({ w, selected = false, onSelect }) {
       </div>
       <div className={s.wodMeta}>
         <span>{w.dt}</span>
-        {w.count > 0 && <span>{w.count} atleta{w.count !== 1 ? 's' : ''}</span>}
+        {w.count > 0 && (
+          <span>
+            {w.count} atleta{w.count !== 1 ? 's' : ''}
+          </span>
+        )}
       </div>
     </div>
   )

@@ -6,5 +6,5 @@ import Recover from './Recover.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Recover />
-  </StrictMode>
+  </StrictMode>,
 )

@@ -1,8 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
-  initials, getTargets, matchesAthlete, prValLabel, unitLabel,
-  calcStreak, calcMaxStreak, calcBlockStats, buildEvents, catToInputType, computeDelta,
-  DIST_TYPES, PR_SKIP,
+  initials,
+  getTargets,
+  matchesAthlete,
+  prValLabel,
+  unitLabel,
+  calcStreak,
+  calcMaxStreak,
+  calcBlockStats,
+  buildEvents,
+  catToInputType,
+  computeDelta,
+  DIST_TYPES,
+  PR_SKIP,
 } from './meHelpers.js'
 
 // me.html's helpers had zero tests before #52 — they lived as module-level functions
@@ -86,9 +96,12 @@ describe('calcStreak', () => {
 describe('calcMaxStreak', () => {
   it('finds the longest run of consecutive days anywhere in history', () => {
     const rs = [
-      R('2026-01-01'), R('2026-01-02'), R('2026-01-03'), // 3
-      R('2026-02-10'),                                    // 1
-      R('2026-03-01'), R('2026-03-02'),                   // 2
+      R('2026-01-01'),
+      R('2026-01-02'),
+      R('2026-01-03'), // 3
+      R('2026-02-10'), // 1
+      R('2026-03-01'),
+      R('2026-03-02'), // 2
     ]
     expect(calcMaxStreak(rs)).toBe(3)
   })
@@ -101,39 +114,67 @@ describe('calcMaxStreak', () => {
 describe('calcBlockStats', () => {
   const FORCA = 'Força'
   const sessions = {
-    '2026-07-06': [{ public: true, mainTraining: ['Bruna'], blocks: [{ type: FORCA }, { type: 'For Time' }] }],
+    '2026-07-06': [
+      { public: true, mainTraining: ['Bruna'], blocks: [{ type: FORCA }, { type: 'For Time' }] },
+    ],
     '2026-07-07': [{ public: true, mainTraining: ['Bruna'], blocks: [{ type: FORCA }] }],
-    '2026-07-08': [{ public: true, mainTraining: ['Arthur'], blocks: [{ type: FORCA }] }],  // not hers
-    '2026-07-09': [{ public: false, mainTraining: ['Bruna'], blocks: [{ type: FORCA }] }],  // hidden
-    '2026-06-01': [{ public: true, mainTraining: ['Bruna'], blocks: [{ type: FORCA }] }],   // out of window
+    '2026-07-08': [{ public: true, mainTraining: ['Arthur'], blocks: [{ type: FORCA }] }], // not hers
+    '2026-07-09': [{ public: false, mainTraining: ['Bruna'], blocks: [{ type: FORCA }] }], // hidden
+    '2026-06-01': [{ public: true, mainTraining: ['Bruna'], blocks: [{ type: FORCA }] }], // out of window
   }
   const present = [
     R('2026-07-06', 'Presente', [{ blockType: 'For Time' }]),
-    R('2026-06-01', 'Presente', [{ blockType: FORCA }]),  // out of window
+    R('2026-06-01', 'Presente', [{ blockType: FORCA }]), // out of window
   ]
 
   it('counts only in-window, public, assigned sessions as planned', () => {
-    const { planned } = calcBlockStats(sessions, present, 'Bruna', [FORCA, 'For Time'], '2026-07-01', '2026-07-31')
-    expect(planned[FORCA]).toBe(2)      // the 8th is Arthur's, the 9th is hidden, June is out
+    const { planned } = calcBlockStats(
+      sessions,
+      present,
+      'Bruna',
+      [FORCA, 'For Time'],
+      '2026-07-01',
+      '2026-07-31',
+    )
+    expect(planned[FORCA]).toBe(2) // the 8th is Arthur's, the 9th is hidden, June is out
     expect(planned['For Time']).toBe(1)
   })
 
   it('counts executed blocks from results inside the same window', () => {
-    const { executed } = calcBlockStats(sessions, present, 'Bruna', [FORCA, 'For Time'], '2026-07-01', '2026-07-31')
+    const { executed } = calcBlockStats(
+      sessions,
+      present,
+      'Bruna',
+      [FORCA, 'For Time'],
+      '2026-07-01',
+      '2026-07-31',
+    )
     expect(executed['For Time']).toBe(1)
-    expect(executed[FORCA]).toBe(0)     // June's result is out of window
+    expect(executed[FORCA]).toBe(0) // June's result is out of window
   })
 })
 
 describe('buildEvents', () => {
   it('reports a load PR improvement, newest first, and ignores a regression', () => {
     const prs = [
-      { name: 'Back Squat', type: 'load', unit: 'kg', results: [
-        { value: '90', date: '2026-07-01' }, { value: '100', date: '2026-07-05' },
-      ]},
-      { name: 'Deadlift', type: 'load', unit: 'kg', results: [
-        { value: '140', date: '2026-07-02' }, { value: '130', date: '2026-07-06' },  // went down
-      ]},
+      {
+        name: 'Back Squat',
+        type: 'load',
+        unit: 'kg',
+        results: [
+          { value: '90', date: '2026-07-01' },
+          { value: '100', date: '2026-07-05' },
+        ],
+      },
+      {
+        name: 'Deadlift',
+        type: 'load',
+        unit: 'kg',
+        results: [
+          { value: '140', date: '2026-07-02' },
+          { value: '130', date: '2026-07-06' }, // went down
+        ],
+      },
     ]
     const evs = buildEvents(prs, [])
     expect(evs).toHaveLength(1)
@@ -144,23 +185,40 @@ describe('buildEvents', () => {
   })
 
   it('treats a FASTER time as the improvement', () => {
-    const prs = [{ name: 'Fran', type: 'time', results: [
-      { value: '5:00', date: '2026-07-01' }, { value: '4:30', date: '2026-07-05' },
-    ]}]
+    const prs = [
+      {
+        name: 'Fran',
+        type: 'time',
+        results: [
+          { value: '5:00', date: '2026-07-01' },
+          { value: '4:30', date: '2026-07-05' },
+        ],
+      },
+    ]
     const evs = buildEvents(prs, [])
     expect(evs).toHaveLength(1)
-    expect(evs[0].sub).toContain('-00:30')   // canonical fmtSecs pads the minutes
+    expect(evs[0].sub).toContain('-00:30') // canonical fmtSecs pads the minutes
   })
 
   it('needs two results to have anything to compare', () => {
-    expect(buildEvents([{ name: 'Snatch', type: 'load', results: [{ value: '60', date: '2026-07-01' }] }], [])).toEqual([])
+    expect(
+      buildEvents(
+        [{ name: 'Snatch', type: 'load', results: [{ value: '60', date: '2026-07-01' }] }],
+        [],
+      ),
+    ).toEqual([])
   })
 
   it('includes milestones that were hit, and caps the list at 5', () => {
-    const goals = [{ name: 'Primeiro Muscle-up', milestones: [
-      { label: 'Kipping', pct: 30, hit: true, hitDate: '2026-07-04' },
-      { label: 'Transicao', pct: 60, hit: false },
-    ]}]
+    const goals = [
+      {
+        name: 'Primeiro Muscle-up',
+        milestones: [
+          { label: 'Kipping', pct: 30, hit: true, hitDate: '2026-07-04' },
+          { label: 'Transicao', pct: 60, hit: false },
+        ],
+      },
+    ]
     const evs = buildEvents([], goals)
     expect(evs).toHaveLength(1)
     expect(evs[0].title).toContain('Primeiro Muscle-up')

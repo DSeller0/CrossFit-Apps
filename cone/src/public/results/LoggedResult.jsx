@@ -13,7 +13,9 @@ export default function LoggedResult({ br, btype, onEdit = null }) {
     <div className={styles.logged}>
       <div className={styles.loggedItem}>
         <div className={styles.loggedLbl}>Escala</div>
-        <div className={styles.loggedVal} style={{ color: scaleColor(br.scale) }}>{br.scale || '—'}</div>
+        <div className={styles.loggedVal} style={{ color: scaleColor(br.scale) }}>
+          {br.scale || '—'}
+        </div>
       </div>
       <div className={styles.loggedItem}>
         <div className={styles.loggedLbl}>RPE</div>

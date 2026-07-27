@@ -39,9 +39,33 @@ export function Section({ title, sub, children }) {
 // Contained fixed-overlay: a transformed wrapper makes ConfirmReview's position:fixed
 // overlay resolve to this box instead of the page viewport (same trick as FixedFrame).
 export function ModalBox({ children }) {
-  return <div style={{ position: 'relative', transform: 'translateZ(0)', height: 340, overflow: 'hidden', border: '1px solid var(--divider)' }}>{children}</div>
+  return (
+    <div
+      style={{
+        position: 'relative',
+        transform: 'translateZ(0)',
+        height: 340,
+        overflow: 'hidden',
+        border: '1px solid var(--divider)',
+      }}
+    >
+      {children}
+    </div>
+  )
 }
 
 export function TallModalBox({ children }) {
-  return <div style={{ position: 'relative', transform: 'translateZ(0)', height: 560, overflow: 'hidden', border: '1px solid var(--divider)' }}>{children}</div>
+  return (
+    <div
+      style={{
+        position: 'relative',
+        transform: 'translateZ(0)',
+        height: 560,
+        overflow: 'hidden',
+        border: '1px solid var(--divider)',
+      }}
+    >
+      {children}
+    </div>
+  )
 }

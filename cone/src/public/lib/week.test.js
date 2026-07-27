@@ -90,6 +90,8 @@ describe('fmtDate', () => {
   })
   test('uses DAY_PT_TITLE/MONTH_PT_SHORT arrays', () => {
     const d = new Date('2026-06-24T12:00:00')
-    expect(fmtDate('2026-06-24')).toBe(`${DAY_PT_TITLE[d.getDay()]} ${d.getDate()} ${MONTH_PT_SHORT[d.getMonth()]}`)
+    expect(fmtDate('2026-06-24')).toBe(
+      `${DAY_PT_TITLE[d.getDay()]} ${d.getDate()} ${MONTH_PT_SHORT[d.getMonth()]}`,
+    )
   })
 })

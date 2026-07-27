@@ -20,7 +20,10 @@ export default defineConfig({
       // It also makes the SSR class mapping and the emitted CSS agree by construction.
       // A function, not '[name]__[local]', because [name] keeps the ".module" suffix.
       generateScopedName: (local, filename) => {
-        const base = filename.split(/[\\/]/).pop().replace(/\.module\.css$/, '')
+        const base = filename
+          .split(/[\\/]/)
+          .pop()
+          .replace(/\.module\.css$/, '')
         return `${base}__${local}`
       },
     },

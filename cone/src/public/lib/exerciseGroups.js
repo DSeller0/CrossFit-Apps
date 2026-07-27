@@ -14,14 +14,20 @@
 import { normExName } from './registry.js'
 
 export const FAMILY_GROUPS = [
-  { key: 'WOD',  label: 'WOD',             color: '#d8a840',
-    cats: ['HIIT', 'MetCon', 'EMOM', 'For Time', 'AMRAP', 'Estações', 'Benchmark'] },
-  { key: 'Forca', label: 'Força',          color: '#5090e0',
-    cats: ['Força', 'LPO', 'Core', 'Acessórios'] },
-  { key: 'Gin',  label: 'Ginástica',       color: '#4ac8c0',
-    cats: ['Skill'] },
-  { key: 'Cond', label: 'Condicionamento', color: '#40b878',
-    cats: ['Cardio', 'Aquecimento', 'Mobilidade'] },
+  {
+    key: 'WOD',
+    label: 'WOD',
+    color: '#d8a840',
+    cats: ['HIIT', 'MetCon', 'EMOM', 'For Time', 'AMRAP', 'Estações', 'Benchmark'],
+  },
+  { key: 'Forca', label: 'Força', color: '#5090e0', cats: ['Força', 'LPO', 'Core', 'Acessórios'] },
+  { key: 'Gin', label: 'Ginástica', color: '#4ac8c0', cats: ['Skill'] },
+  {
+    key: 'Cond',
+    label: 'Condicionamento',
+    color: '#40b878',
+    cats: ['Cardio', 'Aquecimento', 'Mobilidade'],
+  },
 ]
 
 // Every category, in family order — the canonical iteration order for the grouped list.
@@ -38,10 +44,36 @@ export const familyOf = cat => FAMILY_GROUPS.find(f => f.cats.includes(cat)) || 
 // and trims but KEEPS the hyphen, and tokenize() splits on space AND hyphen, so both parts
 // line up. List order only breaks an exact end+length tie (earlier wins).
 export const ROOTS = [
-  'Muscle-up', 'Pull-up', 'Push-up', 'Sit-up', 'Good Morning',
-  'Deadlift', 'Squat', 'Snatch', 'Clean', 'Jerk', 'Press', 'Row', 'Pull',
-  'Raise', 'Curl', 'Dip', 'Swing', 'Extension', 'Climb', 'Lunge', 'Carry', 'Jump',
-  'Hold', 'Plank', 'Stretch', 'Pose', 'Distraction', 'Circle', 'HSPU', 'Run',
+  'Muscle-up',
+  'Pull-up',
+  'Push-up',
+  'Sit-up',
+  'Good Morning',
+  'Deadlift',
+  'Squat',
+  'Snatch',
+  'Clean',
+  'Jerk',
+  'Press',
+  'Row',
+  'Pull',
+  'Raise',
+  'Curl',
+  'Dip',
+  'Swing',
+  'Extension',
+  'Climb',
+  'Lunge',
+  'Carry',
+  'Jump',
+  'Hold',
+  'Plank',
+  'Stretch',
+  'Pose',
+  'Distraction',
+  'Circle',
+  'HSPU',
+  'Run',
 ]
 
 const tokenize = key => key.split(/[\s-]+/).filter(Boolean)
@@ -53,7 +85,11 @@ function rightmostRun(hay, needle) {
   let end = -1
   for (let i = 0; i + needle.length <= hay.length; i++) {
     let ok = true
-    for (let j = 0; j < needle.length; j++) if (hay[i + j] !== needle[j]) { ok = false; break }
+    for (let j = 0; j < needle.length; j++)
+      if (hay[i + j] !== needle[j]) {
+        ok = false
+        break
+      }
     if (ok) end = i + needle.length
   }
   return end
@@ -85,8 +121,14 @@ export function groupByRoot(exercises, nameOf = e => (typeof e === 'string' ? e 
   const noRoot = []
   for (const ex of exercises) {
     const root = rootGroup(nameOf(ex))
-    if (!root) { noRoot.push(ex); continue }
-    if (!byRoot.has(root)) { byRoot.set(root, []); order.push(root) }
+    if (!root) {
+      noRoot.push(ex)
+      continue
+    }
+    if (!byRoot.has(root)) {
+      byRoot.set(root, [])
+      order.push(root)
+    }
     byRoot.get(root).push(ex)
   }
   const groups = []

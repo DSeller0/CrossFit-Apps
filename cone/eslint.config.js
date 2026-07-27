@@ -55,10 +55,13 @@ export default defineConfig([
       'src/public/shared/ScaleFilter.jsx',
     ],
     rules: {
-      'react-refresh/only-export-components': ['error', {
-        allowConstantExport: true,
-        allowExportNames: ['useAuth', 'useSync', 'isNavHidden', 'dayTitle', 'FILTER_SCALES'],
-      }],
+      'react-refresh/only-export-components': [
+        'error',
+        {
+          allowConstantExport: true,
+          allowExportNames: ['useAuth', 'useSync', 'isNavHidden', 'dayTitle', 'FILTER_SCALES'],
+        },
+      ],
     },
   },
 ])

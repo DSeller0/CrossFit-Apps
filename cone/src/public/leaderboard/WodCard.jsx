@@ -17,7 +17,9 @@ export default function WodCard({ w, summary, expanded, onToggle, children }) {
   const meta = (
     <>
       <span className={s.cardDate}>{w.dt}</span>
-      <span className={s.cardCount}>{w.count} atleta{w.count !== 1 ? 's' : ''}</span>
+      <span className={s.cardCount}>
+        {w.count} atleta{w.count !== 1 ? 's' : ''}
+      </span>
       {leaderName && (
         <span className={s.cardLeader}>
           {/* React icon, not the `ti` webfont — leaderboard.html doesn't load it. */}

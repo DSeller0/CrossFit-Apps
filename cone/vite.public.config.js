@@ -23,16 +23,16 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        index:       resolve(root, 'index.html'),   // React
-        schedule:    resolve(root, 'schedule.html'),
-        me:          resolve(root, 'me.html'),
-        results:     resolve(root, 'results.html'),
+        index: resolve(root, 'index.html'), // React
+        schedule: resolve(root, 'schedule.html'),
+        me: resolve(root, 'me.html'),
+        results: resolve(root, 'results.html'),
         leaderboard: resolve(root, 'leaderboard.html'),
-        athletes:    resolve(root, 'athletes.html'),
-        timer:       resolve(root, 'timer.html'),
-        recover:     resolve(root, 'recover.html'),
-        tv:          resolve(root, 'tv.html'),
-      }
-    }
-  }
+        athletes: resolve(root, 'athletes.html'),
+        timer: resolve(root, 'timer.html'),
+        recover: resolve(root, 'recover.html'),
+        tv: resolve(root, 'tv.html'),
+      },
+    },
+  },
 })

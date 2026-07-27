@@ -26,15 +26,23 @@ export default function AccordionCard({
 }) {
   return (
     <div data-card-id={dataId} className={`${s.card}${expanded ? ' ' + s.expanded : ''}`}>
-      <div className={s.hdr} role="button" tabIndex={0} aria-expanded={expanded}
-        onClick={onToggle} onKeyDown={onKey(onToggle)}>
+      <div
+        className={s.hdr}
+        role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
+        onClick={onToggle}
+        onKeyDown={onKey(onToggle)}
+      >
         <div className={s.top}>
           <span className={`${s.dot}${filled ? ' ' + s.dotFilled : ''}`} />
           <span className={s.title}>{title}</span>
           {tag && <span className={s.tag}>{tag}</span>}
-          {expanded
-            ? <IconChevronUp size={15} className={s.chev} aria-hidden="true" />
-            : <IconChevronDown size={15} className={s.chev} aria-hidden="true" />}
+          {expanded ? (
+            <IconChevronUp size={15} className={s.chev} aria-hidden="true" />
+          ) : (
+            <IconChevronDown size={15} className={s.chev} aria-hidden="true" />
+          )}
         </div>
         {meta && <div className={s.meta}>{meta}</div>}
       </div>

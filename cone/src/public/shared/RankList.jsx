@@ -29,16 +29,23 @@ export default function RankList({
   const cls = `${s.list} ${size === 'large' ? s.large : ''}`
 
   if (!ranked.length) {
-    return <div className={cls} aria-live="polite"><div className={s.empty}>{emptyLabel}</div></div>
+    return (
+      <div className={cls} aria-live="polite">
+        <div className={s.empty}>{emptyLabel}</div>
+      </div>
+    )
   }
 
   return (
     <ol className={cls} aria-live="polite">
       {ranked.map((e, i) => {
-        const pod  = podium && i < 3 ? s[`pod${i + 1}`] : ''
+        const pod = podium && i < 3 ? s[`pod${i + 1}`] : ''
         const self = highlightAthleteId && String(e.athleteId) === String(highlightAthleteId)
         return (
-          <li key={e.id ?? e.athleteId ?? i} className={`${s.row} ${pod}${self ? ' ' + s.self : ''}`}>
+          <li
+            key={e.id ?? e.athleteId ?? i}
+            className={`${s.row} ${pod}${self ? ' ' + s.self : ''}`}
+          >
             <span className={s.rank}>{i + 1}º</span>
             {showDots && <span className={s.dot} style={{ background: e.color || 'var(--dim)' }} />}
             <span className={s.name}>{e.name || '—'}</span>

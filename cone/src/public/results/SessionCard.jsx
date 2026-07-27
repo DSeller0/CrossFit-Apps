@@ -9,14 +9,24 @@ import { sessName } from './resultsHelpers.js'
 //
 // The disclosure itself is AccordionCard, shared with leaderboard's WodCard —
 // same gesture, same keyboard contract. Only this header's contents are local.
-export default function SessionCard({ sess, dk, isExpanded, onToggle, summary, hasAthlete = false, children }) {
+export default function SessionCard({
+  sess,
+  dk,
+  isExpanded,
+  onToggle,
+  summary,
+  hasAthlete = false,
+  children,
+}) {
   const { count = 0, leaderName = '', leaderPerf = '', ownPerf = '' } = summary || {}
 
   const meta = (
     <>
       {count > 0 ? (
         <>
-          <span className={styles.cardCount}>{count} resultado{count !== 1 ? 's' : ''}</span>
+          <span className={styles.cardCount}>
+            {count} resultado{count !== 1 ? 's' : ''}
+          </span>
           {leaderName && (
             <span className={styles.cardLeader}>
               <i className="ti ti-trophy" aria-hidden="true" />
@@ -29,11 +39,14 @@ export default function SessionCard({ sess, dk, isExpanded, onToggle, summary, h
         <span className={styles.cardCountEmpty}>Nenhum resultado ainda</span>
       )}
 
-      {hasAthlete && (
-        ownPerf
-          ? <span className={styles.cardOwn}>Você <b>{ownPerf}</b></span>
-          : <span className={styles.cardOwnCta}>Registrar</span>
-      )}
+      {hasAthlete &&
+        (ownPerf ? (
+          <span className={styles.cardOwn}>
+            Você <b>{ownPerf}</b>
+          </span>
+        ) : (
+          <span className={styles.cardOwnCta}>Registrar</span>
+        ))}
     </>
   )
 

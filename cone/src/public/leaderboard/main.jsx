@@ -9,5 +9,5 @@ registerSW()
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Leaderboard />
-  </StrictMode>
+  </StrictMode>,
 )

@@ -8,21 +8,22 @@ export default function KpiGrid({ kpis, btype, variant = 'compact' }) {
   const { count, avgRpe, perfKpi, rxPct, rxPctStr, interPct, scPct } = kpis
   const perfLbl = isTimeBlock(btype) ? 'Tempo médio' : 'Rds médio'
 
-  const items = variant === 'extended'
-    ? [
-        { val: count,          lbl: 'Atletas' },
-        { val: avgRpe || '—',  lbl: 'RPE médio' },
-        { val: perfKpi || '—', lbl: perfLbl },
-        { val: rxPctStr,       lbl: '% RX' },
-        { val: interPct,       lbl: '% Inter' },
-        { val: scPct,          lbl: '% SC' },
-      ]
-    : [
-        { val: count,                          lbl: 'Atletas' },
-        { val: avgRpe || '—',                  lbl: 'RPE médio' },
-        { val: rxPct !== null ? rxPct + '%' : '—', lbl: '% RX' },
-        { val: perfKpi || '—',                 lbl: perfLbl },
-      ]
+  const items =
+    variant === 'extended'
+      ? [
+          { val: count, lbl: 'Atletas' },
+          { val: avgRpe || '—', lbl: 'RPE médio' },
+          { val: perfKpi || '—', lbl: perfLbl },
+          { val: rxPctStr, lbl: '% RX' },
+          { val: interPct, lbl: '% Inter' },
+          { val: scPct, lbl: '% SC' },
+        ]
+      : [
+          { val: count, lbl: 'Atletas' },
+          { val: avgRpe || '—', lbl: 'RPE médio' },
+          { val: rxPct !== null ? rxPct + '%' : '—', lbl: '% RX' },
+          { val: perfKpi || '—', lbl: perfLbl },
+        ]
 
   return (
     <div className={variant === 'extended' ? styles.kpiGridExt : styles.kpiGrid}>

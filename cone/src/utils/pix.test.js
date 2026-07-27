@@ -36,7 +36,7 @@ describe('buildPixPayload', () => {
 
   test('amount 0 omits the amount field (shorter payload)', () => {
     const withZero = buildPixPayload({ ...base, amount: 0 })
-    const withAmt  = buildPixPayload({ ...base, amount: 100 })
+    const withAmt = buildPixPayload({ ...base, amount: 100 })
     expect(withZero.length).toBeLessThan(withAmt.length)
   })
 

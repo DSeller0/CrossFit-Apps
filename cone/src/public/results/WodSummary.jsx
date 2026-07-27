@@ -12,19 +12,28 @@ import { blkMeta } from './resultsHelpers.js'
 // carry it) — so a WOD built from a complex simply showed no movements at all.
 function exName(ex) {
   if (!ex.isComplex) return ex.name
-  return ex.name || (ex.complexMovements || []).map(m => m.name).filter(Boolean).join(' + ')
+  return (
+    ex.name ||
+    (ex.complexMovements || [])
+      .map(m => m.name)
+      .filter(Boolean)
+      .join(' + ')
+  )
 }
 
 function exVol(ex) {
   if (!ex.isComplex) return exVolStr(ex)
-  const notation = (ex.complexMovements || []).filter(m => m.name).map(m => m.reps || '?').join('+')
+  const notation = (ex.complexMovements || [])
+    .filter(m => m.name)
+    .map(m => m.reps || '?')
+    .join('+')
   const sets = ex.sets ? `${ex.sets}×` : ''
   return notation ? `${sets}(${notation})` : sets
 }
 
 export default function WodSummary({ bl, variant = 'compact', showTitle = false }) {
   const meta = blkMeta(bl)
-  const exs  = (bl.exercises || []).filter(e => e.name || e.isComplex)
+  const exs = (bl.exercises || []).filter(e => e.name || e.isComplex)
   if (!meta && !exs.length && !showTitle) return null
 
   const title = showTitle && blkLabel(bl)
@@ -35,7 +44,11 @@ export default function WodSummary({ bl, variant = 'compact', showTitle = false 
         {title && <div className={styles.wodSumTitle}>{title}</div>}
         {meta && (
           <div className={styles.wodSumPills}>
-            {meta.split(' · ').map((m, i) => <span key={i} className={styles.wodSumPill}>{m}</span>)}
+            {meta.split(' · ').map((m, i) => (
+              <span key={i} className={styles.wodSumPill}>
+                {m}
+              </span>
+            ))}
           </div>
         )}
         {exs.length > 0 && (

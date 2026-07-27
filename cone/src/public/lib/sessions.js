@@ -19,7 +19,10 @@ export function normalizeSessionIds(blob) {
   const out = {}
   Object.keys(blob).forEach(dateKey => {
     const arr = blob[dateKey]
-    if (!Array.isArray(arr)) { out[dateKey] = arr; return }
+    if (!Array.isArray(arr)) {
+      out[dateKey] = arr
+      return
+    }
     out[dateKey] = arr.map(s => {
       if (!s || typeof s !== 'object') return s
       return { ...s, id: s.id != null ? String(s.id) : uid() }
@@ -33,7 +36,9 @@ export function getTargets(s) {
   return Array.isArray(s.mainTraining) ? s.mainTraining : [s.mainTraining]
 }
 
-export function matchesAthlete(s, name) { return getTargets(s).includes(name) }
+export function matchesAthlete(s, name) {
+  return getTargets(s).includes(name)
+}
 
 // Session display name — superset fallback chain: explicit name, then legacy
 // mainTraining (string or array, joined), then the weekday. Canonical since

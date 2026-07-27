@@ -5,7 +5,9 @@ import { groupProgressionSteps, isWodBlock, SCALES } from '../lib/wod.js'
 
 export const LOG_SCALES = SCALES
 
-export function isRoundBlock(bl) { return !isWodBlock(bl) && Number(bl.rounds) > 0 }
+export function isRoundBlock(bl) {
+  return !isWodBlock(bl) && Number(bl.rounds) > 0
+}
 
 // A progression exercise with zero intensity.steps still needs one countable
 // row/checkbox slot in the interactive schedule view (so it can be checked off
@@ -17,22 +19,31 @@ export function progGroups(ex) {
 }
 
 export function parseDurMins(d) {
-  if (!d) return 0; const p = String(d).trim()
-  if (p.includes(':')) { const [m, s] = p.split(':').map(n => parseInt(n) || 0); return m + s / 60 }
+  if (!d) return 0
+  const p = String(d).trim()
+  if (p.includes(':')) {
+    const [m, s] = p.split(':').map(n => parseInt(n) || 0)
+    return m + s / 60
+  }
   return parseInt(p) || 0
 }
 
 export function stationsCapMins(bl) {
-  const sts = bl.stations || [], cycM = sts.reduce((t, s) => t + parseDurMins(s.duration), 0)
-  const last = sts[sts.length - 1], lastRest = last?.isRest ? parseDurMins(last.duration) : 0
-  const rep = bl.stationRepeat || 1, betM = parseDurMins(bl.restBetweenCycles)
+  const sts = bl.stations || [],
+    cycM = sts.reduce((t, s) => t + parseDurMins(s.duration), 0)
+  const last = sts[sts.length - 1],
+    lastRest = last?.isRest ? parseDurMins(last.duration) : 0
+  const rep = bl.stationRepeat || 1,
+    betM = parseDurMins(bl.restBetweenCycles)
   const tot = cycM * rep + Math.max(0, rep - 1) * betM - lastRest
   return tot > 0 ? Math.round(tot) : 0
 }
 
 export function extractYtId(url) {
   if (!url) return null
-  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/)
+  const m = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/,
+  )
   return m ? m[1] : null
 }
 
@@ -47,5 +58,11 @@ export function fmtDeskPerf(blk) {
 
 // Enter/Space keyboard activation for click-divs (#14)
 export function onKey(fn) {
-  return e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); fn() } }
+  return e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      e.stopPropagation()
+      fn()
+    }
+  }
 }

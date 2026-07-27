@@ -6,5 +6,5 @@ import Timer from './Timer.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Timer />
-  </StrictMode>
+  </StrictMode>,
 )

@@ -20,8 +20,15 @@ import PrLogSheet from './PrLogSheet.jsx'
 import BodySheet from './BodySheet.jsx'
 import ConfirmSheet from './ConfirmSheet.jsx'
 import {
-  DIST_TYPES, matchesAthlete, prValLabel, calcStreak, calcMaxStreak,
-  calcBlockStats, buildEvents, catToInputType, computeDelta,
+  DIST_TYPES,
+  matchesAthlete,
+  prValLabel,
+  calcStreak,
+  calcMaxStreak,
+  calcBlockStats,
+  buildEvents,
+  catToInputType,
+  computeDelta,
 } from './meHelpers.js'
 import { prBest } from '../lib/goals.js'
 import { toSecs } from '../lib/wod.js'
@@ -45,18 +52,19 @@ export default function Me() {
   const [goalsData, setGoalsData] = useState({ athleteGoals: {}, prs: {} })
   const [registry, setRegistry] = useState({})
   const [selAthlete, setSelAthlete] = useState(null)
-  const [box] = useState(() => getBoxScope())   // per-box view scope (?box=)
+  const [box] = useState(() => getBoxScope()) // per-box view scope (?box=)
   const [query, setQuery] = useState('')
   // PR board (#87): several family cards can be open at once — a Set, not one id
   // (same pattern as Criador WeekGrid's openIds). The tile grid is glanceable, so
   // there is no longer a per-exercise second disclosure level.
   const [openBlocks, setOpenBlocks] = useState(() => new Set())
   const [prQuery, setPrQuery] = useState('')
-  const toggleBlock = bt => setOpenBlocks(prev => {
-    const next = new Set(prev)
-    next.has(bt) ? next.delete(bt) : next.add(bt)
-    return next
-  })
+  const toggleBlock = bt =>
+    setOpenBlocks(prev => {
+      const next = new Set(prev)
+      next.has(bt) ? next.delete(bt) : next.add(bt)
+      return next
+    })
 
   // Exactly one sheet may be open: 'pr' | 'body' | 'clear' | null. Before #52 both
   // sheets rendered unconditionally at the same z-index and could stack.
@@ -94,7 +102,9 @@ export default function Me() {
   useEffect(() => {
     registerSW()
     load()
-    const onShow = e => { if (e.persisted) load() }
+    const onShow = e => {
+      if (e.persisted) load()
+    }
     window.addEventListener('pageshow', onShow)
     return () => window.removeEventListener('pageshow', onShow)
   }, [])
@@ -103,8 +113,15 @@ export default function Me() {
     const onPop = () => {
       const id = new URLSearchParams(location.search).get('id')
       const ath = id ? athletes.find(a => String(a.id) === String(id)) : null
-      if (ath) { setSelAthlete(ath); setStatus('profile'); document.title = ath.name + ' · Cone' }
-      else { setSelAthlete(null); setStatus('picker'); document.title = 'Meu Perfil · Cone' }
+      if (ath) {
+        setSelAthlete(ath)
+        setStatus('profile')
+        document.title = ath.name + ' · Cone'
+      } else {
+        setSelAthlete(null)
+        setStatus('picker')
+        document.title = 'Meu Perfil · Cone'
+      }
     }
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
@@ -145,7 +162,10 @@ export default function Me() {
         setStatus('picker')
       }
     } catch (e) {
-      if (attempt < 2) { setTimeout(() => load(attempt + 1), 2000 * (attempt + 1)); return }
+      if (attempt < 2) {
+        setTimeout(() => load(attempt + 1), 2000 * (attempt + 1))
+        return
+      }
       console.error(e)
       setStatus('error')
     }
@@ -176,18 +196,27 @@ export default function Me() {
     if (pr) {
       if (pr.type === 'time') unit = 'time'
       else if (pr.type === 'reps') unit = 'reps'
-      else if (pr.unit && ['kg','reps','m','time'].includes(pr.unit)) unit = pr.unit
+      else if (pr.unit && ['kg', 'reps', 'm', 'time'].includes(pr.unit)) unit = pr.unit
     } else {
       const t = catToInputType(cats)
       if (t === 'time') unit = 'time'
       else if (t === 'reps') unit = 'reps'
       else if (t === 'dist') unit = 'm'
     }
-    setLsName(name); setLsCats(cats || []); setLsPr(pr || null)
-    setLsUnit(unit); setLsDate(todayISO())
-    setLsVal(''); setLsReps(''); setLsGoal(pr?.target || ''); setLsNote('')
+    setLsName(name)
+    setLsCats(cats || [])
+    setLsPr(pr || null)
+    setLsUnit(unit)
+    setLsDate(todayISO())
+    setLsVal('')
+    setLsReps('')
+    setLsGoal(pr?.target || '')
+    setLsNote('')
     setLsDelta({ txt: '', tone: 'none' })
-    setLsPending(null); setLsSaving(false); setLsSaveResult(null); setLsWarn('')
+    setLsPending(null)
+    setLsSaving(false)
+    setLsSaveResult(null)
+    setLsWarn('')
     setSheet('pr')
   }
 
@@ -229,17 +258,21 @@ export default function Me() {
     setLsSaving(true)
     const { error } = await sb.rpc('submit_pr', {
       p_athlete_id: String(selAthlete.id),
-      p_exercise:   lsName,
-      p_value:      String(p ? p.numVal : numVal),
-      p_unit:       lsUnit,
-      p_reps:       (p ? p.reps : reps) || null,
+      p_exercise: lsName,
+      p_value: String(p ? p.numVal : numVal),
+      p_unit: lsUnit,
+      p_reps: (p ? p.reps : reps) || null,
       p_categories: lsCats,
       p_is_pr_best: finalIsNew,
-      p_note:       (p ? p.note : note) || null,
-      p_date:       p ? p.date : date,
-      p_target:     lsGoal.trim() || null,
+      p_note: (p ? p.note : note) || null,
+      p_date: p ? p.date : date,
+      p_target: lsGoal.trim() || null,
     })
-    if (error) { setLsSaving(false); setLsWarn('Erro ao salvar. Verifique conexão.'); return }
+    if (error) {
+      setLsSaving(false)
+      setLsWarn('Erro ao salvar. Verifique conexão.')
+      return
+    }
 
     setLsSaveResult(finalIsNew ? 'pr' : 'saved')
     setTimeout(async () => {
@@ -251,7 +284,10 @@ export default function Me() {
 
   // ── Clear PR ───────────────────────────────────────────────────────────────
   function askClear(name) {
-    setClearName(name); setClearErr(''); setClearBusy(false); setSheet('clear')
+    setClearName(name)
+    setClearErr('')
+    setClearBusy(false)
+    setSheet('clear')
   }
 
   async function confirmClear() {
@@ -260,7 +296,11 @@ export default function Me() {
       p_athlete_id: String(selAthlete.id),
       p_exercise: clearName,
     })
-    if (error) { setClearBusy(false); setClearErr('Erro ao apagar. Verifique conexão.'); return }
+    if (error) {
+      setClearBusy(false)
+      setClearErr('Erro ao apagar. Verifique conexão.')
+      return
+    }
     await refreshGoals()
     setClearBusy(false)
     setSheet(null)
@@ -272,19 +312,25 @@ export default function Me() {
   }
 
   function openBody() {
-    setBmWeight(''); setBmHeight(''); setBmBf(''); setBmNote(''); setBmWarn(false)
+    setBmWeight('')
+    setBmHeight('')
+    setBmBf('')
+    setBmNote('')
+    setBmWarn(false)
     setSheet('body')
   }
 
   // ── Profile data ───────────────────────────────────────────────────────────
   function getProfileData() {
     const id = String(selAthlete.id)
-    const prs   = (goalsData?.prs || {})[id] || []
+    const prs = (goalsData?.prs || {})[id] || []
     const goals = (goalsData?.athleteGoals || {})[id] || []
     const color = selAthlete.color || 'var(--teal)'
 
-    const now = new Date(), td = todayISO()
-    const nowY = now.getFullYear(), nowM = now.getMonth() + 1
+    const now = new Date(),
+      td = todayISO()
+    const nowY = now.getFullYear(),
+      nowM = now.getMonth() + 1
     const mPrefix = `${nowY}-${String(nowM).padStart(2, '0')}`
 
     const myResults = allResults.filter(r => String(r.athleteId) === id)
@@ -298,9 +344,11 @@ export default function Me() {
     const plannedDates = new Set()
     Object.keys(sessions).forEach(date => {
       if (!date.startsWith(mPrefix)) return
-      ;(sessions[date] || []).filter(s => s.public !== false && inBoxScope(s, box)).forEach(s => {
-        if (matchesAthlete(s, selAthlete.name)) plannedDates.add(date)
-      })
+      ;(sessions[date] || [])
+        .filter(s => s.public !== false && inBoxScope(s, box))
+        .forEach(s => {
+          if (matchesAthlete(s, selAthlete.name)) plannedDates.add(date)
+        })
     })
     const heartTotal = Math.min(Math.max(plannedDates.size, mResults.length, 12), 20)
     const hearts = []
@@ -318,10 +366,11 @@ export default function Me() {
     // which scalesOf filters out — so the rate is — (not a flattering 0% or a fake
     // RX) until a real scale exists (plans/22 rules 1, 3, 5). The caption states the
     // denominator so a thin one is visible rather than hidden behind a bare %.
-    const scalesOf = rs => rs.flatMap(r => (r.blocks || []).map(b => deriveScale(b)).filter(s => s && s !== '-'))
+    const scalesOf = rs =>
+      rs.flatMap(r => (r.blocks || []).map(b => deriveScale(b)).filter(s => s && s !== '-'))
     const allScales = scalesOf(present)
     const rxCount = allScales.filter(s => s === 'RX').length
-    const rxRate = allScales.length ? Math.round(rxCount / allScales.length * 100) : null
+    const rxRate = allScales.length ? Math.round((rxCount / allScales.length) * 100) : null
 
     // Recent sessions
     const prDateSet = new Set(prs.flatMap(p => (p.results || []).map(r => r.date)))
@@ -332,7 +381,9 @@ export default function Me() {
       let scale = null
       if (sc.length) {
         const c = {}
-        sc.forEach(x => { c[x] = (c[x] || 0) + 1 })
+        sc.forEach(x => {
+          c[x] = (c[x] || 0) + 1
+        })
         scale = Object.entries(c).sort((a, b) => b[1] - a[1])[0][0]
       }
       return {
@@ -346,31 +397,63 @@ export default function Me() {
 
     // Executed vs planned, by block type.
     const monthStart = `${mPrefix}-01`
-    const wStats = calcBlockStats(sessions, present, selAthlete.name, WOD_TYPES, monthStart, td, box)
+    const wStats = calcBlockStats(
+      sessions,
+      present,
+      selAthlete.name,
+      WOD_TYPES,
+      monthStart,
+      td,
+      box,
+    )
     const wodRows = WOD_TYPES.filter(t => (wStats.planned[t] || 0) > 0).map(t => {
-      const pl = wStats.planned[t], ex = Math.min(wStats.executed[t] || 0, pl)
-      return { type: t, pl, ex, pct: Math.round(ex / pl * 100), color: blkColor({ type: t }) }
+      const pl = wStats.planned[t],
+        ex = Math.min(wStats.executed[t] || 0, pl)
+      return { type: t, pl, ex, pct: Math.round((ex / pl) * 100), color: blkColor({ type: t }) }
     })
 
-    const d90 = new Date(now); d90.setDate(d90.getDate() - 90)
-    const dStats = calcBlockStats(sessions, present, selAthlete.name, DIST_TYPES, toISO(d90), td, box)
+    const d90 = new Date(now)
+    d90.setDate(d90.getDate() - 90)
+    const dStats = calcBlockStats(
+      sessions,
+      present,
+      selAthlete.name,
+      DIST_TYPES,
+      toISO(d90),
+      td,
+      box,
+    )
     const distRows = DIST_TYPES.filter(t => (dStats.planned[t] || 0) > 0).map(t => {
-      const pl = dStats.planned[t], ex = Math.min(dStats.executed[t] || 0, pl)
-      return { type: t, pl, ex, pct: Math.round(ex / pl * 100), color: blkColor({ type: t }) }
+      const pl = dStats.planned[t],
+        ex = Math.min(dStats.executed[t] || 0, pl)
+      return { type: t, pl, ex, pct: Math.round((ex / pl) * 100), color: blkColor({ type: t }) }
     })
 
     return {
-      color, nowY, nowM, hearts, heartTotal, thisMon: mResults.length,
+      color,
+      nowY,
+      nowM,
+      hearts,
+      heartTotal,
+      thisMon: mResults.length,
       totalSess: present.length,
-      streak: calcStreak(present), maxStreak: calcMaxStreak(present),
+      streak: calcStreak(present),
+      maxStreak: calcMaxStreak(present),
       totalPrs: prs.length,
       prsThisMon: prs.filter(p => p.results?.some(r => r.date?.startsWith(mPrefix))).length,
-      rxRate, rxCount, rxTotal: allScales.length,
+      rxRate,
+      rxCount,
+      rxTotal: allScales.length,
       recSess,
       events: buildEvents(prs, goals),
       goals,
-      totalMarcosHit: goals.reduce((sum, g) => sum + (g.milestones || []).filter(m => m.hit).length, 0),
-      wodRows, distRows, prs,
+      totalMarcosHit: goals.reduce(
+        (sum, g) => sum + (g.milestones || []).filter(m => m.hit).length,
+        0,
+      ),
+      wodRows,
+      distRows,
+      prs,
       sinceStr: selAthlete.since ? fmtDateYear(selAthlete.since) : '',
       days: selAthlete.since
         ? Math.floor((now - new Date(selAthlete.since + 'T12:00:00')) / 86400000)
@@ -383,64 +466,118 @@ export default function Me() {
   return (
     <>
       <PrLogSheet
-        open={sheet === 'pr'} onClose={closeSheet} valRef={lsValRef}
-        name={lsName} cats={lsCats} pr={lsPr} unit={lsUnit} date={lsDate}
-        val={lsVal} reps={lsReps} goal={lsGoal} note={lsNote}
-        delta={lsDelta} pending={lsPending} saving={lsSaving} saveResult={lsSaveResult} warn={lsWarn}
-        onVal={onValChange} onUnit={switchUnit} onDate={setLsDate} onReps={setLsReps}
-        onGoal={setLsGoal} onNote={setLsNote}
-        onSave={savePr} onCancelPending={() => setLsPending(null)}
+        open={sheet === 'pr'}
+        onClose={closeSheet}
+        valRef={lsValRef}
+        name={lsName}
+        cats={lsCats}
+        pr={lsPr}
+        unit={lsUnit}
+        date={lsDate}
+        val={lsVal}
+        reps={lsReps}
+        goal={lsGoal}
+        note={lsNote}
+        delta={lsDelta}
+        pending={lsPending}
+        saving={lsSaving}
+        saveResult={lsSaveResult}
+        warn={lsWarn}
+        onVal={onValChange}
+        onUnit={switchUnit}
+        onDate={setLsDate}
+        onReps={setLsReps}
+        onGoal={setLsGoal}
+        onNote={setLsNote}
+        onSave={savePr}
+        onCancelPending={() => setLsPending(null)}
       />
 
       <BodySheet
-        open={sheet === 'body'} onClose={closeSheet} athlete={selAthlete}
-        weight={bmWeight} height={bmHeight} bodyFat={bmBf} note={bmNote} warn={bmWarn}
-        onWeight={setBmWeight} onHeight={setBmHeight} onBodyFat={setBmBf} onNote={setBmNote}
+        open={sheet === 'body'}
+        onClose={closeSheet}
+        athlete={selAthlete}
+        weight={bmWeight}
+        height={bmHeight}
+        bodyFat={bmBf}
+        note={bmNote}
+        warn={bmWarn}
+        onWeight={setBmWeight}
+        onHeight={setBmHeight}
+        onBodyFat={setBmBf}
+        onNote={setBmNote}
         onSave={() => setBmWarn(true)}
       />
 
       <ConfirmSheet
-        open={sheet === 'clear'} onClose={closeSheet}
+        open={sheet === 'clear'}
+        onClose={closeSheet}
         title="Apagar registros"
         body={`Todos os registros de "${clearName}" serão apagados. Isso não pode ser desfeito.`}
-        confirmLabel="APAGAR" onConfirm={confirmClear} busy={clearBusy} error={clearErr}
+        confirmLabel="APAGAR"
+        onConfirm={confirmClear}
+        busy={clearBusy}
+        error={clearErr}
       />
 
-      <div className={styles.pageRoot}><div className={styles.inner}>
-        <Header brand={gymName.toUpperCase()} sub="MEU PERFIL" />
+      <div className={styles.pageRoot}>
+        <div className={styles.inner}>
+          <Header brand={gymName.toUpperCase()} sub="MEU PERFIL" />
 
-        <div className={styles.twoPaneBody}>
-          <AthletePicker
-            variant="rail" athletes={athletes} selected={selAthlete}
-            query={query} onQuery={setQuery} onSelect={selectAthlete} onClear={selectAll}
-          />
+          <div className={styles.twoPaneBody}>
+            <AthletePicker
+              variant="rail"
+              athletes={athletes}
+              selected={selAthlete}
+              query={query}
+              onQuery={setQuery}
+              onSelect={selectAthlete}
+              onClear={selectAll}
+            />
 
-          <main className={styles.profPane}>
-            {status === 'loading' && <div className={styles.centerMsg} aria-live="polite">⏳ carregando...</div>}
+            <main className={styles.profPane}>
+              {status === 'loading' && (
+                <div className={styles.centerMsg} aria-live="polite">
+                  ⏳ carregando...
+                </div>
+              )}
 
-            {status === 'error' && (
-              <div className={styles.centerMsg} aria-live="polite">
-                Erro ao carregar.<br />
-                <button className={styles.retryBtn} onClick={() => load()}>↺ Tentar novamente</button>
-              </div>
-            )}
+              {status === 'error' && (
+                <div className={styles.centerMsg} aria-live="polite">
+                  Erro ao carregar.
+                  <br />
+                  <button className={styles.retryBtn} onClick={() => load()}>
+                    ↺ Tentar novamente
+                  </button>
+                </div>
+              )}
 
-            {status === 'picker' && (
-              <>
-                <AthletePicker
-                  variant="picker" athletes={athletes} selected={null}
-                  query={query} onQuery={setQuery} onSelect={selectAthlete} onClear={selectAll}
-                />
-                <div className={styles.noSel}>Selecione um atleta ao lado.</div>
-              </>
-            )}
+              {status === 'picker' && (
+                <>
+                  <AthletePicker
+                    variant="picker"
+                    athletes={athletes}
+                    selected={null}
+                    query={query}
+                    onQuery={setQuery}
+                    onSelect={selectAthlete}
+                    onClear={selectAll}
+                  />
+                  <div className={styles.noSel}>Selecione um atleta ao lado.</div>
+                </>
+              )}
 
-            {status === 'profile' && pd && (
-              <div className={styles.page}>
-                <HeroCard athlete={selAthlete} pd={pd} onOpenBody={openBody} onSwitch={selectAll} />
-                <KpiStrip pd={pd} />
+              {status === 'profile' && pd && (
+                <div className={styles.page}>
+                  <HeroCard
+                    athlete={selAthlete}
+                    pd={pd}
+                    onOpenBody={openBody}
+                    onSwitch={selectAll}
+                  />
+                  <KpiStrip pd={pd} />
 
-                {/* One column at every width (Design mockup 24). The two-column
+                  {/* One column at every width (Design mockup 24). The two-column
                     contentGrid put the identity lane in the NARROW 40% — 314px on a
                     1280 screen, narrower than a phone — where the Sessões header and
                     the Distribuição title already painted outside their cards, while
@@ -448,34 +585,43 @@ export default function Me() {
                     plans/22's Desenvolvimento card is just another card in here: no
                     reserved slot, no re-layout. It still renders nothing until it has
                     real data (plans/21 §5). */}
-                <div className={styles.stack}>
-                  {pd.goals.length > 0 && <GoalList goals={pd.goals} totalMarcosHit={pd.totalMarcosHit} />}
-                  <EventList events={pd.events} />
-                  <SessionList rows={pd.recSess} />
-                  {pd.wodRows.length > 0 && (
-                    <BarList title="WODs" rows={pd.wodRows}
-                      sub={`${MONTH_PT_SHORT[pd.nowM - 1]} ${pd.nowY} · executados/planejados`} />
-                  )}
-                  {pd.distRows.length > 0 && (
-                    <BarList title="Distribuição" rows={pd.distRows}
-                      sub="Últimos 90 dias · executados/planejados" />
-                  )}
-                  <PrSection
-                    prs={pd.prs}
-                    registry={registry}
-                    openBlocks={openBlocks}
-                    setOpenBlock={toggleBlock}
-                    query={prQuery}
-                    onQuery={setPrQuery}
-                    onOpen={openLogSheet}
-                    onClear={askClear}
-                  />
+                  <div className={styles.stack}>
+                    {pd.goals.length > 0 && (
+                      <GoalList goals={pd.goals} totalMarcosHit={pd.totalMarcosHit} />
+                    )}
+                    <EventList events={pd.events} />
+                    <SessionList rows={pd.recSess} />
+                    {pd.wodRows.length > 0 && (
+                      <BarList
+                        title="WODs"
+                        rows={pd.wodRows}
+                        sub={`${MONTH_PT_SHORT[pd.nowM - 1]} ${pd.nowY} · executados/planejados`}
+                      />
+                    )}
+                    {pd.distRows.length > 0 && (
+                      <BarList
+                        title="Distribuição"
+                        rows={pd.distRows}
+                        sub="Últimos 90 dias · executados/planejados"
+                      />
+                    )}
+                    <PrSection
+                      prs={pd.prs}
+                      registry={registry}
+                      openBlocks={openBlocks}
+                      setOpenBlock={toggleBlock}
+                      query={prQuery}
+                      onQuery={setPrQuery}
+                      onOpen={openLogSheet}
+                      onClear={askClear}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
-          </main>
+              )}
+            </main>
+          </div>
         </div>
-      </div></div>
+      </div>
 
       <Nav active="me" gymName={gymName} lockedId={selAthlete?.id} box={box} />
     </>

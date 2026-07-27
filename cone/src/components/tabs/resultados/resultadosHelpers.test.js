@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { getWeeksInMonth, weekLabel, calcKPIs, calcSessionKPIs, getPerformanceStr } from './resultadosHelpers.js'
+import {
+  getWeeksInMonth,
+  weekLabel,
+  calcKPIs,
+  calcSessionKPIs,
+  getPerformanceStr,
+} from './resultadosHelpers.js'
 import { monthGridCells } from '../../../public/lib/week.js'
 
 // Resultados.jsx's helpers had zero tests before #74-B/plans/44 — they lived as
@@ -7,19 +13,20 @@ import { monthGridCells } from '../../../public/lib/week.js'
 // no behavior change); these tests pin what they already did.
 
 describe('getWeeksInMonth', () => {
-  it('matches monthGridCells\' week count, each week Sunday→Saturday', () => {
+  it("matches monthGridCells' week count, each week Sunday→Saturday", () => {
     const weeks = getWeeksInMonth(2026, 6) // July 2026
     expect(weeks.length).toBe(monthGridCells(2026, 6).length)
     weeks.forEach(w => {
       expect(w.start.getDay()).toBe(0) // Sunday
-      expect(w.end.getDay()).toBe(6)   // Saturday
+      expect(w.end.getDay()).toBe(6) // Saturday
       expect(w.end.getTime() - w.start.getTime()).toBe(6 * 24 * 60 * 60 * 1000)
     })
   })
 })
 
 describe('weekLabel', () => {
-  const year = 2026, month = 6 // July
+  const year = 2026,
+    month = 6 // July
 
   it('renders a plain in-month week as "start–end"', () => {
     const week = { start: new Date(2026, 6, 12), end: new Date(2026, 6, 18) }
@@ -31,7 +38,7 @@ describe('weekLabel', () => {
     expect(weekLabel(week, year, month)).toBe('1–4')
   })
 
-  it('clamps the end to the month\'s last day when the week bleeds into the next month', () => {
+  it("clamps the end to the month's last day when the week bleeds into the next month", () => {
     const week = { start: new Date(2026, 6, 26), end: new Date(2026, 7, 1) }
     expect(weekLabel(week, year, month)).toBe('26–31') // July has 31 days
   })
@@ -42,7 +49,16 @@ const R = (athleteId, date, presence, blocks = []) => ({ athleteId, date, presen
 describe('calcKPIs', () => {
   it('returns zeroed/null KPIs for an athlete with no results', () => {
     const k = calcKPIs('a1', [])
-    expect(k).toEqual({ freq: 0, avgRpe: null, rxRate: null, rxCount: 0, scaleCount: 0, loadTrend: null, lastRpes: [], totalSessions: 0 })
+    expect(k).toEqual({
+      freq: 0,
+      avgRpe: null,
+      rxRate: null,
+      rxCount: 0,
+      scaleCount: 0,
+      loadTrend: null,
+      lastRpes: [],
+      totalSessions: 0,
+    })
   })
 
   it('computes attendance frequency from Presente vs total results', () => {

@@ -62,18 +62,37 @@ export default function ConfirmReview({
     restoreRef.current = document.activeElement
     dlg?.focus()
 
-    const focusables = () => dlg
-      ? [...dlg.querySelectorAll('button:not(:disabled),[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])')]
-      : []
+    const focusables = () =>
+      dlg
+        ? [
+            ...dlg.querySelectorAll(
+              'button:not(:disabled),[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])',
+            ),
+          ]
+        : []
 
     function onKey(e) {
-      if (e.key === 'Escape') { e.stopPropagation(); (hRef.current.onEdit || hRef.current.onClose)?.(); return }
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        ;(hRef.current.onEdit || hRef.current.onClose)?.()
+        return
+      }
       if (e.key !== 'Tab') return
       const f = focusables()
-      if (!f.length) { e.preventDefault(); dlg?.focus(); return }
-      const first = f[0], last = f[f.length - 1]
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+      if (!f.length) {
+        e.preventDefault()
+        dlg?.focus()
+        return
+      }
+      const first = f[0],
+        last = f[f.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     document.addEventListener('keydown', onKey, true)
     return () => {
@@ -85,16 +104,35 @@ export default function ConfirmReview({
   if (!open) return null
   return (
     <div className={s.overlay} onClick={onClose}>
-      <div ref={dialogRef} className={s.modal} role="dialog" aria-modal="true"
-        aria-labelledby="cr-title" tabIndex={-1} onClick={e => e.stopPropagation()}>
-        <div id="cr-title" className={s.title}>{title}</div>
+      <div
+        ref={dialogRef}
+        className={s.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cr-title"
+        tabIndex={-1}
+        onClick={e => e.stopPropagation()}
+      >
+        <div id="cr-title" className={s.title}>
+          {title}
+        </div>
         <div className={s.body}>{children}</div>
         {error && <div className={s.err}>{error}</div>}
         <div className={s.btns}>
-          <button type="button" className={`${s.btn} ${s.edit}`} disabled={submitting || undefined} onClick={onEdit}>
+          <button
+            type="button"
+            className={`${s.btn} ${s.edit}`}
+            disabled={submitting || undefined}
+            onClick={onEdit}
+          >
             {editLabel}
           </button>
-          <button type="button" className={`${s.btn} ${s.confirm}`} disabled={submitting || undefined} onClick={onConfirm}>
+          <button
+            type="button"
+            className={`${s.btn} ${s.confirm}`}
+            disabled={submitting || undefined}
+            onClick={onConfirm}
+          >
             {submitting ? submittingLabel : confirmLabel}
           </button>
         </div>

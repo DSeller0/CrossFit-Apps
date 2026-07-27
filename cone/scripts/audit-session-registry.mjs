@@ -5,7 +5,12 @@
 // → rewrites docs/reviews/94-session-registry-audit.md. Uses .env.production (anon read).
 import { readFileSync, writeFileSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
-import { normExName, buildRegistryIndex, resolveExercise, ALIASES } from '../src/public/lib/registry.js'
+import {
+  normExName,
+  buildRegistryIndex,
+  resolveExercise,
+  ALIASES,
+} from '../src/public/lib/registry.js'
 
 const env = readFileSync('./.env.production', 'utf8')
 const get = k => (env.match(new RegExp('^' + k + '=(.*)$', 'm')) || [])[1]?.trim()
@@ -19,29 +24,43 @@ const sessions = sessRow?.value || {}
 const index = buildRegistryIndex(regRow?.value || {})
 
 const names = []
-const pushName = n => { if (n && String(n).trim()) names.push(String(n).trim()) }
+const pushName = n => {
+  if (n && String(n).trim()) names.push(String(n).trim())
+}
 function walk(node) {
   if (Array.isArray(node)) return node.forEach(walk)
   if (!node || typeof node !== 'object') return
-  const looksExercise = typeof node.name === 'string' &&
-    ('sets' in node || 'reps' in node || 'intensity' in node || 'isComplex' in node || 'complexMovements' in node || 'dist' in node)
+  const looksExercise =
+    typeof node.name === 'string' &&
+    ('sets' in node ||
+      'reps' in node ||
+      'intensity' in node ||
+      'isComplex' in node ||
+      'complexMovements' in node ||
+      'dist' in node)
   if (looksExercise) {
     if (!node.isComplex) pushName(node.name)
     if (Array.isArray(node.complexMovements)) node.complexMovements.forEach(m => pushName(m?.name))
   }
   for (const k in node) if (k !== 'complexMovements') walk(node[k])
 }
-Object.values(sessions).forEach(day => (Array.isArray(day) ? day : []).forEach(sess => walk(sess.blocks)))
+Object.values(sessions).forEach(day =>
+  (Array.isArray(day) ? day : []).forEach(sess => walk(sess.blocks)),
+)
 
 const miss = new Map()
-let total = 0, missTotal = 0
+let total = 0,
+  missTotal = 0
 for (const raw of names) {
-  const key = normExName(raw); if (!key) continue
+  const key = normExName(raw)
+  if (!key) continue
   total++
   if (resolveExercise(raw, index)) continue
   missTotal++
   const e = miss.get(key) || { count: 0, samples: new Set() }
-  e.count++; e.samples.add(raw); miss.set(key, e)
+  e.count++
+  e.samples.add(raw)
+  miss.set(key, e)
 }
 
 // Categorize each distinct miss.
@@ -50,19 +69,24 @@ for (const raw of names) {
 // ("Max C&J"), an either/or ("Row ou 1000m Run"), a bare load/percentage ("60% Rm",
 // "80/85/90") and pt-BR block labels ("MMII" = lower body, "Buy in"/"Buy out"). They used
 // to land in bucket 1 and read as "register me", which they are not.
-const NOISE = new RegExp([
-  '^(rest|then|rounds?|diversos|bloco|amrap|emom|for time|descanso|obs|nota)\\b',
-  '^(mmii|mmss|mix|sets?|buy\\s*-?\\s*(in|out))\\b',
-  '^max\\b',                       // "Max C&J", "Max BMU", "Max RMU"
-  '\\b(ou)\\b.*\\d',                // "Row ou 1000m Run", "Run ou 800m Row"
-  '^\\d+\\s*%',                     // "60% Rm"
-  '^[\\d/\\-]+$',                   // "80/85/90", "10-8-6-4-2"
-].join('|'), 'i')
+const NOISE = new RegExp(
+  [
+    '^(rest|then|rounds?|diversos|bloco|amrap|emom|for time|descanso|obs|nota)\\b',
+    '^(mmii|mmss|mix|sets?|buy\\s*-?\\s*(in|out))\\b',
+    '^max\\b', // "Max C&J", "Max BMU", "Max RMU"
+    '\\b(ou)\\b.*\\d', // "Row ou 1000m Run", "Run ou 800m Row"
+    '^\\d+\\s*%', // "60% Rm"
+    '^[\\d/\\-]+$', // "80/85/90", "10-8-6-4-2"
+  ].join('|'),
+  'i',
+)
 const cat = raw => {
   const t = raw.trim()
   if (NOISE.test(t)) return 'noise'
-  if (/[+,]/.test(t) && /\b(power|hang|snatch|clean|jerk|pull|squat|muscle|dip|press)\b/i.test(t)) return 'complex'
-  if (/^\d|["”'′]|^\d+\s*(m|km|cal|reps?)\b/i.test(t) || /^\d+\/\d+/.test(t) || /^\d+m\b/i.test(t)) return 'prescription'
+  if (/[+,]/.test(t) && /\b(power|hang|snatch|clean|jerk|pull|squat|muscle|dip|press)\b/i.test(t))
+    return 'complex'
+  if (/^\d|["”'′]|^\d+\s*(m|km|cal|reps?)\b/i.test(t) || /^\d+\/\d+/.test(t) || /^\d+m\b/i.test(t))
+    return 'prescription'
   return 'movement'
 }
 const buckets = { movement: [], prescription: [], complex: [], noise: [] }
@@ -72,14 +96,16 @@ for (const [key, e] of miss) {
 }
 Object.values(buckets).forEach(b => b.sort((a, z) => z.count - a.count))
 
-const fmt = b => b.map(r => `- **${r.samples.slice(0, 3).join('** · **')}**  ×${r.count}`).join('\n')
+const fmt = b =>
+  b.map(r => `- **${r.samples.slice(0, 3).join('** · **')}**  ×${r.count}`).join('\n')
 
 // The report has a HAND-WRITTEN head (intro · comment convention · recommendations ·
 // coach comments) above this sentinel and an AUTO-GENERATED data section below it. A
 // re-run preserves everything above the sentinel and regenerates only the data — so the
 // recommendations + the coach's annotations survive `node scripts/audit-session-registry.mjs`.
 const OUT = './docs/reviews/94-session-registry-audit.md'
-const SENTINEL = '<!-- ===AUDIT-DATA-BELOW=== auto-generated by scripts/audit-session-registry.mjs — edits below are overwritten on the next run -->'
+const SENTINEL =
+  '<!-- ===AUDIT-DATA-BELOW=== auto-generated by scripts/audit-session-registry.mjs — edits below are overwritten on the next run -->'
 const defaultHead = `# #94 · Session exercise names not in the registry (prod audit)
 
 Read-only scan of prod \`sessions\` exercise names against \`exercise_registry\`
@@ -90,7 +116,9 @@ try {
   const existing = readFileSync(OUT, 'utf8')
   const i = existing.indexOf(SENTINEL)
   if (i !== -1) head = existing.slice(0, i)
-} catch { /* first run — use defaultHead */ }
+} catch {
+  /* first run — use defaultHead */
+}
 
 // Every ALIASES value must name an entry that actually exists — a value pointing at a
 // missing entry is a dangling pointer that silently resolves to nothing. This is checked
@@ -105,11 +133,13 @@ const data = `${SENTINEL}
 _Auto-generated ${new Date().toISOString().slice(0, 10)} — a miss is one distinct \`normExName\` key; ×N = occurrences._
 
 - **${total}** name occurrences across all sessions
-- **${missTotal}** unresolved (**${(missTotal / total * 100).toFixed(1)}%**)
+- **${missTotal}** unresolved (**${((missTotal / total) * 100).toFixed(1)}%**)
 - **${miss.size}** distinct misses
-- **${dangling.length}** dangling aliases${dangling.length
-  ? ` — an alias whose target entry does not exist resolves to nothing. Any listed below\nthat names an entry from \`94-registry-additions.sql\` clears once that SQL is applied to\nprod; anything else is a real typo to fix in \`ALIASES\`.\n${dangling.join('\n')}`
-  : ' ✅'}
+- **${dangling.length}** dangling aliases${
+  dangling.length
+    ? ` — an alias whose target entry does not exist resolves to nothing. Any listed below\nthat names an entry from \`94-registry-additions.sql\` clears once that SQL is applied to\nprod; anything else is a real typo to fix in \`ALIASES\`.\n${dangling.join('\n')}`
+    : ' ✅'
+}
 
 ## 1 · Likely-registerable single movements (${buckets.movement.length}) — the actionable list
 These are real movements the coach types that have no registry entry (or need an alias).
@@ -131,6 +161,10 @@ ${fmt(buckets.complex)}
 ${fmt(buckets.noise)}
 `
 writeFileSync(OUT, head.replace(/\s+$/, '') + '\n\n' + data)
-console.log(`total=${total} miss=${missTotal} (${(missTotal / total * 100).toFixed(1)}%) distinct=${miss.size}`)
-console.log(`movements=${buckets.movement.length} prescription=${buckets.prescription.length} complex=${buckets.complex.length} noise=${buckets.noise.length}`)
+console.log(
+  `total=${total} miss=${missTotal} (${((missTotal / total) * 100).toFixed(1)}%) distinct=${miss.size}`,
+)
+console.log(
+  `movements=${buckets.movement.length} prescription=${buckets.prescription.length} complex=${buckets.complex.length} noise=${buckets.noise.length}`,
+)
 console.log('wrote docs/reviews/94-session-registry-audit.md')

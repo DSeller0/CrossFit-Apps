@@ -12,15 +12,21 @@ import styles from './Me.module.css'
 // says which one.
 export default function BarList({ title, sub, rows }) {
   return (
-    <section className={styles.sh}><div className={styles.shInner}>
-      <h2 className={styles.shTitle}>{title} <span className={styles.shTitleR}>{sub}</span></h2>
-      {rows.map((r, i) => (
-        <div key={i} className={styles.distRow}>
-          <span className={styles.distLbl}>{r.type}</span>
-          <TallyBar pct={r.pct} color={r.color} grow />
-          <span className={styles.distVal} style={{ color: r.color }}>{r.ex}/{r.pl}</span>
-        </div>
-      ))}
-    </div></section>
+    <section className={styles.sh}>
+      <div className={styles.shInner}>
+        <h2 className={styles.shTitle}>
+          {title} <span className={styles.shTitleR}>{sub}</span>
+        </h2>
+        {rows.map((r, i) => (
+          <div key={i} className={styles.distRow}>
+            <span className={styles.distLbl}>{r.type}</span>
+            <TallyBar pct={r.pct} color={r.color} grow />
+            <span className={styles.distVal} style={{ color: r.color }}>
+              {r.ex}/{r.pl}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }

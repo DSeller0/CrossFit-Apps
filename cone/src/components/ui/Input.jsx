@@ -29,17 +29,31 @@ export default function Input({
   const describedBy = error || hint ? msgId : undefined
   return (
     <div className={`${s.field} ${className}`.trim()}>
-      {label && <label htmlFor={fieldId} className={s.label}>{label}</label>}
+      {label && (
+        <label htmlFor={fieldId} className={s.label}>
+          {label}
+        </label>
+      )}
       <Control
         id={fieldId}
         className={`${s.control}${error ? ' ' + s.errored : ''}`}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
         {...rest}
-      >{children}</Control>
-      {error
-        ? <span id={msgId} className={s.error}>{error}</span>
-        : hint && <span id={msgId} className={s.hint}>{hint}</span>}
+      >
+        {children}
+      </Control>
+      {error ? (
+        <span id={msgId} className={s.error}>
+          {error}
+        </span>
+      ) : (
+        hint && (
+          <span id={msgId} className={s.hint}>
+            {hint}
+          </span>
+        )
+      )}
     </div>
   )
 }

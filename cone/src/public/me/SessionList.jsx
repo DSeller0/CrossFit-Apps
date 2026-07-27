@@ -8,18 +8,27 @@ import styles from './Me.module.css'
 // result, a different color depending on which page you were looking at.
 export default function SessionList({ rows }) {
   return (
-    <section className={styles.sh}><div className={styles.shInner}>
-      <h2 className={styles.shTitle}>Sessões Recentes <span className={styles.shTitleR}>últimas 5</span></h2>
-      {!rows.length
-        ? <p className={styles.emptyLine}>Nenhuma sessão registrada ainda.</p>
-        : (
+    <section className={styles.sh}>
+      <div className={styles.shInner}>
+        <h2 className={styles.shTitle}>
+          Sessões Recentes <span className={styles.shTitleR}>últimas 5</span>
+        </h2>
+        {!rows.length ? (
+          <p className={styles.emptyLine}>Nenhuma sessão registrada ainda.</p>
+        ) : (
           <>
             <div className={styles.sessColHdr}>
-              <span /><span>Sessão</span><span>Data</span><span>Escala</span><span>RPE</span>
+              <span />
+              <span>Sessão</span>
+              <span>Data</span>
+              <span>Escala</span>
+              <span>RPE</span>
             </div>
             {rows.map((r, i) => (
               <div key={i} className={styles.sessRow}>
-                <span className={styles.sdi} aria-hidden="true">◈</span>
+                <span className={styles.sdi} aria-hidden="true">
+                  ◈
+                </span>
                 <span className={styles.sname}>
                   {r.name}
                   {r.hasPr && <span className={`${styles.bdg} ${styles.bPr}`}>PR</span>}
@@ -33,7 +42,9 @@ export default function SessionList({ rows }) {
                         color: scaleColor(r.scale),
                         background: `color-mix(in srgb, ${scaleColor(r.scale)} 12%, transparent)`,
                       }}
-                    >{scaleLabel(r.scale)}</span>
+                    >
+                      {scaleLabel(r.scale)}
+                    </span>
                   )}
                 </span>
                 <span className={styles.srpe}>{r.rpe || '—'}</span>
@@ -41,6 +52,7 @@ export default function SessionList({ rows }) {
             ))}
           </>
         )}
-    </div></section>
+      </div>
+    </section>
   )
 }

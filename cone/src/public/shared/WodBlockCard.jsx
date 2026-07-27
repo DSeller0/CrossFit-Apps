@@ -11,24 +11,47 @@ import s from './WodBlockCard.module.css'
 //
 // Estações flattens into one list, matching TV — the recorded decision (Schedule
 // keeps the full station structure as the detailed view).
-export default function WodBlockCard({ bl, dt, sessName, scaleFilter = 'Todos', size = 'compact' }) {
+export default function WodBlockCard({
+  bl,
+  dt,
+  sessName,
+  scaleFilter = 'Todos',
+  size = 'compact',
+}) {
   const color = blkColor(bl)
   const label = blkLabel(bl)
 
-  const exes = bl.type === 'Estações'
-    ? (bl.stations || []).flatMap(st => (st.exercises || []).map(e => ({ ...e, _station: st.name })))
-    : (bl.exercises || [])
+  const exes =
+    bl.type === 'Estações'
+      ? (bl.stations || []).flatMap(st =>
+          (st.exercises || []).map(e => ({ ...e, _station: st.name })),
+        )
+      : bl.exercises || []
 
   const chips = blkMetaParts(bl)
   const goal = goalStr(bl)
 
-  const foot = [dt, sessName, scaleFilter !== 'Todos' ? scaleFilter : null].filter(Boolean).join(' · ')
+  const foot = [dt, sessName, scaleFilter !== 'Todos' ? scaleFilter : null]
+    .filter(Boolean)
+    .join(' · ')
 
   return (
-    <section className={`${s.card} ${size === 'large' ? s.large : ''}`} style={{ borderLeftColor: color }}>
+    <section
+      className={`${s.card} ${size === 'large' ? s.large : ''}`}
+      style={{ borderLeftColor: color }}
+    >
       <header className={s.hdr}>
-        <h2 className={s.badge} style={{ background: `color-mix(in srgb, ${color} 14%, transparent)`, color }}>{label}</h2>
-        {chips.map(c => <span key={c} className={s.chip}>{c}</span>)}
+        <h2
+          className={s.badge}
+          style={{ background: `color-mix(in srgb, ${color} 14%, transparent)`, color }}
+        >
+          {label}
+        </h2>
+        {chips.map(c => (
+          <span key={c} className={s.chip}>
+            {c}
+          </span>
+        ))}
         {goal && <span className={s.goal}>Meta {goal}</span>}
       </header>
 

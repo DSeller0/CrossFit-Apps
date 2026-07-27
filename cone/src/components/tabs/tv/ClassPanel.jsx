@@ -5,7 +5,10 @@ import st from './tvController.module.css'
 function buildMembers(cls, athletes) {
   return [
     ...(cls.athlete_ids || []).map(id => ({
-      type: 'real', id, key: `real:${id}`, name: athletes.find(a => a.id === id)?.name || '?',
+      type: 'real',
+      id,
+      key: `real:${id}`,
+      name: athletes.find(a => a.id === id)?.name || '?',
     })),
     ...(cls.anon_names || []).map(name => ({ type: 'anon', name, key: `anon:${name}` })),
   ]
@@ -17,7 +20,13 @@ function scoreMembers(members, cls, results, activeBlockId, liveOverride) {
     if (m.type === 'real') {
       const row = results.find(r => r.athleteId === m.id)
       const blk = row?.blocks?.find(b => b.blockId === activeBlockId)
-      if (blk) entry = { perfTime: blk.perfTime, perfRounds: blk.perfRounds, perfReps: blk.perfReps, scale: blk.scale }
+      if (blk)
+        entry = {
+          perfTime: blk.perfTime,
+          perfRounds: blk.perfRounds,
+          perfReps: blk.perfReps,
+          scale: blk.scale,
+        }
     } else {
       const ar = cls.anon_results?.[m.name]
       if (ar && ar.blockId === activeBlockId) entry = { perfTime: ar.perfTime, scale: ar.scale }
@@ -29,7 +38,7 @@ function scoreMembers(members, cls, results, activeBlockId, liveOverride) {
 
 function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
   const [editing, setEditing] = useState(false)
-  const [draft,   setDraft]   = useState(null)
+  const [draft, setDraft] = useState(null)
   const scale = liveReg.liveScales[m.key] ?? 'Rx'
 
   function startEdit() {
@@ -51,16 +60,31 @@ function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
         <span className={st.rank}>{rank ?? '—'}</span>
         <span className={st.athName}>{m.name}</span>
         <div className={st.scalePills}>
-          {['Rx','Sc','Adp'].map(sc => (
-            <button key={sc} className={`${st.scalePill} ${draft.scale === sc ? st.sel : ''}`}
-              onClick={() => setDraft(d => ({ ...d, scale: sc }))}>{sc}</button>
+          {['Rx', 'Sc', 'Adp'].map(sc => (
+            <button
+              key={sc}
+              className={`${st.scalePill} ${draft.scale === sc ? st.sel : ''}`}
+              onClick={() => setDraft(d => ({ ...d, scale: sc }))}
+            >
+              {sc}
+            </button>
           ))}
         </div>
-        <input className={`${st.input} ${st.editTimeInput}`} value={draft.perfTime} placeholder="mm:ss"
-          onChange={e => setDraft(d => ({ ...d, perfTime: e.target.value }))} />
-        <button className={`${st.btn} ${st.rowBtn} ${st.reg}`} onClick={saveEdit}>Salvar</button>
-        <button className={`${st.btn} ${st.rowBtn} ${st.remove}`} onClick={remove}><i className="ti ti-trash" /></button>
-        <button className={`${st.btn} ${st.rowBtn} ${st.edit}`} onClick={() => setEditing(false)}>Cancelar</button>
+        <input
+          className={`${st.input} ${st.editTimeInput}`}
+          value={draft.perfTime}
+          placeholder="mm:ss"
+          onChange={e => setDraft(d => ({ ...d, perfTime: e.target.value }))}
+        />
+        <button className={`${st.btn} ${st.rowBtn} ${st.reg}`} onClick={saveEdit}>
+          Salvar
+        </button>
+        <button className={`${st.btn} ${st.rowBtn} ${st.remove}`} onClick={remove}>
+          <i className="ti ti-trash" />
+        </button>
+        <button className={`${st.btn} ${st.rowBtn} ${st.edit}`} onClick={() => setEditing(false)}>
+          Cancelar
+        </button>
       </div>
     )
   }
@@ -69,12 +93,15 @@ function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
     <div className={`${st.rosterRow} ${m.entry ? st.registered : ''}`}>
       <span className={st.rank}>{m.entry ? rank : '—'}</span>
       <span className={st.athName}>
-        {m.name}{m.type === 'anon' && <span className={st.guestBadge}>visitante</span>}
+        {m.name}
+        {m.type === 'anon' && <span className={st.guestBadge}>visitante</span>}
       </span>
       {m.entry ? (
         <>
           <span className={st.pill}>{m.entry.scale || '—'}</span>
-          <span className={`${st.perf} ${!m.entry.perfTime && !m.entry.perfRounds ? st.empty : ''}`}>
+          <span
+            className={`${st.perf} ${!m.entry.perfTime && !m.entry.perfRounds ? st.empty : ''}`}
+          >
             {perfStr(m.entry, timerType)}
           </span>
           {isActive && (
@@ -86,12 +113,20 @@ function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
       ) : canRegister ? (
         <>
           <div className={st.scalePills}>
-            {['Rx','Sc','Adp'].map(sc => (
-              <button key={sc} className={`${st.scalePill} ${scale === sc ? st.sel : ''}`}
-                onClick={() => liveReg.setLiveScales(s => ({ ...s, [m.key]: sc }))}>{sc}</button>
+            {['Rx', 'Sc', 'Adp'].map(sc => (
+              <button
+                key={sc}
+                className={`${st.scalePill} ${scale === sc ? st.sel : ''}`}
+                onClick={() => liveReg.setLiveScales(s => ({ ...s, [m.key]: sc }))}
+              >
+                {sc}
+              </button>
             ))}
           </div>
-          <button className={`${st.btn} ${st.rowBtn} ${st.reg}`} onClick={() => liveReg.registerLive(m, scale)}>
+          <button
+            className={`${st.btn} ${st.rowBtn} ${st.reg}`}
+            onClick={() => liveReg.registerLive(m, scale)}
+          >
             <i className="ti ti-check" /> Registrar
           </button>
         </>
@@ -102,13 +137,27 @@ function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
   )
 }
 
-function ClassAccordion({ cls, isActive, expanded, onToggle, athletes, results, activeBlockId, timerType, canRegister, liveReg, endClass }) {
+function ClassAccordion({
+  cls,
+  isActive,
+  expanded,
+  onToggle,
+  athletes,
+  results,
+  activeBlockId,
+  timerType,
+  canRegister,
+  liveReg,
+  endClass,
+}) {
   const members = buildMembers(cls, athletes)
-  const scored  = scoreMembers(members, cls, results, activeBlockId, liveReg.liveOverride)
+  const scored = scoreMembers(members, cls, results, activeBlockId, liveReg.liveOverride)
   const registered = scored.filter(m => m.entry)
-  const pending    = scored.filter(m => !m.entry)
-  const ranked     = rankResults(registered.map(m => m.entry), timerType)
-    .map(e => registered.find(m => m.entry === e))
+  const pending = scored.filter(m => !m.entry)
+  const ranked = rankResults(
+    registered.map(m => m.entry),
+    timerType,
+  ).map(e => registered.find(m => m.entry === e))
 
   return (
     <div className={`${st.classCard} ${isActive ? st.active : ''} ${expanded ? st.expanded : ''}`}>
@@ -118,10 +167,18 @@ function ClassAccordion({ cls, isActive, expanded, onToggle, athletes, results, 
             {isActive && <span className={st.liveDot} />}
             {cls.class_label || 'Turma'}
           </div>
-          <div className={st.cMeta}>{members.length} atletas · {registered.length} registrados</div>
+          <div className={st.cMeta}>
+            {members.length} atletas · {registered.length} registrados
+          </div>
         </div>
         {isActive && (
-          <button className={`${st.btn} ${st.endBtn}`} onClick={e => { e.stopPropagation(); endClass() }}>
+          <button
+            className={`${st.btn} ${st.endBtn}`}
+            onClick={e => {
+              e.stopPropagation()
+              endClass()
+            }}
+          >
             <i className="ti ti-square-off" /> Encerrar
           </button>
         )}
@@ -130,12 +187,26 @@ function ClassAccordion({ cls, isActive, expanded, onToggle, athletes, results, 
       {expanded && (
         <div className={st.rosterList}>
           {ranked.map((m, i) => (
-            <RosterRow key={m.key} m={m} rank={i + 1} timerType={timerType}
-              isActive={isActive} canRegister={false} liveReg={liveReg} />
+            <RosterRow
+              key={m.key}
+              m={m}
+              rank={i + 1}
+              timerType={timerType}
+              isActive={isActive}
+              canRegister={false}
+              liveReg={liveReg}
+            />
           ))}
           {pending.map(m => (
-            <RosterRow key={m.key} m={m} rank={null} timerType={timerType}
-              isActive={isActive} canRegister={isActive && canRegister} liveReg={liveReg} />
+            <RosterRow
+              key={m.key}
+              m={m}
+              rank={null}
+              timerType={timerType}
+              isActive={isActive}
+              canRegister={isActive && canRegister}
+              liveReg={liveReg}
+            />
           ))}
         </div>
       )}
@@ -144,11 +215,23 @@ function ClassAccordion({ cls, isActive, expanded, onToggle, athletes, results, 
 }
 
 export default function ClassPanel({
-  tv, selSessId, todayClasses, activeClass, athletes, results, activeBlockId, timerType, timerRun,
-  classLabel, setClassLabel, startClass, endClass, liveReg,
+  tv,
+  selSessId,
+  todayClasses,
+  activeClass,
+  athletes,
+  results,
+  activeBlockId,
+  timerType,
+  timerRun,
+  classLabel,
+  setClassLabel,
+  startClass,
+  endClass,
+  liveReg,
 }) {
   const [manualToggle, setManualToggle] = useState({})
-  const canRegister = timerType === 'For Time' && (timerRun || (tv?.timer_paused_elapsed > 0))
+  const canRegister = timerType === 'For Time' && (timerRun || tv?.timer_paused_elapsed > 0)
 
   return (
     <div className={st.card}>
@@ -156,10 +239,19 @@ export default function ClassPanel({
       <div className={st.classForm}>
         <div className={st.classFormField}>
           <label className={st.lbl}>Turma</label>
-          <input className={st.input} value={classLabel} onChange={e => setClassLabel(e.target.value)}
-            placeholder="ex: 7h, 9h, Turma A" disabled={!!activeClass} />
+          <input
+            className={st.input}
+            value={classLabel}
+            onChange={e => setClassLabel(e.target.value)}
+            placeholder="ex: 7h, 9h, Turma A"
+            disabled={!!activeClass}
+          />
         </div>
-        <button className={`${st.btn} ${st.classFormBtn}`} onClick={startClass} disabled={!selSessId || !!activeClass}>
+        <button
+          className={`${st.btn} ${st.classFormBtn}`}
+          onClick={startClass}
+          disabled={!selSessId || !!activeClass}
+        >
           <i className="ti ti-whistle" /> Iniciar
         </button>
       </div>
@@ -173,10 +265,20 @@ export default function ClassPanel({
             const isActive = cls.id === activeClass?.id
             const expanded = manualToggle[cls.id] ?? isActive
             return (
-              <ClassAccordion key={cls.id} cls={cls} isActive={isActive} expanded={expanded}
+              <ClassAccordion
+                key={cls.id}
+                cls={cls}
+                isActive={isActive}
+                expanded={expanded}
                 onToggle={() => setManualToggle(t => ({ ...t, [cls.id]: !expanded }))}
-                athletes={athletes} results={results} activeBlockId={activeBlockId}
-                timerType={timerType} canRegister={canRegister} liveReg={liveReg} endClass={endClass} />
+                athletes={athletes}
+                results={results}
+                activeBlockId={activeBlockId}
+                timerType={timerType}
+                canRegister={canRegister}
+                liveReg={liveReg}
+                endClass={endClass}
+              />
             )
           })}
         </div>

@@ -6,10 +6,15 @@ import { fmtSecs, uid } from '../public/lib/wod.js'
 // key is `real:<athleteId>` or `anon:<name>` — unified identity across results_v2 (real) and
 // class_executions.anon_results (guest, day-scoped only — see CLAUDE.md TV system notes).
 export function useLiveRegistration({
-  selSessId, selDate, selSessObj, activeClassId,
-  elapsedSecs, currentTimerBlock, loadResults,
+  selSessId,
+  selDate,
+  selSessObj,
+  activeClassId,
+  elapsedSecs,
+  currentTimerBlock,
+  loadResults,
 }) {
-  const [liveScales,   setLiveScales]   = useState({}) // key -> 'Rx'|'Sc'|'Adp', pre-registration picker
+  const [liveScales, setLiveScales] = useState({}) // key -> 'Rx'|'Sc'|'Adp', pre-registration picker
   const [liveOverride, setLiveOverride] = useState({}) // key -> { perfTime, scale }, optimistic until server data lands
 
   function currentBlockId() {
@@ -20,28 +25,40 @@ export function useLiveRegistration({
     const blockId = currentBlockId()
     if (member.type === 'real') {
       const block = currentTimerBlock(selSessObj)
-      const { data: existing } = await supabase.from('results_v2')
-        .select('id,blocks').eq('athlete_id', member.id)
-        .eq('session_id', selSessId).eq('date', selDate)
+      const { data: existing } = await supabase
+        .from('results_v2')
+        .select('id,blocks')
+        .eq('athlete_id', member.id)
+        .eq('session_id', selSessId)
+        .eq('date', selDate)
         .maybeSingle()
       const newBlk = {
-        blockId, blockType: block?.type || 'For Time',
+        blockId,
+        blockType: block?.type || 'For Time',
         blockLabel: block?.label || block?.type || 'For Time',
-        perfTime, scale, rpe: null,
+        perfTime,
+        scale,
+        rpe: null,
       }
       const merged = existing
         ? [...(existing.blocks || []).filter(b => b.blockId !== blockId), newBlk]
         : [newBlk]
       await supabase.from('results_v2').upsert({
         id: existing?.id || uid(),
-        date: selDate, athlete_id: member.id, session_id: selSessId,
-        blocks: merged, logged_by_athlete: false,
+        date: selDate,
+        athlete_id: member.id,
+        session_id: selSessId,
+        blocks: merged,
+        logged_by_athlete: false,
       })
       loadResults()
     } else {
       if (!activeClassId) return
-      const { data: cls } = await supabase.from('class_executions')
-        .select('anon_results').eq('id', activeClassId).maybeSingle()
+      const { data: cls } = await supabase
+        .from('class_executions')
+        .select('anon_results')
+        .eq('id', activeClassId)
+        .maybeSingle()
       const next = { ...(cls?.anon_results || {}), [member.name]: { blockId, perfTime, scale } }
       await supabase.from('class_executions').update({ anon_results: next }).eq('id', activeClassId)
     }
@@ -59,9 +76,12 @@ export function useLiveRegistration({
   async function removeLive(member) {
     const blockId = currentBlockId()
     if (member.type === 'real') {
-      const { data: existing } = await supabase.from('results_v2')
-        .select('id,blocks').eq('athlete_id', member.id)
-        .eq('session_id', selSessId).eq('date', selDate)
+      const { data: existing } = await supabase
+        .from('results_v2')
+        .select('id,blocks')
+        .eq('athlete_id', member.id)
+        .eq('session_id', selSessId)
+        .eq('date', selDate)
         .maybeSingle()
       if (existing) {
         const trimmed = (existing.blocks || []).filter(b => b.blockId !== blockId)
@@ -69,13 +89,20 @@ export function useLiveRegistration({
       }
       loadResults()
     } else if (activeClassId) {
-      const { data: cls } = await supabase.from('class_executions')
-        .select('anon_results').eq('id', activeClassId).maybeSingle()
+      const { data: cls } = await supabase
+        .from('class_executions')
+        .select('anon_results')
+        .eq('id', activeClassId)
+        .maybeSingle()
       const next = { ...(cls?.anon_results || {}) }
       delete next[member.name]
       await supabase.from('class_executions').update({ anon_results: next }).eq('id', activeClassId)
     }
-    setLiveOverride(o => { const n = { ...o }; delete n[member.key]; return n })
+    setLiveOverride(o => {
+      const n = { ...o }
+      delete n[member.key]
+      return n
+    })
   }
 
   return { liveScales, setLiveScales, liveOverride, registerLive, editLive, removeLive }

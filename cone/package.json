@@ -11,8 +11,8 @@
     "build:all": "npm run build && npm run build:public",
     "design:cards": "node scripts/build-design-cards.mjs",
     "lint": "eslint . --max-warnings 84",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "prettier --write \"src/**/*.{js,jsx}\" \"scripts/**/*.{js,jsx,mjs,cjs}\" \"*.js\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx}\" \"scripts/**/*.{js,jsx,mjs,cjs}\" \"*.js\"",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

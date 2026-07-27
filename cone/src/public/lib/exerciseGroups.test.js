@@ -1,13 +1,31 @@
 import { describe, it, expect } from 'vitest'
 import {
-  FAMILY_GROUPS, ALL_CATEGORIES, familyOf, rootGroup, groupByRoot, completeness,
+  FAMILY_GROUPS,
+  ALL_CATEGORIES,
+  familyOf,
+  rootGroup,
+  groupByRoot,
+  completeness,
 } from './exerciseGroups.js'
 
 // The 15 registry categories (Exercicios.jsx BLOCK_ORDER) — the family map must cover
 // each exactly once. Duplicated here as a fixed contract so the test stays client-free.
 const CATEGORIES = [
-  'HIIT', 'MetCon', 'EMOM', 'For Time', 'AMRAP', 'Estações', 'Força', 'LPO', 'Core',
-  'Acessórios', 'Aquecimento', 'Skill', 'Cardio', 'Mobilidade', 'Benchmark',
+  'HIIT',
+  'MetCon',
+  'EMOM',
+  'For Time',
+  'AMRAP',
+  'Estações',
+  'Força',
+  'LPO',
+  'Core',
+  'Acessórios',
+  'Aquecimento',
+  'Skill',
+  'Cardio',
+  'Mobilidade',
+  'Benchmark',
 ]
 
 describe('FAMILY_GROUPS', () => {
@@ -31,7 +49,7 @@ describe('FAMILY_GROUPS', () => {
 
 describe('rootGroup — rightmost-token, longest-wins', () => {
   it('takes the LAST movement of a compound lift', () => {
-    expect(rootGroup('Snatch Deadlift')).toBe('Deadlift')  // a deadlift, not a snatch
+    expect(rootGroup('Snatch Deadlift')).toBe('Deadlift') // a deadlift, not a snatch
     expect(rootGroup('Clean & Jerk')).toBe('Jerk')
     expect(rootGroup('Push Press')).toBe('Press')
     expect(rootGroup('Snatch Pull')).toBe('Pull')
@@ -42,19 +60,19 @@ describe('rootGroup — rightmost-token, longest-wins', () => {
     expect(rootGroup('Strict Pull-up')).toBe('Pull-up')
     expect(rootGroup('Ring Strict Pull-up')).toBe('Pull-up')
     expect(rootGroup('Weighted Pull-up')).toBe('Pull-up')
-    expect(rootGroup('Face Pull')).toBe('Pull')      // no -up → plain Pull
+    expect(rootGroup('Face Pull')).toBe('Pull') // no -up → plain Pull
     expect(rootGroup('Bar Muscle-up')).toBe('Muscle-up')
   })
 
   it('matches whole tokens only — never a substring', () => {
-    expect(rootGroup('Tuck Planche')).toBeNull()     // "planche" is not "plank"
+    expect(rootGroup('Tuck Planche')).toBeNull() // "planche" is not "plank"
     expect(rootGroup('Snatch Balance')).toBe('Snatch')
   })
 
   it('returns null for names with no curated root (singletons)', () => {
     expect(rootGroup('Chest-to-Bar')).toBeNull()
     expect(rootGroup('Toes to Bar')).toBeNull()
-    expect(rootGroup('L-Sit')).toBeNull()            // "l-sit" ≠ "sit-up"
+    expect(rootGroup('L-Sit')).toBeNull() // "l-sit" ≠ "sit-up"
     expect(rootGroup('Double Under')).toBeNull()
     expect(rootGroup('Handstand Walk')).toBeNull()
     expect(rootGroup('')).toBeNull()
@@ -62,34 +80,73 @@ describe('rootGroup — rightmost-token, longest-wins', () => {
 
   it('is accent/case/whitespace-safe via normExName', () => {
     expect(rootGroup('  BACK   SQUAT ')).toBe('Squat')
-    expect(rootGroup('Agachamento')).toBeNull()      // pt-BR free-text, no root
+    expect(rootGroup('Agachamento')).toBeNull() // pt-BR free-text, no root
   })
 })
 
 describe('groupByRoot — real prod categories', () => {
   it('Força → Squat(7) · Deadlift(4) · Jerk(2) · Press(3), 4 singles', () => {
     const forca = [
-      'Back Squat', 'Barbell Row', 'Bench Press', 'Box Squat', 'Bulgarian Split Squat',
-      'Deadlift', 'Front Squat', 'Good Morning', 'Overhead Squat', 'Pause Squat',
-      'Push Jerk', 'Push Press', 'Romanian Deadlift', 'Split Jerk', 'Strict Press',
-      'Sumo Deadlift', 'Trap Bar Deadlift', 'Weighted Dip', 'Weighted Pull-up', 'Zercher Squat',
+      'Back Squat',
+      'Barbell Row',
+      'Bench Press',
+      'Box Squat',
+      'Bulgarian Split Squat',
+      'Deadlift',
+      'Front Squat',
+      'Good Morning',
+      'Overhead Squat',
+      'Pause Squat',
+      'Push Jerk',
+      'Push Press',
+      'Romanian Deadlift',
+      'Split Jerk',
+      'Strict Press',
+      'Sumo Deadlift',
+      'Trap Bar Deadlift',
+      'Weighted Dip',
+      'Weighted Pull-up',
+      'Zercher Squat',
     ]
     const { groups, singles } = groupByRoot(forca)
     const map = Object.fromEntries(groups.map(g => [g.root, g.items.length]))
     expect(map).toEqual({ Squat: 7, Deadlift: 4, Jerk: 2, Press: 3 })
     // Row/Good Morning/Dip/Pull-up are 1-member each here → singles
-    expect(singles.sort()).toEqual(['Barbell Row', 'Good Morning', 'Weighted Dip', 'Weighted Pull-up'])
+    expect(singles.sort()).toEqual([
+      'Barbell Row',
+      'Good Morning',
+      'Weighted Dip',
+      'Weighted Pull-up',
+    ])
     // nothing lost
     expect(groups.reduce((n, g) => n + g.items.length, 0) + singles.length).toBe(forca.length)
   })
 
   it('Skill → Pull-up(3) · Muscle-up(2) · HSPU(2) · Dip(2) · Climb(2) · Jump(2)', () => {
     const skill = [
-      'Bar Dip', 'Bar Muscle-up', 'Box Jump', 'Broad Jump', 'Chest-to-Bar', 'Double Under',
-      'Handstand Hold', 'Handstand Walk', 'Kipping HSPU', 'Kipping Pull-up', 'L-sit (rings)',
-      'Legless Rope Climb', 'Low bar banded', 'Pistol Squat', 'Ring Dip', 'Ring Muscle-up',
-      'Ring Push-up', 'Ring Row', 'Ring Strict Pull-up', 'Rope Climb', 'Strict HSPU',
-      'Strict Pull-up', 'Tuck Planche',
+      'Bar Dip',
+      'Bar Muscle-up',
+      'Box Jump',
+      'Broad Jump',
+      'Chest-to-Bar',
+      'Double Under',
+      'Handstand Hold',
+      'Handstand Walk',
+      'Kipping HSPU',
+      'Kipping Pull-up',
+      'L-sit (rings)',
+      'Legless Rope Climb',
+      'Low bar banded',
+      'Pistol Squat',
+      'Ring Dip',
+      'Ring Muscle-up',
+      'Ring Push-up',
+      'Ring Row',
+      'Ring Strict Pull-up',
+      'Rope Climb',
+      'Strict HSPU',
+      'Strict Pull-up',
+      'Tuck Planche',
     ]
     const { groups, singles } = groupByRoot(skill)
     const map = Object.fromEntries(groups.map(g => [g.root, g.items.length]))
@@ -101,8 +158,8 @@ describe('groupByRoot — real prod categories', () => {
     const list = ['Front Squat', 'Deadlift', 'Back Squat', 'Random Thing']
     const { groups, singles } = groupByRoot(list)
     expect(groups.find(g => g.root === 'Squat').items).toEqual(['Front Squat', 'Back Squat'])
-    expect(singles).toContain('Random Thing')   // no root
-    expect(singles).toContain('Deadlift')       // 1-member root → single
+    expect(singles).toContain('Random Thing') // no root
+    expect(singles).toContain('Deadlift') // 1-member root → single
   })
 
   it('reads names off objects too', () => {
@@ -137,6 +194,12 @@ describe('completeness', () => {
   })
 
   it('accepts a bare string exercise (all empty)', () => {
-    expect(completeness('Back Squat')).toEqual({ cargas: false, video: 'none', desc: false, musc: false, det: false })
+    expect(completeness('Back Squat')).toEqual({
+      cargas: false,
+      video: 'none',
+      desc: false,
+      musc: false,
+      det: false,
+    })
   })
 })

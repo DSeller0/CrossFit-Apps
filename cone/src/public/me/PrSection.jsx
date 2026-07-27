@@ -39,9 +39,18 @@ function bestParts(pr, bench = false) {
 function Delta({ delta }) {
   if (!delta) return null
   const arrow = delta.label.startsWith('-') ? '↓ ' : delta.label.startsWith('+') ? '↑ ' : ''
-  const tone = delta.good === true ? styles.deltaGood
-    : delta.good === false ? styles.deltaBad : styles.deltaEven
-  return <span className={`${styles.delta} ${tone}`}>{arrow}{delta.label}</span>
+  const tone =
+    delta.good === true
+      ? styles.deltaGood
+      : delta.good === false
+        ? styles.deltaBad
+        : styles.deltaEven
+  return (
+    <span className={`${styles.delta} ${tone}`}>
+      {arrow}
+      {delta.label}
+    </span>
+  )
 }
 
 function MovTile({ name, pr, color, bt, onOpen, onClear }) {
@@ -49,8 +58,11 @@ function MovTile({ name, pr, color, bt, onOpen, onClear }) {
     return (
       <div className={`${styles.tile} ${styles.tileNone}`}>
         <span className={styles.tileName}>{name}</span>
-        <button className={styles.noneBtn} style={{ '--fam': color }}
-          onClick={() => onOpen(name, bt ? [bt] : [], null)}>
+        <button
+          className={styles.noneBtn}
+          style={{ '--fam': color }}
+          onClick={() => onOpen(name, bt ? [bt] : [], null)}
+        >
           <IconPlus size={12} aria-hidden="true" /> Registrar
         </button>
       </div>
@@ -64,12 +76,18 @@ function MovTile({ name, pr, color, bt, onOpen, onClear }) {
       <div className={styles.tileTop}>
         <span className={styles.tileName}>{name}</span>
         <span className={styles.tileActs}>
-          <button className={styles.iconBtn} aria-label={`Editar PR de ${name}`}
-            onClick={() => onOpen(name, pr.categories || [pr.category].filter(Boolean), pr)}>
+          <button
+            className={styles.iconBtn}
+            aria-label={`Editar PR de ${name}`}
+            onClick={() => onOpen(name, pr.categories || [pr.category].filter(Boolean), pr)}
+          >
             <IconPencil size={12} aria-hidden="true" />
           </button>
-          <button className={`${styles.iconBtn} ${styles.iconBtnDanger}`} aria-label={`Apagar registros de ${name}`}
-            onClick={() => onClear(name)}>
+          <button
+            className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
+            aria-label={`Apagar registros de ${name}`}
+            onClick={() => onClear(name)}
+          >
             <IconX size={12} aria-hidden="true" />
           </button>
         </span>
@@ -80,7 +98,11 @@ function MovTile({ name, pr, color, bt, onOpen, onClear }) {
       </div>
       {(pct !== null || delta) && (
         <div className={styles.barRow}>
-          {pct !== null && <span className={styles.barGrow}><TallyBar pct={pct} color={color} size="sm" grow /></span>}
+          {pct !== null && (
+            <span className={styles.barGrow}>
+              <TallyBar pct={pct} color={color} size="sm" grow />
+            </span>
+          )}
           <Delta delta={delta} />
         </div>
       )}
@@ -99,12 +121,18 @@ function BenchTile({ name, desc, pr, color, onOpen, onClear }) {
         {desc && <span className={styles.benchRx}>{desc}</span>}
         {pr && (
           <span className={styles.tileActs}>
-            <button className={styles.iconBtn} aria-label={`Editar PR de ${name}`}
-              onClick={() => onOpen(name, pr.categories || [BENCHMARK_CAT], pr)}>
+            <button
+              className={styles.iconBtn}
+              aria-label={`Editar PR de ${name}`}
+              onClick={() => onOpen(name, pr.categories || [BENCHMARK_CAT], pr)}
+            >
               <IconPencil size={12} aria-hidden="true" />
             </button>
-            <button className={`${styles.iconBtn} ${styles.iconBtnDanger}`} aria-label={`Apagar registros de ${name}`}
-              onClick={() => onClear(name)}>
+            <button
+              className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
+              aria-label={`Apagar registros de ${name}`}
+              onClick={() => onClear(name)}
+            >
               <IconX size={12} aria-hidden="true" />
             </button>
           </span>
@@ -118,8 +146,11 @@ function BenchTile({ name, desc, pr, color, onOpen, onClear }) {
           {pr.target && <span className={styles.tileMeta}>meta {prValLabel(pr.target, pr)}</span>}
         </div>
       ) : (
-        <button className={styles.noneBtn} style={{ '--fam': color }}
-          onClick={() => onOpen(name, [BENCHMARK_CAT], null)}>
+        <button
+          className={styles.noneBtn}
+          style={{ '--fam': color }}
+          onClick={() => onOpen(name, [BENCHMARK_CAT], null)}
+        >
           <IconPlus size={12} aria-hidden="true" /> Registrar tempo
         </button>
       )}
@@ -129,25 +160,50 @@ function BenchTile({ name, desc, pr, color, onOpen, onClear }) {
 
 // Family / benchmark card: a stone surface with a family-colored left accent, a header
 // carrying coverage (TallyBar + N/M), and a body of PR tiles rendered only when open.
-function FamCard({ bt, color, sub, entries, isOpen, toggle, prFor, onOpen, onClear, bench = false }) {
+function FamCard({
+  bt,
+  color,
+  sub,
+  entries,
+  isOpen,
+  toggle,
+  prFor,
+  onOpen,
+  onClear,
+  bench = false,
+}) {
   const total = entries.length
   const prCount = entries.filter(e => !!prFor(getName(e))).length
-  const pct = total ? Math.round(prCount / total * 100) : 0
+  const pct = total ? Math.round((prCount / total) * 100) : 0
 
   return (
     <div className={styles.famCard} style={{ '--fam': color }}>
-      <div className={styles.famHead} role="button" tabIndex={0} aria-expanded={isOpen}
-        onClick={toggle} onKeyDown={onKey(toggle)}>
+      <div
+        className={styles.famHead}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isOpen}
+        onClick={toggle}
+        onKeyDown={onKey(toggle)}
+      >
         <span className={styles.famDot} aria-hidden="true" />
         <span className={styles.famName}>{bt}</span>
         {sub && <span className={styles.famSub}>{sub}</span>}
         <span className={styles.famSpacer} />
         <span className={styles.famCov}>
-          <span className={styles.famCovBar}><TallyBar pct={pct} color={color} size="sm" grow /></span>
-          <span className={`${styles.famCovNum}${prCount ? ' ' + styles.famCovNumHas : ''}`}
-            style={prCount ? { color } : undefined}>{prCount} / {total}</span>
+          <span className={styles.famCovBar}>
+            <TallyBar pct={pct} color={color} size="sm" grow />
+          </span>
+          <span
+            className={`${styles.famCovNum}${prCount ? ' ' + styles.famCovNumHas : ''}`}
+            style={prCount ? { color } : undefined}
+          >
+            {prCount} / {total}
+          </span>
         </span>
-        <span className={styles.famChev} aria-hidden="true">{isOpen ? '▼' : '▶'}</span>
+        <span className={styles.famChev} aria-hidden="true">
+          {isOpen ? '▼' : '▶'}
+        </span>
       </div>
 
       {isOpen && (
@@ -155,11 +211,27 @@ function FamCard({ bt, color, sub, entries, isOpen, toggle, prFor, onOpen, onCle
           <div className={styles.tileGrid}>
             {entries.map(e => {
               const name = getName(e)
-              return bench
-                ? <BenchTile key={name} name={name} desc={getDesc(e)} pr={prFor(name)}
-                    color={color} onOpen={onOpen} onClear={onClear} />
-                : <MovTile key={name} name={name} pr={prFor(name)} color={color} bt={bt}
-                    onOpen={onOpen} onClear={onClear} />
+              return bench ? (
+                <BenchTile
+                  key={name}
+                  name={name}
+                  desc={getDesc(e)}
+                  pr={prFor(name)}
+                  color={color}
+                  onOpen={onOpen}
+                  onClear={onClear}
+                />
+              ) : (
+                <MovTile
+                  key={name}
+                  name={name}
+                  pr={prFor(name)}
+                  color={color}
+                  bt={bt}
+                  onOpen={onOpen}
+                  onClear={onClear}
+                />
+              )
             })}
           </div>
         </div>
@@ -168,7 +240,16 @@ function FamCard({ bt, color, sub, entries, isOpen, toggle, prFor, onOpen, onCle
   )
 }
 
-export default function PrSection({ prs, registry, openBlocks, setOpenBlock, onOpen, onClear, query = '', onQuery }) {
+export default function PrSection({
+  prs,
+  registry,
+  openBlocks,
+  setOpenBlock,
+  onOpen,
+  onClear,
+  query = '',
+  onQuery,
+}) {
   const q = normExName(query || '')
   const matches = name => !q || normExName(name).includes(q)
   const prFor = name => prs.find(p => (p.name || '').toLowerCase() === name.toLowerCase())
@@ -183,8 +264,9 @@ export default function PrSection({ prs, registry, openBlocks, setOpenBlock, onO
 
   const benchEntries = (registry[BENCHMARK_CAT] || []).filter(e => matches(getName(e)))
 
-  const hasAny = Object.keys(registry).some(bt =>
-    (bt === BENCHMARK_CAT || !PR_SKIP.has(bt)) && (registry[bt] || []).length > 0)
+  const hasAny = Object.keys(registry).some(
+    bt => (bt === BENCHMARK_CAT || !PR_SKIP.has(bt)) && (registry[bt] || []).length > 0,
+  )
   if (!hasAny) return null
 
   const nothing = q && !famBlocks.length && !benchEntries.length
@@ -192,34 +274,59 @@ export default function PrSection({ prs, registry, openBlocks, setOpenBlock, onO
   const isOpen = bt => !!q || openBlocks.has(bt)
 
   return (
-    <section className={styles.sh}><div className={styles.shInner}>
-      <h2 className={styles.shTitle}>PR <span className={styles.shTitleR}>por família de movimento</span></h2>
+    <section className={styles.sh}>
+      <div className={styles.shInner}>
+        <h2 className={styles.shTitle}>
+          PR <span className={styles.shTitleR}>por família de movimento</span>
+        </h2>
 
-      {onQuery && (
-        <div className={styles.prSearch}>
-          <input className={styles.prSearchInput} type="search" value={query}
-            onChange={e => onQuery(e.target.value)} placeholder="Buscar exercício…"
-            aria-label="Buscar exercício por nome" />
-        </div>
-      )}
+        {onQuery && (
+          <div className={styles.prSearch}>
+            <input
+              className={styles.prSearchInput}
+              type="search"
+              value={query}
+              onChange={e => onQuery(e.target.value)}
+              placeholder="Buscar exercício…"
+              aria-label="Buscar exercício por nome"
+            />
+          </div>
+        )}
 
-      {nothing && <div className={styles.emptyLine}>Nenhum exercício encontrado.</div>}
+        {nothing && <div className={styles.emptyLine}>Nenhum exercício encontrado.</div>}
 
-      {famBlocks.map(({ bt, entries }) => (
-        <FamCard key={bt} bt={bt} color={blkColor({ type: bt })} entries={entries}
-          isOpen={isOpen(bt)} toggle={() => setOpenBlock(bt)}
-          prFor={prFor} onOpen={onOpen} onClear={onClear} />
-      ))}
+        {famBlocks.map(({ bt, entries }) => (
+          <FamCard
+            key={bt}
+            bt={bt}
+            color={blkColor({ type: bt })}
+            entries={entries}
+            isOpen={isOpen(bt)}
+            toggle={() => setOpenBlock(bt)}
+            prFor={prFor}
+            onOpen={onOpen}
+            onClear={onClear}
+          />
+        ))}
 
-      {benchEntries.length > 0 && (
-        <>
-          <div className={styles.prSubLabel}>Benchmarks — tempo de conclusão</div>
-          <FamCard bt="Benchmarks" sub="WODs nomeados" color={blkColor({ type: BENCHMARK_CAT })}
-            entries={benchEntries} isOpen={isOpen(BENCHMARK_CAT)}
-            toggle={() => setOpenBlock(BENCHMARK_CAT)}
-            prFor={prFor} onOpen={onOpen} onClear={onClear} bench />
-        </>
-      )}
-    </div></section>
+        {benchEntries.length > 0 && (
+          <>
+            <div className={styles.prSubLabel}>Benchmarks — tempo de conclusão</div>
+            <FamCard
+              bt="Benchmarks"
+              sub="WODs nomeados"
+              color={blkColor({ type: BENCHMARK_CAT })}
+              entries={benchEntries}
+              isOpen={isOpen(BENCHMARK_CAT)}
+              toggle={() => setOpenBlock(BENCHMARK_CAT)}
+              prFor={prFor}
+              onOpen={onOpen}
+              onClear={onClear}
+              bench
+            />
+          </>
+        )}
+      </div>
+    </section>
   )
 }
