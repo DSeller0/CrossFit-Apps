@@ -25,6 +25,10 @@ export default function MobileFrame({ theme, width = 390, children }) {
 
   useEffect(() => {
     const doc = iframeRef.current?.contentDocument
+    // Writing to the iframe's own documentElement, not to iframeRef; the rule follows the
+    // alias from the ref to the DOM node it points at. Imperative DOM mutation from an
+    // effect is exactly what a ref is for.
+    // eslint-disable-next-line react-hooks/immutability
     if (doc?.documentElement) doc.documentElement.className = 'theme-' + theme
   }, [theme, mountNode])
 

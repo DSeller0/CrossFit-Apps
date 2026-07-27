@@ -175,6 +175,11 @@ export default function Leaderboard() {
       date = p.get('date')
     const deepKey = wod && sessId && date ? `${date}|${sessId}|${wod}` : null
     const target = (deepKey && wodList.find(w => w.key === deepKey)) || wodList[0]
+    // Reacting to data that arrived from Supabase, not to a render: the guard above makes
+    // this fire exactly once per load and `selWod` then latches it off. Deriving it during
+    // render instead would mean reading window.location.search there, trading this for a
+    // purity violation.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelWod(target.key)
     setWeekOffset(dateToWeekOffset(target.dateKey))
   }, [appState, wodList]) // eslint-disable-line react-hooks/exhaustive-deps

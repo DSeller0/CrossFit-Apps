@@ -38,8 +38,11 @@ export default function PresenterView({ logUrl, onClose, children }) {
       .catch(() => {})
   }, [logUrl])
 
+  // Only the timeout half of resetHideTimer is wanted on mount — its setShowControls(true)
+  // is a no-op there (useState already seeds `true`) and was the whole reason this tripped
+  // react-hooks/set-state-in-effect. Starting an external timer is what an effect is for.
   useEffect(() => {
-    resetHideTimer()
+    hideTimer.current = setTimeout(() => setShowControls(false), 3000)
     return () => clearTimeout(hideTimer.current)
   }, [])
 

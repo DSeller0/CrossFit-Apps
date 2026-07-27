@@ -412,10 +412,14 @@ function PrModal({ onSave, onClose, editPr, existingNames }) {
   const [target, setTarget] = useState(editPr?.target || '')
   const [date, setDate] = useState(todayISO)
   const [value, setValue] = useState('')
-  const registry = loadRegistry() || {}
   const isEdit = !!editPr
 
-  const registryIndex = useMemo(() => buildRegistryIndex(registry), [registry])
+  // loadRegistry() hands back a fresh object every call, so holding it in a render-scoped
+  // const made this memo's dep change identity on every render — buildRegistryIndex ran
+  // over the whole registry on each keystroke in the name field below. Read it inside the
+  // memo instead: the modal is mounted for one PR edit and the registry can't change under
+  // it (react-hooks/exhaustive-deps).
+  const registryIndex = useMemo(() => buildRegistryIndex(loadRegistry() || {}), [])
   // Resolved via #62's alias/normalization layer so a PR logged under shorthand
   // ("BMU", "T2B") still tags a real category instead of falling into "Sem categoria".
   const exBlocks = useMemo(

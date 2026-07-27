@@ -38,9 +38,15 @@ export function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
     return names.map(name => ({ name, blockType: typeMap[name] || blockLabel || '' }))
   }, [blockLabel, query])
 
-  useEffect(() => {
+  // `query` is local (the coach types freely before committing a name), so it re-syncs
+  // when the committed `value` changes underneath — e.g. the row is re-keyed to another
+  // exercise. Adjusted during render rather than from an effect, React's documented
+  // replacement for that shape (react-hooks/set-state-in-effect).
+  const [prevValue, setPrevValue] = useState(value)
+  if (prevValue !== value) {
+    setPrevValue(value)
     setQuery(value || '')
-  }, [value])
+  }
 
   useEffect(() => {
     const handler = e => {

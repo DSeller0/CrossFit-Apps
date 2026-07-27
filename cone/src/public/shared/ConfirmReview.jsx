@@ -53,8 +53,13 @@ export default function ConfirmReview({
   const restoreRef = useRef(null)
   // Latest handlers in a ref so the key listener reads current values without the
   // effect re-subscribing (and re-stealing focus) on every parent re-render.
+  // Written from a deps-less effect (runs after every render, same cadence as the
+  // render-time assignment it replaces) rather than during render — the only reader is
+  // onKey, which fires from a DOM event, long after commit (react-hooks/refs).
   const hRef = useRef({})
-  hRef.current = { onEdit, onClose }
+  useEffect(() => {
+    hRef.current = { onEdit, onClose }
+  })
 
   useEffect(() => {
     if (!open) return

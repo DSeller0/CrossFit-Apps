@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Button from '../ui/Button.jsx'
 
 // ── IntensityInput ────────────────────────────────────────────────────────────
@@ -21,10 +21,18 @@ export default function IntensityInput({
     value?.mode && value.mode !== 'none' ? value.mode : hasGhost ? ghostDefault.mode : 'none'
   const isGhost = hasGhost
 
+  // `mode` is local because setM can drive it somewhere the prop hasn't caught up to yet
+  // (picking the active mode again clears to 'none' while onChange(null) propagates up),
+  // so it has to re-sync when the prop-derived mode changes. Done by adjusting state
+  // during render — React's documented replacement for the useEffect+setState shape
+  // (react-hooks/set-state-in-effect): React re-runs this component immediately, before
+  // committing anything, instead of painting the stale mode and then correcting it.
   const [mode, setMode] = useState(displayMode)
-  useEffect(() => {
+  const [prevDisplayMode, setPrevDisplayMode] = useState(displayMode)
+  if (prevDisplayMode !== displayMode) {
+    setPrevDisplayMode(displayMode)
     setMode(displayMode)
-  }, [displayMode])
+  }
 
   const v = value || {}
   const gv = isGhost ? ghostDefault : {}

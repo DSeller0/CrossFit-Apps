@@ -23,6 +23,10 @@ export function useClassTracking({ selSessId, selDate, push, classId }) {
   }, [selSessId, selDate])
 
   useEffect(() => {
+    // loadClasses is async: its setTodayClasses lands in the await continuation, not
+    // synchronously in the effect body. The rule traces the call graph and can't see
+    // the await boundary — this is a fetch-on-mount, which is what effects are for.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadClasses()
   }, [loadClasses])
 

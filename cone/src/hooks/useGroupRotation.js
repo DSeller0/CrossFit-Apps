@@ -47,6 +47,11 @@ export function useGroupRotation({
       if (elapsed >= t.timer_cap_secs && !hasAutoAdvRef.current) {
         hasAutoAdvRef.current = true
         const rSecs = t.rotation_rest_secs || 0
+        // advanceFromRefs is a `function` declaration (below), which JS hoists and
+        // initializes for the whole scope: there is no TDZ here, and this call is inside
+        // an interval besides. The rule models it like a `const`. Hoisting the 70-line
+        // body above three effects to satisfy that would cost more than it protects.
+        // eslint-disable-next-line react-hooks/immutability
         rSecs > 0 ? push({ rotation_rest_until: Date.now() + rSecs * 1000 }) : advanceFromRefs()
       }
     }, 500)

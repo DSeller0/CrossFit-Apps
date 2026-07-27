@@ -5,7 +5,15 @@ export function useTvSync({ onTvLoaded } = {}) {
   const [tv, setTv] = useState(null)
   const [saving, setSaving] = useState(false)
   const tvRef = useRef(null)
-  tvRef.current = tv
+  // Latest-tv mirror for the callbacks in useTimer/useGroupRotation/push, which read
+  // tvRef.current from event handlers and intervals — never during render. Written from
+  // an effect rather than during render (react-hooks/refs): the ref then updates after
+  // commit instead of mid-render, which is the same instant as far as every reader is
+  // concerned (none of them run in the render phase) and is safe under concurrent
+  // rendering, where a render can be thrown away.
+  useEffect(() => {
+    tvRef.current = tv
+  }, [tv])
 
   // Fetch initial tv_state; notify caller so it can sync form controls
   useEffect(() => {

@@ -99,6 +99,9 @@ export default function Me() {
   const [bmNote, setBmNote] = useState('')
   const [bmWarn, setBmWarn] = useState(false)
 
+  // Mount-only: `load` is this page's whole Supabase fetch and is redefined every render,
+  // so listing it would re-fetch the page on every render. Intentionally not in the deps
+  // array (react-hooks/exhaustive-deps).
   useEffect(() => {
     registerSW()
     load()
@@ -107,6 +110,7 @@ export default function Me() {
     }
     window.addEventListener('pageshow', onShow)
     return () => window.removeEventListener('pageshow', onShow)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {

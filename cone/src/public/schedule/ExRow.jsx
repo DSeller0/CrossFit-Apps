@@ -38,7 +38,7 @@ export default function ExRow({
       rmInputRef.current.focus()
       if (rmInputRef.current.value) rmInputRef.current.select()
     }
-  }, [rmEditKey])
+  }, [rmEditKey, ex.id])
 
   function confirmRm(e) {
     e?.preventDefault()
