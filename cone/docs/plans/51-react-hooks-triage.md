@@ -1,5 +1,18 @@
 # 51 — #108 · React-hooks correctness cluster (the whole CI lint floor)
 
+> ✅ **Done 2026-07-27** — `a19615e` (b1) · `030dee2` (b2) · `c3eeaad` (b3) · `f950140` (b4) ·
+> `7163abe` (b5a Timer) · `24f6f10` (b5b Schedule) · `953e4e2` (b5c slides).
+> **84 → 0.** The five rules are back on `error` in `eslint.config.js`, its explanatory comment
+> block is replaced by the outcome, and `--max-warnings` is `0` — the finish line this plan named.
+> Re-deriving the table first (as the warning below insisted) confirmed the plan's counts exactly:
+> 84 total, same per-rule and per-file mix, only line numbers moved. Three of its predictions did
+> **not** survive contact, all recorded in the batch commits: the `immutability` cluster needed
+> neither of the two options the plan weighed (the rule identifies refs by a `Ref` name suffix, so
+> renaming was the real fix); 3 of those 13 were browser-global assignments, not refs at all, and
+> two became `location.assign()`; and `Publicador.jsx`'s finding was a worse bug than filed — the
+> mobile preview also went stale on resize. **One item is deliberately left open** — see
+> "Follow-up" at the bottom.
+
 > Planned 2026-07-27, **Tier 2** of the housekeeping program. Run order:
 > [49 prettier baseline](./49-prettier-format-baseline.md) →
 > [50 taxonomy single source](./50-taxonomy-single-source.md) → **51 (this)**.
@@ -136,5 +149,23 @@ Batch-specific:
 - **Batch 5** — `/verify` on the real flow: start a For Time timer, pause, resume, hit the cap; run a
   class through TvController with the TV page open and confirm the wall display tracks. This is the batch
   where "the tests pass" is not evidence.
+
+## Follow-up (the one thing this plan found and did NOT fix)
+
+**`Timer.jsx`'s clock has two sources of truth kept in step by hand.** `statusRef`/`cfgRef`/
+`splitsRef`/`finSecsRef` are not a latest-ref mirror of state — every action handler writes the ref
+*before* the matching `setState`, the 250ms tick reads the refs and pushes nothing into React but
+`forceUpdate()`, and the render body reads them too (`const e = elapsedRaw()`). So React state
+exists only to trigger renders while the refs carry the values the clock math agrees on.
+
+That is why the mechanical fix (write the refs from an effect) is wrong here: it lands each value
+one frame *after* the render that reads it, on a clock projected on the gym wall mid-class. The
+rule's objection still stands in principle — a render React discards would have written them anyway
+— but discharging it properly means picking ONE source of truth for the clock, which is a rewrite of
+this component's state model. Suppressed with that reasoning written at the site (`Timer.jsx`, the
+block above `statusRef.current = status`), not papered over.
+
+Not filed as its own backlog row: there is no user-visible symptom today, this app uses no
+concurrent React features, and the change is only worth making alongside a Timer redesign.
 
 Model: Opus · Size: M→L
