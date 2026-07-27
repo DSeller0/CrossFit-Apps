@@ -1,5 +1,15 @@
 # 47 — #111 · Load-path write-back (completes #109's bug class)
 
+> ✅ Done: `a3a0a1d` — 2026-07-27. Not picked from the ranked list — fired live: a session
+> created 2026-07-25/26 was visible on two devices, then gone from prod Monday morning. Diagnosed to
+> `SyncContext.jsx:30`'s mount-firing `saveLS(sessions)` POSTing a stale local snapshot over the
+> server before the pull could correct it. Fixed exactly as scoped below (cache-only writers +
+> mount/pull-suppression guards, extended to `handleSync` too). Live-verified against the seeded
+> local stack: 0 POSTs on cold load (was ≥9), `updated_at` unchanged across reloads, exactly 1 POST
+> on a genuine edit, and a direct repro (poisoned localStorage missing the current day) confirmed
+> the fix stops the write rather than just reducing its frequency. See BACKLOG.md Done for the full
+> writeup.
+
 > Planned 2026-07-26 from the housekeeping ranking pass. Run order:
 > [46 session-id identity](./46-session-id-identity.md) → **47 (this)** →
 > [48 dead-weight sweep](./48-dead-weight-sweep.md).
