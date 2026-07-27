@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Nav, { isNavHidden } from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
@@ -62,7 +62,16 @@ export default function Schedule() {
   const [selAth, setSelAth] = useState(() => localStorage.getItem('cone_athlete_filter') || '')
   const [expanded, setExpanded] = useState(new Set())
   const [checked, setChecked] = useState(new Set())
-  const [roundState, setRoundState] = useState({})
+  // Seeded straight from localStorage — it used to be read in the mount effect and pushed
+  // in with setRoundState, which is a wasted render for data already on hand
+  // (react-hooks/set-state-in-effect).
+  const [roundState, setRoundState] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('sched_rounds') || '{}')
+    } catch {
+      return {}
+    }
+  })
   const [rmValues, setRmValues] = useState({})
   const [rmEditKey, setRmEditKey] = useState(null)
   const [demoTarget, setDemoTarget] = useState(null)
@@ -102,23 +111,26 @@ export default function Schedule() {
   const [lockedId] = useState(() => new URLSearchParams(location.search).get('id') || '')
   const [box] = useState(() => getBoxScope())
 
-  const demoMapRef = useRef(new Map())
-  const goalsRef = useRef({})
+  // Fetched data that the render tree reads (demo videos, RM autofill), so it is state,
+  // not refs. Held in refs it had to be read during render (react-hooks/refs); as state it
+  // costs nothing extra — load() sets it in the same batch as sessions/athletes/status.
+  const [demoMap, setDemoMap] = useState(() => new Map())
+  const [goals, setGoals] = useState({})
 
+  // `load` is a hoisted `function` declaration below, so there is no TDZ here; the rule
+  // models it like a `const` (react-hooks/immutability). Mount-only on purpose: `load` is
+  // this page's whole Supabase fetch and is redefined every render, so listing it in the
+  // deps would re-fetch the page on every render (react-hooks/exhaustive-deps).
   useEffect(() => {
     registerSW()
-    try {
-      const s = localStorage.getItem('sched_rounds')
-      if (s) setRoundState(JSON.parse(s))
-    } catch {
-      /* ignore */
-    }
+    // eslint-disable-next-line react-hooks/immutability
     load()
     const onShow = e => {
       if (e.persisted) load()
     }
     window.addEventListener('pageshow', onShow)
     return () => window.removeEventListener('pageshow', onShow)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Auto-select today's session on first load
@@ -128,9 +140,15 @@ export default function Schedule() {
       const todaySess = (sessions[t] || []).filter(
         s => s.public !== false && inBoxScope(s, box) && s.blocks && s.blocks.length,
       )
+      // Reacting to the fetch landing (status -> 'ok'), not to a render, and the !selSess
+      // guard makes it fire once. Deriving it during render would mean calling
+      // toISO(new Date()) there — one warning traded for a purity one. The deps array is
+      // deliberately just [status]: box/selSess/sessions/weekOffset all change as the user
+      // browses, and re-running this would yank them back to today's session.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (todaySess.length > 0) setSelSess({ dateKey: t, sessId: todaySess[0].id })
     }
-  }, [status])
+  }, [status]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load class_execution for check-in flow
   useEffect(() => {
@@ -161,6 +179,10 @@ export default function Schedule() {
     if (attempt === 0) setStatus('loading')
     try {
       const [cfgRes, sR, aR, rRaw, stR, gdR, erR] = await Promise.all([
+        // Cache-buster in an async fetch, called from the mount effect and the pageshow
+        // handler — never during render. The rule flags any Date.now() reachable from a
+        // component-scoped function.
+        // eslint-disable-next-line react-hooks/purity
         fetch('./config.json?v=' + Date.now()).catch(() => null),
         sb.from('sessions').select('value').eq('id', 1).maybeSingle(),
         sb.from('athletes').select('value').eq('id', 1).maybeSingle(),
@@ -205,8 +227,8 @@ export default function Schedule() {
         }
       }
 
-      demoMapRef.current = buildRegistryIndex(erD)
-      goalsRef.current = gdD
+      setDemoMap(buildRegistryIndex(erD))
+      setGoals(gdD)
 
       const sp = new URLSearchParams(location.search)
       const pDate = sp.get('date'),
@@ -381,7 +403,7 @@ export default function Schedule() {
     setExpanded(new Set())
     setRmEditKey(null)
     setDeskRegBl(null)
-    const newAuto = autofillRm(sessions, athletes, val, goalsRef.current)
+    const newAuto = autofillRm(sessions, athletes, val, goals)
     setRmValues(prev => {
       const manual = Object.fromEntries(
         Object.entries(prev).filter(([, v]) => v.source === 'manual'),
@@ -714,7 +736,7 @@ export default function Schedule() {
     <>
       <DemoPanel
         target={demoTarget}
-        demoMap={demoMapRef.current}
+        demoMap={demoMap}
         onClose={() => setDemoTarget(null)}
       />
       <LogPane
@@ -947,7 +969,7 @@ export default function Schedule() {
                                       roundState={roundState}
                                       rmValues={rmValues}
                                       rmEditKey={rmEditKey}
-                                      demoMap={demoMapRef.current}
+                                      demoMap={demoMap}
                                       isWodLogged={bl => isWodLogged(sess, bl)}
                                       onCheck={(blId, exId) =>
                                         setChecked(prev => {
@@ -1171,7 +1193,7 @@ export default function Schedule() {
                                 roundState={roundState}
                                 rmValues={rmValues}
                                 rmEditKey={rmEditKey}
-                                demoMap={demoMapRef.current}
+                                demoMap={demoMap}
                                 isWodLogged={b => isWodLogged(selSessObj, b)}
                                 onCheck={(blId, exId) =>
                                   setChecked(prev => {
