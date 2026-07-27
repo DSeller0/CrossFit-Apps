@@ -7,7 +7,7 @@ import { mapResultRow } from '../lib/blobTables.js'
 import { toISO, todayISO, fmtDateYear, MONTH_PT_SHORT } from '../lib/week.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { WOD_TYPES, blkColor, deriveScale } from '../lib/wod.js'
-import { sessName } from '../lib/sessions.js'
+import { sessName, normalizeSessionIds } from '../lib/sessions.js'
 import HeroCard from './HeroCard.jsx'
 import KpiStrip from './KpiStrip.jsx'
 import AthletePicker from './AthletePicker.jsx'
@@ -128,7 +128,7 @@ export default function Me() {
       const athList = athRow.data?.value || []
       const settD = settRow.data?.value || {}
       setAthletes(athList)
-      setSessions(sessRow.data?.value || {})
+      setSessions(normalizeSessionIds(sessRow.data?.value || {}))
       setAllResults((resRaw.data || []).map(mapResultRow))
       setGoalsData(goalsRow.data?.value || { athleteGoals: {}, prs: {} })
       setRegistry(regRow.data?.value || {})

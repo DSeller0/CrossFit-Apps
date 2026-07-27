@@ -13,6 +13,7 @@ import { isWodBlock, deriveScale, rankResults, perfStr } from '../lib/wod.js'
 import { MONTH_PT_SHORT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
 import { mapResultRow } from '../lib/blobTables.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
+import { normalizeSessionIds } from '../lib/sessions.js'
 
 // The lb_colors custom-color system is retired (#51). It predated the 4-theme
 // system and force-wrote --accent onto <html>, which is why this page rendered
@@ -85,7 +86,7 @@ async function fetchState() {
     sb.from('results_v2').select('*'),
   ])
   return {
-    sessions: sessionsRow.data?.value ?? {},
+    sessions: normalizeSessionIds(sessionsRow.data?.value ?? {}),
     athletes: athletesRow.data?.value ?? [],
     results: (resRaw.data || []).map(mapResultRow),
     settings: settingsRow.data?.value ?? {},

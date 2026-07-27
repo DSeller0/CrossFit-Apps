@@ -6,6 +6,7 @@ import s from './Index.module.css'
 import { blkLabel, isWodBlock, rankResults, perfStr, blkMeta } from '../lib/wod.js'
 import { getWeek, toISO, todayISO } from '../lib/week.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
+import { normalizeSessionIds } from '../lib/sessions.js'
 import { mapResultRow } from '../lib/blobTables.js'
 import { WeekGrid, DaySessionCard, DayRanking, BoxWarnings, MobileWarning, dayTitle } from './rail.jsx'
 
@@ -36,7 +37,7 @@ export default function Index() {
         sb.from('settings').select('value').eq('id',1).maybeSingle(),
         sb.from('athletes').select('value').eq('id',1).maybeSingle(),
       ])
-      const allSessions = sessRes.data?.value || {}
+      const allSessions = normalizeSessionIds(sessRes.data?.value || {})
       const settings    = settRes.data?.value || {}
       const allAthletes = athRes.data?.value || []
 

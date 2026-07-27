@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { sb } from '../supabaseClient.js'
 import { WodSlide, TimerSlide, ResultsSlide, QrSlide } from './slides.jsx'
+import { normalizeSessionIds } from '../lib/sessions.js'
 import s from './TV.module.css'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -38,7 +39,7 @@ export default function TV() {
         sb.from('settings').select('value').eq('id', 1).maybeSingle(),
       ])
       if (tvR.data)           setTv(tvR.data)
-      if (sessR.data?.value)  setSessions(sessR.data.value)
+      if (sessR.data?.value)  setSessions(normalizeSessionIds(sessR.data.value))
       if (athR.data?.value)   setAthletes(athR.data.value)
       if (stR.data?.value?.gymName) setGymName(stR.data.value.gymName)
     }

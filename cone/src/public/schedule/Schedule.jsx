@@ -6,7 +6,7 @@ import styles from './Schedule.module.css'
 import { MONTH_PT, DAY_PT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
 import { uid, blkLabel, isWodBlock, blkColor } from '../lib/wod.js'
 import { buildRegistryIndex } from '../lib/registry.js'
-import { getTargets, sessName } from '../lib/sessions.js'
+import { getTargets, sessName, normalizeSessionIds } from '../lib/sessions.js'
 import { prBest } from '../lib/goals.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { isRoundBlock, progGroups, parseDurMins, onKey } from './scheduleHelpers.js'
@@ -141,7 +141,7 @@ export default function Schedule() {
         sb.from('goals_data').select('value').eq('id',1).maybeSingle(),
         sb.from('exercise_registry').select('value').eq('id',1).maybeSingle(),
       ])
-      const sD=sR.data?.value||{},aD=aR.data?.value||[]
+      const sD=normalizeSessionIds(sR.data?.value||{}),aD=aR.data?.value||[]
       const rD=(rRaw.data||[]).map(r=>({id:r.id,date:r.date,athleteId:r.athlete_id,sessionId:r.session_id,presence:r.presence,energyLevel:r.energy_level,blocks:r.blocks,coachNote:r.coach_note,flagForReview:r.flag_for_review,loggedByAthlete:r.logged_by_athlete}))
       const stD=stR.data?.value||{},gdD=gdR.data?.value||{athleteGoals:{},prs:{}}
       const erD=erR.data?.value||{}

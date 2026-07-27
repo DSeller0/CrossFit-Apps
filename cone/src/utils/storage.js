@@ -1,7 +1,7 @@
 import { normaliseType, normaliseZone } from './config';
 import { uid } from '../public/lib/wod.js';
 import { toISO, todayISO } from '../public/lib/week.js';
-import { getTargets, matchesAthlete } from '../public/lib/sessions.js';
+import { getTargets, matchesAthlete, normalizeSessionIds } from '../public/lib/sessions.js';
 import {
   dbSaveSessions, dbSaveAthletes, dbSaveResults, dbSaveEvents,
   dbSaveLocations, dbSaveCoach, dbSaveSettings, dbSaveRegistry,
@@ -88,12 +88,7 @@ export const loadLS = () => {
   try {
     const d = localStorage.getItem(LS_KEY);
     if (!d) return {};
-    const parsed = migrateTypes(JSON.parse(d));
-    // ensure every session has an id
-    Object.keys(parsed).forEach(dateKey => {
-      parsed[dateKey] = (parsed[dateKey] || []).map(s => s.id ? s : { ...s, id: uid() });
-    });
-    return parsed;
+    return normalizeSessionIds(migrateTypes(JSON.parse(d)));
   } catch { return {}; }
 };
 export const saveLS = d => { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } markSessionsSaved(); dbSaveSessions(d); };
@@ -157,7 +152,7 @@ export async function syncFromSupabase() {
   const out = {};
 
   if (sessions && typeof sessions === 'object' && !Array.isArray(sessions)) {
-    const migrated = migrateTypes(sessions);
+    const migrated = normalizeSessionIds(migrateTypes(sessions));
     saveLS(migrated);
     out.sessions = migrated;
   }

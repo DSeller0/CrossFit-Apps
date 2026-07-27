@@ -8,6 +8,7 @@ import { MONTH_PT, DAY_PT, toISO, todayISO, getWeek, dateToWeekOffset } from '..
 import { uid, blkLabel, isWodBlock, rankResults, toSecs, fmtSecs, isTimeBlock } from '../lib/wod.js'
 import { onKey } from '../schedule/scheduleHelpers.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
+import { normalizeSessionIds } from '../lib/sessions.js'
 import RankList from '../shared/RankList.jsx'
 import ScaleFilter from '../shared/ScaleFilter.jsx'
 import SessionCard from './SessionCard.jsx'
@@ -89,7 +90,7 @@ export default function Results() {
         sb.from('results_v2').select('*'),
         sb.from('settings').select('value').eq('id', 1).maybeSingle(),
       ])
-      const sD = sR.data?.value || {}, aD = aR.data?.value || []
+      const sD = normalizeSessionIds(sR.data?.value || {}), aD = aR.data?.value || []
       const rD = (rRaw.data || []).map(r => ({ id: r.id, date: r.date, athleteId: r.athlete_id, sessionId: r.session_id, presence: r.presence, energyLevel: r.energy_level, blocks: r.blocks, coachNote: r.coach_note, flagForReview: r.flag_for_review, loggedByAthlete: r.logged_by_athlete }))
       const stD = stR.data?.value || {}
       setSessions(sD); setAthletes(aD); setResults(rD)

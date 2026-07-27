@@ -4,6 +4,29 @@
 // carried an equivalent, untested copy.
 
 import { dayNameFull } from './week.js'
+import { uid } from './wod.js'
+
+// Sessions created before mid-June 2026 carry a numeric Date.now()+Math.random()
+// id; uid() has returned a base36 string since. results_v2.session_id is `text`
+// and every writer does String(sessionId), so a session read back with a numeric
+// id never === its own results (#110). Call this at every point sessions enter
+// the app (SPA load + sync, each public page's fetch) so every downstream `===`
+// is string-vs-string for free — coercing at the ~12 comparison sites instead is
+// how this bug keeps coming back. Pure; a missing id gets a fresh uid() (folds in
+// the stamping loadLS already did).
+export function normalizeSessionIds(blob) {
+  if (!blob || typeof blob !== 'object') return blob
+  const out = {}
+  Object.keys(blob).forEach(dateKey => {
+    const arr = blob[dateKey]
+    if (!Array.isArray(arr)) { out[dateKey] = arr; return }
+    out[dateKey] = arr.map(s => {
+      if (!s || typeof s !== 'object') return s
+      return { ...s, id: s.id != null ? String(s.id) : uid() }
+    })
+  })
+  return out
+}
 
 export function getTargets(s) {
   if (!s?.mainTraining) return []
