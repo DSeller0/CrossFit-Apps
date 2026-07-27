@@ -76,12 +76,14 @@ function QrFooter({ dateKey, sessId, classId }) {
   const [qrUrl, setQrUrl] = useState('')
   const base = `${window.location.origin}/CrossFit-Apps/schedule.html?date=${dateKey}&session=${sessId}&from=tv`
   const url = classId ? `${base}&checkin=${classId}` : base
+  // dateKey/sessId are listed alongside `url` purely to be honest — `url` is built from
+  // both, so it already changes whenever they do and this fires on the same occasions.
   useEffect(() => {
     if (!dateKey || !sessId) return
     QRCode.toDataURL(url, { width: 160, margin: 1, color: qrColors() })
       .then(setQrUrl)
       .catch(() => {})
-  }, [url])
+  }, [url, dateKey, sessId])
   if (!dateKey || !sessId) return null
   return (
     <div className={s.qrFooter}>
@@ -234,10 +236,21 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
   const [elapsed, setElapsed] = useState(() => elapsedSecs(tv))
   const tickRef = useRef(null)
   const tvRef = useRef(tv)
-  tvRef.current = tv
+  // Latest-tv mirror for the 250ms interval below. Written from a deps-less effect rather
+  // than during render (react-hooks/refs); declared BEFORE the interval effect so it is
+  // the first to run on any commit, and the interval only reads it 250ms later anyway.
+  useEffect(() => {
+    tvRef.current = tv
+  })
 
   useEffect(() => {
     clearInterval(tickRef.current)
+    // Re-seeding the displayed clock from a tv_state push that just arrived over realtime,
+    // not from a render — and elapsedSecs reads Date.now(), so deriving it in the render
+    // body would trade this for a purity violation. The deps are deliberately the three
+    // timer fields, not `tv`: any other tv_state change (slide, QR, group positions) would
+    // otherwise tear down and restart the running interval.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setElapsed(elapsedSecs(tv))
     const restUntilVal = tv?.rotation_rest_until || 0
     const isResting = restUntilVal > Date.now()
@@ -245,6 +258,7 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
       tickRef.current = setInterval(() => setElapsed(elapsedSecs(tvRef.current)), 250)
     }
     return () => clearInterval(tickRef.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tv?.timer_started_at, tv?.timer_paused_elapsed, tv?.rotation_rest_until])
 
   const dayS = sessions?.[tv?.date_key] || []
@@ -281,6 +295,10 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
   // Rest between blocks
   const restUntil = tv?.rotation_rest_until || 0
   const restTotal = tv?.rotation_rest_secs || 0
+  // Reading the wall clock during render is what a countdown IS: the interval above only
+  // drives re-renders via setElapsed, and the rest timer is derived fresh each frame from
+  // rotation_rest_until rather than round-tripped through its own state.
+  // eslint-disable-next-line react-hooks/purity
   const restRemaining = restUntil > Date.now() ? Math.max(0, (restUntil - Date.now()) / 1000) : 0
   const isResting = restRemaining > 0
   const restProg = restTotal > 0 ? restRemaining / restTotal : 1
@@ -544,12 +562,13 @@ export function QrSlide({ tv }) {
   const base = `${window.location.origin}/CrossFit-Apps/schedule.html?date=${tv?.date_key || ''}&session=${tv?.session_id || ''}&from=tv`
   const url = tv?.class_id ? `${base}&checkin=${tv.class_id}` : base
   const title = tv?.class_id ? 'CHECK-IN DA AULA' : 'REGISTRE SEU RESULTADO'
+  // date_key/session_id listed alongside `url` for the same reason as QrFooter's above.
   useEffect(() => {
     if (!tv?.date_key || !tv?.session_id) return
     QRCode.toDataURL(url, { width: 500, margin: 2, color: qrColors() })
       .then(setQrUrl)
       .catch(() => {})
-  }, [url])
+  }, [url, tv?.date_key, tv?.session_id])
   return (
     <div className={s.qrSlide}>
       <div className={s.qrTitle}>{title}</div>

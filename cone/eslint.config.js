@@ -17,19 +17,11 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    rules: {
-      // React-hooks correctness cluster (#108, plans/43) — real findings, not
-      // mechanical debt, and two of the worst files (Schedule.jsx, Timer.jsx)
-      // are public pages used live at the gym. Downgraded from the plugin's
-      // default 'error' to 'warn' so `--max-warnings` (package.json) still gates
-      // CI on the current floor without blocking every unrelated commit until
-      // #108 is triaged file-by-file.
-      'react-hooks/set-state-in-effect': 'warn',
-      'react-hooks/refs': 'warn',
-      'react-hooks/immutability': 'warn',
-      'react-hooks/purity': 'warn',
-      'react-hooks/static-components': 'warn',
-    },
+    // The react-hooks correctness cluster (#108) was downgraded to 'warn' here while
+    // plans/51 triaged its 84 findings file-by-file. That reached zero on 2026-07-27, so
+    // the five rules are back on the plugin's default 'error' — every remaining instance
+    // in the tree carries an inline disable with a written reason at the site. There is
+    // no `--max-warnings` floor left in package.json to ratchet.
   },
   {
     // Dev-only component gallery (#43/plans/43): never built — excluded from
