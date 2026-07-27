@@ -11,6 +11,8 @@
     "build:all": "npm run build && npm run build:public",
     "design:cards": "node scripts/build-design-cards.mjs",
     "lint": "eslint . --max-warnings 84",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -37,6 +39,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "prettier": "^3.9.6",
     "vite": "^8.0.12",
     "vitest": "^4.1.9"
   }
