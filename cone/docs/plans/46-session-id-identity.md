@@ -1,5 +1,11 @@
 # 46 — #110 · Session-id identity (a type-mismatch bug class)
 
+> ✅ Done: `a104370` · 2026-07-26 — see BACKLOG.md. Safety property confirmed (byte-identical,
+> and zero existing `results_v2` rows referenced any of the 7 legacy sessions, so nothing to
+> break). The one-time prod blob fix is hand-off SQL (`scripts/normalize-session-ids.mjs
+> --env=production --write`), not yet applied — no prod service-role key in this repo, prod
+> writes go through an authenticated coach session per the standing migration workflow.
+
 > Planned 2026-07-26 from the housekeeping ranking pass. Run order:
 > **46 (this)** → [47 load-path write-back](./47-load-path-writeback.md) →
 > [48 dead-weight sweep](./48-dead-weight-sweep.md).
