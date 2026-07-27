@@ -1,5 +1,42 @@
 # 49 — #24 · Prettier format baseline (big-bang, JS/JSX only)
 
+> ✅ Done: `56b73db` (config) → `9b82015` (reformat) → `d9b1b45` (blame-ignore) — 2026-07-27.
+> **Two corrections found at execution, both fixed before the reformat commit landed:**
+> 1. **This plan's own Approach step 1 specified `"format": "prettier --write ."`** — that is NOT
+>    scoped to JS/JSX. Prettier's `.` target processes every extension it supports by default, filtered
+>    only by `.prettierignore` (which excludes directories, not file types). Running it reformatted every
+>    Markdown doc (BACKLOG.md, CLAUDE.md, every `docs/plans/*.md`, every `docs/reviews/*.md`), every
+>    `.css`/`.module.css` file **including `index.css`** (whose ownership comments are load-bearing per
+>    CLAUDE.md #99), and the root HTML — none of which "JS/JSX only" intended to touch. Caught before
+>    committing; reverted in full. Fixed scripts: `prettier --write "src/**/*.{js,jsx}"
+>    "scripts/**/*.{js,jsx,mjs,cjs}" "*.js"` (same fix in `format:check`).
+> 2. **The census undercounted `scripts/`** — it globbed only `*.js`/`*.jsx`, missing the 6 `.mjs` files
+>    that make up most of that directory. True reformatted count: **165 files** (49 `.js`, 110 `.jsx`,
+>    6 `.mjs`) + the corrected `package.json` = **166 changed**, same total the plan predicted, for a
+>    partly different reason.
+>
+> `npm run design:cards` regenerated two cards (`index.html`, `me.html`) with a one-line diff each —
+> both confirmed to be **pre-existing wall-clock artifacts** in gallery fixtures (`new Date().getDay()`
+> for "today" in the index fixture; a relative date label in the me fixture), unrelated to the reformat
+> and present on any regen regardless of it. Reverted rather than committed, so as not to misattribute
+> unrelated date drift to this change. Filed as a minor Icebox finding (design-card generation isn't
+> perfectly idempotent day-to-day) rather than fixed here — out of scope for a JS-only Prettier item.
+>
+> **Live-verified** on the reseeded local stack (Docker + `supabase start` + `seed-dev.mjs`, real
+> prod-shaped data): logged in via the real OTP flow, opened Criador, opened a session with 6 diverse
+> blocks (Core/Acessórios/Força/LPO/a complex-movement block/Cardio) — all exercise rows, intensity
+> chips, and controls rendered and were editable. Also drove `timer.html` standalone: started, ticked
+> (confirmed elapsed time advancing across two snapshots), paused, and resumed correctly — the most
+> heavily reformatted file (14 lint findings, `statusRef`/`cfgRef` ref-mirroring). Zero console errors
+> beyond the expected Supabase-unreachable noise before the stack was started.
+>
+> `git blame`/`ignoreRevsFile` verified working as designed: with the config genuinely unset, a
+> reformatted line blamed to `9b82015` (wrong); with `blame.ignoreRevsFile=.git-blame-ignore-revs` set,
+> the same line correctly blamed to `60dbcf19` (2026-06-21, its real last content change).
+>
+> `npm test` 580/580, `npm run lint` 84/84, both builds succeed (9 public pages) — all unchanged from
+> pre-reformat baseline, confirming the AST-equivalence guarantee held in practice, not just in theory.
+
 > Planned 2026-07-27, opening **Tier 2** of the housekeeping program. Run order:
 > **49 (this)** → [50 taxonomy single source](./50-taxonomy-single-source.md) →
 > [51 react-hooks triage](./51-react-hooks-triage.md).
@@ -102,9 +139,13 @@ inherits an argument instead of a rule.
 1. **Config only, no reformat.** `prettier` as a devDependency, `.prettierrc`, `.prettierignore`, and two
    scripts in `package.json`:
    ```
-   "format":       "prettier --write .",
-   "format:check": "prettier --check ."
+   "format":       "prettier --write \"src/**/*.{js,jsx}\" \"scripts/**/*.{js,jsx,mjs,cjs}\" \"*.js\"",
+   "format:check": "prettier --check \"src/**/*.{js,jsx}\" \"scripts/**/*.{js,jsx,mjs,cjs}\" \"*.js\""
    ```
+   ⚠️ **Do not use `prettier --write .` / `--check .`** — that is NOT scoped to JS/JSX. Prettier's `.`
+   target processes every extension it supports, filtered only by `.prettierignore` (directories, not
+   file types), and will reformat every Markdown doc and every `.css` file including `index.css`. This
+   was this plan's own original mistake, caught and fixed at execution — see the Done marker above.
    Add `npm run format:check` to `.github/workflows/deploy.yml` **after the lint step** (`:31-33`),
    same `working-directory: cone`. **CI enforcement is what makes this a baseline rather than a one-off**
    — without it the repo drifts back within a few sessions.
