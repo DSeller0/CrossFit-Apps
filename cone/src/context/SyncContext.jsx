@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { loadLS, saveLS, loadEvents, saveEvents, syncFromSupabase, getSessionsTs } from '../utils/storage';
 import { dbGetUpdatedAt } from '../utils/supabase';
 import { useAuth } from './AuthContext';
@@ -11,6 +11,13 @@ export function SyncProvider({ children }) {
   const [events,   setEvents]   = useState(loadEvents);
   const [syncState, setSyncState] = useState('idle'); // 'idle'|'syncing'|'synced'|'conflict'
 
+  // Consumed by the auto-save effects below to skip the write their own
+  // setSessions/setEvents call triggers (#111) — set just before each setter,
+  // by both the startup pull and the manual "Sincronizar" button (handleSync),
+  // since both are reads and neither may write back what it just read.
+  const suppressSessionsSave = useRef(false);
+  const suppressEventsSave   = useRef(false);
+
   // ── Pull latest data from Supabase once the coach's session is established ──
   // Gated on auth (#81): locations/coach_profile reads now require is_allowed_user(),
   // so the pull must run with the authenticated JWT attached — not in the brief anon
@@ -21,14 +28,31 @@ export function SyncProvider({ children }) {
   useEffect(() => {
     if (!authed) return;
     syncFromSupabase().then(fresh => {
-      if (fresh.sessions) setSessions(fresh.sessions);
-      if (fresh.events)   setEvents(fresh.events);
+      if (fresh.sessions) { suppressSessionsSave.current = true; setSessions(fresh.sessions); }
+      if (fresh.events)   { suppressEventsSave.current = true; setEvents(fresh.events); }
     }).catch(() => {});
   }, [authed]);
 
-  // ── Auto-save ─────────────────────────────────────────────────────────────
-  useEffect(() => { saveLS(sessions); },    [sessions]);
-  useEffect(() => { saveEvents(events); }, [events]);
+  // ── Auto-save — skips the mount run and the pull's own setState (#111) ─────
+  // The mount run would only re-persist what loadLS/loadEvents just read; the
+  // pull run is itself a read and must not write back what it read (CLAUDE.md:
+  // "a load/read path never writes" — this was the biggest instance of that
+  // class, and the one hiding #109's `locations`/`coach_profile` writes in that
+  // plan's network trace). A genuine user edit is neither of those and still
+  // saves exactly as before.
+  const sessionsMounted = useRef(false);
+  useEffect(() => {
+    if (!sessionsMounted.current) { sessionsMounted.current = true; return; }
+    if (suppressSessionsSave.current) { suppressSessionsSave.current = false; return; }
+    saveLS(sessions);
+  }, [sessions]);
+
+  const eventsMounted = useRef(false);
+  useEffect(() => {
+    if (!eventsMounted.current) { eventsMounted.current = true; return; }
+    if (suppressEventsSave.current) { suppressEventsSave.current = false; return; }
+    saveEvents(events);
+  }, [events]);
 
   // ── Conflict detection — poll every 30 s ─────────────────────────────────
   useEffect(() => {
@@ -50,8 +74,8 @@ export function SyncProvider({ children }) {
     setSyncState('syncing');
     try {
       const fresh = await syncFromSupabase();
-      if (fresh.sessions) setSessions(fresh.sessions);
-      if (fresh.events)   setEvents(fresh.events);
+      if (fresh.sessions) { suppressSessionsSave.current = true; setSessions(fresh.sessions); }
+      if (fresh.events)   { suppressEventsSave.current = true; setEvents(fresh.events); }
       setSyncState('synced');
       setTimeout(() => setSyncState('idle'), 2200);
     } catch {

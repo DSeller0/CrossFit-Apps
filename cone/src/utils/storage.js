@@ -68,6 +68,13 @@ export const LS_TEMPLATES = 'cone_templates_v1';
 // (wod.js/week.js/sessions.js) — re-exported above so existing SPA imports from
 // './storage' keep working.
 
+// Cache-only write: localStorage only, never Supabase. Every table's save*
+// composes this with its dbSave*; syncFromSupabase (the pull) calls the
+// cache-only half directly so a read never re-upserts what it just read
+// (#111 — extends #76's cacheResultsLS, the original instance of this
+// pattern, to every blob table; "a load/read path never writes", CLAUDE.md).
+const cacheLS = (key, data) => { try { localStorage.setItem(key, JSON.stringify(data)); } catch { /* localStorage best-effort; dbSave* still runs from save* */ } };
+
 // ── Sessions ──────────────────────────────────────────────────────────────────
 const migrateTypes = sessions => {
   const out = {};
@@ -91,51 +98,61 @@ export const loadLS = () => {
     return normalizeSessionIds(migrateTypes(JSON.parse(d)));
   } catch { return {}; }
 };
-export const saveLS = d => { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } markSessionsSaved(); dbSaveSessions(d); };
+export const cacheSessionsLS = d => cacheLS(LS_KEY, d);
+export const saveLS = d => { cacheSessionsLS(d); markSessionsSaved(); dbSaveSessions(d); };
 
 // ── Athletes ──────────────────────────────────────────────────────────────────
 export const loadAthletes  = () => { try { const d = localStorage.getItem(LS_ATHLETES);  return d ? JSON.parse(d) : []; } catch { return []; } };
-export const saveAthletes  = d => { try { localStorage.setItem(LS_ATHLETES, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveAthletes(d); };
+export const cacheAthletesLS = d => cacheLS(LS_ATHLETES, d);
+export const saveAthletes  = d => { cacheAthletesLS(d); dbSaveAthletes(d); };
 
 // ── Results ───────────────────────────────────────────────────────────────────
 export const loadResults   = () => { try { const d = localStorage.getItem(LS_RESULTS); const p = d ? JSON.parse(d) : []; return Array.isArray(p) ? p : []; } catch { return []; } };
 // Cache to localStorage only — no Supabase write. Used by the startup pull so a
 // *read* never re-upserts (#76): saveResults → dbSaveResults stamps updated_at on
 // every row, so pulling on each SPA load was rewriting all provenance timestamps.
-export const cacheResultsLS = d => { try { localStorage.setItem(LS_RESULTS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } };
+export const cacheResultsLS = d => cacheLS(LS_RESULTS, d);
 export const saveResults   = d => { cacheResultsLS(d); dbSaveResults(d); };
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 export const loadSettings  = () => { try { const d = localStorage.getItem(LS_SETTINGS);  return d ? JSON.parse(d) : {}; } catch { return {}; } };
-export const saveSettings  = d => { try { localStorage.setItem(LS_SETTINGS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveSettings(d); };
+export const cacheSettingsLS = d => cacheLS(LS_SETTINGS, d);
+export const saveSettings  = d => { cacheSettingsLS(d); dbSaveSettings(d); };
 
 // ── Exercise registry ─────────────────────────────────────────────────────────
 export const loadRegistry  = () => { try { const d = localStorage.getItem(LS_REGISTRY);  return d ? JSON.parse(d) : null; } catch { return null; } };
-export const saveRegistry  = d => { try { localStorage.setItem(LS_REGISTRY, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveRegistry(d); };
+export const cacheRegistryLS = d => cacheLS(LS_REGISTRY, d);
+export const saveRegistry  = d => { cacheRegistryLS(d); dbSaveRegistry(d); };
 
 // ── Goals & PRs ───────────────────────────────────────────────────────────────
 export const loadGoalsData = () => { try { const d = localStorage.getItem(LS_GOALS); return d ? JSON.parse(d) : { athleteGoals: {}, prs: {} }; } catch { return { athleteGoals: {}, prs: {} }; } };
-export const saveGoalsData = d => { try { localStorage.setItem(LS_GOALS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveGoalsData(d); };
+export const cacheGoalsDataLS = d => cacheLS(LS_GOALS, d);
+export const saveGoalsData = d => { cacheGoalsDataLS(d); dbSaveGoalsData(d); };
 
 // ── Events (agenda) ───────────────────────────────────────────────────────────
 export const loadEvents    = () => { try { const d = localStorage.getItem(LS_EVENTS);    return d ? JSON.parse(d) : {}; } catch { return {}; } };
-export const saveEvents    = d => { try { localStorage.setItem(LS_EVENTS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveEvents(d); };
+export const cacheEventsLS = d => cacheLS(LS_EVENTS, d);
+export const saveEvents    = d => { cacheEventsLS(d); dbSaveEvents(d); };
 
 // ── Locations / services ──────────────────────────────────────────────────────
 export const loadLocations = () => { try { const d = localStorage.getItem(LS_LOCATIONS); return d ? JSON.parse(d) : []; } catch { return []; } };
-export const saveLocations = d => { try { localStorage.setItem(LS_LOCATIONS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveLocations(d); };
+export const cacheLocationsLS = d => cacheLS(LS_LOCATIONS, d);
+export const saveLocations = d => { cacheLocationsLS(d); dbSaveLocations(d); };
 
 // ── Coach profile ─────────────────────────────────────────────────────────────
 export const loadCoach     = () => { try { const d = localStorage.getItem(LS_COACH); return d ? JSON.parse(d) : { name: '', contact: '', phone: '' }; } catch { return { name: '', contact: '', phone: '' }; } };
-export const saveCoach     = d => { try { localStorage.setItem(LS_COACH, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveCoach(d); };
+export const cacheCoachLS = d => cacheLS(LS_COACH, d);
+export const saveCoach     = d => { cacheCoachLS(d); dbSaveCoach(d); };
 
 // ── Leaderboard colours ───────────────────────────────────────────────────────
 export const loadLBColors  = () => { try { const d = localStorage.getItem(LS_LB_COLORS); return d ? JSON.parse(d) : {}; } catch { return {}; } };
-export const saveLBColors  = d => { try { localStorage.setItem(LS_LB_COLORS, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveLBColors(d); };
+export const cacheLBColorsLS = d => cacheLS(LS_LB_COLORS, d);
+export const saveLBColors  = d => { cacheLBColorsLS(d); dbSaveLBColors(d); };
 
 // ── Session templates ─────────────────────────────────────────────────────────
 export const loadTemplates = () => { try { const d = localStorage.getItem(LS_TEMPLATES); return d ? JSON.parse(d) : []; } catch { return []; } };
-export const saveTemplates = d => { try { localStorage.setItem(LS_TEMPLATES, JSON.stringify(d)); } catch { /* localStorage best-effort; db write still runs */ } dbSaveTemplates(d); };
+export const cacheTemplatesLS = d => cacheLS(LS_TEMPLATES, d);
+export const saveTemplates = d => { cacheTemplatesLS(d); dbSaveTemplates(d); };
 
 // ── Pull all data from Supabase into localStorage ─────────────────────────────
 // Called once on app startup. Returns an object with the fresh data so App.jsx
@@ -151,27 +168,33 @@ export async function syncFromSupabase() {
 
   const out = {};
 
+  // Cache-only throughout (#111 — extends #76's results-only fix to every blob
+  // table): the pull is a read and must never call a dbSave*, or it re-upserts
+  // everything it just read on every authenticated SPA mount, stamping a fresh
+  // updated_at and (worse, on a stale device) overwriting the server with an
+  // out-of-date local copy.
   if (sessions && typeof sessions === 'object' && !Array.isArray(sessions)) {
     const migrated = normalizeSessionIds(migrateTypes(sessions));
-    saveLS(migrated);
+    cacheSessionsLS(migrated);
     out.sessions = migrated;
   }
-  if (Array.isArray(athletes))   { saveAthletes(athletes);   out.athletes = athletes; }
-  // Cache-only, never re-upsert — a pull must not rewrite every row's updated_at (#76).
-  if (Array.isArray(results))    { cacheResultsLS(results);  out.results  = results;  }
+  if (Array.isArray(athletes))   { cacheAthletesLS(athletes);   out.athletes = athletes; }
+  if (Array.isArray(results))    { cacheResultsLS(results);     out.results  = results;  }
   if (events && typeof events === 'object' && !Array.isArray(events)) {
-    saveEvents(events); out.events = events;
+    cacheEventsLS(events); out.events = events;
   }
-  if (Array.isArray(locations))  { saveLocations(locations); out.locations = locations; }
-  if (coach && typeof coach === 'object')      { saveCoach(coach);       out.coach    = coach;    }
-  if (settings && typeof settings === 'object'){ saveSettings(settings); out.settings = settings; }
-  if (registry && typeof registry === 'object'){ saveRegistry(registry); out.registry = registry; }
-  if (goalsData && typeof goalsData === 'object') { saveGoalsData(goalsData); out.goalsData = goalsData; }
-  if (lbColors && typeof lbColors === 'object')   { saveLBColors(lbColors);   out.lbColors  = lbColors;  }
-  if (Array.isArray(templates))                   { saveTemplates(templates); out.templates = templates; }
+  if (Array.isArray(locations))  { cacheLocationsLS(locations); out.locations = locations; }
+  if (coach && typeof coach === 'object')      { cacheCoachLS(coach);       out.coach    = coach;    }
+  if (settings && typeof settings === 'object'){ cacheSettingsLS(settings); out.settings = settings; }
+  if (registry && typeof registry === 'object'){ cacheRegistryLS(registry); out.registry = registry; }
+  if (goalsData && typeof goalsData === 'object') { cacheGoalsDataLS(goalsData); out.goalsData = goalsData; }
+  if (lbColors && typeof lbColors === 'object')   { cacheLBColorsLS(lbColors);   out.lbColors  = lbColors;  }
+  if (Array.isArray(templates))                   { cacheTemplatesLS(templates); out.templates = templates; }
 
-  // Record the Supabase timestamp AFTER saveLS (which sets a provisional value).
-  // This becomes the baseline for conflict detection going forward.
+  // The pull no longer calls saveLS, so there's no provisional stamp to
+  // overwrite — _sessionsTs is set directly from the real remote updated_at,
+  // which is exactly what the 30s conflict poller (SyncContext.jsx) should be
+  // comparing against.
   if (sessionsTs) _sessionsTs = sessionsTs;
 
   return out;
