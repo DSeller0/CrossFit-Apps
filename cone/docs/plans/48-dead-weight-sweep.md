@@ -1,5 +1,18 @@
 # 48 — #73 + #60 + #100 · Dead-weight sweep (deletion only)
 
+> ✅ Done: `0ed963e` — 2026-07-27. All four parts shipped as scoped, every deletion re-verified
+> zero-consumer at execution time. Part A: `config.js`'s `DAYS`/`DEFAULT_TYPES`/`TYPES` + Crimson Pro 600
+> deleted. Part B: the `lb_colors` client leg removed entirely (table itself stays, tracked at #60) + the
+> v1 `results` blob dropped from `seed-dev.mjs`/`backup-supabase.mjs`. Part C: 18 dead root HTML files
+> deleted, the 4 `schedule_builder_*` variants moved to `legacy/` (kept for #64's `exerciseRows`
+> reference), 5 untracked loose `design-*.html` deleted. **One correction to this plan's own file list:**
+> `log.html` isn't dead — `Publicador.jsx`'s `PresenterView` builds a live share URL pointing at it — so
+> it was pulled from the deletion list and filed as #113 instead. Part D: the blkMeta fork reintroduced
+> at `criador/SessionTextPane.jsx:23` is fixed (the other three Part D items were already corrected by an
+> earlier session). `npm test` 580/580, lint 84/0 unchanged, `build:all` clean (9 pages), `design:cards`
+> no diff, live-verified against the reseeded local stack (SW installs, `athletes.html` precached, no
+> console errors). See BACKLOG.md Done for the full writeup.
+
 > Planned 2026-07-26 from the housekeeping ranking pass. Run order:
 > [46 session-id identity](./46-session-id-identity.md) →
 > [47 load-path write-back](./47-load-path-writeback.md) → **48 (this)**.
