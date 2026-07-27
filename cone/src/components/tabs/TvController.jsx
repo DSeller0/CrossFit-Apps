@@ -29,11 +29,16 @@ function DatePicker({ selDate, sessions, onChange }) {
     d.setDate(d.getDate() - d.getDay())
     return toISO(d)
   }
+  // weekStart is real local state — the ‹ › arrows below move it independently of selDate —
+  // that re-syncs whenever selDate jumps to another week. Adjusted during render rather
+  // than from an effect (react-hooks/set-state-in-effect), React's documented replacement.
   const [weekStart, setWeekStart] = useState(() => startOfWeek(selDate))
-  useEffect(() => {
+  const [prevSelDate, setPrevSelDate] = useState(selDate)
+  if (prevSelDate !== selDate) {
+    setPrevSelDate(selDate)
     const ws = startOfWeek(selDate)
     if (ws !== weekStart) setWeekStart(ws)
-  }, [selDate]) // eslint-disable-line react-hooks/exhaustive-deps
+  }
 
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(weekStart + 'T12:00:00')
@@ -86,7 +91,10 @@ function DatePicker({ selDate, sessions, onChange }) {
 export default function TvController({ sessions: propSessions }) {
   const [selDate, setSelDate] = useState(() => toISO(new Date()))
   const [selSessId, setSelSessId] = useState(null)
-  const [athletes, setAthletes] = useState([])
+  // Lazy initializer — loadAthletes() is a synchronous localStorage read, so seeding it
+  // here is strictly better than the mount effect that used to set it (an extra render for
+  // data already available; react-hooks/set-state-in-effect). Never set again after mount.
+  const [athletes] = useState(loadAthletes)
   const [results, setResults] = useState([])
   const [gymName, setGymName] = useState('')
   const [prevScale, setPrevScale] = useState(1)
@@ -126,6 +134,9 @@ export default function TvController({ sessions: propSessions }) {
       )
   }, [selSessId, selDate])
   useEffect(() => {
+    // loadResults is async — its setState lands past an await, not in the effect body.
+    // Same false positive as useClassTracking's; the rule can't see the await boundary.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadResults()
   }, [loadResults])
   // Periodic refresh — results_v2 has no realtime subscription here (unlike class_executions),
@@ -172,10 +183,13 @@ export default function TvController({ sessions: propSessions }) {
     return () => obs.disconnect()
   }, [])
 
-  // One-time sync: when tv_state first loads, restore form controls to match current TV state
+  // One-time sync: when tv_state first loads, restore form controls to match current TV state.
+  // Reacting to a Supabase row arriving, not to a render, and syncedFromTv latches it off
+  // after the first one — there is no cascade to avoid here.
   useEffect(() => {
     if (!tv || syncedFromTv.current) return
     syncedFromTv.current = true
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (tv.date_key) setSelDate(tv.date_key)
     if (tv.session_id) setSelSessId(tv.session_id)
     if (tv.timer_type) timer.setTimerType(tv.timer_type)
@@ -183,9 +197,10 @@ export default function TvController({ sessions: propSessions }) {
     timer.setTimerBlkId(tv.timer_block_id || null)
   }, [tv]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load athletes from localStorage + gymName from Supabase
+  // gymName from Supabase. (athletes is seeded by a lazy useState initializer above —
+  // loadAthletes() is a synchronous localStorage read, so setting it from a mount effect
+  // was a pointless second render, react-hooks/set-state-in-effect.)
   useEffect(() => {
-    setAthletes(loadAthletes())
     supabase
       .from('settings')
       .select('value')
@@ -196,9 +211,15 @@ export default function TvController({ sessions: propSessions }) {
       })
   }, [])
 
-  // Keep refs in sync for hooks that read them inside intervals/timeouts
-  selSessObjRef.current = selSessObj
-  activeClassRef.current = classes.activeClass
+  // Keep refs in sync for hooks that read them inside intervals/timeouts. Written from a
+  // deps-less effect (runs after every render, the same cadence as the render-time
+  // assignment it replaces) rather than during render: the only readers are
+  // useGroupRotation's interval/timeout callbacks, which run long after commit
+  // (react-hooks/refs).
+  useEffect(() => {
+    selSessObjRef.current = selSessObj
+    activeClassRef.current = classes.activeClass
+  })
 
   // Remaining derived values
   const slide = tv?.slide || 'blank'

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { loadLocations, getTargets, toISO } from '../../../utils/storage'
 import { MONTH_PT, DAY_PT_TITLE } from '../../../public/lib/week.js'
 import { sessName } from '../../../public/lib/sessions.js'
@@ -34,7 +34,10 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
     WOD: '#e87820',
     HIIT: '#ff6d00',
   }
-  const mobileWeeks = getWeeksOfMonth(year, month)
+  // Memoized so the effect below can honestly depend on it (react-hooks/exhaustive-deps):
+  // recomputed inline it changed identity every render, which is why the effect had to
+  // omit it. Also stops rebuilding the month grid on every render — it feeds 4 call sites.
+  const mobileWeeks = useMemo(() => getWeeksOfMonth(year, month), [year, month])
 
   const locs = loadLocations()
   function svcName(ev) {
@@ -83,15 +86,20 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
   const totalEvs = totalAulas + totalPersonal
   const totalCompleted = completedAulas + completedPersonal
 
+  // Resets the visible week when the month changes. Kept as an effect rather than adjusted
+  // during render: it needs `new Date()`, and calling that in the render body is a purity
+  // violation — this would trade one warning for another. Guarded by the deps, so it fires
+  // once per month change, not per render.
   useEffect(() => {
     const now = new Date()
     if (now.getFullYear() === year && now.getMonth() === month) {
       const idx = mobileWeeks.findIndex(w => now >= w[0] && now <= w[6])
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setViewWeekIdx(idx >= 0 ? idx : 0)
     } else {
       setViewWeekIdx(0)
     }
-  }, [year, month])
+  }, [year, month, mobileWeeks])
 
   function uid2() {
     return Math.random().toString(36).slice(2) + Date.now().toString(36)

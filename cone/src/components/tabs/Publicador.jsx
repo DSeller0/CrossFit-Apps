@@ -115,7 +115,13 @@ function SchedulePublisher({ sessions }) {
   const [mmDivider, setMmDivider] = useState(
     migEa(_sc.mmDivider, 'rgba(0,184,212,0.1)', 'rgba(74,200,192,0.1)'),
   )
-  const [previewScale, setPreviewScale] = useState(1)
+  // Measured width of the preview wrapper. Both preview scales derive from it: the
+  // desktop views divide by 1920, the two mobile ones by 1080. Held in state rather than
+  // read off previewWrapRef during render (react-hooks/refs) — see the ResizeObserver
+  // below, ported from Criador's TV-preview pane.
+  const [previewWrapW, setPreviewWrapW] = useState(800)
+  const previewScale = previewWrapW / 1920
+  const previewMobileScale = previewWrapW / 1080
 
   useEffect(() => {
     APP_CONFIG.exportScale = exportScale
@@ -245,10 +251,20 @@ function SchedulePublisher({ sessions }) {
     e.target.value = ''
   }
 
+  // A ResizeObserver, not a one-shot measure: the old effect read the width once when the
+  // preview opened and never again, so the desktop scale went stale on a window resize —
+  // and the mobile targets side-stepped it entirely by reading previewWrapRef.current
+  // during render, which is null on the first render after opening and silently fell back
+  // to 800px (wrong scale until an unrelated re-render). Same shape as Criador's TV
+  // preview and TvController's preview pane.
   useEffect(() => {
-    if (!previewOpen || !previewWrapRef.current) return
-    const w = previewWrapRef.current.offsetWidth || 800
-    setPreviewScale(w / 1920)
+    const el = previewWrapRef.current
+    if (!previewOpen || !el) return
+    const measure = () => setPreviewWrapW(el.offsetWidth || 800)
+    const obs = new ResizeObserver(measure)
+    obs.observe(el)
+    measure()
+    return () => obs.disconnect()
   }, [previewOpen])
 
   const doExport = async target => {
@@ -1386,7 +1402,7 @@ function SchedulePublisher({ sessions }) {
               'div',
               {
                 style: {
-                  transform: `scale(${previewTarget === 'mobileA' || previewTarget === 'mobileB' ? (previewWrapRef.current?.offsetWidth || 800) / 1080 : previewScale})`,
+                  transform: `scale(${previewTarget === 'mobileA' || previewTarget === 'mobileB' ? previewMobileScale : previewScale})`,
                   transformOrigin: 'top left',
                   width:
                     previewTarget === 'mobileA' || previewTarget === 'mobileB'

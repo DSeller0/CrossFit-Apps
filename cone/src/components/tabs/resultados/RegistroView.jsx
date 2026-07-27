@@ -38,15 +38,20 @@ export function RegistroView({
 
   const weeks = useMemo(() => getWeeksInMonth(viewYear, viewMonth), [viewYear, viewMonth])
 
+  // Resets the visible week when the month changes — same call as AgendaView's, and kept
+  // as an effect for the same reason: it needs `new Date()`, which is impure in a render
+  // body. `weeks` is a useMemo on [viewYear, viewMonth], so depending on it rather than
+  // on weeks.length fires on exactly the same occasions and is honest.
   useEffect(() => {
     const d = new Date()
     if (d.getFullYear() === viewYear && d.getMonth() === viewMonth) {
       const idx = weeks.findIndex(w => d >= w.start && d <= w.end)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setViewWeekIdx(idx >= 0 ? idx : 0)
     } else {
       setViewWeekIdx(0)
     }
-  }, [viewYear, viewMonth, weeks.length])
+  }, [viewYear, viewMonth, weeks])
 
   const selWeek = weeks[viewWeekIdx] ?? weeks[0]
 
@@ -84,10 +89,16 @@ export function RegistroView({
     return m
   }, [results, selDateKey, selSession])
 
+  // Consumes a one-shot preload handed down from another tab, then calls
+  // onPreloadConsumed. Reacting to a prop arriving, not to a render — and the deps array
+  // is deliberately narrow: adding sessions/athletes/isMobile/onPreloadConsumed (all of
+  // which change identity freely) would re-run the consumption and yank the coach back to
+  // the preloaded athlete mid-edit. Same shape as Criador's preload effect.
   useEffect(() => {
     if (!preload) return
     if (preload.date) {
       const d = new Date(preload.date + 'T12:00:00')
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setViewYear(d.getFullYear())
       setViewMonth(d.getMonth())
       const sArr = sessions[preload.date] || []
@@ -101,10 +112,15 @@ export function RegistroView({
       }
     }
     onPreloadConsumed?.()
-  }, [preload])
+  }, [preload]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Loads the log form for the selected athlete/session. Keyed on the three IDS, not the
+  // objects, and deliberately NOT on `results`: re-running this on every results refresh
+  // would overwrite whatever the coach has typed but not yet saved. That narrowness is the
+  // point of the effect, so both rules are suppressed rather than satisfied.
   useEffect(() => {
     if (!selAthlete || !selDateKey || !selSession) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBlockLogs([])
       setPresence('Presente')
       setEnergyLevel(3)
@@ -161,7 +177,7 @@ export function RegistroView({
     }
     setDelConfirm(false)
     setShowNote(false)
-  }, [selAthlete?.id, selDateKey, selSession?.id])
+  }, [selAthlete?.id, selDateKey, selSession?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const updBlock = (i, f, v) =>
     setBlockLogs(prev => {

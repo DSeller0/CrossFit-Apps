@@ -102,6 +102,8 @@ export default function Results() {
   const didUrlScroll = useRef(false)
   const didAutoSelect = useRef(false)
 
+  // Mount-only: `load` is this page's whole Supabase fetch and is redefined every render,
+  // so listing it would re-fetch the page on every render. Same call as Me.jsx's.
   useEffect(() => {
     registerSW()
     load()
@@ -110,6 +112,7 @@ export default function Results() {
     }
     window.addEventListener('pageshow', onShow)
     return () => window.removeEventListener('pageshow', onShow)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function load(attempt = 0) {
@@ -185,6 +188,10 @@ export default function Results() {
 
   // Auto-select on load, and again whenever the week changes or the selection
   // falls outside the visible week.
+  // Reacting to the fetch landing (status -> 'ok') and to week navigation, not to a
+  // render; the didAutoSelect/in-week guard above stops it re-picking under the user.
+  // Deriving the pick during render instead would mean calling pickDefaultWod with
+  // `today` there, which is impure — one warning traded for another.
   useEffect(() => {
     if (status !== 'ok') return
     if (didAutoSelect.current && selWod && week.map(toISO).includes(selWod.dk)) return
@@ -193,6 +200,7 @@ export default function Results() {
     didAutoSelect.current = true
     // Mobile: open the same session. Unlike leaderboard, do NOT require results —
     // results.html is where you go to LOG, so an empty-but-loggable WOD is right.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (pick) setExpanded(prev => (prev.size ? prev : new Set([pick.sid])))
   }, [status, weekOffset, sessions]) // eslint-disable-line react-hooks/exhaustive-deps
 

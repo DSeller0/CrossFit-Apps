@@ -255,13 +255,17 @@ function TrainingCreator({
     setTimeout(scrollToEditor, 60)
   }
 
-  // Preload from another tab
+  // Preload from another tab. Reacting to a prop arriving, not to a render. The deps array
+  // is deliberately just [preload]: the effect consumes the one-shot preload and calls
+  // onPreloadConsumed, so adding startEdit/openNewSession/onPreloadConsumed (all
+  // redefined every render) would re-fire it and reopen the session the coach just closed.
   useEffect(() => {
     if (!preload) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (preload._newForDate) openNewSession(preload._newForDate)
     else startEdit(preload, preload.date || preload._dateKey || '')
     onPreloadConsumed?.()
-  }, [preload])
+  }, [preload]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Templates
   const saveAsTemplate = () => {

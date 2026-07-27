@@ -48,19 +48,43 @@ const TABS = [
   ['config', 'ti-settings', 'Configurações'],
 ]
 
+// Reads the ?tab= / ?editSession= + ?editDate= deep-link. Called once from a lazy
+// useState initializer so the URL seeds the first render rather than being applied
+// afterwards by an effect.
+function readDeepLink() {
+  const p = new URLSearchParams(window.location.search)
+  const editSessId = p.get('editSession')
+  const editDate = p.get('editDate')
+  if (editSessId && editDate) {
+    const sess = (loadLS()[editDate] || []).find(s => s.id === editSessId)
+    if (sess) {
+      return { tab: 'creator', preload: { ...sess, date: editDate, _dateKey: editDate } }
+    }
+  }
+  return { tab: p.get('tab'), preload: null }
+}
+
 export default function App() {
   const { session, authLoading } = useAuth()
   const { sessions, setSessions, events, setEvents, syncState, handleSync } = useSync()
 
-  const [tab, setTab] = useState('creator')
-  const [creatorPreload, setCreatorPreload] = useState(null)
+  // The ?tab= / ?editSession= deep-link seeds initial state instead of being applied by a
+  // mount effect (react-hooks/set-state-in-effect): the effect rendered the default tab
+  // first and then swapped it, so a ?tab=results link flashed the Criador on the way in.
+  // One lazy useState so readDeepLink() runs exactly once.
+  const [deepLink] = useState(readDeepLink)
+  const [tab, setTab] = useState(deepLink.tab || 'creator')
+  const [creatorPreload, setCreatorPreload] = useState(deepLink.preload)
   const [resultsPreload, setResultsPreload] = useState(null)
   const [saved, setSaved] = useState(false)
   const [toast, setToast] = useState(null)
   const [blockNames, setBlockNames] = useState(APP_CONFIG.blockNames)
   const [saveFileName, setSaveFileName] = useState('')
   const [showSaveName, setShowSaveName] = useState(false)
-  const [configLoaded, setConfigLoaded] = useState(false)
+  // A run-once guard for the config fetch below, never read while rendering — so a ref,
+  // not state. As state its setter fired inside the effect that reads it, which is both a
+  // cascading render and a self-referential deps array (react-hooks/set-state-in-effect).
+  const configLoadedRef = useRef(false)
   const fileInputRef = useRef()
   const savedMount = useRef(true)
 
@@ -74,8 +98,8 @@ export default function App() {
 
   // ── Fetch config.json on first empty-state visit ──────────────────────────
   useEffect(() => {
-    if (configLoaded) return
-    setConfigLoaded(true)
+    if (configLoadedRef.current) return
+    configLoadedRef.current = true
     if (window.location.protocol === 'file:') return
     fetch('./config.json?v=' + Date.now())
       .then(r => (r.ok ? r.json() : null))
@@ -187,23 +211,6 @@ export default function App() {
           }
         }
       })
-  }, [configLoaded])
-
-  // ── URL param deep-links ──────────────────────────────────────────────────
-  useEffect(() => {
-    const p = new URLSearchParams(window.location.search)
-    const tabParam = p.get('tab')
-    const editSessId = p.get('editSession')
-    const editDate = p.get('editDate')
-    if (editSessId && editDate) {
-      const sess = (loadLS()[editDate] || []).find(s => s.id === editSessId)
-      if (sess) {
-        setCreatorPreload({ ...sess, date: editDate, _dateKey: editDate })
-        setTab('creator')
-      }
-    } else if (tabParam) {
-      setTab(tabParam)
-    }
   }, [])
 
   // ── Saved badge (skip initial mount) ─────────────────────────────────────

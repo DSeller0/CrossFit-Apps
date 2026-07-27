@@ -15,10 +15,17 @@ function CurrencyInput({ value, onChange, placeholder, style }) {
   const toCentavos = v => Math.round((parseFloat(v) || 0) * 100)
   const [centavos, setCentavos] = useState(() => toCentavos(value))
 
-  useEffect(() => {
+  // Re-sync when the committed value changes underneath (the parent can reset the field).
+  // Adjusted during render rather than from an effect — the same treatment IntensityInput
+  // and ExerciseCombobox got, React's documented replacement for prop->state sync
+  // (react-hooks/set-state-in-effect). Typing calls onChange, so `value` comes back
+  // changed and `incoming` then equals `centavos`: it re-syncs without fighting the user.
+  const [prevValue, setPrevValue] = useState(value)
+  if (prevValue !== value) {
+    setPrevValue(value)
     const incoming = toCentavos(value)
     if (incoming !== centavos) setCentavos(incoming)
-  }, [value])
+  }
 
   const display =
     centavos === 0

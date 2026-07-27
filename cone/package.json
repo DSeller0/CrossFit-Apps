@@ -10,7 +10,7 @@
     "build:public": "vite build --config vite.public.config.js",
     "build:all": "npm run build && npm run build:public",
     "design:cards": "node scripts/build-design-cards.mjs",
-    "lint": "eslint . --max-warnings 55",
+    "lint": "eslint . --max-warnings 30",
     "format": "prettier --write \"src/**/*.{js,jsx}\" \"scripts/**/*.{js,jsx,mjs,cjs}\" \"*.js\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx}\" \"scripts/**/*.{js,jsx,mjs,cjs}\" \"*.js\"",
     "preview": "vite preview",
