@@ -37,6 +37,12 @@ export default function MaskedTimeInput({
         className={`${s.control}${error ? ' ' + s.errored : ''}`}
         type="text"
         inputMode="numeric"
+        // type="text" on iOS otherwise floats the autocorrect/predictive bar over what is a
+        // digits-only field, and can substitute characters the mask then strips (#115).
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
         placeholder={placeholder}
         value={value}
         onChange={e => onChange?.(maskMMSS(e.target.value))}

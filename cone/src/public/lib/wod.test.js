@@ -5,6 +5,7 @@ import {
   toSecs,
   fmtSecs,
   maskMMSS,
+  expandMMSS,
   rankResults,
   perfStr,
   groupProgressionSteps,
@@ -215,6 +216,40 @@ describe('maskMMSS', () => {
     expect(maskMMSS(undefined)).toBe('')
   })
   test('does not validate — 999 → 9:99', () => expect(maskMMSS('9:99')).toBe('9:99'))
+})
+
+// The blur-time completion maskMMSS cannot do (#115). Prod held a bare '14' and '18' on For Time
+// blocks, which toSecs read as 14 and 18 SECONDS — see docs/reviews/115-results-audit.md.
+describe('expandMMSS', () => {
+  test('empty stays empty — completes a value, never invents one', () => {
+    expect(expandMMSS('')).toBe('')
+    expect(expandMMSS(null)).toBe('')
+    expect(expandMMSS(undefined)).toBe('')
+  })
+  test('a bare number is MINUTES', () => {
+    expect(expandMMSS('14')).toBe('14:00')
+    expect(expandMMSS('18')).toBe('18:00')
+  })
+  test('one digit pads to two', () => expect(expandMMSS('9')).toBe('09:00'))
+  test('anything already carrying a colon is untouched', () => {
+    expect(expandMMSS('1:23')).toBe('1:23')
+    expect(expandMMSS('12:34')).toBe('12:34')
+    expect(expandMMSS('09:00')).toBe('09:00')
+  })
+  test('idempotent', () => expect(expandMMSS(expandMMSS('14'))).toBe('14:00'))
+  test('composes with maskMMSS the way the field uses it', () => {
+    // typing 1,4 then blurring
+    expect(expandMMSS(maskMMSS('14'))).toBe('14:00')
+    // typing 0,9,0,0 — the mask already produced a colon, so blur is a no-op
+    expect(expandMMSS(maskMMSS('0900'))).toBe('09:00')
+    // typing 1,2,3 — right-fill wins, blur must not turn 1:23 into 123:00
+    expect(expandMMSS(maskMMSS('123'))).toBe('1:23')
+  })
+  test('the prod corruption cases now read correctly through toSecs', () => {
+    expect(toSecs(expandMMSS('14'))).toBe(14 * 60)
+    expect(toSecs(expandMMSS(maskMMSS('1400')))).toBe(14 * 60)
+    expect(toSecs(expandMMSS(maskMMSS('1636')))).toBe(16 * 60 + 36)
+  })
 })
 
 describe('rankResults', () => {

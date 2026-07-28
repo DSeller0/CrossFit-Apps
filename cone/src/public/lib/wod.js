@@ -217,6 +217,23 @@ export function groupProgressionSteps(ex) {
   return groups
 }
 
+// The exercises a REGISTER FORM shows for a block. Estações nests its exercises under
+// stations rather than bl.exercises, so any consumer reading bl.exercises directly renders
+// nothing for that type. Rest stations are dropped and notes stripped — the approved compact
+// register-form treatment shows the prescription only (mockups/20-result-card-exerciselist.html).
+//
+// ⚠️ shared/WodBlockCard.jsx has a SIMILAR-LOOKING but deliberately different flattener: it
+// KEEPS rest stations and tags each exercise with `_station` for display. Same shape, different
+// contract — do not collapse them (checked #115, plans/52).
+export function blockExercises(bl) {
+  if (!bl) return []
+  const exs =
+    bl.type === 'Estações'
+      ? (bl.stations || []).filter(st => !st.isRest).flatMap(st => st.exercises || [])
+      : bl.exercises || []
+  return exs.map(ex => ({ ...ex, note: undefined }))
+}
+
 export function toSecs(t) {
   if (!t) return Infinity
   const p = String(t).split(':')
@@ -241,6 +258,26 @@ export function maskMMSS(raw) {
     .slice(0, 4)
   if (d.length <= 2) return d
   return d.slice(0, d.length - 2) + ':' + d.slice(d.length - 2)
+}
+
+// The half maskMMSS cannot cover (#115/plans/52). The mask fills from the RIGHT, so one or two
+// digits are returned untouched — '14' stays '14', which toSecs then reads as 14 SECONDS. That
+// is not hypothetical: 9 of 16 logged times in prod had no colon, including a bare '14' and '18'
+// on For Time blocks (docs/reviews/115-results-audit.md).
+//
+// A bare number in a WOD time field means MINUTES. Applied on BLUR only, never on change —
+// expanding while typing would fight the right-fill ('1' → '01:00' makes '1','2','3' → '1:23'
+// unreachable). Anything already carrying a colon is left exactly as typed, and empty stays
+// empty: this completes a value, it never invents one.
+//
+//   ''  → ''        '9'    → '09:00'
+//   '14'→ '14:00'   '1:23' → '1:23'
+export function expandMMSS(v) {
+  const s = String(v ?? '').trim()
+  if (!s || s.includes(':')) return s
+  const d = s.replace(/\D/g, '')
+  if (!d) return ''
+  return `${d.padStart(2, '0')}:00`
 }
 
 export function rankResults(results, blType) {

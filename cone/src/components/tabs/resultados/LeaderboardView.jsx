@@ -8,8 +8,8 @@ import {
   deriveScale,
   SCALES,
   blkMeta,
+  perfStr,
 } from '../../../public/lib/wod.js'
-import { getPerformanceStr } from './resultadosHelpers.js'
 
 // Palette for the EXPORTED leaderboard image (#51). It replaces the 20-slot
 // lb_colors picker, which predated the 4-theme system and let the coach paint
@@ -376,7 +376,7 @@ export function LeaderboardView({ athletes, sessions, results }) {
               ) : (
                 ranked.map((r, ri) => {
                   const ath = athletes.find(a => String(a.id) === String(r.athleteId))
-                  const perf = getPerformanceStr(r, selObj.blType)
+                  const perf = perfStr(r, selObj.blType)
                   const isPodium = ri < 3,
                     pColor = isPodium ? LB_IMG.podium[ri] : null
                   return (

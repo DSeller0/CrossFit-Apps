@@ -1,4 +1,3 @@
-import { isTimeBlock } from '../../../public/lib/wod.js'
 import { monthGridCells } from '../../../public/lib/week.js'
 
 // Pure helpers behind the Resultados tab (#74-B/plans/44, pure move out of
@@ -103,15 +102,9 @@ export function calcSessionKPIs(dateKey, results) {
   return { avgRpe, rxPct, scaleDist, scaleTotal: allScales.length, flags, count: sr.length }
 }
 
-// ⚠️ Known live divergence (plans/44) — do NOT fix here. This is a fork of
-// canonical `perfStr` (public/lib/wod.js) missing its DNF branch: a capped For
-// Time athlete renders their work everywhere else and a bare dash here. Extracted
-// verbatim on purpose so the decomposition stays a pure move; swap to `perfStr`
-// in a separate follow-up commit so that behavior change is reviewable on its own.
-export function getPerformanceStr(r, blockType) {
-  if (isTimeBlock(blockType)) return r.perfTime || '—'
-  const parts = []
-  if (r.perfRounds) parts.push(`${r.perfRounds} rds`)
-  if (r.perfReps) parts.push(`${r.perfReps} reps`)
-  return parts.join(' + ') || '—'
-}
+// `getPerformanceStr` was a fork of canonical `perfStr` missing its DNF branch — a capped
+// For Time athlete rendered "4 rds (DNF)" everywhere else and a bare dash here. plans/44
+// extracted it verbatim on purpose (keeping that decomposition a pure move) and deferred the
+// swap to a reviewable commit of its own; #115 is that commit. Consumers import `perfStr`
+// from public/lib/wod.js directly. Step 2 (#112) changes what a DNF renders as, and a
+// knowingly-divergent fork must not survive into that.

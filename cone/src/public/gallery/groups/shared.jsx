@@ -4,7 +4,9 @@ import RankList from '../../shared/RankList.jsx'
 import AccordionCard from '../../shared/AccordionCard.jsx'
 import WodBlockCard from '../../shared/WodBlockCard.jsx'
 import TallyBar from '../../shared/TallyBar.jsx'
+import ScoreFields, { ScaleRow, ScoreInputs } from '../../shared/ScoreFields.jsx'
 import Nav from '../../Nav.jsx'
+import { DEF_INP } from '../../results/resultsHelpers.js'
 import { Case, Section } from '../harness.jsx'
 import {
   AMBER,
@@ -31,8 +33,60 @@ import {
   lbBlForTime,
   lbBlEstacoes,
   lbBlBare,
+  rcBlFT,
+  rcBlFTCap,
+  rcBlAmrap,
+  rcInpDone,
 } from '../fixtures.js'
 import s from '../Gallery.module.css'
+
+// ScoreFields is controlled, and the whole point of #115 is the typing behaviour — so the
+// gallery has to hold real state or the mask can't be exercised at all.
+function ScoreFieldsDemo({ block, initial, disabled }) {
+  const [v, setV] = useState(initial || DEF_INP())
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 420 }}>
+      <ScoreFields
+        block={block}
+        value={v}
+        onChange={patch => setV(p => ({ ...p, ...patch }))}
+        disabled={disabled}
+      />
+      <code
+        style={{
+          fontSize: 11,
+          color: 'var(--muted)',
+          fontFamily: 'var(--font-mono)',
+          wordBreak: 'break-all',
+        }}
+      >
+        {JSON.stringify(v)}
+      </code>
+    </div>
+  )
+}
+
+function ScoreInputsSmDemo() {
+  const [v, setV] = useState({ ...DEF_INP(), scale: 'RX' })
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, flexWrap: 'wrap' }}>
+      <ScaleRow
+        short
+        size="sm"
+        label={null}
+        value={v.scale}
+        onChange={sc => setV(p => ({ ...p, scale: sc }))}
+      />
+      <ScoreInputs
+        blockType="For Time"
+        size="sm"
+        value={v}
+        onChange={patch => setV(p => ({ ...p, ...patch }))}
+        timeLabel={null}
+      />
+    </div>
+  )
+}
 
 function AccordionCardDemo({ initial = false, title = 'Treino A', tag = null }) {
   const [open, setOpen] = useState(initial)
@@ -315,6 +369,35 @@ export default {
               title="Treino de Sábado — Turma da Manhã"
               tag="Benchmark de Resistência Muscular"
             />
+          </Case>
+        </Section>
+      ),
+    },
+    {
+      id: 'scorefields',
+      label: 'ScoreFields',
+      render: () => (
+        <Section
+          title="ScoreFields"
+          sub="src/public/shared/ScoreFields.jsx — a única superfície de pontuação (#115). Cinco telas mantinham cópias à mão destes campos e já tinham divergido: o DeskRegPane perdeu o campo de DNF, o ClassPanel gravava 'Rx'/'Sc'/'Adp' fora do padrão, e todas usavam caixa de texto crua para o tempo. Estes campos são interativos — digite 0,9,0,0 e veja 09:00; digite 14 e saia do campo para ver 14:00."
+        >
+          <Case label="For Time — máscara mm:ss (digite 1,2,3,4 → 12:34)">
+            <ScoreFieldsDemo block={rcBlFT} />
+          </Case>
+          <Case label="For Time com CAP — ganha o campo de rounds (DNF)">
+            <ScoreFieldsDemo block={rcBlFTCap} />
+          </Case>
+          <Case label="AMRAP — rounds + reps">
+            <ScoreFieldsDemo block={rcBlAmrap} />
+          </Case>
+          <Case label="Preenchido">
+            <ScoreFieldsDemo block={rcBlFT} initial={rcInpDone} />
+          </Case>
+          <Case label="disabled (durante o envio)">
+            <ScoreFieldsDemo block={rcBlFT} initial={rcInpDone} disabled />
+          </Case>
+          <Case label="size='sm' + escala curta — a linha de chamada do TvController">
+            <ScoreInputsSmDemo />
           </Case>
         </Section>
       ),

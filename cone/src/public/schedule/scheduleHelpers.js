@@ -1,9 +1,11 @@
-import { groupProgressionSteps, isWodBlock, SCALES } from '../lib/wod.js'
+import { groupProgressionSteps, isWodBlock } from '../lib/wod.js'
 
 // Shared by Schedule.jsx and its extracted schedule/ components (#17) — one
 // canonical copy so extraction can't drift the same helper two ways.
-
-export const LOG_SCALES = SCALES
+//
+// `LOG_SCALES` (an alias for SCALES) was removed in #115: both its consumers now render the
+// shared ScaleRow, and a re-export that only renamed the canonical constant was one more
+// place a fifth scale list could have grown.
 
 export function isRoundBlock(bl) {
   return !isWodBlock(bl) && Number(bl.rounds) > 0

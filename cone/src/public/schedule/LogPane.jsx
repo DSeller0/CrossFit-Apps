@@ -1,21 +1,8 @@
 import styles from './Schedule.module.css'
-import { LOG_SCALES, fmtDeskPerf } from './scheduleHelpers.js'
-import { blkColor, isTimeBlock } from '../lib/wod.js'
+import { fmtDeskPerf } from './scheduleHelpers.js'
+import { blkColor, blockExercises } from '../lib/wod.js'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
-
-// Estações nests its exercises under stations rather than bl.exercises directly
-// (see BlockDetail.jsx's Estações branch) — flatten them here so the review/edit
-// exercise list isn't silently empty for that block type. Notes are stripped —
-// approved design (mockups/20-result-card-exerciselist.html) shows the
-// prescription only, no coaching notes, in this compact register-form context.
-function blockExercises(bl) {
-  if (!bl) return []
-  const exs =
-    bl.type === 'Estações'
-      ? (bl.stations || []).filter(st => !st.isRest).flatMap(st => st.exercises || [])
-      : bl.exercises || []
-  return exs.map(ex => ({ ...ex, note: undefined }))
-}
+import ScoreFields from '../shared/ScoreFields.jsx'
 
 // ── Log Pane (mobile) ─────────────────────────────────────────────────────────
 export default function LogPane({
@@ -34,14 +21,10 @@ export default function LogPane({
   lockedAthName,
 }) {
   const isOpen = !!pane
-  function setRpe(i, n) {
-    onBlocks(prev => prev.map((b, j) => (j === i ? { ...b, rpe: n } : b)))
-  }
-  function setScale(i, s) {
-    onBlocks(prev => prev.map((b, j) => (j === i ? { ...b, scale: s } : b)))
-  }
-  function setField(i, f, v) {
-    onBlocks(prev => prev.map((b, j) => (j === i ? { ...b, [f]: v } : b)))
+  // ScoreFields emits a partial patch, which is exactly what this reducer already wanted —
+  // the three setRpe/setScale/setField variants collapse into one (#115).
+  function patchBlock(i, patch) {
+    onBlocks(prev => prev.map((b, j) => (j === i ? { ...b, ...patch } : b)))
   }
   const dateStr = pane
     ? new Date(pane.dateKey + 'T12:00:00').toLocaleDateString('pt-BR', {
@@ -191,89 +174,13 @@ export default function LogPane({
                         {exs.length > 0 && (
                           <ExerciseList exercises={exs} color={blkColor(fullBl)} size="tiny" />
                         )}
-                        <span className={styles.lpLbl}>RPE (1–10)</span>
-                        <div className={styles.lpRpeRow}>
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
-                            <button
-                              key={n}
-                              type="button"
-                              className={`${styles.lpRpeBtn}${bl.rpe === n ? ' ' + styles.lpRpeBtnOn : ''}`}
-                              onClick={() => setRpe(i, n)}
-                            >
-                              {n}
-                            </button>
-                          ))}
-                        </div>
-                        <span className={styles.lpLbl}>Escala</span>
-                        <div className={styles.lpScaleRow}>
-                          {LOG_SCALES.map(s => (
-                            <button
-                              key={s}
-                              type="button"
-                              className={`${styles.lpScaleBtn}${bl.scale === s ? ' ' + styles.lpScaleBtnOn : ''}`}
-                              onClick={() => setScale(i, s)}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                        {isTimeBlock(bl.blockType) ? (
-                          <>
-                            <span className={styles.lpLbl}>Tempo (MM:SS)</span>
-                            <input
-                              className={styles.lpInput}
-                              type="text"
-                              placeholder="ex: 12:34"
-                              inputMode="numeric"
-                              value={bl.perfTime || ''}
-                              onChange={e => setField(i, 'perfTime', e.target.value)}
-                            />
-                            {Number(fullBl?.rounds) > 0 && (
-                              <>
-                                <span className={styles.lpLbl}>
-                                  Rounds completos de {fullBl.rounds} (DNF)
-                                </span>
-                                <input
-                                  className={styles.lpInput}
-                                  type="number"
-                                  placeholder={`0/${fullBl.rounds}`}
-                                  min="0"
-                                  max={fullBl.rounds}
-                                  inputMode="numeric"
-                                  value={bl.perfRounds || ''}
-                                  onChange={e => setField(i, 'perfRounds', e.target.value)}
-                                />
-                              </>
-                            )}
-                          </>
-                        ) : (
-                          <div className={styles.lpRow2}>
-                            <div>
-                              <span className={styles.lpLbl}>Rounds</span>
-                              <input
-                                className={styles.lpInput}
-                                type="number"
-                                placeholder="0"
-                                min="0"
-                                inputMode="numeric"
-                                value={bl.perfRounds || ''}
-                                onChange={e => setField(i, 'perfRounds', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <span className={styles.lpLbl}>Reps</span>
-                              <input
-                                className={styles.lpInput}
-                                type="number"
-                                placeholder="0"
-                                min="0"
-                                inputMode="numeric"
-                                value={bl.perfReps || ''}
-                                onChange={e => setField(i, 'perfReps', e.target.value)}
-                              />
-                            </div>
-                          </div>
-                        )}
+                        <ScoreFields
+                          block={fullBl}
+                          blockType={bl.blockType}
+                          rounds={fullBl?.rounds}
+                          value={bl}
+                          onChange={patch => patchBlock(i, patch)}
+                        />
                       </div>
                     )
                   })}

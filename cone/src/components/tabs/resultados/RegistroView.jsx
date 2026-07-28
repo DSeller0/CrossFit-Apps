@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { saveResults, uid } from '../../../utils/storage'
-import { exVolStr, isTimeBlock, isWodBlock, SCALES, blkMeta } from '../../../public/lib/wod.js'
+import { exVolStr, isWodBlock, blkMeta } from '../../../public/lib/wod.js'
+import { ScaleRow, ScoreInputs } from '../../../public/shared/ScoreFields.jsx'
 import { toISO, MONTH_PT, DAY_PT_TITLE } from '../../../public/lib/week.js'
 import { sessName } from '../../../public/lib/sessions.js'
 import { useIsMobile } from '../../../hooks/useIsMobile'
@@ -632,56 +633,23 @@ export function RegistroView({
                         })}
                       </div>
                     )}
-                    <div className="rp-scale-row">
-                      {SCALES.map(s => (
-                        <button
-                          key={s}
-                          type="button"
-                          className={`rp-scale-btn${bl.scale === s ? ' on' : ''}`}
-                          onClick={() => updBlock(i, 'scale', s)}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                    {isTimeBlock(bl.blockType) ? (
-                      <div className="rp-perf-row">
-                        <span className="rp-perf-lbl">Tempo</span>
-                        <input
-                          className="rp-perf-input"
-                          type="text"
-                          inputMode="numeric"
-                          placeholder="MM:SS"
-                          value={bl.perfTime}
-                          onChange={e => updBlock(i, 'perfTime', e.target.value)}
-                        />
-                      </div>
-                    ) : (
-                      <div className="rp-perf-row">
-                        <span className="rp-perf-lbl">Rounds</span>
-                        <input
-                          className="rp-perf-input"
-                          type="number"
-                          inputMode="numeric"
-                          min="0"
-                          placeholder="0"
-                          style={{ width: 52 }}
-                          value={bl.perfRounds}
-                          onChange={e => updBlock(i, 'perfRounds', e.target.value)}
-                        />
-                        <span className="rp-perf-lbl">Reps</span>
-                        <input
-                          className="rp-perf-input"
-                          type="number"
-                          inputMode="numeric"
-                          min="0"
-                          placeholder="0"
-                          style={{ width: 52 }}
-                          value={bl.perfReps}
-                          onChange={e => updBlock(i, 'perfReps', e.target.value)}
-                        />
-                      </div>
-                    )}
+                    {/* Scale + score come from the shared ScoreFields (#115) — this view's
+                        copy was the one with no DNF field and an unmasked time box. Its
+                        10-segment RPE bar below stays as-is: that is #57's call, not this. */}
+                    <ScaleRow
+                      value={bl.scale}
+                      onChange={sc => updBlock(i, 'scale', sc)}
+                      label={null}
+                    />
+                    <ScoreInputs
+                      block={sessbl}
+                      blockType={bl.blockType}
+                      rounds={sessbl?.rounds}
+                      value={bl}
+                      onChange={patch =>
+                        Object.entries(patch).forEach(([f, v]) => updBlock(i, f, v))
+                      }
+                    />
                     <div className="rp-rpe-row">
                       <span
                         style={{

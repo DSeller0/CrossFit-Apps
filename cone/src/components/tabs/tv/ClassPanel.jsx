@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { rankResults, perfStr } from '../../../public/lib/wod.js'
+import { rankResults, perfStr, SCALES } from '../../../public/lib/wod.js'
+import { ScaleRow, TimeField } from '../../../public/shared/ScoreFields.jsx'
 import st from './tvController.module.css'
 
 function buildMembers(cls, athletes) {
@@ -39,7 +40,10 @@ function scoreMembers(members, cls, results, activeBlockId, liveOverride) {
 function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(null)
-  const scale = liveReg.liveScales[m.key] ?? 'Rx'
+  // Canonical SCALES since #115. This row used to write 'Rx'/'Sc'/'Adp' into the same
+  // blocks[].scale slot every other surface reads — values SCALE_COL cannot colour and
+  // ScaleFilter can never match. (0 such rows in prod, so no back-fill was needed.)
+  const scale = liveReg.liveScales[m.key] ?? SCALES[0]
 
   function startEdit() {
     setDraft({ perfTime: m.entry.perfTime || '', scale: m.entry.scale || null })
@@ -59,22 +63,17 @@ function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
       <div className={st.rosterRow}>
         <span className={st.rank}>{rank ?? '—'}</span>
         <span className={st.athName}>{m.name}</span>
-        <div className={st.scalePills}>
-          {['Rx', 'Sc', 'Adp'].map(sc => (
-            <button
-              key={sc}
-              className={`${st.scalePill} ${draft.scale === sc ? st.sel : ''}`}
-              onClick={() => setDraft(d => ({ ...d, scale: sc }))}
-            >
-              {sc}
-            </button>
-          ))}
-        </div>
-        <input
-          className={`${st.input} ${st.editTimeInput}`}
+        <ScaleRow
+          short
+          size="sm"
+          label={null}
+          value={draft.scale}
+          onChange={sc => setDraft(d => ({ ...d, scale: sc }))}
+        />
+        <TimeField
+          className={st.editTimeInput}
           value={draft.perfTime}
-          placeholder="mm:ss"
-          onChange={e => setDraft(d => ({ ...d, perfTime: e.target.value }))}
+          onChange={v => setDraft(d => ({ ...d, perfTime: v }))}
         />
         <button className={`${st.btn} ${st.rowBtn} ${st.reg}`} onClick={saveEdit}>
           Salvar
@@ -112,17 +111,13 @@ function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
         </>
       ) : canRegister ? (
         <>
-          <div className={st.scalePills}>
-            {['Rx', 'Sc', 'Adp'].map(sc => (
-              <button
-                key={sc}
-                className={`${st.scalePill} ${scale === sc ? st.sel : ''}`}
-                onClick={() => liveReg.setLiveScales(s => ({ ...s, [m.key]: sc }))}
-              >
-                {sc}
-              </button>
-            ))}
-          </div>
+          <ScaleRow
+            short
+            size="sm"
+            label={null}
+            value={scale}
+            onChange={sc => liveReg.setLiveScales(s => ({ ...s, [m.key]: sc }))}
+          />
           <button
             className={`${st.btn} ${st.rowBtn} ${st.reg}`}
             onClick={() => liveReg.registerLive(m, scale)}

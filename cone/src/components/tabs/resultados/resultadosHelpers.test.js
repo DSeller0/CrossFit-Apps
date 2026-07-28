@@ -1,12 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import {
-  getWeeksInMonth,
-  weekLabel,
-  calcKPIs,
-  calcSessionKPIs,
-  getPerformanceStr,
-} from './resultadosHelpers.js'
+import { getWeeksInMonth, weekLabel, calcKPIs, calcSessionKPIs } from './resultadosHelpers.js'
 import { monthGridCells } from '../../../public/lib/week.js'
+import { perfStr } from '../../../public/lib/wod.js'
 
 // Resultados.jsx's helpers had zero tests before #74-B/plans/44 — they lived as
 // module-level functions inside a 912-line tab. Extracted verbatim (pure move,
@@ -129,19 +124,20 @@ describe('calcSessionKPIs', () => {
   })
 })
 
-// ⚠️ getPerformanceStr is a KNOWN-BUGGY verbatim extraction (see resultadosHelpers.js)
-// — it lacks canonical perfStr's DNF branch. This test pins the CURRENT behavior on
-// purpose; it is expected to change in the separate follow-up commit that swaps this
-// for canonical perfStr, which is the point of pinning it here rather than leaving it
-// undocumented.
-describe('getPerformanceStr (known divergence from canonical perfStr)', () => {
-  it('renders a dash for a capped For Time result instead of "N rds (DNF)"', () => {
-    expect(getPerformanceStr({ perfTime: '' }, 'For Time')).toBe('—')
+// The old `getPerformanceStr` fork was deleted in #115 and LeaderboardView now renders
+// canonical `perfStr`. These assert the divergence is actually gone rather than merely
+// untested — the capped case is the one that used to differ.
+describe('SPA leaderboard renders canonical perfStr (fork deleted, #115)', () => {
+  it('a capped For Time result shows its rounds, not a dash', () => {
+    expect(perfStr({ perfTime: '', perfRounds: '4' }, 'For Time')).toBe('4 rds (DNF)')
+  })
+  it('a For Time result with nothing logged is still a dash', () => {
+    expect(perfStr({ perfTime: '' }, 'For Time')).toBe('—')
   })
   it('renders perfTime as-is for a completed For Time result', () => {
-    expect(getPerformanceStr({ perfTime: '12:34' }, 'For Time')).toBe('12:34')
+    expect(perfStr({ perfTime: '12:34' }, 'For Time')).toBe('12:34')
   })
   it('joins rounds + reps for a non-time block', () => {
-    expect(getPerformanceStr({ perfRounds: '5', perfReps: '10' }, 'AMRAP')).toBe('5 rds + 10 reps')
+    expect(perfStr({ perfRounds: '5', perfReps: '10' }, 'AMRAP')).toBe('5 rds + 10 reps')
   })
 })

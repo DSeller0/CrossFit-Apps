@@ -1,0 +1,181 @@
+/* ScoreFields (#115/plans/52) — the one score-entry surface, shared by results.html's LogForm,
+   schedule.html's LogPane + DeskRegPane, the SPA RegistroView and TvController's ClassPanel.
+   House style matches results/Results.module.css, which every one of those had drifted from:
+   zero border-radius, hairline dividers, token-only colors (color-mix, never rgba), 10px
+   uppercase labels, tabular numerals on every numeric value.
+
+   Two-tone selection is deliberate and pre-existing: RPE selects TEAL, scale selects GOLD.
+   Keeping them distinct is what lets a coach read a dense roster row at a glance. */
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.label {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── RPE ─────────────────────────────────────────────────────────────────── */
+
+.rpeRow {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.rpeBtn {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--divider);
+  background: transparent;
+  color: var(--sub);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.rpeBtn:hover:not(:disabled):not(.on) {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.rpeBtn.on {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--accent-text);
+}
+
+/* ── Scale ───────────────────────────────────────────────────────────────── */
+
+.scaleRow {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.scaleBtn {
+  padding: 4px 10px;
+  border: 1px solid var(--divider);
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.scaleBtn:hover:not(:disabled):not(.on) {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.scaleBtn.on {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--accent-text);
+}
+
+/* ── Score inputs ────────────────────────────────────────────────────────── */
+
+.scoreWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.numRow {
+  display: flex;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.input {
+  background: var(--stone2);
+  border: 1px solid var(--border);
+  color: var(--cream);
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: var(--font);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--teal);
+}
+
+.inputSm {
+  width: 100px;
+}
+
+/* The time field is MaskedTimeInput, which brings its own control styling; this only
+   constrains its width so it doesn't stretch across a wide desktop pane. */
+.timeField {
+  max-width: 160px;
+}
+
+/* ── Shared disabled + focus contract ────────────────────────────────────── */
+
+.rpeBtn:focus-visible,
+.scaleBtn:focus-visible,
+.input:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+}
+
+.rpeBtn:disabled,
+.scaleBtn:disabled,
+.input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── size="sm" — the TvController roster row, where a full form does not fit ── */
+
+.sm .rpeBtn {
+  width: 22px;
+  height: 22px;
+  font-size: 10px;
+}
+
+.sm .scaleBtn {
+  padding: 2px 7px;
+  font-size: 10px;
+}
+
+.sm .input {
+  padding: 4px 7px;
+  font-size: 12px;
+}
+
+.sm .inputSm {
+  width: 68px;
+}
+
+.sm .timeField {
+  max-width: 92px;
+}
+
+.sm .numRow {
+  gap: 8px;
+}
+
+.sm .scoreWrap {
+  gap: 6px;
+}

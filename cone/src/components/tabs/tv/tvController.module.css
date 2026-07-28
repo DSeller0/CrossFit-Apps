@@ -126,9 +126,9 @@
 .rank         { flex-shrink: 0; color: var(--dim); width: 20px; font-size: 10px; }
 .athName      { flex: 1; min-width: 70px; color: var(--cream); font-weight: 700; }
 .guestBadge   { font-size: 9px; color: var(--dim); font-weight: 700; text-transform: uppercase; margin-left: 4px; }
-.scalePills   { display: flex; gap: 3px; flex-shrink: 0; }
-.scalePill    { padding: 3px 8px; font-size: 10px; font-weight: 700; cursor: pointer; border: 1px solid var(--divider); background: transparent; color: var(--muted); border-radius: 3px; }
-.scalePill.sel { border-color: var(--teal); background: #0d1a1a; color: var(--teal); }
+/* scalePills/scalePill moved to shared/ScoreFields.module.css in #115 — this roster row was
+   writing non-canonical 'Rx'/'Sc'/'Adp' and its pill also carried a hardcoded #0d1a1a that
+   froze totk-dark across all four themes. Both go away with the shared ScaleRow. */
 .perf         { flex-shrink: 0; width: 46px; text-align: right; color: var(--teal); font-family: monospace; font-weight: 700; }
 .perf.empty   { color: var(--dim); }
 .rowBtn       { flex-shrink: 0; white-space: nowrap; padding: 5px 12px; font-size: 12px; }

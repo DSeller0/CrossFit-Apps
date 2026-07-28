@@ -1,6 +1,7 @@
 import styles from './Schedule.module.css'
-import { blkLabel, isTimeBlock } from '../lib/wod.js'
-import { LOG_SCALES, fmtDeskPerf } from './scheduleHelpers.js'
+import { blkLabel } from '../lib/wod.js'
+import { fmtDeskPerf } from './scheduleHelpers.js'
+import ScoreFields from '../shared/ScoreFields.jsx'
 
 // ── Desktop Reg Pane ──────────────────────────────────────────────────────────
 export default function DeskRegPane({
@@ -26,9 +27,18 @@ export default function DeskRegPane({
 }) {
   if (!regBl) return null
   const { bl } = regBl
-  const isForTime = isTimeBlock(bl.type)
   const label = blkLabel(bl)
   const perfVal = fmtDeskPerf({ perfTime, perfRounds, perfReps })
+  // This pane keeps its five separate value/callback props (Schedule.jsx owns the state);
+  // ScoreFields speaks one value object + one patch, so translate at the boundary (#115).
+  const scoreValue = { rpe, scale, perfTime, perfRounds, perfReps }
+  const onScoreChange = patch => {
+    if ('rpe' in patch) onRpe(patch.rpe)
+    if ('scale' in patch) onScale(patch.scale)
+    if ('perfTime' in patch) onPerfTime(patch.perfTime)
+    if ('perfRounds' in patch) onPerfRounds(patch.perfRounds)
+    if ('perfReps' in patch) onPerfReps(patch.perfReps)
+  }
   return (
     <div className={styles.deskRegPane}>
       <div className={styles.deskRegPaneHdr}>
@@ -44,79 +54,13 @@ export default function DeskRegPane({
         {step === 'form' && (
           <>
             <div className={styles.deskRegSec}>
-              <span className={styles.deskRegLbl}>Escala</span>
-              <div className={styles.deskRegScaleRow}>
-                {LOG_SCALES.map(s => (
-                  <button
-                    key={s}
-                    className={`${styles.deskRegScaleBtn}${scale === s ? ' ' + styles.deskRegScaleBtnOn : ''}`}
-                    onClick={() => onScale(s)}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
+              {/* Gains the DNF rounds field it never had — this pane was the surface that had
+                  drifted furthest from the other four (#115). */}
+              <ScoreFields block={bl} value={scoreValue} onChange={onScoreChange} />
+              {bl.type === 'AMRAP' && (
+                <div className={styles.deskRegHint}>Rounds completos + reps extras</div>
+              )}
             </div>
-            <div className={styles.deskRegSec}>
-              <span className={styles.deskRegLbl}>RPE (1–10)</span>
-              <div className={styles.deskRegRpeRow}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
-                  <button
-                    key={n}
-                    className={`${styles.deskRegRpeBtn}${rpe === n ? ' ' + styles.deskRegRpeBtnOn : ''}`}
-                    onClick={() => onRpe(n)}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {isForTime ? (
-              <div className={styles.deskRegSec}>
-                <span className={styles.deskRegLbl}>Tempo (MM:SS)</span>
-                <input
-                  className={styles.deskRegInput}
-                  type="text"
-                  placeholder="ex: 12:34"
-                  value={perfTime}
-                  onChange={e => onPerfTime(e.target.value)}
-                  inputMode="numeric"
-                />
-              </div>
-            ) : (
-              <div className={styles.deskRegSec}>
-                <span className={styles.deskRegLbl}>Resultado</span>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <div style={{ flex: 1 }}>
-                    <span className={styles.deskRegLbl}>Rounds</span>
-                    <input
-                      className={styles.deskRegInput}
-                      type="number"
-                      placeholder="0"
-                      min="0"
-                      inputMode="numeric"
-                      value={perfRounds}
-                      onChange={e => onPerfRounds(e.target.value)}
-                    />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <span className={styles.deskRegLbl}>Reps</span>
-                    <input
-                      className={styles.deskRegInput}
-                      type="number"
-                      placeholder="0"
-                      min="0"
-                      inputMode="numeric"
-                      value={perfReps}
-                      onChange={e => onPerfReps(e.target.value)}
-                    />
-                  </div>
-                </div>
-                {bl.type === 'AMRAP' && (
-                  <div className={styles.deskRegHint}>Rounds completos + reps extras</div>
-                )}
-              </div>
-            )}
             <button
               className={styles.deskRegSubmitBtn}
               disabled={!scale || !rpe}

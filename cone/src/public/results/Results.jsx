@@ -5,7 +5,16 @@ import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
 import styles from './Results.module.css'
 import { MONTH_PT, DAY_PT, toISO, todayISO, getWeek, dateToWeekOffset } from '../lib/week.js'
-import { uid, blkLabel, isWodBlock, rankResults, toSecs, fmtSecs, isTimeBlock } from '../lib/wod.js'
+import {
+  uid,
+  blkLabel,
+  isWodBlock,
+  rankResults,
+  toSecs,
+  fmtSecs,
+  isTimeBlock,
+  perfStr,
+} from '../lib/wod.js'
 import { onKey } from '../schedule/scheduleHelpers.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { normalizeSessionIds } from '../lib/sessions.js'
@@ -373,11 +382,11 @@ export default function Results() {
       n.delete(k)
       return n
     })
-    let perf = ''
-    if (isTimeBlock(btype))
-      perf = inp.perfTime || (inp.perfRounds ? `${inp.perfRounds} rds (DNF)` : '')
-    else if (inp.perfRounds)
-      perf = `${inp.perfRounds} rds${inp.perfReps ? ' + ' + inp.perfReps + ' reps' : ''}`
+    // Canonical perfStr since #115 — this was hand-rolled here and in the confirm modal,
+    // a third and fourth copy of the "(DNF)" wording the #51 comments exist to prevent.
+    // perfStr renders "nothing logged" as an em dash; these two surfaces omit the row instead.
+    const perfRaw = perfStr(inp, btype)
+    const perf = perfRaw === '—' ? '' : perfRaw
     setSuccessData({ blockLabel: lbl, scale: inp.scale, rpe: inp.rpe, perf, btype })
   }
 
@@ -426,11 +435,11 @@ export default function Results() {
     const bl = (sess?.blocks || []).find(b => b.id === bid)
     const lbl = bl ? blkLabel(bl) : bid,
       btype = bl?.type || ''
-    let perf = ''
-    if (isTimeBlock(btype))
-      perf = inp.perfTime || (inp.perfRounds ? `${inp.perfRounds} rds (DNF)` : '')
-    else if (inp.perfRounds)
-      perf = `${inp.perfRounds} rds${inp.perfReps ? ' + ' + inp.perfReps + ' reps' : ''}`
+    // Canonical perfStr since #115 — this was hand-rolled here and in the confirm modal,
+    // a third and fourth copy of the "(DNF)" wording the #51 comments exist to prevent.
+    // perfStr renders "nothing logged" as an em dash; these two surfaces omit the row instead.
+    const perfRaw = perfStr(inp, btype)
+    const perf = perfRaw === '—' ? '' : perfRaw
     const plbl = isTimeBlock(btype) ? (inp.perfTime ? 'Tempo' : 'Resultado') : 'Resultado'
     confirmContent = (
       <>

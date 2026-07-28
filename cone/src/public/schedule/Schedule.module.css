@@ -191,17 +191,13 @@
 .lpBody { padding:16px; display:flex; flex-direction:column; gap:12px; }
 .lpSection { background:var(--stone2); border:1px solid var(--divider); padding:14px; }
 .lpSectionTitle { font-size:10px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.09em; margin-bottom:10px; }
-.lpLbl { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px; display:block; }
-.lpSelect,.lpInput { font-family:inherit; font-size:13px; padding:8px 10px; border:1px solid var(--divider); background:var(--stone2); color:var(--text); width:100%; outline:none; }
-.lpSelect:focus,.lpInput:focus { border-color:var(--accent); }
+/* The lpLbl / lpRpe* / lpScale* / lpInput / lpRow2 score-field rules moved to
+   shared/ScoreFields.module.css in #115 — this pane's copy was one of five. */
+.lpSelect { font-family:inherit; font-size:13px; padding:8px 10px; border:1px solid var(--divider); background:var(--stone2); color:var(--text); width:100%; outline:none; }
+.lpSelect:focus { border-color:var(--accent); }
 .lpBlock { padding:10px 0; margin-bottom:8px; }
 .lpBlock:last-child { margin-bottom:0; }
 .lpBlockTitle { font-size:11px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:.07em; margin-bottom:8px; }
-.lpRow2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.lpRpeRow,.lpScaleRow { display:flex; gap:3px; flex-wrap:wrap; margin-bottom:8px; }
-.lpRpeBtn,.lpScaleBtn { font-family:inherit; font-size:11px; font-weight:700; padding:5px 0; border:1px solid var(--divider); background:transparent; color:var(--muted); cursor:pointer; flex:1; min-width:22px; }
-.lpRpeBtnOn { background:var(--accent); color:var(--accent-text); border-color:var(--accent); }
-.lpScaleBtnOn { background:var(--gold); color:var(--accent-text); border-color:var(--gold); }
 .lpSubmit { font-family:inherit; font-size:14px; font-weight:900; padding:13px; border:none; background:var(--accent); color:var(--accent-text); cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; letter-spacing:.04em; }
 .lpSubmit:disabled { opacity:.4; cursor:not-allowed; }
 .lpErr { font-size:11px; color:var(--err); text-align:center; margin-top:4px; }
@@ -311,14 +307,8 @@
 .deskRegScroll::-webkit-scrollbar-thumb { background:var(--divider); }
 .deskRegSec { margin-bottom:12px; }
 .deskRegLbl { display:block; font-size:9px; font-weight:900; letter-spacing:.1em; color:var(--muted); text-transform:uppercase; margin-bottom:5px; }
-.deskRegScaleRow { display:flex; gap:4px; flex-wrap:wrap; }
-.deskRegScaleBtn { font-family:inherit; font-size:11px; font-weight:700; background:var(--stone2); border:1px solid var(--divider); color:var(--muted); padding:4px 6px; cursor:pointer; flex:1; text-align:center; }
-.deskRegScaleBtnOn { background:color-mix(in srgb,var(--gold) 15%,var(--stone2)); border-color:var(--gold); color:var(--gold); }
-.deskRegRpeRow { display:flex; gap:3px; flex-wrap:wrap; }
-.deskRegRpeBtn { font-family:inherit; font-size:11px; font-weight:700; background:var(--stone2); border:1px solid var(--divider); color:var(--muted); padding:4px 0; width:22px; cursor:pointer; text-align:center; }
-.deskRegRpeBtnOn { background:color-mix(in srgb,var(--teal) 15%,var(--stone2)); border-color:var(--teal); color:var(--teal); }
-.deskRegInput { width:100%; box-sizing:border-box; background:var(--stone2); border:1px solid var(--divider); color:var(--cream); font-family:inherit; font-size:14px; padding:7px 9px; }
-.deskRegInput:focus { outline:none; border-color:var(--teal); }
+/* deskRegScale* / deskRegRpe* / deskRegInput moved to shared/ScoreFields.module.css (#115).
+   This pane was the surface that had drifted furthest — it had no DNF field at all. */
 .deskRegHint { font-size:9px; color:var(--dim); margin-top:3px; }
 .deskRegSubmitBtn { display:block; width:100%; background:color-mix(in srgb,var(--teal) 15%,transparent); border:1px solid color-mix(in srgb,var(--teal) 50%,transparent); color:var(--teal); font-family:inherit; font-size:13px; font-weight:900; letter-spacing:.08em; padding:8px; cursor:pointer; margin-top:4px; text-align:center; }
 .deskRegSubmitBtn:hover { background:color-mix(in srgb,var(--teal) 22%,transparent); }
