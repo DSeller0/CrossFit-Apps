@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+# Auto-format staged JS/JSX before every commit (#115 follow-up, 2026-07-27).
+#
+# CI runs `prettier --check` as its own step and stayed red for ~4h on 2026-07-27: plans/49
+# added that gate in the same session plans/51 landed four commits of react-hooks fixes, and
+# those edits never re-ran `npm run format`. Formatting is not a judgement call, so this
+# rewrites the staged files and re-stages them rather than rejecting the commit — a hook that
+# only says "no" is a hook people bypass with --no-verify.
+#
+# ── Why this is hand-written and not `husky` ──────────────────────────────────────────────
+# husky was tried first and REFUSES this repo: it requires package.json at the git root, and
+# here the root is CrossFit-Apps/ while the project lives in cone/ ("`.git` can't be found").
+# The hook is one line, so the dependency bought nothing. Two consequences of that layout,
+# both load-bearing:
+#   1. The shebang above is REQUIRED. Without it git reports the confusing
+#      "cannot spawn cone/.githooks/pre-commit: No such file or directory" on a file that
+#      plainly exists — that is the kernel failing to find an interpreter, not a missing file.
+#   2. git runs hooks with CWD = the repo root, not the project — hence the `cd cone`.
+#
+# `core.hooksPath` is pointed here by package.json's `prepare` script, which npm runs after
+# `npm install`, so a fresh clone is wired up automatically. Bypass with `git commit --no-verify`.
+cd cone && npx lint-staged

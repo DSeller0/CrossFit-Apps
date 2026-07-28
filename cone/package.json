@@ -15,7 +15,11 @@
     "format:check": "prettier --check \"src/**/*.{js,jsx}\" \"scripts/**/*.{js,jsx,mjs,cjs}\" \"*.js\"",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepare": "cd .. && git config core.hooksPath cone/.githooks || exit 0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,mjs,cjs}": "prettier --write"
   },
   "dependencies": {
     "@fontsource/amarante": "^5.2.8",
@@ -39,6 +43,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "lint-staged": "^17.2.0",
     "prettier": "^3.9.6",
     "vite": "^8.0.12",
     "vitest": "^4.1.9"
