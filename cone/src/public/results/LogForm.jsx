@@ -42,7 +42,12 @@ export default function LogForm({
 
       <div className={styles.formBtns}>
         {onCancel && (
-          <button type="button" className={styles.btnCancelInline} disabled={dis} onClick={onCancel}>
+          <button
+            type="button"
+            className={styles.btnCancelInline}
+            disabled={dis}
+            onClick={onCancel}
+          >
             Cancelar
           </button>
         )}

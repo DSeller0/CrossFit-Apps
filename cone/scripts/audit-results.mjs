@@ -176,7 +176,13 @@ console.log(`
 results_v2 fidelity audit  ·  ${rows.length} rows / ${entries.length} block entries
 
 1. malformed perfTime (no colon)   ${badTime.length} of ${entries.filter(e => e.perfTime).length} logged times
-2. non-canonical scale             ${badScale.length}  ${badScale.length ? `(${tally(badScale.map(e => e.scale)).map(([v, n]) => `${v}×${n}`).join(', ')})` : ''}
+2. non-canonical scale             ${badScale.length}  ${
+  badScale.length
+    ? `(${tally(badScale.map(e => e.scale))
+        .map(([v, n]) => `${v}×${n}`)
+        .join(', ')})`
+    : ''
+}
 3. MetCon/HIIT entries             ${mcEntries.length}  (time ${mcWithTime.length} / rounds ${mcWithRounds.length})
 4. blocks with a goal              ${goalBlocks.length} of ${allBlocks.length}  (comparable ${goalComparable.length}, with results ${goalWithResults.length})
 5. DNF-shaped entries              ${dnfShaped.length}   · time entries with no score ${timeNoScore.length}

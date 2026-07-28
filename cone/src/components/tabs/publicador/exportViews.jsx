@@ -465,19 +465,17 @@ export function WeeklyExportView({ sessions, label, year, month, onDayClick }) {
                 React.createElement(
                   'div',
                   { className: 'wk-day-blocks' },
-                  (s.blocks || [])
-                    .slice(0, 4)
-                    .map(bl =>
-                      React.createElement(
-                        'span',
-                        {
-                          key: bl.id,
-                          className: `wg-pill ${PLC[bl.type] || 'p-st'}`,
-                          style: { fontSize: '9px', padding: '1px 5px' },
-                        },
-                        bl.type,
-                      ),
+                  (s.blocks || []).slice(0, 4).map(bl =>
+                    React.createElement(
+                      'span',
+                      {
+                        key: bl.id,
+                        className: `wg-pill ${PLC[bl.type] || 'p-st'}`,
+                        style: { fontSize: '9px', padding: '1px 5px' },
+                      },
+                      bl.type,
                     ),
+                  ),
                 ),
               ),
           )
@@ -767,28 +765,26 @@ export function WeeklyCalendarExportView({
                         },
                         bl.type + (meta ? ` · ${meta}` : ''),
                       ),
-                      exs
-                        .slice(0, 4)
-                        .map(ex =>
+                      exs.slice(0, 4).map(ex =>
+                        React.createElement(
+                          'div',
+                          { key: ex.id, style: { marginTop: '3px' } },
                           React.createElement(
                             'div',
-                            { key: ex.id, style: { marginTop: '3px' } },
-                            React.createElement(
-                              'div',
-                              {
-                                style: {
-                                  fontSize: `calc(13px * var(--fs,1))`,
-                                  fontWeight: 900,
-                                  color: wk.exName || '#fff',
-                                  textTransform: 'uppercase',
-                                  letterSpacing: '.04em',
-                                  lineHeight: 1.15,
-                                },
+                            {
+                              style: {
+                                fontSize: `calc(13px * var(--fs,1))`,
+                                fontWeight: 900,
+                                color: wk.exName || '#fff',
+                                textTransform: 'uppercase',
+                                letterSpacing: '.04em',
+                                lineHeight: 1.15,
                               },
-                              ex.isComplex ? complexLine(ex) : exLine(ex),
-                            ),
+                            },
+                            ex.isComplex ? complexLine(ex) : exLine(ex),
                           ),
                         ),
+                      ),
                       bl.notes &&
                         React.createElement(
                           'div',

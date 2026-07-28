@@ -11,7 +11,8 @@ import { useMemo, useSyncExternalStore } from 'react'
 // (3rd arg) covers the render; the guard covers this useMemo body, which runs anyway.
 export function useIsMobile(breakpoint = 600) {
   const [subscribe, getSnapshot] = useMemo(() => {
-    const mq = typeof window !== 'undefined' ? window.matchMedia(`(max-width:${breakpoint}px)`) : null
+    const mq =
+      typeof window !== 'undefined' ? window.matchMedia(`(max-width:${breakpoint}px)`) : null
     if (!mq) return [() => () => {}, () => false]
     return [
       cb => {

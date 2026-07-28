@@ -1,16 +1,20 @@
 // #115 · One-time repair of colonless perfTime values in results_v2.blocks.
-// Run from cone/:  node scripts/repair-results-time.mjs [--env=production] [--write]
+// Run from cone/:
+//   node scripts/repair-results-time.mjs [--env=production] [--write] [--assume-mmss]
 //
 // Every result-logging form used a raw text box until #115, so athletes typed `1400` meaning
 // 14:00. toSecs' single-segment branch reads that as 1400 SECONDS — 23:20 — and ranks it
 // accordingly. The prod audit found 9 of 16 logged times affected
 // (docs/reviews/115-results-audit.md).
 //
-// ⚠️ Repairs ONLY the unambiguous cases. A 3- or 4-digit value is mm:ss read from the right,
-// exactly as maskMMSS would have produced it, so `1400` → `14:00` is a rewrite of notation and
-// not a guess. A 1- or 2-digit value is genuinely ambiguous — `14` is almost certainly 14
-// minutes, but it could be 14 seconds, and only a human knows. Those are REPORTED and never
+// ⚠️ By default repairs ONLY the unambiguous cases. A 3- or 4-digit value is mm:ss read from
+// the right, exactly as maskMMSS would have produced it, so `1400` → `14:00` is a rewrite of
+// notation and not a guess. A 1- or 2-digit value (`14`) or one with a decimal separator
+// (`11.50`) is genuinely ambiguous, and only a human knows. Those are REPORTED and never
 // written: inventing a number that reads as data is the failure mode #66 exists to name.
+//
+// `--assume-mmss` resolves the ambiguous ones as mm:ss — the user's recorded call on prod's
+// three (2026-07-27). It stays opt-in so a future run against new data still stops and asks.
 //
 // Mirrors scripts/normalize-session-ids.mjs: dry-run by default, --write applies locally, and
 // against production it refuses and prints SQL to paste into the Supabase SQL editor instead
@@ -21,6 +25,11 @@ import { maskMMSS, expandMMSS, fmtSecs } from '../src/public/lib/wod.js'
 
 const args = process.argv.slice(2)
 const doWrite = args.includes('--write')
+// The user's recorded call (2026-07-27) on the three ambiguous prod values: '14' and '18' are
+// 14:00/18:00, and '11.50' is 11:50 — all read as mm:ss, none as seconds or decimal minutes.
+// Kept behind a FLAG rather than made the default: the ambiguity is real, and a future run
+// against new data must surface it for a decision instead of quietly resolving it.
+const assumeMMSS = args.includes('--assume-mmss')
 const envName = (args.find(a => a.startsWith('--env=')) || '--env=production').split('=')[1]
 const envFile = `./.env.${envName}`
 
@@ -58,7 +67,7 @@ function buildSql(fixes) {
   const lines = [
     '-- #115 · repair colonless perfTime values in results_v2.blocks',
     '-- Each statement rewrites ONE block entry of ONE row. Idempotent: the WHERE clause',
-    "-- matches only while the old value is still there, so re-running is a no-op.",
+    '-- matches only while the old value is still there, so re-running is a no-op.',
     'begin;',
   ]
   fixes.forEach(f => {
@@ -86,7 +95,13 @@ async function main() {
     const blocks = Array.isArray(r.blocks) ? r.blocks : []
     let touched = false
     const copy = blocks.map((b, index) => {
-      const c = classify(b?.perfTime)
+      const c0 = classify(b?.perfTime)
+      // --assume-mmss promotes the ambiguous readings to their mm:ss interpretation, which is
+      // exactly the `guess` classify() already computed.
+      const c =
+        assumeMMSS && c0.kind === 'ambiguous'
+          ? { kind: 'fix', to: c0.guess, wasAmbiguous: true }
+          : c0
       if (c.kind === 'fix') {
         fixes.push({
           rowId: r.id,
@@ -95,6 +110,7 @@ async function main() {
           label: b.blockLabel,
           from: String(b.perfTime),
           to: c.to,
+          wasAmbiguous: !!c.wasAmbiguous,
         })
         touched = true
         return { ...b, perfTime: c.to }
@@ -120,9 +136,12 @@ async function main() {
   }
 
   if (fixes.length) {
-    console.log(`\n${fixes.length} unambiguous value(s) — 3+ digits, mm:ss from the right:`)
+    console.log(`\n${fixes.length} value(s) to repair:`)
     fixes.forEach(f =>
-      console.log(`  ${f.date}  ${f.label || '(block)'}  "${f.from}"  ->  "${f.to}"`),
+      console.log(
+        `  ${f.date}  ${f.label || '(block)'}  "${f.from}"  ->  "${f.to}"` +
+          (f.wasAmbiguous ? '   [ambiguous, resolved as mm:ss by --assume-mmss]' : ''),
+      ),
     )
   }
 

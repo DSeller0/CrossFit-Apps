@@ -734,11 +734,7 @@ export default function Schedule() {
 
   return (
     <>
-      <DemoPanel
-        target={demoTarget}
-        demoMap={demoMap}
-        onClose={() => setDemoTarget(null)}
-      />
+      <DemoPanel target={demoTarget} demoMap={demoMap} onClose={() => setDemoTarget(null)} />
       <LogPane
         pane={logPane}
         athId={logAthId}
