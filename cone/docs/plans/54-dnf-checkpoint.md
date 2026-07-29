@@ -1,5 +1,7 @@
 # 54 — #112 · DNF checkpoint (where the athlete actually landed)
 
+> ✅ Done: e6b5764 · 2026-07-29 — see BACKLOG.md "Ready" for the shipped summary.
+
 > Step 3 of the **result fidelity chain** ([plans/52](./52-result-fidelity-chain.md)).
 > Run order: #115 ✅ → #118 ([plans/53](./53-block-entry-durability.md)) → **#112 (this)** → #117 → #116.
 > ⚠️ **Blocked on #118.** Without it the `checkpoint` written here is destroyed by the next re-log

@@ -1,5 +1,7 @@
 # 53 — #118 · Block-entry durability (the five writers preserve unknown keys)
 
+> ✅ Done: 7156b6c · 2026-07-29 — see BACKLOG.md "Ready" for the shipped summary.
+
 > Step 2 of the **result fidelity chain** ([plans/52](./52-result-fidelity-chain.md)), and a
 > **hard prerequisite** for #112 (plans/54) and #116 (plans/56).
 > Run order: #115 ✅ → **#118 (this)** → #112 → #117 → #116.
