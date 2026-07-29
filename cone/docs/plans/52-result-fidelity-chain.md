@@ -1,6 +1,28 @@
-# 52 — Result fidelity chain (#115 → #117)
+# 52 — Result fidelity chain (#115 → #118)
 
-> ✅ **Step 1 (#115) Done: 2026-07-27** — see BACKLOG.md. Steps 2–4 (#112, #116, #117) remain.
+> ✅ **Step 1 (#115) Done: 2026-07-27** — see BACKLOG.md.
+>
+> **The remaining steps were planned in full on 2026-07-28 and now have their own plan files.
+> This file is the program record; those four are what a session executes.** Three things changed
+> from the outline below — read them before using it:
+>
+> 1. **A new step appeared: #118 ([plans/53](./53-block-entry-durability.md)), and it runs FIRST.**
+>    None of the five logging writers preserves unknown keys on a block entry, so #112's
+>    `checkpoint` and #116's `exerciseRows` would be written and then destroyed by the next re-log.
+>    The outline below assumed the new fields could simply be added. They cannot.
+> 2. **#116 is Lane A, not Lane B.** `ScoreFields` did not exist when this file was written; now it
+>    does and is gallery-covered, so a static mockup would be a mirror of shipped UI — see
+>    `design/README.md:41-42`.
+> 3. **Run order is #118 → #112 → #117 → #116**, with #117 promoted ahead of #116 (it is small and
+>    `goalOutcome` needs #112's checkpoint to classify a DNF as `missed`).
+>
+> | step | item | plan |
+> |---|---|---|
+> | 1 ✅ | #115 score fields | this file, below |
+> | 2 | #118 block-entry durability | [plans/53](./53-block-entry-durability.md) |
+> | 3 | #112 DNF checkpoint | [plans/54](./54-dnf-checkpoint.md) |
+> | 4 | #117 goal badge | [plans/55](./55-goal-badge.md) |
+> | 5 | #116 per-exercise notes | [plans/56](./56-per-exercise-notes.md) |
 
 > Program plan, same shape as [plans/22](./22-athlete-character-stats.md): four steps, each its own
 > backlog row and its own plan file at Ready. This file is **step 1 (#115)** at execution depth,
