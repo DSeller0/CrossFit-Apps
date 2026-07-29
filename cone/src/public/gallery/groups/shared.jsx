@@ -37,6 +37,8 @@ import {
   rcBlFTCap,
   rcBlAmrap,
   rcInpDone,
+  rcInpDNF,
+  rcInpAmrapCheckpoint,
 } from '../fixtures.js'
 import s from '../Gallery.module.css'
 
@@ -379,16 +381,25 @@ export default {
       render: () => (
         <Section
           title="ScoreFields"
-          sub="src/public/shared/ScoreFields.jsx — a única superfície de pontuação (#115). Cinco telas mantinham cópias à mão destes campos e já tinham divergido: o DeskRegPane perdeu o campo de DNF, o ClassPanel gravava 'Rx'/'Sc'/'Adp' fora do padrão, e todas usavam caixa de texto crua para o tempo. Estes campos são interativos — digite 0,9,0,0 e veja 09:00; digite 14 e saia do campo para ver 14:00."
+          sub="src/public/shared/ScoreFields.jsx — a única superfície de pontuação (#115). Cinco telas mantinham cópias à mão destes campos e já tinham divergido: o DeskRegPane perdeu o campo de DNF, o ClassPanel gravava 'Rx'/'Sc'/'Adp' fora do padrão, e todas usavam caixa de texto crua para o tempo. Estes campos são interativos — digite 0,9,0,0 e veja 09:00; digite 14 e saia do campo para ver 14:00. O checkpoint de DNF (#112) é revelado por um botão, 'Não terminei'/'Onde parou' — nunca inferido de um Tempo vazio."
         >
           <Case label="For Time — máscara mm:ss (digite 1,2,3,4 → 12:34)">
             <ScoreFieldsDemo block={rcBlFT} />
           </Case>
-          <Case label="For Time com CAP — ganha o campo de rounds (DNF)">
+          <Case label="For Time sem rounds definidos — 'Não terminei' cai para N=1 (chipper)">
+            <ScoreFieldsDemo block={rcBlFT} />
+          </Case>
+          <Case label="For Time com rounds definidos — 'Não terminei' usa o N real">
             <ScoreFieldsDemo block={rcBlFTCap} />
+          </Case>
+          <Case label="For Time — checkpoint aberto (4 de 5 rounds, parou na Assault Bike)">
+            <ScoreFieldsDemo block={rcBlFTCap} initial={rcInpDNF} />
           </Case>
           <Case label="AMRAP — rounds + reps">
             <ScoreFieldsDemo block={rcBlAmrap} />
+          </Case>
+          <Case label="AMRAP — 'Onde parou' aberto (reps calculadas a partir do exercício)">
+            <ScoreFieldsDemo block={rcBlAmrap} initial={rcInpAmrapCheckpoint} />
           </Case>
           <Case label="Preenchido">
             <ScoreFieldsDemo block={rcBlFT} initial={rcInpDone} />

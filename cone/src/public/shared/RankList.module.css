@@ -55,9 +55,11 @@
   padding: 2px 6px;
   border: 1px solid currentColor;
 }
-/* Wide enough for the longest perf string ("9 rds + 12 reps") on one line. */
+/* Wide enough for the longest perf string on one line — the DNF checkpoint (#112) reads
+   "N rds + M (DNF)" and can run a little longer than the previous basis, "9 rds + 12 reps",
+   once both numbers hit double digits ("12 rds + 25 (DNF)"). */
 .perf {
-  flex: 0 0 108px;
+  flex: 0 0 124px;
   text-align: left;
   white-space: nowrap;
   font-weight: 900;
@@ -94,7 +96,7 @@
 .large .dot      { width: 10px; height: 10px; }
 .large .name     { font-size: 15px; }
 .large .scaleCol { flex-basis: 76px; }
-.large .perf     { flex-basis: 128px; font-size: 15px; }
+.large .perf     { flex-basis: 146px; font-size: 15px; }
 .large .scale    { font-size: 11px; padding: 2px 7px; }
 .large .empty    { padding: 40px 20px; font-size: 15px; }
 

@@ -23,6 +23,10 @@ export const DEF_INP = () => ({
   perfTime: '',
   perfRounds: '',
   perfReps: '',
+  // #112 — the DNF/where-you-stopped checkpoint. Same null defaults as resultEntry.js's
+  // ATHLETE_KEY_DEFAULTS (this file predates that consolidation and keeps its own copy).
+  finished: null,
+  checkpoint: null,
 })
 
 export function inputKey(sid, bid) {

@@ -1,6 +1,5 @@
 import styles from './Schedule.module.css'
-import { blkLabel } from '../lib/wod.js'
-import { fmtDeskPerf } from './scheduleHelpers.js'
+import { blkLabel, perfStr } from '../lib/wod.js'
 import ScoreFields from '../shared/ScoreFields.jsx'
 
 // ── Desktop Reg Pane ──────────────────────────────────────────────────────────
@@ -12,12 +11,16 @@ export default function DeskRegPane({
   perfTime,
   perfRounds,
   perfReps,
+  finished,
+  checkpoint,
   athName,
   onScale,
   onRpe,
   onPerfTime,
   onPerfRounds,
   onPerfReps,
+  onFinished,
+  onCheckpoint,
   onConfirm,
   onSubmit,
   onBack,
@@ -28,16 +31,19 @@ export default function DeskRegPane({
   if (!regBl) return null
   const { bl } = regBl
   const label = blkLabel(bl)
-  const perfVal = fmtDeskPerf({ perfTime, perfRounds, perfReps })
-  // This pane keeps its five separate value/callback props (Schedule.jsx owns the state);
-  // ScoreFields speaks one value object + one patch, so translate at the boundary (#115).
-  const scoreValue = { rpe, scale, perfTime, perfRounds, perfReps }
+  const perfVal = perfStr({ perfTime, perfRounds, perfReps, checkpoint }, bl.type)
+  // This pane keeps its separate value/callback props (Schedule.jsx owns the state);
+  // ScoreFields speaks one value object + one patch, so translate at the boundary (#115,
+  // finished/checkpoint added #112).
+  const scoreValue = { rpe, scale, perfTime, perfRounds, perfReps, finished, checkpoint }
   const onScoreChange = patch => {
     if ('rpe' in patch) onRpe(patch.rpe)
     if ('scale' in patch) onScale(patch.scale)
     if ('perfTime' in patch) onPerfTime(patch.perfTime)
     if ('perfRounds' in patch) onPerfRounds(patch.perfRounds)
     if ('perfReps' in patch) onPerfReps(patch.perfReps)
+    if ('finished' in patch) onFinished(patch.finished)
+    if ('checkpoint' in patch) onCheckpoint(patch.checkpoint)
   }
   return (
     <div className={styles.deskRegPane}>

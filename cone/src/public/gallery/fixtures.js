@@ -315,12 +315,69 @@ export const rcBlComplex = {
 } // complexo: sem `name` próprio
 export const rcBlBare = { id: 'rcb5', type: 'AMRAP' } // sem meta e sem exercícios → não renderiza nada
 
-export const rcInpEmpty = { rpe: null, scale: null, perfTime: '', perfRounds: '', perfReps: '' }
-export const rcInpDone = { rpe: 9, scale: 'Inter', perfTime: '11:24', perfRounds: '', perfReps: '' }
-export const rcInpAmrap = { rpe: 8, scale: 'RX', perfTime: '', perfRounds: '9', perfReps: '12' }
+// #112 — every DEF_INP()-shaped fixture must carry finished/checkpoint too, or those
+// gallery cases render `undefined` for the new fields.
+export const rcInpEmpty = {
+  rpe: null,
+  scale: null,
+  perfTime: '',
+  perfRounds: '',
+  perfReps: '',
+  finished: null,
+  checkpoint: null,
+}
+export const rcInpDone = {
+  rpe: 9,
+  scale: 'Inter',
+  perfTime: '11:24',
+  perfRounds: '',
+  perfReps: '',
+  finished: null,
+  checkpoint: null,
+}
+export const rcInpAmrap = {
+  rpe: 8,
+  scale: 'RX',
+  perfTime: '',
+  perfRounds: '9',
+  perfReps: '12',
+  finished: null,
+  checkpoint: null,
+}
+// The checkpoint toggle opened (#112) — paired with rcBlFTCap (rounds: 5), so
+// "Rounds completos de 5" shows a real total rather than the N=1 chipper fallback.
+export const rcInpDNF = {
+  rpe: 9,
+  scale: 'Inter',
+  perfTime: '',
+  perfRounds: '4',
+  perfReps: '',
+  finished: false,
+  checkpoint: { roundsDone: 4, roundsTotal: 5, exIdx: 1, exName: 'Assault Bike', exReps: 7 },
+}
+// "Onde parou" opened on an AMRAP (#112) — no roundsTotal, no `finished`: an AMRAP never DNFs.
+export const rcInpAmrapCheckpoint = {
+  rpe: 8,
+  scale: 'RX',
+  perfTime: '',
+  perfRounds: '9',
+  perfReps: '12',
+  finished: null,
+  checkpoint: { exIdx: 0, exName: 'Thruster', exReps: 6 },
+}
 
 export const rcBrFT = { blockId: 'rcb1', rpe: 8, scale: 'RX', perfTime: '10:32' }
-export const rcBrDNF = { blockId: 'rcb2', rpe: 9, scale: 'Inter', perfRounds: '4' }
+// The DNF checkpoint fixture (#112) — paired with rcBlFTCap (rounds: 5, exercises:
+// [exStandard "Thruster", exCal "Assault Bike"]): 4 of 5 rounds, capped 7 reps into the
+// Assault Bike.
+export const rcBrDNF = {
+  blockId: 'rcb2',
+  rpe: 9,
+  scale: 'Inter',
+  perfRounds: '4',
+  finished: false,
+  checkpoint: { roundsDone: 4, roundsTotal: 5, exIdx: 1, exName: 'Assault Bike', exReps: 7 },
+}
 export const rcBrAmrap = { blockId: 'rcb3', rpe: 7, scale: 'SC', perfRounds: '9', perfReps: '12' }
 
 // ── Mock fixtures — leaderboard/ chrome ──

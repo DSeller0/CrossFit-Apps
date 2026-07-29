@@ -1,6 +1,5 @@
 import styles from './Schedule.module.css'
-import { fmtDeskPerf } from './scheduleHelpers.js'
-import { blkColor, blockExercises } from '../lib/wod.js'
+import { blkColor, blockExercises, perfStr } from '../lib/wod.js'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
 import ScoreFields from '../shared/ScoreFields.jsx'
 
@@ -76,7 +75,7 @@ export default function LogPane({
                 {pane.sess.sessionName ? ` · ${pane.sess.sessionName}` : ''}
               </div>
               {blocks.map(bl => {
-                const perf = fmtDeskPerf(bl)
+                const perf = perfStr(bl, bl.blockType)
                 const fullBl = pane.sess.blocks?.find(b => b.id === bl.blockId)
                 const exs = blockExercises(fullBl)
                 return (

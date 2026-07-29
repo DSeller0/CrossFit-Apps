@@ -25,6 +25,12 @@ export default function LoggedResult({ br, btype, onEdit = null }) {
         <div className={styles.loggedLbl}>{plbl}</div>
         <div className={styles.loggedVal}>{perf}</div>
       </div>
+      {br.checkpoint?.exName && (
+        <div className={styles.loggedItem}>
+          <div className={styles.loggedLbl}>Parou em</div>
+          <div className={styles.loggedVal}>{br.checkpoint.exName}</div>
+        </div>
+      )}
       {onEdit && (
         <button type="button" className={styles.editBtn} onClick={onEdit}>
           <i className="ti ti-pencil" aria-hidden="true" /> Editar

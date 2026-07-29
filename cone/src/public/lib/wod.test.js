@@ -8,6 +8,7 @@ import {
   expandMMSS,
   rankResults,
   perfStr,
+  repsBefore,
   groupProgressionSteps,
   goalStr,
   BLOCK_FAMILY,
@@ -283,6 +284,60 @@ describe('rankResults', () => {
     expect(ranked[1].perfReps).toBe('15')
     expect(ranked[2].perfReps).toBe('10')
   })
+
+  // #112 — two capped athletes used to tie (Infinity - Infinity = NaN), so 4 rounds ranked
+  // identically to 1. The checkpoint breaks the tie by real progress.
+  test('For Time: two DNFs with checkpoints order by roundsDone desc, not tied', () => {
+    const ranked = rankResults(
+      [
+        { perfTime: '', checkpoint: { roundsDone: 1, exIdx: 0, exReps: 3 } },
+        { perfTime: '', checkpoint: { roundsDone: 4, exIdx: 2, exReps: 1 } },
+      ],
+      'For Time',
+    )
+    expect(ranked.map(r => r.checkpoint.roundsDone)).toEqual([4, 1])
+  })
+
+  test('For Time: DNF checkpoints tied on roundsDone break on exIdx, then exReps', () => {
+    const ranked = rankResults(
+      [
+        { perfTime: '', checkpoint: { roundsDone: 3, exIdx: 0, exReps: 9 } },
+        { perfTime: '', checkpoint: { roundsDone: 3, exIdx: 1, exReps: 2 } },
+      ],
+      'For Time',
+    )
+    expect(ranked[0].checkpoint.exIdx).toBe(1)
+    const tiedOnExIdx = rankResults(
+      [
+        { perfTime: '', checkpoint: { roundsDone: 3, exIdx: 1, exReps: 2 } },
+        { perfTime: '', checkpoint: { roundsDone: 3, exIdx: 1, exReps: 9 } },
+      ],
+      'For Time',
+    )
+    expect(tiedOnExIdx[0].checkpoint.exReps).toBe(9)
+  })
+
+  test('For Time: a legacy DNF (no checkpoint) still ranks by perfRounds, not tied at zero', () => {
+    const ranked = rankResults(
+      [
+        { perfTime: '', perfRounds: '1' },
+        { perfTime: '', perfRounds: '4' },
+      ],
+      'For Time',
+    )
+    expect(ranked.map(r => r.perfRounds)).toEqual(['4', '1'])
+  })
+
+  test('For Time: a finished result always outranks a DNF regardless of checkpoint', () => {
+    const ranked = rankResults(
+      [
+        { perfTime: '', checkpoint: { roundsDone: 99, exIdx: 9, exReps: 99 } },
+        { perfTime: '08:00' },
+      ],
+      'For Time',
+    )
+    expect(ranked[0].perfTime).toBe('08:00')
+  })
 })
 
 describe('perfStr', () => {
@@ -291,6 +346,19 @@ describe('perfStr', () => {
   })
   test('For Time without time → —', () => {
     expect(perfStr({}, 'For Time')).toBe('—')
+  })
+  test('For Time capped, legacy row (no checkpoint) → "N rds (DNF)"', () => {
+    expect(perfStr({ perfRounds: '4' }, 'For Time')).toBe('4 rds (DNF)')
+  })
+  test('For Time capped with a checkpoint → "N rds + M (DNF)"', () => {
+    expect(perfStr({ checkpoint: { roundsDone: 3, exIdx: 1, exReps: 7 } }, 'For Time')).toBe(
+      '3 rds + 7 (DNF)',
+    )
+  })
+  test('For Time capped with a checkpoint but no partial reps → "N rds (DNF)", no stray "+ 0"', () => {
+    expect(perfStr({ checkpoint: { roundsDone: 3, exIdx: 0, exReps: 0 } }, 'For Time')).toBe(
+      '3 rds (DNF)',
+    )
   })
   test('AMRAP with rounds and reps', () => {
     expect(perfStr({ perfRounds: '5', perfReps: '10' }, 'AMRAP')).toBe('5 rds + 10 reps')
@@ -303,6 +371,52 @@ describe('perfStr', () => {
   })
   test('AMRAP empty → —', () => {
     expect(perfStr({}, 'AMRAP')).toBe('—')
+  })
+})
+
+describe('repsBefore', () => {
+  test('exIdx 0 → no preceding exercises, sum is 0', () => {
+    const bl = { exercises: [{ name: 'Thruster', reps: '10' }] }
+    expect(repsBefore(bl, 0)).toBe(0)
+  })
+  test('preceding exercises with plain integer reps → summed', () => {
+    const bl = {
+      exercises: [
+        { name: 'Thruster', reps: '10' },
+        { name: 'Pull-up', reps: '10' },
+        { name: 'Row', dist: '400', distUnit: 'm' },
+      ],
+    }
+    expect(repsBefore(bl, 2)).toBe(20)
+  })
+  test('a preceding exercise with a rep scheme ("21-15-9") → null, never guessed', () => {
+    const bl = {
+      exercises: [
+        { name: 'Wall Ball', reps: '21-15-9' },
+        { name: 'Thruster', reps: '10' },
+      ],
+    }
+    expect(repsBefore(bl, 1)).toBe(null)
+  })
+  test('a preceding dist/cal exercise carries no reps → null', () => {
+    const bl = {
+      exercises: [
+        { name: 'Row', dist: '500', distUnit: 'm' },
+        { name: 'Thruster', reps: '10' },
+      ],
+    }
+    expect(repsBefore(bl, 1)).toBe(null)
+  })
+  test('Estações — reads the flattened station exercises via blockExercises', () => {
+    const bl = {
+      type: 'Estações',
+      stations: [
+        { exercises: [{ name: 'Row', reps: '10' }] },
+        { isRest: true, exercises: [{ name: 'rest' }] },
+        { exercises: [{ name: 'Burpee', reps: '5' }] },
+      ],
+    }
+    expect(repsBefore(bl, 1)).toBe(10)
   })
 })
 

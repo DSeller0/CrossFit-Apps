@@ -283,7 +283,29 @@ export function expandMMSS(v) {
 export function rankResults(results, blType) {
   const isForTime = isTimeBlock(blType)
   return [...results].sort((a, b) => {
-    if (isForTime) return toSecs(a.perfTime) - toSecs(b.perfTime)
+    if (isForTime) {
+      const ta = toSecs(a.perfTime),
+        tb = toSecs(b.perfTime)
+      if (ta !== tb) return ta - tb
+      if (ta !== Infinity) return 0
+      // Both capped — a bare `Infinity - Infinity` is NaN, which Array.sort treats as
+      // "equal", so every DNF used to tie regardless of how far each athlete actually got
+      // (#112). The checkpoint (#112) breaks the tie by real progress: rounds completed,
+      // then how far into the stopping exercise, then reps within it. A row logged before
+      // #112 has no checkpoint — its perfRounds is read in checkpoint's place so an old
+      // and a new DNF row still compare sanely against each other.
+      const roundsOf = r =>
+        r.checkpoint ? Number(r.checkpoint.roundsDone) || 0 : parseInt(r.perfRounds) || 0
+      const exIdxOf = r => (r.checkpoint ? Number(r.checkpoint.exIdx) : -1)
+      const exRepsOf = r => (r.checkpoint ? Number(r.checkpoint.exReps) || 0 : 0)
+      const ra = roundsOf(a),
+        rb = roundsOf(b)
+      if (ra !== rb) return rb - ra
+      const xa = exIdxOf(a),
+        xb = exIdxOf(b)
+      if (xa !== xb) return xb - xa
+      return exRepsOf(b) - exRepsOf(a)
+    }
     const ra = parseInt(a.perfRounds) || 0,
       rb = parseInt(b.perfRounds) || 0
     if (ra !== rb) return rb - ra
@@ -299,12 +321,37 @@ export function perfStr(r, blType) {
   // here in #51 so every ranking surface agrees.
   if (isTimeBlock(blType)) {
     if (r.perfTime) return r.perfTime
+    // The checkpoint (#112) carries more than perfRounds alone did — how many reps
+    // into the stopping exercise, not just which round. Short enough for the TV wall:
+    // "3 rds + 7 (DNF)", not the exercise name (that's LoggedResult's detail row).
+    if (r.checkpoint) {
+      const roundsDone = r.checkpoint.roundsDone ?? 0
+      const exReps = Number(r.checkpoint.exReps) || 0
+      return exReps > 0 ? `${roundsDone} rds + ${exReps} (DNF)` : `${roundsDone} rds (DNF)`
+    }
     return r.perfRounds ? `${r.perfRounds} rds (DNF)` : '—'
   }
   const p = []
   if (r.perfRounds) p.push(`${r.perfRounds} rds`)
   if (r.perfReps) p.push(`${r.perfReps} reps`)
   return p.join(' + ') || '—'
+}
+
+// The DNF checkpoint's derived perfReps (#112) — sums the prescribed rep counts of the
+// exercises BEFORE `exIdx` in the block, so "stopped at exercise 3, rep 7" becomes a real
+// total instead of the coach guessing one. Returns null the moment any preceding exercise's
+// reps isn't a plain integer — real prod reps are frequently a scheme ("21-15-9") or a
+// dist/cal exercise with no reps at all, and fabricating a number that reads as data is the
+// energy_level/#66 failure mode. On null the caller leaves perfReps a manual field.
+export function repsBefore(bl, exIdx) {
+  const exs = blockExercises(bl)
+  let total = 0
+  for (let i = 0; i < exIdx; i++) {
+    const reps = String(exs[i]?.reps ?? '').trim()
+    if (!/^\d+$/.test(reps)) return null
+    total += parseInt(reps, 10)
+  }
+  return total
 }
 
 export function fmtIntensity(ins) {

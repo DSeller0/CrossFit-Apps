@@ -15,6 +15,12 @@ const ATHLETE_KEY_DEFAULTS = {
   perfTime: '',
   perfRounds: '',
   perfReps: '',
+  // #112 — the DNF/where-you-stopped checkpoint. `finished` is only meaningful on a time
+  // block; `checkpoint` is present only when the coach actually recorded one. Both null by
+  // default, same as rpe/scale, rather than a hollow object (goalStr's "undefined, never a
+  // hollow object" convention).
+  finished: null,
+  checkpoint: null,
 }
 
 export const ATHLETE_KEYS = Object.keys(ATHLETE_KEY_DEFAULTS)

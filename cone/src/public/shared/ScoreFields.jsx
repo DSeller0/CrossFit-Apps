@@ -1,5 +1,12 @@
 import { useId } from 'react'
-import { SCALES, scaleLabel, isTimeBlock, expandMMSS } from '../lib/wod.js'
+import {
+  SCALES,
+  scaleLabel,
+  isTimeBlock,
+  expandMMSS,
+  blockExercises,
+  repsBefore,
+} from '../lib/wod.js'
 import MaskedTimeInput from './MaskedTimeInput.jsx'
 import s from './ScoreFields.module.css'
 
@@ -111,6 +118,139 @@ export function TimeField({ value, onChange, label, disabled, className, ...rest
   )
 }
 
+// The DNF/checkpoint entry (#112 · plans/54) — where the athlete actually landed. One
+// component, two labellings, not two shapes: a For Time result has a checkpoint because it
+// DIDN'T finish ("Não terminei"); an AMRAP never DNFs — every result is "finished" at the
+// cap, so its checkpoint is merely "Onde parou". Revealed by a toggle, never inferred from an
+// empty Tempo — most results finish, and this feature exists precisely because an empty time
+// field means "hasn't typed it yet" just as often as "capped".
+//
+// `timeBlock` decides three things: the toggle wording, whether "Rounds completos de N" shows
+// at all (an AMRAP's own Rounds field above already IS that number — no prescribed total to
+// compare it to, so no N), and whether `finished` gets written (only a time block has a
+// meaningful "did they finish" at all).
+function CheckpointFields({ block, rounds, timeBlock, value, onChange, disabled, size }) {
+  const exs = blockExercises(block)
+  const cp = value.checkpoint
+  const dis = disabled || undefined
+  const wrap = `${s.group}${size === 'sm' ? ' ' + s.sm : ''}`
+
+  function openCheckpoint() {
+    const exIdx = 0
+    const exName = exs[0]?.name || ''
+    if (timeBlock) {
+      // N falls back to 1 where the coach set no rounds at all — a chipper (one long list of
+      // exercises, done once through) is one round, not a hidden field.
+      const roundsTotal = Number(rounds) || 1
+      onChange({
+        checkpoint: { roundsDone: 0, roundsTotal, exIdx, exName, exReps: 0 },
+        finished: 0 === roundsTotal,
+        perfRounds: '0',
+      })
+    } else {
+      onChange({ checkpoint: { exIdx, exName, exReps: 0 } })
+    }
+  }
+
+  function closeCheckpoint() {
+    const patch = { checkpoint: undefined }
+    if (timeBlock) {
+      patch.finished = undefined
+      patch.perfRounds = ''
+    }
+    onChange(patch)
+  }
+
+  function update(fields) {
+    const next = { ...cp, ...fields }
+    const patch = { checkpoint: next }
+    if (timeBlock) {
+      patch.finished = Number(next.roundsDone) === Number(next.roundsTotal)
+      patch.perfRounds = String(next.roundsDone)
+    }
+    // perfReps is DERIVED, never guessed (#112) — repsBefore sums the preceding
+    // exercises' prescribed reps. It returns null the moment one of them isn't a plain
+    // integer (a rep scheme, a dist/cal movement) — recomputed on EVERY field change
+    // (not just when exIdx itself changes) and cleared to '' rather than left showing a
+    // stale total from a since-changed exercise: typing exReps before picking the
+    // exercise, then picking one repsBefore can't resolve, must not leave the earlier
+    // guess sitting there looking authoritative.
+    const rb = repsBefore(block, Number(next.exIdx) || 0)
+    patch.perfReps = rb !== null ? String(rb + (Number(next.exReps) || 0)) : ''
+    onChange(patch)
+  }
+
+  const rb = cp ? repsBefore(block, Number(cp.exIdx) || 0) : null
+
+  return (
+    <div className={wrap}>
+      <button
+        type="button"
+        className={s.checkpointToggle}
+        aria-pressed={!!cp}
+        disabled={dis}
+        onClick={() => (cp ? closeCheckpoint() : openCheckpoint())}
+      >
+        {timeBlock ? 'Não terminei' : 'Onde parou'}
+      </button>
+      {cp && (
+        <div className={s.checkpointBody}>
+          {timeBlock && (
+            <label className={s.field}>
+              <span className={s.label}>Rounds completos de {cp.roundsTotal}</span>
+              <input
+                className={`${s.input} ${s.inputSm}`}
+                type="number"
+                min="0"
+                max={cp.roundsTotal}
+                inputMode="numeric"
+                value={cp.roundsDone}
+                disabled={dis}
+                onChange={e => update({ roundsDone: e.target.value })}
+              />
+            </label>
+          )}
+          {exs.length > 0 && (
+            <label className={s.field}>
+              <span className={s.label}>Parou em</span>
+              <select
+                className={s.input}
+                value={cp.exIdx}
+                disabled={dis}
+                onChange={e => {
+                  const exIdx = Number(e.target.value)
+                  update({ exIdx, exName: exs[exIdx]?.name || '' })
+                }}
+              >
+                {exs.map((ex, i) => (
+                  <option key={i} value={i}>
+                    {ex.name || `Exercício ${i + 1}`}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <label className={s.field}>
+            <span className={s.label}>Reps desse exercício</span>
+            <input
+              className={`${s.input} ${s.inputSm}`}
+              type="number"
+              min="0"
+              inputMode="numeric"
+              value={cp.exReps}
+              disabled={dis}
+              onChange={e => update({ exReps: e.target.value })}
+            />
+          </label>
+          {rb !== null && (
+            <div className={s.checkpointCalc}>≈ {rb + (Number(cp.exReps) || 0)} reps no total</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // The time-vs-rounds fork, and the only place a WOD time is typed anywhere in the app.
 //
 // `block` is the full block when the caller has it; `blockType`/`rounds` are the escape hatch
@@ -140,22 +280,15 @@ export function ScoreInputs({
           disabled={dis}
           onChange={v => onChange({ perfTime: v })}
         />
-        {blRounds > 0 && (
-          <label className={s.field}>
-            <span className={s.label}>Rounds completos de {blRounds} (DNF)</span>
-            <input
-              className={`${s.input} ${s.inputSm}`}
-              type="number"
-              min="0"
-              max={blRounds}
-              inputMode="numeric"
-              placeholder={`0/${blRounds}`}
-              value={value.perfRounds || ''}
-              disabled={dis}
-              onChange={e => onChange({ perfRounds: e.target.value })}
-            />
-          </label>
-        )}
+        <CheckpointFields
+          block={block}
+          rounds={blRounds}
+          timeBlock
+          value={value}
+          onChange={onChange}
+          disabled={dis}
+          size={size}
+        />
       </div>
     )
   }
@@ -190,6 +323,15 @@ export function ScoreInputs({
           />
         </label>
       </div>
+      <CheckpointFields
+        block={block}
+        rounds={blRounds}
+        timeBlock={false}
+        value={value}
+        onChange={onChange}
+        disabled={dis}
+        size={size}
+      />
     </div>
   )
 }

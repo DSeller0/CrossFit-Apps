@@ -3,10 +3,12 @@ import { ATHLETE_KEYS, mergeBlockEntry, clearAthleteKeys } from './resultEntry.j
 
 describe('mergeBlockEntry', () => {
   test('unknown key on prev survives a patch that does not mention it', () => {
-    const prev = { blockId: 'b1', blockType: 'For Time', blockLabel: 'WOD', checkpoint: [1, 2] }
+    // `exerciseRows` stands in for a field this version doesn't know about (#116, not
+    // landed) — `checkpoint` itself is now a real ATHLETE_KEYS field (#112).
+    const prev = { blockId: 'b1', blockType: 'For Time', blockLabel: 'WOD', exerciseRows: [1, 2] }
     const patch = { blockId: 'b1', blockType: 'For Time', blockLabel: 'WOD', rpe: 8, scale: 'RX' }
     const merged = mergeBlockEntry(prev, patch)
-    expect(merged.checkpoint).toEqual([1, 2])
+    expect(merged.exerciseRows).toEqual([1, 2])
     expect(merged.rpe).toBe(8)
     expect(merged.scale).toBe('RX')
   })
@@ -37,9 +39,15 @@ describe('mergeBlockEntry', () => {
     // doOpenLog builds a fresh identity+empty-athlete-fields base, then merges the
     // persisted entry (eb) on top — the base must not clobber eb's unknown keys.
     const base = clearAthleteKeys({ blockId: 'b1', blockType: 'For Time', blockLabel: 'WOD' })
-    const eb = { blockId: 'b1', blockType: 'For Time', blockLabel: 'WOD', rpe: 8, checkpoint: [3] }
+    const eb = {
+      blockId: 'b1',
+      blockType: 'For Time',
+      blockLabel: 'WOD',
+      rpe: 8,
+      exerciseRows: [3],
+    }
     const merged = mergeBlockEntry(base, eb)
-    expect(merged.checkpoint).toEqual([3])
+    expect(merged.exerciseRows).toEqual([3])
     expect(merged.rpe).toBe(8)
   })
 
@@ -84,18 +92,21 @@ describe('clearAthleteKeys', () => {
   })
 
   test('leaves identity fields and unknown keys untouched', () => {
+    // `exerciseRows` stands in for a field this version doesn't know about yet (#116,
+    // not landed) — `checkpoint` itself moved INTO ATHLETE_KEYS with #112, so it no
+    // longer illustrates an unknown key.
     const entry = {
       blockId: 'b1',
       blockType: 'For Time',
       blockLabel: 'WOD',
       rpe: 8,
-      checkpoint: [1, 2, 3],
+      exerciseRows: [1, 2, 3],
     }
     const cleared = clearAthleteKeys(entry)
     expect(cleared.blockId).toBe('b1')
     expect(cleared.blockType).toBe('For Time')
     expect(cleared.blockLabel).toBe('WOD')
-    expect(cleared.checkpoint).toEqual([1, 2, 3])
+    expect(cleared.exerciseRows).toEqual([1, 2, 3])
   })
 
   test('every ATHLETE_KEYS entry is present on the cleared result', () => {
@@ -112,6 +123,8 @@ describe('clearAthleteKeys', () => {
       perfTime: '',
       perfRounds: '',
       perfReps: '',
+      finished: null,
+      checkpoint: null,
     })
     expect(clearAthleteKeys(undefined)).toEqual({
       rpe: null,
@@ -119,6 +132,8 @@ describe('clearAthleteKeys', () => {
       perfTime: '',
       perfRounds: '',
       perfReps: '',
+      finished: null,
+      checkpoint: null,
     })
   })
 })

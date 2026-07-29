@@ -49,15 +49,6 @@ export function extractYtId(url) {
   return m ? m[1] : null
 }
 
-export function fmtDeskPerf(blk) {
-  if (!blk) return null
-  if (blk.perfTime) return blk.perfTime
-  const p = []
-  if (blk.perfRounds) p.push(`${blk.perfRounds} Rds`)
-  if (blk.perfReps) p.push(`${blk.perfReps} Reps`)
-  return p.join(' + ') || null
-}
-
 // Enter/Space keyboard activation for click-divs (#14)
 export function onKey(fn) {
   return e => {

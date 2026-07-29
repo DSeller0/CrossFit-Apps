@@ -1,6 +1,6 @@
 import styles from './Schedule.module.css'
-import { blkLabel, blkColor, isWodBlock, blkMeta, goalStr } from '../lib/wod.js'
-import { isRoundBlock, progGroups, stationsCapMins, fmtDeskPerf } from './scheduleHelpers.js'
+import { blkLabel, blkColor, isWodBlock, blkMeta, goalStr, perfStr } from '../lib/wod.js'
+import { isRoundBlock, progGroups, stationsCapMins } from './scheduleHelpers.js'
 import ExRow from './ExRow.jsx'
 
 // ── Block Detail ──────────────────────────────────────────────────────────────
@@ -49,8 +49,6 @@ export default function BlockDetail({
     onDemo,
   }
 
-  const perfStr = fmtDeskPerf(athResult)
-
   const athSection = onLogBlock && isWod && (
     <>
       <div
@@ -63,7 +61,7 @@ export default function BlockDetail({
         </span>
         {athResult ? (
           <>
-            {perfStr && <span className={styles.deskAthResultVal}>{perfStr}</span>}
+            <span className={styles.deskAthResultVal}>{perfStr(athResult, bl.type)}</span>
             <span className={styles.deskAthResultScale}>
               {athResult.scale}
               {athResult.rpe ? ` · RPE ${athResult.rpe}` : ''}

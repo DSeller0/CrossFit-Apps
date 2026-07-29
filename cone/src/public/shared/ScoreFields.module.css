@@ -130,10 +130,51 @@
   max-width: 160px;
 }
 
+/* ── DNF/checkpoint (#112) ───────────────────────────────────────────────── */
+
+/* Same visual language as .scaleBtn — a toggle, not a submit action. */
+.checkpointToggle {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border: 1px solid var(--divider);
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.checkpointToggle:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.checkpointToggle[aria-pressed='true'] {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--accent-text);
+}
+
+.checkpointBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--divider);
+}
+
+.checkpointCalc {
+  font-size: 11px;
+  color: var(--teal);
+}
+
 /* ── Shared disabled + focus contract ────────────────────────────────────── */
 
 .rpeBtn:focus-visible,
 .scaleBtn:focus-visible,
+.checkpointToggle:focus-visible,
 .input:focus-visible {
   outline: 2px solid var(--teal);
   outline-offset: 1px;
@@ -141,6 +182,7 @@
 
 .rpeBtn:disabled,
 .scaleBtn:disabled,
+.checkpointToggle:disabled,
 .input:disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -170,6 +212,16 @@
 
 .sm .timeField {
   max-width: 92px;
+}
+
+.sm .checkpointToggle {
+  padding: 2px 7px;
+  font-size: 10px;
+}
+
+.sm .checkpointBody {
+  padding: 7px;
+  gap: 6px;
 }
 
 .sm .numRow {
