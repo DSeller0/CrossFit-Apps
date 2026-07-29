@@ -4,6 +4,7 @@ import { exVolStr, isWodBlock, blkMeta } from '../../../public/lib/wod.js'
 import { ScaleRow, ScoreInputs } from '../../../public/shared/ScoreFields.jsx'
 import { toISO, MONTH_PT, DAY_PT_TITLE } from '../../../public/lib/week.js'
 import { sessName } from '../../../public/lib/sessions.js'
+import { mergeBlockEntry, clearAthleteKeys } from '../../../public/lib/resultEntry.js'
 import { useIsMobile } from '../../../hooks/useIsMobile'
 import { PRESENCE, LEVEL_CLS, getWeeksInMonth, weekLabel } from './resultadosHelpers.js'
 
@@ -138,44 +139,19 @@ export function RegistroView({
         (r.sessionId === selSession.id || (!r.sessionId && !selSession.id)),
     )
     const wodBlocks = (selSession.blocks || []).filter(isWodBlock)
-    if (existing) {
-      setPresence(existing.presence || 'Presente')
-      setEnergyLevel(existing.energyLevel || 3)
-      setCoachNote(existing.coachNote || '')
-      setFlag(existing.flagForReview || false)
-      setBlockLogs(
-        wodBlocks.map(b => {
-          const eb = (existing.blocks || []).find(eb => eb.blockId === b.id) || {}
-          return {
-            blockId: b.id,
-            blockType: b.type,
-            blockLabel: b.label || b.type,
-            scale: eb.scale || null,
-            perfTime: eb.perfTime || '',
-            perfRounds: eb.perfRounds || '',
-            perfReps: eb.perfReps || '',
-            rpe: eb.rpe || null,
-          }
-        }),
-      )
-    } else {
-      setPresence('Presente')
-      setEnergyLevel(3)
-      setCoachNote('')
-      setFlag(false)
-      setBlockLogs(
-        wodBlocks.map(b => ({
-          blockId: b.id,
-          blockType: b.type,
-          blockLabel: b.label || b.type,
-          scale: null,
-          perfTime: '',
-          perfRounds: '',
-          perfReps: '',
-          rpe: null,
-        })),
-      )
+    // Identity comes from the CURRENT session block (b) — a block renamed/retyped in
+    // Criador since the last save must re-label here. The persisted entry (eb), when
+    // present, is the fallback for everything else, so an unknown key survives (#118).
+    const buildBlockLog = b => {
+      const identity = { blockId: b.id, blockType: b.type, blockLabel: b.label || b.type }
+      const eb = (existing?.blocks || []).find(eb => eb.blockId === b.id)
+      return eb ? mergeBlockEntry(eb, identity) : clearAthleteKeys(identity)
     }
+    setPresence(existing?.presence || 'Presente')
+    setEnergyLevel(existing?.energyLevel || 3)
+    setCoachNote(existing?.coachNote || '')
+    setFlag(existing?.flagForReview || false)
+    setBlockLogs(wodBlocks.map(buildBlockLog))
     setDelConfirm(false)
     setShowNote(false)
   }, [selAthlete?.id, selDateKey, selSession?.id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -202,6 +178,26 @@ export function RegistroView({
         r.athleteId === selAthlete.id &&
         (r.sessionId === selSession.id || (!r.sessionId && !selSession.id)),
     )
+    // Merge into the existing blocks array, never replace it (#118): a wholesale
+    // `blocks: blockLogs` dropped any entry for a non-WOD block or a block since
+    // deleted in Criador (neither is in `wodBlocks`/`blockLogs`), and `presence
+    // !== 'Presente' ? [] :` wiped every logged block on a presence flip. Both the
+    // untouched siblings AND the matched blocks (re-merged against the freshest
+    // persisted entry, so an unknown key survives) are kept; presence alone records
+    // the absence.
+    const existingBlocks = existing?.blocks || []
+    const mergedBlocks =
+      presence === 'Presente'
+        ? [
+            ...existingBlocks.filter(b => !blockLogs.some(bl => bl.blockId === b.blockId)),
+            ...blockLogs.map(bl =>
+              mergeBlockEntry(
+                existingBlocks.find(b => b.blockId === bl.blockId),
+                bl,
+              ),
+            ),
+          ]
+        : existingBlocks
     const entry = {
       id: existing?.id || uid(),
       date: selDateKey,
@@ -209,7 +205,7 @@ export function RegistroView({
       sessionId: selSession.id,
       presence,
       energyLevel,
-      blocks: presence === 'Presente' ? blockLogs : [],
+      blocks: mergedBlocks,
       coachNote,
       flagForReview: flag,
       loggedByAthlete: false,

@@ -9,6 +9,7 @@ import { buildRegistryIndex } from '../lib/registry.js'
 import { getTargets, sessName, normalizeSessionIds } from '../lib/sessions.js'
 import { prBest } from '../lib/goals.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
+import { mergeBlockEntry, clearAthleteKeys } from '../lib/resultEntry.js'
 import { isRoundBlock, progGroups, parseDurMins, onKey } from './scheduleHelpers.js'
 import DemoPanel from './DemoPanel.jsx'
 import LogPane from './LogPane.jsx'
@@ -88,6 +89,9 @@ export default function Schedule() {
   const [deskAthSearch, setDeskAthSearch] = useState('')
   const [deskRegBl, setDeskRegBl] = useState(null) // {bl, sess, dateKey}
   const [deskRegStep, setDeskRegStep] = useState('form') // 'form'|'confirm'|'success'
+  // The persisted entry for this athlete+block, if any — the pane itself holds 5 scalar
+  // fields (not an object), so this is where an unknown key rides between open and submit.
+  const [deskRegPrev, setDeskRegPrev] = useState(null)
   const [deskRegScale, setDeskRegScale] = useState(null)
   const [deskRegRpe, setDeskRegRpe] = useState(null)
   const [deskRegPerfTime, setDeskRegPerfTime] = useState('')
@@ -518,17 +522,17 @@ export default function Schedule() {
       : null
     const blocks = wodBls.map(b => {
       const eb = existing?.blocks?.find(x => x.blockId === b.id)
-      return {
+      // Identity comes from the CURRENT session block (b), not from eb — a block
+      // renamed/retyped in Criador since the last log must re-label here. eb (the
+      // persisted entry) is the fallback for everything else, so an unknown key
+      // (checkpoint/exerciseRows) survives into the form instead of being dropped.
+      const identity = {
         blockId: b.id,
         blockType: b.type,
         blockLabel:
           b.label && b.type && b.label !== b.type ? `${b.label} · ${b.type}` : b.label || b.type,
-        rpe: eb?.rpe ?? null,
-        scale: eb?.scale || null,
-        perfTime: eb?.perfTime || '',
-        perfRounds: eb?.perfRounds || '',
-        perfReps: eb?.perfReps || '',
       }
+      return eb ? mergeBlockEntry(eb, identity) : clearAthleteKeys(identity)
     })
     if (prefill?.blockId) {
       const bi = blocks.findIndex(b => b.blockId === prefill.blockId)
@@ -550,6 +554,9 @@ export default function Schedule() {
   // prefilled fields for the newly picked athlete — otherwise the previous
   // athlete's real rpe/scale/perfTime values silently ride along into the
   // new athlete's submission (doOpenLog only prefills once, at open time).
+  // ⚠️ Never `...b` here — `b` is the OUTGOING athlete's whole form entry, and
+  // spreading it carries their data (any key, known or not) into the incoming
+  // athlete's submission. Only the identity fields are safe to keep from `b`.
   function changeLogAthId(newAthId) {
     setLogAthId(newAthId)
     if (!logPane) return
@@ -558,15 +565,9 @@ export default function Schedule() {
       : null
     setLogBlocks(prev =>
       prev.map(b => {
+        const identity = { blockId: b.blockId, blockType: b.blockType, blockLabel: b.blockLabel }
         const eb = existing?.blocks?.find(x => x.blockId === b.blockId)
-        return {
-          ...b,
-          rpe: eb?.rpe ?? null,
-          scale: eb?.scale || null,
-          perfTime: eb?.perfTime || '',
-          perfRounds: eb?.perfRounds || '',
-          perfReps: eb?.perfReps || '',
-        }
+        return eb ? mergeBlockEntry(eb, identity) : clearAthleteKeys(identity)
       }),
     )
   }
@@ -596,10 +597,18 @@ export default function Schedule() {
     // can hold just one block, and log_result's upsert overwrites the whole
     // blocks column — replacing wholesale would silently drop any other
     // already-logged block for this athlete+session (same fix as submitDeskReg).
+    // Each block is itself re-merged against the freshest persisted entry (#118)
+    // rather than written as-is — logBlocks was seeded from `results` at open
+    // time, which may be stale by submit time.
     const mergedBlocks = existing
       ? [
           ...(existing.blocks || []).filter(b => !logBlocks.some(lb => lb.blockId === b.blockId)),
-          ...logBlocks,
+          ...logBlocks.map(lb =>
+            mergeBlockEntry(
+              (existing.blocks || []).find(b => b.blockId === lb.blockId),
+              lb,
+            ),
+          ),
         ]
       : logBlocks
     const result = {
@@ -639,9 +648,12 @@ export default function Schedule() {
 
   function deskOpenReg(bl, sess, dateKey) {
     const existing = results.find(r => r.sessionId === sess.id && r.athleteId === selAth)
-    const existingBlock = existing?.blocks?.find(b => b.blockId === bl.id)
+    const existingBlock = existing?.blocks?.find(b => b.blockId === bl.id) || null
     setDeskRegBl({ bl, sess, dateKey })
     setDeskRegStep('form')
+    // Stashed whole, unlike the 5 scalars below — this pane has no object to spread
+    // an unknown key through, so this is where one rides between open and submit.
+    setDeskRegPrev(existingBlock)
     setDeskRegScale(existingBlock?.scale || null)
     setDeskRegRpe(existingBlock?.rpe || null)
     setDeskRegPerfTime(existingBlock?.perfTime || '')
@@ -653,6 +665,7 @@ export default function Schedule() {
   function deskCloseReg() {
     setDeskRegBl(null)
     setDeskRegStep('form')
+    setDeskRegPrev(null)
     setDeskRegError('')
   }
 
@@ -666,7 +679,7 @@ export default function Schedule() {
     setDeskRegError('')
     const { bl, sess, dateKey } = deskRegBl
     const existing = results.find(r => r.sessionId === sess.id && r.athleteId === selAth)
-    const blockResult = {
+    const blockPatch = {
       blockId: bl.id,
       blockType: bl.type,
       blockLabel: blkLabel(bl),
@@ -676,6 +689,7 @@ export default function Schedule() {
       perfRounds: deskRegPerfRounds,
       perfReps: deskRegPerfReps,
     }
+    const blockResult = mergeBlockEntry(deskRegPrev, blockPatch)
     const mergedBlocks = existing
       ? [...(existing.blocks || []).filter(b => b.blockId !== bl.id), blockResult]
       : [blockResult]

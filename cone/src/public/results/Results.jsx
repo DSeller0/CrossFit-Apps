@@ -18,6 +18,7 @@ import {
 import { onKey } from '../schedule/scheduleHelpers.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { normalizeSessionIds } from '../lib/sessions.js'
+import { mergeBlockEntry } from '../lib/resultEntry.js'
 import RankList from '../shared/RankList.jsx'
 import ScaleFilter from '../shared/ScaleFilter.jsx'
 import SessionCard from './SessionCard.jsx'
@@ -271,13 +272,9 @@ export default function Results() {
   function startEdit(sid, bid) {
     const br = getAthBlock(sid, bid)
     if (!br) return
-    setInp(sid, bid, {
-      rpe: br.rpe ?? null,
-      scale: br.scale || null,
-      perfTime: br.perfTime || '',
-      perfRounds: br.perfRounds || '',
-      perfReps: br.perfReps || '',
-    })
+    // Carry the whole persisted entry into the form, not a 5-key cherry-pick — a field
+    // this version doesn't render (yet) still round-trips through edit/re-submit.
+    setInp(sid, bid, br)
     setEditing(prev => new Set(prev).add(inputKey(sid, bid)))
   }
   function cancelEdit(sid, bid) {
@@ -325,7 +322,7 @@ export default function Results() {
     const bl = (sess?.blocks || []).find(b => b.id === bid)
     const lbl = bl ? blkLabel(bl) : bid,
       btype = bl?.type || ''
-    const blockEntry = {
+    const blockPatch = {
       blockId: bid,
       blockType: btype,
       blockLabel: lbl,
@@ -338,7 +335,10 @@ export default function Results() {
     const existing = Array.isArray(results) ? results : []
     const prev = existing.find(r => r.sessionId === sid && r.athleteId === selAth)
     // Merge, never replace: the row's other blocks — and the coach's note/flag —
-    // must survive a re-log.
+    // must survive a re-log. mergeBlockEntry keeps any key this version doesn't
+    // know about (#118) — the row-level merge above only protects sibling blocks.
+    const prevEntry = prev?.blocks?.find(b => b.blockId === bid)
+    const blockEntry = mergeBlockEntry(prevEntry, blockPatch)
     const newResult = prev
       ? { ...prev, blocks: [...(prev.blocks || []).filter(b => b.blockId !== bid), blockEntry] }
       : {

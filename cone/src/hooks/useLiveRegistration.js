@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../utils/supabase'
 import { fmtSecs, uid } from '../public/lib/wod.js'
+import { mergeBlockEntry } from '../public/lib/resultEntry.js'
 
 // member shape: { type:'real', id, name, key } | { type:'anon', name, key }
 // key is `real:<athleteId>` or `anon:<name>` — unified identity across results_v2 (real) and
@@ -32,14 +33,16 @@ export function useLiveRegistration({
         .eq('session_id', selSessId)
         .eq('date', selDate)
         .maybeSingle()
-      const newBlk = {
+      // Spread the matched persisted entry — this used to hardcode `rpe: null`,
+      // destroying any RPE the athlete had already logged from another surface (#118).
+      const prevEntry = existing?.blocks?.find(b => b.blockId === blockId)
+      const newBlk = mergeBlockEntry(prevEntry, {
         blockId,
         blockType: block?.type || 'For Time',
         blockLabel: block?.label || block?.type || 'For Time',
         perfTime,
         scale,
-        rpe: null,
-      }
+      })
       const merged = existing
         ? [...(existing.blocks || []).filter(b => b.blockId !== blockId), newBlk]
         : [newBlk]
