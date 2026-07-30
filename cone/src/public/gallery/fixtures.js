@@ -285,6 +285,16 @@ export const rlMany = [
   { id: 'r12', athleteId: 'a12', name: 'Lucas Ferreira', scale: 'RX', perfTime: '19:25' },
 ]
 
+// Goal badge (#117) — bl.goal shapes, not entries. A time WINDOW against rlFT's own
+// perfTime spread (08:12/09:05/10:47/11:30/13:02/15:20) yields one beat, two met, and
+// two missed rows in the same list — and against rlDNF (which reuses rlFT's first 3
+// plus a capped row and a nothing-logged row) shows the capped/nothing-logged rows
+// correctly render NO badge (missed and null both look like absence on screen).
+export const rlGoalWindow = { kind: 'time', min: '09:00', max: '11:00' }
+// Against rlAmrap's own rounds/reps (9+12 / 9+4 / 8+0 / 6+15) — rounds has no 'met'
+// state, so this only ever shows beat or nothing.
+export const rlGoalRounds = { kind: 'rounds', min: 8, reps: 5 }
+
 export const rcSess = { id: 'rc1', sessionName: 'Treino A · 18h' }
 export const rcSessDay = { id: 'rc2' } // no name → falls back to the day name
 export const rcBlFT = {

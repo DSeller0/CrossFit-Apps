@@ -29,6 +29,8 @@ import {
   rlAmrap,
   rlLong,
   rlMany,
+  rlGoalWindow,
+  rlGoalRounds,
   lbBlMetcon,
   lbBlForTime,
   lbBlEstacoes,
@@ -319,6 +321,15 @@ export default {
               showDots
               highlightAthleteId="a2"
             />
+          </Case>
+          <Case label="Selo de meta (#117) · Meta 09–11' — bateu / dentro / nada">
+            <RankList entries={rlFT} blType="For Time" goal={rlGoalWindow} />
+          </Case>
+          <Case label="Selo de meta · DNF e sem resultado não ganham selo (é 'missed', não null)">
+            <RankList entries={rlDNF} blType="For Time" goal={rlGoalWindow} />
+          </Case>
+          <Case label="Selo de meta · AMRAP (rounds/reps, sem estado 'dentro')">
+            <RankList entries={rlAmrap} blType="AMRAP" goal={rlGoalRounds} />
           </Case>
         </Section>
       ),

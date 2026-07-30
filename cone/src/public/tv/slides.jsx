@@ -10,6 +10,7 @@ import {
   MODE_LBL,
   blkMeta,
   goalStr,
+  goalOutcome,
 } from '../lib/wod.js'
 import { DAY_PT_TITLE, MONTH_PT_SHORT } from '../lib/week.js'
 import { sessName } from '../lib/sessions.js'
@@ -404,6 +405,33 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
   )
 }
 
+// The wall-display twin of RankList's badge (#117) — same goalOutcome, same glyphs
+// (target-arrow filled / target outline), different import: slides.jsx may legally
+// use the `ti` webfont (tv.html loads it, unlike leaderboard.html), so this stays
+// consistent with the rest of the file instead of pulling in @tabler/icons-react.
+// `className` picks podium- vs restRow-scale sizing; color (beat vs met) is fixed
+// here since it's a status, not a layout concern.
+function GoalBadge({ entry, bl, className }) {
+  const outcome = goalOutcome(entry, bl)
+  if (outcome === 'beat')
+    return (
+      <i
+        className={`ti ti-target-arrow ${s.goalBeat} ${className}`}
+        title="Bateu a meta"
+        aria-hidden="true"
+      />
+    )
+  if (outcome === 'met')
+    return (
+      <i
+        className={`ti ti-target ${s.goalMet} ${className}`}
+        title="Dentro da meta"
+        aria-hidden="true"
+      />
+    )
+  return null
+}
+
 // ── Slide: Results (live leaderboard, with optional banter mode) ──────────────
 export function ResultsSlide({ tv, sessions, athletes, results, classExecs }) {
   const dayS = sessions?.[tv?.date_key] || []
@@ -465,6 +493,7 @@ export function ResultsSlide({ tv, sessions, athletes, results, classExecs }) {
                     <div className={s.podiumName}>{r.athleteName}</div>
                     <div className={s.podiumPerf}>{perfStr(r, selBl.type)}</div>
                     <div className={s.podiumScale}>{r.scale || '—'}</div>
+                    <GoalBadge entry={r} bl={selBl} className={s.podiumGoalBadge} />
                   </div>
                 )
               })}
@@ -477,6 +506,7 @@ export function ResultsSlide({ tv, sessions, athletes, results, classExecs }) {
                     <span className={s.restName}>{r.athleteName}</span>
                     <span className={s.restScale}>{r.scale || '—'}</span>
                     <span className={s.restPerf}>{perfStr(r, selBl.type)}</span>
+                    <GoalBadge entry={r} bl={selBl} className={s.restGoalBadge} />
                   </div>
                 ))}
               </div>
@@ -533,6 +563,7 @@ export function ResultsSlide({ tv, sessions, athletes, results, classExecs }) {
                   <div className={s.podiumName}>{r.athleteName}</div>
                   <div className={s.podiumPerf}>{perfStr(r, selBl.type)}</div>
                   <div className={s.podiumScale}>{r.scale || '—'}</div>
+                  <GoalBadge entry={r} bl={selBl} className={s.podiumGoalBadge} />
                 </div>
               )
             })}
@@ -546,6 +577,7 @@ export function ResultsSlide({ tv, sessions, athletes, results, classExecs }) {
                   <span className={s.restName}>{r.athleteName}</span>
                   <span className={s.restScale}>{r.scale || '—'}</span>
                   <span className={s.restPerf}>{perfStr(r, selBl.type)}</span>
+                  <GoalBadge entry={r} bl={selBl} className={s.restGoalBadge} />
                 </div>
               ))}
             </div>

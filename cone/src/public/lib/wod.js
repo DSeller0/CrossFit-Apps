@@ -92,8 +92,13 @@ export function deriveScale(blk) {
 // perf-shape branch (results.html, the SPA coach view, rankResults/perfStr)
 // agree, so a Benchmark result stores/ranks/renders the same regardless of
 // which page logged it.
+// MetCon and HIIT added #117: blockModel.js's goalKindFor already gives both a TIME
+// goal, while this function counted only For Time/Benchmark — so the coach's Meta:
+// line showed a time target on a block the athlete logged (and this ranked) as
+// rounds/reps. Measured blast radius: 1 prod entry re-ranks (rounds-scored, no
+// time, so it sorts last either way).
 export function isTimeBlock(blType) {
-  return blType === 'For Time' || blType === 'Benchmark'
+  return blType === 'For Time' || blType === 'Benchmark' || blType === 'MetCon' || blType === 'HIIT'
 }
 
 export function blkLabel(bl) {
@@ -136,6 +141,10 @@ export function goalStr(bl) {
   const short = t => (t && /:00$/.test(t) ? `${t.slice(0, -3)}'` : t)
   if (g.kind === 'time') {
     if (g.min && g.max) {
+      // A fixed goal is normally expressed by leaving max blank (the `return
+      // short(g.min)` branch below) — but both ends equal is still reachable data
+      // and must render as the single value, not a degenerate "14–14'" range.
+      if (g.min === g.max) return short(g.min)
       // "11–12'" when both are whole minutes; "11:30–12:15" the moment either isn't.
       const whole = /:00$/.test(g.min) && /:00$/.test(g.max)
       return whole ? `${g.min.slice(0, -3)}–${g.max.slice(0, -3)}'` : `${g.min}–${g.max}`
@@ -149,6 +158,47 @@ export function goalStr(bl) {
     return [r, x].filter(Boolean).join(' + ')
   }
   return (g.text || '').trim()
+}
+
+// Compares a LOGGED result against the block's own `Meta:` goal (#117) — the badge
+// behind "did this athlete beat/meet the coach's target". `bl` is a block-shaped
+// object ({ goal }, the same argument `goalStr` takes — a real block or RankList's
+// synthesized `{ type, goal }` both work since only `.goal` is read).
+//
+// Returns 'beat' | 'met' | 'missed' | null. null is reserved for "cannot honestly
+// judge" — no goal, `kind:'text'`, or nothing logged yet. A DNF (capped, no
+// perfTime) is a judgement against the goal, not an absence of one, so it always
+// resolves to 'missed', never null.
+export function goalOutcome(entry, bl) {
+  const g = bl?.goal
+  if (!g || g.kind === 'text') return null
+  if (g.kind === 'time') {
+    if (!g.min && !g.max) return null
+    if (!entry.perfTime) {
+      // A checkpoint (#112) or a legacy perfRounds-only row both mean "capped", not
+      // "hasn't logged yet" — see the module comment above.
+      return entry.checkpoint || entry.perfRounds ? 'missed' : null
+    }
+    const t = toSecs(entry.perfTime)
+    if (g.min && g.max) {
+      if (t < toSecs(g.min)) return 'beat'
+      return t <= toSecs(g.max) ? 'met' : 'missed'
+    }
+    // One end only ("14:00" or "sub 12'") — hitting it IS the goal, no window to
+    // land inside, so there's no 'met' state here.
+    return t <= toSecs(g.min || g.max) ? 'beat' : 'missed'
+  }
+  if (g.kind === 'rounds') {
+    if (!g.min && !g.reps) return null
+    if (!entry.perfRounds && !entry.perfReps) return null
+    const rd = parseInt(entry.perfRounds) || 0,
+      rp = parseInt(entry.perfReps) || 0
+    const gr = Number(g.min) || 0,
+      gx = Number(g.reps) || 0
+    if (rd !== gr) return rd > gr ? 'beat' : 'missed'
+    return rp >= gx ? 'beat' : 'missed'
+  }
+  return null
 }
 
 // Timer/TV mode display label — Timer.jsx and tv/slides.jsx both hand-rolled

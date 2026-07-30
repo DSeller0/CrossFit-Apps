@@ -211,6 +211,9 @@
 .successRow { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid var(--divider); font-size:12px; }
 .successRowLbl { color:var(--muted); }
 .successRowVal { color:var(--cream); font-weight:700; }
+/* #117 — same beat (gold, filled)/met (sub, outline) split as RankList's badge. */
+.successGoalBeat { color:var(--gold); margin-left:5px; font-size:12px; }
+.successGoalMet { color:var(--sub); margin-left:5px; font-size:12px; }
 .btnDismiss { width:100%; padding:9px; background:var(--teal); border:none; color:var(--accent-text); font-size:13px; font-weight:900; cursor:pointer; font-family:var(--font); }
 
 /* ══════════════════════════════════════════════════════════════════════════════

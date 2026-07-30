@@ -312,7 +312,12 @@ export default function Leaderboard() {
                         sessName={w.sessName}
                         scaleFilter={scaleFilter}
                       />
-                      <RankList entries={wEntries} blType={w.blType} scaleFilter={scaleFilter} />
+                      <RankList
+                        entries={wEntries}
+                        blType={w.blType}
+                        goal={w.bl?.goal}
+                        scaleFilter={scaleFilter}
+                      />
                     </div>
                   </WodCard>
                 )
@@ -351,6 +356,7 @@ export default function Leaderboard() {
                   <RankList
                     entries={entries}
                     blType={selObj.blType}
+                    goal={selObj.bl?.goal}
                     scaleFilter={scaleFilter}
                     size="large"
                     showDots

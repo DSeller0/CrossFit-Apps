@@ -1,4 +1,5 @@
-import { rankResults, perfStr, scaleColor, scaleLabel } from '../lib/wod.js'
+import { IconTargetArrow, IconTarget } from '@tabler/icons-react'
+import { rankResults, perfStr, scaleColor, scaleLabel, goalOutcome } from '../lib/wod.js'
 import s from './RankList.module.css'
 
 // Shared ranking list — the one truth for "athletes, ordered by result" (#51).
@@ -13,9 +14,13 @@ import s from './RankList.module.css'
 // the markup would mean a new CSS variant for no visible change.
 //
 // entries: [{ id?, athleteId, name, scale?, color?, perfTime?, perfRounds?, perfReps? }]
+// `goal` is the block's own `Meta:` object (#117, bl.goal) — optional, and only ever
+// passed as a sibling to blType (goalOutcome reads goal.kind, not blType, so the two
+// stay decoupled). Omitting it renders exactly as before: no badge column at all.
 export default function RankList({
   entries = [],
   blType,
+  goal,
   scaleFilter = 'Todos',
   highlightAthleteId = '',
   podium = true,
@@ -41,6 +46,7 @@ export default function RankList({
       {ranked.map((e, i) => {
         const pod = podium && i < 3 ? s[`pod${i + 1}`] : ''
         const self = highlightAthleteId && String(e.athleteId) === String(highlightAthleteId)
+        const outcome = goal ? goalOutcome(e, { goal }) : null
         return (
           <li
             key={e.id ?? e.athleteId ?? i}
@@ -61,6 +67,28 @@ export default function RankList({
               )}
             </span>
             <span className={s.perf}>{perfStr(e, blType)}</span>
+            {/* Trailing, not fixed-width — only 3 of 294 prod blocks carry a goal today
+                (#117), so most rows render nothing here. Placed after .perf (not inside
+                .name, which ellipsises long names, or .perf, which has no slack). */}
+            {(outcome === 'beat' || outcome === 'met') && (
+              <span className={s.badgeCol}>
+                {outcome === 'beat' ? (
+                  <IconTargetArrow
+                    size={16}
+                    className={s.badgeBeat}
+                    aria-label="Bateu a meta"
+                    role="img"
+                  />
+                ) : (
+                  <IconTarget
+                    size={16}
+                    className={s.badgeMet}
+                    aria-label="Dentro da meta"
+                    role="img"
+                  />
+                )}
+              </span>
+            )}
           </li>
         )
       })}

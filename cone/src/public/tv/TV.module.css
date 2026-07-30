@@ -235,6 +235,15 @@
 .restScale { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .1em; }
 .restPerf  { font-size: 20px; font-weight: 700; color: var(--teal); font-family: var(--font-mono); width: 90px; text-align: right; }
 
+/* Goal badge (#117) — same filled(beat)/outline(met) split as RankList's, wall scale.
+   .podiumCard is a column flex so this is just another child, no reflow risk; .restRow
+   is a row flex where .restName is flex:1, so this eats into that give (expected — only
+   3 of 294 prod blocks carry a goal today, most rows render neither icon at all). */
+.podiumGoalBadge { font-size: 22px; }
+.restGoalBadge   { font-size: 18px; flex-shrink: 0; }
+.goalBeat { color: var(--gold); }
+.goalMet  { color: var(--sub); }
+
 .noResults {
   font-size: 26px; color: var(--dim); text-align: center;
   margin-top: 60px; text-transform: uppercase; letter-spacing: .2em;

@@ -14,6 +14,7 @@ import {
   fmtSecs,
   isTimeBlock,
   perfStr,
+  goalOutcome,
 } from '../lib/wod.js'
 import { onKey } from '../schedule/scheduleHelpers.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
@@ -389,7 +390,14 @@ export default function Results() {
     // perfStr renders "nothing logged" as an em dash; these two surfaces omit the row instead.
     const perfRaw = perfStr(inp, btype)
     const perf = perfRaw === '—' ? '' : perfRaw
-    setSuccessData({ blockLabel: lbl, scale: inp.scale, rpe: inp.rpe, perf, btype })
+    setSuccessData({
+      blockLabel: lbl,
+      scale: inp.scale,
+      rpe: inp.rpe,
+      perf,
+      btype,
+      goalOutcome: goalOutcome(inp, bl),
+    })
   }
 
   // ── Computed ──
@@ -418,13 +426,15 @@ export default function Results() {
   // Mobile LB flyout
   let lbTitle = '',
     lbEntries = [],
-    lbType = ''
+    lbType = '',
+    lbGoal = null
   if (lbTarget) {
     const { sid, bid, dk } = lbTarget
     const sess = (sessions[dk] || []).find(s => s.id === sid)
     const bl = (sess?.blocks || []).find(b => b.id === bid)
     lbTitle = bl ? blkLabel(bl) : 'WOD'
     lbType = bl?.type || ''
+    lbGoal = bl?.goal || null
     lbEntries = blockEntries(results, athletes, sid, bid)
   }
 
@@ -535,7 +545,7 @@ export default function Results() {
           </button>
         </div>
         <div className={styles.lbList}>
-          <RankList entries={lbEntries} blType={lbType} highlightAthleteId={selAth} />
+          <RankList entries={lbEntries} blType={lbType} goal={lbGoal} highlightAthleteId={selAth} />
         </div>
       </div>
 
@@ -565,7 +575,7 @@ export default function Results() {
       >
         {successData &&
           (() => {
-            const { blockLabel: lbl, scale, rpe, perf, btype } = successData
+            const { blockLabel: lbl, scale, rpe, perf, btype, goalOutcome: goalOut } = successData
             const plbl = isTimeBlock(btype) ? 'Tempo' : 'Resultado'
             return (
               <>
@@ -584,7 +594,25 @@ export default function Results() {
                   {perf && (
                     <div className={styles.successRow}>
                       <span className={styles.successRowLbl}>{plbl}</span>
-                      <span className={styles.successRowVal}>{perf}</span>
+                      <span className={styles.successRowVal}>
+                        {perf}
+                        {/* #117 — same beat/met badge as RankList/TV, on the one surface
+                            that isn't a ranked list: the athlete's own confirmation. */}
+                        {goalOut === 'beat' && (
+                          <i
+                            className={`ti ti-target-arrow ${styles.successGoalBeat}`}
+                            title="Bateu a meta"
+                            aria-hidden="true"
+                          />
+                        )}
+                        {goalOut === 'met' && (
+                          <i
+                            className={`ti ti-target ${styles.successGoalMet}`}
+                            title="Dentro da meta"
+                            aria-hidden="true"
+                          />
+                        )}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -870,6 +898,7 @@ export default function Results() {
                           <RankList
                             entries={selEntries}
                             blType={selBlock.type}
+                            goal={selBlock.goal}
                             scaleFilter={lbScale}
                             highlightAthleteId={selAth}
                           />

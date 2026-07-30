@@ -67,6 +67,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Goal badge (#117) — trailing, auto-width (not a fixed column like .scaleCol/.perf
+   above): most rows carry no goal at all, so there is nothing to left-align against.
+   The icon SHAPE carries filled-vs-outline (beat the fast end vs landed inside the
+   coach's range); color just weights beat as the headline (gold) over met (sub). */
+.badgeCol { flex: 0 0 auto; display: flex; align-items: center; }
+.badgeBeat { color: var(--gold); }
+.badgeMet { color: var(--sub); }
+
 /* ── Podium ── */
 .pod1, .pod1:nth-child(even) { background: color-mix(in srgb, var(--podium-1) 8%, transparent); }
 .pod2, .pod2:nth-child(even) { background: color-mix(in srgb, var(--podium-2) 8%, transparent); }

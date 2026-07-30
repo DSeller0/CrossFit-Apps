@@ -11,6 +11,8 @@ import {
   repsBefore,
   groupProgressionSteps,
   goalStr,
+  goalOutcome,
+  isTimeBlock,
   BLOCK_FAMILY,
 } from './wod.js'
 import { ALL_CATEGORIES } from './exerciseGroups.js'
@@ -21,6 +23,24 @@ import { ALL_CATEGORIES } from './exerciseGroups.js'
 describe('BLOCK_FAMILY', () => {
   test('covers every registry category', () => {
     ALL_CATEGORIES.forEach(c => expect(BLOCK_FAMILY).toHaveProperty(c))
+  })
+})
+
+// #117 — MetCon/HIIT added: goalKindFor (blockModel.js) already gives them a time
+// goal; this asserts isTimeBlock now agrees so a time Meta: doesn't show against a
+// block that ranks/logs as rounds/reps.
+describe('isTimeBlock', () => {
+  test('For Time, Benchmark, MetCon, HIIT → true', () => {
+    expect(isTimeBlock('For Time')).toBe(true)
+    expect(isTimeBlock('Benchmark')).toBe(true)
+    expect(isTimeBlock('MetCon')).toBe(true)
+    expect(isTimeBlock('HIIT')).toBe(true)
+  })
+  test('AMRAP, EMOM, WOD, Estações → false', () => {
+    expect(isTimeBlock('AMRAP')).toBe(false)
+    expect(isTimeBlock('EMOM')).toBe(false)
+    expect(isTimeBlock('WOD')).toBe(false)
+    expect(isTimeBlock('Estações')).toBe(false)
   })
 })
 
@@ -451,5 +471,103 @@ describe('goalStr', () => {
     expect(goalStr({ goal: { kind: 'time' } })).toBe('')
     expect(goalStr({ goal: { kind: 'rounds' } })).toBe('')
     expect(goalStr({ goal: { kind: 'text', text: '' } })).toBe('')
+  })
+  test('degenerate range (min === max) renders the single value, not "14–14\'"', () => {
+    expect(goalStr({ goal: { kind: 'time', min: '14:00', max: '14:00' } })).toBe("14'")
+    expect(goalStr({ goal: { kind: 'time', min: '11:30', max: '11:30' } })).toBe('11:30')
+  })
+})
+
+describe('goalOutcome', () => {
+  test('no goal → null', () => {
+    expect(goalOutcome({ perfTime: '10:00' }, { type: 'For Time' })).toBe(null)
+    expect(goalOutcome({ perfTime: '10:00' }, null)).toBe(null)
+  })
+  test('kind:text → null, never comparable', () => {
+    const bl = { type: 'WOD', goal: { kind: 'text', text: 'sem quebrar' } }
+    expect(goalOutcome({ perfTime: '10:00' }, bl)).toBe(null)
+  })
+  test('an empty goal object (no min/max) → null', () => {
+    expect(goalOutcome({ perfTime: '10:00' }, { goal: { kind: 'time' } })).toBe(null)
+  })
+  test('nothing logged yet (no perfTime, no checkpoint, no perfRounds) → null', () => {
+    const bl = { goal: { kind: 'time', min: '11:00', max: '12:00' } }
+    expect(goalOutcome({}, bl)).toBe(null)
+  })
+
+  describe('time, both ends (11:00–12:00)', () => {
+    const bl = { goal: { kind: 'time', min: '11:00', max: '12:00' } }
+    test('faster than min → beat', () => {
+      expect(goalOutcome({ perfTime: '10:45' }, bl)).toBe('beat')
+    })
+    test('exactly the min → met, not beat (not STRICTLY under)', () => {
+      expect(goalOutcome({ perfTime: '11:00' }, bl)).toBe('met')
+    })
+    test('inside the window → met', () => {
+      expect(goalOutcome({ perfTime: '11:30' }, bl)).toBe('met')
+    })
+    test('exactly the max → met', () => {
+      expect(goalOutcome({ perfTime: '12:00' }, bl)).toBe('met')
+    })
+    test('slower than max → missed', () => {
+      expect(goalOutcome({ perfTime: '12:40' }, bl)).toBe('missed')
+    })
+  })
+
+  describe('time, one end only (bare "14:00")', () => {
+    const bl = { goal: { kind: 'time', min: '14:00' } }
+    test('at or under → beat, no met state', () => {
+      expect(goalOutcome({ perfTime: '13:50' }, bl)).toBe('beat')
+      expect(goalOutcome({ perfTime: '14:00' }, bl)).toBe('beat')
+    })
+    test('over → missed', () => {
+      expect(goalOutcome({ perfTime: '14:10' }, bl)).toBe('missed')
+    })
+  })
+
+  describe('time, max only ("sub 12\'")', () => {
+    const bl = { goal: { kind: 'time', max: '12:00' } }
+    test('at or under the cap → beat', () => {
+      expect(goalOutcome({ perfTime: '11:59' }, bl)).toBe('beat')
+      expect(goalOutcome({ perfTime: '12:00' }, bl)).toBe('beat')
+    })
+    test('over the cap → missed', () => {
+      expect(goalOutcome({ perfTime: '12:01' }, bl)).toBe('missed')
+    })
+  })
+
+  describe('DNF is missed, never null', () => {
+    const bl = { goal: { kind: 'time', min: '11:00', max: '12:00' } }
+    test('capped with a checkpoint, no perfTime → missed', () => {
+      expect(
+        goalOutcome({ perfTime: '', checkpoint: { roundsDone: 3, exIdx: 1, exReps: 2 } }, bl),
+      ).toBe('missed')
+    })
+    test('legacy DNF (perfRounds only, no checkpoint, no perfTime) → missed', () => {
+      expect(goalOutcome({ perfTime: '', perfRounds: '4' }, bl)).toBe('missed')
+    })
+  })
+
+  describe('rounds (AMRAP)', () => {
+    const bl = { goal: { kind: 'rounds', min: 5, reps: 12 } }
+    test('more rounds than the goal → beat', () => {
+      expect(goalOutcome({ perfRounds: '6', perfReps: '0' }, bl)).toBe('beat')
+    })
+    test('fewer rounds than the goal → missed, regardless of reps', () => {
+      expect(goalOutcome({ perfRounds: '4', perfReps: '50' }, bl)).toBe('missed')
+    })
+    test('same rounds, reps at or past the goal → beat', () => {
+      expect(goalOutcome({ perfRounds: '5', perfReps: '12' }, bl)).toBe('beat')
+      expect(goalOutcome({ perfRounds: '5', perfReps: '15' }, bl)).toBe('beat')
+    })
+    test('same rounds, reps short of the goal → missed', () => {
+      expect(goalOutcome({ perfRounds: '5', perfReps: '3' }, bl)).toBe('missed')
+    })
+    test('nothing logged (no perfRounds, no perfReps) → null', () => {
+      expect(goalOutcome({}, bl)).toBe(null)
+    })
+    test('an empty goal object (no min/reps) → null', () => {
+      expect(goalOutcome({ perfRounds: '5' }, { goal: { kind: 'rounds' } })).toBe(null)
+    })
   })
 })
