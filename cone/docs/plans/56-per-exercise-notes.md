@@ -1,5 +1,8 @@
 # 56 — #116 · Per-exercise adaptation notes (what the athlete actually scaled)
 
+> ✅ Done: 527dff5 · 2026-07-30 — see BACKLOG.md "Ready" for the shipped summary. **Result fidelity
+> chain complete**: #115 → #118 → #112 → #117 → #116, all shipped.
+
 > Step 5 of the **result fidelity chain** ([plans/52](./52-result-fidelity-chain.md)), and the last.
 > Run order: #115 ✅ → #118 ([plans/53](./53-block-entry-durability.md)) →
 > #112 ([plans/54](./54-dnf-checkpoint.md)) → #117 ([plans/55](./55-goal-badge.md)) → **#116 (this)**.

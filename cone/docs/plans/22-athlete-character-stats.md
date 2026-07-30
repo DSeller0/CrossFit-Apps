@@ -79,7 +79,7 @@ Unlocks the movement axis — registry `muscles` is 100% populated, and the cate
 ### Step 4 — 🔑 Log strength blocks with the real load · L · **Lane B (needs a mockup)**
 **The keystone, and a genuine product expansion.** Today Cone logs *WOD scores*; this makes it log *training*. Força/LPO/Core/Skill blocks are prescribed (79 blocks / 214 exercises in prod) and **never recorded**.
 
-- Revive **`exerciseRows`** — `{name, scale, load, reps}` — a schema slot **4 read-sites already understand**, so no migration and no new column.
+- **Extend `exerciseRows`** — `{exId, name, note}` since [plans/56](./56-per-exercise-notes.md)/#116 gave it its first real writer — with `{load, loadUnit}`, not revive it from scratch. Still no migration and no new column (`results_v2.blocks` is `jsonb`); the free lunch is narrower than the old wording implied, though: only `deriveScale()` (`wod.js:78`) reads the field itself, and #116 deliberately writes no `scale`, so it stays dormant. The 4 files this step actually lights up (`LeaderboardView.jsx`, `leaderboard/Leaderboard.jsx`, `results/resultsHelpers.js`, `me/Me.jsx`) all CALL `deriveScale()` — they're net-new UI, not a read-site the schema slot already reaches.
 - Prefill from the block's `intensity` (`pct` → % of the athlete's PR; `progression` → the step ladder; `gender` → the athlete's rail, now that Step 3 exists) and the registry `defaults`, so logging a 5×5 is ~2 taps, not 10 fields.
 - **Auto-PR detection**: a logged load above the athlete's current best on that movement → offer to submit it as a PR (`submit_pr` already exists and is athlete-callable). This is the moment the app starts feeling alive.
 - New surface ⇒ **Lane B**: ideation mockup in `cone/design/` → user approval → build → it enters the gallery.
