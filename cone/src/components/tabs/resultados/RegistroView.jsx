@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { saveResults, uid } from '../../../utils/storage'
-import { exVolStr, isWodBlock, blkMeta } from '../../../public/lib/wod.js'
+import { exVolStr, isWodBlock, blkMeta, blockExercises } from '../../../public/lib/wod.js'
 import { ScaleRow, ScoreInputs } from '../../../public/shared/ScoreFields.jsx'
 import { toISO, MONTH_PT, DAY_PT_TITLE } from '../../../public/lib/week.js'
 import { sessName } from '../../../public/lib/sessions.js'
@@ -603,7 +603,9 @@ export function RegistroView({
             blockLogs.map((bl, i) => {
               const sessbl = (selSession.blocks || []).find(b => b.id === bl.blockId)
               const rpeCol = rpeColor(bl.rpe)
-              const exercises = (sessbl?.exercises || []).filter(e => e.name)
+              // blockExercises(), not sessbl?.exercises directly — Estações nests exercises
+              // under stations, so a direct read showed nothing for that type (#116).
+              const exercises = blockExercises(sessbl).filter(e => e.name)
               return (
                 <div key={bl.blockId} className="rp-block-card">
                   <div className="rp-block-label">

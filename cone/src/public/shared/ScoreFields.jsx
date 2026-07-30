@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import {
   SCALES,
   scaleLabel,
@@ -27,8 +27,12 @@ import s from './ScoreFields.module.css'
 // `onChange` takes a PARTIAL patch, matching how Results.jsx's setInp(sid, bid, {...})
 // already works — one callback instead of the five onPerfX props DeskRegPane had.
 //
-// ScoreInputs is the export that grows in steps 2–4 (DNF checkpoint, per-exercise notes,
-// goal badge). Keep its prop surface deliberate.
+// ScoreInputs is the export that grows across the result-fidelity chain — DNF checkpoint
+// (#112) and per-exercise notes (#116) both live inside it, so every consumer that renders
+// ScoreInputs directly (RegistroView) gets each new piece for free, same as one that renders
+// the composed default (LogForm/LogPane/DeskRegPane). The goal badge (#117) turned out to
+// belong on the READ side instead (RankList/the success modal/TV) — nothing here. Keep its
+// prop surface deliberate.
 
 const RPE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
@@ -251,6 +255,87 @@ function CheckpointFields({ block, rounds, timeBlock, value, onChange, disabled,
   )
 }
 
+// Per-exercise adaptation notes (#116) — revealed only when the logged scale isn't RX
+// (deriveScale already reports the block-level scale; this never writes a `scale` key of
+// its own, so that signal stays exactly as dormant as it is today). One row per exercise,
+// each a toggle plus a text field revealed only when toggled — not N always-open boxes,
+// because eight free-text fields on a phone after a workout is how a field goes
+// permanently empty (the energy_level/#66 failure mode, arrived at from the other
+// direction). `blockExercises(block)` is what already flattens Estações' stations.
+//
+// A row with a real note is always shown open — derived straight from `value.exerciseRows`,
+// so switching which athlete/block a mounted form is editing can never leave a stale note
+// visible. A row toggled open with nothing typed yet is local-only UI state (`openIds`):
+// closing it, or leaving it empty at submit time, writes nothing — an all-empty
+// `exerciseRows` collapses to `undefined`, never an array of hollow `{note:''}` objects.
+function ExerciseNotesRows({ block, value, onChange, disabled, size }) {
+  const exs = blockExercises(block)
+  const rows = value.exerciseRows || []
+  const [openIds, setOpenIds] = useState(() => new Set())
+  const dis = disabled || undefined
+
+  if (!exs.length || !value.scale || value.scale === 'RX') return null
+
+  function commit(next) {
+    onChange({ exerciseRows: next.length ? next : undefined })
+  }
+
+  function toggle(exId) {
+    if (rows.some(r => r.exId === exId)) {
+      // Closing a row that already has a note discards it — same "abandon = clear"
+      // contract as CheckpointFields' close button.
+      commit(rows.filter(r => r.exId !== exId))
+      return
+    }
+    setOpenIds(prev => {
+      const next = new Set(prev)
+      next.has(exId) ? next.delete(exId) : next.add(exId)
+      return next
+    })
+  }
+
+  function setNote(exId, name, note) {
+    const filtered = rows.filter(r => r.exId !== exId)
+    commit(note.trim() ? [...filtered, { exId, name, note }] : filtered)
+  }
+
+  return (
+    <div className={`${s.group}${size === 'sm' ? ' ' + s.sm : ''}`}>
+      <span className={s.label}>O que foi adaptado?</span>
+      <div className={s.notesList}>
+        {exs.map((ex, i) => {
+          const exId = ex.id || `i${i}`
+          const row = rows.find(r => r.exId === exId)
+          const open = !!row || openIds.has(exId)
+          return (
+            <div key={exId} className={s.notesRow}>
+              <button
+                type="button"
+                className={s.notesToggle}
+                aria-pressed={open}
+                disabled={dis}
+                onClick={() => toggle(exId)}
+              >
+                {ex.name || `Exercício ${i + 1}`}
+              </button>
+              {open && (
+                <input
+                  className={s.input}
+                  type="text"
+                  placeholder="O que foi adaptado…"
+                  value={row?.note || ''}
+                  disabled={dis}
+                  onChange={e => setNote(exId, ex.name || '', e.target.value)}
+                />
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // The time-vs-rounds fork, and the only place a WOD time is typed anywhere in the app.
 //
 // `block` is the full block when the caller has it; `blockType`/`rounds` are the escape hatch
@@ -284,6 +369,13 @@ export function ScoreInputs({
           block={block}
           rounds={blRounds}
           timeBlock
+          value={value}
+          onChange={onChange}
+          disabled={dis}
+          size={size}
+        />
+        <ExerciseNotesRows
+          block={block}
           value={value}
           onChange={onChange}
           disabled={dis}
@@ -327,6 +419,13 @@ export function ScoreInputs({
         block={block}
         rounds={blRounds}
         timeBlock={false}
+        value={value}
+        onChange={onChange}
+        disabled={dis}
+        size={size}
+      />
+      <ExerciseNotesRows
+        block={block}
         value={value}
         onChange={onChange}
         disabled={dis}

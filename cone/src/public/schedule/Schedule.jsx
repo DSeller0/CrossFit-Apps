@@ -99,6 +99,7 @@ export default function Schedule() {
   const [deskRegPerfReps, setDeskRegPerfReps] = useState('')
   const [deskRegFinished, setDeskRegFinished] = useState(null)
   const [deskRegCheckpoint, setDeskRegCheckpoint] = useState(null)
+  const [deskRegExerciseRows, setDeskRegExerciseRows] = useState(null)
   const [deskRegSubmitting, setDeskRegSubmitting] = useState(false)
   const [deskRegError, setDeskRegError] = useState('')
 
@@ -663,6 +664,7 @@ export default function Schedule() {
     setDeskRegPerfReps(existingBlock?.perfReps || '')
     setDeskRegFinished(existingBlock?.finished ?? null)
     setDeskRegCheckpoint(existingBlock?.checkpoint ?? null)
+    setDeskRegExerciseRows(existingBlock?.exerciseRows ?? null)
     setDeskRegError('')
   }
 
@@ -672,6 +674,7 @@ export default function Schedule() {
     setDeskRegPrev(null)
     setDeskRegFinished(null)
     setDeskRegCheckpoint(null)
+    setDeskRegExerciseRows(null)
     setDeskRegError('')
   }
 
@@ -696,6 +699,7 @@ export default function Schedule() {
       perfReps: deskRegPerfReps,
       finished: deskRegFinished,
       checkpoint: deskRegCheckpoint,
+      exerciseRows: deskRegExerciseRows,
     }
     const blockResult = mergeBlockEntry(deskRegPrev, blockPatch)
     const mergedBlocks = existing
@@ -1267,6 +1271,7 @@ export default function Schedule() {
                       perfReps={deskRegPerfReps}
                       finished={deskRegFinished}
                       checkpoint={deskRegCheckpoint}
+                      exerciseRows={deskRegExerciseRows}
                       athName={selAthObj?.name || ''}
                       onScale={setDeskRegScale}
                       onRpe={setDeskRegRpe}
@@ -1275,6 +1280,7 @@ export default function Schedule() {
                       onPerfReps={setDeskRegPerfReps}
                       onFinished={setDeskRegFinished}
                       onCheckpoint={setDeskRegCheckpoint}
+                      onExerciseRows={setDeskRegExerciseRows}
                       onConfirm={() => setDeskRegStep('confirm')}
                       onSubmit={submitDeskReg}
                       onBack={() => setDeskRegStep('form')}

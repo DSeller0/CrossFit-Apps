@@ -13,6 +13,7 @@ import {
   goalStr,
   goalOutcome,
   isTimeBlock,
+  deriveScale,
   BLOCK_FAMILY,
 } from './wod.js'
 import { ALL_CATEGORIES } from './exerciseGroups.js'
@@ -41,6 +42,44 @@ describe('isTimeBlock', () => {
     expect(isTimeBlock('EMOM')).toBe(false)
     expect(isTimeBlock('WOD')).toBe(false)
     expect(isTimeBlock('Estações')).toBe(false)
+  })
+})
+
+describe('deriveScale', () => {
+  test('no exerciseRows → the flat blk.scale', () => {
+    expect(deriveScale({ scale: 'Inter' })).toBe('Inter')
+  })
+  test('no exerciseRows and no scale → "-"', () => {
+    expect(deriveScale({})).toBe('-')
+    expect(deriveScale(null)).toBe('-')
+  })
+  test('per-exercise scale present → the WEAKEST row wins', () => {
+    const blk = {
+      scale: 'RX',
+      exerciseRows: [{ scale: 'RX' }, { scale: 'SC' }, { scale: 'Inter' }],
+    }
+    expect(deriveScale(blk)).toBe('SC')
+  })
+  // #116 — ExerciseNotesRows' rows are {exId, name, note}, deliberately with no
+  // `.scale`. A naive `!rows.length` check took the per-exercise branch anyway and
+  // ranked every scale-less row below Adaptado, turning a real block scale into '-'
+  // the moment an athlete added any adaptation note. Caught live against real data.
+  test('exerciseRows present but carrying no .scale (an adaptation note, #116) → falls through to blk.scale, unchanged', () => {
+    const blk = {
+      scale: 'SC',
+      exerciseRows: [{ exId: 'e1', name: 'Toes to Bar', note: 'Fiz com banda auxiliar' }],
+    }
+    expect(deriveScale(blk)).toBe('SC')
+  })
+  test('a mix of scored and note-only rows → only the scored ones count', () => {
+    const blk = {
+      scale: 'RX',
+      exerciseRows: [
+        { exId: 'e1', name: 'Toes to Bar', note: 'sem barra' },
+        { exId: 'e2', name: 'Deadlift', scale: 'Inter' },
+      ],
+    }
+    expect(deriveScale(blk)).toBe('Inter')
   })
 })
 

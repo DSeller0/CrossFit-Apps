@@ -23,6 +23,7 @@ import {
   rcBrFT,
   rcBrDNF,
   rcBrAmrap,
+  bdBlEstacoes,
 } from '../fixtures.js'
 import s from '../Gallery.module.css'
 
@@ -176,6 +177,9 @@ export default {
           <Case label="extended · AMRAP (3 exercícios)">
             <WodSummary bl={rcBlAmrap} variant="extended" />
           </Case>
+          <Case label="compact · Estações (blockExercises achata as estações, #116)">
+            <WodSummary bl={bdBlEstacoes} showTitle />
+          </Case>
         </Section>
       ),
     },
@@ -244,7 +248,7 @@ export default {
       render: () => (
         <Section
           title="LoggedResult"
-          sub="src/public/results/LoggedResult.jsx — resultado já registrado. O botão Editar é a autocorreção (#51, decisão 2): o caminho de submit já mesclava certo, era só este bloqueio visual que tornava o resultado final."
+          sub="src/public/results/LoggedResult.jsx — resultado já registrado. O botão Editar é a autocorreção (#51, decisão 2): o caminho de submit já mesclava certo, era só este bloqueio visual que tornava o resultado final. As notas por exercício (#116), quando presentes, aparecem num bloco separado abaixo — .logged é uma única linha flex e uma nota pode ser uma frase inteira."
         >
           <Case label="For Time · com Editar">
             <LoggedResult br={rcBrFT} btype="For Time" onEdit={NOOP} />
@@ -255,7 +259,7 @@ export default {
           <Case label="For Time · DNF (capped em 4 rds)">
             <LoggedResult br={rcBrDNF} btype="For Time" onEdit={NOOP} />
           </Case>
-          <Case label="AMRAP">
+          <Case label="AMRAP · com notas por exercício (#116)">
             <LoggedResult br={rcBrAmrap} btype="AMRAP" onEdit={NOOP} />
           </Case>
           <Case label="Sem escala / sem RPE (dados antigos)">
@@ -314,7 +318,7 @@ export default {
               />
             </div>
           </Case>
-          <Case label="Criar · AMRAP (rounds + reps)">
+          <Case label="Criar · AMRAP (rounds + reps + notas por exercício não-RX, #116)">
             <div className={s.rcBody}>
               <WodSummary bl={rcBlAmrap} showTitle />
               <LogForm

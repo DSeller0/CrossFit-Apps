@@ -334,6 +334,7 @@ export default function Results() {
       perfReps: inp.perfReps || '',
       finished: inp.finished ?? null,
       checkpoint: inp.checkpoint ?? null,
+      exerciseRows: inp.exerciseRows ?? null,
     }
     const existing = Array.isArray(results) ? results : []
     const prev = existing.find(r => r.sessionId === sid && r.athleteId === selAth)

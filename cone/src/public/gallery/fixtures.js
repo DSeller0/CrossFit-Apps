@@ -325,8 +325,8 @@ export const rcBlComplex = {
 } // complexo: sem `name` próprio
 export const rcBlBare = { id: 'rcb5', type: 'AMRAP' } // sem meta e sem exercícios → não renderiza nada
 
-// #112 — every DEF_INP()-shaped fixture must carry finished/checkpoint too, or those
-// gallery cases render `undefined` for the new fields.
+// #112/#116 — every DEF_INP()-shaped fixture must carry finished/checkpoint/exerciseRows
+// too, or those gallery cases render `undefined` for the new fields.
 export const rcInpEmpty = {
   rpe: null,
   scale: null,
@@ -335,6 +335,7 @@ export const rcInpEmpty = {
   perfReps: '',
   finished: null,
   checkpoint: null,
+  exerciseRows: null,
 }
 export const rcInpDone = {
   rpe: 9,
@@ -344,15 +345,24 @@ export const rcInpDone = {
   perfReps: '',
   finished: null,
   checkpoint: null,
+  exerciseRows: null,
 }
+// #116 — scale is non-RX (was RX) specifically so this is also the gallery's live demo of
+// per-exercise adaptation notes in an open form: 2 of rcBlAmrap's 3 exercises (Thruster,
+// Wall Ball) carry a note and render open; the third (Row) renders closed. Paired with
+// rcBrAmrap below, which carries the same rows for the READ-BACK side (LoggedResult).
 export const rcInpAmrap = {
   rpe: 8,
-  scale: 'RX',
+  scale: 'SC',
   perfTime: '',
   perfRounds: '9',
   perfReps: '12',
   finished: null,
   checkpoint: null,
+  exerciseRows: [
+    { exId: 'e1', name: 'Thruster', note: 'Reduzi a carga pra 30kg' },
+    { exId: 'e2', name: 'Wall Ball', note: 'Bola de 6kg em vez de 9kg' },
+  ],
 }
 // The checkpoint toggle opened (#112) — paired with rcBlFTCap (rounds: 5), so
 // "Rounds completos de 5" shows a real total rather than the N=1 chipper fallback.
@@ -364,6 +374,7 @@ export const rcInpDNF = {
   perfReps: '',
   finished: false,
   checkpoint: { roundsDone: 4, roundsTotal: 5, exIdx: 1, exName: 'Assault Bike', exReps: 7 },
+  exerciseRows: null,
 }
 // "Onde parou" opened on an AMRAP (#112) — no roundsTotal, no `finished`: an AMRAP never DNFs.
 export const rcInpAmrapCheckpoint = {
@@ -374,6 +385,7 @@ export const rcInpAmrapCheckpoint = {
   perfReps: '12',
   finished: null,
   checkpoint: { exIdx: 0, exName: 'Thruster', exReps: 6 },
+  exerciseRows: null,
 }
 
 export const rcBrFT = { blockId: 'rcb1', rpe: 8, scale: 'RX', perfTime: '10:32' }
@@ -388,7 +400,23 @@ export const rcBrDNF = {
   finished: false,
   checkpoint: { roundsDone: 4, roundsTotal: 5, exIdx: 1, exName: 'Assault Bike', exReps: 7 },
 }
-export const rcBrAmrap = { blockId: 'rcb3', rpe: 7, scale: 'SC', perfRounds: '9', perfReps: '12' }
+// #116 — same two rows as rcInpAmrap above, the read-back (LoggedResult) side of the pair.
+export const rcBrAmrap = {
+  blockId: 'rcb3',
+  rpe: 7,
+  scale: 'SC',
+  perfRounds: '9',
+  perfReps: '12',
+  exerciseRows: [
+    { exId: 'e1', name: 'Thruster', note: 'Reduzi a carga pra 30kg' },
+    { exId: 'e2', name: 'Wall Ball', note: 'Bola de 6kg em vez de 9kg' },
+  ],
+}
+
+// #116 — the extra ScoreFields states plans/56's Verification checklist calls for that
+// rcBlAmrap/rcBlBare can't cover on their own: a long exercise name (truncation) and an
+// Estações block (flattened list — reuses schedule's own bdBlEstacoes fixture below).
+export const rcBlLongEx = { id: 'rcb6', type: 'AMRAP', duration: '15', exercises: [exLong] }
 
 // ── Mock fixtures — leaderboard/ chrome ──
 export const lbWods = [

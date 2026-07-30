@@ -21,6 +21,9 @@ const ATHLETE_KEY_DEFAULTS = {
   // hollow object" convention).
   finished: null,
   checkpoint: null,
+  // #116 — per-exercise adaptation notes, written by ScoreFields.jsx's ExerciseNotesRows
+  // whenever the athlete's scale isn't RX. Same "null, never a hollow array" convention.
+  exerciseRows: null,
 }
 
 export const ATHLETE_KEYS = Object.keys(ATHLETE_KEY_DEFAULTS)

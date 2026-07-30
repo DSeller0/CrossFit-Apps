@@ -73,10 +73,20 @@ export function scaleLabel(sc) {
 // A block's effective scale is its WEAKEST per-exercise scale: an athlete who
 // scaled one movement did not do the WOD RX. Blocks logged before per-exercise
 // scaling existed carry a flat blk.scale instead — fall back to it.
+//
+// ⚠️ Filter to rows that actually carry a `.scale` before checking length (#116).
+// exerciseRows got its first real writer in #116 (ScoreFields.jsx's
+// ExerciseNotesRows) — {exId, name, note}, deliberately with NO `.scale` field,
+// specifically so this function stays dormant. But `rows.length` alone doesn't
+// know that: a block with adaptation notes and no per-exercise scale ANYWHERE
+// used to take the "has rows" branch anyway, and `SCALE_RANK[undefined] ?? 0`
+// ranked every row below Adaptado — one adaptation note silently blanked a
+// real RX/Inter/SC/Adaptado to '-' on every ranking, KPI and ScaleFilter.
+// Caught live-verifying #116 against real prod-snapshot data, not by a test.
 const SCALE_RANK = { RX: 4, Inter: 3, SC: 2, Adaptado: 1, '-': 0 }
 const SCALE_NAMES = { 4: 'RX', 3: 'Inter', 2: 'SC', 1: 'Adaptado', 0: '-' }
 export function deriveScale(blk) {
-  const rows = blk?.exerciseRows || []
+  const rows = (blk?.exerciseRows || []).filter(r => r.scale)
   if (!rows.length) return blk?.scale || '-'
   let min = 4
   rows.forEach(r => {

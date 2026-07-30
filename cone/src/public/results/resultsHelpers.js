@@ -27,6 +27,8 @@ export const DEF_INP = () => ({
   // ATHLETE_KEY_DEFAULTS (this file predates that consolidation and keeps its own copy).
   finished: null,
   checkpoint: null,
+  // #116 — per-exercise adaptation notes. Same null default, same reasoning.
+  exerciseRows: null,
 })
 
 export function inputKey(sid, bid) {

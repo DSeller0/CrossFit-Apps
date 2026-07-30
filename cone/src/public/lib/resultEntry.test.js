@@ -3,12 +3,13 @@ import { ATHLETE_KEYS, mergeBlockEntry, clearAthleteKeys } from './resultEntry.j
 
 describe('mergeBlockEntry', () => {
   test('unknown key on prev survives a patch that does not mention it', () => {
-    // `exerciseRows` stands in for a field this version doesn't know about (#116, not
-    // landed) — `checkpoint` itself is now a real ATHLETE_KEYS field (#112).
-    const prev = { blockId: 'b1', blockType: 'For Time', blockLabel: 'WOD', exerciseRows: [1, 2] }
+    // `futureField` stands in for a field THIS version doesn't know about yet — both
+    // `checkpoint` (#112) and `exerciseRows` (#116) were this placeholder in earlier
+    // sessions and are now real ATHLETE_KEYS fields, tested on their own terms below.
+    const prev = { blockId: 'b1', blockType: 'For Time', blockLabel: 'WOD', futureField: [1, 2] }
     const patch = { blockId: 'b1', blockType: 'For Time', blockLabel: 'WOD', rpe: 8, scale: 'RX' }
     const merged = mergeBlockEntry(prev, patch)
-    expect(merged.exerciseRows).toEqual([1, 2])
+    expect(merged.futureField).toEqual([1, 2])
     expect(merged.rpe).toBe(8)
     expect(merged.scale).toBe('RX')
   })
@@ -44,10 +45,10 @@ describe('mergeBlockEntry', () => {
       blockType: 'For Time',
       blockLabel: 'WOD',
       rpe: 8,
-      exerciseRows: [3],
+      futureField: [3],
     }
     const merged = mergeBlockEntry(base, eb)
-    expect(merged.exerciseRows).toEqual([3])
+    expect(merged.futureField).toEqual([3])
     expect(merged.rpe).toBe(8)
   })
 
@@ -59,7 +60,7 @@ describe('mergeBlockEntry', () => {
       blockId: 'b1',
       blockType: 'For Time',
       blockLabel: 'WOD',
-      exerciseRows: ['x'],
+      futureField: ['x'],
     }
     const formEntry = {
       blockId: 'b1',
@@ -69,7 +70,15 @@ describe('mergeBlockEntry', () => {
       scale: 'RX',
     }
     const merged = mergeBlockEntry(persisted, formEntry)
-    expect(merged.exerciseRows).toEqual(['x'])
+    expect(merged.futureField).toEqual(['x'])
+  })
+
+  test('exerciseRows (#116) round-trips through the same re-merge shape now that it is real', () => {
+    const persisted = { blockId: 'b1', exerciseRows: [{ exId: 'e1', name: 'Thruster', note: 'x' }] }
+    const formEntry = { blockId: 'b1', rpe: 7, scale: 'SC' }
+    expect(mergeBlockEntry(persisted, formEntry).exerciseRows).toEqual([
+      { exId: 'e1', name: 'Thruster', note: 'x' },
+    ])
   })
 })
 
@@ -82,6 +91,9 @@ describe('clearAthleteKeys', () => {
       perfTime: '12:34',
       perfRounds: '5',
       perfReps: '10',
+      finished: true,
+      checkpoint: { roundsDone: 3, roundsTotal: 5, exIdx: 1, exName: 'Row', exReps: 2 },
+      exerciseRows: [{ exId: 'e1', name: 'Thruster', note: 'reduzi a carga' }],
     }
     const cleared = clearAthleteKeys(entry)
     expect(cleared.rpe).toBe(null)
@@ -89,24 +101,29 @@ describe('clearAthleteKeys', () => {
     expect(cleared.perfTime).toBe('')
     expect(cleared.perfRounds).toBe('')
     expect(cleared.perfReps).toBe('')
+    expect(cleared.finished).toBe(null)
+    expect(cleared.checkpoint).toBe(null)
+    // #116 — switching which athlete a form edits must not carry the outgoing athlete's
+    // adaptation notes into the incoming one's submission, same reasoning as rpe/scale.
+    expect(cleared.exerciseRows).toBe(null)
   })
 
-  test('leaves identity fields and unknown keys untouched', () => {
-    // `exerciseRows` stands in for a field this version doesn't know about yet (#116,
-    // not landed) — `checkpoint` itself moved INTO ATHLETE_KEYS with #112, so it no
-    // longer illustrates an unknown key.
+  test('leaves identity fields and truly unknown keys untouched', () => {
+    // `futureField` stands in for a field THIS version doesn't know about — `checkpoint`
+    // (#112) and `exerciseRows` (#116) both used to illustrate this and are now real
+    // ATHLETE_KEYS fields, covered by the test above instead.
     const entry = {
       blockId: 'b1',
       blockType: 'For Time',
       blockLabel: 'WOD',
       rpe: 8,
-      exerciseRows: [1, 2, 3],
+      futureField: [1, 2, 3],
     }
     const cleared = clearAthleteKeys(entry)
     expect(cleared.blockId).toBe('b1')
     expect(cleared.blockType).toBe('For Time')
     expect(cleared.blockLabel).toBe('WOD')
-    expect(cleared.exerciseRows).toEqual([1, 2, 3])
+    expect(cleared.futureField).toEqual([1, 2, 3])
   })
 
   test('every ATHLETE_KEYS entry is present on the cleared result', () => {
@@ -125,6 +142,7 @@ describe('clearAthleteKeys', () => {
       perfReps: '',
       finished: null,
       checkpoint: null,
+      exerciseRows: null,
     })
     expect(clearAthleteKeys(undefined)).toEqual({
       rpe: null,
@@ -134,6 +152,7 @@ describe('clearAthleteKeys', () => {
       perfReps: '',
       finished: null,
       checkpoint: null,
+      exerciseRows: null,
     })
   })
 })

@@ -273,6 +273,13 @@
 .editBtn:hover { border-color:var(--teal); color:var(--teal); }
 .editBtn:focus-visible { outline:2px solid var(--teal); outline-offset:1px; }
 
+/* #116 — per-exercise adaptation note read-back, a separate block below .logged. */
+.loggedNotes { margin:-4px 0 8px; padding:8px; background:var(--stone); border:1px solid var(--divider); }
+.loggedNotesLbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+.loggedNoteRow { display:flex; gap:8px; padding:3px 0; font-size:12px; }
+.loggedNoteEx { flex-shrink:0; font-weight:700; color:var(--gold); }
+.loggedNoteText { color:var(--sub); }
+
 /* ── LogForm ── */
 /* The RPE / scale / perf-input rules that lived here moved to shared/ScoreFields.module.css
    in #115 — this page's copy was one of five. What remains is the form's own frame. */

@@ -38,9 +38,13 @@ import {
   rcBlFT,
   rcBlFTCap,
   rcBlAmrap,
+  rcBlBare,
+  rcBlLongEx,
+  rcInpAmrap,
   rcInpDone,
   rcInpDNF,
   rcInpAmrapCheckpoint,
+  bdBlEstacoes,
 } from '../fixtures.js'
 import s from '../Gallery.module.css'
 
@@ -392,7 +396,7 @@ export default {
       render: () => (
         <Section
           title="ScoreFields"
-          sub="src/public/shared/ScoreFields.jsx — a única superfície de pontuação (#115). Cinco telas mantinham cópias à mão destes campos e já tinham divergido: o DeskRegPane perdeu o campo de DNF, o ClassPanel gravava 'Rx'/'Sc'/'Adp' fora do padrão, e todas usavam caixa de texto crua para o tempo. Estes campos são interativos — digite 0,9,0,0 e veja 09:00; digite 14 e saia do campo para ver 14:00. O checkpoint de DNF (#112) é revelado por um botão, 'Não terminei'/'Onde parou' — nunca inferido de um Tempo vazio."
+          sub="src/public/shared/ScoreFields.jsx — a única superfície de pontuação (#115). Cinco telas mantinham cópias à mão destes campos e já tinham divergido: o DeskRegPane perdeu o campo de DNF, o ClassPanel gravava 'Rx'/'Sc'/'Adp' fora do padrão, e todas usavam caixa de texto crua para o tempo. Estes campos são interativos — digite 0,9,0,0 e veja 09:00; digite 14 e saia do campo para ver 14:00. O checkpoint de DNF (#112) é revelado por um botão, 'Não terminei'/'Onde parou' — nunca inferido de um Tempo vazio. As notas por exercício (#116) só aparecem quando a escala não é RX — cada linha é um toggle mais um campo revelado só ao abrir, nunca N caixas sempre abertas."
         >
           <Case label="For Time — máscara mm:ss (digite 1,2,3,4 → 12:34)">
             <ScoreFieldsDemo block={rcBlFT} />
@@ -411,6 +415,34 @@ export default {
           </Case>
           <Case label="AMRAP — 'Onde parou' aberto (reps calculadas a partir do exercício)">
             <ScoreFieldsDemo block={rcBlAmrap} initial={rcInpAmrapCheckpoint} />
+          </Case>
+          <Case label="Notas por exercício (#116) — RX não revela linhas">
+            <ScoreFieldsDemo block={rcBlAmrap} initial={{ ...DEF_INP(), scale: 'RX' }} />
+          </Case>
+          <Case label="Notas por exercício — não-RX, linhas recolhidas (nada digitado ainda)">
+            <ScoreFieldsDemo block={rcBlAmrap} initial={{ ...DEF_INP(), scale: 'Inter' }} />
+          </Case>
+          <Case label="Notas por exercício — uma linha aberta">
+            <ScoreFieldsDemo
+              block={rcBlAmrap}
+              initial={{
+                ...DEF_INP(),
+                scale: 'Inter',
+                exerciseRows: [{ exId: 'e1', name: 'Thruster', note: 'Peguei mais leve' }],
+              }}
+            />
+          </Case>
+          <Case label="Notas por exercício — várias linhas abertas">
+            <ScoreFieldsDemo block={rcBlAmrap} initial={rcInpAmrap} />
+          </Case>
+          <Case label="Notas por exercício — nome de exercício longo (quebra, não trunca)">
+            <ScoreFieldsDemo block={rcBlLongEx} initial={{ ...DEF_INP(), scale: 'SC' }} />
+          </Case>
+          <Case label="Notas por exercício — bloco Estações (lista achatada por blockExercises)">
+            <ScoreFieldsDemo block={bdBlEstacoes} initial={{ ...DEF_INP(), scale: 'Adaptado' }} />
+          </Case>
+          <Case label="Notas por exercício — bloco sem exercícios → nada renderiza, nem o rótulo">
+            <ScoreFieldsDemo block={rcBlBare} initial={{ ...DEF_INP(), scale: 'SC' }} />
           </Case>
           <Case label="Preenchido">
             <ScoreFieldsDemo block={rcBlFT} initial={rcInpDone} />

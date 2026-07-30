@@ -170,11 +170,53 @@
   color: var(--teal);
 }
 
+/* ── Per-exercise adaptation notes (#116) ────────────────────────────────── */
+
+.notesList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notesRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Same visual language as .scaleBtn/.checkpointToggle — a toggle, not a submit action.
+   Left-aligned and full-width (unlike those two) since the label is an exercise name,
+   not a short code, and rows stack one per line. */
+.notesToggle {
+  align-self: stretch;
+  text-align: left;
+  padding: 4px 10px;
+  border: 1px solid var(--divider);
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.notesToggle:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.notesToggle[aria-pressed='true'] {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
 /* ── Shared disabled + focus contract ────────────────────────────────────── */
 
 .rpeBtn:focus-visible,
 .scaleBtn:focus-visible,
 .checkpointToggle:focus-visible,
+.notesToggle:focus-visible,
 .input:focus-visible {
   outline: 2px solid var(--teal);
   outline-offset: 1px;
@@ -183,6 +225,7 @@
 .rpeBtn:disabled,
 .scaleBtn:disabled,
 .checkpointToggle:disabled,
+.notesToggle:disabled,
 .input:disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -217,6 +260,15 @@
 .sm .checkpointToggle {
   padding: 2px 7px;
   font-size: 10px;
+}
+
+.sm .notesToggle {
+  padding: 2px 7px;
+  font-size: 10px;
+}
+
+.sm .notesList {
+  gap: 4px;
 }
 
 .sm .checkpointBody {

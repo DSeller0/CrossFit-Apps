@@ -13,6 +13,7 @@ export default function DeskRegPane({
   perfReps,
   finished,
   checkpoint,
+  exerciseRows,
   athName,
   onScale,
   onRpe,
@@ -21,6 +22,7 @@ export default function DeskRegPane({
   onPerfReps,
   onFinished,
   onCheckpoint,
+  onExerciseRows,
   onConfirm,
   onSubmit,
   onBack,
@@ -34,8 +36,17 @@ export default function DeskRegPane({
   const perfVal = perfStr({ perfTime, perfRounds, perfReps, checkpoint }, bl.type)
   // This pane keeps its separate value/callback props (Schedule.jsx owns the state);
   // ScoreFields speaks one value object + one patch, so translate at the boundary (#115,
-  // finished/checkpoint added #112).
-  const scoreValue = { rpe, scale, perfTime, perfRounds, perfReps, finished, checkpoint }
+  // finished/checkpoint added #112, exerciseRows added #116).
+  const scoreValue = {
+    rpe,
+    scale,
+    perfTime,
+    perfRounds,
+    perfReps,
+    finished,
+    checkpoint,
+    exerciseRows,
+  }
   const onScoreChange = patch => {
     if ('rpe' in patch) onRpe(patch.rpe)
     if ('scale' in patch) onScale(patch.scale)
@@ -44,6 +55,7 @@ export default function DeskRegPane({
     if ('perfReps' in patch) onPerfReps(patch.perfReps)
     if ('finished' in patch) onFinished(patch.finished)
     if ('checkpoint' in patch) onCheckpoint(patch.checkpoint)
+    if ('exerciseRows' in patch) onExerciseRows(patch.exerciseRows)
   }
   return (
     <div className={styles.deskRegPane}>

@@ -1,5 +1,5 @@
 import styles from './Results.module.css'
-import { exVolStr, blkLabel } from '../lib/wod.js'
+import { exVolStr, blkLabel, blockExercises } from '../lib/wod.js'
 import { blkMeta } from './resultsHelpers.js'
 
 // The WOD itself — what the athlete reads while logging. Two densities, both
@@ -33,7 +33,9 @@ function exVol(ex) {
 
 export default function WodSummary({ bl, variant = 'compact', showTitle = false }) {
   const meta = blkMeta(bl)
-  const exs = (bl.exercises || []).filter(e => e.name || e.isComplex)
+  // blockExercises(), not bl.exercises directly — Estações nests exercises under
+  // stations, so a direct read showed nothing for that type (#116).
+  const exs = blockExercises(bl).filter(e => e.name || e.isComplex)
   if (!meta && !exs.length && !showTitle) return null
 
   const title = showTitle && blkLabel(bl)
