@@ -1,5 +1,7 @@
 # 55 — #117 · Goal badge (mark results that beat the coach's `Meta:`)
 
+> ✅ Done: 7e853ba · 2026-07-29 — see BACKLOG.md "Ready" for the shipped summary.
+
 > Step 4 of the **result fidelity chain** ([plans/52](./52-result-fidelity-chain.md)).
 > Run order: #115 ✅ → #118 ([plans/53](./53-block-entry-durability.md)) →
 > #112 ([plans/54](./54-dnf-checkpoint.md)) → **#117 (this)** → #116.
