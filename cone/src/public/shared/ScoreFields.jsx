@@ -1,12 +1,5 @@
 import { useId, useState } from 'react'
-import {
-  SCALES,
-  scaleLabel,
-  isTimeBlock,
-  expandMMSS,
-  blockExercises,
-  repsBefore,
-} from '../lib/wod.js'
+import { SCALES, scaleLabel, isTimeBlock, blockExercises, repsBefore } from '../lib/wod.js'
 import MaskedTimeInput from './MaskedTimeInput.jsx'
 import s from './ScoreFields.module.css'
 
@@ -98,12 +91,11 @@ export function RpeRow({ value, onChange, disabled, size = 'md', label = 'RPE (1
   )
 }
 
-// The mm:ss field, with the blur contract in ONE place so every surface gets it.
-//
-// maskMMSS fills from the right, so one or two digits come back untouched ('14' stays '14',
-// which toSecs reads as 14 SECONDS — prod held exactly that). expandMMSS completes it on BLUR,
-// never on change, where it would fight the right-fill and make '1','2','3' → '1:23'
-// unreachable. Any surface typing a WOD time uses this, not MaskedTimeInput directly.
+// The mm:ss field. The blur-completion contract (maskMMSS fills from the right, so one or two
+// digits come back untouched — '14' stays '14', which toSecs reads as 14 SECONDS — and
+// expandMMSS completes it on BLUR, never on change, where it would fight the right-fill and
+// make '1','2','3' → '1:23' unreachable) now lives in MaskedTimeInput itself (#125), so this is
+// a thin, semantically-named pass-through kept for its call sites (ClassPanel, ScoreInputs).
 export function TimeField({ value, onChange, label, disabled, className, ...rest }) {
   return (
     <MaskedTimeInput
@@ -112,11 +104,7 @@ export function TimeField({ value, onChange, label, disabled, className, ...rest
       placeholder="12:34"
       value={value || ''}
       disabled={disabled}
-      onChange={v => onChange(v)}
-      onBlur={() => {
-        const done = expandMMSS(value)
-        if (done !== value) onChange(done)
-      }}
+      onChange={onChange}
       {...rest}
     />
   )

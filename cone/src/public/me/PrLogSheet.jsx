@@ -1,4 +1,4 @@
-import { blkColor } from '../lib/wod.js'
+import { blkColor, maskMMSS, expandMMSS } from '../lib/wod.js'
 import { prBest } from '../lib/goals.js'
 import { fmtDate } from '../lib/week.js'
 import Sheet from './Sheet.jsx'
@@ -152,10 +152,15 @@ export default function PrLogSheet({
               <input
                 ref={valRef}
                 type="text"
+                inputMode="numeric"
                 className={styles.lsInp}
                 value={val}
                 placeholder="00:00"
-                onChange={e => onVal(e.target.value)}
+                onChange={e => onVal(maskMMSS(e.target.value))}
+                onBlur={() => {
+                  const done = expandMMSS(val)
+                  if (done !== val) onVal(done)
+                }}
               />
               <span className={styles.lsInpLbl}>Tempo (mm:ss)</span>
             </label>
