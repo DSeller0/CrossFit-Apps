@@ -1,5 +1,7 @@
 # 59 — #124 · Coach is unreachable from Perfil and Agenda (`lockedId` carries two meanings)
 
+> ✅ Done: e7ff679 · 2026-08-03 — see BACKLOG.md
+
 ## Context
 
 From the user's 2026-08-03 report: *"Agenda and Perfil pages do not show Coach when the slide sheet
