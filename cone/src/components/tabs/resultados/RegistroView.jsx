@@ -633,20 +633,12 @@ export function RegistroView({
                     )}
                     {/* Scale + score come from the shared ScoreFields (#115) — this view's
                         copy was the one with no DNF field and an unmasked time box. Its
-                        10-segment RPE bar below stays as-is: that is #57's call, not this. */}
+                        10-segment RPE bar below stays as-is: that is #57's call, not this.
+                        Escala → RPE → score (#122) — the order the athlete answers in. */}
                     <ScaleRow
                       value={bl.scale}
                       onChange={sc => updBlock(i, 'scale', sc)}
                       label={null}
-                    />
-                    <ScoreInputs
-                      block={sessbl}
-                      blockType={bl.blockType}
-                      rounds={sessbl?.rounds}
-                      value={bl}
-                      onChange={patch =>
-                        Object.entries(patch).forEach(([f, v]) => updBlock(i, f, v))
-                      }
                     />
                     <div className="rp-rpe-row">
                       <span
@@ -676,6 +668,15 @@ export function RegistroView({
                         })}
                       </div>
                     </div>
+                    <ScoreInputs
+                      block={sessbl}
+                      blockType={bl.blockType}
+                      rounds={sessbl?.rounds}
+                      value={bl}
+                      onChange={patch =>
+                        Object.entries(patch).forEach(([f, v]) => updBlock(i, f, v))
+                      }
+                    />
                   </div>
                 </div>
               )

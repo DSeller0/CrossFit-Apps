@@ -423,19 +423,20 @@ export function ScoreInputs({
   )
 }
 
-// The composed default: RPE · Escala · score. The order the three form surfaces already used.
+// The composed default: Escala · RPE · score — the order the athlete actually answers in
+// (#122): what did I scale, how hard was it, what was my time.
 export default function ScoreFields({ block, blockType, rounds, value, onChange, disabled, size }) {
   return (
     <>
-      <RpeRow
-        value={value.rpe}
-        onChange={n => onChange({ rpe: n })}
-        disabled={disabled}
-        size={size}
-      />
       <ScaleRow
         value={value.scale}
         onChange={sc => onChange({ scale: sc })}
+        disabled={disabled}
+        size={size}
+      />
+      <RpeRow
+        value={value.rpe}
+        onChange={n => onChange({ rpe: n })}
         disabled={disabled}
         size={size}
       />
