@@ -1,5 +1,7 @@
 # 58 — #119 · Criador's "+ sessão" opens the day's first session instead of a new one
 
+> ✅ Done: d1299e3 · 2026-08-03 — see BACKLOG.md
+
 ## Context
 
 From the user's 2026-08-03 report: *"When you hit the button, it keeps getting the first session of
