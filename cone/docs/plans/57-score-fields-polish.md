@@ -1,5 +1,7 @@
 # 57 — #122 + #123 · Score-fields polish (field order + the invisible DNF toggle)
 
+> ✅ Done: 0e812ac · 2026-08-03 — see BACKLOG.md
+
 > **Two backlog rows, one plan, deliberately.** Both live in `src/public/shared/ScoreFields.jsx`
 > and its `.module.css`, both are S, and both need the same live verification across the same five
 > logging surfaces plus four themes. Shipping them separately pays that verification twice for no
