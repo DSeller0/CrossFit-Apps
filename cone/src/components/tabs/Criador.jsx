@@ -200,7 +200,10 @@ function TrainingCreator({
     })
 
   // Clicking a day: open that day's session if there is one, otherwise start a new
-  // one there. Same gesture on the full grid and on the collapsed strip.
+  // one there. Same gesture on the full grid and on the collapsed strip — a DAY
+  // PICKER, not an add button. "+ sessão" wires straight to openNewSession
+  // (onNewSession below) instead, so it always opens blank even on a day that
+  // already has a session (#119/plans/58). Don't unify these back together.
   const pickDay = dateKey => {
     const first = (sessions[dateKey] || []).filter(boxFilter)[0]
     if (first) startEdit(first, dateKey)
@@ -806,6 +809,7 @@ function TrainingCreator({
               startEdit={startEdit}
               onDelete={del}
               onPickDay={pickDay}
+              onNewSession={openNewSession}
               gridMode={gridMode}
               setGridMode={setGridMode}
               onImport={() => setShowImport(true)}

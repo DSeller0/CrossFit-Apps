@@ -91,6 +91,7 @@ export function WeekGrid({
   startEdit,
   onDelete,
   onPickDay,
+  onNewSession,
   gridMode,
   setGridMode,
   onImport,
@@ -494,7 +495,7 @@ export function WeekGrid({
                       type="button"
                       className="wg-add"
                       aria-label={`Nova sessão em ${DAY_PT[di]} ${date.getDate()}`}
-                      onClick={() => onPickDay(dateKey)}
+                      onClick={() => onNewSession(dateKey)}
                     >
                       <i className="ti ti-plus" /> sessão
                     </button>
