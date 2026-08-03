@@ -14,7 +14,7 @@
 
 import { uid } from '../../../public/lib/wod.js'
 import { normExName, resolveExercise } from '../../../public/lib/registry.js'
-import { TYPE_CONFIG } from './blockModel.js'
+import { TYPE_CONFIG, goalKindFor, normalizeCardioEx } from './blockModel.js'
 
 // ── Normalization ─────────────────────────────────────────────────────────────
 // The coach writes on a phone: typographic quotes for minutes/seconds, en-dashes,
@@ -90,8 +90,11 @@ export function isTextEditable(block) {
 const RE_LADDER = /^(\d+(?:\s*-\s*\d+)+)(?=\s|$)/
 const RE_EVERY = /\b(?:a\s+cada|every)\s+(\d+)\s*'(?:\s*(\d+)\s*")?/i
 const RE_ROUNDS = /\b(\d+)\s*(?:rounds?|rds?|sets?|voltas?|s[ée]ries?|ciclos?)\b/i
-const RE_CAP = /\b(?:tc|cap|time\s*cap)\s*(\d+)\s*(?::(\d{2})|')?/i
-const RE_TIME = /\b(\d+)\s*'(?:\s*(\d{1,2})\s*")?/
+// Decimals on purpose: `block.duration` is a bare minutes NUMBER (#93), and prod holds
+// values like 2.3 — without this the serialized `2.3'` reads back as a 3-minute cap
+// with a stray "2." note.
+const RE_CAP = /\b(?:tc|cap|time\s*cap)\s*(\d+(?:[.,]\d+)?)\s*(?::(\d{2})|')?/i
+const RE_TIME = /\b(\d+(?:[.,]\d+)?)\s*'(?:\s*(\d{1,2})\s*")?/
 const STRUCT_TYPES = [
   [/\bfor\s*time\b/i, 'For Time'],
   [/\bamrap\b/i, 'AMRAP'],
@@ -133,11 +136,11 @@ export function parseStructure(raw) {
     }
   }
   if ((m = s.match(RE_CAP))) {
-    out.duration = m[1]
+    out.duration = dec(m[1])
     eat(m)
   }
   if (!out.duration && (m = s.match(RE_TIME))) {
-    out.duration = m[1]
+    out.duration = dec(m[1])
     eat(m)
   }
   out.rest = s.replace(/\s+/g, ' ').trim()
@@ -145,7 +148,10 @@ export function parseStructure(raw) {
 }
 
 // ── Exercise lines ────────────────────────────────────────────────────────────
-const RE_SLOT = /^([A-Z])\s*[).\-–]?\s+(?=\S)/
+// A slot letter is either punctuated (`B) …`, `C - …`) or bare — and a BARE one has to
+// be followed by a quantity, or the first word of every exercise starting with a lone
+// capital is eaten as a letter (`V ups Alt` → slot V + "ups Alt", live on prod).
+const RE_SLOT = /^([A-Z])(?:\s*[).\-–]\s*(?=\S)|\s+(?=\d))/
 const RE_REST = /^(?:rest|descanso)\b\s*(.*)$/i
 const RE_NOTE_PAREN = /\s*\(([^()]*)\)\s*$/
 const RE_META = /^(?:meta|alvo|goal)\s*:\s*(.+)$/i
@@ -157,10 +163,14 @@ const RE_Q_SETS_DIST = new RegExp(
   `^(\\d+)\\s*[x×]\\s*(\\d+(?:[.,]\\d+)?)\\s*${DIST_UNITS}(?![a-zA-Z])\\s*`,
   'i',
 )
+// `3x20"` — sets times a HOLD. Must be tried before the plain sets×reps form, which
+// would otherwise take `3x 20` and leave the quote mark stranded on the name.
+const RE_Q_SETS_HOLD = /^(\d+)\s*[x×]\s*(\d+\s*['"]{1,2})\s*/
 const RE_Q_SETS_REPS = /^(\d+)\s*[x×]\s*(\d+)(?![a-zA-Z\d])\s*/
 const RE_Q_SETS_ONLY = /^(\d+)\s*[x×]\s+/
 const RE_Q_DIST = new RegExp(`^(\\d+(?:[.,]\\d+)?)\\s*${DIST_UNITS}(?![a-zA-Z])\\s*`, 'i')
-const RE_Q_HOLD = /^(\d+\s*['"])\s*/
+// `{1,2}` so the coach's doubled-apostrophe seconds (`20''`) survives whole.
+const RE_Q_HOLD = /^(\d+\s*['"]{1,2})\s*/
 const RE_Q_LADDER = /^(\d+(?:\s*-\s*\d+)+)\s+/
 const RE_Q_REPS = /^(\d+)\s+/
 
@@ -174,20 +184,49 @@ const RE_GENDER_PAIR =
   /(?:^|[\s–—-])((?:\d+(?:[.,]\d+)?|-)\s*\/\s*(?:\d+(?:[.,]\d+)?|-))\s*(kg|lb|kgs|lbs)?\s*$/i
 const RE_LOAD_LIST = /(?:^|\s)(\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)*)\s*(kg|lb)s?\s*$/i
 
+// `3x60kg / 2x70%` — the pair form, the one notation that carries PER-STEP reps and
+// MIXED units (#121a). EVERY token carries its own unit, which is exactly what keeps it
+// off `60/70/80kg` (one trailing unit) and off the gender pair (`–`-separated, and its
+// halves carry no unit of their own). Tried first in takeLoad because it is the most
+// specific of the load forms, not despite it.
+const LOAD_UNIT = '(?:kgs?|lbs?|%)'
+// A step's reps is digits and separators only (`2`, `2+1`, `21-15-9`) — never a word, or
+// an exercise name would be read as one.
+const STEP_REPS = '\\d[\\d+\\-,.]*'
+const PAIR_TOK = `(?:${STEP_REPS}\\s*[x×]\\s*)?\\d+(?:[.,]\\d+)?\\s*${LOAD_UNIT}`
+const RE_PROG_PAIRS = new RegExp(`(?:^|\\s)(${PAIR_TOK}(?:\\s*\\/\\s*${PAIR_TOK})+)\\s*$`, 'i')
+const RE_PAIR_TOK = new RegExp(
+  `^(?:(${STEP_REPS})\\s*[x×]\\s*)?(\\d+(?:[.,]\\d+)?)\\s*(${LOAD_UNIT})$`,
+  'i',
+)
+const RE_STEP_REPS_OK = new RegExp(`^${STEP_REPS}$`)
+
 const SCALE_ORDER = ['RX', 'Inter', 'SC']
-// Steps carry no `reps` of their own: groupProgressionSteps falls back to ex.reps,
-// and that is the shape IntensityInput actually writes (its per-step reps field is
-// placeholder-only until the coach overrides a single step). v1 limitation: a
-// progression whose steps have DIFFERENT reps has no notation here, so it can't
-// round-trip — the loads survive, the per-step reps collapse to the exercise's.
+// Steps usually carry no `reps` of their own: groupProgressionSteps falls back to
+// ex.reps, and that is the shape IntensityInput writes until the coach overrides a
+// single step. When they DO differ — or the units are mixed — the pair form
+// (RE_PROG_PAIRS) carries both; this builder is the uniform case.
 const progSteps = (loads, unit) => ({
   mode: 'progression',
   steps: loads.map(l => ({ reps: '', load: dec(l), unit })),
 })
+const stepUnit = u => (/^%$/.test(u) ? '% do RM' : u.toLowerCase().replace(/s$/, ''))
 
 // Returns { intensity, rest } — `rest` is the line with the load removed.
 function takeLoad(tail) {
   let m
+  if ((m = tail.match(RE_PROG_PAIRS))) {
+    const steps = m[1]
+      .split('/')
+      .map(t => t.trim().match(RE_PAIR_TOK))
+      .filter(Boolean)
+      .map(t => ({ reps: t[1] || '', load: dec(t[2]), unit: stepUnit(t[3]) }))
+    if (steps.length > 1)
+      return {
+        intensity: { mode: 'progression', steps },
+        rest: tail.slice(0, tail.length - m[0].length).trim(),
+      }
+  }
   if ((m = tail.match(RE_PROG_PCT_CONCAT))) {
     const loads = m[1].split('%').filter(Boolean)
     return {
@@ -284,18 +323,40 @@ export function parseExerciseLine(raw) {
   const rest = s.match(RE_REST)
   if (rest) return { ex: { ...ex, name: 'Rest', reps: normLine(rest[1]) }, hadSlot, isRest: true }
 
+  // `<nome>: <complexo>` — a complex's own name (ExerciseRow's "Nome do complexo",
+  // dropped on every round trip until #121a). Claimed only when the remainder really
+  // parses as a complex, so it can't fire on a plain exercise; Obs:/Meta:/Zona: are
+  // matched on the line before this ever runs, so it can't collide with them either.
+  const named = s.match(/^([^:]{1,60}?)\s*:\s+(?=\S)(.+)$/)
+  if (named) {
+    const inner = parseExerciseLine(named[2])
+    if (inner.ex.isComplex)
+      return { ex: { ...inner.ex, name: named[1].trim() }, hadSlot, isRest: false }
+  }
+
   const note = s.match(RE_NOTE_PAREN)
   if (note) {
     ex.note = note[1].trim()
     s = s.slice(0, s.length - note[0].length).trim()
   }
 
+  // A line that is ENTIRELY a load — the coach's bare load list — must not have its first
+  // token eaten as a leading quantity: `3x55% / 3x65% / 3x70%` is three loads with per-step
+  // reps, not "3 sets × 55 reps" followed by two.
+  const bareLoad = (l => l.intensity && !l.rest)(takeLoad(s.trim()))
+
   let m,
     leadReps = ''
-  if ((m = s.match(RE_Q_SETS_DIST))) {
+  if (bareLoad) {
+    /* the whole line is the load; takeLoad below claims it */
+  } else if ((m = s.match(RE_Q_SETS_DIST))) {
     ex.sets = m[1]
     ex.dist = dec(m[2])
     ex.distUnit = m[3].toLowerCase()
+    s = s.slice(m[0].length)
+  } else if ((m = s.match(RE_Q_SETS_HOLD))) {
+    ex.sets = m[1]
+    ex.reps = m[2].replace(/\s+/g, '')
     s = s.slice(m[0].length)
   } else if ((m = s.match(RE_Q_SETS_REPS))) {
     ex.sets = m[1]
@@ -365,14 +426,36 @@ export function parseGoal(raw) {
     const max = parseTimeToken(m[2].trim())
     if (min && max) return { kind: 'time', min, max }
   }
-  if ((m = s.match(/^(\d+)\s*(?:rounds?|rds?|voltas?)\b/i))) return { kind: 'rounds', min: +m[1] }
+  // `min` stays a STRING: GoalInput writes strings and goalOutcome coerces with
+  // Number(), so a goal typed in Texto mode and one typed in Detalhado mode are the
+  // same object — #110's type-mismatch family, not a behavior change.
+  if ((m = s.match(/^(\d+)\s*(?:rounds?|rds?|voltas?)\b(?:\s*\+\s*(\d+)\s*reps?\b)?/i)))
+    return { kind: 'rounds', min: m[1], ...(m[2] ? { reps: m[2] } : {}) }
+  if ((m = s.match(/^(\d+)\s*reps?\b/i))) return { kind: 'rounds', reps: m[1] }
   const one = parseTimeToken(s)
   if (one && /['":]/.test(s)) return { kind: 'time', min: one }
   return { kind: 'text', text: s }
 }
+
+// `goalKindFor` makes the goal's shape a function of the block's TYPE (#10), and
+// GoalInput:20 drops any goal whose kind doesn't match — so `Meta: sub 10'` on a Skill
+// block was promoted to a time and then rendered as an EMPTY Meta field. One-directional
+// on purpose: a parse can be demoted to the coach's own sentence, never promoted into a
+// scoring axis the line doesn't carry.
+function coerceGoal(goal, type, raw) {
+  if (!goal) return undefined
+  return goalKindFor(type) === 'text' && goal.kind !== 'text' ? { kind: 'text', text: raw } : goal
+}
+
 export function serializeGoal(goal) {
   if (!goal) return null
-  if (goal.kind === 'rounds') return `${goal.min} rounds`
+  if (goal.kind === 'rounds')
+    return [
+      goal.min === undefined || goal.min === '' ? '' : `${goal.min} rounds`,
+      goal.reps ? `${goal.reps} reps` : '',
+    ]
+      .filter(Boolean)
+      .join(' + ')
   if (goal.kind === 'time') {
     const short = t => (t && t.endsWith(':00') ? `${t.slice(0, -3)}'` : t)
     if (goal.min && goal.max) {
@@ -404,6 +487,27 @@ function emptyParsedBlock() {
   }
 }
 
+// The one rule that separates a line that IS an exercise from a line that merely wears a
+// number — used by both the header probe and the structure probe (#130).
+//
+// It needs a leading quantity and a name after it: `Quem já faz tc 15'` and `Isabel` have
+// no quantity, so they stay the labels they are. And when the structure parse also
+// consumed something, the two must cover the SAME span: in `50' Run` structure took `50'`
+// and the exercise took `50'` too (leftover "Run" both ways) — it is a 50-second Run,
+// not a 50-minute cap plus an orphan note. In `3 sets cada letra` structure took `3 sets`
+// while the exercise could only take `3`, so it is a structure line with prose after it.
+function isExerciseNotStructure(line, st) {
+  const { ex } = parseExerciseLine(line)
+  if (ex.isComplex) return true
+  if (!ex.name || !(ex.reps || ex.dist || ex.sets)) return false
+  if (!st?.consumed) return true
+  // The structure tokens have to be a LEADING run, so what's left is the line's own tail.
+  // `3x 20" Handstand Hold` leaves `3x " Handstand Hold` — an interior bite out of the
+  // quantity, which means the line was never a structure line to begin with.
+  if (!normLine(line).endsWith(st.rest)) return true
+  return !!st.rest && ex.name === st.rest
+}
+
 // The first line of a group. Returns null when the line is not a header at all
 // (`knownType` mode, or a line with a clear exercise shape).
 function parseHeaderLine(raw, allowUnresolved) {
@@ -420,6 +524,7 @@ function parseHeaderLine(raw, allowUnresolved) {
     if (whole.consumed && !whole.rest)
       return { type: whole.type, labelParts: [], struct: whole, pureStructure: true }
     if (!allowUnresolved) return null
+    if (isExerciseNotStructure(line, whole)) return null
     return { type: null, labelParts: [line], struct: null, unresolved: true }
   }
 
@@ -493,9 +598,16 @@ function buildBlock(lines, o) {
   // Structure line: the line right after the header, unless the header WAS one.
   let struct = head?.struct || (head?.pureStructure ? head.struct || null : null)
   if (head?.pureStructure) struct = mergeStruct(struct || { rest: '' }, head.struct)
-  if (!head?.pureStructure && i < lines.length) {
+  // A keyword line is never the structure line, whatever numbers it carries — the body
+  // loop below owns Meta:/Obs:/Zona:, and letting the probe have first refusal turned
+  // `Meta: Corrida abaixo de 1'.` into a 1-minute duration plus a mangled note.
+  const isKeywordLine = l => RE_META.test(l) || RE_OBS.test(l) || RE_ZONA.test(l)
+  if (!head?.pureStructure && i < lines.length && !isKeywordLine(normLine(lines[i].raw))) {
     const st = parseStructure(lines[i].raw)
-    if (st.consumed) {
+    // A structure line, unless the line is really an exercise wearing a number — that is
+    // what turned `50' Run` into a 50-minute cap plus an orphan "Run" note and `2.3'`
+    // into a 3-minute one (#130, #93 from a new direction).
+    if (st.consumed && !isExerciseNotStructure(lines[i].raw, st)) {
       struct = struct ? mergeStruct(struct, st) : st
       audit.push({ lineNo: lines[i].lineNo, kind: 'structure', line: normLine(lines[i].raw) })
       if (st.rest) {
@@ -535,9 +647,14 @@ function buildBlock(lines, o) {
       delete block.typeUnresolved
     }
   }
+  // `WOD` is a section marker, not a format (TYPE_ALIASES → WOD_PENDING) — a bare one
+  // with no structure line has no type YET, and a block whose first line turned out to be
+  // an exercise never had a header at all. Both are "escolher tipo", not a silent '':
+  // typeUnresolved now means exactly "this block has no format yet" (#121d).
+  if (!block.type && !o.knownType) block.typeUnresolved = true
   // Warn only once the structure line has had its say: `Quem já faz !` followed by
   // `Emom 15'` resolves to EMOM, so warning at header-parse time cried wolf.
-  if (block.typeUnresolved)
+  if (block.typeUnresolved && lines.length)
     warn('type-unresolved', lines[0], 'Tipo de bloco não reconhecido — escolha um tipo')
 
   // Body
@@ -547,7 +664,8 @@ function buildBlock(lines, o) {
       line = normLine(l.raw)
     let m
     if ((m = line.match(RE_META))) {
-      block.goal = parseGoal(m[1])
+      // The raw text rides along so the coercion has a faithful fallback to demote to.
+      block.goal = coerceGoal(parseGoal(m[1]), block.type, normLine(m[1]))
       audit.push({ lineNo: l.lineNo, kind: 'meta', line })
       continue
     }
@@ -838,20 +956,40 @@ function loadStr(ins) {
   if (!ins || !ins.mode) return ''
   if (ins.mode === 'pct') return ins.pct ? `${ins.pct}%` : ''
   if (ins.mode === 'gender') {
+    // ⚠️ ONE unit for both genders: a per-gender unit split has blast radius ZERO on
+    // prod (0 of 78 gender-intensity exercises, measured #121a/C-1 and pinned in a test)
+    // and giving it notation would destabilize the scale-vs-gender axis divergence above.
+    // Recorded deliberately — do not "fix" this without re-measuring first.
     const unit = ins.Masculino_unit || ins.Feminino_unit || 'kg'
-    const pairs = SCALE_ORDER.map(sc => [ins[`Masculino_${sc}`], ins[`Feminino_${sc}`]])
-      .filter(([m, f]) => m || f)
+    const cells = SCALE_ORDER.map(sc => [ins[`Masculino_${sc}`], ins[`Feminino_${sc}`]])
+    const last = cells.reduce((n, [m, f], i) => (m || f ? i : n), -1)
+    if (last < 0) return ''
+    // Pairs are POSITIONAL (RX · Inter · SC), so a missing middle scale has to hold its
+    // slot with `-/-` — dropping it made an SC load read back as Inter (prod, 5 rows).
+    return cells
+      .slice(0, last + 1)
       .map(([m, f]) => `${m || '-'}/${f || '-'}${unit}`)
-    return pairs.join(' – ')
+      .join(' – ')
   }
   if (ins.mode === 'progression') {
-    const steps = ins.steps || [],
-      loads = steps.map(s => s.load).filter(Boolean)
-    if (!loads.length) return ''
-    const unit = steps[0]?.unit || '% do RM'
-    return unit === '% do RM' ? `${loads.join('/')}%` : `${loads.join('/')}${unit}`
+    const steps = (ins.steps || []).filter(s => s.load)
+    if (!steps.length) return ''
+    const u = s => ((s.unit || '% do RM') === '% do RM' ? '%' : s.unit)
+    const rep = s => String(s.reps || '').replace(/\s+/g, '')
+    const mixedUnits = new Set(steps.map(s => s.unit || '% do RM')).size > 1
+    // Reps ride along only when every one of them is expressible — a step whose reps is
+    // free text has no notation here and would come back as part of the exercise name.
+    const anyReps =
+      steps.some(s => rep(s)) && steps.every(s => !rep(s) || RE_STEP_REPS_OK.test(rep(s)))
+    // The pair form is the only one that carries per-step reps and mixed units; the
+    // plain list stays the default so nothing the coach already writes changes shape.
+    if (mixedUnits || anyReps)
+      return steps.map(s => `${anyReps && rep(s) ? `${rep(s)}x` : ''}${s.load}${u(s)}`).join(' / ')
+    return `${steps.map(s => s.load).join('/')}${u(steps[0])}`
   }
-  if (ins.mode === 'cardio') return '' // legacy; distance lives in dist/distUnit (#37)
+  // Defensive only: serializeExercise runs normalizeCardioEx first, so a legacy cardio
+  // exercise's distance is already in dist/distUnit by the time this sees it (#37/#127).
+  if (ins.mode === 'cardio') return ''
   return ''
 }
 
@@ -872,21 +1010,61 @@ function volStr(ex) {
 }
 
 export function serializeExercise(ex, { letter } = {}) {
-  const pre = letter ? `${letter} ` : ''
-  if (ex.name === 'Rest') return `${pre}Rest${ex.reps ? ` ${ex.reps}` : ''}`
-  if (ex.isComplex) {
-    const movs = (ex.complexMovements || []).map(mv => `${mv.reps || ''} ${mv.name || ''}`.trim())
-    // Two-line form when the complex carries progression loads (the coach's own
-    // shape); the inline `+` form otherwise.
-    const load = loadStr(ex.intensity)
-    if (ex.intensity?.mode === 'progression' && load) return `${movs.join('\n')}\n${load}`
-    const head = ex.sets ? `${ex.sets}x${movs[0] || ''}` : movs[0] || ''
-    return [pre + [head].concat(movs.slice(1)).join(' + '), load].filter(Boolean).join(' ')
+  // Legacy `intensity.mode:'cardio'` carried the distance in the load slot (#37) — run
+  // it through the canonical lazy normalizer rather than hand-rolling a fallback in
+  // volStr, or `5m HSW` serializes to a bare `HSW` (#127, 41 prod exercises).
+  const x = normalizeCardioEx(ex)
+  // A bare slot letter needs a quantity after it to read back as one (RE_SLOT), so an
+  // exercise that starts with a word takes the punctuated form instead.
+  const withLetter = body => (letter ? `${letter}${/^\d/.test(body) ? '' : ')'} ${body}` : body)
+  if (x.name === 'Rest') return withLetter(`Rest${x.reps ? ` ${x.reps}` : ''}`)
+  // A note is ONE line: an embedded newline splits the exercise in two on the way back,
+  // and a second line beginning `Meta:` is then eaten as the block's goal (live on prod).
+  const note = String(x.note || '')
+    .replace(/\s*\n\s*/g, ' ')
+    .trim()
+  const tail = note ? ` (${note})` : ''
+  const movs = x.isComplex
+    ? (x.complexMovements || []).map(mv => `${mv.reps || ''} ${mv.name || ''}`.trim())
+    : []
+  // A "complex" with fewer than two real movements is a hollow one (prod has them: the
+  // flag was set, the movement rows left blank) — serialize it as the plain exercise it
+  // effectively is, or the whole row is emitted as blank lines and disappears.
+  if (movs.filter(Boolean).length >= 2) {
+    const load = loadStr(x.intensity)
+    // A complex's own name only gets the `<nome>:` prefix when it can't be read back as
+    // anything else. Prod's `name` field holds free text as often as a real name ("5
+    // Rounds", "C- 2x 1 Hang power +1 Low Squat"), and emitting THAT ahead of a colon
+    // makes the line ambiguous with a header, a slot letter and the complex itself.
+    const raw = String(x.name || '').trim()
+    const name =
+      raw && !/[+:]/.test(raw) && !/^\d/.test(raw) && !parseStructure(raw).consumed ? raw : ''
+    const steps =
+      x.intensity?.mode === 'progression' ? (x.intensity.steps || []).filter(s => s.load) : []
+    // splitComplex only reads the inline form back as a complex when EVERY movement
+    // carries its own reps.
+    const inlineOk = movs.length >= 2 && movs.every(m => /^\d/.test(m))
+    // The coach's own two-line shape carries none of `sets`, the complex name or a note —
+    // so it is used only when there is none of the three to lose. `sets` in particular
+    // came back rewritten to the step count on every round trip (#130, 15 prod rows).
+    const twoLine =
+      !!load &&
+      !!steps.length &&
+      !raw &&
+      !note &&
+      (!x.sets || String(x.sets) === String(steps.length))
+    if (twoLine || !inlineOk) return withLetter(movs.join('\n') + (load ? `\n${load}` : '')) + tail
+    const head = x.sets ? `${x.sets}x${movs[0]}` : movs[0]
+    const body = [[head].concat(movs.slice(1)).join(' + '), load].filter(Boolean).join(' ')
+    return withLetter(name ? `${name}: ${body}` : body) + tail
   }
-  return [pre + [volStr(ex), ex.name].filter(Boolean).join(' '), loadStr(ex.intensity)]
-    .filter(Boolean)
-    .join(' ')
-    .concat(ex.note ? ` (${ex.note})` : '')
+  return (
+    withLetter(
+      [[volStr(x), x.name].filter(Boolean).join(' '), loadStr(x.intensity)]
+        .filter(Boolean)
+        .join(' '),
+    ) + tail
+  )
 }
 
 function serializeStations(block) {
@@ -909,15 +1087,22 @@ export function serializeBlock(block, opts = {}) {
   const type = block.type || ''
   const label = block.label && block.label !== type ? block.label : ''
   if (header) {
-    const h = block.typeUnresolved ? block.label || '' : [type, label].filter(Boolean).join(' – ')
+    // Keyed on the TYPE, not on `typeUnresolved`: a block imported from text and then
+    // given a type in the block bar keeps a stale `typeUnresolved:true` in storage, and
+    // honouring it silently dropped the type it now has (prod, 2026-08-03 Core).
+    const h = type ? [type, label].filter(Boolean).join(' – ') : String(block.label || '').trim()
     if (h) out.push(h)
   }
 
   const exs = block.exercises || []
-  const ladderShared =
-    block.ladderMode && exs.length && exs.every(e => e.reps && e.reps === exs[0].reps)
-      ? exs[0].reps
-      : ''
+  // A ladder line is emitted whenever the block IS one and SOME exercise carries the
+  // scheme — not just the first, which on prod is routinely a distance row with no reps
+  // at all. Reps are then stripped only from the exercises that actually share it, so a
+  // MIXED ladder no longer loses `ladderMode` on the way back (#121a, 5 prod blocks) —
+  // buildBlock's fill only touches exercises with no reps and no distance of their own.
+  const ladderShared = block.ladderMode
+    ? String(exs.find(e => /[,-]/.test(String(e?.reps || '')))?.reps || '')
+    : ''
   const st = []
   if (ladderShared)
     st.push(
@@ -934,7 +1119,7 @@ export function serializeBlock(block, opts = {}) {
   if (block.type === 'Estações') out.push(...serializeStations(block))
   else
     exs.forEach((ex, i) => {
-      const e = ladderShared ? { ...ex, reps: '' } : ex
+      const e = ladderShared && String(ex.reps) === ladderShared ? { ...ex, reps: '' } : ex
       out.push(
         serializeExercise(e, { letter: block.lettered ? String.fromCharCode(65 + i) : null }),
       )

@@ -86,6 +86,18 @@ and surfaces it. Running C first would produce a reference that is wrong by the 
 
 # 61·A — Round-trip fidelity
 
+> ## ✅ DONE — shipped 2026-08-03
+> Every loss class reads **0 outside Estações**; the five still non-zero are all inside Estações
+> blocks and belong to 61·B. Baseline → after (same script both sides, `scripts/audit-text-roundtrip.mjs`):
+> cardio-volume **41 → 2**, progression-reps **57 → 0**, sets-rewrite **10 → 0**, first-line-eaten
+> **18 → 1**, duration-invented **5 → 1**, silent type-drift **3 → 0**, ladder-off **3 → 0**,
+> goal-kind **1 → 0**; blocks identical after a round trip **129/339 → 190/339**.
+> **A10 was dropped** (measured blast radius zero on prod) and **A7 landed with zero prod effect**
+> (all 6 prod complex "names" are free text the serializer must not emit) — both recorded in the
+> BACKLOG Done entry, which also lists the seven extra fixes the new audit turned up.
+> ⚠️ **61·B inherits the instrument**: `node scripts/audit-text-roundtrip.mjs` already reports B's
+> rows, and its "em Estações" column is what separates them from A's.
+
 ## Acceptance
 
 - `node scripts/audit-text-roundtrip.mjs` (new, A12) reports **0** in every loss class against live

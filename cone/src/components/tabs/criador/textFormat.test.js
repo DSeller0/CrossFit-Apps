@@ -339,7 +339,7 @@ describe('rest', () => {
 describe('goal', () => {
   test.each([
     ["11-12'", { kind: 'time', min: '11:00', max: '12:00' }],
-    ['5 rounds', { kind: 'rounds', min: 5 }],
+    ['5 rounds', { kind: 'rounds', min: '5' }],
     ["sub 10'", { kind: 'time', max: '10:00' }],
     ['o mais rápido possível', { kind: 'text', text: 'o mais rápido possível' }],
   ])('%s', (raw, expected) => expect(parseGoal(raw)).toEqual(expected))
@@ -357,7 +357,8 @@ describe('goal', () => {
       { kind: 'time', min: '11:00', max: '12:00' },
       { kind: 'time', min: '11:30', max: '12:00' },
       { kind: 'time', max: '10:00' },
-      { kind: 'rounds', min: 5 },
+      { kind: 'rounds', min: '5' },
+      { kind: 'rounds', min: '5', reps: '10' },
       { kind: 'text', text: 'sem cap' },
     ].forEach(goal => expect(parseGoal(serializeGoal(goal))).toEqual(goal))
   })
@@ -381,6 +382,201 @@ describe('never drops a line', () => {
   })
   test('Obs:/Nota: lines round-trip as block notes', () => {
     expect(blk('For Time\n10 Thruster\nObs: usar barra leve').notes).toBe('usar barra leve')
+  })
+})
+
+// ── Round-trip fidelity (plans/61·A) ──────────────────────────────────────────
+// One test per loss class the prod audit (scripts/audit-text-roundtrip.mjs) measured;
+// the CORPUS entries below prove the round trip, these pin the specific defect.
+describe('round-trip fidelity', () => {
+  test('A1 · a legacy cardio exercise keeps its distance instead of serializing bare', () => {
+    const ex = { name: 'HSW', intensity: { mode: 'cardio', cardioVal: '5', cardioUnit: 'm' } }
+    expect(serializeExercise(ex)).toBe('5m HSW')
+    expect(ex1(serializeExercise(ex))).toMatchObject({ dist: '5', distUnit: 'm', name: 'HSW' })
+  })
+
+  test('A1 · an exercise note is written on ONE line, so a "Meta:" second line is not eaten', () => {
+    const b = mkBlk({
+      type: 'For Time',
+      exercises: [mkEx({ name: 'Run', dist: '2000', note: 'Ou 1600m.\nMeta: 8 minutos.' })],
+    })
+    const text = serializeBlock(b)
+    expect(text.split('\n')).toHaveLength(2)
+    const again = blk(text)
+    expect(again.goal).toBeUndefined()
+    expect(again.exercises[0].note).toBe('Ou 1600m. Meta: 8 minutos.')
+  })
+
+  test('A2 · a bare number is NOT a time — the pre-plans/60 {min:"14"} shape stays text', () => {
+    // plans/60 closed the input that produced `{kind:'time',min:'14'}` and repaired the one
+    // prod row; this is the regression guard, not a live shape. See docs/plans/60.
+    expect(parseGoal('14')).toEqual({ kind: 'text', text: '14' })
+    expect(parseGoal("14'")).toEqual({ kind: 'time', min: '14:00' })
+  })
+
+  test('A2 · a Meta: line right after the header is not swallowed as structure', () => {
+    const b = blk("For Time\nMeta: correr abaixo de 1'.\n10 Thruster")
+    expect(b.duration).toBe('')
+    expect(b.notes).toBe('')
+    expect(b.goal).toEqual({ kind: 'text', text: "correr abaixo de 1'." })
+  })
+
+  test('A3 · a bare WOD with no format is "escolher tipo", never a silent ""', () => {
+    const { block, warnings } = parseBlock('WOD – -\n12 HSPU')
+    expect(block.type).toBe('')
+    expect(block.typeUnresolved).toBe(true)
+    expect(warnings.map(w => w.kind)).toContain('type-unresolved')
+    expect(block.exercises.map(e => e.name)).toEqual(['HSPU'])
+  })
+
+  test('A3 · a stale typeUnresolved never suppresses a type the block actually has', () => {
+    const b = { type: 'Core', label: 'Segunda feira', typeUnresolved: true, exercises: [] }
+    expect(serializeBlock(b).split('\n')[0]).toBe('Core – Segunda feira')
+  })
+
+  test('A4 · a block whose first line is an exercise keeps every exercise', () => {
+    const { block, warnings } = parseBlock('40" Prancha\n30" Hollow Hold\n20 Sit Up')
+    expect(block.exercises.map(e => e.name)).toEqual(['Prancha', 'Hollow Hold', 'Sit Up'])
+    expect(block.label).toBe('')
+    expect(warnings.map(w => w.kind)).toContain('type-unresolved')
+  })
+
+  test('A4 · a time-metric movement round-trips in every position', () => {
+    // structure-line position — `50' Run` is a 50-second Run, not a 50-minute cap
+    const b = blk("Cardio\n50' Run\n2' Bike")
+    expect(b.duration).toBe('')
+    expect(b.notes).toBe('')
+    expect(b.exercises).toEqual([
+      expect.objectContaining({ reps: "50'", name: 'Run' }),
+      expect.objectContaining({ reps: "2'", name: 'Bike' }),
+    ])
+  })
+
+  test('A4 · a structure line with prose after it is still a structure line', () => {
+    // The discriminator is the SPAN: structure ate `3 sets`, the exercise could only eat `3`.
+    expect(blk('Skill\n3 sets cada letra\n20" Hold')).toMatchObject({
+      rounds: '3',
+      notes: 'cada letra',
+    })
+  })
+
+  test('A5 · a complex whose sets is not the step count keeps its sets', () => {
+    const text = serializeBlock(CORPUS['complex whose sets is NOT the step count'])
+    expect(text.split('\n')[1]).toBe('2x1 Hang Squat Snatch + 1 Squat Snatch 60/70/80kg')
+    expect(blk(text).exercises[0].sets).toBe('2')
+  })
+
+  test('A6 · the pair form carries per-step reps and mixed units', () => {
+    expect(ex1('Back Squat 3x60kg / 2x70%').intensity).toEqual({
+      mode: 'progression',
+      steps: [
+        { reps: '3', load: '60', unit: 'kg' },
+        { reps: '2', load: '70', unit: '% do RM' },
+      ],
+    })
+  })
+
+  test('A6 · a uniform single-unit progression keeps the plain list — nothing the coach writes changes shape', () => {
+    expect(
+      serializeExercise(
+        mkEx({
+          name: 'Back Squat',
+          sets: '5',
+          reps: '5',
+          intensity: {
+            mode: 'progression',
+            steps: ['65', '70', '75'].map(load => ({ reps: '', load, unit: '% do RM' })),
+          },
+        }),
+      ),
+    ).toBe('5x5 Back Squat 65/70/75%')
+  })
+
+  test('A6 · a bare pair list is a load list, not a leading quantity', () => {
+    const b = blk('LPO\n3 Low Squat\n2 Hang power\n3x55% / 3x65%')
+    expect(b.exercises).toHaveLength(1)
+    expect(b.exercises[0].isComplex).toBe(true)
+    expect(b.exercises[0].intensity.steps.map(s => `${s.reps}x${s.load}`)).toEqual(['3x55', '3x65'])
+  })
+
+  test('A6 · a gender pair is never mistaken for the pair form', () => {
+    expect(ex1('8 Power Clean 60/45kg – 50/35kg').intensity.mode).toBe('gender')
+    expect(ex1('5x5 Back Squat 65/70/75%').intensity.mode).toBe('progression')
+  })
+
+  test('A7 · a named complex round-trips through the `<nome>:` form', () => {
+    const ex = ex1('Complexo A: 3x1 Hang Squat Snatch + 1 Squat Snatch 60/70/80kg')
+    expect(ex).toMatchObject({ name: 'Complexo A', sets: '3', isComplex: true })
+    expect(stripIds(ex.complexMovements)).toEqual([
+      { name: 'Hang Squat Snatch', reps: '1' },
+      { name: 'Squat Snatch', reps: '1' },
+    ])
+  })
+
+  test('A7 · a plain exercise with a colon in it is not turned into a named complex', () => {
+    const ex = ex1('10 Row 500m: forte')
+    expect(ex.isComplex).toBeFalsy()
+    expect(ex).toMatchObject({ reps: '10', name: 'Row 500m: forte' })
+  })
+
+  test('A8 · a mixed ladder keeps ladderMode, and only the shared reps are stripped', () => {
+    const text = serializeBlock(CORPUS['mixed ladder — only some exercises share the scheme'])
+    expect(text.split('\n')).toEqual(['For Time', '21-15-9', '200m Run', 'Thruster', '10 Pull Up'])
+    expect(blk(text).ladderMode).toBe(true)
+  })
+
+  test('A11 · per-gender units are deliberately NOT round-tripped (blast radius zero on prod)', () => {
+    // Measured: 0 of 78 gender-intensity prod exercises carry different units per gender
+    // (#121a/C-1). Pinned so a future session doesn't "fix" it blind — giving it notation
+    // would destabilize the scale-vs-gender axis divergence serializeExercise relies on.
+    const ins = {
+      mode: 'gender',
+      Masculino_RX: '60',
+      Feminino_RX: '45',
+      Masculino_unit: 'kg',
+      Feminino_unit: 'lb',
+    }
+    expect(serializeExercise(mkEx({ name: 'Clean', reps: '3', intensity: ins }))).toBe(
+      '3 Clean 60/45kg',
+    )
+  })
+
+  test('a lone capital is only a slot letter when a quantity follows it', () => {
+    expect(parseExerciseLine('V ups Alt')).toMatchObject({ hadSlot: false })
+    expect(ex1('V ups Alt').name).toBe('V ups Alt')
+    expect(parseExerciseLine('A 4 Strict C2B')).toMatchObject({ hadSlot: true })
+    expect(parseExerciseLine('A) Deslocamento com apoio')).toMatchObject({ hadSlot: true })
+  })
+
+  test('a lettered block re-emits letters even for a name-first exercise', () => {
+    const b = mkBlk({
+      type: 'Skill',
+      lettered: true,
+      exercises: [mkEx({ name: 'Deslocamento com apoio' }), mkEx({ name: 'Wall Walk', reps: '5' })],
+    })
+    expect(serializeBlock(b).split('\n')).toEqual([
+      'Skill',
+      'A) Deslocamento com apoio',
+      'B 5 Wall Walk',
+    ])
+    expect(blk(serializeBlock(b))).toMatchObject({ lettered: true })
+  })
+
+  test('a hollow complex (flag set, movements blank) is serialized as the exercise it is', () => {
+    const ex = mkEx({
+      name: '4-3-2-1 Snatch',
+      sets: '4',
+      isComplex: true,
+      complexMovements: [
+        { id: 'm', name: '', reps: '' },
+        { id: 'm', name: '', reps: '' },
+      ],
+    })
+    // The row survives as a row — which is the point; before this it serialized to two
+    // BLANK lines and disappeared. The ladder in the name is prescription the coach typed
+    // into the name field, so the grammar re-attributes it (a projection shift, stable).
+    expect(serializeExercise(ex)).toBe('4x 4-3-2-1 Snatch')
+    expect(ex1('4x 4-3-2-1 Snatch')).toMatchObject({ sets: '4', reps: '4' })
   })
 })
 
@@ -418,7 +614,7 @@ describe('the real coach week', () => {
     expect(days.map(d => d.blocks.map(b => b.goal).find(Boolean) || null)).toEqual([
       { kind: 'time', min: '11:00', max: '12:00' },
       { kind: 'time', min: '9:00', max: '10:00' },
-      { kind: 'rounds', min: 5 },
+      { kind: 'rounds', min: '5' },
       null,
       { kind: 'time', min: '11:00', max: '13:00' },
     ])
@@ -651,6 +847,138 @@ const CORPUS = {
       mkEx({ name: 'Handstand Hold', reps: '20"' }),
       mkEx({ name: 'Strict Pull Up', reps: '5', note: 'band' }),
       mkEx({ name: 'Rest', reps: "1'" }),
+    ],
+  }),
+  // ── plans/61·A · one entry per loss class the prod audit measured ────────────
+  'rounds goal with a reps tail': mkBlk({
+    type: 'AMRAP',
+    label: 'AMRAP',
+    duration: '12',
+    goal: { kind: 'rounds', min: '5', reps: '10' },
+    exercises: [mkEx({ name: 'Burpee', reps: '10' })],
+  }),
+  'goal demoted to text on a type with no scoring axis': mkBlk({
+    type: 'Skill',
+    label: 'Skill',
+    goal: { kind: 'text', text: "sub 10'" },
+    exercises: [mkEx({ name: 'Wall Walk', reps: '5' })],
+  }),
+  'progression with per-step reps': mkBlk({
+    type: 'Força',
+    label: 'Força',
+    exercises: [
+      mkEx({
+        name: 'Back Squat',
+        intensity: {
+          mode: 'progression',
+          steps: [
+            { reps: '3', load: '60', unit: 'kg' },
+            { reps: '2', load: '70', unit: 'kg' },
+            { reps: '1', load: '80', unit: 'kg' },
+          ],
+        },
+      }),
+    ],
+  }),
+  'progression with mixed units': mkBlk({
+    type: 'Força',
+    label: 'Força',
+    exercises: [
+      mkEx({
+        name: 'Push Press',
+        reps: '3',
+        intensity: {
+          mode: 'progression',
+          steps: [
+            { reps: '', load: '60', unit: 'kg' },
+            { reps: '', load: '70', unit: '% do RM' },
+          ],
+        },
+      }),
+    ],
+  }),
+  'named complex': mkBlk({
+    type: 'LPO',
+    label: 'LPO',
+    exercises: [
+      mkEx({
+        name: 'Complexo A',
+        sets: '3',
+        isComplex: true,
+        intensity: {
+          mode: 'progression',
+          steps: ['60', '70', '80'].map(load => ({ reps: '', load, unit: 'kg' })),
+        },
+        complexMovements: [
+          { id: 'm', name: 'Hang Squat Snatch', reps: '1' },
+          { id: 'm', name: 'Squat Snatch', reps: '1' },
+        ],
+      }),
+    ],
+  }),
+  'complex whose sets is NOT the step count': mkBlk({
+    type: 'LPO',
+    label: 'LPO',
+    exercises: [
+      mkEx({
+        sets: '2',
+        isComplex: true,
+        intensity: {
+          mode: 'progression',
+          steps: ['60', '70', '80'].map(load => ({ reps: '', load, unit: 'kg' })),
+        },
+        complexMovements: [
+          { id: 'm', name: 'Hang Squat Snatch', reps: '1' },
+          { id: 'm', name: 'Squat Snatch', reps: '1' },
+        ],
+      }),
+    ],
+  }),
+  'mixed ladder — only some exercises share the scheme': mkBlk({
+    type: 'For Time',
+    label: 'For Time',
+    ladderMode: true,
+    exercises: [
+      mkEx({ name: 'Run', dist: '200', distUnit: 'm' }),
+      mkEx({ name: 'Thruster', reps: '21,15,9' }),
+      mkEx({ name: 'Pull Up', reps: '10' }),
+    ],
+  }),
+  'gender scales with a gap — RX and SC, no Inter': mkBlk({
+    type: 'For Time',
+    label: 'For Time',
+    exercises: [
+      mkEx({
+        name: 'Power Clean',
+        reps: '8',
+        intensity: gender({
+          Masculino_RX: '60',
+          Feminino_RX: '45',
+          Masculino_SC: '40',
+          Feminino_SC: '30',
+        }),
+      }),
+    ],
+  }),
+  'sets times a hold': mkBlk({
+    type: 'Skill',
+    label: 'Skill',
+    exercises: [mkEx({ name: 'Handstand Hold', sets: '3', reps: '20"' })],
+  }),
+  'decimal duration (#93)': mkBlk({
+    type: 'LPO',
+    label: 'LPO',
+    duration: '2.3',
+    exercises: [mkEx({ name: 'Clean Pull', reps: '3' })],
+  }),
+  'no header at all — the first line is an exercise': mkBlk({
+    type: '',
+    label: '',
+    typeUnresolved: true,
+    exercises: [
+      mkEx({ name: 'Prancha', reps: '40"' }),
+      mkEx({ name: 'Hollow Hold', reps: '30"' }),
+      mkEx({ name: 'Sit Up', reps: '20' }),
     ],
   }),
   'unresolved type': mkBlk({

@@ -24,6 +24,8 @@ export function BlockTextEditor({ block, onApply, registry }) {
 
   // The text carries volume/exercises/goal/notes; identity and the fields the
   // block bar owns (label, zone, benchmark link) are preserved from the block.
+  // `goal` and `lettered` apply UNCONDITIONALLY: applied only when truthy, deleting the
+  // `Meta:` line left the old goal in place, so neither could ever be cleared (#121a).
   const merge = p => ({
     ...block,
     duration: p.duration,
@@ -31,8 +33,8 @@ export function BlockTextEditor({ block, onApply, registry }) {
     ladderMode: p.ladderMode,
     notes: p.notes,
     exercises: p.exercises,
-    ...(p.lettered ? { lettered: true } : {}),
-    ...(p.goal ? { goal: p.goal } : {}),
+    lettered: !!p.lettered,
+    goal: p.goal,
   })
 
   const commit = () => onApply(merge(parsed))

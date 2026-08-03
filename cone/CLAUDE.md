@@ -170,8 +170,42 @@ refinements: [docs/plans/36](./docs/plans/36-criador-text-mode.md).
   "nothing was lost" is asserted rather than hoped. Warning kinds: `type-unresolved` ·
   `unknown-exercise` · `complex-detected` · `interval-approximated` · `unparsed-line` ·
   `orphan-load` · `preamble`.
+- **`scripts/audit-text-roundtrip.mjs` (61·A) is the fidelity instrument** — read-only,
+  runs serialize→parse over every prod block in two passes (the pane direction and the
+  coach's header-less **paste** direction, which break differently) and prints a
+  per-class table. Run it before and after any grammar change. Two things make it
+  trustworthy and are worth preserving: it diffs at **path level**, so a loss can't hide
+  behind a class nobody thought to look for, and it separates loss from **projection
+  shift** by asking whether the text *stabilizes* (`t2 === t3`) rather than whether it
+  came back byte-identical — volume the coach typed into the NAME field ("30\" HSW HOLD",
+  "800m Run") moving into the reps/dist the grammar names is re-attribution, not loss,
+  and it is the single biggest bucket on prod. The **"em Estações"** column exists because
+  Estações is 61·B's scope, not A's.
 - **An unresolved block type is `type: ''` + `typeUnresolved: true`** — nothing is
-  guessed; the preview's chip is a button onto the existing `TypePicker`.
+  guessed; the preview's chip is a button onto the existing `TypePicker`. `typeUnresolved`
+  means exactly "no format yet", whether the header was unrecognised, was a bare `WOD`
+  section marker, or the block had no header at all. ⚠️ **`serializeBlock`'s header is
+  keyed on `block.type`, NOT on `typeUnresolved`** — a block imported from text and then
+  given a type in the block bar keeps a stale `typeUnresolved:true` in storage, and
+  honouring it silently dropped the type it now has.
+- **One predicate decides "exercise vs structure": `isExerciseNotStructure`.** A line is
+  an exercise when it has a leading quantity AND a name — and, when `parseStructure` also
+  bit, when the two cover the **same span**. `50' Run` (structure took `50'`, the exercise
+  took `50'` too) is a 50-second Run; `3 sets cada letra` (structure took `3 sets`, the
+  exercise could only take `3`) is a structure line with prose after it, and stays one.
+  Used by the header probe and the structure probe both, so they can't disagree.
+- **`3x60kg / 2x70%` is the pair form** — the only notation carrying per-step reps and
+  mixed units. Every token carries its own unit, which is what keeps it off `60/70/80kg`
+  (one trailing unit) and off the gender pair (`–`-separated). Tried FIRST in `takeLoad`.
+  ⚠️ A line that is *entirely* a load must skip the leading-quantity strip, or `3x55%` is
+  read as "3 sets × 55 reps".
+- **Gender scale pairs are POSITIONAL** (RX · Inter · SC), so a missing middle scale is
+  emitted as `-/-` to hold its slot — without it an SC load read back as Inter.
+- **`block.goal.kind` is a function of `block.type` via `goalKindFor`, one-directionally.**
+  A parse is demoted to the coach's own sentence on a block with no scoring axis (`Meta:
+  sub 10'` on a Skill block), never promoted into an axis the line doesn't carry. This is
+  what `GoalInput.jsx:20` needs — it drops any goal whose kind doesn't match the type.
+  `parseGoal` keeps `min` a **string** (#110's type-mismatch family).
 - **The week grid has two render modes, it is not a new view** (`WeekGrid` `gridMode` +
   `WeekSessionCard`): **Grade** = the real `ExerciseList` at size `tiny`; **Texto** =
   `serializeSession`. Same 7 columns, same `boxFilter`. Texto is the copyable one and
@@ -353,7 +387,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 
 - Dev: `supabase start` (once per Docker session) then `npm run dev` inside `cone/` — talks to the local stack, never prod
 - Build: `npm run build` → `dist/`
-- Tests: `npm test` (**580 tests across 17 files**, re-measured 2026-07-27 — the previous "530 / 14" was stale: wod, week, sessions, goals, registry, boxScope, exerciseGroups (`public/lib/`) · entries (`public/`) · meHelpers (`public/me/`) · pix, resultMappers, storage (`utils/`) · blockModel, textFormat (`criador/`) · exerciciosHelpers, resultadosHelpers (`components/tabs/`) · useClassTracking (`hooks/`))
+- Tests: `npm test` (**677 tests across 19 files**, re-measured 2026-08-03: wod, week, sessions, goals, registry, boxScope, exerciseGroups, resultEntry (`public/lib/`) · entries (`public/`) · meHelpers (`public/me/`) · pix, resultMappers, storage, config (`utils/`) · blockModel, textFormat (`criador/`) · exerciciosHelpers, resultadosHelpers (`components/tabs/`) · useClassTracking (`hooks/`))
 - Lint: `npm run lint` (`eslint.config.js`) — gated in CI (below), **clean at `--max-warnings 0`** since #108/plans/51 took the react-hooks correctness cluster 84 → 0 (2026-07-27). The five rules (`set-state-in-effect`/`refs`/`immutability`/`purity`/`static-components`) are back on the plugin's default `error`; there is no floor left to ratchet, so **a new warning fails CI**. Every surviving instance carries an inline disable with a written reason at the site — see the `eslint-disable` policy below
 - CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder); also runs `npm test` then `npm run lint` (plans/43, #32) — a lint regression fails the build same as a test failure
 
