@@ -6,6 +6,7 @@ import BlockTypePicker from './BlockTypePicker.jsx'
 import { benchmarkToTimerExes } from '../lib/benchmarks.js'
 import { fmtSecs, isTimeBlock, MODE_LBL, maskMMSS } from '../lib/wod.js'
 import { fmtDate } from '../lib/week.js'
+import { getBoxScope } from '../lib/boxScope.js'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const K_CFG = 'timer_config',
@@ -95,6 +96,7 @@ export default function Timer() {
   const initStatus = initSaved ? initSaved.status : fromSched && loadSavedCfg() ? 'ready' : 'cfg'
 
   const [gymName, setGymName] = useState('Cone')
+  const [box] = useState(() => getBoxScope())
   const [status, setStatus] = useState(initStatus)
   const [cfg, setCfg] = useState(initCfg)
   const [splits, setSplits] = useState(() => initSaved?.splits ?? [])
@@ -725,7 +727,7 @@ export default function Timer() {
           <div className={s.getreadyLbl}>Preparar</div>
           <div className={s.getreadyNum}>{getreadySecs}</div>
         </div>
-        <Nav active="timer" gymName={gymName} />
+        <Nav active="timer" gymName={gymName} box={box} />
       </div>
     )
   }
@@ -922,7 +924,7 @@ export default function Timer() {
           </div>
         )}
 
-        <Nav active="timer" gymName={gymName} />
+        <Nav active="timer" gymName={gymName} box={box} />
 
         {showTypePicker && (
           <BlockTypePicker
@@ -987,7 +989,7 @@ export default function Timer() {
             ▶ INICIAR
           </button>
         </div>
-        <Nav active="timer" gymName={gymName} />
+        <Nav active="timer" gymName={gymName} box={box} />
       </div>
     )
   }
@@ -1038,7 +1040,7 @@ export default function Timer() {
             </button>
           )}
         </div>
-        <Nav active="timer" gymName={gymName} />
+        <Nav active="timer" gymName={gymName} box={box} />
       </div>
     )
   }
@@ -1117,7 +1119,7 @@ export default function Timer() {
           })}
         </div>
       </div>
-      <Nav active="timer" gymName={gymName} />
+      <Nav active="timer" gymName={gymName} box={box} />
     </div>
   )
 }

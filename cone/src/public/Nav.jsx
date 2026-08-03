@@ -10,6 +10,10 @@ import {
 } from '@tabler/icons-react'
 import s from './Nav.module.css'
 
+// A QR-scanned page (?from=tv, the gym-wall code) is a scan-and-log flow mid-class —
+// full nav chrome, including Coach, would just get in the way, and the coach is
+// physically present at the gym anyway. Deliberate exception to "Coach is reachable
+// from every page" (#124/plans/59): decided, not an oversight.
 export function isNavHidden() {
   return new URLSearchParams(window.location.search).get('from') === 'tv'
 }
@@ -82,6 +86,9 @@ export default function Nav({ active, lockedId, gymName = '', box = null }) {
     return qs ? `${tab.href}?${qs}` : tab.href
   }
 
+  const timerTab = TABS.find(t => t.key === 'timer')
+  const coachTab = { href: 'cone/', lockable: false }
+
   return (
     <>
       {/* Mobile overflow overlay */}
@@ -91,16 +98,14 @@ export default function Nav({ active, lockedId, gymName = '', box = null }) {
       <div className={`${s.ovSheet}${ovOpen ? ' ' + s.ovSheetOpen : ''}`}>
         <div className={s.ovHandle} />
         <div className={s.ovGrid}>
-          <a className={s.ovTile} href="timer.html">
+          <a className={s.ovTile} href={hrefFor(timerTab)}>
             <IconClock className={s.ovIc} />
             <span className={s.ovLbl}>Timer</span>
           </a>
-          {!lockedId && (
-            <a className={s.ovTile} href="cone/">
-              <IconSettings className={s.ovIc} />
-              <span className={s.ovLbl}>Coach</span>
-            </a>
-          )}
+          <a className={s.ovTile} href={hrefFor(coachTab)}>
+            <IconSettings className={s.ovIc} />
+            <span className={s.ovLbl}>Coach</span>
+          </a>
         </div>
       </div>
 
@@ -135,16 +140,17 @@ export default function Nav({ active, lockedId, gymName = '', box = null }) {
           })}
         </div>
 
-        {/* Desktop-only extra links */}
-        {!lockedId && (
-          <div className={s.sideExtra}>
-            <div className={s.sep} />
-            <a className={s.btn} href="cone/">
-              <IconSettings className={s.ic} />
-              <span>Coach</span>
-            </a>
-          </div>
-        )}
+        {/* Desktop-only extra links. Coach is always shown here — the SPA is already
+            gated by AuthContext's OTP + is_allowed_user(), so hiding the link is not
+            a security boundary, only tidiness that used to misfire whenever lockedId
+            was set by ordinary in-page athlete selection (not just a shared-link lock). */}
+        <div className={s.sideExtra}>
+          <div className={s.sep} />
+          <a className={s.btn} href={hrefFor(coachTab)}>
+            <IconSettings className={s.ic} />
+            <span>Coach</span>
+          </a>
+        </div>
       </nav>
     </>
   )
