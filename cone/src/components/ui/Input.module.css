@@ -16,7 +16,13 @@
   width:100%;
   background:var(--bg);
   color:var(--text);
-  border:1px solid var(--divider);
+  /* --border, not --divider: a control's own outline is what identifies it as a
+     control. The two tokens were byte-identical until #137/plans/65, so this file
+     and MaskedTimeInput picked one and Card/Button.secondary/ScoreFields' .input
+     picked the other with no visible difference. Now there is one — and a canonical
+     Input outlined more faintly than the Card around it (or than the ScaleBtn beside
+     it) is the inversion #134 reports, one level up. */
+  border:1px solid var(--border);
   border-radius:var(--radius-sm);
   outline:none;
   -webkit-appearance:none;

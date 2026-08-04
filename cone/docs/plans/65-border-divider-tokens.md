@@ -1,5 +1,38 @@
 # 65 — #137 · `--border` ≢ `--divider`, and `--red` fails contrast on the dark themes
 
+> ✅ Done: `<pending>` · 2026-08-04 — see BACKLOG.md
+>
+> **Values shipped** (all four themes; `--divider` unchanged, `--div` still its alias):
+> `--border` totk-dark `#4a3e30` · totk-light `#b4a490` · spirit-blossom `#4a3060` · sb-light `#c4a8d8`
+> — each the point on its own palette's `--div → --muted` ramp measuring **1.50:1 against `--divider`**,
+> which lands at 1.80–1.98:1 against `--bg` (divider: 1.18–1.33). **Token count verified still 29 per
+> theme with identical key sets.**
+> `--red`/`--err` (they move together; text/border only, never a fill): totk-dark `#c83030` **×1.25** →
+> `#fa3c3c`, spirit-blossom `#c82850` **×1.20** → `#f03060` — exact per-channel scalars, so the hue is
+> mathematically unchanged. The light themes already passed and were not touched. Worst surface
+> (`--stone2`) goes 3.23/3.35 → **4.76/4.58**.
+> sb-light `--teal`/`--accent`/`--cyan` `#1490a0` → `#0f727e` — one edit closing **two** cells:
+> `.rpeBtn.on` 3.80 → **5.63** (the one plans/57 deferred here) and `--teal` as body text 3.34 → **4.95**
+> (#14's). Confirms plans/57's call that `--gold-text` would not have helped.
+>
+> **Three deviations / discoveries worth carrying forward:**
+> 1. **The "each instance is a judgement call" discovery landed bigger than expected** — ~150 full-box
+>    borders in page-level CSS are on `--divider` vs ~28 on `--border`. Reclassifying them is a whole-app
+>    restyle, not an S. Only the **two shared primitives whose mismatch is visible side by side** were
+>    moved: `ui/Input`'s `.control` and `shared/MaskedTimeInput`'s `.control` (the latter is load-bearing —
+>    `ScoreFields`' `.timeField` *is* a MaskedTimeInput in the same `.numRow` as its `.input`). The rest is
+>    each page's own design-pass call, and CLAUDE.md now says so.
+> 2. **`--border` was NOT pushed to WCAG 1.4.11's 3:1** for control boundaries. On these palettes 3:1
+>    would put a card outline brighter than `--dim` — a far larger visual change than this plan decided.
+>    Recorded as a measured gap on #14's row instead.
+> 3. **#14's table gained a failure nobody had measured**: `--green` on sb-light at **2.93:1**.
+>    `--gold`/`--green`/`--muted`/`--dim` were left alone deliberately — palette-identity colors used
+>    app-wide, so moving them is #14's decision, not a scoped token repair.
+>
+> ⚠️ **The `design:cards` diff carries more than this change**: plans/64 shipped without regenerating
+> (`e47dec8` touched no `design/` file), so the 9 cards also pick up its `ConfirmReview` adoption in
+> `LogPane`/`DeskRegPane`. No #114 date drift this run; remaining noise is React `useId` churn.
+
 *Planned 2026-08-04 alongside plans/63/64/66. **Not executed in that session** — its own session.
 **Opus**: this is a token decision across four palettes, not a swap.*
 

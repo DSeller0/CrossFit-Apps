@@ -16,17 +16,30 @@
  * semantics in every theme but are tuned per palette for contrast on that
  * theme's background. Row tints are derived with color-mix() at the call site,
  * so there are 3 tokens here, not 6.
+ *
+ * --border vs --divider (#137 / plans/65, 2026-08-04) — these WERE byte-identical
+ * in all four themes, which made the design system's "--border = stronger (card
+ * outlines) / --divider = subtle (internal separators)" rule untrue in the code:
+ * every call site that "chose" between them chose nothing (the direct cause of
+ * #134, where a toggle at --divider is indistinguishable from an input at
+ * --border). They now differ, derived per palette rather than by one global
+ * delta, since two of the four are light themes where "stronger" means DARKER:
+ * each --border sits on its own palette's --div → --muted ramp at the point
+ * where it measures 1.50:1 against --divider, which lands it at 1.77–1.99:1
+ * against --bg in every theme. --divider itself is UNCHANGED (it is ~330 of the
+ * ~360 call sites — moving it would restyle the whole app), and --div stays its
+ * legacy alias. Token count is unchanged at 29 per theme: both already existed.
  */
 
 /* ── Fallback (totk-dark, no class) ─────────────────────────────────────── */
 :root{
   --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
   --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
-  --red:#c83030;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+  --red:#fa3c3c;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
   --font:'Cinzel',serif;--font-body:'Crimson Pro',serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
-  --divider:#2a231c;--border:#2a231c;--accent:#4ac8c0;--accent-text:#000;
+  --divider:#2a231c;--border:#4a3e30;--accent:#4ac8c0;--accent-text:#000;
   --text:#f0e8d0;--cyan:#4ac8c0;--sc-font:'Cinzel',serif;
-  --bg2:#161210;--bg3:#1e1a16;--err:#c83030;
+  --bg2:#161210;--bg3:#1e1a16;--err:#fa3c3c;
   --podium-1:#d8a840;--podium-2:#b8b8c4;--podium-3:#c07840;
 }
 
@@ -42,14 +55,20 @@
 }
 
 /* ── TotK Dark ───────────────────────────────────────────────────────────── */
+/* --red/--err: #c83030 measured 3.67:1 on --bg and only 3.23:1 on --stone2 (the
+   surface SessionTextPane's .warnRow actually renders on, inside .prevBlk) — the
+   LEAST legible text in a pane whose textarea is 14.8:1, and it is the one element
+   telling the coach something needs attention. Brightened by an exact ×1.25 on
+   every channel, so the hue is untouched: now 5.40 / 5.12 / 4.76 on bg/stone/stone2.
+   The light themes already passed and are unchanged (#137(b) / plans/65). */
 html.theme-totk-dark{
   --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
   --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
-  --red:#c83030;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+  --red:#fa3c3c;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
   --font:'Cinzel',serif;--font-body:'Crimson Pro',serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
-  --divider:#2a231c;--border:#2a231c;--accent:#4ac8c0;--accent-text:#000;
+  --divider:#2a231c;--border:#4a3e30;--accent:#4ac8c0;--accent-text:#000;
   --text:#f0e8d0;--cyan:#4ac8c0;--sc-font:'Cinzel',serif;
-  --bg2:#161210;--bg3:#1e1a16;--err:#c83030;
+  --bg2:#161210;--bg3:#1e1a16;--err:#fa3c3c;
   --podium-1:#d8a840;--podium-2:#b8b8c4;--podium-3:#c07840;
 }
 
@@ -59,32 +78,47 @@ html.theme-totk-light{
   --gold:#9a6c14;--gold2:#7a5008;--teal:#1c6860;--green:#1a6830;
   --red:#b83020;--cream:#1c1508;--sub:#503828;--muted:#7a6448;--dim:#a89070;
   --font:'Cinzel',serif;--font-body:'Crimson Pro',serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
-  --divider:#d4cab8;--border:#d4cab8;--accent:#1c6860;--accent-text:#fff;
+  --divider:#d4cab8;--border:#b4a490;--accent:#1c6860;--accent-text:#fff;
   --text:#1c1508;--cyan:#1c6860;--sc-font:'Cinzel',serif;
   --bg2:#f5f1e8;--bg3:#e8e2d4;--err:#b83020;
   --podium-1:#8a6010;--podium-2:#5c5c68;--podium-3:#8a5220;
 }
 
 /* ── Spirit Blossom Dark ─────────────────────────────────────────────────── */
+/* --red/--err: same fix as totk-dark — #c82850 measured 3.69:1 on --bg / 3.35:1 on
+   --stone2. Brightened by an exact ×1.20 on every channel (hue untouched): now
+   5.05 / 4.83 / 4.58. ⚠️ This palette is compressed at the bottom — its --dim is
+   1.75:1 on --bg, the worst cell in the whole system — so --border lands at 1.80:1,
+   about level with --dim rather than below it. That is #14's --dim problem showing
+   through, not a --border miscalibration; do not "fix" it by pulling --border back. */
 html.theme-spirit-blossom{
   --bg:#09070f;--stone:#100d1c;--stone2:#17122a;--div:#221638;
   --gold:#e05490;--gold2:#b83872;--teal:#38c4d0;--green:#50d890;
-  --red:#c82850;--cream:#ede4f8;--sub:#c4a0d0;--muted:#7d5090;--dim:#4a2d60;
+  --red:#f03060;--cream:#ede4f8;--sub:#c4a0d0;--muted:#7d5090;--dim:#4a2d60;
   --font:'Amarante',serif;--font-body:'Amarante',serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
-  --divider:#221638;--border:#221638;--accent:#38c4d0;--accent-text:#09070f;
+  --divider:#221638;--border:#4a3060;--accent:#38c4d0;--accent-text:#09070f;
   --text:#ede4f8;--cyan:#38c4d0;--sc-font:'Amarante',serif;
-  --bg2:#100d1c;--bg3:#17122a;--err:#c82850;
+  --bg2:#100d1c;--bg3:#17122a;--err:#f03060;
   --podium-1:#e8c060;--podium-2:#c0b8d8;--podium-3:#d08858;
 }
 
 /* ── Spirit Blossom Light ────────────────────────────────────────────────── */
+/* --teal/--accent/--cyan: #1490a0 was the one failing cell in the --accent-text
+   pressed pairing (white on teal = 3.80:1 — ScoreFields' .rpeBtn.on, and Button's
+   primary variant shares it), AND the same value failed as body text on --bg at
+   3.34:1 (#14's table). ONE token causes both, so darkening it fixes both: #0f727e
+   is white-on-teal 5.63 · on-bg 4.95 · on-stone2 4.72. A --gold-text token would
+   NOT have helped here — it is the --teal pairing that fails; gold's own worst cell
+   passes at 4.64:1. The other three themes' teal already passed and are unchanged.
+   (plans/57 measured this cell, recorded it in ScoreFields.module.css and deferred
+   it to #137 precisely because --accent/--accent-text is wider than one component.) */
 html.theme-spirit-blossom-light{
   --bg:#f4eefb;--stone:#ffffff;--stone2:#f0e8f8;--div:#e2d4f0;
-  --gold:#c83070;--gold2:#a02258;--teal:#1490a0;--green:#28a064;
+  --gold:#c83070;--gold2:#a02258;--teal:#0f727e;--green:#28a064;
   --red:#c02040;--cream:#1a0828;--sub:#4a2460;--muted:#7840a0;--dim:#9070b0;
   --font:'Amarante',serif;--font-body:'Amarante',serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
-  --divider:#e2d4f0;--border:#e2d4f0;--accent:#1490a0;--accent-text:#fff;
-  --text:#1a0828;--cyan:#1490a0;--sc-font:'Amarante',serif;
+  --divider:#e2d4f0;--border:#c4a8d8;--accent:#0f727e;--accent-text:#fff;
+  --text:#1a0828;--cyan:#0f727e;--sc-font:'Amarante',serif;
   --bg2:#ffffff;--bg3:#f0e8f8;--err:#c02040;
   --podium-1:#8a6414;--podium-2:#61596e;--podium-3:#95502a;
 }

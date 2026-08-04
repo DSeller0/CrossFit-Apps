@@ -17,7 +17,12 @@
   width:100%;
   background:var(--bg);
   color:var(--text);
-  border:1px solid var(--divider);
+  /* --border, matching Input.module.css's .control — see the note there (#137/plans/65).
+     This one is load-bearing beyond consistency: ScoreFields' .timeField IS a
+     MaskedTimeInput and sits in the same .numRow as its .input, which is on --border,
+     so leaving it on --divider would put two adjacent fields in one form at two
+     different border strengths. */
+  border:1px solid var(--border);
   border-radius:var(--radius-sm);
   outline:none;
   -webkit-appearance:none;

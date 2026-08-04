@@ -50,13 +50,15 @@
 
 /* --accent-text is DEFINED as the readable text for --accent (themes.css), and --accent
    equals --teal in all 4 themes — so this pairing looks correct by construction. It isn't
-   guaranteed by that definition, and in fact ISN'T here: measured (WCAG relative-luminance)
-   contrast is totk-dark 10.31:1, totk-light 6.57:1, spirit-blossom 9.51:1, but
-   spirit-blossom-light is 3.80:1 — below the 4.5:1 AA floor (#137(c)). That's a
-   --accent/--accent-text token pairing bug, not a ScoreFields one — Button's primary
-   variant uses the identical pair — so it's #137's token decision to fix (already scoped
-   Opus/S for exactly this class), not something an S-sized CSS-guard fix should absorb.
-   Recorded here rather than assumed fine, per the correction on this plan's BACKLOG row. */
+   guaranteed by that definition, and once wasn't: plans/57 measured spirit-blossom-light at
+   3.80:1, below the 4.5:1 AA floor, and deferred it to #137 because --accent/--accent-text
+   is wider than one component (Button's primary variant uses the identical pair).
+   ✅ FIXED in the token, not here (#137/plans/65, 2026-08-04): sb-light's --teal/--accent/
+   --cyan went #1490a0 → #0f727e, which took this cell to 5.63:1 and also cleared the same
+   token's separate 3.34:1 failure as body text on --bg. All four now measure
+   totk-dark 10.31 · totk-light 6.57 · spirit-blossom 9.51 · sb-light 5.63.
+   ⚠️ Re-measure both cells when #43 adds four more themes — the pairing is still a
+   per-palette coincidence, not something --accent-text's definition guarantees. */
 .rpeBtn.on {
   background: var(--teal);
   border-color: var(--teal);
@@ -95,8 +97,9 @@
    spirit-blossom 5.57:1, spirit-blossom-light 5.11:1 — all pass today, but totk-light has
    only ~0.14 of headroom. Recorded verified-and-intentional per #123 rather than adding a
    --gold-text token (29→30 per-theme count) for an S-sized fix; #43's new themes should
-   re-measure this before extending it, and a --gold-text token becomes worth its cost the
-   first time a theme fails here — as one already has for the --teal pairing above (#137(c)). */
+   re-measure this before extending it. ✅ #137/plans/65 confirmed --gold-text is still not
+   worth its cost: the cell that failed was the --teal one above, and it was fixable in
+   --teal itself — gold's own worst cell is untouched and still passes at 4.64:1. */
 .scaleBtn.on {
   background: var(--gold);
   border-color: var(--gold);
