@@ -1,6 +1,6 @@
 # 65 — #137 · `--border` ≢ `--divider`, and `--red` fails contrast on the dark themes
 
-> ✅ Done: `<pending>` · 2026-08-04 — see BACKLOG.md
+> ✅ Done: `5527586` · 2026-08-04 — see BACKLOG.md
 >
 > **Values shipped** (all four themes; `--divider` unchanged, `--div` still its alias):
 > `--border` totk-dark `#4a3e30` · totk-light `#b4a490` · spirit-blossom `#4a3060` · sb-light `#c4a8d8`
