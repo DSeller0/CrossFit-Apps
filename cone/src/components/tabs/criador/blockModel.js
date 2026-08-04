@@ -1,4 +1,4 @@
-import { uid } from '../../../public/lib/wod.js'
+import { uid, expandMMSS } from '../../../public/lib/wod.js'
 import { todayISO } from '../../../public/lib/week.js'
 import { resolveExercise } from '../../../public/lib/registry.js'
 
@@ -280,6 +280,37 @@ const GOAL_KIND = {
   AMRAP: 'rounds',
 }
 export const goalKindFor = type => GOAL_KIND[type] || 'text'
+
+// Complete a time goal's mm:ss (#139). `MaskedTimeInput` owns the expandMMSS-on-blur
+// contract (plans/60), but `GoalInput` persists on every keystroke — so a field that is
+// never blurred (flipping to ¶ Texto unmounts it, and no blur fires for a removed
+// element) leaves `min: '14'` in storage, which toSecs reads as 14 SECONDS. That
+// re-opens exactly what plans/60 closed: goalStr renders "14" and goalOutcome resolves
+// every finisher to 'missed'.
+//
+// Runs at the persistence boundary (`saveS`), NOT in GoalInput's onChange —
+// expandMMSS('1') is '01:00', so normalizing per keystroke makes the field untypable.
+// Returns the same object when there is nothing to complete, so a caller can map over
+// every block without churning identity. `serializeGoal` covers the other half: the
+// text pane projects UNSAVED blocks and never reaches this.
+export function normalizeGoal(goal) {
+  if (!goal || goal.kind !== 'time') return goal
+  const min = expandMMSS(goal.min || '') || undefined
+  const max = expandMMSS(goal.max || '') || undefined
+  if (min === goal.min && max === goal.max) return goal
+  const next = { ...goal }
+  if (min === undefined) delete next.min
+  else next.min = min
+  if (max === undefined) delete next.max
+  else next.max = max
+  return next
+}
+
+export const normalizeBlockGoals = blocks =>
+  (blocks || []).map(b => {
+    const goal = normalizeGoal(b.goal)
+    return goal === b.goal ? b : { ...b, goal }
+  })
 
 export function stationsCapStr(block) {
   if (block.type !== 'Estações') return null

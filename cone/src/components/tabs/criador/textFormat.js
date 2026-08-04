@@ -12,7 +12,7 @@
 // reported in `warnings`; `audit` carries one entry per non-blank input line so a
 // test can assert total coverage.
 
-import { uid } from '../../../public/lib/wod.js'
+import { uid, expandMMSS } from '../../../public/lib/wod.js'
 import { normExName, resolveExercise } from '../../../public/lib/registry.js'
 import { TYPE_CONFIG, goalKindFor, normalizeCardioEx } from './blockModel.js'
 
@@ -639,15 +639,22 @@ export function serializeGoal(goal) {
       .filter(Boolean)
       .join(' + ')
   if (goal.kind === 'time') {
+    // Complete a colonless value FIRST (#139). GoalInput persists on every keystroke and
+    // MaskedTimeInput only expands on blur, so a Meta typed as `14` and flipped straight
+    // to ¶ Texto arrives here bare — and `short()` below only shortens a `:00`-suffixed
+    // value, so it would emit `Meta: 14`, which parseGoal refuses to read as a time
+    // (it requires a ' " or :) and returns as {kind:'text'} — killing #117's badge.
+    // blockModel's normalizeBlockGoals covers the SAVED path; this covers the pane,
+    // which projects unsaved blocks and never reaches it.
+    const min = expandMMSS(goal.min || '')
+    const max = expandMMSS(goal.max || '')
     const short = t => (t && t.endsWith(':00') ? `${t.slice(0, -3)}'` : t)
-    if (goal.min && goal.max) {
-      const whole = goal.min.endsWith(':00') && goal.max.endsWith(':00')
-      return whole
-        ? `${goal.min.slice(0, -3)}-${goal.max.slice(0, -3)}'`
-        : `${goal.min}-${goal.max}`
+    if (min && max) {
+      const whole = min.endsWith(':00') && max.endsWith(':00')
+      return whole ? `${min.slice(0, -3)}-${max.slice(0, -3)}'` : `${min}-${max}`
     }
-    if (goal.max) return `sub ${short(goal.max)}`
-    if (goal.min) return short(goal.min)
+    if (max) return `sub ${short(max)}`
+    if (min) return short(min)
   }
   return goal.text || ''
 }

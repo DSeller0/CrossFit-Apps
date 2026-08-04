@@ -429,11 +429,36 @@ describe('round-trip fidelity', () => {
     expect(again.exercises[0].note).toBe('Ou 1600m. Meta: 8 minutos.')
   })
 
-  test('A2 · a bare number is NOT a time — the pre-plans/60 {min:"14"} shape stays text', () => {
-    // plans/60 closed the input that produced `{kind:'time',min:'14'}` and repaired the one
-    // prod row; this is the regression guard, not a live shape. See docs/plans/60.
+  test('A2 · a bare number is NOT a time — the parser side stays strict', () => {
+    // ⚠️ This test was written on a false premise (61·A): "plans/60 closed the input".
+    // It closed the BLUR path only — GoalInput persists on every keystroke, so
+    // `{kind:'time',min:'14'}` is a LIVE shape, not history (#139, plans/63). The
+    // parser rule below is still right and unchanged; what changed is that the
+    // SERIALIZER no longer emits a bare `14` for it — see the next test.
     expect(parseGoal('14')).toEqual({ kind: 'text', text: '14' })
     expect(parseGoal("14'")).toEqual({ kind: 'time', min: '14:00' })
+  })
+
+  test('#139 · an unblurred colonless Meta: still round-trips as a TIME', () => {
+    // The pane serializes UNSAVED blocks, so it sees exactly what GoalInput last wrote.
+    // serializeGoal completes the mm:ss itself rather than emitting `Meta: 14`, which
+    // parseGoal would hand back as {kind:'text'} — killing #117's badge for that block.
+    expect(serializeGoal({ kind: 'time', min: '14' })).toBe("14'")
+    expect(parseGoal(serializeGoal({ kind: 'time', min: '14' }))).toEqual({
+      kind: 'time',
+      min: '14:00',
+    })
+    // expandMMSS zero-pads and parseTimeToken strips the zero again, so a single digit
+    // makes ONE padding shift ('9' → "sub 09'" → '9:00') and is stable from there —
+    // the same "stabilizes rather than returns byte-identical" standard
+    // scripts/audit-text-roundtrip.mjs judges by. The time itself is unchanged, which
+    // is the only thing toSecs and goalOutcome read.
+    expect(serializeGoal({ kind: 'time', max: '9' })).toBe("sub 09'")
+    const once = parseGoal(serializeGoal({ kind: 'time', max: '9' }))
+    expect(once).toEqual({ kind: 'time', max: '9:00' })
+    expect(parseGoal(serializeGoal(once))).toEqual(once)
+    expect(serializeGoal({ kind: 'time', min: '11', max: '12' })).toBe("11-12'")
+    expect(serializeGoal({ kind: 'time', min: '11', max: '12:30' })).toBe('11:00-12:30')
   })
 
   test('A2 · a Meta: line right after the header is not swallowed as structure', () => {

@@ -7,6 +7,8 @@ import {
   stationsCapStr,
   loadBadgeStr,
   TYPE_CONFIG,
+  normalizeGoal,
+  normalizeBlockGoals,
 } from './blockModel.js'
 import { ALL_CATEGORIES } from '../../../public/lib/exerciseGroups.js'
 
@@ -258,5 +260,56 @@ describe('loadBadgeStr', () => {
 
   test('progression mode with no loads on any step → stepless arrow', () => {
     expect(loadBadgeStr({ intensity: { mode: 'progression', steps: [{ reps: '5' }] } })).toBe('↗')
+  })
+})
+
+// ── normalizeGoal (#139, plans/63) ────────────────────────────────────────────
+// GoalInput persists on every keystroke and MaskedTimeInput only completes the mm:ss
+// on blur, so a Meta typed as `14` and never blurred reaches storage bare — where
+// toSecs reads it as 14 SECONDS and goalOutcome resolves every finisher to 'missed'.
+// This runs at the save boundary. The projection half lives in serializeGoal.
+describe('normalizeGoal', () => {
+  test('completes a colonless min and max to mm:ss', () => {
+    expect(normalizeGoal({ kind: 'time', min: '14' })).toEqual({ kind: 'time', min: '14:00' })
+    expect(normalizeGoal({ kind: 'time', min: '11', max: '12' })).toEqual({
+      kind: 'time',
+      min: '11:00',
+      max: '12:00',
+    })
+    expect(normalizeGoal({ kind: 'time', max: '9' })).toEqual({ kind: 'time', max: '09:00' })
+  })
+
+  test('leaves an already-complete time untouched, by identity', () => {
+    const g = { kind: 'time', min: '11:30', max: '12:00' }
+    expect(normalizeGoal(g)).toBe(g)
+  })
+
+  test('never touches a rounds or text goal, or a missing one', () => {
+    const rounds = { kind: 'rounds', min: '5', reps: '10' }
+    const text = { kind: 'text', text: '14' }
+    expect(normalizeGoal(rounds)).toBe(rounds)
+    expect(normalizeGoal(text)).toBe(text)
+    expect(normalizeGoal(undefined)).toBeUndefined()
+    expect(normalizeGoal(null)).toBeNull()
+  })
+
+  test('an empty field stays absent rather than becoming an empty string', () => {
+    expect(normalizeGoal({ kind: 'time', min: '14', max: '' })).toEqual({
+      kind: 'time',
+      min: '14:00',
+    })
+    expect(normalizeGoal({ kind: 'time', min: '14', max: '' })).not.toHaveProperty('max')
+  })
+
+  test('normalizeBlockGoals maps a block list and keeps untouched blocks by identity', () => {
+    const clean = { id: 'a', goal: { kind: 'time', min: '11:00' } }
+    const dirty = { id: 'b', goal: { kind: 'time', min: '14' } }
+    const none = { id: 'c' }
+    const out = normalizeBlockGoals([clean, dirty, none])
+    expect(out[0]).toBe(clean)
+    expect(out[2]).toBe(none)
+    expect(out[1]).not.toBe(dirty)
+    expect(out[1].goal).toEqual({ kind: 'time', min: '14:00' })
+    expect(normalizeBlockGoals(undefined)).toEqual([])
   })
 })

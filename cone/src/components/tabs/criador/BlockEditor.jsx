@@ -46,6 +46,35 @@ export function BlockEditor({
   const capStr = stationsCapStr(block)
   const customName = block.label && block.label !== block.type ? block.label : ''
 
+  // The name field types into a local draft (#140). It used to render `customName`
+  // directly while trimming on every keystroke, which made a space UNTYPABLE — the
+  // trailing space of "Aquecimento " was stripped before the next character arrived,
+  // so the coach got "Aquecimentog" and had to go back and insert spaces by hand.
+  // Raw-on-change fixes that; the draft fixes the second hazard in the same field,
+  // which is that `customName` derives to '' the moment `label === type`, so typing a
+  // block's own type name ("WOD" into a WOD block) blanked it mid-word.
+  //
+  // ⚠️ Synced against what this field LAST SENT UP, not against `customName` itself —
+  // the parent transforms what we write (label → customName collapses to '' when it
+  // equals the type), so a plain `prev !== prop` sync would resync the draft back to ''
+  // on that very keystroke and defeat its own purpose. Comparing to `lastSent` means
+  // only a change from OUTSIDE this field (type switch, template apply, text import)
+  // resyncs. Still the render-phase form react-hooks/set-state-in-effect requires — an
+  // effect here fails CI; same shape as ExerciseCombobox's `query`.
+  const [nameDraft, setNameDraft] = useState(customName)
+  const [lastSent, setLastSent] = useState(customName)
+  if (lastSent !== customName) {
+    setLastSent(customName)
+    setNameDraft(customName)
+  }
+  // Commit raw on change so a name typed and never blurred is not lost (the #139
+  // lesson, same session); trim and fall back to the type on blur, which is where
+  // that normalization always belonged.
+  const commitName = label => {
+    setLastSent(label === block.type ? '' : label)
+    onUpdate({ ...block, label })
+  }
+
   // Keyboard equivalent of the drag handle (#14) — dragging is mouse-only, and a
   // block list you can't reorder without a pointer is a list half the coaches can't
   // reorder at all on a tablet.
@@ -396,10 +425,16 @@ export function BlockEditor({
                   <input
                     className="blk-name-input"
                     placeholder={`Nome personalizado (padrão: ${block.type})`}
-                    value={customName}
-                    onChange={e =>
-                      onUpdate({ ...block, label: e.target.value.trim() || block.type })
-                    }
+                    value={nameDraft}
+                    onChange={e => {
+                      setNameDraft(e.target.value)
+                      commitName(e.target.value)
+                    }}
+                    onBlur={e => {
+                      const label = e.target.value.trim() || block.type
+                      setNameDraft(label === block.type ? '' : label)
+                      commitName(label)
+                    }}
                     style={fch('label')}
                   />
                 </div>

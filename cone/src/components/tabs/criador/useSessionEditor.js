@@ -1,7 +1,12 @@
 import { useState } from 'react'
 import { uid, todayISO, loadRegistry, getTargets } from '../../../utils/storage'
 import { sessionBoxIds } from '../../../public/lib/boxScope.js'
-import { emptyS, normalizeLegacyCardio, materializeBlocks } from './blockModel.js'
+import {
+  emptyS,
+  normalizeLegacyCardio,
+  materializeBlocks,
+  normalizeBlockGoals,
+} from './blockModel.js'
 
 // ── useSessionEditor ──────────────────────────────────────────────────────────
 // Everything about THE OPEN SESSION: its form, its blocks, whether the editor is
@@ -157,7 +162,11 @@ export function useSessionEditor({ setSessions, defaultBoxIds, onOpened, onSaved
     const session = {
       ...form,
       date: dateKey,
-      blocks: materializeBlocks(normalizeLegacyCardio(blocks), loadRegistry()),
+      // The persistence boundary's normalization pipeline. `normalizeBlockGoals` (#139)
+      // completes a Meta: time the coach typed but never blurred — GoalInput persists on
+      // every keystroke, so `14` reaches here unexpanded and toSecs would read it as 14
+      // SECONDS. Last in the chain: it only touches `goal`, which the other two ignore.
+      blocks: normalizeBlockGoals(materializeBlocks(normalizeLegacyCardio(blocks), loadRegistry())),
       id: savedId,
     }
 

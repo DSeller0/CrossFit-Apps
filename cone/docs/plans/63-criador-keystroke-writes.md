@@ -1,5 +1,43 @@
 # 63 — #139 + #140 · Criador inputs that rewrite what the coach typed, per keystroke
 
+> ✅ Done: `<commit>` · 2026-08-04 — see BACKLOG.md
+>
+> Planned + executed 2026-08-04 in one session (S), alongside the plan files for 64–66.
+>
+> **Shipped as planned. Both #139 fixes landed** (they are complements, not alternatives — that
+> finding held up): `normalizeGoal`/`normalizeBlockGoals` in `blockModel.js` applied last in
+> `saveS`'s existing `materializeBlocks(normalizeLegacyCardio(…))` pipeline, and `serializeGoal`
+> completing `min`/`max` through `expandMMSS` before its own `short()`.
+>
+> **Two things learned at execution, both recorded in code:**
+> - 🔴 **The render-phase draft sync had to key on what the field LAST SENT UP, not on the derived
+>   prop.** The plan said "same shape as `ExerciseCombobox`'s `query`" — but the parent *transforms*
+>   what this field writes (`label` collapses to an empty `customName` when it equals the type), so a
+>   plain `prev !== prop` sync resyncs the draft to `''` on that very keystroke and **defeats the
+>   draft in the exact case it exists for**. Caught by reasoning through "WOD" typed into a WOD block
+>   before running it, not by the tests. `lastSent` is why the comment in `BlockEditor.jsx` is long.
+> - **`expandMMSS` zero-pads and `parseTimeToken` strips the zero again**, so a single-digit goal
+>   makes one padding shift (`'9'` → `"sub 09'"` → `'9:00'`) and is stable from there. That is the
+>   "stabilizes rather than returns byte-identical" standard `audit-text-roundtrip.mjs` already
+>   judges by, so it is pinned as such rather than "fixed" — the time itself never changes, and it is
+>   the only thing `toSecs`/`goalOutcome` read.
+>
+> **⚠️ The audit's `goal-kind` counter still reads 1, and that is the fix working, not the bug.**
+> It now reports `goal.min: "14" → "14:00"` — storage still holds the legacy bare value on the one
+> prod row, and the round trip *corrects* it instead of degrading it to `{kind:'text'}`. The counter
+> reaches 0 when the data is repaired; `scripts/repair-goal-time.mjs` printed the one-row SQL, which
+> was handed to the user (prod has no service-role key in this repo). **Re-run the audit after the
+> SQL is applied to confirm 0.**
+>
+> **Live-verified** against the local stack at 1280 (no service worker present — checked first):
+> `Aquecimento geral` typed left to right in one pass, space intact; clearing the field falls back to
+> the type; `For Time` typed into a For Time block is no longer blanked mid-word; `14` typed into
+> `Meta` and flipped to `¶ Texto` **without blurring** projected `Meta: 14'`; the same unblurred `14`
+> saved as `{kind:'time', min:'14:00'}`; the week grid's Texto mode renders
+> `For Time – Teste 139 / Thruster / Meta: 14'`. Test session created and deleted; 53 day keys
+> intact. 704 tests (+6) / lint 0 / `build:all` clean / `format` clean. Gallery opened —
+> `GoalInput` and `BlockTextEditor` render; no gallery-rendered markup changed, so no `design:cards`.
+
 ## Context
 
 Two bugs with **one root cause**: a Criador input does normalization work on **every keystroke** that
