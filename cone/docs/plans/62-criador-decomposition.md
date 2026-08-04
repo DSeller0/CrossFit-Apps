@@ -1,6 +1,30 @@
 # 62 — #74-C · `Criador.jsx` decomposition (pure move)
 
+> ✅ Done: `221aa54` (the move) + `69eb66a` (the `getWeek` fork) · 2026-08-04 — see BACKLOG.md
+>
 > Planned + executed 2026-08-04 in one session (M). Tier 2's last row.
+>
+> **Shipped as measured, with three deviations worth recording:**
+> - **Container landed at 389 raw lines**, not the 330–360 estimated (still under the 400 line at
+>   which the plan said to cut `CriadorModals.jsx`, so that cut was not made). The extra ~30 lines
+>   are the 🔴 comments the plan asked for at the sites that must not move.
+> - `CriadorConfirms.jsx` folds the **four identical inline `toLocaleDateString` calls** into one
+>   local `fmtDay` — same options object, same `''` for a missing key. A local dedupe inside moved
+>   code, not a behaviour change.
+> - `useSessionEditor` gained two named functions the plan implied but didn't name — `keepMetaDate`
+>   / `confirmMetaDate` (the move-day confirm's two inline handlers) and `openMetaEdit` — so
+>   `CriadorConfirms` and `SessionEditor` stay presentational.
+>
+> **The unused-directive prediction was right:** the preload effect's
+> `react-hooks/set-state-in-effect` disable went unused once `openNewSession` crossed the module
+> boundary and was removed; the `exhaustive-deps` one stayed.
+>
+> **One verification gap, stated:** the **linked-Benchmark locked-block** round trip could not be
+> driven live — the dev seed contains **no block with a `benchmarkRef`** (checked directly against
+> `cone_sessions_v1`, 52 date keys, 0 hits). It lives entirely inside the unchanged
+> `SessionTextPane` and is covered by `textFormat.test.js`'s `splitLockedBlocks`/`mergeLockedBlocks`
+> tests; what this session changed about it — where `onApply` is wired — was verified with a real
+> 7-block session including an Estações block.
 
 ## Context
 

@@ -35,6 +35,25 @@ Each page is a self-contained HTML file. Most use a React component mounted at `
 the editor renders only while a session is open (`editorOpen`, which `editing` alone
 can't carry — a *new* session is being edited but has no id/dateKey yet).
 
+**Decomposed #74-C/plans/62 (2026-08-04, pure move — 1198 → 379).** `Criador.jsx` now owns
+only the week around the editor, the composition order of the two, and the measurement that
+keeps both on screen. Everything else is in `criador/`: **hooks** `useSessionEditor` (form ·
+blocks · editing · editorOpen · isDirty · changedBlockFields · activeTemplateId · metaModal ·
+pendingDate · pendingClose · sessionMode, + start/new/close/commitMeta/**saveS**) ·
+`useBlockList` (add/copy/upd/del/reorder + collapsed · insertAtIdx · the drag refs) ·
+`useTemplates` (the list + the whole recurring generator) · `useBoxWarnings`; **components**
+`SessionEditor` (the editor Card, both header layouts) · `CriadorConfirms` (the 4 dialogs) ·
+`CriadorToolbar` · `TvPreviewPane`. Three rules that survived the split and must keep surviving:
+- 🔴 **`scrollToEditor` stays in the container** — it measures `--spa-sticky-top` plus the pinned
+  block's *live* height and needs both `editorRef` and `weekGridRef`. `useSessionEditor` receives
+  it as an injected **`onOpened`** callback and must never reach for it.
+- 🔴 **`saveS` writes the session; the container reveals it.** The hook does the `setSessions`
+  write and the target-week arithmetic, then calls **`onSaved({savedId, weekOffset})`** — the week
+  jump, the 2s highlight and the scroll are week-view state and stay in the container.
+- **`SessionEditor`/`CriadorConfirms` take the hook APIs whole** (`editor`, `blockList`,
+  `templates`) rather than 30 flat props. They are container-private surfaces, not gallery
+  components — don't "improve" them into a reusable prop contract they have no second consumer for.
+
 - **The week grid renders unconditionally** — an empty week is this page's empty
   state, with its day columns and their `+ sessão` affordances. (It used to be
   gated on `totalSessions > 0`.)
