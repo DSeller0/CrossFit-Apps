@@ -1,50 +1,39 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import { WodSlide } from '../../public/tv/slides.jsx'
-import {
-  uid,
-  toISO,
-  todayISO,
-  loadAthletes,
-  loadRegistry,
-  loadTemplates,
-  saveTemplates,
-  loadSettings,
-  saveSettings,
-  loadLocations,
-  getTargets,
-} from '../../utils/storage'
-import { APP_CONFIG } from '../../utils/config'
+import { todayISO, loadAthletes, loadRegistry, loadLocations } from '../../utils/storage'
 import { DAY_PT } from '../../public/lib/week.js'
 import { sessionBoxIds } from '../../public/lib/boxScope.js'
-import {
-  emptyS,
-  normalizeLegacyCardio,
-  materializeBlocks,
-  cloneBlocks,
-  emptyBlock,
-} from './criador/blockModel.js'
-import { BlockEditor } from './criador/BlockEditor'
+import { materializeBlocks } from './criador/blockModel.js'
 import { CriadorTypePicker } from './criador/TypePicker'
 import { WeekGrid } from './criador/WeekGrid'
 import { TemplatesModal } from './criador/TemplatesModal'
 import { RecurringModal } from './criador/RecurringModal'
-import { SessionTextPane } from './criador/SessionTextPane'
 import { WeekImportModal } from './criador/WeekImportModal'
 import { SessionMetaModal } from './criador/SessionMetaModal'
+import { CriadorToolbar } from './criador/CriadorToolbar.jsx'
+import { CriadorConfirms } from './criador/CriadorConfirms.jsx'
+import { SessionEditor } from './criador/SessionEditor.jsx'
+import { TvPreviewPane } from './criador/TvPreviewPane.jsx'
+import { useSessionEditor } from './criador/useSessionEditor.js'
+import { useBlockList } from './criador/useBlockList.js'
+import { useTemplates } from './criador/useTemplates.js'
+import { useBoxWarnings } from './criador/useBoxWarnings.js'
 import Button from '../ui/Button.jsx'
-import Card from '../ui/Card.jsx'
-import ConfirmReview, { ReadRow } from '../../public/shared/ConfirmReview.jsx'
-import tm from './criador/textMode.module.css'
 import cr from './criador/criador.module.css'
 
-// ── TrainingCreator ───────────────────────────────────────────────────────────
+// ── CriadorTab ────────────────────────────────────────────────────────────────
 // The page opens on THE WEEK (#58). It used to open on an empty session form with
 // the week below it — but the coach thinks in weeks, and creating a session is a
 // deliberate act, not the default state of the screen. So: the grid is the landing
 // surface and renders even when empty, `+ sessão` / `+ Nova sessão` open the
 // session-meta dialog, and confirming it opens the block editor.
-function TrainingCreator({
+//
+// This file is the CONTAINER (#74-C/plans/62). It owns the week around the editor,
+// the composition order of the two, and the measurement that keeps them both on
+// screen; everything else lives in criador/: useSessionEditor · useBlockList ·
+// useTemplates · useBoxWarnings, and SessionEditor · CriadorToolbar ·
+// CriadorConfirms · TvPreviewPane.
+export default function CriadorTab({
   sessions,
   setSessions,
   blockNames,
@@ -52,71 +41,21 @@ function TrainingCreator({
   onPreloadConsumed,
   onGoToPublish,
 }) {
-  const [form, setForm] = useState(emptyS())
-  const [blocks, setBlocks] = useState([])
-  const [editing, setEditing] = useState(null)
-  // The editor exists only while a session is open. `editing` alone can't carry this:
-  // a NEW session is being edited but has no id/dateKey yet.
-  const [editorOpen, setEditorOpen] = useState(false)
-  const [metaModal, setMetaModal] = useState(null) // { isEdit, draft }
-  const [pendingDate, setPendingDate] = useState(null)
-  const [collapsedBlocks, setCollapsedBlocks] = useState({})
-  const [showBlockPicker, setShowBlockPicker] = useState(false)
-  const [templates, setTemplates] = useState(loadTemplates)
-  const [showTemplateModal, setShowTemplateModal] = useState(false)
-  const [templateFlash, setTemplateFlash] = useState(null)
-  const [recurringTpl, setRecurringTpl] = useState(null)
-  const [recurDays, setRecurDays] = useState(new Set([1, 3, 5]))
-  const [recurStart, setRecurStart] = useState(todayISO)
-  const [recurEnd, setRecurEnd] = useState(() => {
-    const d = new Date()
-    d.setDate(d.getDate() + 28)
-    return toISO(d)
-  })
-  const [recurDone, setRecurDone] = useState(null)
+  const isMobile = useIsMobile()
   const [weekOffset, setWeekOffset] = useState(0)
   const [weekGridCollapsed, setWeekGridCollapsed] = useState(false)
-  // Text mode (#92) is EDITOR UI STATE, never persisted: detalhado→texto
-  // serializes, texto→detalhado parses. The blocks stay canonical either way.
-  const [sessionMode, setSessionMode] = useState('detalhado') // 'detalhado' | 'texto'
   const [gridMode, setGridMode] = useState('grade') // 'grade' | 'texto'
   const [showImport, setShowImport] = useState(false)
-  const registry = useMemo(() => loadRegistry(), [])
-  const boxLocs = useMemo(() => loadLocations().filter(l => l.type === 'box'), [])
-  const [selBox, setSelBox] = useState('all') // 'all' | 'none' | <locationId> — grid filter + new-session default
-  // "Avisos do box" for index.html — a dated list. Each: { id, date, message, box, active }
-  // where box is a locationId or 'all' (gym-wide). Lives in settings.value (anon-readable;
-  // locations is anon-locked #81 and the index is public). The index shows the 3 most recent
-  // active in-scope ones. #53.
-  const [boxWarnings, setBoxWarnings] = useState(() => {
-    const w = loadSettings().boxWarnings
-    return Array.isArray(w) ? w : []
-  })
-  const [isDirty, setIsDirty] = useState(false)
+  const [highlightedSessionId, setHighlightedSessionId] = useState(null)
+  const [pendingDelete, setPendingDelete] = useState(null)
+  const [tvPreviewOpen, setTvPreviewOpen] = useState(false)
   const [undoToast, setUndoToast] = useState(null)
   const undoTimerRef = useRef(null)
   const editorRef = useRef()
   const weekGridRef = useRef()
-  const [changedBlockFields, setChangedBlockFields] = useState({})
-  const [activeTemplateId, setActiveTemplateId] = useState(null)
-  const [showUpdateTemplateModal, setShowUpdateTemplateModal] = useState(false)
-  const [highlightedSessionId, setHighlightedSessionId] = useState(null)
-  const [pendingDelete, setPendingDelete] = useState(null)
-  const [pendingClose, setPendingClose] = useState(false)
-  const [tvPreviewOpen, setTvPreviewOpen] = useState(false)
-  const isMobile = useIsMobile()
-  const previewPaneRef = useRef(null)
-  const [prevScale, setPrevScale] = useState(1)
-
-  // Scale preview pane to fit container width
-  useEffect(() => {
-    const el = previewPaneRef.current
-    if (!el || !tvPreviewOpen) return
-    const obs = new ResizeObserver(() => setPrevScale(el.clientWidth / 1920))
-    obs.observe(el)
-    setPrevScale(el.clientWidth / 1920)
-    return () => obs.disconnect()
-  }, [tvPreviewOpen])
+  const registry = useMemo(() => loadRegistry(), [])
+  const boxLocs = useMemo(() => loadLocations().filter(l => l.type === 'box'), [])
+  const [selBox, setSelBox] = useState('all') // 'all' | 'none' | <locationId> — grid filter + new-session default
 
   const fireUndo = (msg, undoFn) => {
     clearTimeout(undoTimerRef.current)
@@ -124,408 +63,7 @@ function TrainingCreator({
     undoTimerRef.current = setTimeout(() => setUndoToast(null), 5000)
   }
 
-  // Read-merge-write the whole settings blob (mirrors Config.jsx) so theme/gymName survive.
-  const persistWarnings = list => {
-    setBoxWarnings(list)
-    saveSettings({ ...loadSettings(), boxWarnings: list })
-  }
-  // Returns the new id — mobile's "+ Adicionar" opens the edit sheet straight onto
-  // the row it just created, rather than leaving the coach to find it in the list.
-  const addWarning = key => {
-    const id = uid()
-    persistWarnings([{ id, date: todayISO(), box: key, message: '', active: true }, ...boxWarnings])
-    return id
-  }
-  const patchWarning = (id, patch) =>
-    persistWarnings(boxWarnings.map(w => (w.id === id ? { ...w, ...patch } : w)))
-  const removeWarning = id => persistWarnings(boxWarnings.filter(w => w.id !== id))
-
-  // Bring the session into view — and no further. Scrolling it to the top of the
-  // page would push the week grid off the screen, and the whole point of keeping
-  // the grid while editing is seeing the week and the session together: at a normal
-  // window size the editor is already below the grid and in view, so opening a
-  // session scrolls nothing at all. It only moves when the editor genuinely isn't
-  // visible — from a scrolled-down position, or with the grid collapsed.
-  //
-  // Not `scrollIntoView` with a CSS scroll-margin: the pinned block's height is not
-  // a constant (week bar + box tabs, plus the day strip when the grid is collapsed),
-  // so a fixed margin would be wrong in one of the two states. Measured, both work.
-  const scrollToEditor = () => {
-    const el = editorRef.current
-    if (!el) return
-    const chrome =
-      parseInt(
-        getComputedStyle(document.documentElement).getPropertyValue('--spa-sticky-top'),
-        10,
-      ) || 88
-    const stuck = weekGridRef.current?.getBoundingClientRect().height || 0
-    const safeTop = chrome + stuck + 8 // first row of pixels the pinned chrome doesn't cover
-    const { top } = el.getBoundingClientRect()
-    if (top >= safeTop && top < window.innerHeight) return
-    window.scrollTo({ top: Math.max(0, window.scrollY + top - safeTop), behavior: 'smooth' })
-  }
-
-  // ── Opening / closing the editor ───────────────────────────────────────────
-  const startEdit = (s, dateKey) => {
-    const targets = getTargets(s)
-    const sName = typeof s.mainTraining === 'string' ? s.mainTraining : s.sessionName || ''
-    setForm({
-      ...s,
-      date: dateKey,
-      mainTraining: targets,
-      sessionName: sName,
-      locationIds: sessionBoxIds(s),
-    })
-    setBlocks(s.blocks?.length ? normalizeLegacyCardio(s.blocks) : [])
-    setEditing({ dateKey, id: s.id })
-    setEditorOpen(true)
-    setIsDirty(false)
-    setChangedBlockFields({})
-    setActiveTemplateId(null)
-    // The week grid stays as it is — opening a session used to auto-collapse it to
-    // the strip, but the coach wants the week's contents in view while he edits.
-    setTimeout(scrollToEditor, 60)
-  }
-
-  // A new session inherits the browsing filter's box — the coach is almost always
-  // building for the box he is looking at.
-  const openNewSession = dateKey =>
-    setMetaModal({
-      isEdit: false,
-      draft: {
-        ...emptyS(),
-        date: dateKey || todayISO(),
-        locationIds: selBox === 'all' || selBox === 'none' ? [] : [selBox],
-      },
-    })
-
-  // Clicking a day: open that day's session if there is one, otherwise start a new
-  // one there. Same gesture on the full grid and on the collapsed strip — a DAY
-  // PICKER, not an add button. "+ sessão" wires straight to openNewSession
-  // (onNewSession below) instead, so it always opens blank even on a day that
-  // already has a session (#119/plans/58). Don't unify these back together.
-  const pickDay = dateKey => {
-    const first = (sessions[dateKey] || []).filter(boxFilter)[0]
-    if (first) startEdit(first, dateKey)
-    else openNewSession(dateKey)
-  }
-
-  const closeEditor = () => {
-    setForm(emptyS())
-    setBlocks([])
-    setEditing(null)
-    setEditorOpen(false)
-    setSessionMode('detalhado')
-    setIsDirty(false)
-    setChangedBlockFields({})
-    setActiveTemplateId(null)
-    setPendingClose(false)
-  }
-
-  // Closing throws the edit away. That was survivable while the button read
-  // "Fechar"; as a red ✕ next to "Salvar" it is one slip away from losing a
-  // session's worth of work, so it asks — but only when there IS work.
-  const requestClose = () => {
-    if (isDirty) setPendingClose(true)
-    else closeEditor()
-  }
-
-  // ── Session meta (date/name/audience/visibility/box/briefing) ──────────────
-  const commitMeta = draft => {
-    const wasDate = form.date || todayISO()
-    setMetaModal(null)
-
-    if (metaModal?.isEdit) {
-      // Moving an already-saved session to another day is the one meta change that
-      // needs confirming — it rewrites which day the athletes see it on.
-      if (editing && draft.date !== wasDate) {
-        setPendingDate({ draft, oldDate: wasDate, newDate: draft.date })
-        return
-      }
-      setForm(f => ({ ...f, ...draft }))
-      setIsDirty(true)
-      return
-    }
-
-    // New session — the meta dialog IS the create step.
-    setForm(draft)
-    setBlocks([])
-    setEditing(null)
-    setEditorOpen(true)
-    setIsDirty(true)
-    setChangedBlockFields({})
-    setActiveTemplateId(null)
-    setTimeout(scrollToEditor, 60)
-  }
-
-  // Preload from another tab. Reacting to a prop arriving, not to a render. The deps array
-  // is deliberately just [preload]: the effect consumes the one-shot preload and calls
-  // onPreloadConsumed, so adding startEdit/openNewSession/onPreloadConsumed (all
-  // redefined every render) would re-fire it and reopen the session the coach just closed.
-  useEffect(() => {
-    if (!preload) return
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (preload._newForDate) openNewSession(preload._newForDate)
-    else startEdit(preload, preload.date || preload._dateKey || '')
-    onPreloadConsumed?.()
-  }, [preload]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Templates
-  const saveAsTemplate = () => {
-    const name = (form.sessionName || '').trim() || `Template ${templates.length + 1}`
-    const tpl = { id: uid(), name, blocks: cloneBlocks(blocks) }
-    const updated = [...templates, tpl]
-    setTemplates(updated)
-    saveTemplates(updated)
-    setActiveTemplateId(tpl.id)
-    setTemplateFlash(name)
-    setTimeout(() => setTemplateFlash(null), 2000)
-  }
-  const applyTemplate = tpl => {
-    setBlocks(normalizeLegacyCardio(cloneBlocks(tpl.blocks)))
-    setForm(f => ({ ...f, sessionName: f.sessionName || tpl.name }))
-    setShowTemplateModal(false)
-    setActiveTemplateId(tpl.id)
-    setChangedBlockFields({})
-    // A template applied from the week view has to land somewhere — open the editor.
-    if (!editorOpen) setEditorOpen(true)
-    setIsDirty(true)
-  }
-  const deleteTemplate = id => {
-    const updated = templates.filter(t => t.id !== id)
-    setTemplates(updated)
-    saveTemplates(updated)
-  }
-
-  // TV Preview (Phase 4) — built from local form+blocks state, no Supabase round-trip
-  const gymName = loadSettings()?.gymName || ''
-  const tvPreviewSess = useMemo(() => ({ ...form, blocks }), [form, blocks])
-  const tvPreviewSessions = useMemo(
-    () => ({ [form.date || todayISO()]: [tvPreviewSess] }),
-    [form.date, tvPreviewSess],
-  )
-  const tvPreviewTv = useMemo(
-    () => ({ session_id: form.id, date_key: form.date || todayISO() }),
-    [form.id, form.date],
-  )
-
-  // Recurring
-  const recurPreviewDates = useMemo(() => {
-    if (!recurStart || !recurEnd) return []
-    const out = []
-    const cur = new Date(recurStart + 'T12:00:00')
-    const end = new Date(recurEnd + 'T12:00:00')
-    while (cur <= end) {
-      if (recurDays.has(cur.getDay())) out.push(toISO(cur))
-      cur.setDate(cur.getDate() + 1)
-    }
-    return out
-  }, [recurStart, recurEnd, recurDays])
-
-  const applyRecurring = () => {
-    if (!recurringTpl || !recurPreviewDates.length) return
-    setSessions(prev => {
-      const next = { ...prev }
-      recurPreviewDates.forEach(dateKey => {
-        const session = {
-          id: uid(),
-          date: dateKey,
-          sessionName: recurringTpl.name,
-          mainTraining: [],
-          locationIds: selBox === 'all' || selBox === 'none' ? [] : [selBox],
-          blocks: cloneBlocks(recurringTpl.blocks),
-        }
-        next[dateKey] = [...(next[dateKey] || []), session]
-      })
-      return next
-    })
-    setRecurDone(recurPreviewDates.length)
-    setTimeout(() => {
-      setRecurDone(null)
-      setRecurringTpl(null)
-    }, 2500)
-  }
-
-  // Save / delete
-  const saveS = () => {
-    const emptyBlocks = blocks.filter(
-      bl =>
-        bl.type !== 'Estações' &&
-        !(bl.exercises || []).some(e => (e.name || '').trim() || e.isComplex),
-    )
-    if (emptyBlocks.length > 0) {
-      alert('Há blocos sem exercícios preenchidos. Adicione ao menos um exercício antes de salvar.')
-      return
-    }
-    const dateKey = form.date || todayISO()
-    const savedId = editing?.id || form.id || uid()
-    const session = {
-      ...form,
-      date: dateKey,
-      blocks: materializeBlocks(normalizeLegacyCardio(blocks), loadRegistry()),
-      id: savedId,
-    }
-
-    const targetDate = new Date(dateKey + 'T12:00:00')
-    const today = new Date()
-    const targetSunday = new Date(targetDate)
-    targetSunday.setDate(targetDate.getDate() - targetDate.getDay())
-    const thisSunday = new Date(today)
-    thisSunday.setDate(today.getDate() - today.getDay())
-    const targetWeekOffset = Math.round((targetSunday - thisSunday) / (7 * 24 * 60 * 60 * 1000))
-
-    setSessions(prev => {
-      const next = { ...prev }
-      if (editing) {
-        const oldKey = editing.dateKey
-        if (oldKey !== dateKey) next[oldKey] = (next[oldKey] || []).filter(s => s.id !== editing.id)
-        if ((next[dateKey] || []).some(s => s.id === editing.id))
-          next[dateKey] = next[dateKey].map(s => (s.id === editing.id ? session : s))
-        else next[dateKey] = [...(next[dateKey] || []), session]
-      } else {
-        next[dateKey] = [...(next[dateKey] || []), session]
-      }
-      return next
-    })
-
-    setWeekOffset(targetWeekOffset)
-    setHighlightedSessionId(savedId)
-    setTimeout(
-      () => weekGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-      100,
-    )
-    setTimeout(() => setHighlightedSessionId(null), 2000)
-    closeEditor()
-  }
-
-  const del = (dateKey, id) => {
-    const sess = (sessions[dateKey] || []).find(s => s.id === id)
-    setPendingDelete({ dateKey, id, sessionName: sess?.sessionName || '—' })
-  }
-
-  const confirmDelete = () => {
-    if (!pendingDelete) return
-    const { dateKey, id, sessionName } = pendingDelete
-    const snap = (sessions[dateKey] || []).find(s => s.id === id)
-    setSessions(prev => {
-      const n = { ...prev }
-      n[dateKey] = (n[dateKey] || []).filter(s => s.id !== id)
-      return n
-    })
-    setPendingDelete(null)
-    if (editing?.id === id) closeEditor()
-    if (snap) {
-      fireUndo(`Sessão "${sessionName}" removida`, () => {
-        setSessions(prev => {
-          const n = { ...prev }
-          n[dateKey] = [...(n[dateKey] || []), snap]
-          return n
-        })
-      })
-    }
-  }
-
-  const updateTemplate = () => {
-    if (!activeTemplateId) return
-    setTemplates(prev => {
-      const updated = prev.map(t =>
-        t.id === activeTemplateId ? { ...t, blocks: cloneBlocks(blocks) } : t,
-      )
-      saveTemplates(updated)
-      return updated
-    })
-    setActiveTemplateId(null)
-    setShowUpdateTemplateModal(false)
-  }
-
-  // Block management
-  const [insertAtIdx, setInsertAtIdx] = useState(null)
-  const addBlock = typeOrBlock => {
-    const rawBlk =
-      typeof typeOrBlock === 'string' ? emptyBlock(typeOrBlock) : { ...typeOrBlock, id: uid() }
-    // Benchmark blocks (buildBenchmarkBlock) can still carry legacy cardio-mode Run legs (Helen, Murph...) — normalize on insert.
-    const newBlk = normalizeLegacyCardio([rawBlk])[0]
-    setBlocks(b => {
-      if (insertAtIdx === null) return [...b, newBlk]
-      const next = [...b]
-      next.splice(insertAtIdx + 1, 0, newBlk)
-      return next
-    })
-    setInsertAtIdx(null)
-    setShowBlockPicker(false)
-    setIsDirty(true)
-  }
-  const copyBlock = id => {
-    setBlocks(b => {
-      const idx = b.findIndex(x => x.id === id)
-      if (idx < 0) return b
-      const orig = b[idx]
-      const copy = {
-        ...orig,
-        id: uid(),
-        exercises: (orig.exercises || []).map(ex => ({ ...ex, id: uid() })),
-      }
-      const next = [...b]
-      next.splice(idx + 1, 0, copy)
-      return next
-    })
-    setIsDirty(true)
-  }
-  const updBlock = (id, upd) => {
-    const old = blocks.find(x => x.id === id)
-    setBlocks(b => b.map(x => (x.id === id ? upd : x)))
-    setIsDirty(true)
-    if (!old) return
-    const newFields = new Set()
-    ;['label', 'type', 'duration', 'rounds', 'notes', 'zone', 'ladderMode', 'goal'].forEach(f => {
-      if (JSON.stringify(upd[f]) !== JSON.stringify(old[f])) newFields.add(f)
-    })
-    const oldExs = old.exercises || []
-    ;(upd.exercises || []).forEach(ex => {
-      const oldEx = oldExs.find(x => x.id === ex.id)
-      if (!oldEx || JSON.stringify(ex) !== JSON.stringify(oldEx)) newFields.add(`ex:${ex.id}`)
-    })
-    if (!newFields.size) return
-    setChangedBlockFields(prev => {
-      const cur = new Set(prev[id] || [])
-      newFields.forEach(f => cur.add(f))
-      return { ...prev, [id]: cur }
-    })
-  }
-  const delBlock = id => {
-    const idx = blocks.findIndex(x => x.id === id)
-    if (blocks.length <= 1 || idx < 0) return
-    const deleted = blocks[idx]
-    setBlocks(b => b.filter(x => x.id !== id))
-    setIsDirty(true)
-    fireUndo('Bloco removido', () => {
-      setBlocks(b => {
-        const n = [...b]
-        n.splice(idx, 0, deleted)
-        return n
-      })
-    })
-  }
-
-  // Named *Ref because eslint-plugin-react-hooks identifies refs by that suffix: passed
-  // down as a prop, an unsuffixed ref reads to the rule as a plain (immutable) prop and
-  // every `.current =` in a child's drag handler trips react-hooks/immutability. Writing
-  // a ref from an event handler is correct — drag state must be readable synchronously in
-  // `drop` and must not re-render on every dragover — so the name is the fix, not a disable.
-  const dragBlkIdxRef = useRef(null)
-  const [dragOverBlkIdx, setDragOverBlkIdx] = useState(null)
-  const reorderBlocks = (fromIdx, toIdx) => {
-    if (fromIdx === toIdx || fromIdx === null || toIdx === null) return
-    setBlocks(prev => {
-      const arr = [...prev]
-      const [mv] = arr.splice(fromIdx, 1)
-      arr.splice(toIdx, 0, mv)
-      return arr
-    })
-    setIsDirty(true)
-  }
-
-  // Week grid
+  // ── The week ───────────────────────────────────────────────────────────────
   const getSundayWeek = offset => {
     const d = new Date()
     const dow = d.getDay()
@@ -545,114 +83,131 @@ function TrainingCreator({
         ? sessionBoxIds(s).length === 0
         : sessionBoxIds(s).includes(selBox)
   const weekLabel = `${weekDates[0].getDate()}/${weekDates[0].getMonth() + 1} – ${weekDates[6].getDate()}/${weekDates[6].getMonth() + 1}/${weekDates[6].getFullYear()}`
+  // A new session inherits the browsing filter's box.
+  const defaultBoxIds = selBox === 'all' || selBox === 'none' ? [] : [selBox]
+
+  // Bring the session into view — and no further. Scrolling it to the top of the
+  // page would push the week grid off the screen, and the whole point of keeping
+  // the grid while editing is seeing the week and the session together: at a normal
+  // window size the editor is already below the grid and in view, so opening a
+  // session scrolls nothing at all. It only moves when the editor genuinely isn't
+  // visible — from a scrolled-down position, or with the grid collapsed.
+  //
+  // Not `scrollIntoView` with a CSS scroll-margin: the pinned block's height is not
+  // a constant (week bar + box tabs, plus the day strip when the grid is collapsed),
+  // so a fixed margin would be wrong in one of the two states. Measured, both work.
+  //
+  // 🔴 Stays in the container (#74-C): it needs BOTH refs and the pinned chrome's
+  // live height. Injected into useSessionEditor as `onOpened`, never moved into it.
+  const scrollToEditor = () => {
+    const el = editorRef.current
+    if (!el) return
+    const chrome =
+      parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue('--spa-sticky-top'),
+        10,
+      ) || 88
+    const stuck = weekGridRef.current?.getBoundingClientRect().height || 0
+    const safeTop = chrome + stuck + 8 // first row of pixels the pinned chrome doesn't cover
+    const { top } = el.getBoundingClientRect()
+    if (top >= safeTop && top < window.innerHeight) return
+    window.scrollTo({ top: Math.max(0, window.scrollY + top - safeTop), behavior: 'smooth' })
+  }
+
+  // ── State clusters ─────────────────────────────────────────────────────────
+  const warnings = useBoxWarnings()
+  const editor = useSessionEditor({
+    setSessions,
+    defaultBoxIds,
+    onOpened: () => setTimeout(scrollToEditor, 60),
+    // Saving jumps the week to the session and flashes it — week-view state, so the
+    // hook writes the session and hands the reveal back here.
+    onSaved: ({ savedId, weekOffset: target }) => {
+      setWeekOffset(target)
+      setHighlightedSessionId(savedId)
+      setTimeout(
+        () => weekGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+        100,
+      )
+      setTimeout(() => setHighlightedSessionId(null), 2000)
+    },
+  })
+  const blockList = useBlockList({
+    blocks: editor.blocks,
+    setBlocks: editor.setBlocks,
+    markDirty: editor.markDirty,
+    trackBlockChange: editor.trackBlockChange,
+    fireUndo,
+  })
+  const templates = useTemplates({ editor, setSessions, defaultBoxIds })
+
+  // Clicking a day: open that day's session if there is one, otherwise start a new
+  // one there. Same gesture on the full grid and on the collapsed strip — a DAY
+  // PICKER, not an add button. "+ sessão" wires straight to openNewSession
+  // (onNewSession below) instead, so it always opens blank even on a day that
+  // already has a session (#119/plans/58). Don't unify these back together.
+  const pickDay = dateKey => {
+    const first = (sessions[dateKey] || []).filter(boxFilter)[0]
+    if (first) editor.startEdit(first, dateKey)
+    else editor.openNewSession(dateKey)
+  }
+
+  // Preload from another tab. Reacting to a prop arriving, not to a render. The deps array
+  // is deliberately just [preload]: the effect consumes the one-shot preload and calls
+  // onPreloadConsumed, so adding startEdit/openNewSession/onPreloadConsumed (all
+  // redefined every render) would re-fire it and reopen the session the coach just closed.
+  useEffect(() => {
+    if (!preload) return
+    if (preload._newForDate) editor.openNewSession(preload._newForDate)
+    else editor.startEdit(preload, preload.date || preload._dateKey || '')
+    onPreloadConsumed?.()
+  }, [preload]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Deleting a session ─────────────────────────────────────────────────────
+  const del = (dateKey, id) => {
+    const sess = (sessions[dateKey] || []).find(s => s.id === id)
+    setPendingDelete({ dateKey, id, sessionName: sess?.sessionName || '—' })
+  }
+
+  const confirmDelete = () => {
+    if (!pendingDelete) return
+    const { dateKey, id, sessionName } = pendingDelete
+    const snap = (sessions[dateKey] || []).find(s => s.id === id)
+    setSessions(prev => {
+      const n = { ...prev }
+      n[dateKey] = (n[dateKey] || []).filter(s => s.id !== id)
+      return n
+    })
+    setPendingDelete(null)
+    if (editor.editing?.id === id) editor.closeEditor()
+    if (snap) {
+      fireUndo(`Sessão "${sessionName}" removida`, () => {
+        setSessions(prev => {
+          const n = { ...prev }
+          n[dateKey] = [...(n[dateKey] || []), snap]
+          return n
+        })
+      })
+    }
+  }
 
   const athletes = loadAthletes()
-  const editorDate = new Date((form.date || todayISO()) + 'T12:00:00')
+  const editorDate = new Date((editor.form.date || todayISO()) + 'T12:00:00')
   const editorDateStr = `${DAY_PT[editorDate.getDay()]} ${String(editorDate.getDate()).padStart(2, '0')}/${String(editorDate.getMonth() + 1).padStart(2, '0')}`
-  const editorBoxes = (form.locationIds || [])
+  const editorBoxes = (editor.form.locationIds || [])
     .map(id => boxLocs.find(b => b.id === id))
     .filter(Boolean)
 
   return (
     <div>
-      {/* ── Move-session-to-another-date confirm ── */}
-      <ConfirmReview
-        open={!!pendingDate}
-        title="Mover sessão de dia"
-        editLabel="Manter o dia"
-        confirmLabel="Mover"
-        onEdit={() => {
-          // Keep every other meta edit; only the date reverts.
-          if (pendingDate) setForm(f => ({ ...f, ...pendingDate.draft, date: pendingDate.oldDate }))
-          setPendingDate(null)
-        }}
-        onConfirm={() => {
-          if (pendingDate) {
-            setForm(f => ({ ...f, ...pendingDate.draft }))
-            setIsDirty(true)
-          }
-          setPendingDate(null)
-        }}
-      >
-        <ReadRow
-          label="De"
-          value={
-            pendingDate
-              ? new Date(pendingDate.oldDate + 'T12:00:00').toLocaleDateString('pt-BR', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: '2-digit',
-                })
-              : ''
-          }
-        />
-        <ReadRow
-          label="Para"
-          value={
-            pendingDate
-              ? new Date(pendingDate.newDate + 'T12:00:00').toLocaleDateString('pt-BR', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: '2-digit',
-                })
-              : ''
-          }
-        />
-      </ConfirmReview>
-      {/* ── Delete confirm ── */}
-      <ConfirmReview
-        open={!!pendingDelete}
-        title="Remover sessão"
-        editLabel="Cancelar"
-        confirmLabel="Remover"
-        onEdit={() => setPendingDelete(null)}
-        onClose={() => setPendingDelete(null)}
-        onConfirm={confirmDelete}
-      >
-        <ReadRow label="Sessão" value={pendingDelete?.sessionName || '—'} />
-        <ReadRow
-          label="Dia"
-          value={
-            pendingDelete
-              ? new Date(pendingDelete.dateKey + 'T12:00:00').toLocaleDateString('pt-BR', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: '2-digit',
-                })
-              : ''
-          }
-        />
-      </ConfirmReview>
-      {/* ── Discard-on-close confirm ── */}
-      <ConfirmReview
-        open={pendingClose}
-        title="Descartar alterações"
-        editLabel="Voltar"
-        confirmLabel="Descartar"
-        onEdit={() => setPendingClose(false)}
-        onClose={() => setPendingClose(false)}
-        onConfirm={closeEditor}
-      >
-        <ReadRow label="Sessão" value={form.sessionName?.trim() || 'Sessão sem nome'} />
-        <ReadRow label="Dia" value={editorDateStr} />
-        <ReadRow label="Blocos" value={`${blocks.length}`} />
-      </ConfirmReview>
-      {/* ── Update template confirm ── */}
-      <ConfirmReview
-        open={showUpdateTemplateModal}
-        title="Atualizar template"
-        editLabel="Cancelar"
-        confirmLabel="Atualizar"
-        onEdit={() => setShowUpdateTemplateModal(false)}
-        onClose={() => setShowUpdateTemplateModal(false)}
-        onConfirm={updateTemplate}
-      >
-        <ReadRow
-          label="Template"
-          value={templates.find(t => t.id === activeTemplateId)?.name || ''}
-        />
-        <ReadRow label="Blocos" value={`${blocks.length}`} />
-      </ConfirmReview>
+      <CriadorConfirms
+        editor={editor}
+        templates={templates}
+        editorDateStr={editorDateStr}
+        pendingDelete={pendingDelete}
+        onCancelDelete={() => setPendingDelete(null)}
+        onConfirmDelete={confirmDelete}
+      />
       {/* ── Undo toast ── */}
       {undoToast && (
         <div className={cr.toast} role="status">
@@ -670,51 +225,51 @@ function TrainingCreator({
         </div>
       )}
       {/* ── Session meta modal — create, and "Editar dados" from the editor header ── */}
-      {metaModal && (
+      {editor.metaModal && (
         <SessionMetaModal
-          initial={metaModal.draft}
-          isEdit={metaModal.isEdit}
+          initial={editor.metaModal.draft}
+          isEdit={editor.metaModal.isEdit}
           athletes={athletes}
           boxLocs={boxLocs}
-          onCancel={() => setMetaModal(null)}
-          onConfirm={commitMeta}
+          onCancel={() => editor.setMetaModal(null)}
+          onConfirm={editor.commitMeta}
         />
       )}
       {/* ── Template modal ── */}
-      {showTemplateModal && !recurringTpl && (
+      {templates.showTemplateModal && !templates.recurringTpl && (
         <TemplatesModal
-          templates={templates}
-          onClose={() => setShowTemplateModal(false)}
-          onApply={applyTemplate}
-          onDelete={deleteTemplate}
+          templates={templates.templates}
+          onClose={() => templates.setShowTemplateModal(false)}
+          onApply={templates.applyTemplate}
+          onDelete={templates.deleteTemplate}
           onRecurring={tpl => {
-            setShowTemplateModal(false)
-            setRecurringTpl(tpl)
+            templates.setShowTemplateModal(false)
+            templates.setRecurringTpl(tpl)
           }}
         />
       )}
       {/* ── Recurring modal ── */}
-      {recurringTpl && (
+      {templates.recurringTpl && (
         <RecurringModal
-          recurringTpl={recurringTpl}
-          onClose={() => setRecurringTpl(null)}
-          recurDays={recurDays}
-          setRecurDays={setRecurDays}
-          recurStart={recurStart}
-          setRecurStart={setRecurStart}
-          recurEnd={recurEnd}
-          setRecurEnd={setRecurEnd}
-          recurPreviewDates={recurPreviewDates}
-          recurDone={recurDone}
-          onApply={applyRecurring}
+          recurringTpl={templates.recurringTpl}
+          onClose={() => templates.setRecurringTpl(null)}
+          recurDays={templates.recurDays}
+          setRecurDays={templates.setRecurDays}
+          recurStart={templates.recurStart}
+          setRecurStart={templates.setRecurStart}
+          recurEnd={templates.recurEnd}
+          setRecurEnd={templates.setRecurEnd}
+          recurPreviewDates={templates.recurPreviewDates}
+          recurDone={templates.recurDone}
+          onApply={templates.applyRecurring}
         />
       )}
       {/* ── Block type picker ── */}
-      {showBlockPicker && (
+      {blockList.showBlockPicker && (
         <CriadorTypePicker
           blockNames={blockNames}
-          onSelect={addBlock}
-          onClose={() => setShowBlockPicker(false)}
+          onSelect={blockList.addBlock}
+          onClose={() => blockList.setShowBlockPicker(false)}
         />
       )}
       {/* ── Week import (#92) — one paste, one session per weekday ── */}
@@ -754,36 +309,23 @@ function TrainingCreator({
       <div className={tvPreviewOpen && !isMobile ? cr.split : undefined}>
         <div className={tvPreviewOpen && !isMobile ? cr.splitMain : undefined}>
           {/* ── Toolbar — the page's actions, above the week ── */}
-          {!editorOpen && (
-            <div className={cr.toolbar}>
-              <span className={cr.toolbarTitle}>Criador</span>
-              <span className={cr.toolbarSpacer} />
-              <Button
-                size="sm"
-                onClick={() => setShowImport(true)}
-                title="Colar a semana inteira de uma vez"
-              >
-                <i className="ti ti-clipboard-text" /> Importar semana
-              </Button>
-              <Button size="sm" onClick={() => setShowTemplateModal(true)}>
-                <i className="ti ti-template" /> Templates
-              </Button>
-              {onGoToPublish && (
-                <Button size="sm" onClick={onGoToPublish} title="Ir para Publicador">
-                  <i className="ti ti-calendar-event" /> Publicar
-                </Button>
-              )}
-              <Button size="sm" variant="primary" onClick={() => openNewSession(todayISO())}>
-                <i className="ti ti-plus" /> Nova sessão
-              </Button>
-            </div>
+          {!editor.editorOpen && (
+            <CriadorToolbar
+              onImport={() => setShowImport(true)}
+              onTemplates={() => templates.setShowTemplateModal(true)}
+              onGoToPublish={onGoToPublish}
+              onNewSession={() => editor.openNewSession(todayISO())}
+            />
           )}
 
           {/* ── The week. Always rendered — an empty week IS this page's empty state, with
              its day columns and their "+ sessão" affordances. While editing it stays
              on screen as the collapsed day strip on desktop; on mobile the editor
-             takes the whole screen and the week steps aside. ── */}
-          {(!editorOpen || !isMobile) && (
+             takes the whole screen and the week steps aside.
+             🔴 Rendered directly here, never wrapped: WeekGrid returns a FRAGMENT so
+             its sticky header isn't clipped by a parent box, and the grid/editor order
+             below is the one two rejected redesigns tried to change. ── */}
+          {(!editor.editorOpen || !isMobile) && (
             <WeekGrid
               gridRef={weekGridRef}
               weekOffset={weekOffset}
@@ -794,23 +336,23 @@ function TrainingCreator({
               boxLocs={boxLocs}
               selBox={selBox}
               setSelBox={setSelBox}
-              boxWarnings={boxWarnings}
-              addWarning={addWarning}
-              patchWarning={patchWarning}
-              removeWarning={removeWarning}
+              boxWarnings={warnings.boxWarnings}
+              addWarning={warnings.addWarning}
+              patchWarning={warnings.patchWarning}
+              removeWarning={warnings.removeWarning}
               weekDates={weekDates}
               sessions={sessions}
               setSessions={setSessions}
               boxFilter={boxFilter}
-              editing={editing}
+              editing={editor.editing}
               /* The day being worked on — form.date, not editing.dateKey: a new session
              has no dateKey, and a moved one is on its new day the moment you confirm. */
-              activeDate={editorOpen ? form.date || todayISO() : null}
+              activeDate={editor.editorOpen ? editor.form.date || todayISO() : null}
               highlightedSessionId={highlightedSessionId}
-              startEdit={startEdit}
+              startEdit={editor.startEdit}
               onDelete={del}
               onPickDay={pickDay}
-              onNewSession={openNewSession}
+              onNewSession={editor.openNewSession}
               gridMode={gridMode}
               setGridMode={setGridMode}
               onImport={() => setShowImport(true)}
@@ -818,381 +360,30 @@ function TrainingCreator({
           )}
 
           {/* ── Session editor ── */}
-          {editorOpen && (
+          {editor.editorOpen && (
             <div ref={editorRef}>
-              <Card>
-                {isMobile ? (
-                  /* Four explicit rows — the coach reads this on a 390px screen, not
-               1280px, so grouping by row beats one long flex-wrap line: close,
-               then who/when, then where/visibility, then what you can do. No TV
-               preview (desktop-only pane) and no red ✕ — "Voltar à semana" IS the
-               close here, so a second one would be a redundant destructive action. */
-                  <div className={cr.editorHdMobile}>
-                    <button type="button" className={cr.editorBack} onClick={requestClose}>
-                      <i className="ti ti-chevron-left" aria-hidden="true" /> Voltar à semana
-                    </button>
-                    <div className={cr.editorHdRow}>
-                      <span className={cr.editorDate}>{editorDateStr}</span>
-                      <span className={cr.editorName}>
-                        {form.sessionName?.trim() || 'Sessão sem nome'}
-                      </span>
-                    </div>
-                    <div className={cr.editorHdRow}>
-                      {editorBoxes.map(b => (
-                        <span
-                          key={b.id}
-                          className={cr.editorTag}
-                          style={{ borderColor: b.color, color: b.color }}
-                        >
-                          <span
-                            className={cr.dot}
-                            style={{ background: b.color || 'var(--muted)' }}
-                          />
-                          {b.name}
-                        </span>
-                      ))}
-                      <span
-                        className={`${cr.editorTag}${form.public === false ? ' ' + cr.editorTagHidden : ''}`}
-                      >
-                        {form.public === false ? 'Oculto' : 'Público'}
-                      </span>
-                      {templateFlash && (
-                        <span className={cr.editorTag}>
-                          <i className="ti ti-bookmark-filled" aria-hidden="true" /> &ldquo;
-                          {templateFlash}&rdquo; salvo
-                        </span>
-                      )}
-                    </div>
-                    <div className={cr.editorHdRow}>
-                      <Button
-                        size="sm"
-                        iconOnly
-                        aria-label="Editar dados"
-                        title="Editar dados"
-                        onClick={() => setMetaModal({ isEdit: true, draft: { ...form } })}
-                      >
-                        <i className="ti ti-settings" />
-                      </Button>
-                      {blocks.length > 0 && (
-                        <Button
-                          size="sm"
-                          iconOnly
-                          aria-label={
-                            activeTemplateId
-                              ? 'Template ativo — clique para atualizar'
-                              : 'Salvar como template'
-                          }
-                          title={
-                            activeTemplateId
-                              ? 'Template ativo — clique para atualizar'
-                              : 'Salvar como template'
-                          }
-                          onClick={
-                            activeTemplateId
-                              ? () => setShowUpdateTemplateModal(true)
-                              : saveAsTemplate
-                          }
-                        >
-                          <i
-                            className={`ti ${activeTemplateId ? 'ti-bookmark-filled' : 'ti-bookmark'}`}
-                          />
-                        </Button>
-                      )}
-                      <span className={cr.editorHdSpacer} />
-                      <Button size="sm" variant="primary" onClick={saveS}>
-                        <i className="ti ti-check" />{' '}
-                        {editing ? 'Salvar alterações' : 'Salvar sessão'}
-                        {isDirty && <span aria-hidden="true"> ●</span>}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className={cr.editorHd}>
-                    <span className={cr.editorDate}>{editorDateStr}</span>
-                    <span className={cr.editorName}>
-                      {form.sessionName?.trim() || 'Sessão sem nome'}
-                    </span>
-                    {editorBoxes.map(b => (
-                      <span
-                        key={b.id}
-                        className={cr.editorTag}
-                        style={{ borderColor: b.color, color: b.color }}
-                      >
-                        <span
-                          className={cr.dot}
-                          style={{ background: b.color || 'var(--muted)' }}
-                        />
-                        {b.name}
-                      </span>
-                    ))}
-                    <span
-                      className={`${cr.editorTag}${form.public === false ? ' ' + cr.editorTagHidden : ''}`}
-                    >
-                      {form.public === false ? 'Oculto' : 'Público'}
-                    </span>
-                    {/* The gear belongs to the title, not to the action cluster: everything
-                it edits — date, name, box, visibility — is what the title shows. */}
-                    <Button
-                      size="sm"
-                      iconOnly
-                      aria-label="Editar dados"
-                      title="Editar dados"
-                      onClick={() => setMetaModal({ isEdit: true, draft: { ...form } })}
-                    >
-                      <i className="ti ti-settings" />
-                    </Button>
-                    {templateFlash && (
-                      <span className={cr.editorTag}>
-                        <i className="ti ti-bookmark-filled" aria-hidden="true" /> &ldquo;
-                        {templateFlash}&rdquo; salvo
-                      </span>
-                    )}
-                    <span className={cr.editorHdSpacer} />
-                    {blocks.length > 0 && (
-                      <Button
-                        size="sm"
-                        iconOnly
-                        aria-label={
-                          activeTemplateId
-                            ? 'Template ativo — clique para atualizar'
-                            : 'Salvar como template'
-                        }
-                        title={
-                          activeTemplateId
-                            ? 'Template ativo — clique para atualizar'
-                            : 'Salvar como template'
-                        }
-                        onClick={
-                          activeTemplateId ? () => setShowUpdateTemplateModal(true) : saveAsTemplate
-                        }
-                      >
-                        <i
-                          className={`ti ${activeTemplateId ? 'ti-bookmark-filled' : 'ti-bookmark'}`}
-                        />
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      iconOnly
-                      aria-label="Preview TV"
-                      title="Preview TV"
-                      aria-pressed={tvPreviewOpen}
-                      onClick={() => setTvPreviewOpen(v => !v)}
-                    >
-                      <i className="ti ti-device-tv" />
-                    </Button>
-                    <Button size="sm" variant="primary" onClick={saveS}>
-                      <i className="ti ti-check" />{' '}
-                      {editing ? 'Salvar alterações' : 'Salvar sessão'}
-                      {isDirty && <span aria-hidden="true"> ●</span>}
-                    </Button>
-                    {/* Same red ✕ as the exercise/movement delete — it is the discard, and
-                it now looks like one. Which is exactly why it asks first when
-                there is something to lose. */}
-                    <Button
-                      size="sm"
-                      iconOnly
-                      variant="destructive"
-                      aria-label="Fechar"
-                      title="Fechar"
-                      onClick={requestClose}
-                    >
-                      <i className="ti ti-x" />
-                    </Button>
-                  </div>
-                )}
-
-                {/* Blocks */}
-                <div>
-                  <div className={cr.blocksBar}>
-                    <span className={cr.blocksCount}>
-                      {blocks.length
-                        ? `${blocks.length} Bloco${blocks.length !== 1 ? 's' : ''}`
-                        : 'Blocos'}
-                    </span>
-                    <div className={cr.blocksBarActions}>
-                      {blocks.length > 1 && sessionMode === 'detalhado' && (
-                        <>
-                          <Button
-                            size="xs"
-                            variant="ghost"
-                            onClick={() =>
-                              setCollapsedBlocks(Object.fromEntries(blocks.map(b => [b.id, true])))
-                            }
-                          >
-                            <i className="ti ti-arrows-minimize" /> Recolher
-                          </Button>
-                          <Button size="xs" variant="ghost" onClick={() => setCollapsedBlocks({})}>
-                            <i className="ti ti-arrows-maximize" /> Expandir
-                          </Button>
-                        </>
-                      )}
-                      {/* Detalhado / Texto — the whole session as the coach's own notation */}
-                      <span
-                        className={tm.modeSeg}
-                        role="group"
-                        aria-label="Modo de edição da sessão"
-                      >
-                        <button
-                          type="button"
-                          className={sessionMode === 'detalhado' ? tm.on : ''}
-                          aria-pressed={sessionMode === 'detalhado'}
-                          onClick={() => setSessionMode('detalhado')}
-                        >
-                          ▤ Detalhado
-                        </button>
-                        <button
-                          type="button"
-                          className={sessionMode === 'texto' ? tm.on : ''}
-                          aria-pressed={sessionMode === 'texto'}
-                          onClick={() => setSessionMode('texto')}
-                        >
-                          ¶ Texto
-                        </button>
-                      </span>
-                    </div>
-                  </div>
-
-                  {sessionMode === 'texto' && (
-                    <SessionTextPane
-                      blocks={blocks}
-                      registry={registry}
-                      blockNames={blockNames || APP_CONFIG.blockNames}
-                      typePicker={CriadorTypePicker}
-                      onCancel={() => setSessionMode('detalhado')}
-                      onApply={next => {
-                        // Already merged and normalized by the pane: the locked blocks in
-                        // `next` are the ORIGINAL objects and must be passed through
-                        // untouched (plans/61·B), so nothing may be re-mapped here.
-                        setBlocks(next)
-                        setIsDirty(true)
-                        setCollapsedBlocks({})
-                        setSessionMode('detalhado')
-                      }}
-                    />
-                  )}
-
-                  {sessionMode === 'detalhado' &&
-                    blocks.flatMap((bl, i) => {
-                      const editor = (
-                        <BlockEditor
-                          key={bl.id}
-                          block={bl}
-                          idx={i}
-                          total={blocks.length}
-                          blockNames={blockNames || APP_CONFIG.blockNames}
-                          onUpdate={upd => updBlock(bl.id, upd)}
-                          onDelete={() => delBlock(bl.id)}
-                          onCopy={() => copyBlock(bl.id)}
-                          collapsed={!!collapsedBlocks[bl.id]}
-                          onToggleCollapse={() =>
-                            setCollapsedBlocks(p => ({ ...p, [bl.id]: !p[bl.id] }))
-                          }
-                          dragBlkIdxRef={dragBlkIdxRef}
-                          dragOverBlkIdx={dragOverBlkIdx}
-                          setDragOverBlkIdx={setDragOverBlkIdx}
-                          reorderBlocks={reorderBlocks}
-                          blockIdx={i}
-                          changedFields={changedBlockFields[bl.id] || null}
-                          registry={registry}
-                        />
-                      )
-                      if (i < blocks.length - 1) {
-                        return [
-                          editor,
-                          <button
-                            key={`ins-${i}`}
-                            type="button"
-                            className="insert-blk-btn"
-                            aria-label={`Inserir bloco depois do bloco ${i + 1}`}
-                            title="Inserir bloco aqui"
-                            onClick={() => {
-                              setInsertAtIdx(i)
-                              setShowBlockPicker(true)
-                            }}
-                          >
-                            <i className="ti ti-plus" />
-                          </button>,
-                        ]
-                      }
-                      return [editor]
-                    })}
-
-                  {/* Add block */}
-                  {sessionMode === 'detalhado' && (
-                    <button
-                      type="button"
-                      className="add-blk-btn"
-                      style={{ width: '100%', marginBottom: 0 }}
-                      onClick={() => {
-                        setInsertAtIdx(null)
-                        setShowBlockPicker(true)
-                      }}
-                    >
-                      <i className="ti ti-layout-grid-add" style={{ fontSize: 16 }} /> Adicionar
-                      bloco
-                    </button>
-                  )}
-                </div>
-
-                {/* Save row — the header's save is out of reach once the block list is long. */}
-                <div className={cr.mt3}>
-                  <Button variant="primary" full onClick={saveS}>
-                    <i className="ti ti-check" /> {editing ? 'Salvar alterações' : 'Salvar sessão'}
-                    {isDirty && <span aria-hidden="true"> ●</span>}
-                  </Button>
-                </div>
-              </Card>
+              <SessionEditor
+                editor={editor}
+                blockList={blockList}
+                templates={templates}
+                isMobile={isMobile}
+                registry={registry}
+                blockNames={blockNames}
+                editorDateStr={editorDateStr}
+                editorBoxes={editorBoxes}
+                tvPreviewOpen={tvPreviewOpen}
+                onToggleTvPreview={() => setTvPreviewOpen(v => !v)}
+              />
             </div>
           )}
         </div>{' '}
         {/* end left pane */}
         {/* ── TV Preview pane (desktop only, when toggled) ── */}
-        {tvPreviewOpen && !isMobile && editorOpen && (
-          <div className={cr.splitAside}>
-            <div className={cr.previewTitle}>
-              <i className="ti ti-device-tv" aria-hidden="true" /> Preview TV
-              <span className={cr.previewSub}>· atualiza em tempo real</span>
-            </div>
-            <div ref={previewPaneRef} className={cr.previewFrame}>
-              <div
-                style={{
-                  width: 1920,
-                  height: 1080,
-                  transform: `scale(${prevScale})`,
-                  transformOrigin: 'top left',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                }}
-              >
-                <WodSlide sessions={tvPreviewSessions} tv={tvPreviewTv} gymName={gymName} />
-              </div>
-            </div>
-          </div>
+        {tvPreviewOpen && !isMobile && editor.editorOpen && (
+          <TvPreviewPane form={editor.form} blocks={editor.blocks} />
         )}
       </div>{' '}
       {/* end content flex container */}
     </div>
-  )
-}
-
-export default function CriadorTab({
-  sessions,
-  setSessions,
-  blockNames,
-  preload,
-  onPreloadConsumed,
-  onGoToPublish,
-}) {
-  return (
-    <TrainingCreator
-      sessions={sessions}
-      setSessions={setSessions}
-      blockNames={blockNames}
-      preload={preload}
-      onPreloadConsumed={onPreloadConsumed}
-      onGoToPublish={onGoToPublish}
-    />
   )
 }
