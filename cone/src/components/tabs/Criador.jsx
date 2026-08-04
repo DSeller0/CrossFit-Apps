@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { todayISO, loadAthletes, loadRegistry, loadLocations } from '../../utils/storage'
-import { DAY_PT } from '../../public/lib/week.js'
+import { DAY_PT, getWeek } from '../../public/lib/week.js'
 import { sessionBoxIds } from '../../public/lib/boxScope.js'
 import { materializeBlocks } from './criador/blockModel.js'
 import { CriadorTypePicker } from './criador/TypePicker'
@@ -64,17 +64,7 @@ export default function CriadorTab({
   }
 
   // ── The week ───────────────────────────────────────────────────────────────
-  const getSundayWeek = offset => {
-    const d = new Date()
-    const dow = d.getDay()
-    d.setDate(d.getDate() - dow + offset * 7)
-    return Array.from({ length: 7 }, (_, i) => {
-      const w = new Date(d)
-      w.setDate(d.getDate() + i)
-      return w
-    })
-  }
-  const weekDates = getSundayWeek(weekOffset)
+  const weekDates = getWeek(weekOffset)
   // Box grid filter: 'all' shows everything, 'none' shows only box-less sessions, an id shows that box.
   const boxFilter = s =>
     selBox === 'all'
