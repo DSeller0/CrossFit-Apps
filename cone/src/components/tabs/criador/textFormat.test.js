@@ -14,6 +14,8 @@ import {
   matchDayHeader,
   resolveType,
   isTextEditable,
+  splitLockedBlocks,
+  mergeLockedBlocks,
   normLine,
 } from './textFormat.js'
 
@@ -704,6 +706,14 @@ const mkBlk = o => ({
   ...o,
 })
 const gender = o => ({ mode: 'gender', Masculino_unit: 'kg', Feminino_unit: 'kg', ...o })
+const mkSt = o => ({ id: 's', name: '', duration: '', isRest: false, exercises: [], ...o })
+// An Estações block keeps its exercises under `stations` and carries no `exercises` key
+// at all — same shape as blockModel's emptyBlock('Estações').
+const mkStBlk = o => {
+  const b = mkBlk({ type: 'Estações', label: 'Estações', ...o })
+  delete b.exercises
+  return { ...b, stationRepeat: 1, ...o }
+}
 
 const CORPUS = {
   'standard rounds + cap + goal': mkBlk({
@@ -993,6 +1003,54 @@ const CORPUS = {
     label: 'Acessórios',
     exercises: [mkEx({ name: 'Bicep Curl', sets: '3' })],
   }),
+  // ── plans/61·B · stations ───────────────────────────────────────────────────
+  'stations — two groups, a rest station, repeat and inter-cycle rest': mkStBlk({
+    stationRepeat: 2,
+    restBetweenCycles: '01:00',
+    stations: [
+      mkSt({
+        name: 'Grupo A',
+        duration: '3:00',
+        exercises: [mkEx({ name: 'Wall Ball', reps: '15' })],
+      }),
+      mkSt({
+        name: 'Grupo B',
+        duration: '3:00',
+        exercises: [mkEx({ name: 'Box Jump', reps: '12' })],
+      }),
+      mkSt({ name: 'Descanso', duration: '1:00', isRest: true }),
+    ],
+  }),
+  'stations — a duration-less group and an unnamed one': mkStBlk({
+    stations: [
+      mkSt({ name: 'Grupo A', exercises: [mkEx({ name: 'Clean & Jerk', reps: '5' })] }),
+      mkSt({ duration: '10:00', exercises: [mkEx({ name: 'Run', dist: '400', distUnit: 'm' })] }),
+    ],
+  }),
+  // The station NAME carries the coach's own `'`/`"` notation; only the trailing mm:ss
+  // is the duration (prod, 2026-06-19 — this used to invent a 3-minute block duration).
+  'stations — a name that looks like a duration': mkStBlk({
+    stationRepeat: 4,
+    stations: [
+      mkSt({
+        name: "AMRAP 3'30''",
+        duration: '03:30',
+        exercises: [mkEx({ name: 'DU', reps: '50' }), mkEx({ name: 'Max RMU' })],
+      }),
+      mkSt({ name: 'Descanso', duration: '02:00', isRest: true }),
+    ],
+  }),
+  'stations — block-level rounds, cap, goal and zone survive alongside': mkStBlk({
+    label: 'Estações – Cardio',
+    zone: 'Zona 03',
+    rounds: '3',
+    duration: '30',
+    stationRepeat: 3,
+    restBetweenCycles: '00:00',
+    goal: { kind: 'text', text: '3 voltas completas' },
+    notes: 'terminar antes do fim do round',
+    stations: [mkSt({ duration: '10:00', exercises: [mkEx({ name: 'Pull Up', reps: '15' })] })],
+  }),
 }
 
 describe('round-trip: parseSession(serializeSession(s)).blocks === s.blocks', () => {
@@ -1019,34 +1077,130 @@ describe('round-trip: parseSession(serializeSession(s)).blocks === s.blocks', ()
   })
 })
 
-// ── Non-text-editable block types ─────────────────────────────────────────────
-describe('isTextEditable', () => {
-  test('Estações and Benchmark blocks stay out of text mode', () => {
-    expect(isTextEditable({ type: 'For Time' })).toBe(true)
-    expect(isTextEditable({ type: 'Estações', stations: [] })).toBe(false)
-    expect(isTextEditable({ type: 'For Time', benchmarkRef: 'Fran' })).toBe(false)
-  })
-  test('an Estações block still serializes for the read-only week view', () => {
-    const b = {
-      type: 'Estações',
-      label: 'Estações',
-      stations: [
-        {
-          id: 's',
-          name: 'Grupo A',
-          duration: '3:00',
-          isRest: false,
-          exercises: [mkEx({ name: 'Wall Ball', reps: '15' })],
-        },
-        { id: 's', name: 'Descanso', duration: '1:00', isRest: true, exercises: [] },
-      ],
-    }
+// ── Stations (plans/61·B) ─────────────────────────────────────────────────────
+describe('stations', () => {
+  const b = {
+    type: 'Estações',
+    label: 'Estações',
+    stationRepeat: 2,
+    restBetweenCycles: '01:00',
+    stations: [
+      {
+        id: 's',
+        name: 'Grupo A',
+        duration: '3:00',
+        isRest: false,
+        exercises: [mkEx({ name: 'Wall Ball', reps: '15' })],
+      },
+      { id: 's', name: 'Descanso', duration: '1:00', isRest: true, exercises: [] },
+    ],
+  }
+
+  test('the notation is the header, the two cycle keywords, then station-then-exercises', () => {
     expect(serializeBlock(b).split('\n')).toEqual([
       'Estações',
+      'Ciclos: 2',
+      'Entre ciclos: 01:00',
       'Grupo A 3:00',
       '15 Wall Ball',
       'Descanso 1:00',
     ])
+  })
+
+  test('`Descanso 1:00` is a rest STATION, not a Rest exercise (RE_REST would shadow it)', () => {
+    const { block } = parseBlock(serializeBlock(b))
+    expect(block.stations).toHaveLength(2)
+    expect(block.stations[1]).toMatchObject({ name: 'Descanso', duration: '1:00', isRest: true })
+    expect(block.stations[1].exercises).toEqual([])
+  })
+
+  test("a Rest EXERCISE inside a station still parses as one — it writes mm's, not mm:ss", () => {
+    const { block } = parseBlock("Estações\nGrupo A 3:00\n15 Wall Ball\nRest 2'")
+    expect(block.stations).toHaveLength(1)
+    expect(block.stations[0].exercises.at(-1)).toMatchObject({ name: 'Rest', reps: "2'" })
+  })
+
+  test('a leading quantity means an exercise, never a station', () => {
+    const { block } = parseBlock('Estações\nGrupo A 3:00\n15 Wall Ball 1:00')
+    expect(block.stations).toHaveLength(1)
+    expect(block.stations[0].exercises).toHaveLength(1)
+  })
+
+  test('an exercise before any station header opens an unnamed one — no line is lost', () => {
+    const { block } = parseBlock('Estações\n15 Wall Ball\nGrupo B 2:00\n10 Box Jump')
+    expect(block.stations.map(st => st.name)).toEqual(['', 'Grupo B'])
+    expect(block.stations[0].exercises).toHaveLength(1)
+  })
+
+  test('the block carries stations, never an exercises array', () => {
+    const { block } = parseBlock(serializeBlock(b))
+    expect(block.exercises).toBeUndefined()
+    expect(block).toMatchObject({ stationRepeat: 2, restBetweenCycles: '01:00' })
+  })
+
+  test('a repeat of 1 is the default everywhere it is read, so it carries no line', () => {
+    expect(serializeBlock({ ...b, stationRepeat: 1 })).not.toContain('Ciclos:')
+    expect(parseBlock('Estações\nGrupo A 3:00').block.stationRepeat).toBe(1)
+  })
+
+  test('station lines only exist inside an Estações block', () => {
+    const { block } = parseBlock('For Time\nGrupo A 3:00\n15 Wall Ball')
+    expect(block.stations).toBeUndefined()
+    expect(block.exercises).toHaveLength(2)
+  })
+})
+
+// ── Locked passthrough (plans/61·B) ───────────────────────────────────────────
+describe('isTextEditable + locked blocks', () => {
+  test('only a LINKED benchmark is locked out of text mode', () => {
+    expect(isTextEditable({ type: 'For Time' })).toBe(true)
+    expect(isTextEditable({ type: 'Estações', stations: [] })).toBe(true)
+    expect(isTextEditable({ type: 'For Time', benchmarkRef: 'Fran' })).toBe(false)
+  })
+
+  const fran = { id: 'f', type: 'Benchmark', label: 'Fran', benchmarkRef: 'Fran', exercises: [] }
+  const a = mkBlk({
+    id: 'a',
+    type: 'Aquecimento',
+    label: 'Aquecimento',
+    exercises: [mkEx({ name: 'Row', dist: '500', distUnit: 'm' })],
+  })
+  const c = mkBlk({
+    id: 'c',
+    type: 'For Time',
+    label: 'For Time',
+    exercises: [mkEx({ name: 'Burpee', reps: '20' })],
+  })
+
+  test('a locked block is held out of the text and warned about', () => {
+    const { text, layout, warnings } = splitLockedBlocks([a, fran, c])
+    expect(text).not.toContain('Fran')
+    expect(layout.map(l => l.kind)).toEqual(['text', 'locked', 'text'])
+    expect(warnings).toHaveLength(1)
+    expect(warnings[0]).toMatchObject({ kind: 'block-locked', lineNo: null })
+  })
+
+  test('it comes back byte-identical, at its own index', () => {
+    const { text, layout } = splitLockedBlocks([a, fran, c])
+    const merged = mergeLockedBlocks(parseSession(text).blocks, layout)
+    expect(merged).toHaveLength(3)
+    expect(merged[1]).toBe(fran) // the SAME object — not a re-parse of it
+    expect(merged.map(b => b.type)).toEqual(['Aquecimento', 'Benchmark', 'For Time'])
+  })
+
+  test('it stays anchored when the coach adds or removes blocks in the textarea', () => {
+    const { layout } = splitLockedBlocks([a, fran, c])
+    // one text block deleted
+    expect(mergeLockedBlocks([a], layout).map(b => b.id)).toEqual(['a', 'f'])
+    // one added at the end — the locked block keeps the slot it had
+    const extra = mkBlk({ id: 'd', type: 'Core' })
+    expect(mergeLockedBlocks([a, c, extra], layout).map(b => b.id)).toEqual(['a', 'f', 'c', 'd'])
+  })
+
+  test('a session with nothing but a locked block still round-trips', () => {
+    const { text, layout } = splitLockedBlocks([fran])
+    expect(text).toBe('')
+    expect(mergeLockedBlocks(parseSession(text).blocks, layout)).toEqual([fran])
   })
 })
 

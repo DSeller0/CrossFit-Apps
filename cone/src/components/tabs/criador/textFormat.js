@@ -76,14 +76,14 @@ export function resolveType(seg) {
 // affects how the structure line is *written* — both forms parse back to duration.
 const CAP_TYPES = ['For Time', 'Benchmark', 'MetCon', 'HIIT']
 
-// Estações carries stations (not exercises) and Benchmark blocks are read-only in
-// the detailed editor — neither is expressible in this grammar, so text mode is not
-// offered for them. serializeBlock still renders them for the read-only week view.
-export const TEXT_UNSUPPORTED_TYPES = ['Estações']
+// A block is locked out of text mode when its exercises are not the coach's to type:
+// a LINKED Benchmark's movements come from the benchmark definition, so round-tripping
+// one through the grammar would rewrite an official WOD from a paraphrase of it.
+// Estações was locked too until plans/61·B gave stations their own notation
+// (`matchStationLine`) — it is editable now, and Benchmark is the only case left.
+// serializeBlock still renders a locked block for the read-only week Texto view.
 export function isTextEditable(block) {
-  if (!block) return false
-  if (block.benchmarkRef) return false
-  return !TEXT_UNSUPPORTED_TYPES.includes(block.type)
+  return !!block && !block.benchmarkRef
 }
 
 // ── Structure lines ───────────────────────────────────────────────────────────
@@ -152,11 +152,21 @@ export function parseStructure(raw) {
 // be followed by a quantity, or the first word of every exercise starting with a lone
 // capital is eaten as a letter (`V ups Alt` → slot V + "ups Alt", live on prod).
 const RE_SLOT = /^([A-Z])(?:\s*[).\-–]\s*(?=\S)|\s+(?=\d))/
+// ⚠️ Inside an Estações block `Descanso 1:00` is a rest STATION, not a Rest exercise —
+// the station probe (matchStationLine) runs before this one for exactly that reason.
+// The two forms stay distinguishable anyway: a rest exercise writes its duration in the
+// coach's own `'`/`"` notation (`Rest 2'`), a station in the editor's mm:ss.
 const RE_REST = /^(?:rest|descanso)\b\s*(.*)$/i
 const RE_NOTE_PAREN = /\s*\(([^()]*)\)\s*$/
 const RE_META = /^(?:meta|alvo|goal)\s*:\s*(.+)$/i
 const RE_OBS = /^(?:obs|nota|note)\s*:\s*(.*)$/i
 const RE_ZONA = /^zona\s*:\s*(.+)$/i
+// Estações only (#121c · plans/61·B). `Ciclos:`/`Entre ciclos:` join the Meta:/Obs:/Zona:
+// keyword family rather than riding on the header, for two concrete reasons: the header
+// is split into type + label segments (HEADER_SPLIT) and a `×2` segment has no grammar
+// there, and a bare `2 ciclos` is ALREADY claimed by RE_ROUNDS as `block.rounds`.
+const RE_CICLOS = /^ciclos\s*:\s*(\d+)\s*$/i
+const RE_ENTRE_CICLOS = /^entre\s+ciclos\s*:\s*(.*)$/i
 
 const DIST_UNITS = '(m|km|cal|mi)'
 const RE_Q_SETS_DIST = new RegExp(
@@ -403,6 +413,44 @@ function foldKm(ex) {
   return ex
 }
 
+// ── Station lines ─────────────────────────────────────────────────────────────
+// Estações is the one type whose exercises hang off STATIONS instead of the block, so
+// inside one the top level of the text is a list of station headers, each followed by
+// its own exercise lines. Two forms, both decidable, and only ever tried inside a block
+// whose resolved type is Estações:
+//
+//   Grupo A 3:00   a name (possibly empty) + a trailing mm:ss duration
+//   Grupo A:       a trailing colon, for a station that carries no duration
+//
+// ⚠️ The duration is **mm:ss only**. `'`/`"` are the exercise and structure notation and
+// a station NAME can contain them — prod carries one called `AMRAP 3'30''`, whose own
+// header would otherwise be read as a 3-minute cap (that is today's `duration-invented`).
+// mm:ss is also exactly what `maskMMSS` writes into the field, so nothing is reformatted.
+//
+// A leading digit means the line is an exercise wearing a quantity (`15 Wall Ball 1:00`),
+// never a station. Rest stations are marked by the WORD, since `isRest` changes how the
+// station renders everywhere while a custom rest name (prod has none — the editor names
+// them "Descanso" and renders an empty name as "Descanso") is cosmetic.
+const RE_STATION_DUR = /^(.*?)\s*(\d{1,2}:\d{2})$/
+const RE_STATION_BARE = /^(.*?):$/
+const RE_STATION_REST = /^(?:rest|descanso)$/i
+
+export function matchStationLine(raw) {
+  const line = normLine(raw)
+  if (!line) return null
+  let m,
+    name,
+    duration = ''
+  if ((m = line.match(RE_STATION_DUR))) {
+    name = m[1].trim()
+    duration = m[2]
+  } else if ((m = line.match(RE_STATION_BARE))) {
+    name = m[1].trim()
+  } else return null
+  if (/^\d/.test(name)) return null
+  return { name, duration, isRest: RE_STATION_REST.test(name) }
+}
+
 // ── Goals ─────────────────────────────────────────────────────────────────────
 const timeStr = (min, sec) => `${min}:${String(sec ?? 0).padStart(2, '0')}`
 function parseTimeToken(tok) {
@@ -594,6 +642,13 @@ function buildBlock(lines, o) {
   block.type = head?.type || o.knownType || ''
   if (head?.unresolved) block.typeUnresolved = true
   const labelParts = head?.labelParts || []
+  // Station mode is a function of the resolved TYPE and can only be decided here: the
+  // header is the sole place Estações can come from (STRUCT_TYPES has no entry for it,
+  // so the struct-line resolution below can never turn a block INTO one).
+  const stationMode = block.type === 'Estações'
+  if (stationMode) block.stations = []
+  let cycles = 0,
+    restCycles = ''
 
   // Structure line: the line right after the header, unless the header WAS one.
   let struct = head?.struct || (head?.pureStructure ? head.struct || null : null)
@@ -601,8 +656,22 @@ function buildBlock(lines, o) {
   // A keyword line is never the structure line, whatever numbers it carries — the body
   // loop below owns Meta:/Obs:/Zona:, and letting the probe have first refusal turned
   // `Meta: Corrida abaixo de 1'.` into a 1-minute duration plus a mangled note.
-  const isKeywordLine = l => RE_META.test(l) || RE_OBS.test(l) || RE_ZONA.test(l)
-  if (!head?.pureStructure && i < lines.length && !isKeywordLine(normLine(lines[i].raw))) {
+  const isKeywordLine = l =>
+    RE_META.test(l) ||
+    RE_OBS.test(l) ||
+    RE_ZONA.test(l) ||
+    RE_CICLOS.test(l) ||
+    RE_ENTRE_CICLOS.test(l)
+  // A station header is never the structure line either — `AMRAP 3'30'' 03:30` is a
+  // station called `AMRAP 3'30''`, and letting the probe have first refusal is what
+  // invented a 3-minute duration for it (prod, 2026-06-19).
+  const isStationLine = l => stationMode && !!matchStationLine(l)
+  if (
+    !head?.pureStructure &&
+    i < lines.length &&
+    !isKeywordLine(normLine(lines[i].raw)) &&
+    !isStationLine(lines[i].raw)
+  ) {
     const st = parseStructure(lines[i].raw)
     // A structure line, unless the line is really an exercise wearing a number — that is
     // what turned `50' Run` into a 50-minute cap plus an orphan "Run" note and `2.3'`
@@ -659,6 +728,19 @@ function buildBlock(lines, o) {
 
   // Body
   let lettered = false
+  // In station mode every exercise belongs to the station above it. `bucket()` is that
+  // station (or the block itself outside station mode) and opens an unnamed one when an
+  // exercise arrives before any station header, so a line can never fall on the floor.
+  let curStation = null
+  const peek = () => (stationMode ? curStation : block)
+  const bucket = () => {
+    if (!stationMode) return block
+    if (!curStation) {
+      curStation = { id: uid(), name: '', duration: '', isRest: false, exercises: [] }
+      block.stations.push(curStation)
+    }
+    return curStation
+  }
   for (; i < lines.length; i++) {
     const l = lines[i],
       line = normLine(l.raw)
@@ -679,11 +761,31 @@ function buildBlock(lines, o) {
       audit.push({ lineNo: l.lineNo, kind: 'zone', line })
       continue
     }
+    if (stationMode) {
+      if ((m = line.match(RE_CICLOS))) {
+        cycles = +m[1]
+        audit.push({ lineNo: l.lineNo, kind: 'cycles', line })
+        continue
+      }
+      if ((m = line.match(RE_ENTRE_CICLOS))) {
+        restCycles = m[1].trim()
+        audit.push({ lineNo: l.lineNo, kind: 'cycles', line })
+        continue
+      }
+      // Before the exercise parse, so `Descanso 1:00` is the rest STATION it is.
+      const stn = matchStationLine(line)
+      if (stn) {
+        curStation = { id: uid(), ...stn, exercises: [] }
+        block.stations.push(curStation)
+        audit.push({ lineNo: l.lineNo, kind: 'station', line })
+        continue
+      }
+    }
 
     const { ex, hadSlot, isRest } = parseExerciseLine(line)
     if (hadSlot) lettered = true
     if (isRest) {
-      block.exercises.push(ex)
+      bucket().exercises.push(ex)
       audit.push({ lineNo: l.lineNo, kind: 'rest', line })
       continue
     }
@@ -694,7 +796,7 @@ function buildBlock(lines, o) {
       // the coach's two-line complex (the Friday LPO block); with one, it's just
       // that exercise's progression. The highest-ambiguity rule in the grammar —
       // it always announces itself in `warnings` so the preview can offer an undo.
-      const merged = applyBareLoadList(block, ex.intensity)
+      const merged = applyBareLoadList(bucket(), ex.intensity)
       if (merged === 'complex')
         warn('complex-detected', l, 'Complexo detectado a partir da lista de cargas')
       else if (merged === 'none') {
@@ -704,10 +806,10 @@ function buildBlock(lines, o) {
       audit.push({ lineNo: l.lineNo, kind: 'load', line })
       continue
     }
-    if (bare && (ex.sets || ex.reps || ex.dist || ex.intensity) && block.exercises.length) {
+    if (bare && (ex.sets || ex.reps || ex.dist || ex.intensity) && peek()?.exercises.length) {
       // Name-then-prescription: "Back Squat" / "5x5 65/70/75/80/85%".
-      const prev = block.exercises[block.exercises.length - 1]
-      block.exercises[block.exercises.length - 1] = mergePrescription(prev, ex)
+      const exs = peek().exercises
+      exs[exs.length - 1] = mergePrescription(exs[exs.length - 1], ex)
       audit.push({ lineNo: l.lineNo, kind: 'exercise', line })
       continue
     }
@@ -718,7 +820,7 @@ function buildBlock(lines, o) {
       continue
     }
 
-    block.exercises.push(ex)
+    bucket().exercises.push(ex)
     audit.push({ lineNo: l.lineNo, kind: 'exercise', line })
   }
 
@@ -731,9 +833,21 @@ function buildBlock(lines, o) {
   }
   block.label = labelParts.join(' – ') || block.type || ''
   block.notes = noteLines.join('\n')
+  if (stationMode) {
+    // `1` is the default everywhere `stationRepeat` is read (`block.stationRepeat || 1`),
+    // so the notation carries only a real repeat — same rule blockSummary's `×N` uses.
+    block.stationRepeat = cycles || 1
+    if (restCycles) block.restBetweenCycles = restCycles
+    // Estações keeps its exercises under `stations`; `emptyBlock('Estações')` has no
+    // `exercises` key at all and no consumer reads one (wod.js `blockExercises`).
+    delete block.exercises
+  }
 
+  const allExercises = stationMode
+    ? block.stations.flatMap(st => st.exercises || [])
+    : block.exercises
   if (o.registry) {
-    block.exercises.forEach(ex => {
+    allExercises.forEach(ex => {
       const names = ex.isComplex ? (ex.complexMovements || []).map(mv => mv.name) : [ex.name]
       names.filter(Boolean).forEach(n => {
         if (n !== 'Rest' && !resolveExercise(n, o.registry)) {
@@ -752,7 +866,10 @@ function buildBlock(lines, o) {
 
 // The two-line complex assist. Movements only ever carry name+reps, so a candidate
 // must be rep-based and load-free — that keeps `100m Run` out of a complex.
-function applyBareLoadList(block, intensity) {
+// `holder` is whatever owns the exercise list: the block, or (in station mode) the
+// station the lines are landing in.
+function applyBareLoadList(holder, intensity) {
+  const block = holder
   const exs = block.exercises
   const cand = []
   for (let k = exs.length - 1; k >= 0; k--) {
@@ -1067,11 +1184,39 @@ export function serializeExercise(ex, { letter } = {}) {
   )
 }
 
+// The station half of an Estações block (#121c · plans/61·B) — see matchStationLine for
+// the two header forms and why the duration is mm:ss only.
 function serializeStations(block) {
   const out = []
-  ;(block.stations || []).forEach(st => {
-    out.push([st.isRest ? 'Descanso' : st.name, st.duration].filter(Boolean).join(' '))
-    ;(st.exercises || []).forEach(ex => out.push(serializeExercise(ex)))
+  const rep = Number(block.stationRepeat || 1)
+  if (rep > 1) out.push(`Ciclos: ${rep}`)
+  const rest = String(block.restBetweenCycles || '').trim()
+  if (rest) out.push(`Entre ciclos: ${rest}`)
+
+  const sts = block.stations || []
+  // The type was switched to Estações before any station was built: emit whatever
+  // exercises the block still carries rather than an empty block, and let them come
+  // back under one unnamed station. Prod has no such block — this is the safety net
+  // that keeps a mid-switch block from serializing to nothing.
+  if (!sts.length)
+    return out.concat(
+      (block.exercises || []).map(ex => serializeExercise(ex)).filter(l => l.trim()),
+    )
+
+  sts.forEach(st => {
+    // The rest marker is the WORD: `isRest` changes how the station renders everywhere,
+    // a custom rest name does not (BlockDetail renders `st.name || 'Descanso'`, and the
+    // editor names every rest station "Descanso"). So a rest station is always written
+    // out as one, and a hand-named one — prod has none — reads back as its name.
+    const name = st.isRest ? 'Descanso' : String(st.name || '').trim()
+    const dur = String(st.duration || '').trim()
+    out.push(dur ? `${name} ${dur}`.trim() : `${name}:`)
+    ;(st.exercises || []).forEach(ex => {
+      const line = serializeExercise(ex)
+      // A blank editor row carries nothing — and an empty LINE would split the block in
+      // two on the way back (prod 2026-07-06: 7 blocks came back as 8).
+      if (line.trim()) out.push(line)
+    })
   })
   return out
 }
@@ -1137,4 +1282,42 @@ export function serializeBlock(block, opts = {}) {
 
 export function serializeSession(session) {
   return (session?.blocks || []).map(b => serializeBlock(b)).join('\n\n')
+}
+
+// ── Locked passthrough (plans/61·B) ───────────────────────────────────────────
+// The session pane hands the coach ONE textarea for a whole session, so a block the
+// grammar can't express (a linked Benchmark) has to survive it byte-identical rather
+// than being rewritten from a paraphrase of itself. Split the session into the text
+// half and a LAYOUT that remembers where the locked ones sat; `mergeLockedBlocks` puts
+// them back at their own index however much the text changed in between.
+// Pure and unit-testable on purpose — the pane stays thin.
+export function splitLockedBlocks(blocks) {
+  const list = blocks || []
+  const layout = list.map(b =>
+    isTextEditable(b) ? { kind: 'text' } : { kind: 'locked', block: b },
+  )
+  const warnings = list
+    .filter(b => !isTextEditable(b))
+    .map(b => ({
+      kind: 'block-locked',
+      line: b.benchmarkRef || b.label || b.type || '',
+      lineNo: null,
+      message: `"${b.benchmarkRef || b.label || b.type}" não é editável em texto — preservado`,
+    }))
+  return { text: serializeSession({ blocks: list.filter(isTextEditable) }), layout, warnings }
+}
+
+// Parsed blocks fill the `text` slots in order; a locked block anchors AFTER the text
+// block it followed, so adding or removing blocks in the textarea leaves it where it is.
+// Blocks the coach added beyond the original count land at the end.
+export function mergeLockedBlocks(parsedBlocks, layout) {
+  const parsed = parsedBlocks || []
+  const out = []
+  let i = 0
+  for (const slot of layout || []) {
+    if (slot.kind === 'locked') out.push(slot.block)
+    else if (i < parsed.length) out.push(parsed[i++])
+  }
+  while (i < parsed.length) out.push(parsed[i++])
+  return out
 }

@@ -118,15 +118,28 @@ function normBlock(b) {
     goal: normGoal(b.goal),
     exercises: (b.exercises || []).map(normEx),
   }
+  // Both sides of the exercises/stations fork are kept in the projection so `classify`
+  // can NAME the residue rather than hide it — see `vestigial-*` there.
   if (b.type === 'Estações' || b.stations)
     o.stations = (b.stations || []).map(st => ({
-      name: W(st?.name),
+      // An empty rest name and a literal "Descanso" are the same station on screen
+      // (`BlockDetail.jsx` renders `st.name || 'Descanso'`, and the editor names every
+      // rest station that), so the notation writing the word out is the serializer's
+      // contract, not a loss — the same argument as `label` above.
+      name: W(st?.name) || (st?.isRest ? 'Descanso' : ''),
       duration: T(st?.duration),
       isRest: !!st?.isRest,
-      exercises: (st?.exercises || []).map(normEx),
+      // A blank editor row carries nothing in text — and an empty LINE would split the
+      // block in two — so it is dropped on both sides.
+      exercises: (st?.exercises || [])
+        .map(normEx)
+        .filter(e => e.name || e.isComplex || e.reps || e.dist || e.sets || e.intensity),
     }))
   if (T(b.benchmarkRef)) o.benchmarkRef = T(b.benchmarkRef)
-  if (b.stationRepeat != null) o.stationRepeat = T(b.stationRepeat)
+  // `stationRepeat` has ONE default everywhere it is read (`block.stationRepeat || 1`),
+  // so undefined and 1 are the same block and the notation carries neither.
+  if (b.type === 'Estações') o.stationRepeat = T(b.stationRepeat) || '1'
+  else if (b.stationRepeat != null) o.stationRepeat = T(b.stationRepeat)
   if (T(b.restBetweenCycles)) o.restBetweenCycles = T(b.restBetweenCycles)
   return o
 }
@@ -185,6 +198,13 @@ const CLASSES = [
 //   too (the recorded normalization, CLAUDE.md "Criador text format").
 // · `gender-units` — plans/61·A A11, blast radius zero, measured.
 // · `interval-approximated` — plans/36's deliberate v1 limitation (no interval field).
+// · `vestigial-exercises` / `vestigial-stations` — a block carrying BOTH an `exercises`
+//   array and a `stations` array (prod has 5: the type was switched after the fact and
+//   the editor left the old side behind). Which side is live is decided by the TYPE, and
+//   every consumer makes exactly that fork — `blockExercises` (wod.js), `normalizeLegacyCardio`,
+//   `materializeBlocks`, `blockSummary`, `BlockDetail`, `rail.jsx`. The other side is
+//   unreachable by every render path AND by the editor, so text projects the live side
+//   only and the residue does not survive a round trip. Counted, not hidden.
 const ACCEPTED = [
   'projection-shift',
   'complex-name-unnotatable',
@@ -193,11 +213,23 @@ const ACCEPTED = [
   'first-line-ambiguous',
   'gender-units',
   'interval-approximated',
+  'vestigial-exercises',
+  'vestigial-stations',
 ]
 
+// An exercise inside a station is still an exercise, so the per-field rules below decide
+// its diffs exactly as they do a top-level one — only a STATION's own structure (which
+// stations exist · name · duration · isRest) is `stations-lost`. These two resolve either
+// path shape: `exercises[i]…` and `stations[s].exercises[i]…`.
+const RE_EX_PATH = /^(?:stations\[(\d+)\]\.)?exercises\[(\d+)\]/
 const exIdx = p => {
-  const m = p.match(/^exercises\[(\d+)\]/)
-  return m ? +m[1] : null
+  const m = p.match(RE_EX_PATH)
+  return m ? (m[1] ? `${m[1]}.${m[2]}` : m[2]) : null
+}
+const exSrc = (raw, path) => {
+  const m = path.match(RE_EX_PATH)
+  if (!m) return null
+  return m[1] ? ((raw.stations || [])[+m[1]]?.exercises || [])[+m[2]] : (raw.exercises || [])[+m[2]]
 }
 
 // A complex name the serializer deliberately refuses to emit, because the coach's `name`
@@ -208,6 +240,11 @@ const unnotatableName = n => !n || /[+:]/.test(n) || /^\d/.test(n)
 
 function classify(path, raw, d) {
   const p = path.replace(/\[\d+\]/g, '[]')
+  // The side of the block its own type does not read is residue — see ACCEPTED.
+  const isEst = raw.type === 'Estações'
+  if (isEst && p.startsWith('exercises')) return 'vestigial-exercises'
+  if (!isEst && (p.startsWith('stations') || p === 'stationRepeat' || p === 'restBetweenCycles'))
+    return 'vestigial-stations'
   if (p === 'type') return 'type-drift'
   if (p === 'duration') return 'duration-invented'
   if (p === 'rounds') return 'rounds-invented'
@@ -218,13 +255,13 @@ function classify(path, raw, d) {
       ? 'ladder-off'
       : 'ladder-vestigial'
   if (p === 'benchmarkRef') return 'benchmark-lost'
-  if (p === 'stations' || p.startsWith('stations[')) return 'stations-lost'
+  if (p === 'stations' || (p.startsWith('stations[') && !p.includes('.exercises[')))
+    return 'stations-lost'
   if (p === 'stationRepeat' || p === 'restBetweenCycles') return 'stations-lost'
   if (p === 'goal' || p.startsWith('goal.')) return p.endsWith('.reps') ? 'goal-reps' : 'goal-kind'
-  if (p.startsWith('exercises[]')) {
-    const i = exIdx(path)
-    const src = i == null ? null : (raw.exercises || [])[i]
-    const tail = p.slice('exercises[].'.length)
+  if (/^(?:stations\[\]\.)?exercises\[\]/.test(p)) {
+    const src = exSrc(raw, path)
+    const tail = p.replace(/^(?:stations\[\]\.)?exercises\[\]\.?/, '')
     if (/^(dist|distUnit)$/.test(tail) && src?.intensity?.mode === 'cardio') return 'cardio-volume'
     // `sets` REWRITTEN is the loss A5 targets. `sets` INVENTED where there was none is the
     // grammar reading what the notation says (a coach-typed "2x " in the name, or a 3-step
@@ -389,6 +426,13 @@ for (const { dateKey, s } of allSessions) {
     // Header-less text (what the coach actually types) re-parsed with no knownType:
     // parseHeaderLine claims the first line as the block label, so an exercise there
     // disappears with only a `type-unresolved` warning to show for it.
+    //
+    // Estações is out of this pass by construction: the station grammar is scoped to a
+    // block whose type resolved to Estações, and a header-less paste has no type — so
+    // stations paste back as a flat exercise list until the coach taps the preview's
+    // "? escolher tipo" chip, which rewrites the header line and re-parses WITH one.
+    // (Its own `exercises` array is residue besides, so there is nothing to count against.)
+    if (b.type === 'Estações') return
     try {
       const paste = serializeBlock(b, { header: false })
       if (paste.trim()) {

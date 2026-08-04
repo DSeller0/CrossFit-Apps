@@ -228,9 +228,10 @@ export function BlockEditor({
 
         <div className="blk-spacer" />
 
-        {/* Detalhado / Texto for this block alone (#92). Estações carries groups
-            and a Benchmark is read-only, so neither has a text form — the toggle
-            is DISABLED rather than hidden, so its absence is explainable. */}
+        {/* Detalhado / Texto for this block alone (#92). A LINKED Benchmark's movements
+            come from the benchmark definition rather than from the coach, so it has no
+            text form — the toggle is DISABLED rather than hidden, so its absence is
+            explainable. (Estações joined the grammar in plans/61·B and is editable.) */}
         {!collapsed && (
           <span className={tm.modeSeg} role="group" aria-label="Modo de edição do bloco">
             <button

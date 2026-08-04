@@ -86,6 +86,37 @@ const txtRegistry = {
   ],
   LPO: [{ name: 'Power Clean' }],
 }
+// plans/61·B — the two states the station grammar and the locked passthrough added.
+// The Estações block is the PARSER'S output for its own notation, same rule as Monday's.
+const txtStationsBlock = parseSession(
+  `Estações
+Ciclos: 2
+Entre ciclos: 01:00
+Grupo A 3:00
+15 Wall Ball
+12 Box Jump
+Grupo B 3:00
+400m Corrida
+Descanso 1:00`,
+).blocks[0]
+// A LINKED benchmark is the one block text can't express: its movements come from the
+// benchmark definition, so the pane holds it out of the textarea and puts it back.
+const txtLockedBlocks = [
+  txtMondayBlocks[0],
+  {
+    id: 'bm1',
+    type: 'Benchmark',
+    label: 'Fran',
+    benchmarkRef: 'Fran',
+    zone: 'Zona 01',
+    notes: '21-15-9 Thruster / Pull Up',
+    exercises: [
+      { id: 'e1', name: 'Thruster', reps: '21,15,9', intensity: null, note: '' },
+      { id: 'e2', name: 'Pull Up', reps: '21,15,9', intensity: null, note: '' },
+    ],
+  },
+  txtMondayBlocks[3],
+]
 const txtWeekDates = getWeek(0)
 const txtBoxLocs = [
   { id: 'b1', name: 'Eagles', color: '#4ac8c0' },
@@ -171,6 +202,15 @@ export default {
               typePicker={StubTypePicker}
             />
           </Case>
+          <Case label="Benchmark no meio da sessão — fora do texto, preservado no índice (plans/61·B)">
+            <SessionTextPane
+              blocks={txtLockedBlocks}
+              registry={txtRegistry}
+              onApply={NOOP}
+              onCancel={NOOP}
+              typePicker={StubTypePicker}
+            />
+          </Case>
           <Case label="Vazio — nada colado ainda">
             <SessionTextPane blocks={[]} onApply={NOOP} typePicker={StubTypePicker} />
           </Case>
@@ -190,6 +230,9 @@ export default {
           </Case>
           <Case label="Bloco com nome fora do registro (ⓘ no rodapé)">
             <BlockTextEditor block={txtMondayBlocks[2]} onApply={NOOP} registry={txtRegistry} />
+          </Case>
+          <Case label="Estações — grupos, descanso e ciclos, agora expressáveis (plans/61·B)">
+            <BlockTextEditor block={txtStationsBlock} onApply={NOOP} registry={txtRegistry} />
           </Case>
         </Section>
       ),

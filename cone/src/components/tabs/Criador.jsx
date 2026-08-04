@@ -1059,8 +1059,11 @@ function TrainingCreator({
                       blockNames={blockNames || APP_CONFIG.blockNames}
                       typePicker={CriadorTypePicker}
                       onCancel={() => setSessionMode('detalhado')}
-                      onApply={parsed => {
-                        setBlocks(normalizeLegacyCardio(parsed))
+                      onApply={next => {
+                        // Already merged and normalized by the pane: the locked blocks in
+                        // `next` are the ORIGINAL objects and must be passed through
+                        // untouched (plans/61·B), so nothing may be re-mapped here.
+                        setBlocks(next)
                         setIsDirty(true)
                         setCollapsedBlocks({})
                         setSessionMode('detalhado')

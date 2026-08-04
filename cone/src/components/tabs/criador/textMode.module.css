@@ -58,6 +58,13 @@
   border-radius: var(--radius-sm); padding: var(--sp-2); margin-bottom: var(--sp-2);
 }
 .prevBlkPending { border-style: dashed }
+/* A block held out of the textarea and preserved as-is (plans/61·B) — reads as inert,
+   not as a warning: nothing is wrong with it, it simply isn't the text's to change. */
+.prevBlkLocked { border-left-style: dashed }
+.chipLock {
+  font-size: 10px; color: var(--muted); font-family: var(--font-mono);
+  display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+}
 .prevHd { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px }
 .chip {
   font-size: 10px; letter-spacing: .06em; text-transform: uppercase; font-weight: 700;

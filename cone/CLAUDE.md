@@ -210,8 +210,35 @@ refinements: [docs/plans/36](./docs/plans/36-criador-text-mode.md).
   `WeekSessionCard`): **Grade** = the real `ExerciseList` at size `tiny`; **Texto** =
   `serializeSession`. Same 7 columns, same `boxFilter`. Texto is the copyable one and
   the only one carrying the structure line, `Meta:` and notes.
-- **`isTextEditable(block)` is false for Estações and Benchmark** — neither is
-  expressible in the grammar. The block toggle renders **disabled, not hidden**.
+- **`isTextEditable(block)` is false for a LINKED Benchmark only** (`block.benchmarkRef`) — its
+  movements come from the benchmark definition, not from the coach, so a round trip would
+  rewrite an official WOD from a paraphrase of it. The block toggle renders **disabled, not
+  hidden**. Estações joined the grammar in 61·B; `TEXT_UNSUPPORTED_TYPES` went with it.
+- **Estações notation (61·B): `Ciclos: N` · `Entre ciclos: mm:ss` · `<nome> <mm:ss>` per
+  station** (`matchStationLine`), plus `<nome>:` for a duration-less one. The cycle fields are
+  **keyword lines in the `Meta:`/`Obs:`/`Zona:` family, NOT `×2` on the header** — the header
+  splits into type+label segments (`HEADER_SPLIT`) and has no grammar for a `×2` segment, and a
+  bare `2 ciclos` is already claimed by `RE_ROUNDS` as `block.rounds`. ⚠️ **A station duration is
+  mm:ss ONLY**: `'`/`"` are the exercise/structure notation and a station NAME can contain them
+  (prod has one called `AMRAP 3'30''`, which used to parse as a 3-minute block duration).
+  ⚠️ **Inside an Estações block `Descanso 1:00` is a rest STATION** — the station probe runs
+  before `RE_REST`, which would otherwise claim it as a Rest *exercise*; a rest exercise writes
+  `Rest 2'`, not mm:ss. A leading digit means an exercise wearing a quantity, never a station.
+- **When a block carries BOTH `stations` and `exercises`, its TYPE decides which side is live**
+  (prod has 5 — the type was switched after the fact and the editor left the old side behind).
+  That is the fork every consumer already makes: `blockExercises` (`wod.js`),
+  `normalizeLegacyCardio`, `materializeBlocks`, `blockSummary`, `BlockDetail`, `rail.jsx`. Text
+  projects the **live** side only; the other is unreachable residue and does not survive a round
+  trip. `audit-text-roundtrip.mjs` **counts** it (`vestigial-exercises`/`vestigial-stations`)
+  rather than letting it hide in `projection-shift`. In that script **a station's exercise is an
+  exercise** — the per-field rules apply to `stations[].exercises[]…` exactly as to
+  `exercises[]…`, and only a station's own structure (which stations exist · name · duration ·
+  isRest) is `stations-lost`.
+- **The session pane holds locked blocks OUT of the textarea and puts them back by index**
+  (`splitLockedBlocks`/`mergeLockedBlocks` in `textFormat.js` — pure and unit-tested, so the pane
+  stays thin). A locked block comes back as the **same object**, never a re-parse, rendered as a
+  read-only `PreviewBlock` at its real index with a `block-locked` warning. `normalizeLegacyCardio`
+  runs on the **parsed half only** — `Criador.jsx`'s `onApply` must not re-map what the pane hands it.
 - **Flipping a session to text and back normalizes whitespace and curly quotes in
   names** (`40” prancha ` → `40" prancha`). Verified on real prod data: 4 diffs in 42
   lines, all of that kind — no semantic loss.

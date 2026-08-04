@@ -261,6 +261,42 @@ and `textFormat` — plan it with #93, not here.
 
 # 61·B — Blocks the grammar can't express
 
+> ## ✅ DONE — shipped 2026-08-04
+> `stations-lost` **9 → 0** and `benchmark-lost` **0 → 0** (`scripts/audit-text-roundtrip.mjs`, same
+> script both sides). Estações also took `cardio-volume` **2 → 0**, `first-line-eaten` **1 → 0**,
+> `duration-invented` **1 → 0** and the session-level block-count change **1 → 0**; blocks identical
+> after a round trip **196/352 → 198/352**. **Every loss class now reads 0 except `goal-kind` (1)** —
+> see the ⚠️ below, it is not B's and it was already non-zero in B's baseline.
+> **Three things the plan didn't cover, decided here and recorded on #121(c):**
+> - **`Ciclos: N` + `Entre ciclos: mm:ss` keyword lines, NOT `×2` on the header.** `parseHeaderLine`
+>   splits the header into type + label segments (`HEADER_SPLIT`) and a `×2` segment has no grammar
+>   there; the plan's alternative spelling `2 ciclos` is **already claimed by `RE_ROUNDS`** as
+>   `block.rounds`, which prod Estações blocks really carry. Keyword lines collide with neither.
+> - **Which side wins when a block carries BOTH `stations` and `exercises`** (prod has 5, not the 3
+>   first measured — the type was switched after the fact and the editor left the old side behind).
+>   **The TYPE decides**, which is the fork every consumer already makes (`blockExercises` in
+>   `wod.js`, `normalizeLegacyCardio`, `materializeBlocks`, `blockSummary`, `BlockDetail`,
+>   `rail.jsx`): for Estações `stations` is live and `exercises` is unreachable residue, and vice
+>   versa. Text projects the live side only. The audit **counts** the residue as
+>   `vestigial-exercises` (38) / `vestigial-stations` (1) rather than hiding it in `projection-shift`.
+> - **A station's exercise is an exercise.** The audit was routing every `stations…` path to
+>   `stations-lost` before its per-exercise rules ran, so two ordinary projection shifts inside a
+>   station (`"5 C&J ubrok"` → reps + name, `"Remo (Ergômetro)"` → name + note) were counted as lost
+>   stations. `classify` now applies the same per-field rules to both path shapes; only a STATION's
+>   own structure (which stations exist · name · duration · isRest) is `stations-lost`.
+>
+> **0 prod blocks carry a `benchmarkRef`**, so `benchmark-lost` read 0 before this session and will
+> read 0 whatever B does — the locked passthrough is proved by unit test (`mergeLockedBlocks` returns
+> the *same object*, asserted with `toBe`) and live in the gallery, not by prod movement. Same shape
+> as A7. **`BlockTextEditor.jsx` was in scope after all** (B's Files list omits it): making
+> `isTextEditable` true for Estações enables the per-block `¶` toggle, and its `merge` would have
+> dropped `stations` on commit.
+> ⚠️ **`goal-kind` reads 1 and is NOT B's row — it was already 1 in B's baseline, before any edit.**
+> `2026-08-03 #2 For Time` holds `{kind:'time', min:'14'}`, which serializes to a bare `Meta: 14` and
+> parses back as `{kind:'text', text:'14'}`. 61·A pinned this shape as a regression guard on the
+> stated basis that its *input* was closed by plans/60 — **it is not**: `MaskedTimeInput` writes
+> through on every keystroke, so typing `14` and moving on still stores `min:'14'`. Filed as **#139**.
+
 ## Acceptance
 
 - An Estações block round-trips through `serializeSession`/`parseSession` with `stations`,
