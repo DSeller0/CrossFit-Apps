@@ -11,11 +11,30 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 
 ## 🟢 Ready (planned — pick from the top)
 
-> 🔵 **STATE, 2026-08-04: Ready is EMPTY.** All four rows below carry ✅ — 61·A/B/C and #74-C shipped
-> 2026-08-03/04, and every run-order pointer in the narrative underneath is now exhausted (its last
-> waypoint, *"Next up after 61·A/B/C: #74-C"*, is done). **Nothing here is a pick.** The next pick is
-> **Tier 3** of the Housekeeping program below, whose next-pick blockquote is the live pointer.
-> The rows and the narrative stay for the record — but read the ✅s before reading the order.
+> 🟢 **REFILLED 2026-08-04 — one planning session, four plan files, Tier 3's remaining batch.**
+> Ready had emptied (61·A/B/C + #74-C all shipped 2026-08-03/04, and every run-order pointer in the
+> older narrative below is exhausted — the four ✅ rows at the end of this section are history, not
+> picks). **plans/63 was planned AND executed in that session; 64–66 are planned only** and each is
+> its own execution session per WORKFLOW.md.
+> **Run order: #139+#140 (63) → #132+#133 (64) → #137 (65) → #134–#136 (66).**
+> 🔴 **65 gates 66** — #134's fix is a function of the `--border`/`--divider` value 65 sets, so
+> running 66 first means guessing and redoing.
+>
+> **Three decisions were taken in that planning session so no execution session re-litigates them:**
+> **(1) #133 adopts the full `ConfirmReview` shell in all three surfaces**, not just its read-back
+> rows — the component's own docstring names these three forks as what it was built to collapse, and
+> the real prize is the a11y contract (`LogPane`/`DeskRegPane` render their confirm as an inline pane
+> step today, so they have no focus trap, no Escape→Editar and no focus restore). **(2) #135 deletes
+> the 10 dead `.sm` rules and the gallery case** rather than giving `ClassPanel` a real `sm`
+> `ScoreInputs` — and records that ClassPanel's compact time input therefore stays on
+> `tvController.module.css`'s `editTimeInput` as a stated choice. **(3) #137 differentiates
+> `--border` from `--divider`** per theme rather than dropping the claim from CLAUDE.md — token count
+> stays 29, both already exist.
+
+- 🟢 **[→ Ready · plans/63](./plans/63-criador-keystroke-writes.md)** — **#139 + #140 Criador inputs that rewrite what the coach typed, per keystroke** · **S** · **Sonnet** · two bugs, one root cause: normalization work done on every keystroke that belongs at commit time. 🔑 **#139's "two candidate fixes, pick deliberately" resolves to BOTH** — they cover different paths and each alone leaves a live hole (`saveS` can't cover the Texto pane, which serializes *unsaved* blocks; `serializeGoal` can't cover `toSecs`/`goalStr`/`goalOutcome`, which never go through the serializer). **#140 is the user's 2026-08-04 report**, root-caused to `BlockEditor.jsx:401`'s trim-on-change.
+- 🟢 **[→ Ready · plans/64](./plans/64-logging-confirm-chain.md)** — **#132 + #133 The logging chain's review step** · **S + M** · **Sonnet** · one plan, three files (`Results.jsx` · `LogPane.jsx` · `DeskRegPane.jsx`). #133 absorbs #132 — same markup, so the note rows land while the frame is being replaced. Two things the plan already handles rather than discovers: two of the three confirms are **inline pane steps, not modals**, so an overlay now sits above a pane at 390; and `Results.jsx` has a slide transition `ConfirmReview` doesn't (port it or record the loss).
+- 🟢 **[→ Ready · plans/65](./plans/65-border-divider-tokens.md)** — **#137 `--border` ≢ `--divider`, and `--red` fails contrast on both dark themes** · **S** · **Opus** · a token decision across four palettes (two of them light, where "stronger" means darker). Folds in the one contrast cell plans/57 deliberately deferred — `.rpeBtn.on` at 3.80:1 in spirit-blossom-light, an `--accent-text`/`--teal` pairing `Button`'s primary shares. Ends in `npm run design:cards` (the cards inline `themes.css`, so a token change makes all nine stale — the plans/40 precedent).
+- 🟢 **[→ Ready · plans/66](./plans/66-scorefields-polish-2.md)** — **#134 + #135 + #136 ScoreFields polish, round two** · **S** · **Sonnet** · 🔴 **runs after plans/65.** Note toggles that read as text inputs (#134, blocked on the token value), the 10/11-dead `sm` variant + the gallery case advertising a state the app never renders (#135), and four wording/labelling drifts (#136) — a DNF labelled "Tempo", an unlabelled `ScaleRow`, glyph-only accessible names on the ▤/¶ pair, and `1 logs` in a pt-BR UI.
 
 > **Refilled 2026-08-03 from a user bug report — six rows, #119–#124, three of them planned.**
 > Ready had emptied (plans/52–56 closed the result-fidelity chain) and In Progress was empty. The six
@@ -131,21 +150,23 @@ rows (#119–#124) landed here and jumped the three pre-existing ones. Then the 
 13 more (#125–#137)**. Ranking principle unchanged: found-in-live-use and small-and-visible first,
 then the planning-session inputs, then everything else.
 >
-> 🔑 **NEXT PICK, set 2026-08-04 (supersedes the 2026-08-04 pointer that named #132+#133 first — it
-> did not know about #139).** Tier 1 and Tier 2 are both fully shipped; rows 5–8, 10 and 13 have all
-> closed; Ready is empty. **Run order: #139 → #132+#133 → #137 → #134–#136**, then #89 · #97 · #114 ·
-> #104(a)(b)(d) · #71.
-> 1. **#139** — a live regression in a shipped fix: [plans/60](./plans/60-goal-time-input.md) was
->    written to kill the colonless-`Meta:` bug and closed only the blur path, so the write path still
->    stores `min:'14'`. Smallest unit on the board, and the row already names the two candidate fixes —
->    **picking between them deliberately is the session.** Four docs claimed this input was closed;
->    corrected 2026-08-04, but the code is not.
+> 🔑 **ALL FOUR TOP ROWS ARE NOW PLANNED — 2026-08-04, one planning session, plans/63–66 (see Ready).**
+> Tier 1 and Tier 2 are both fully shipped; rows 5–8, 10 and 13 have all closed.
+> **Run order: #139+#140 (63) → #132+#133 (64) → #137 (65) → #134–#136 (66)**, then #89 · #97 ·
+> #114 · #104(a)(b)(d) · #71. Each of 64/65/66 is its own session.
+> 1. **#139 + #140** — a live regression in a shipped fix plus the user's 2026-08-04 space-bar
+>    report, same root shape. 🔑 The row's "two candidate fixes, **pick deliberately**" resolved to
+>    **both** — see plans/63; each alone leaves a live hole.
 > 2. **#132 + #133** — one plan, same three files. ⚠️ Flagged **orphaned**: the public design passes
 >    have shipped and C1–C5 are SPA-only, so no queued session owns it; it stays unpicked unless
 >    scheduled here.
 > 3. **#137 gates #134's fix** — a token decision (Opus), cheaper to settle before the ScoreFields
 >    batch than during it. This is why the real sequence is not the list order.
 > 4. **#134–#136** — one batch, after #137 answers.
+>
+> **After these four, Tier 3 has five rows left** (#71 · #89 · #97 · #104 · #114), all **S** and none
+> blocking another — the point at which the housekeeping program is effectively done and the design
+> program becomes the queue (**#95 first**: its design is already settled and it can be planned cold).
 >
 > ⚠️ **Four rows were never ranked into any tier and are now placed** (2026-08-04): **#139**, **#97**
 > and **#114** into this tier, **#113** into Tier 4 (it needs a decision before it can be planned).
@@ -155,15 +176,15 @@ then the planning-session inputs, then everything else.
 6. ✅ **[shipped 2026-08-03 · plans/57](./plans/57-score-fields-polish.md)** (see Done) — **#122 + #123** score-fields polish. #137(c)'s one failing contrast cell (`.rpeBtn.on` teal, 3.80:1 in spirit-blossom-light) folded in as a recorded gap, not a fix — see that row.
 7. ✅ **[shipped 2026-08-03 · plans/58](./plans/58-new-session-button.md)** (see Done) — **#119** "+ sessão" opens the day's first session.
 8. ✅ **[shipped 2026-08-03 · plans/59](./plans/59-coach-reachability.md)** (see Done) — **#124** Coach unreachable from Perfil/Agenda.
-9. **#132 + #133** the logging chain's review step — the #116 note is invisible in every confirm, and the three confirm frames still haven't adopted `ConfirmReview` · S + M · **one plan, same three files.** ⚠️ **No queued design session owns these** (public passes shipped, C1–C5 are SPA-only), so they stay unpicked unless scheduled here.
+9. 🟢 **[→ Ready · plans/64](./plans/64-logging-confirm-chain.md)** — **#132 + #133** the logging chain's review step — the #116 note is invisible in every confirm, and the three confirm frames still haven't adopted `ConfirmReview` · S + M · **one plan, same three files.** ⚠️ **No queued design session owns these** (public passes shipped, C1–C5 are SPA-only), so they stay unpicked unless scheduled here.
 10. ✅ **PLANNED 2026-08-03 → [plans/61](./plans/61-criador-text-roundtrip.md)** — **#121 + #120 + #126–#131** Criador text mode. Now **three ordered Ready rows** (61·A Opus·L → 61·B Opus·M → 61·C Sonnet·M), see Ready. The planning session re-ran every claim against the live parser and live prod: **2 new root causes** (legacy-`WOD` residue behind the `type:''` drift, and a first-line exercise being swallowed into `block.label`), **4 corrections** (see each row below) and **1 spun-out row, #138**. #131 was folded into 61·C by the user.
-11. **#134 + #135 + #136** ScoreFields polish, round two — note toggles read as inputs, the `sm` variant is 10/11 dead, and four wording/labelling drifts · S · batch after #133 lands.
-12. **#137** `--border` ≡ `--divider` in all 4 themes (CLAUDE.md claims otherwise), and `--red` fails 4.5:1 on both dark themes · S · **Opus** — a token decision, and it gates #134's fix.
+11. 🟢 **[→ Ready · plans/66](./plans/66-scorefields-polish-2.md)** — **#134 + #135 + #136** ScoreFields polish, round two — note toggles read as inputs, the `sm` variant is 10/11 dead, and four wording/labelling drifts · S · batch after #133 lands.
+12. 🟢 **[→ Ready · plans/65](./plans/65-border-divider-tokens.md)** — **#137** `--border` ≡ `--divider` in all 4 themes (CLAUDE.md claims otherwise), and `--red` fails 4.5:1 on both dark themes · S · **Opus** — a token decision, and it gates #134's fix.
 13. ✅ **[shipped 2026-08-04 · plans/61](./plans/61-criador-text-roundtrip.md)** (see Done) — **#131** fixed-height text panes. Folded into **61·C** by the user rather than left to ride a future layout pass, which is what this row said would happen. ⚠️ **Still listed as an open pick until 2026-08-04** — same stale-marker correction as #125 above.
 14. **#71** `class_checkin` guest dedupe/cap · S — needs a decision (two guests can share a first name).
 15. **#89** index agenda link is a no-op · S — `Schedule.jsx` reads **6** URL params (re-counted 2026-08-04; this row said 10); `session` still isn't one.
 16. **#104 (a)(b)(d)** billing bugs — `per_hour` bills 90min as 1hr; mixed-currency total is meaningless; `pixClean` duplicated byte-identical. *(c) rate-history is a feature, stays in #104.*
-17. 🔑 **#139** `MaskedTimeInput` writes a partial mm:ss through on every keystroke · S · Sonnet — **ranked 2026-08-04, and it is the NEXT PICK** (see the blockquote above; list position here is chronological, not priority). A live regression in a shipped fix: plans/60 closed the blur path only. Re-verified — `GoalInput.jsx:41` still reads `onChange={v => put({ min: v })}`.
+17. 🟢 **[→ Ready · plans/63](./plans/63-criador-keystroke-writes.md)** — **#139 + #140** the two Criador inputs that rewrite what the coach typed per keystroke · S · Sonnet — **ranked 2026-08-04, and they are the NEXT PICK** (see the blockquote above; list position here is chronological, not priority). #139 is a live regression in a shipped fix (plans/60 closed the blur path only); **#140 is the user's space-bar report**, root-caused to `BlockEditor.jsx:401`'s trim-on-change — the only one in `src/`.
 18. **#97** TV's timer ring colour ramp is frozen to the dark palette · S · Sonnet — **ranked 2026-08-04; it had never been placed in any tier.** Public-facing, on the gym wall, and a bug rather than a design pass, so the 2026-07-26 scope call includes it (its exclusion list names #95/#96, not #97). Re-verified live: `tv/slides.jsx:50-52` still hardcodes the ramp, `:309` the resting ring, `TV.module.css:141` the red.
 19. **#114** `design:cards` isn't idempotent day-to-day — two gallery fixtures read the wall clock · S · Sonnet — **ranked 2026-08-04. Second sighting:** plans/60 hit it again and had to re-derive that 3 card diffs were date noise, exactly as this row predicted a future session would. Re-verified: `gallery/groups/index.jsx:22` still calls `new Date()`.
 
@@ -207,6 +228,10 @@ on first measurement and re-derived before being written down (a loose CSS selec
 ### Found while executing plans/61·B (2026-08-04)
 
 - 🔑 **[Tier 3 · NEXT PICK, ranked 2026-08-04]** — **#139 `MaskedTimeInput` writes a partial mm:ss through on every keystroke, so a `Meta:` typed as `14` is still stored as `{kind:'time', min:'14'}`** · **S** · **surfaced by `scripts/audit-text-roundtrip.mjs`, which reads `goal-kind: 1` against live prod on a row created 2026-08-03 — i.e. AFTER [plans/60](./plans/60-goal-time-input.md) shipped.** ⚠️ **This corrects an assumption in 61·A:** A2 pinned the `{kind:'time', min:'14'}` shape as a regression guard on the stated basis that *"input closed, prod row repaired"*. The **prod row** was repaired; the **input was not**. plans/60 moved the `expandMMSS`-on-blur contract into `MaskedTimeInput`, but `GoalInput.jsx`'s `onChange={v => put({ min: v })}` persists every intermediate value, so typing `14` and clicking away leaves `min: '14'` in storage whenever blur doesn't land on the field the way plans/60's live test did. Round trip: `serializeGoal` emits a bare `Meta: 14` (its `short()` only shortens a `:00`-suffixed value), and `parseGoal` refuses to read a naked integer as a time (`if (one && /['":]/.test(s))`) — so it comes back `{kind:'text', text:'14'}` and **#117's "Bateu a meta" badge stops rendering for that block**, the exact failure plans/60 was written to kill. Two candidate fixes, pick deliberately: normalize the legacy bare-minutes shape in `serializeGoal` (one line, makes the round trip lossless but leaves the wrong value in storage), or stop `GoalInput` persisting an unexpanded value (fixes the source; touches the field every `Meta:` goes through). **Blast radius today: 1 prod block.** Deliberately **not** fixed by 61·B — it is a goal-serialization row in 61·A's family, and 61·B's scope was stations + the locked passthrough.
+
+### From the 2026-08-04 user bug report
+
+- 🟢 **[→ Ready · plans/63](./plans/63-criador-keystroke-writes.md)** — **#140 The Criador's block-name field swallows the space bar** · **S** · **Sonnet** · **user-reported from live use, and root-caused at capture.** The coach's account: *"complex names do not register the space bar the first time — I have to write everything then go back and add the spaces."* `BlockEditor.jsx:400-402` is `onChange={e => onUpdate({ ...block, label: e.target.value.trim() || block.type })}` — **`.trim()` runs on every keystroke**, so the trailing space of `Aquecimento ` is stripped before it can be typed: press space, nothing appears; type `g`, you get `Aquecimentog`. Mid-string spaces survive a trim, which is exactly why typing the name first and inserting spaces afterwards works. 🔎 **This is the only trim-on-change input in `src/`** (verified repo-wide), so it is one field, not a class. The `|| block.type` half is *why* the trim is there (an empty custom name falls back to the type) and carries **a second defect of the same shape**: `customName` (`:47`) derives to `''` whenever `block.label === block.type`, so typing a name that *equals* the type (`WOD` on a WOD block) blanks the field mid-word. Fix is a local draft synced during render — `ExerciseCombobox.jsx:45-49`'s `prevValue`/`setPrevValue` shape, which is what `react-hooks/set-state-in-effect` requires (a `useEffect` here fails CI) — committing raw on change and normalized on blur. One draft fixes both. **Rides plans/63** because it is #139's root shape seen from another angle.
 
 ### Found while planning plans/61 (2026-08-03)
 
