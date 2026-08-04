@@ -22,12 +22,18 @@
 >   judges by, so it is pinned as such rather than "fixed" — the time itself never changes, and it is
 >   the only thing `toSecs`/`goalOutcome` read.
 >
-> **⚠️ The audit's `goal-kind` counter still reads 1, and that is the fix working, not the bug.**
-> It now reports `goal.min: "14" → "14:00"` — storage still holds the legacy bare value on the one
-> prod row, and the round trip *corrects* it instead of degrading it to `{kind:'text'}`. The counter
-> reaches 0 when the data is repaired; `scripts/repair-goal-time.mjs` printed the one-row SQL, which
-> was handed to the user (prod has no service-role key in this repo). **Re-run the audit after the
-> SQL is applied to confirm 0.**
+> **✅ Prod repair applied by the user 2026-08-04, and re-verified: `goal-kind` 1 → 0.** Clean
+> round-trip blocks went 206 → **207/361**. Between the code landing and the SQL running, the counter
+> read 1 while reporting `goal.min: "14" → "14:00"` — i.e. the fix working (storage held the legacy
+> value; the round trip *corrected* it rather than degrading it to `{kind:'text'}`), not the bug.
+>
+> **One unrelated thing the re-run surfaced and this plan did NOT fix:** the audit's separate
+> *"goals com `min` numérico em storage"* counter reads **1** and is a different defect —
+> `2026-07-29 #2 AMRAP "Eagles Wednesday Test"` holds `{"min": 4, kind:"rounds"}`, a JS **number**
+> where every writer since 61·A emits a string (#110's type-mismatch family). Benign today — every
+> reader coerces — filed as **#141**. Worth noting that this plan's `serializeGoal` change
+> incidentally *hardened* the time branch against it: the old code called `goal.min.endsWith(':00')`
+> directly, which would throw on a number; it now runs `expandMMSS` first, which stringifies.
 >
 > **Live-verified** against the local stack at 1280 (no service worker present — checked first):
 > `Aquecimento geral` typed left to right in one pass, space intact; clearing the field falls back to
@@ -202,3 +208,5 @@ origin on 2026-08-03.
 BACKLOG: Done entry; mark #139 and #140 shipped; **correct #139's own row** — its "two candidate
 fixes, pick deliberately" framing is superseded by "both, they cover different paths". Done marker on
 this plan. Commit + push.
+
+Model: Sonnet · Size: S

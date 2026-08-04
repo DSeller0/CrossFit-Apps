@@ -97,3 +97,5 @@ on the button that opened it.
 **Gallery:** the `ConfirmReview` case (SPA group) and the `ScoreFields` notes cases already exist.
 Open `gallery.html` — dev-only, never built, **no CI gate catches a broken import there**. Regenerate
 `npm run design:cards` if any gallery-rendered markup changed.
+
+Model: Sonnet · Size: **S** (#132) + **M** (#133) — one session, #133 absorbs #132

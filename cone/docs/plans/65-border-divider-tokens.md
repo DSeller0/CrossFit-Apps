@@ -90,3 +90,5 @@ still open) — revert those, same precedent as #24 and plans/60.
 
 BACKLOG: Done entry; close #137; note on **#134**'s row that its blocker is answered and with what
 value. CLAUDE.md design-system section corrected. Done marker on this plan. Commit + push.
+
+Model: Opus · Size: S

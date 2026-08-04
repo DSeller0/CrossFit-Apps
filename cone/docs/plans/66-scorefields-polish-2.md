@@ -104,3 +104,5 @@ removal left no dangling reference. Regenerate `npm run design:cards`.
 ## Ritual
 
 BACKLOG: Done entry; close #134, #135, #136. Done marker on this plan. Commit + push.
+
+Model: Sonnet · Size: S
