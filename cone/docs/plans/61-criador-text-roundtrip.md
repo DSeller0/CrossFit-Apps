@@ -374,6 +374,24 @@ unchanged, that surface is display-only.
 
 # 61·C — The three surfaces
 
+> ## ✅ DONE — shipped 2026-08-04
+> All four acceptance bullets met. **One** `FORMAT_REFERENCE`/`FORMAT_EXAMPLE` (`textFormat.js`,
+> type-alias list generated from `TYPE_ALIASES`) replaces the four divergent strings and is reachable
+> from all three surfaces (`BlockTextEditor` gained the `ⓘ Formato` control it never had). **One**
+> `WARNING_KINDS` table + `ParseWarnings.jsx` replaces the three surfaces' independent hand-counting;
+> `interval-approximated` and `preamble` both reach all three now. `WeekImportModal` gained a per-day
+> expandable row (the extracted `PreviewBlock`) and its first `preamble` consumer. Both textareas grow
+> per #131. `plans/36` lines 49-182 updated; gallery + `design:cards` regenerated.
+> **One bug found while extracting `PreviewBlock`:** it read `block.exercises` directly, so an
+> Estações block's preview always showed **zero** exercises — fixed via `blockExercises()`, the same
+> fork every other consumer makes (not filed separately since it's inside C3's own extraction).
+> **`DAY_MAP`'s numbered-weekday gap (#128) was widened beyond the measured 2/15** — the fix covers
+> the whole `2a/2ª…7a/7ª` family (Brazilian civil weekday numbering), not just Monday's two failing
+> spellings, since the underlying notation applies to every weekday and the addition is pure/zero-risk.
+> 698 tests (+6) / lint 0 / `build:all` clean. `audit-text-roundtrip.mjs` re-run as insurance (not
+> this session's acceptance instrument) — unchanged from 61·B's baseline. See BACKLOG Done entry for
+> full detail and live-verification notes.
+
 ## Acceptance
 
 - **One** grammar reference and **one** canonical example, exported from `textFormat.js` and

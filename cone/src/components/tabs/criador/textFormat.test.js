@@ -17,7 +17,12 @@ import {
   splitLockedBlocks,
   mergeLockedBlocks,
   normLine,
+  WARNING_KINDS,
+  FORMAT_REFERENCE,
+  FORMAT_EXAMPLE,
+  FORMAT_EXAMPLE_BLOCK,
 } from './textFormat.js'
+import { TYPE_CONFIG } from './blockModel.js'
 
 // The real coach artefact is the fixture, read from disk so it can never drift
 // from the file the parser was designed against.
@@ -44,6 +49,21 @@ describe('matchDayHeader', () => {
   test('a non-weekday line is not a day header', () => {
     expect(matchDayHeader('Warm Up')).toBeNull()
     expect(matchDayHeader('')).toBeNull()
+  })
+  // #128 · plans/61·C — Brazilian civil weekday numbering (domingo=1º dia, so
+  // segunda-feira is "2ª feira" through sábado "7ª feira"), both spellings of the
+  // ordinal (ª/a), spaced and hyphenated. The two that were tested and failed
+  // before this fix.
+  test('numbered weekday notation (2a/2ª feira … 7a/7ª) resolves', () => {
+    expect(matchDayHeader('2a feira')).toEqual({ dayIndex: 1, sessionName: '' })
+    expect(matchDayHeader('2ª feira')).toEqual({ dayIndex: 1, sessionName: '' })
+    expect(matchDayHeader('2ª-feira')).toEqual({ dayIndex: 1, sessionName: '' })
+    expect(matchDayHeader('3ª feira')).toEqual({ dayIndex: 2, sessionName: '' })
+    expect(matchDayHeader('4ª feira')).toEqual({ dayIndex: 3, sessionName: '' })
+    expect(matchDayHeader('5ª feira')).toEqual({ dayIndex: 4, sessionName: '' })
+    expect(matchDayHeader('6ª feira (HYROX)')).toEqual({ dayIndex: 5, sessionName: 'HYROX' })
+    expect(matchDayHeader('7ª feira')).toEqual({ dayIndex: 6, sessionName: '' })
+    expect(matchDayHeader('7a')).toEqual({ dayIndex: 6, sessionName: '' })
   })
 })
 
@@ -677,6 +697,51 @@ describe('warnings', () => {
   test('a name the registry knows produces no unknown-exercise warning', () => {
     const reg = { Cardio: [{ name: 'Run' }] }
     const { warnings } = parseBlock('For Time\n400m Run', { registry: reg })
+    expect(warnings).toEqual([])
+  })
+})
+
+// ── Format reference + warning kinds (#120/#129 · plans/61·C) ────────────────
+describe('WARNING_KINDS', () => {
+  test('covers exactly the 8 kinds the parser can produce, plus block-locked', () => {
+    // The 7 parser-only kinds are asserted directly above; block-locked comes
+    // from splitLockedBlocks (tested separately), not buildBlock/parseWeek.
+    expect(Object.keys(WARNING_KINDS).sort()).toEqual([
+      'block-locked',
+      'complex-detected',
+      'interval-approximated',
+      'orphan-load',
+      'preamble',
+      'type-unresolved',
+      'unknown-exercise',
+      'unparsed-line',
+    ])
+  })
+  test('every kind has a severity and both a singular and plural label', () => {
+    Object.entries(WARNING_KINDS).forEach(([kind, cfg]) => {
+      expect(['warn', 'info'], kind).toContain(cfg.severity)
+      expect(cfg.label, kind).toBeTruthy()
+      expect(cfg.labelOne, kind).toBeTruthy()
+    })
+  })
+})
+
+describe('FORMAT_REFERENCE / FORMAT_EXAMPLE', () => {
+  test('the reference lists every real block type and cannot drift from TYPE_ALIASES', () => {
+    Object.keys(TYPE_CONFIG).forEach(type => expect(FORMAT_REFERENCE).toContain(type))
+    // A generated alias, not hand-copied — proves the table is built from
+    // TYPE_ALIASES rather than a second, driftable copy of it.
+    expect(FORMAT_REFERENCE).toContain('warmup')
+    expect(FORMAT_REFERENCE).toContain('Sinônimos')
+  })
+  test('the example embeds verbatim in the reference and parses clean', () => {
+    expect(FORMAT_REFERENCE).toContain(FORMAT_EXAMPLE)
+    const { warnings } = parseSession(FORMAT_EXAMPLE)
+    expect(warnings).toEqual([])
+  })
+  test('the block-only example is the example’s second block, and parses headerless', () => {
+    expect(FORMAT_EXAMPLE.split('\n\n')[1]).toBe(FORMAT_EXAMPLE_BLOCK)
+    const { warnings } = parseBlock(FORMAT_EXAMPLE_BLOCK, { knownType: 'For Time' })
     expect(warnings).toEqual([])
   })
 })

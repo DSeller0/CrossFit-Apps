@@ -4,6 +4,7 @@ import { WeekSessionCard } from '../../../components/tabs/criador/WeekSessionCar
 import { WeekImportModal } from '../../../components/tabs/criador/WeekImportModal.jsx'
 import { GoalInput } from '../../../components/tabs/criador/GoalInput.jsx'
 import { SessionMetaModal } from '../../../components/tabs/criador/SessionMetaModal.jsx'
+import { ParseWarnings } from '../../../components/tabs/criador/ParseWarnings.jsx'
 import { parseSession } from '../../../components/tabs/criador/textFormat.js'
 import { getWeek, toISO } from '../../lib/week.js'
 import { Case, Section, TallModalBox } from '../harness.jsx'
@@ -39,7 +40,13 @@ WOD – TC 14'
 100m Run
 Meta: 11-12'`
 
-const WEEK_TEXT = `SEGUNDA-FEIRA
+// The leading two lines are a PREAMBLE — text before the first day header, which
+// parseWeek has nowhere to attach but the loss of it (#128). ParseWarnings is its
+// first real consumer: the modal now reports it instead of silently dropping it.
+const WEEK_TEXT = `SEMANA 32 — Eagles
+Foco: gimnastico
+
+SEGUNDA-FEIRA
 
 ${MONDAY_TEXT}
 
@@ -150,6 +157,30 @@ const gridColStyle = {
   borderRadius: 6,
   padding: 8,
 }
+// ParseWarnings fixtures (#129) — every one of WARNING_KINDS' 8 kinds, a repeated
+// kind to show the plural label, and a lone one for the singular. Only `kind` is
+// read by the component; line/message/lineNo are irrelevant to it.
+const pwAllKinds = [
+  'type-unresolved',
+  'type-unresolved',
+  'complex-detected',
+  'block-locked',
+  'unknown-exercise',
+  'unparsed-line',
+  'orphan-load',
+  'interval-approximated',
+  'preamble',
+].map(kind => ({ kind }))
+const pwSingle = [{ kind: 'type-unresolved' }]
+const statusDemoStyle = {
+  display: 'flex',
+  gap: 8,
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  fontSize: 11,
+  fontFamily: 'var(--font-mono)',
+  color: 'var(--muted)',
+}
 
 // The real picker reaches utils/storage for custom benchmarks (→ Supabase client),
 // so the gallery injects a stub: the chip-as-button state is what matters here.
@@ -238,6 +269,32 @@ export default {
       ),
     },
     {
+      id: 'criador-parsewarnings',
+      label: 'ParseWarnings',
+      render: () => (
+        <Section
+          title="ParseWarnings"
+          sub="src/components/tabs/criador/ParseWarnings.jsx — uma renderização para os oito tipos de aviso que textFormat.js produz (#129), para que toda superfície que pode produzi-los também possa mostrá-los. WARNING_KINDS (textFormat.js) define ordem, severidade e rótulo — com plural — uma vez só; antes disso, SessionTextPane contava 4 dos 8, WeekImportModal 2, e BlockTextEditor imprimia a mensagem crua de cada linha."
+        >
+          <Case label="Os 8 tipos — singular e plural, aviso (⚠) e informativo (ⓘ), em bloco">
+            <ParseWarnings warnings={pwAllKinds} />
+          </Case>
+          <Case label="Modo inline — a linha de status do BlockTextEditor">
+            <div style={statusDemoStyle}>
+              <span>✓ 3 exercícios · CAP 14&apos;</span>
+              <ParseWarnings warnings={pwAllKinds} inline />
+            </div>
+          </Case>
+          <Case label="Um só aviso — rótulo no singular">
+            <ParseWarnings warnings={pwSingle} />
+          </Case>
+          <Case label="Vazio — não renderiza nada">
+            <ParseWarnings warnings={[]} />
+          </Case>
+        </Section>
+      ),
+    },
+    {
       id: 'criador-weeksessioncard',
       label: 'WeekSessionCard (grade da semana)',
       render: () => (
@@ -269,9 +326,9 @@ export default {
       render: () => (
         <Section
           title="WeekImportModal"
-          sub="src/components/tabs/criador/WeekImportModal.jsx — uma colagem, cinco sessões. A detecção roda ANTES de criar qualquer coisa, e a importação só ADICIONA: um dia que já tem sessão aparece marcado e é pulado. locationIds em array (multi-box), nunca o locationId singular legado."
+          sub="src/components/tabs/criador/WeekImportModal.jsx — uma colagem, cinco sessões. A detecção roda ANTES de criar qualquer coisa, e a importação só ADICIONA: um dia que já tem sessão aparece marcado e é pulado. locationIds em array (multi-box), nunca o locationId singular legado. Cada dia expande num preview bloco-a-bloco (#128) — o mesmo PreviewBlock da sessão."
         >
-          <Case label="Semana real colada — 4 dias a criar, quinta já ocupada">
+          <Case label="Semana real colada — preâmbulo, 4 dias a criar, quinta já ocupada (expanda um dia)">
             <TallModalBox>
               <WeekImportModal
                 weekDates={txtWeekDates}
@@ -281,6 +338,7 @@ export default {
                 boxFilter={() => true}
                 boxLocs={txtBoxLocs}
                 selBox="all"
+                registry={txtRegistry}
                 onPrevWeek={NOOP}
                 onNextWeek={NOOP}
                 onCreate={NOOP}

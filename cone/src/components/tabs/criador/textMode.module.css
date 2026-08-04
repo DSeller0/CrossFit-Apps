@@ -25,7 +25,14 @@
 }
 .ta:focus { outline: 0; border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent) }
 .taBlock { min-height: 128px }
-.taSession { min-height: 340px }
+/* #131 — neither textarea should show a fraction of its content while the page
+   has room. Viewport-relative with a floor, same family as Exercicios/Atletas'
+   own calc(100vh - Npx) full-height panes. */
+.taSession { min-height: max(340px, calc(100vh - 320px)) }
+/* Import lives inside a modal capped at 88vh with its own scroll (.modalBody),
+   so this only needs to be generous, not viewport-chasing — the modal absorbs
+   the rest via its internal scroll. */
+.taImport { min-height: min(50vh, 420px) }
 
 /* ── parse status line (block level) ─────────────────────────────────────── */
 .status { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: 11px; font-family: var(--font-mono); color: var(--muted) }
@@ -123,7 +130,7 @@
 .det td { padding: 5px 0; border-bottom: 1px solid var(--divider); vertical-align: middle }
 .detDay { font-family: var(--font-mono); color: var(--cream); width: 68px }
 .detCount { color: var(--sub); font-family: var(--font-mono); font-size: 11.5px }
-.detState { text-align: right; font-size: 11px; white-space: nowrap }
+.detState { text-align: right; font-size: 11px }
 .detSkip { opacity: .5 }
 .pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--sp-3) }
 .pill {

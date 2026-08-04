@@ -726,6 +726,7 @@ function TrainingCreator({
           boxFilter={boxFilter}
           boxLocs={boxLocs}
           selBox={selBox}
+          registry={registry}
           onPrevWeek={() => setWeekOffset(o => o - 1)}
           onNextWeek={() => setWeekOffset(o => o + 1)}
           onClose={() => setShowImport(false)}

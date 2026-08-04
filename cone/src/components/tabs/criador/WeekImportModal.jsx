@@ -1,10 +1,12 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, Fragment } from 'react'
 // uid/toISO come straight from the canonical lib modules, not the utils/storage
 // re-export: storage pulls the SPA Supabase client, and this component renders in
 // the (client-free) gallery.
-import { uid } from '../../../public/lib/wod.js'
+import { uid, blockExercises } from '../../../public/lib/wod.js'
 import { DAY_PT, toISO } from '../../../public/lib/week.js'
-import { parseWeek } from './textFormat.js'
+import { parseWeek, FORMAT_REFERENCE, FORMAT_EXAMPLE } from './textFormat.js'
+import { PreviewBlock } from './PreviewBlock.jsx'
+import { ParseWarnings } from './ParseWarnings.jsx'
 import s from './textMode.module.css'
 import Button from '../../ui/Button.jsx'
 
@@ -20,6 +22,7 @@ export function WeekImportModal({
   boxFilter,
   boxLocs,
   selBox,
+  registry,
   onPrevWeek,
   onNextWeek,
   onCreate,
@@ -31,8 +34,10 @@ export function WeekImportModal({
     selBox === 'all' || selBox === 'none' ? [] : [selBox],
   )
   const [isPublic, setIsPublic] = useState(true)
+  const [showHelp, setShowHelp] = useState(false)
+  const [expanded, setExpanded] = useState(() => new Set())
 
-  const days = useMemo(() => (text.trim() ? parseWeek(text) : []), [text])
+  const days = useMemo(() => (text.trim() ? parseWeek(text, { registry }) : []), [text, registry])
 
   const rows = useMemo(
     () =>
@@ -41,20 +46,32 @@ export function WeekImportModal({
         const dateKey = date ? toISO(date) : null
         const taken = dateKey ? (sessions[dateKey] || []).filter(boxFilter).length > 0 : false
         const exCount = d.blocks.reduce(
-          (n, b) =>
-            n + (b.exercises || []).filter(e => (e.name || '').trim() || e.isComplex).length,
+          (n, b) => n + blockExercises(b).filter(e => (e.name || '').trim() || e.isComplex).length,
           0,
         )
-        const noType = d.warnings.filter(w => w.kind === 'type-unresolved').length
-        const noted = d.warnings.filter(
-          w => w.kind === 'unparsed-line' || w.kind === 'orphan-load',
-        ).length
-        return { ...d, date, dateKey, taken, exCount, noType, noted }
+        // Preamble warnings land on the FIRST day (parseWeek has nowhere else to put
+        // text that came before any day header) but they aren't that day's own
+        // problem — kept out of its row so the cell reads as "day 1 is fine".
+        const rowWarnings = d.warnings.filter(w => w.kind !== 'preamble')
+        return { ...d, date, dateKey, taken, exCount, warnings: rowWarnings }
       }),
     [days, weekDates, sessions, boxFilter],
   )
 
+  const preambleWarnings = days.length ? days[0].warnings.filter(w => w.kind === 'preamble') : []
+  const totalWarnings = days.flatMap(d => d.warnings)
+  const totalBlocks = rows.reduce((n, r) => n + r.blocks.length, 0)
+  const totalEx = rows.reduce((n, r) => n + r.exCount, 0)
+
   const creatable = rows.filter(r => r.dateKey && !r.taken)
+
+  const toggle = i =>
+    setExpanded(cur => {
+      const next = new Set(cur)
+      if (next.has(i)) next.delete(i)
+      else next.add(i)
+      return next
+    })
 
   const create = () => {
     onCreate(
@@ -91,15 +108,25 @@ export function WeekImportModal({
         </div>
 
         <div className={s.modalBody}>
-          <label className={s.lbl} htmlFor="wk-import-ta">
-            Cole o texto da semana
-          </label>
+          <div className={s.paneBar}>
+            <label className={s.lbl} htmlFor="wk-import-ta" style={{ margin: 0 }}>
+              Cole o texto da semana
+            </label>
+            <button
+              type="button"
+              className={s.fmtHelp}
+              onClick={() => setShowHelp(v => !v)}
+              aria-expanded={showHelp}
+            >
+              ⓘ Formato
+            </button>
+          </div>
+          {showHelp && <div className={s.fmtBox}>{FORMAT_REFERENCE}</div>}
           <textarea
             id="wk-import-ta"
-            className={s.ta}
-            style={{ minHeight: 130 }}
+            className={`${s.ta} ${s.taImport}`}
             spellCheck={false}
-            placeholder={'SEGUNDA-FEIRA\n\nWarm Up\n3 rounds\n100m Run\n…'}
+            placeholder={`SEGUNDA-FEIRA\n\n${FORMAT_EXAMPLE}`}
             value={text}
             onChange={e => setText(e.target.value)}
           />
@@ -118,6 +145,11 @@ export function WeekImportModal({
           </div>
 
           <span className={s.lbl}>Detectado</span>
+          {preambleWarnings.length > 0 && (
+            <div className={s.prevFoot} style={{ borderTop: 0, marginTop: 0, paddingTop: 0 }}>
+              <ParseWarnings warnings={preambleWarnings} />
+            </div>
+          )}
           {!text.trim() ? (
             <div className={s.prevEmpty}>Nada colado ainda.</div>
           ) : rows.length === 0 ? (
@@ -129,36 +161,68 @@ export function WeekImportModal({
               </span>
             </div>
           ) : (
-            <table className={s.det}>
-              <tbody>
-                {rows.map((r, i) => (
-                  <tr key={i} className={r.taken ? s.detSkip : undefined}>
-                    <td className={s.detDay}>
-                      {DAY_PT[r.dayIndex]} {r.date ? r.date.getDate() : '—'}
-                    </td>
-                    <td className={s.detCount}>
-                      {r.blocks.length} blocos · {r.exCount} ex
-                    </td>
-                    <td className={s.detState}>
-                      {r.taken ? (
-                        <span className={s.infoRow}>já tem sessão — pular</span>
-                      ) : r.noType ? (
-                        <span className={s.warnRow}>⚠ {r.noType} tipo por definir</span>
-                      ) : r.noted ? (
-                        <span className={s.infoRow}>⚠ {r.noted} linha como nota</span>
-                      ) : (
-                        <span style={{ color: 'var(--green)' }}>✓</span>
+            <>
+              <table className={s.det}>
+                <tbody>
+                  {rows.map((r, i) => (
+                    <Fragment key={i}>
+                      <tr
+                        className={r.taken ? s.detSkip : undefined}
+                        onClick={() => toggle(i)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <td className={s.detDay}>
+                          <i
+                            className={`ti ti-chevron-right ${s.mChev}`}
+                            style={{
+                              display: 'inline-block',
+                              transform: expanded.has(i) ? 'rotate(90deg)' : 'none',
+                            }}
+                          />{' '}
+                          {DAY_PT[r.dayIndex]} {r.date ? r.date.getDate() : '—'}
+                        </td>
+                        <td className={s.detCount}>
+                          {r.blocks.length} blocos · {r.exCount} ex
+                        </td>
+                        <td className={s.detState}>
+                          {r.taken ? (
+                            <span className={s.infoRow}>já tem sessão — pular</span>
+                          ) : (
+                            <ParseWarnings warnings={r.warnings} inline />
+                          )}
+                          {!r.taken && !r.warnings.length && (
+                            <span style={{ color: 'var(--green)' }}>✓</span>
+                          )}
+                          {r.sessionName && (
+                            <span style={{ color: 'var(--gold)', marginLeft: 6 }}>
+                              &ldquo;{r.sessionName}&rdquo;
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                      {expanded.has(i) && (
+                        <tr>
+                          <td colSpan={3} style={{ paddingBottom: 'var(--sp-2)' }}>
+                            {r.blocks.length === 0 ? (
+                              <div className={s.prevEmpty}>Nenhum bloco neste dia.</div>
+                            ) : (
+                              r.blocks.map(b => <PreviewBlock key={b.id} block={b} />)
+                            )}
+                          </td>
+                        </tr>
                       )}
-                      {r.sessionName && (
-                        <span style={{ color: 'var(--gold)', marginLeft: 6 }}>
-                          &ldquo;{r.sessionName}&rdquo;
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+              <div className={s.prevFoot}>
+                <b>
+                  {totalBlocks} bloco{totalBlocks === 1 ? '' : 's'} · {totalEx} exercício
+                  {totalEx === 1 ? '' : 's'} em {rows.length} dia{rows.length === 1 ? '' : 's'}
+                </b>
+                <ParseWarnings warnings={totalWarnings} />
+              </div>
+            </>
           )}
 
           {boxLocs.length > 0 && (

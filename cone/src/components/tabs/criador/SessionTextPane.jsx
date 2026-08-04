@@ -1,72 +1,17 @@
 import { useState, useMemo } from 'react'
-import { ExerciseList } from '../../../public/shared/ExerciseList.jsx'
-import { blkColor, blkMeta } from '../../../public/lib/wod.js'
 import {
   parseSession,
-  serializeGoal,
   blockLineStarts,
   splitLockedBlocks,
   mergeLockedBlocks,
+  FORMAT_REFERENCE,
+  FORMAT_EXAMPLE,
 } from './textFormat.js'
-import { getTypeCfg, normalizeLegacyCardio } from './blockModel.js'
+import { normalizeLegacyCardio } from './blockModel.js'
+import { PreviewBlock } from './PreviewBlock.jsx'
+import { ParseWarnings } from './ParseWarnings.jsx'
 import s from './textMode.module.css'
 import Button from '../../ui/Button.jsx'
-
-const FORMAT_HELP = `Warm Up                     ← tipo do bloco (aceita Warm Up, Skill, WOD, Emom…)
-3 rounds                    ← estrutura: 3 rounds · AMRAP 15' · TC 14' · 21-15-9
-100m Run                    ← exercício: [A] [qtd] nome [carga]
-8 Power Clean 60/45kg – 50/35kg   ← RX e depois Inter, agrupado por escala
-Meta: 11-12'                ← objetivo do bloco
-(linha em branco = novo bloco)`
-
-// One parsed block, rendered as it will look once applied. Uses the real
-// ExerciseList (size `tiny`) rather than a private row markup, so the preview
-// can't drift from what the rest of the app draws.
-function PreviewBlock({ block, onPickType, locked }) {
-  const cfg = getTypeCfg(block.type)
-  const color = blkColor(block)
-  const label = block.label && block.label !== block.type ? block.label : ''
-  const meta = blkMeta(block)
-  const goal = serializeGoal(block.goal)
-
-  return (
-    <div
-      className={`${s.prevBlk} ${block.typeUnresolved ? s.prevBlkPending : ''} ${locked ? s.prevBlkLocked : ''}`}
-      style={{ borderLeftColor: block.typeUnresolved || locked ? 'var(--muted)' : color }}
-    >
-      <div className={s.prevHd}>
-        {block.typeUnresolved ? (
-          <button
-            type="button"
-            className={`${s.chip} ${s.chipPick}`}
-            onClick={onPickType}
-            disabled={!onPickType}
-            title="Escolher o tipo deste bloco"
-          >
-            ? escolher tipo
-          </button>
-        ) : (
-          <span
-            className={s.chip}
-            style={{ background: color + '22', color, border: `1px solid ${color}44` }}
-          >
-            <i className={`ti ${cfg.icon}`} /> {block.type}
-          </span>
-        )}
-        {label && <span className={s.prevLbl}>{label}</span>}
-        {meta && <span className={s.prevMeta}>{meta}</span>}
-        {locked && (
-          <span className={s.chipLock}>
-            <i className="ti ti-lock" /> não editável em texto — preservado
-          </span>
-        )}
-      </div>
-      <ExerciseList exercises={block.exercises || []} color={color} size="tiny" />
-      {goal && <div className={s.prevGoal}>Meta {goal}</div>}
-      {block.notes && <div className={s.prevNote}>{block.notes}</div>}
-    </div>
-  )
-}
 
 // ── SessionTextPane (#92) ─────────────────────────────────────────────────────
 // The whole session as the coach's own text, with a live preview of what the
@@ -123,12 +68,6 @@ export function SessionTextPane({
       ).filter(e => (e.name || '').trim() || e.isComplex).length,
     0,
   )
-  const count = kind => warnings.filter(w => w.kind === kind).length
-  const noType = count('type-unresolved')
-  const unknown = count('unknown-exercise')
-  const noted = count('unparsed-line') + count('orphan-load')
-  const complex = count('complex-detected')
-  const locked = count('block-locked')
 
   // One tap to fix an unresolved type: prefix that block's own header line with
   // the chosen type. Editing the line in place rather than re-serializing keeps
@@ -161,7 +100,7 @@ export function SessionTextPane({
           ⓘ Formato
         </button>
       </div>
-      {showHelp && <div className={s.fmtBox}>{FORMAT_HELP}</div>}
+      {showHelp && <div className={s.fmtBox}>{FORMAT_REFERENCE}</div>}
 
       <div className={s.pane}>
         <textarea
@@ -169,7 +108,7 @@ export function SessionTextPane({
           value={text}
           spellCheck={false}
           aria-label="Sessão em texto"
-          placeholder={'Cole ou escreva o treino do dia.\n\nWarm Up\n3 rounds\n100m Run\n…'}
+          placeholder={FORMAT_EXAMPLE}
           onChange={e => setText(e.target.value)}
         />
         <div>
@@ -196,46 +135,7 @@ export function SessionTextPane({
                 {rows.length} bloco{rows.length === 1 ? '' : 's'} · {exCount} exercício
                 {exCount === 1 ? '' : 's'}
               </b>
-              <br />
-              {locked > 0 && (
-                <>
-                  <span className={s.infoRow}>
-                    <i className="ti ti-lock" /> {locked} bloco
-                    {locked === 1 ? '' : 's'} preservado{locked === 1 ? '' : 's'}
-                  </span>
-                  <br />
-                </>
-              )}
-              {noType > 0 && (
-                <>
-                  <span className={s.warnRow}>
-                    ⚠ {noType} tipo{noType === 1 ? '' : 's'} por definir
-                  </span>
-                  <br />
-                </>
-              )}
-              {complex > 0 && (
-                <>
-                  <span className={s.warnRow}>
-                    ⚠ {complex} complexo{complex === 1 ? '' : 's'} detectado
-                    {complex === 1 ? '' : 's'}
-                  </span>
-                  <br />
-                </>
-              )}
-              {unknown > 0 && (
-                <>
-                  <span className={s.infoRow}>
-                    ⓘ {unknown} nome{unknown === 1 ? '' : 's'} fora do registro
-                  </span>
-                  <br />
-                </>
-              )}
-              {noted > 0 && (
-                <span className={s.infoRow}>
-                  ⓘ {noted} linha{noted === 1 ? '' : 's'} mantida{noted === 1 ? '' : 's'} como nota
-                </span>
-              )}
+              <ParseWarnings warnings={warnings} />
             </div>
           )}
         </div>

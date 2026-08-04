@@ -86,6 +86,140 @@ export function isTextEditable(block) {
   return !!block && !block.benchmarkRef
 }
 
+// ── Format reference (#120 · plans/61·C) ─────────────────────────────────────
+// ONE example and ONE reference, reused verbatim by all three text surfaces
+// (BlockTextEditor / SessionTextPane / WeekImportModal). Before this there were
+// four near-duplicate strings — one disclosure plus three placeholders, no two
+// alike, all covering a fraction of the grammar. The type-alias table is
+// GENERATED from TYPE_ALIASES so the reference can't drift from the parser it
+// documents.
+export const FORMAT_EXAMPLE = `Warm Up
+3 rounds
+100m Run
+10 Shoulder Taps
+
+5 Rounds For Time
+8 Power Clean 60/45kg – 50/35kg
+10 Toes to Bar
+Meta: 11-12'`
+// The second block only. BlockTextEditor has no header line — the type is
+// chosen in the block bar — and this line already doubles as one via
+// parseHeaderLine's pureStructure branch, same as it does for a full session.
+export const FORMAT_EXAMPLE_BLOCK = FORMAT_EXAMPLE.split('\n\n')[1]
+
+const aliasesByType = {}
+Object.entries(TYPE_ALIASES).forEach(([k, v]) => {
+  if (v === WOD_PENDING) return
+  ;(aliasesByType[v] = aliasesByType[v] || []).push(k)
+})
+const aliasLines = Object.entries(aliasesByType)
+  .map(([type, keys]) => `    ${type}: ${keys.join(', ')}`)
+  .join('\n')
+
+export const FORMAT_REFERENCE = `DIA (só na semana inteira)
+  SEGUNDA-FEIRA · SEGUNDA (HYROX) → nome de sessão entre parênteses
+
+BLOCO — 1ª linha (omitida quando o tipo já foi escolhido na barra do bloco)
+  <tipo> [– rótulo] [– estrutura]        separadores: – — / :
+  Tipos: ${Object.keys(TYPE_CONFIG).join(', ')}
+  Sinônimos:
+${aliasLines}
+  WOD não é um tipo — é um marcador; o tipo real vem da linha de estrutura
+  Tipo não reconhecido → chip "? escolher tipo" (nunca adivinhado)
+
+ESTRUTURA — linha logo após o cabeçalho, quando não é um exercício
+  3 rounds · 5 sets · 2 voltas             rounds
+  5 Rounds For Time                        rounds + tipo
+  AMRAP 15' · Emom 12'                     tipo + duração
+  TC 14' · Cap 15'                         time cap
+  21-15-9                                  ladder (reps por exercício)
+  A cada 3' · A cada 1'20"                 intervalo (aproximado; guardado na nota)
+
+EXERCÍCIO — [A–Z]? [qtd] nome [carga]
+  100m Run · 20cal Bike                    distância
+  20" Handstand Hold                       hold (fica literal em reps)
+  5x5 Back Squat                           sets × reps
+  21-15-9 Thruster                         ladder
+
+CARGA — à direita, lida da direita para a esquerda
+  60/45kg                                  par de gênero RX (M/F)
+  60/45kg – 50/35kg                        RX + Inter (3º par = SC)
+  75%                                      percentual de RM
+  65/70/75/80/85%                          lista de progressão (uma carga por set)
+  3x60kg / 2x70%                           carga + reps por passo, unidades mistas
+
+COMPLEXO
+  1 Hang Squat Snatch + 1 Squat Snatch     um exercício, dois movimentos
+  Complexo A: 1 Hang Squat Snatch + 1 Squat Snatch 60/70/80kg    com nome
+  (lista de cargas isolada após os movimentos → progressão detectada)
+
+ESTAÇÕES — dentro de um bloco do tipo Estações
+  Ciclos: 2                                repetições do circuito completo
+  Entre ciclos: 1:00                       descanso entre ciclos (mm:ss)
+  Grupo A 3:00                             nome + duração mm:ss abre a estação
+  Grupo A:                                 estação sem duração
+  Descanso 1:00                            estação de descanso
+
+REST
+  Rest 1' · Descanso 1'
+
+META — objetivo do bloco
+  Meta: 11-12'                             faixa de tempo
+  Meta: sub 10'                            tempo máximo
+  Meta: 5 rounds + 10 reps                 rounds (+ reps opcional)
+  Meta: <texto>                            livre
+
+OBS / ZONA
+  Obs: <nota>                              vai para block.notes
+  Zona: <nome>                             vai para block.zone
+
+(linha em branco = novo bloco · nada é descartado — o que não é reconhecido
+fica como nota e aparece nos avisos)
+
+EXEMPLO
+${FORMAT_EXAMPLE}`
+
+// ── Warning kinds (#129 · plans/61·C) ─────────────────────────────────────────
+// One table — order, severity and a pt-BR label with its plural — so all three
+// surfaces render an identical summary instead of each hand-counting a different
+// subset (SessionTextPane counted 4 of these 8, WeekImportModal 2, and
+// `interval-approximated`/`preamble` had no consumer anywhere). Order here is
+// display order: warn kinds first, then info.
+export const WARNING_KINDS = {
+  'type-unresolved': { severity: 'warn', label: 'tipos por definir', labelOne: 'tipo por definir' },
+  'complex-detected': {
+    severity: 'warn',
+    label: 'complexos detectados',
+    labelOne: 'complexo detectado',
+  },
+  'block-locked': { severity: 'info', label: 'blocos preservados', labelOne: 'bloco preservado' },
+  'unknown-exercise': {
+    severity: 'info',
+    label: 'nomes fora do registro',
+    labelOne: 'nome fora do registro',
+  },
+  'unparsed-line': {
+    severity: 'info',
+    label: 'linhas mantidas como nota',
+    labelOne: 'linha mantida como nota',
+  },
+  'orphan-load': {
+    severity: 'info',
+    label: 'cargas sem exercício acima',
+    labelOne: 'carga sem exercício acima',
+  },
+  'interval-approximated': {
+    severity: 'info',
+    label: 'intervalos aproximados',
+    labelOne: 'intervalo aproximado',
+  },
+  preamble: {
+    severity: 'info',
+    label: 'linhas antes do 1º dia — ignoradas',
+    labelOne: 'linha antes do 1º dia — ignorada',
+  },
+}
+
 // ── Structure lines ───────────────────────────────────────────────────────────
 const RE_LADDER = /^(\d+(?:\s*-\s*\d+)+)(?=\s|$)/
 const RE_EVERY = /\b(?:a\s+cada|every)\s+(\d+)\s*'(?:\s*(\d+)\s*")?/i
@@ -1006,6 +1140,15 @@ const DAY_MAP = new Map()
   ['sabado', 6],
   ['sab', 6],
 ].forEach(([k, v]) => DAY_MAP.set(k, v))
+// Numbered day notation (#128 · plans/61·C) — Brazilian civil weekday numbering,
+// domingo=1º dia so segunda-feira is "2ª feira" through sábado "7ª feira". Both the
+// ordinal-indicator (ª) and the plain-letter (a) spellings, spaced and hyphenated.
+;[2, 3, 4, 5, 6, 7].forEach(n => {
+  const dayIndex = n - 1
+  ;[`${n}a feira`, `${n}a-feira`, `${n}ª feira`, `${n}ª-feira`, `${n}a`, `${n}ª`].forEach(k =>
+    DAY_MAP.set(k, dayIndex),
+  )
+})
 
 export function matchDayHeader(raw) {
   const line = normLine(raw)

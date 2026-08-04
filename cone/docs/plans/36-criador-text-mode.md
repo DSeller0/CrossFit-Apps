@@ -83,14 +83,24 @@ from `src/public/lib/week.js` plus `normExName`-style folding from
 `<type> [– <label>] [– <structure>]`, separators `–  —  -  /  :`.
 
 Type resolved against `TYPE_CONFIG`'s keys (now in `criador/blockModel.js`) plus an
-alias table: `Warm Up`/`Warmup` → Aquecimento, `Strength`/`Forca` → Força,
-`Complex` → LPO, `Emom` → EMOM, and so on. A bare `WOD` resolves from its
-**structure line** (`5 Rounds For Time` → For Time, `AMRAP 15'` → AMRAP,
-`Emom 12'` → EMOM).
+alias table (`TYPE_ALIASES`, `textFormat.js`) — generate the reference's own list
+from it (`FORMAT_REFERENCE`, #120) so the two can't drift: `Warm Up`/`Warmup` →
+Aquecimento, `Strength`/`Forca` → Força, `Complex` → LPO, `Emom` → EMOM, `Stations`/
+`Circuito` → Estações, and so on.
+
+⚠️ **`WOD` is not a type, ever — it is a section marker** (#121d, plans/61·A). It
+resolves from the block's own **structure line** (`5 Rounds For Time` → For Time,
+`AMRAP 15'` → AMRAP, `Emom 12'` → EMOM) exactly like an unresolved header does. A
+BARE `WOD` with no structure line to resolve it does **not** fall back to a revived
+`type:'WOD'` — it sets `typeUnresolved: true`, same as any other unresolved header,
+so the preview's "? escolher tipo" chip appears rather than a silent `type:''` with
+no warning at all.
 
 An unresolved header (`Quem já faz tc 15'`) becomes the block **label** with the type
 left flagged — the preview renders that type chip as a **button that opens the
 existing type picker** (`criador/TypePicker.jsx`). One tap to fix, nothing guessed.
+`typeUnresolved` means exactly "this block has no format yet," whichever of the two
+reasons above caused it.
 
 ### Structure line (optional, the line right after the header, when it has no exercise shape)
 
@@ -109,6 +119,19 @@ existing type picker** (`criador/TypePicker.jsx`). One tap to fix, nothing guess
 > the original line survives in `notes`. Do not invent a schema field here — that is
 > a product decision, not a parser decision.
 
+⚠️ **Tightened rule (#130/#93, plans/61·A):** a line only counts as a structure line
+when it is **purely** structure — nothing decidable left over. The probe now shares
+one predicate with the exercise-line parser, `isExerciseNotStructure`: a line is an
+EXERCISE (not structure) whenever it has a leading quantity **and** a name, and,
+when the structure probe also matched something, the two must cover the *same
+span*. `50' Run` is a 50-second Run (structure and the exercise both take exactly
+`50'`, leaving "Run" either way); `3 sets cada letra` stays a structure line because
+the exercise parse can only ever take the bare `3`, not the whole `3 sets`. Before
+this, `50' Run` and `2.3'` were misread as a 50-minute cap / a 3-minute cap plus a
+mangled note — the same header-line probe (`parseHeaderLine`) applies the identical
+rule to a block's first line, so `Quem já faz tc 15'` (no leading quantity) still
+stays a label rather than being shredded.
+
 ### Exercise line — `[A–Z]? [qty] name [load]`
 
 1. **Slot letter.** A leading single letter + separator (`A `, `B)`, `C -`) is
@@ -126,6 +149,13 @@ existing type picker** (`criador/TypePicker.jsx`). One tap to fix, nothing guess
    - `60/45kg – 50/35kg` → RX + Inter · a third pair → SC
    - `42,5/30kg` decimal comma accepted · unit case-insensitive (`KG`, `kg`, `lb`)
    - `75%` → `{mode:'pct', pct:75}`
+   - `65/70/75/80/85%` → a progression list, one load per set
+   - `3x60kg / 2x70%` → **the pair form** (#121a, plans/61·A) — the one notation that
+     carries PER-STEP reps and MIXED units in the same line: every slash-separated
+     token is its own `<reps>x<load><unit>`, so `70%` next to `60kg` is 70% of RM,
+     never 70kg. Tried FIRST (before the plain list and the gender pair), and a line
+     that is *entirely* a load list skips the leading-quantity strip so `3x55%` reads
+     as "3 sets at 55%," not "3 sets × 55 reps."
 4. **Remainder = `name`, verbatim.** Run it through `resolveExercise`
    (`src/public/lib/registry.js`) **for validation only** — per that module's
    match-only rule the coach's text is never rewritten. The preview marks
@@ -159,6 +189,51 @@ conventions from `src/public/lib/wod.js`.
 ### Rest
 
 `Rest 1'` / `Descanso 1'` → an exercise named `Rest` carrying the duration in `reps`.
+⚠️ **Inside an Estações block this is a different thing** — see Stations below.
+
+### Stations (Estações) — plans/61·B, 2026-08-04
+
+Estações is the one type whose exercises hang off **stations**, not the block
+itself, so inside one the top level of the text is a list of station headers, each
+followed by its own exercise lines:
+
+```
+Estações
+Ciclos: 2
+Entre ciclos: 1:00
+Grupo A 3:00
+15 Wall Ball
+12 Box Jump
+Grupo B 3:00
+400m Corrida
+Descanso 1:00
+```
+
+- **A station header is a name (possibly empty) followed by a trailing mm:ss
+  duration, or a bare trailing colon for a duration-less station:** `Grupo A 3:00`
+  opens a 3-minute station; `Grupo A:` opens one with no duration. A **leading
+  digit** means the line is an exercise wearing a quantity (`15 Wall Ball`), never a
+  station — decidable, one rule.
+- ⚠️ **The duration is mm:ss ONLY.** `'`/`"` are the exercise/structure notation and
+  a station *name* can legally contain them — prod has one literally called
+  `AMRAP 3'30''` — so letting the generic structure probe have first refusal invented
+  a 3-minute block duration out of the station's own name. The station probe runs
+  before the structure probe for exactly this reason.
+- ⚠️ **`Descanso 1:00` / `Rest 1:00` inside an Estações block is a rest STATION, not
+  a Rest exercise** — the station probe runs before `RE_REST` so it doesn't shadow
+  this. The two stay distinguishable on sight anyway: a rest *exercise* uses the
+  coach's own `'`/`"` notation (`Rest 2'`), a rest *station* uses mm:ss.
+- **`Ciclos: N`** → `block.stationRepeat` — repetitions of the whole circuit.
+  **`Entre ciclos: mm:ss`** → `block.restBetweenCycles` — rest between repeats. Both
+  are their OWN keyword lines, joining the `Meta:`/`Obs:`/`Zona:` family, rather than
+  riding on the header as a `×2` segment: the header splits into type+label segments
+  with no grammar for a bare `×2`, and a bare `2 ciclos` on its own is already
+  claimed by the rounds structure token (`block.rounds`).
+- A repeat of `1` is the default everywhere it's read, so it carries no line at all
+  on the way back out.
+
+`isTextEditable` is `true` for Estações (only a *linked* Benchmark is locked out of
+text mode — see "Locked passthrough" below).
 
 ### Meta
 
@@ -167,13 +242,31 @@ Prefix `Meta:` / `Alvo:` / `Goal:` →
 | Written | Parsed |
 |---|---|
 | `11-12'` | `{kind:'time', min:'11:00', max:'12:00'}` |
-| `5 rounds` | `{kind:'rounds', min:5}` |
+| `5 rounds` | `{kind:'rounds', min:'5'}` |
+| `5 rounds + 10 reps` | `{kind:'rounds', min:'5', reps:'10'}` (plans/61·A, #126) |
 | `sub 10'` | `{kind:'time', max:'10:00'}` |
 | anything else | `{kind:'text', text:<raw>}` |
 
-Stored on `block.goal`. **This session only parses and serializes it** — the editor
-UI and the downstream rendering are [37](./37-design-c4-criador.md)'s slice (#10).
-Agree the shape here so 37 doesn't have to change it.
+Stored on `block.goal`. **`min`/`reps` stay STRINGS** (#110's type-mismatch family —
+`GoalInput` writes strings, and coercing at render time keeps a goal typed in Texto
+mode and one typed in Detalhado mode the exact same object). **`block.goal.kind` is
+a function of `block.type`, one-directionally** (`goalKindFor`, plans/61·A): a parse
+is demoted to the coach's own sentence on a block with no matching scoring axis
+(`Meta: sub 10'` on a Skill block becomes `{kind:'text', …}`), never promoted into an
+axis the line doesn't carry. The editor UI and the downstream rendering are
+[37](./37-design-c4-criador.md)'s slice (#10).
+
+### Locked passthrough (plans/61·B)
+
+A **linked** Benchmark (`block.benchmarkRef`) is the one block the grammar
+deliberately never expresses: its movements come from the benchmark definition, so
+round-tripping it through free text would rewrite an official WOD from a paraphrase
+of it. `isTextEditable(block)` is `false` for exactly this case (and only this case
+— Estações lost its exemption once it had real notation). The session pane
+(`SessionTextPane`) holds a locked block **out of the textarea entirely** via
+`splitLockedBlocks`/`mergeLockedBlocks` (pure, unit-tested) and renders it as a
+read-only card at its real index; `mergeLockedBlocks` puts back the *same object*,
+never a re-parse. The per-block editor's `¶`/`▤` toggle is disabled for it.
 
 ### The contract
 
