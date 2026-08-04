@@ -121,7 +121,14 @@ per-file figures, and this file's own `npm test` count, which CLAUDE.md had at 5
 rows (#119–#124) landed here and jumped the three pre-existing ones. Then the **targeted review added
 13 more (#125–#137)**. Ranking principle unchanged: found-in-live-use and small-and-visible first,
 then the planning-session inputs, then everything else.
-5. 🔴 **#125** `Meta:` time without a colon is stored as **seconds**, inverting #117's badge · S · **run this first** — smallest fix of the lot, and it is actively producing wrong badges.
+>
+> **Top unshipped row is now #132 + #133** (below) — Tier 1 and Tier 2 are both fully shipped, and
+> rows 5–8, 10 and 13 have all closed. ⚠️ **Two ordering facts that are easy to miss on this list:**
+> #132/#133 is flagged as **orphaned** — no queued design session owns it, so it stays unpicked
+> unless scheduled here — and **#137 gates #134's fix**, so the real sequence is
+> **#132+#133 → #137 → #134–#136**, not the list order. #137 is a token decision (Opus), cheaper
+> to settle before the ScoreFields batch than during it.
+5. ✅ **[shipped 2026-08-03 · plans/60](./plans/60-goal-time-input.md)** (see Done) — **#125** `Meta:` time without a colon was stored as **seconds**, inverting #117's badge. ⚠️ **This row carried a 🔴 "run this first" marker until 2026-08-04**, a day after it shipped — the same stale-marker failure as #83/#84, which read as available picks for a week. Corrected while closing #74-C.
 6. ✅ **[shipped 2026-08-03 · plans/57](./plans/57-score-fields-polish.md)** (see Done) — **#122 + #123** score-fields polish. #137(c)'s one failing contrast cell (`.rpeBtn.on` teal, 3.80:1 in spirit-blossom-light) folded in as a recorded gap, not a fix — see that row.
 7. ✅ **[shipped 2026-08-03 · plans/58](./plans/58-new-session-button.md)** (see Done) — **#119** "+ sessão" opens the day's first session.
 8. ✅ **[shipped 2026-08-03 · plans/59](./plans/59-coach-reachability.md)** (see Done) — **#124** Coach unreachable from Perfil/Agenda.
@@ -129,7 +136,7 @@ then the planning-session inputs, then everything else.
 10. ✅ **PLANNED 2026-08-03 → [plans/61](./plans/61-criador-text-roundtrip.md)** — **#121 + #120 + #126–#131** Criador text mode. Now **three ordered Ready rows** (61·A Opus·L → 61·B Opus·M → 61·C Sonnet·M), see Ready. The planning session re-ran every claim against the live parser and live prod: **2 new root causes** (legacy-`WOD` residue behind the `type:''` drift, and a first-line exercise being swallowed into `block.label`), **4 corrections** (see each row below) and **1 spun-out row, #138**. #131 was folded into 61·C by the user.
 11. **#134 + #135 + #136** ScoreFields polish, round two — note toggles read as inputs, the `sm` variant is 10/11 dead, and four wording/labelling drifts · S · batch after #133 lands.
 12. **#137** `--border` ≡ `--divider` in all 4 themes (CLAUDE.md claims otherwise), and `--red` fails 4.5:1 on both dark themes · S · **Opus** — a token decision, and it gates #134's fix.
-13. **#131** fixed-height text panes waste the page's vertical room · S — rides whichever layout pass runs first.
+13. ✅ **[shipped 2026-08-04 · plans/61](./plans/61-criador-text-roundtrip.md)** (see Done) — **#131** fixed-height text panes. Folded into **61·C** by the user rather than left to ride a future layout pass, which is what this row said would happen. ⚠️ **Still listed as an open pick until 2026-08-04** — same stale-marker correction as #125 above.
 14. **#71** `class_checkin` guest dedupe/cap · S — needs a decision (two guests can share a first name).
 15. **#89** index agenda link is a no-op · S — `Schedule.jsx` reads 10 URL params; `session` isn't one.
 16. **#104 (a)(b)(d)** billing bugs — `per_hour` bills 90min as 1hr; mixed-currency total is meaningless; `pixClean` duplicated byte-identical. *(c) rate-history is a feature, stays in #104.*
