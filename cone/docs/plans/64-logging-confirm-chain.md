@@ -1,7 +1,58 @@
 # 64 — #132 + #133 · The logging chain's review step
 
-*Planned 2026-08-04 alongside plans/63/65/66. **Not executed in that session** — its own session, per
-WORKFLOW.md "one item per session for S/M".*
+> ✅ Done: `e47dec8` · 2026-08-04 — see BACKLOG.md
+>
+> Planned 2026-08-04 alongside plans/63/65/66; executed in its own session the same day, per
+> WORKFLOW.md "one item per session for S/M".
+>
+> **Shipped as planned** — all three surfaces (`Results.jsx` · `LogPane.jsx` · `DeskRegPane.jsx`) now
+> render `ConfirmReview` for their confirm step with the canonical labels, and the #116 note renders
+> in every confirm **and** success step via `ReadBox`/`ReadRow`. `Results.jsx` kept its real
+> "Confirmar alteração" distinction via a `title` override. The dead `deskConfirmBox` family +
+> `deskCancelBtn`/`deskConfirmBtn` (`Schedule.module.css`) and `confirm*` family (`Results.module.css`)
+> were deleted — `grep`-verified zero remaining consumers in both files first.
+>
+> **Two things found at execution, both recorded in code, neither in the plan:**
+> - 🔴 **`.logPane` carries a CSS `transform` even at rest** (`translateX(100%)` / `(0)` — a `transform`
+>   value, never `none`), which makes it a containing block for `position:fixed` descendants. A naive
+>   nested `<ConfirmReview>` would silently behave like `position:absolute` relative to the pane instead
+>   of the viewport. Both `LogPane` and `DeskRegPane` now render `<ConfirmReview>` as a **sibling
+>   outside** the pane/panel element, never nested inside — the plan's "two things to handle" flagged the
+>   overlay-above-a-pane risk but not this specific cause.
+> - **The plan's "keep the pane behind the dialog" intent required restructuring, not just a markup
+>   swap:** the `confirm`/`confirming` step used to *replace* the form's DOM (a ternary), which would
+>   have discarded scroll position and field state the instant `ConfirmReview` opened — same class of
+>   bug the plan exists to prevent, one level up. Both files now render the **form unconditionally**
+>   (gated only on `success`, not on `confirming`/`step==='confirm'`) and layer `ConfirmReview` as an
+>   always-present sibling controlled by `open`. Verified live: `scrollTop` on the pane was identical
+>   (263) before opening the confirm dialog and after pressing Escape — the form was never unmounted.
+>
+> **Two scope calls made explicitly, not silently:**
+> - **Results.jsx's confirm-modal scale/opacity transition was recorded as a deliberate loss**, not
+>   ported into `ConfirmReview.module.css` — the plan offered both options; porting would have changed
+>   the shared dialog's mount lifecycle (`open ? render : null` → always-mounted + CSS transition) for
+>   every future consumer to save one surface's animation. A comment at the CSS site says so. The
+>   success modal's own transition is untouched (it stays a bespoke shell, not `ConfirmReview`).
+> - **`LogPane`'s success step had no read-back at all before this** (just an icon/title/sub/link) —
+>   extending it with the same `ReadBox`/`ReadRow` score + note detail the other two surfaces show was
+>   necessary for the note to have anywhere to render there, and is what the acceptance criterion
+>   ("every confirm **and** success step, on all three") requires.
+>
+> `ConfirmReview.module.css`'s `.body` became `display:flex;flex-direction:column;gap:var(--sp-3)`
+> (was `margin-bottom` only) so multiple `ReadBox` pairs — score + notes, or several blocks in
+> `LogPane`'s multi-block confirm — space evenly without a per-consumer wrapper div.
+>
+> **Live-verified** against the local stack with real prod-shaped data (Playwright, 1280 and 390): all
+> three surfaces' confirm + success steps against a real SC-scale result carrying a genuine #116 note
+> ("Fiz com banda auxiliar" on Toes to Bar) — the note rendered in confirm and success on all three;
+> Escape returned to the still-scrolled, still-filled form rather than closing the pane, on both
+> `LogPane` (mobile, 390) and `DeskRegPane` (desktop); `Results.jsx`'s edit path showed "Confirmar
+> alteração" and the note; `LogPane`'s multi-block confirm (For Time + EMOM) showed two independent
+> `ReadBox`/note pairs with even spacing. Gallery (`ConfirmReview`, `ScoreFields`, `LogPane`,
+> `DeskRegPane` cases, including their pre-built "erro no envio" states) rendered with zero console
+> errors — no `design:cards` run, since no gallery-rendered component's markup shape changed (only
+> `ConfirmReview.module.css`'s `.body` layout and the consuming pages). 704 tests / lint 0 (`--max-warnings 0`)
+> / `build:all` clean / `format` clean.
 
 ## Context
 
