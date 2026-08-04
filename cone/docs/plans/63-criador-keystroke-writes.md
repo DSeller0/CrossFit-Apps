@@ -1,6 +1,6 @@
 # 63 — #139 + #140 · Criador inputs that rewrite what the coach typed, per keystroke
 
-> ✅ Done: `<commit>` · 2026-08-04 — see BACKLOG.md
+> ✅ Done: `4edc639` · 2026-08-04 — see BACKLOG.md
 >
 > Planned + executed 2026-08-04 in one session (S), alongside the plan files for 64–66.
 >
