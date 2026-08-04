@@ -1,6 +1,7 @@
 import styles from './Schedule.module.css'
-import { blkLabel, perfStr } from '../lib/wod.js'
+import { blkLabel, perfStr, isTimeBlock } from '../lib/wod.js'
 import ScoreFields from '../shared/ScoreFields.jsx'
+import ConfirmReview, { ReadBox, ReadRow } from '../shared/ConfirmReview.jsx'
 
 // ── Desktop Reg Pane ──────────────────────────────────────────────────────────
 export default function DeskRegPane({
@@ -57,112 +58,96 @@ export default function DeskRegPane({
     if ('checkpoint' in patch) onCheckpoint(patch.checkpoint)
     if ('exerciseRows' in patch) onExerciseRows(patch.exerciseRows)
   }
+  // #133 — shared between the confirm dialog and the success step, so both read back
+  // the same way. `withTitle` off for success: `.deskSuccessSub` already names the
+  // block, and the pane header (`.deskRegPaneWod`) names it in every step — the
+  // confirm dialog is the one place neither is already on screen.
+  function scoreBox(withTitle) {
+    return (
+      <ReadBox title={withTitle ? label : undefined}>
+        <ReadRow label="Escala" value={scale} />
+        {perfVal && <ReadRow label="Resultado" value={perfVal} mono={isTimeBlock(bl.type)} />}
+        {rpe && <ReadRow label="RPE" value={`${rpe} / 10`} />}
+      </ReadBox>
+    )
+  }
+  // #132
+  const noteBox = exerciseRows?.length > 0 && (
+    <ReadBox title="O que foi adaptado">
+      {exerciseRows.map(r => (
+        <ReadRow key={r.exId} label={r.name} value={r.note} />
+      ))}
+    </ReadBox>
+  )
   return (
-    <div className={styles.deskRegPane}>
-      <div className={styles.deskRegPaneHdr}>
-        <span className={styles.deskRegPaneLbl}>
-          {step === 'success' ? 'Registrado' : athName || 'Registro'}
-        </span>
-        <span className={styles.deskRegPaneWod}>{label}</span>
-        <button className={styles.deskRegClose} onClick={onClose} aria-label="Fechar">
-          ×
-        </button>
-      </div>
-      <div className={styles.deskRegScroll}>
-        {step === 'form' && (
-          <>
-            <div className={styles.deskRegSec}>
-              {/* Gains the DNF rounds field it never had — this pane was the surface that had
-                  drifted furthest from the other four (#115). */}
-              <ScoreFields block={bl} value={scoreValue} onChange={onScoreChange} />
-              {bl.type === 'AMRAP' && (
-                <div className={styles.deskRegHint}>Rounds completos + reps extras</div>
-              )}
-            </div>
-            <button
-              className={styles.deskRegSubmitBtn}
-              disabled={!scale || !rpe}
-              onClick={onConfirm}
-            >
-              Confirmar →
-            </button>
-            {error && <div className={styles.deskRegErr}>{error}</div>}
-          </>
-        )}
-
-        {step === 'confirm' && (
-          <>
-            <div className={styles.deskConfirmBox}>
-              <div className={styles.deskConfirmTitle}>Revisar registro</div>
-              <div className={styles.deskConfirmRow}>
-                <span className={styles.deskConfirmRowLbl}>Bloco</span>
-                <span className={styles.deskConfirmRowVal}>{label}</span>
+    <>
+      <div className={styles.deskRegPane}>
+        <div className={styles.deskRegPaneHdr}>
+          <span className={styles.deskRegPaneLbl}>
+            {step === 'success' ? 'Registrado' : athName || 'Registro'}
+          </span>
+          <span className={styles.deskRegPaneWod}>{label}</span>
+          <button className={styles.deskRegClose} onClick={onClose} aria-label="Fechar">
+            ×
+          </button>
+        </div>
+        <div className={styles.deskRegScroll}>
+          {/* #133/note 1 — 'confirm' no longer swaps this away; ConfirmReview (below,
+              OUTSIDE .deskRegPane) overlays it instead, so the form's scroll position
+              and field values survive a submit failure without a remount. */}
+          {step !== 'success' && (
+            <>
+              <div className={styles.deskRegSec}>
+                {/* Gains the DNF rounds field it never had — this pane was the surface that had
+                    drifted furthest from the other four (#115). */}
+                <ScoreFields block={bl} value={scoreValue} onChange={onScoreChange} />
+                {bl.type === 'AMRAP' && (
+                  <div className={styles.deskRegHint}>Rounds completos + reps extras</div>
+                )}
               </div>
-              <div className={styles.deskConfirmRow}>
-                <span className={styles.deskConfirmRowLbl}>Escala</span>
-                <span className={styles.deskConfirmRowVal}>{scale}</span>
-              </div>
-              {perfVal && (
-                <div className={styles.deskConfirmRow}>
-                  <span className={styles.deskConfirmRowLbl}>Resultado</span>
-                  <span className={styles.deskConfirmRowVal}>{perfVal}</span>
-                </div>
-              )}
-              {rpe && (
-                <div className={styles.deskConfirmRow}>
-                  <span className={styles.deskConfirmRowLbl}>RPE</span>
-                  <span className={styles.deskConfirmRowVal}>{rpe} / 10</span>
-                </div>
-              )}
-            </div>
-            <div className={styles.deskConfirmBtns}>
-              <button className={styles.deskCancelBtn} onClick={onBack}>
-                ← Editar
-              </button>
               <button
-                className={styles.deskConfirmBtn}
-                disabled={submitting || undefined}
-                onClick={onSubmit}
+                className={styles.deskRegSubmitBtn}
+                disabled={!scale || !rpe}
+                onClick={onConfirm}
               >
-                {submitting ? 'Enviando...' : 'Registrar ✓'}
+                Confirmar →
+              </button>
+              {/* The 'confirm' step's error renders inside ConfirmReview instead. */}
+              {error && step === 'form' && <div className={styles.deskRegErr}>{error}</div>}
+            </>
+          )}
+
+          {step === 'success' && (
+            <div className={styles.deskSuccessBox}>
+              <div className={styles.deskSuccessIcon}>✓</div>
+              <div className={styles.deskSuccessTitle}>Resultado registrado</div>
+              <div className={styles.deskSuccessSub}>
+                {athName && `${athName} · `}
+                {label}
+              </div>
+              <div className={styles.deskSuccessDetail}>
+                {scoreBox(false)}
+                {noteBox}
+              </div>
+              <button className={styles.deskDismissBtn} onClick={onClose}>
+                Fechar ×
               </button>
             </div>
-            {error && <div className={styles.deskRegErr}>{error}</div>}
-          </>
-        )}
-
-        {step === 'success' && (
-          <div className={styles.deskSuccessBox}>
-            <div className={styles.deskSuccessIcon}>✓</div>
-            <div className={styles.deskSuccessTitle}>Resultado registrado</div>
-            <div className={styles.deskSuccessSub}>
-              {athName && `${athName} · `}
-              {label}
-            </div>
-            <div className={styles.deskSuccessDetail}>
-              <div className={styles.deskSuccessRow}>
-                <span className={styles.deskSuccessRowLbl}>Escala</span>
-                <span className={styles.deskSuccessRowVal}>{scale}</span>
-              </div>
-              {perfVal && (
-                <div className={styles.deskSuccessRow}>
-                  <span className={styles.deskSuccessRowLbl}>Resultado</span>
-                  <span className={styles.deskSuccessRowVal}>{perfVal}</span>
-                </div>
-              )}
-              {rpe && (
-                <div className={styles.deskSuccessRow}>
-                  <span className={styles.deskSuccessRowLbl}>RPE</span>
-                  <span className={styles.deskSuccessRowVal}>{rpe} / 10</span>
-                </div>
-              )}
-            </div>
-            <button className={styles.deskDismissBtn} onClick={onClose}>
-              Fechar ×
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+
+      <ConfirmReview
+        open={step === 'confirm'}
+        onEdit={onBack}
+        onConfirm={onSubmit}
+        onClose={onBack}
+        submitting={submitting}
+        error={step === 'confirm' ? error : ''}
+      >
+        {scoreBox(true)}
+        {noteBox}
+      </ConfirmReview>
+    </>
   )
 }

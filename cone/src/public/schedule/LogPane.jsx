@@ -1,7 +1,9 @@
+import { Fragment } from 'react'
 import styles from './Schedule.module.css'
-import { blkColor, blockExercises, perfStr } from '../lib/wod.js'
+import { blkColor, blockExercises, perfStr, isTimeBlock } from '../lib/wod.js'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
 import ScoreFields from '../shared/ScoreFields.jsx'
+import ConfirmReview, { ReadBox, ReadRow } from '../shared/ConfirmReview.jsx'
 
 // ── Log Pane (mobile) ─────────────────────────────────────────────────────────
 export default function LogPane({
@@ -32,6 +34,45 @@ export default function LogPane({
         month: 'long',
       })
     : ''
+  // #133 — one ReadBox pair (score · #132's #116 notes) per block, shared by the
+  // confirm dialog and the success step so both read back the same way. Flattened as
+  // direct children (Fragment, not a wrapping div) so ConfirmReview's/`.lpBody`'s own
+  // flex `gap` spaces every box evenly, across blocks and within a block alike.
+  function blockReadBoxes(bl) {
+    const perf = perfStr(bl, bl.blockType)
+    const fullBl = pane?.sess.blocks?.find(b => b.id === bl.blockId)
+    const exs = blockExercises(fullBl)
+    return (
+      <Fragment key={bl.blockId}>
+        <ReadBox title={bl.blockLabel}>
+          {exs.length > 0 && <ExerciseList exercises={exs} color={blkColor(fullBl)} size="tiny" />}
+          <ReadRow label="Escala" value={bl.scale} />
+          {bl.rpe && <ReadRow label="RPE" value={`${bl.rpe} / 10`} />}
+          {perf && <ReadRow label="Resultado" value={perf} mono={isTimeBlock(bl.blockType)} />}
+        </ReadBox>
+        {bl.exerciseRows?.length > 0 && (
+          <ReadBox title="O que foi adaptado">
+            {bl.exerciseRows.map(r => (
+              <ReadRow key={r.exId} label={r.name} value={r.note} />
+            ))}
+          </ReadBox>
+        )}
+      </Fragment>
+    )
+  }
+  // #140/note 1 — a fixed overlay above a still-open pane, not a swap of its content:
+  // `.logPane` carries `transform` even at rest (translateX(100%)/(0)), which makes it
+  // a containing block for `position:fixed` descendants, so ConfirmReview must render
+  // OUTSIDE it (a sibling below), never nested inside.
+  const confirmBody = pane && (
+    <>
+      <div className={styles.lpDate}>
+        {lockedAthName || pane.assignedAth.find(a => String(a.id) === String(athId))?.name || ''}
+        {pane.sess.sessionName ? ` · ${pane.sess.sessionName}` : ''}
+      </div>
+      {blocks.map(blockReadBoxes)}
+    </>
+  )
   return (
     <>
       <div
@@ -56,67 +97,8 @@ export default function LogPane({
                 <i className="ti ti-trophy" /> Ver leaderboard
               </a>
             </div>
-          </div>
-        ) : confirming ? (
-          <div>
-            <div className={styles.lpHeader}>
-              <div className={styles.lpTitle}>
-                <i className="ti ti-clipboard-check" /> Revisar registro
-              </div>
-              <button className={styles.lpClose} onClick={onClose} aria-label="Fechar">
-                <i className="ti ti-x" />
-              </button>
-            </div>
-            <div className={styles.lpBody}>
-              <div className={styles.lpDate}>
-                {lockedAthName ||
-                  pane.assignedAth.find(a => String(a.id) === String(athId))?.name ||
-                  ''}
-                {pane.sess.sessionName ? ` · ${pane.sess.sessionName}` : ''}
-              </div>
-              {blocks.map(bl => {
-                const perf = perfStr(bl, bl.blockType)
-                const fullBl = pane.sess.blocks?.find(b => b.id === bl.blockId)
-                const exs = blockExercises(fullBl)
-                return (
-                  <div key={bl.blockId} className={styles.deskConfirmBox}>
-                    <div className={styles.deskConfirmTitle}>{bl.blockLabel}</div>
-                    {exs.length > 0 && (
-                      <ExerciseList exercises={exs} color={blkColor(fullBl)} size="tiny" />
-                    )}
-                    <div className={styles.deskConfirmRow}>
-                      <span className={styles.deskConfirmRowLbl}>Escala</span>
-                      <span className={styles.deskConfirmRowVal}>{bl.scale}</span>
-                    </div>
-                    {bl.rpe && (
-                      <div className={styles.deskConfirmRow}>
-                        <span className={styles.deskConfirmRowLbl}>RPE</span>
-                        <span className={styles.deskConfirmRowVal}>{bl.rpe} / 10</span>
-                      </div>
-                    )}
-                    {perf && (
-                      <div className={styles.deskConfirmRow}>
-                        <span className={styles.deskConfirmRowLbl}>Resultado</span>
-                        <span className={styles.deskConfirmRowVal}>{perf}</span>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-              <div className={styles.deskConfirmBtns}>
-                <button className={styles.deskCancelBtn} onClick={() => onConfirming(false)}>
-                  ← Editar
-                </button>
-                <button
-                  className={styles.deskConfirmBtn}
-                  disabled={submitting || undefined}
-                  onClick={onSubmit}
-                >
-                  {submitting ? 'Enviando...' : 'Confirmar ✓'}
-                </button>
-              </div>
-              {error && <div className={styles.lpErr}>{error}</div>}
-            </div>
+            {/* #132 — same read-back the confirm dialog shows, now surviving past submit. */}
+            {blocks.length > 0 && <div className={styles.lpBody}>{blocks.map(blockReadBoxes)}</div>}
           </div>
         ) : (
           <div>
@@ -192,11 +174,24 @@ export default function LogPane({
               >
                 <i className="ti ti-check" /> Registrar
               </button>
-              {error && <div className={styles.lpErr}>{error}</div>}
+              {/* Confirming's own error renders inside ConfirmReview instead — this pane
+                  stays mounted (unchanged) behind the dialog, so avoid showing it twice. */}
+              {error && !confirming && <div className={styles.lpErr}>{error}</div>}
             </div>
           </div>
         )}
       </div>
+
+      <ConfirmReview
+        open={!!pane && !success && !!confirming}
+        onEdit={() => onConfirming(false)}
+        onConfirm={onSubmit}
+        onClose={() => onConfirming(false)}
+        submitting={submitting}
+        error={confirming ? error : ''}
+      >
+        {confirmBody}
+      </ConfirmReview>
     </>
   )
 }

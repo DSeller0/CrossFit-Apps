@@ -26,7 +26,9 @@
   margin-bottom:var(--sp-3);
   letter-spacing:.02em;
 }
-.body{margin-bottom:var(--sp-4)}
+/* flex+gap, not margin-bottom on each child — a multi-block confirm (LogPane) stacks
+   several ReadBox pairs here and needs even spacing without a per-consumer wrapper. */
+.body{display:flex;flex-direction:column;gap:var(--sp-3);margin-bottom:var(--sp-4)}
 .err{font-size:12px;color:var(--err);margin-bottom:var(--sp-3)}
 
 .btns{display:flex;gap:var(--sp-2)}

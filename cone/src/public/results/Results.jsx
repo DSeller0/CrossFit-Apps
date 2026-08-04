@@ -22,6 +22,7 @@ import { normalizeSessionIds } from '../lib/sessions.js'
 import { mergeBlockEntry } from '../lib/resultEntry.js'
 import RankList from '../shared/RankList.jsx'
 import ScaleFilter from '../shared/ScaleFilter.jsx'
+import ConfirmReview, { ReadBox, ReadRow } from '../shared/ConfirmReview.jsx'
 import SessionCard from './SessionCard.jsx'
 import WodSummary from './WodSummary.jsx'
 import KpiGrid from './KpiGrid.jsx'
@@ -398,6 +399,7 @@ export default function Results() {
       perf,
       btype,
       goalOutcome: goalOutcome(inp, bl),
+      exerciseRows: inp.exerciseRows,
     })
   }
 
@@ -439,8 +441,9 @@ export default function Results() {
     lbEntries = blockEntries(results, athletes, sid, bid)
   }
 
-  // Confirm modal
-  let confirmContent = null
+  // Confirm dialog (#133 — shared ConfirmReview, replacing the hand-rolled frame)
+  let confirmBody = null,
+    confirmTitle
   if (confirmPending) {
     const { sid, bid, dk } = confirmPending
     const inp = getInp(sid, bid)
@@ -454,36 +457,25 @@ export default function Results() {
     const perfRaw = perfStr(inp, btype)
     const perf = perfRaw === '—' ? '' : perfRaw
     const plbl = isTimeBlock(btype) ? (inp.perfTime ? 'Tempo' : 'Resultado') : 'Resultado'
-    confirmContent = (
+    // ⚠️ Editing an existing log is a real distinction (Results.jsx used to be the only
+    // one of the 3 forks to carry it) — kept via a title override rather than lost to
+    // ConfirmReview's canonical "Revisar registro" default (#133).
+    confirmTitle = isEditing(sid, bid) ? 'Confirmar alteração' : undefined
+    confirmBody = (
       <>
-        <div className={styles.confirmTitle}>
-          {isEditing(sid, bid) ? 'Confirmar alteração' : 'Confirmar registro'}
-        </div>
-        <div className={styles.confirmDetail}>
-          <div className={styles.confirmWod}>{lbl}</div>
-          <div className={styles.confirmRow}>
-            <span className={styles.confirmRowLbl}>Escala</span>
-            <span className={styles.confirmRowVal}>{inp.scale}</span>
-          </div>
-          <div className={styles.confirmRow}>
-            <span className={styles.confirmRowLbl}>RPE</span>
-            <span className={styles.confirmRowVal}>{inp.rpe}</span>
-          </div>
-          {perf && (
-            <div className={styles.confirmRow}>
-              <span className={styles.confirmRowLbl}>{plbl}</span>
-              <span className={styles.confirmRowVal}>{perf}</span>
-            </div>
-          )}
-        </div>
-        <div className={styles.confirmBtns}>
-          <button className={styles.btnCancel} onClick={() => setConfirmPending(null)}>
-            Cancelar
-          </button>
-          <button className={styles.btnConfirm} onClick={proceedSubmit}>
-            Confirmar
-          </button>
-        </div>
+        <ReadBox title={lbl}>
+          <ReadRow label="Escala" value={inp.scale} />
+          <ReadRow label="RPE" value={inp.rpe} />
+          {perf && <ReadRow label={plbl} value={perf} mono={isTimeBlock(btype)} />}
+        </ReadBox>
+        {/* #132 — the #116 adaptation note, invisible in every confirm/success step until now. */}
+        {inp.exerciseRows?.length > 0 && (
+          <ReadBox title="O que foi adaptado">
+            {inp.exerciseRows.map(r => (
+              <ReadRow key={r.exId} label={r.name} value={r.note} />
+            ))}
+          </ReadBox>
+        )}
       </>
     )
   }
@@ -550,18 +542,16 @@ export default function Results() {
         </div>
       </div>
 
-      {/* Confirm modal */}
-      <div
-        className={`${styles.modalOverlay}${confirmPending ? ' ' + styles.modalOverlayOpen : ''}`}
-        onClick={() => setConfirmPending(null)}
-      />
-      <div
-        className={`${styles.confirmModal}${confirmPending ? ' ' + styles.confirmModalOpen : ''}`}
-        role="dialog"
-        aria-modal="true"
+      {/* Confirm dialog (#133) */}
+      <ConfirmReview
+        open={!!confirmPending}
+        onEdit={() => setConfirmPending(null)}
+        onConfirm={proceedSubmit}
+        onClose={() => setConfirmPending(null)}
+        title={confirmTitle}
       >
-        {confirmContent}
-      </div>
+        {confirmBody}
+      </ConfirmReview>
 
       {/* Success modal */}
       <div
@@ -576,45 +566,59 @@ export default function Results() {
       >
         {successData &&
           (() => {
-            const { blockLabel: lbl, scale, rpe, perf, btype, goalOutcome: goalOut } = successData
+            const {
+              blockLabel: lbl,
+              scale,
+              rpe,
+              perf,
+              btype,
+              goalOutcome: goalOut,
+              exerciseRows,
+            } = successData
             const plbl = isTimeBlock(btype) ? 'Tempo' : 'Resultado'
             return (
               <>
                 <i className={`ti ti-circle-check ${styles.successIcon}`} aria-hidden="true" />
                 <div className={styles.successTitle}>Resultado registrado!</div>
-                <div className={styles.successWodLbl}>{lbl}</div>
                 <div className={styles.successDetail}>
-                  <div className={styles.successRow}>
-                    <span className={styles.successRowLbl}>Escala</span>
-                    <span className={styles.successRowVal}>{scale}</span>
-                  </div>
-                  <div className={styles.successRow}>
-                    <span className={styles.successRowLbl}>RPE</span>
-                    <span className={styles.successRowVal}>{rpe}</span>
-                  </div>
-                  {perf && (
-                    <div className={styles.successRow}>
-                      <span className={styles.successRowLbl}>{plbl}</span>
-                      <span className={styles.successRowVal}>
-                        {perf}
-                        {/* #117 — same beat/met badge as RankList/TV, on the one surface
-                            that isn't a ranked list: the athlete's own confirmation. */}
-                        {goalOut === 'beat' && (
-                          <i
-                            className={`ti ti-target-arrow ${styles.successGoalBeat}`}
-                            title="Bateu a meta"
-                            aria-hidden="true"
-                          />
-                        )}
-                        {goalOut === 'met' && (
-                          <i
-                            className={`ti ti-target ${styles.successGoalMet}`}
-                            title="Dentro da meta"
-                            aria-hidden="true"
-                          />
-                        )}
-                      </span>
-                    </div>
+                  <ReadBox title={lbl}>
+                    <ReadRow label="Escala" value={scale} />
+                    <ReadRow label="RPE" value={rpe} />
+                    {perf && (
+                      <ReadRow
+                        label={plbl}
+                        mono={isTimeBlock(btype)}
+                        value={
+                          <>
+                            {perf}
+                            {/* #117 — same beat/met badge as RankList/TV, on the one surface
+                                that isn't a ranked list: the athlete's own confirmation. */}
+                            {goalOut === 'beat' && (
+                              <i
+                                className={`ti ti-target-arrow ${styles.successGoalBeat}`}
+                                title="Bateu a meta"
+                                aria-hidden="true"
+                              />
+                            )}
+                            {goalOut === 'met' && (
+                              <i
+                                className={`ti ti-target ${styles.successGoalMet}`}
+                                title="Dentro da meta"
+                                aria-hidden="true"
+                              />
+                            )}
+                          </>
+                        }
+                      />
+                    )}
+                  </ReadBox>
+                  {/* #132 */}
+                  {exerciseRows?.length > 0 && (
+                    <ReadBox title="O que foi adaptado">
+                      {exerciseRows.map(r => (
+                        <ReadRow key={r.exId} label={r.name} value={r.note} />
+                      ))}
+                    </ReadBox>
                   )}
                 </div>
                 <button className={styles.btnDismiss} onClick={() => setSuccessData(null)}>

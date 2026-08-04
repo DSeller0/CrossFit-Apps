@@ -314,28 +314,19 @@
 .deskRegSubmitBtn:hover { background:color-mix(in srgb,var(--teal) 22%,transparent); }
 .deskRegErr { font-size:11px; color:var(--err); margin-top:5px; text-align:center; }
 
-/* Confirm step */
-.deskConfirmBox { background:var(--stone2); border:1px solid var(--divider); padding:10px; margin-bottom:10px; }
-.deskConfirmTitle { font-size:9px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:8px; }
-.deskConfirmRow { display:flex; align-items:baseline; justify-content:space-between; padding:3px 0; border-bottom:1px solid var(--divider); }
-.deskConfirmRow:last-child { border-bottom:none; }
-.deskConfirmRowLbl { font-size:11px; color:var(--muted); }
-.deskConfirmRowVal { font-size:12px; font-weight:700; color:var(--cream); }
-.deskConfirmBtns { display:flex; gap:6px; }
-.deskCancelBtn { flex:1; background:none; border:1px solid var(--divider); color:var(--muted); font-family:inherit; font-size:12px; font-weight:700; padding:7px; cursor:pointer; }
-.deskCancelBtn:hover { color:var(--sub); border-color:var(--muted); }
-.deskConfirmBtn { flex:2; background:var(--teal); border:none; color:var(--bg); font-family:inherit; font-size:13px; font-weight:900; letter-spacing:.06em; padding:7px; cursor:pointer; }
-.deskConfirmBtn:disabled { opacity:.6; cursor:not-allowed; }
+/* Confirm step (#133) — the deskConfirmBox family + deskCancelBtn/deskConfirmBtn frame
+   moved to shared/ConfirmReview.jsx; LogPane's confirm step used the same classes and
+   converted in the same pass, so nothing else was left holding them. */
 
 /* Success step */
 .deskSuccessBox { display:flex; flex-direction:column; align-items:center; text-align:center; padding:20px 8px; gap:4px; }
 .deskSuccessIcon { width:38px; height:38px; border-radius:50%; background:var(--teal); color:var(--bg); font-size:18px; font-weight:900; display:flex; align-items:center; justify-content:center; margin-bottom:6px; }
 .deskSuccessTitle { font-size:15px; font-weight:900; color:var(--cream); }
 .deskSuccessSub { font-size:11px; color:var(--muted); margin-bottom:8px; }
-.deskSuccessDetail { width:100%; background:var(--stone2); border:1px solid var(--divider); padding:8px 10px; margin-bottom:10px; }
-.deskSuccessRow { display:flex; align-items:baseline; justify-content:space-between; padding:2px 0; }
-.deskSuccessRowLbl { font-size:10px; color:var(--dim); }
-.deskSuccessRowVal { font-size:12px; font-weight:700; color:var(--teal); }
+/* Holds the shared ReadBox(es) (score · #116 notes) — was a bare stone2/divider row list.
+   width:100% + flex/gap because .deskSuccessBox center-aligns and ReadBox doesn't stretch
+   on its own; gap (not a per-box margin) so it spaces the optional notes box the same way. */
+.deskSuccessDetail { width:100%; display:flex; flex-direction:column; gap:var(--sp-3); margin-bottom:10px; }
 .deskDismissBtn { background:none; border:1px solid var(--divider); color:var(--muted); font-family:inherit; font-size:12px; font-weight:700; padding:5px 14px; cursor:pointer; }
 .deskDismissBtn:hover { color:var(--sub); border-color:var(--muted); }
 
