@@ -1,6 +1,16 @@
 # 60 — #125 · A colonless `Meta:` time is read as seconds, inverting the goal badge
 
 > ✅ Done: `0720f77` — 2026-08-03. See BACKLOG.md "Done" for the shipped summary.
+>
+> ⚠️ **PARTIAL — corrected 2026-08-04. This plan closed the BLUR path, not the WRITE path.**
+> Moving the `expandMMSS`-on-blur contract into `MaskedTimeInput` was right and holds, and the one
+> corrupt prod row was repaired. But `GoalInput.jsx:41` persists on **every keystroke**
+> (`onChange={v => put({ min: v })}`), so a value that never receives a blur — the modal closed, the
+> block saved, focus never leaving the field the way this plan's live test made it — is still stored
+> as `min: '14'`. `scripts/audit-text-roundtrip.mjs` found exactly that on a prod row created
+> **2026-08-03, after this shipped** (`goal-kind: 1`), which is what makes it evidence rather than
+> theory. Filed as **BACKLOG #139** with two candidate fixes; 61·A's A2 regression guard was written
+> on this marker's "input closed" wording and inherits the same correction.
 
 ## Context
 
