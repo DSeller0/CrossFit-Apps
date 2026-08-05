@@ -1,1 +1,0 @@
-import{c as e}from"./boxScope-C0MunXGD.js";var t=e(`outline`,`chevron-down`,`ChevronDown`,[[`path`,{d:`M6 9l6 6l6 -6`,key:`svg-0`}]]),n=e(`outline`,`chevron-up`,`ChevronUp`,[[`path`,{d:`M6 15l6 -6l6 6`,key:`svg-0`}]]);export{t as n,n as t};

@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'cone-v7';
+const CACHE_VERSION = 'cone-v8';
 
 // Only precache HTML and manifest. CSS/JS assets (themes.css, cone-client.js,
 // cone-utils.js) are fingerprinted by the Vite build, so their filenames change
@@ -11,9 +11,16 @@ const PRECACHE_URLS = [
   './results.html',
   './athletes.html',
   './timer.html',
+  './tema.html',
   './recover.html',
   './manifest.json',
 ];
+
+// ⚠️ Every URL above must be a page that vite.public.config.js actually BUILDS.
+// cache.addAll rejects ATOMICALLY on a single 404, so one unbuilt entry here stops the
+// service worker installing for every user, on every page — which is why the retired
+// athletes.html stub is still in the repo rather than deleted. Add the build input and
+// the line here in the same change, and bump CACHE_VERSION above so the new list ships.
 
 self.addEventListener('install', event => {
   event.waitUntil(
