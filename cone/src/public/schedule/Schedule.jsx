@@ -20,6 +20,22 @@ import BlockDetail from './BlockDetail.jsx'
 import CheckinSheet from './CheckinSheet.jsx'
 
 // ── Pure helpers ──────────────────────────────────────────────────────────────
+// Shared by the component's own sessionsForDay (state-backed) and load()'s deep-link
+// handling (which has fresh fetch results, not yet committed to state) — one filter,
+// so the two can never disagree about which index a session lands on in the mobile
+// accordion's `expanded` keys.
+function filterDaySessions(daySessions, athId, aths, box) {
+  const all = (daySessions || []).filter(s => s.public !== false && inBoxScope(s, box))
+  if (!athId) return all.filter(s => s.blocks && s.blocks.length)
+  const athName = aths.find(a => a.id === athId)?.name
+  return all
+    .filter(s => {
+      const t = getTargets(s)
+      return t.length === 0 || t.includes(athName)
+    })
+    .filter(s => s.blocks && s.blocks.length)
+}
+
 function autofillRm(sD, aths, athId, gdD) {
   if (!athId) return {}
   const ath = aths.find(a => a.id === athId)
@@ -158,6 +174,21 @@ export default function Schedule() {
     }
   }, [status]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // #89 — land a `?session=` deep link at the top of the page. Desktop's three-pane
+  // layout is height-capped with internal scrolling (Schedule.module.css's
+  // `overflow:hidden` at ≥768px), so it's already in view; this matters for mobile,
+  // where the target day card can be anywhere in the 7-day stack.
+  useEffect(() => {
+    if (status !== 'ok') return
+    const sp = new URLSearchParams(location.search)
+    const pDate = sp.get('date'),
+      pSession = sp.get('session')
+    if (!pDate || !pSession) return
+    const el = document.getElementById(`sess-${pDate}-${pSession}`)
+    if (el) el.scrollIntoView({ block: 'start' })
+    else window.scrollTo(0, 0)
+  }, [status])
+
   // Load class_execution for check-in flow
   useEffect(() => {
     if (!checkinId) return
@@ -248,6 +279,7 @@ export default function Schedule() {
       const pAthlete = sp.get('athlete'),
         pPrefill = sp.get('prefill'),
         pPrefillRounds = sp.get('prefillRounds')
+      const pSession = sp.get('session')
 
       const curAth = lockedId || localStorage.getItem('cone_athlete_filter') || ''
       let athId = curAth
@@ -262,6 +294,18 @@ export default function Schedule() {
           setSelAth(a.id)
           localStorage.setItem('cone_athlete_filter', a.id)
         }
+      }
+
+      // #89 — a deep link from the index's "Ver na agenda" button. Sets both the
+      // desktop pane (selSess) and the mobile accordion (expanded), so whichever
+      // layout is visible at the current viewport shows the session open — and,
+      // by setting selSess before status flips to 'ok', suppresses the
+      // today-autoselect effect below (its `!selSess` guard sees it already set).
+      if (pDate && pSession) {
+        setSelSess({ dateKey: pDate, sessId: pSession })
+        const daySess = filterDaySessions(sD[pDate], athId, aD, box)
+        const si = daySess.findIndex(s => s.id === pSession)
+        if (si >= 0) setExpanded(new Set([`${pDate}|${si}`]))
       }
 
       const newAuto = autofillRm(sD, aD, athId, gdD)
@@ -306,15 +350,7 @@ export default function Schedule() {
   }
 
   function sessionsForDay(dateKey) {
-    const all = (sessions[dateKey] || []).filter(s => s.public !== false && inBoxScope(s, box))
-    if (!selAth) return all.filter(s => s.blocks && s.blocks.length)
-    const athName = athletes.find(a => a.id === selAth)?.name
-    return all
-      .filter(s => {
-        const t = getTargets(s)
-        return t.length === 0 || t.includes(athName)
-      })
-      .filter(s => s.blocks && s.blocks.length)
+    return filterDaySessions(sessions[dateKey], selAth, athletes, box)
   }
 
   function isWodLogged(sess, bl) {
@@ -907,7 +943,7 @@ export default function Schedule() {
                                     )
                                   : null
                               return (
-                                <div key={sess.id}>
+                                <div key={sess.id} id={`sess-${dk}-${sess.id}`}>
                                   <div
                                     className={styles.sessSummary}
                                     role="button"

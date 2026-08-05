@@ -5,13 +5,14 @@ import {
   BoxWarnings,
   MobileWarning,
 } from '../../index/rail.jsx'
-import { getWeek, toISO } from '../../lib/week.js'
+import { toISO } from '../../lib/week.js'
 import { Case, Section } from '../harness.jsx'
-import { NOOP } from '../fixtures.js'
+import { NOOP, FIXED_WEEK } from '../fixtures.js'
 
 // ── Mock fixtures — index/ pieces (#53) ──
-// Sessions on Mon–Fri of the current week so WeekGrid shows names/dots; today is whatever it is.
-const idxWeek = getWeek(0)
+// Sessions on Mon–Fri of a fixed week (#114 — not `getWeek(0)`/`new Date()`, which
+// drifted this card's day numbers and "hoje" highlight every day).
+const idxWeek = FIXED_WEEK
 const idxNames = ['', 'Treino A', 'Treino B', 'Treino C', 'Treino A', 'Treino A', '']
 const idxSessions = Object.fromEntries(
   [1, 2, 3, 4, 5].map(i => [
@@ -19,7 +20,9 @@ const idxSessions = Object.fromEntries(
     [{ id: 's' + i, public: true, sessionName: idxNames[i] }],
   ]),
 )
-const idxToday = toISO(idxWeek[new Date().getDay()])
+// Wednesday, fixed — passed to WeekGrid's `today` override below too, so the "hoje"
+// dot lands on the same day forever instead of tracking the real weekday (#114).
+const idxToday = toISO(idxWeek[3])
 // The same week as the COACH sees it in the Criador's day strip: a second session
 // on Wednesday (the count badge) and a hidden one on Saturday (which his filter
 // keeps and the public one drops).
@@ -103,13 +106,22 @@ export default {
           sub="src/public/index/rail.jsx — grade da semana (começa no Dom), largura toda; cada dia mostra o nome da sessão (ou Descanso). Clicar seleciona o dia; hoje/selecionado em teal. Também é a tira de dias do Criador: dates/filter/showCount são props justamente por isso — o coach navega outras semanas, enxerga sessões ocultas e tem mais de uma sessão por dia."
         >
           <Case label="Semana atual (hoje selecionado)">
-            <WeekGrid sessions={idxSessions} box={null} selectedDate={idxToday} onSelect={NOOP} />
+            <WeekGrid
+              sessions={idxSessions}
+              box={null}
+              selectedDate={idxToday}
+              today={idxToday}
+              dates={idxWeek}
+              onSelect={NOOP}
+            />
           </Case>
           <Case label="showCount — uso do Criador (filtro do coach, sessões ocultas incluídas)">
             <WeekGrid
               sessions={idxSessionsCoach}
               box={null}
               selectedDate={idxToday}
+              today={idxToday}
+              dates={idxWeek}
               onSelect={NOOP}
               filter={() => true}
               showCount

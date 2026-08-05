@@ -6,9 +6,9 @@ import { GoalInput } from '../../../components/tabs/criador/GoalInput.jsx'
 import { SessionMetaModal } from '../../../components/tabs/criador/SessionMetaModal.jsx'
 import { ParseWarnings } from '../../../components/tabs/criador/ParseWarnings.jsx'
 import { parseSession } from '../../../components/tabs/criador/textFormat.js'
-import { getWeek, toISO } from '../../lib/week.js'
+import { toISO } from '../../lib/week.js'
 import { Case, Section, TallModalBox } from '../harness.jsx'
-import { NOOP } from '../fixtures.js'
+import { NOOP, FIXED_WEEK } from '../fixtures.js'
 
 // ── Criador text-mode fixtures (#92) ──────────────────────────────────────────
 // The blocks are the PARSER'S OWN OUTPUT for the real coach file (Monday), not a
@@ -124,7 +124,9 @@ const txtLockedBlocks = [
   },
   txtMondayBlocks[3],
 ]
-const txtWeekDates = getWeek(0)
+// #114 — fixed, not getWeek(0)/`new Date()` (WeekImportModal has no clock of its own;
+// it only ever renders whatever week it's handed).
+const txtWeekDates = FIXED_WEEK
 const txtBoxLocs = [
   { id: 'b1', name: 'Eagles', color: '#4ac8c0' },
   { id: 'b2', name: 'Garra', color: '#e87820' },

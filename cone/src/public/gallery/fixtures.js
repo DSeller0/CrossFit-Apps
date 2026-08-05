@@ -1,6 +1,22 @@
 import { blkColor } from '../lib/wod.js'
 import { THEMES as REAL_THEMES } from '../lib/theme.js'
 
+// #114 — a Sunday-start week of real Date objects, built from a fixed calendar date
+// rather than `new Date()`. `getWeek(0)` (lib/week.js) always reads the wall clock with
+// no way to pin it, so any group that fed it straight into a fixture (index.jsx,
+// criador.jsx) produced a `design:cards` diff every day. Shared here so both groups
+// derive the same week instead of each hand-rolling its own fixed date.
+function weekFrom(refDate) {
+  const sun = new Date(refDate)
+  sun.setDate(refDate.getDate() - refDate.getDay())
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(sun)
+    d.setDate(sun.getDate() + i)
+    return d
+  })
+}
+export const FIXED_WEEK = weekFrom(new Date(2026, 0, 7))
+
 // ── Component gallery (dev-only) — shared mock fixtures ────────────────────────
 // Pure data, no JSX: the state matrix every group's Case fixtures draw from.
 // See Gallery.jsx for the gallery shell and cone/docs/WORKFLOW.md → "Design /

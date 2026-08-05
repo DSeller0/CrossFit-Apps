@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { loadAthletes, loadSettings, loadLocations, loadCoach, toISO } from '../../../utils/storage'
-import { buildPixPayload } from '../../../utils/pix'
+import { buildPixPayload, pixClean } from '../../../utils/pix'
 import { MONTH_PT } from '../../../public/lib/week.js'
 import { sessName } from '../../../public/lib/sessions.js'
-import { pixClean } from './exportHelpers'
 
 // ── EventFormInner — standalone so inputs don't lose focus ───────────────────
 export function EventFormInner({ showForm, sessions, athletes, initialData, onSave, onCancel }) {
@@ -648,8 +647,11 @@ export function ReportModal({ events, sessions, onClose }) {
   function calcTotal(evs, loc) {
     if (!loc || !loc.rate) return null
     const total = evs.reduce((sum, ev) => {
-      const hrs =
-        loc.rateUnit === 'per_hour' ? Math.max(1, Math.floor((ev.durationMin || 60) / 60)) : 1
+      // #104(a) — fractional hours, not Math.floor: a 90-minute per_hour class billed as
+      // one hour flat (fmtDur two lines up already prints "1h30min" for the same event,
+      // so the PDF disagreed with itself about how long the class was). Math.max(1, …)
+      // is kept — a session under an hour still bills a minimum of one.
+      const hrs = loc.rateUnit === 'per_hour' ? Math.max(1, (ev.durationMin || 60) / 60) : 1
       return sum + (loc.rateUnit === 'per_hour' ? hrs * loc.rate : loc.rate)
     }, 0)
     return { total, currency: loc.currency || 'R$' }
@@ -710,8 +712,10 @@ export function ReportModal({ events, sessions, onClose }) {
         doc.text('Relatório — ' + period, 14, y)
         y += 8
         const summaryRows = []
-        let grandTotal = 0
-        let grandCurrency = 'R$'
+        // #104(b) — per-currency subtotals, not one grand total: two locations with
+        // different `currency` strings used to sum into a single meaningless number
+        // (grandCurrency was just whichever group happened to run last).
+        const grandTotals = {}
         Object.entries(groups).forEach(([locId, levs]) => {
           const loc = locations.find(l => l.id === locId)
           const athGroupId2 = locId.startsWith('__ath__') ? locId.slice(7) : null
@@ -731,8 +735,7 @@ export function ReportModal({ events, sessions, onClose }) {
             : loc
           const t = calcTotal(levs, locForCalc)
           if (t) {
-            grandTotal += t.total
-            grandCurrency = t.currency
+            grandTotals[t.currency] = (grandTotals[t.currency] || 0) + t.total
           }
           summaryRows.push([
             name,
@@ -742,14 +745,18 @@ export function ReportModal({ events, sessions, onClose }) {
             t ? t.currency + ' ' + t.total.toLocaleString('pt-BR') : '-',
           ])
         })
+        // One row per currency actually seen (almost always just one) rather than a
+        // single combined figure, so a report spanning R$ and, say, US$ locations never
+        // prints a total that silently added the two together.
+        const grandCurrencies = Object.keys(grandTotals).filter(c => grandTotals[c] > 0)
+        const grandLabel = grandCurrencies
+          .map(c => `${c} ${grandTotals[c].toLocaleString('pt-BR')}`)
+          .join(' + ')
         autoTable(doc, {
           startY: y,
           head: [['Local', 'Tipo', 'Sessões', 'Tempo Total', 'Valor']],
           body: summaryRows,
-          foot:
-            showRate && grandTotal > 0
-              ? [['', '', '', 'Total', grandCurrency + ' ' + grandTotal.toLocaleString('pt-BR')]]
-              : [],
+          foot: showRate && grandCurrencies.length > 0 ? [['', '', '', 'Total', grandLabel]] : [],
           styles: { fontSize: 9, cellPadding: 3 },
           headStyles: { fillColor: [30, 30, 30], textColor: 255, fontStyle: 'bold' },
           footStyles: { fillColor: [245, 245, 245], fontStyle: 'bold' },

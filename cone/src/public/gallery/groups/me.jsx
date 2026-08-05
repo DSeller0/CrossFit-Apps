@@ -288,6 +288,7 @@ function MeSheetHarness() {
       <BodySheet
         open={open === 'body'}
         onClose={() => setOpen(null)}
+        date="2026-07-12"
         athlete={{ bodyMetrics: [{ date: '2026-06-01', weight: 72, height: 168, bodyFat: 19 }] }}
         weight=""
         height=""

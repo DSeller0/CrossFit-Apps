@@ -225,9 +225,17 @@ export default function Results() {
     if (urlSid && expanded.has(urlSid)) {
       didUrlScroll.current = true
       requestAnimationFrame(() => {
-        document
-          .querySelector(`[data-card-id="${urlSid}"]`)
-          ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        const el = document.querySelector(`[data-card-id="${urlSid}"]`)
+        if (!el) return
+        // `block: 'start'` (not 'nearest') so the card actually lands at the top of
+        // the viewport instead of merely "close enough" — but the sticky Header
+        // (Header.module.css, `position:sticky; top:0`) would then cover it, so the
+        // scroll target needs its own scroll-margin-top matching the header's live
+        // rendered height (measured, not hardcoded — it differs at the ≥768px
+        // breakpoint where brand/sub font sizes step up).
+        const header = document.querySelector('header')
+        if (header) el.style.scrollMarginTop = `${header.getBoundingClientRect().height + 8}px`
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       })
     }
   }, [expanded, status])

@@ -1,4 +1,4 @@
-import { fmtDateShort } from '../lib/week.js'
+import { fmtDateShort, todayISO } from '../lib/week.js'
 import Sheet from './Sheet.jsx'
 import styles from './Me.module.css'
 
@@ -20,6 +20,10 @@ export default function BodySheet({
   onBodyFat,
   onNote,
   onSave,
+  // #114 — overridable so a fixed-date fixture (the gallery, design:cards) doesn't
+  // render a different header every day; also drops the ad-hoc
+  // `new Date().toISOString().slice(0,10)` that was reimplementing todayISO().
+  date = todayISO(),
 }) {
   const bm = athlete?.bodyMetrics || []
   const prev = bm.length ? bm[bm.length - 1] : null
@@ -38,9 +42,7 @@ export default function BodySheet({
         <h2 className={styles.lsExName} id="bodySheetTitle">
           Corpo
         </h2>
-        <span className={styles.lsHdrDate}>
-          {fmtDateShort(new Date().toISOString().slice(0, 10))}
-        </span>
+        <span className={styles.lsHdrDate}>{fmtDateShort(date)}</span>
       </div>
 
       <div className={styles.lsBody}>

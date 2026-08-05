@@ -34,8 +34,11 @@ export function WeekGrid({
   dates,
   filter,
   showCount = false,
+  // #114 — an explicit override so a fixed-date fixture (the gallery, design:cards)
+  // can pin which day is "hoje" instead of it silently tracking the wall clock.
+  // Production callers never pass it, so this default preserves today's behavior.
+  today = todayISO(),
 }) {
-  const today = todayISO()
   const keep = filter || publicFilter(box)
   const days = (dates || getWeek(0)).map(d => {
     const key = toISO(d)
@@ -70,12 +73,14 @@ export function WeekGrid({
   )
 }
 
-// Title for the selected day, e.g. "SEXTA, 18 — HOJE".
-export function dayTitle(dateKey) {
+// Title for the selected day, e.g. "SEXTA, 18 — HOJE". `today` is overridable for the
+// same reason as WeekGrid's own prop above (#114) — Index.jsx's one call site doesn't
+// pass it, so this default preserves the real-clock behavior there.
+export function dayTitle(dateKey, today = todayISO()) {
   const [y, m, d] = dateKey.split('-').map(Number)
   const dt = new Date(y, m - 1, d)
   const name = DAY_PT_FULL[dt.getDay()].replace('-feira', '')
-  return `${name}, ${d}${dateKey === todayISO() ? ' — Hoje' : ''}`
+  return `${name}, ${d}${dateKey === today ? ' — Hoje' : ''}`
 }
 
 // ── DaySessionCard ──────────────────────────────────────────────────────────
@@ -92,7 +97,7 @@ export function DaySessionCard({ sess, tag, count, isFuture, box }) {
   const blocks = sess.blocks || []
   const qs = box ? `&box=${encodeURIComponent(box)}` : ''
   const agendaUrl = `schedule.html?date=${sess._dk || ''}&session=${encodeURIComponent(sess.id)}${qs}`
-  const regUrl = `results.html?session=${encodeURIComponent(sess.id)}`
+  const regUrl = `results.html?date=${sess._dk || ''}&session=${encodeURIComponent(sess.id)}${qs}`
   const countLbl =
     count === 0 ? 'Seja o primeiro' : count === 1 ? '1 resultado' : `${count} resultados`
 

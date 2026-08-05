@@ -9,7 +9,9 @@ function crc16Pix(str) {
   return (crc & 0xffff).toString(16).toUpperCase().padStart(4, '0')
 }
 
-const pixClean = s =>
+// #104(d) - the one copy. Was duplicated byte-identical in publicador/exportHelpers.js;
+// events.jsx now imports it from here directly instead of via that second copy.
+export const pixClean = s =>
   (s || '')
     .normalize('NFD')
     .replace(/[\u0300-\u036F]/g, '')

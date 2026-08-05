@@ -47,9 +47,9 @@ function ringProg(e, cap, bt) {
 function ringCol(e, cap, bt) {
   const countdown = bt === 'AMRAP' || bt === 'EMOM'
   const rem = countdown ? ringProg(e, cap, bt) : cap ? (cap - e) / cap : 1
-  if (rem > 0.5) return '#48b860'
-  if (rem > 0.2) return '#d8a840'
-  return '#c84038'
+  if (rem > 0.5) return 'var(--green)'
+  if (rem > 0.2) return 'var(--gold)'
+  return 'var(--red)'
 }
 function fmt(sec) {
   return fmtSecs(Math.max(0, Math.floor(sec)))
@@ -275,6 +275,11 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
       ? (block.stations || []).flatMap(st => st.exercises || [])
       : block.exercises || []
     : []
+  // #97 — this default (not the `blkColor(block)` branch) is the one case with no
+  // block to color at all. `#d8a840` is FAMILY_COLOR's own fallback (wod.js) for an
+  // unmatched type — a data color, deliberately identical across all 4 themes like
+  // the rest of the block-family palette, so it stays a literal rather than becoming
+  // a themes.css token.
   const bColor = block ? blkColor(block) : '#d8a840'
   const bLabel = block ? blkLabel(block) : bt
   const bMeta = block ? blkMeta(block) : ''
@@ -306,7 +311,13 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
 
   const e = elapsed
   const prog = isResting ? restProg : ringProg(e, cap, bt)
-  const col = isResting ? '#4878d8' : ringCol(e, cap, bt)
+  // #97 — "resting between blocks" is a 4th ring state with no themes.css token of its
+  // own (unlike green/gold/red, which ARE per-theme-tuned). It reuses the exact literal
+  // wod.js's FAMILY_COLOR.blue uses for the Força/LPO/Core/Acessórios block family — a
+  // data color, deliberately the SAME in every theme rather than palette-tuned — so
+  // it's a local custom property (TV.module.css's `.timerSlide { --rest-blue }`)
+  // instead of a new global design token.
+  const col = isResting ? 'var(--rest-blue)' : ringCol(e, cap, bt)
   const dashOff = RING_C * (1 - prog)
   const isFinished = !isResting && bt !== 'EMOM' && e >= cap
   const remaining = cap - e
@@ -346,21 +357,26 @@ export function TimerSlide({ tv, sessions, classExecs, athletes }) {
               style={{ stroke: 'var(--stone2, #1e1a16)' }}
               strokeWidth={12}
             />
+            {/* Progress ring: same #85 method as the track above — `stroke` set via the
+                CSS property, not the SVG attribute, so it can carry a var() and follow
+                the active theme instead of freezing to whatever was hardcoded (#97). */}
             <circle
               cx={130}
               cy={130}
               r={RING_R}
               fill="none"
-              stroke={isFinished ? '#c84038' : col}
               strokeWidth={12}
               strokeDasharray={RING_C}
               strokeDashoffset={isFinished ? 0 : dashOff}
               strokeLinecap="round"
               transform="rotate(-90 130 130)"
-              style={{ transition: 'stroke-dashoffset .25s linear, stroke .3s' }}
+              style={{
+                stroke: isFinished ? 'var(--red)' : col,
+                transition: 'stroke-dashoffset .25s linear, stroke .3s',
+              }}
             />
           </svg>
-          <div className={s.ringClock} style={{ color: isFinished ? '#c84038' : col }}>
+          <div className={s.ringClock} style={{ color: isFinished ? 'var(--red)' : col }}>
             {isFinished ? 'TIME!' : fmt(displaySecs)}
           </div>
           {showCountdown && <div className={s.countdownPill}>{Math.ceil(remaining)}</div>}
