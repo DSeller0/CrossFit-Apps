@@ -7,6 +7,7 @@ import { benchmarkToTimerExes } from '../lib/benchmarks.js'
 import { fmtSecs, isTimeBlock, MODE_LBL, maskMMSS } from '../lib/wod.js'
 import { fmtDate } from '../lib/week.js'
 import { getBoxScope } from '../lib/boxScope.js'
+import { syncTheme } from '../lib/theme.js'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const K_CFG = 'timer_config',
@@ -159,17 +160,20 @@ export default function Timer() {
   // "Latest ref" pattern: tick function always reads newest version
   const tickFnRef = useRef(null)
 
-  // ── Gym name ─────────────────────────────────────────────────────────────
+  // ── Gym name + theme ─────────────────────────────────────────────────────
   useEffect(() => {
     sb.from('settings')
       .select('value')
       .eq('id', 1)
       .maybeSingle()
       .then(({ data }) => {
-        if (data?.value?.gymName) setGymName(data.value.gymName)
+        const st = data?.value || {}
+        // Per-box theme (#143) — the box default applies unless the visitor picked their own.
+        syncTheme(st, box)
+        if (st.gymName) setGymName(st.gymName)
       })
       .catch(() => {})
-  }, [])
+  }, [box])
 
   // ── Computed helpers ─────────────────────────────────────────────────────
   function capSecs(c) {

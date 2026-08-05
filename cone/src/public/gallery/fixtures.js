@@ -1,16 +1,15 @@
 import { blkColor } from '../lib/wod.js'
+import { THEMES as REAL_THEMES } from '../lib/theme.js'
 
 // ── Component gallery (dev-only) — shared mock fixtures ────────────────────────
 // Pure data, no JSX: the state matrix every group's Case fixtures draw from.
 // See Gallery.jsx for the gallery shell and cone/docs/WORKFLOW.md → "Design /
 // component gallery" for the coverage standard + process.
 
-export const THEMES = [
-  { v: 'totk-dark', label: 'TotK Dark' },
-  { v: 'totk-light', label: 'TotK Light' },
-  { v: 'spirit-blossom', label: 'Spirit Blossom' },
-  { v: 'spirit-blossom-light', label: 'Spirit Blossom Light' },
-]
+// Derived from the canonical list (public/lib/theme.js) since #143 — this was a fourth
+// hand-maintained copy, and it had already drifted ("Spirit Blossom" vs "Spirit Blossom
+// Dark"). Only the key name differs: the gallery's <select> is written against `v`.
+export const THEMES = REAL_THEMES.map(t => ({ v: t.id, label: t.label }))
 
 // Family (data) colors come from the real blkColor(), not theme tokens.
 export const AMBER = blkColor({ type: 'For Time' })

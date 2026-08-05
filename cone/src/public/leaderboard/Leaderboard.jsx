@@ -13,6 +13,7 @@ import { isWodBlock, deriveScale, rankResults, perfStr } from '../lib/wod.js'
 import { MONTH_PT_SHORT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
 import { mapResultRow } from '../lib/blobTables.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
+import { syncTheme } from '../lib/theme.js'
 import { normalizeSessionIds } from '../lib/sessions.js'
 
 // The lb_colors custom-color system is retired (#51). It predated the 4-theme
@@ -135,6 +136,8 @@ export default function Leaderboard() {
   async function load(attempt = 0) {
     try {
       const stateData = await fetchState()
+      // Per-box theme (#143) — the box default applies unless the visitor picked their own.
+      syncTheme(stateData.settings, box)
       setAppState(stateData)
       setStatus('ok')
     } catch (err) {

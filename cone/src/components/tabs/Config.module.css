@@ -21,7 +21,20 @@
 .saveRow{ display:flex; align-items:center; gap:14px }
 .flash{ font-size:12px; color:var(--accent) }
 
+.hint{ font-size:11px; color:var(--muted); line-height:1.5; margin:-6px 0 0 }
+
 .themeGrid{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
+
+/* Per-box theme rows (#143). A label + a native select — Config has no Select primitive
+   in ui/ and one row per box doesn't justify inventing one. */
+.themeRow{ display:flex; align-items:center; gap:12px; justify-content:space-between }
+.themeRowLbl{ font-size:12px; font-weight:600; color:var(--sub); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.themeSel{
+  background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm);
+  color:var(--cream); font-family:inherit; font-size:12px; padding:7px 9px;
+  cursor:pointer; outline:none; flex-shrink:0; max-width:60%;
+}
+.themeSel:focus-visible{ border-color:var(--accent); outline:2px solid var(--accent); outline-offset:1px }
 .themeBtn{
   display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--bg);
   border:1px solid var(--divider); border-radius:var(--radius-md); color:var(--sub);

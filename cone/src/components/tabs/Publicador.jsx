@@ -135,8 +135,28 @@ function SchedulePublisher({ sessions }) {
   useEffect(() => {
     APP_CONFIG.mobileExerciseNoteColor = noteColor
   }, [noteColor])
+  // #142 — this effect had TWO defects, and both had to go.
+  //
+  // (1) It listed only its own 45 export-styling keys and `saveSettings` (storage.js) is a
+  // BLIND OVERWRITE, not a merge — so every key Publicador doesn't know about was deleted
+  // from the blob: `gymSub`, `logo`, `boxWarnings` (#53, a shipped feature), `customBenchmarks`
+  // and `theme`. Every other caller compensates by read-merging at the call site (Config.jsx,
+  // useBoxWarnings.js, BlockEditor.jsx, App.jsx, LeaderboardView.jsx) — this one didn't.
+  // Fixed with the same `...loadSettings()` spread they use. ⚠️ Do NOT "fix" this by making
+  // saveSettings merge: that would make deleting a key impossible for every caller.
+  //
+  // (2) It is seeded from loadSettings() and therefore FIRED ON MOUNT, so merely opening the
+  // tab re-upserted the whole blob and stamped a fresh updated_at for nothing — the #109/#111
+  // read-path-never-writes class. The ref guard skips that first run, same shape as
+  // SyncContext's and CoachProfileForm's.
+  const settingsMounted = useRef(false)
   useEffect(() => {
+    if (!settingsMounted.current) {
+      settingsMounted.current = true
+      return
+    }
     saveSettings({
+      ...loadSettings(),
       fontScale,
       zoneScales,
       blockTitleScales,

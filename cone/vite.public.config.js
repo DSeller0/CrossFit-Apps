@@ -30,6 +30,7 @@ export default defineConfig({
         leaderboard: resolve(root, 'leaderboard.html'),
         athletes: resolve(root, 'athletes.html'),
         timer: resolve(root, 'timer.html'),
+        tema: resolve(root, 'tema.html'),
         recover: resolve(root, 'recover.html'),
         tv: resolve(root, 'tv.html'),
       },

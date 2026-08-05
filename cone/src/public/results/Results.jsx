@@ -18,6 +18,7 @@ import {
 } from '../lib/wod.js'
 import { onKey } from '../schedule/scheduleHelpers.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
+import { syncTheme } from '../lib/theme.js'
 import { normalizeSessionIds } from '../lib/sessions.js'
 import { mergeBlockEntry } from '../lib/resultEntry.js'
 import RankList from '../shared/RankList.jsx'
@@ -151,6 +152,8 @@ export default function Results() {
         loggedByAthlete: r.logged_by_athlete,
       }))
       const stD = stR.data?.value || {}
+      // Per-box theme (#143) — the box default applies unless the visitor picked their own.
+      syncTheme(stD, box)
       setSessions(sD)
       setAthletes(aD)
       setResults(rD)

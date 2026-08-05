@@ -7,6 +7,7 @@ import {
   IconCalendar,
   IconClock,
   IconSettings,
+  IconPalette,
 } from '@tabler/icons-react'
 import s from './Nav.module.css'
 
@@ -88,6 +89,10 @@ export default function Nav({ active, lockedId, gymName = '', box = null }) {
 
   const timerTab = TABS.find(t => t.key === 'timer')
   const coachTab = { href: 'cone/', lockable: false }
+  // Tema is a real public page, not a link into the SPA like Coach — but it is not a TABS
+  // entry either: the main tab row is the five content pages, and this belongs with the
+  // overflow set (#143).
+  const temaTab = { href: 'tema.html', lockable: false }
 
   return (
     <>
@@ -101,6 +106,10 @@ export default function Nav({ active, lockedId, gymName = '', box = null }) {
           <a className={s.ovTile} href={hrefFor(timerTab)}>
             <IconClock className={s.ovIc} />
             <span className={s.ovLbl}>Timer</span>
+          </a>
+          <a className={s.ovTile} href={hrefFor(temaTab)}>
+            <IconPalette className={s.ovIc} />
+            <span className={s.ovLbl}>Tema</span>
           </a>
           <a className={s.ovTile} href={hrefFor(coachTab)}>
             <IconSettings className={s.ovIc} />
@@ -145,6 +154,13 @@ export default function Nav({ active, lockedId, gymName = '', box = null }) {
             a security boundary, only tidiness that used to misfire whenever lockedId
             was set by ordinary in-page athlete selection (not just a shared-link lock). */}
         <div className={s.sideExtra}>
+          <div className={s.sep} />
+          {/* Tema needs a home here too — the overflow sheet that carries it on mobile is
+              display:none at ≥768px, so without this desktop has no way to reach the page. */}
+          <a className={s.btn} href={hrefFor(temaTab)}>
+            <IconPalette className={s.ic} />
+            <span>Tema</span>
+          </a>
           <div className={s.sep} />
           <a className={s.btn} href={hrefFor(coachTab)}>
             <IconSettings className={s.ic} />

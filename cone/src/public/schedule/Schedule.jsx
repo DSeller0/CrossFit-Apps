@@ -9,6 +9,7 @@ import { buildRegistryIndex } from '../lib/registry.js'
 import { getTargets, sessName, normalizeSessionIds } from '../lib/sessions.js'
 import { prBest } from '../lib/goals.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
+import { syncTheme } from '../lib/theme.js'
 import { mergeBlockEntry, clearAthleteKeys } from '../lib/resultEntry.js'
 import { isRoundBlock, progGroups, parseDurMins, onKey } from './scheduleHelpers.js'
 import DemoPanel from './DemoPanel.jsx'
@@ -215,6 +216,9 @@ export default function Schedule() {
       const stD = stR.data?.value || {},
         gdD = gdR.data?.value || { athleteGoals: {}, prs: {} }
       const erD = erR.data?.value || {}
+
+      // Per-box theme (#143) — the box default applies unless the visitor picked their own.
+      syncTheme(stD, box)
 
       // config.json: functional keys only. Its wk*/theme* color overrides used to be
       // written onto documentElement here — removed (#50): they fought themes.css and

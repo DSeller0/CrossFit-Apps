@@ -1,0 +1,108 @@
+/* ── Page root ── mirrors Results.module.css's shell (sidebar offset at ≥768px) ── */
+.pageRoot { padding-bottom: 70px; }
+@media (min-width: 768px) {
+  .pageRoot { margin-left: 220px; display: flex; flex-direction: column; min-height: 100vh; padding-bottom: 0; }
+}
+.main { padding: 20px 16px 32px; max-width: 720px; margin: 0 auto; width: 100%; }
+
+.lead {
+  font-size: 13px;
+  color: var(--sub);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+/* One card per row on a phone, two once there is room. The preview is the point of the
+   card, so it needs width — a 4-up row would make each one unreadable. */
+.grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 560px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--stone);
+  /* --border, not --divider: this is a control, and plans/65 made those two genuinely
+     different values. */
+  border: 1px solid var(--border);
+  color: var(--sub);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.card:hover { border-color: var(--sub); color: var(--cream); }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.card.active { border-color: var(--accent); color: var(--cream); }
+
+.cardName { flex: 1; min-width: 0; }
+.cardTag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── Theme previews ───────────────────────────────────────────────────────────
+   ⚠️ FIXED HEX ON PURPOSE — themes.css scopes every palette to `html.theme-*`, so a
+   preview nested in the page cannot inherit the theme it is previewing, and all four have
+   to render at once on a page that is only one of them. These are identity colors (they
+   must look the same whatever theme is active), the same recorded exemption
+   Config.module.css's `.swatchTotkDark` set already uses. Values mirror themes.css's
+   --bg / --gold / --cream / --sub / --accent per theme — update by hand if a palette moves. */
+.preview {
+  width: 64px;
+  height: 46px;
+  flex-shrink: 0;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--pv-bg);
+  border: 1px solid var(--pv-line);
+  position: relative;
+}
+.pvBar { height: 3px; width: 70%; background: var(--pv-gold); }
+.pvRow { height: 3px; width: 100%; background: var(--pv-text); opacity: .85; }
+.pvRowShort { width: 60%; opacity: .5; }
+.pvAccent { position: absolute; right: 6px; bottom: 6px; width: 10px; height: 10px; background: var(--pv-accent); }
+
+.pvTotkDark  { --pv-bg:#0d0b09; --pv-line:#4a3e30; --pv-gold:#d8a840; --pv-text:#f0e8d0; --pv-accent:#4ac8c0; }
+.pvTotkLight { --pv-bg:#ede8dc; --pv-line:#b09878; --pv-gold:#9a6c14; --pv-text:#1c1508; --pv-accent:#1c6860; }
+.pvSbDark    { --pv-bg:#09070f; --pv-line:#4a3060; --pv-gold:#e05490; --pv-text:#ede4f8; --pv-accent:#38c4d0; }
+.pvSbLight   { --pv-bg:#f4eefb; --pv-line:#c4a8d8; --pv-gold:#c83070; --pv-text:#1a0828; --pv-accent:#0f727e; }
+
+/* ── Reset row ── */
+.resetRow {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.resetBtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--sub);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.resetBtn:hover { border-color: var(--teal); color: var(--teal); }
+.resetBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.resetHint { font-size: 11px; color: var(--muted); }
+
+.note {
+  margin-top: 22px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}

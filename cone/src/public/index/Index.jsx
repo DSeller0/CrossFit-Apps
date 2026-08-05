@@ -6,6 +6,7 @@ import s from './Index.module.css'
 import { blkLabel, isWodBlock, rankResults, perfStr, blkMeta } from '../lib/wod.js'
 import { getWeek, toISO, todayISO } from '../lib/week.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
+import { syncTheme } from '../lib/theme.js'
 import { normalizeSessionIds } from '../lib/sessions.js'
 import { mapResultRow } from '../lib/blobTables.js'
 import {
@@ -48,17 +49,10 @@ export default function Index() {
       const settings = settRes.data?.value || {}
       const allAthletes = athRes.data?.value || []
 
-      // Theme sync from Supabase
-      if (settings.theme) {
-        const cur = localStorage.getItem('cone_theme')
-        if (cur !== settings.theme) {
-          localStorage.setItem('cone_theme', settings.theme)
-          document.documentElement.className =
-            document.documentElement.className.replace(/\btheme-\S+/g, '').trim() +
-            ' theme-' +
-            settings.theme
-        }
-      }
+      // Theme sync (#143). This was 10 lines of inline localStorage + a regex rewrite of
+      // documentElement.className, and it was the ONLY page doing it — now it is the shared
+      // resolver, and the box scope makes it per-box rather than gym-wide.
+      syncTheme(settings, box)
 
       // Results for every in-scope session in the visible week (one query) — feeds both
       // the ranking and the per-session counts.

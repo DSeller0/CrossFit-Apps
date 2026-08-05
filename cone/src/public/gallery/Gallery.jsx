@@ -9,6 +9,7 @@ import leaderboard from './groups/leaderboard.jsx'
 import me from './groups/me.jsx'
 import schedule from './groups/schedule.jsx'
 import index from './groups/index.jsx'
+import tema from './groups/tema.jsx'
 import s from './Gallery.module.css'
 
 // ── Component gallery (dev-only) ───────────────────────────────────────────────
@@ -25,7 +26,7 @@ import s from './Gallery.module.css'
 
 // Exported for scripts/design-cards-entry.jsx: `npm run design:cards` SSRs these same
 // items into the Claude Design cards, so the cards cannot drift from the gallery.
-export const GROUPS = [spa, criador, shared, results, leaderboard, me, schedule, index]
+export const GROUPS = [spa, criador, shared, results, leaderboard, me, schedule, index, tema]
 
 const ALL_ITEMS = GROUPS.flatMap(g => g.items)
 
