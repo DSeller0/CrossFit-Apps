@@ -152,6 +152,9 @@ export default function Schedule() {
   // raced on the roster read); the ref lets exactly 1. `submitLog`'s #50 guard has the same
   // hole, left alone here as pre-existing and out of #71's scope.
   const checkinBusyRef = useRef(false)
+  // #147 — the one pinned block (header + the two mobile bars). Measured, not assumed:
+  // its height varies with `lockedId`, which decides whether `.selBar` renders at all.
+  const stickyHeadRef = useRef(null)
 
   const [lockedId] = useState(() => new URLSearchParams(location.search).get('id') || '')
   const [box] = useState(() => getBoxScope())
@@ -199,15 +202,30 @@ export default function Schedule() {
   // layout is height-capped with internal scrolling (Schedule.module.css's
   // `overflow:hidden` at ≥768px), so it's already in view; this matters for mobile,
   // where the target day card can be anywhere in the 7-day stack.
+  //
+  // #147 — `block:'start'` alone puts the card at y=0, i.e. entirely underneath the pinned
+  // header (measured: 193px of chrome, so the session's name, date and first block were all
+  // off-screen). It needs a `scroll-margin-top`, and that offset is MEASURED rather than
+  // written down: `.selBar` renders only when `!lockedId`, so the pinned block's height is
+  // 193px or 141px depending on the link. Reading `.stickyHead`'s own height covers both and
+  // survives any padding change. `Results.jsx:222-226` does the same thing against its single
+  // `<header>`; if #144 ever promotes a shared sticky-offset token to the public pages, both
+  // call sites collapse onto it — do not hardcode a literal here in the meantime.
   useEffect(() => {
     if (status !== 'ok') return
     const sp = new URLSearchParams(location.search)
     const pDate = sp.get('date'),
       pSession = sp.get('session')
     if (!pDate || !pSession) return
-    const el = document.getElementById(`sess-${pDate}-${pSession}`)
-    if (el) el.scrollIntoView({ block: 'start' })
-    else window.scrollTo(0, 0)
+    // rAF so the week jump and the accordion state set in load() have laid out before the
+    // measurement — the same reason Results.jsx defers its scroll a frame.
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`sess-${pDate}-${pSession}`)
+      if (!el) return window.scrollTo(0, 0)
+      const head = stickyHeadRef.current
+      if (head) el.style.scrollMarginTop = `${head.getBoundingClientRect().height + 8}px`
+      el.scrollIntoView({ block: 'start' })
+    })
   }, [status])
 
   // Load class_execution for check-in flow
@@ -912,16 +930,21 @@ export default function Schedule() {
 
       <div className={styles.pageRoot} style={isNavHidden() ? { paddingBottom: 0 } : undefined}>
         <div className={styles.inner}>
-          <header className={styles.hdr}>
-            <div className={styles.hdrRule}>
-              <div className={styles.hdrLine} />
-              <div className={styles.hdrDiamond} />
-              <div className={`${styles.hdrLine} ${styles.hdrLineR}`} />
-            </div>
-            <div className={styles.brand}>{gymName.toUpperCase()}</div>
-            <h1 className={styles.gym}>AGENDA</h1>
-          </header>
-          <main className={styles.main}>
+          {/* #147 — the header and the two mobile bars are ONE sticky block. They used to
+              pin individually with hand-written `top` offsets that each had to know the
+              others' heights; see the comment on `.stickyHead` for the two ways that broke.
+              The bars moved out of <main> to get here — they are `.mobileOnly`, so this is a
+              no-op on desktop, where <main> is the overflow:hidden pane container. */}
+          <div className={styles.stickyHead} ref={stickyHeadRef}>
+            <header className={styles.hdr}>
+              <div className={styles.hdrRule}>
+                <div className={styles.hdrLine} />
+                <div className={styles.hdrDiamond} />
+                <div className={`${styles.hdrLine} ${styles.hdrLineR}`} />
+              </div>
+              <div className={styles.brand}>{gymName.toUpperCase()}</div>
+              <h1 className={styles.gym}>AGENDA</h1>
+            </header>
             {/* Mobile bars */}
             {status !== 'loading' && (
               <>
@@ -960,7 +983,8 @@ export default function Schedule() {
                 </div>
               </>
             )}
-
+          </div>
+          <main className={styles.main}>
             {status === 'loading' && (
               <div className={styles.loading}>
                 <i className={`ti ti-loader ${styles.spin}`} /> Carregando...

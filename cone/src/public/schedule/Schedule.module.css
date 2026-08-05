@@ -22,7 +22,20 @@
 }
 
 /* ── Header ── */
-.hdr { padding:18px 20px 14px; border-bottom:1px solid var(--divider); background:var(--stone); position:sticky; top:0; z-index:20; }
+/* #147 — ONE pinned block, not three hand-stacked ones. `.hdr`/`.selBar`/`.weekNav` each
+   used to carry their own `position:sticky` + `top: 0 / 88px / 136px`, i.e. every bar had to
+   know the others' rendered heights. That went wrong twice, both reproduced live at 390px:
+     · 136px was 4px short of .hdr(88) + .selBar(52) = 140, so .weekNav JUMPED UP 4px the
+       moment it pinned and — at z-index 19 against .selBar's 18 — painted over .selBar's
+       bottom divider, which is the line the user saw disappear on scroll;
+     · .selBar renders only when `!lockedId`, so on an athlete's own `?id=` link .weekNav
+       pinned 48px BELOW the header and day-card content scrolled through the hole.
+   Stacking them inside one sticky wrapper makes the offset the browser's problem. Same
+   pattern as criador.module.css's `.stickyHead`. ⚠️ The wrapper must stay a direct child of
+   `.inner` — `position:sticky` is clipped by an ancestor's box, which is the trap CLAUDE.md
+   records for Criador's WeekGrid fragment. */
+.stickyHead { position:sticky; top:0; z-index:20; }
+.hdr { padding:18px 20px 14px; border-bottom:1px solid var(--divider); background:var(--stone); }
 .hdrRule { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
 .hdrLine { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold2)); }
 .hdrLineR { background:linear-gradient(270deg,transparent,var(--gold2)); }
@@ -32,9 +45,9 @@
 @media(min-width:768px){ .brand{font-size:26px} .gym{font-size:11px} }
 
 /* ── Bars ── */
-.selBar { background:var(--bg); border-bottom:1px solid var(--divider); padding:10px 20px; position:sticky; top:88px; z-index:18; }
+.selBar { background:var(--bg); border-bottom:1px solid var(--divider); padding:10px 20px; }
 .athleteSel { font-size:12px; background:var(--stone); border:1px solid var(--divider); color:var(--text); padding:6px 10px; outline:none; cursor:pointer; width:100%; max-width:320px; font-family:inherit; }
-.weekNav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; background:var(--bg); border-bottom:1px solid var(--border); position:sticky; top:136px; z-index:19; }
+.weekNav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; background:var(--bg); border-bottom:1px solid var(--border); }
 .weekLabel { font-size:13px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:.06em; }
 .navBtn { background:transparent; border:1px solid var(--divider); color:var(--muted); font-size:16px; width:32px; height:32px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s; }
 .navBtn:hover { border-color:var(--teal); color:var(--teal); }
