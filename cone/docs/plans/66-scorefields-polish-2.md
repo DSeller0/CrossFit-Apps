@@ -1,5 +1,23 @@
 # 66 — #134 + #135 + #136 · ScoreFields polish, round two
 
+> ✅ Done: `e740066` · 2026-08-04 — see BACKLOG.md
+>
+> **#134** — the token half was already fixed by #137/plans/65. The remaining "wall of toggles" is
+> now a single outer "O que foi adaptado?" toggle (`.checkpointToggle` language) gating the
+> per-exercise list, derived open (`showAll || rows.length > 0`) rather than a one-time initial
+> state; each per-exercise row gained a chevron (`IconChevronDown`/`Up`, `@tabler/icons-react`,
+> same convention as `AccordionCard`). **#135** — deleted the 10 dead `.sm` rules (kept
+> `.sm .scaleBtn`, `ClassPanel`'s only real consumer) and the gallery's `ScoreInputsSmDemo` case.
+> **#136** — all four wording/labelling drifts fixed: the success modal reuses the confirm modal's
+> exact DNF-label expression via a new `hasPerfTime` field; `RegistroView`'s `ScaleRow` dropped
+> `label={null}`; `BlockEditor`'s ▤/¶ toggle gained `aria-label`s (WeekGrid/SessionEditor's
+> text-bearing pairs needed none); `Schedule.jsx`'s day-chip log count is now pt-BR pluralized.
+>
+> Live-verified in the gallery (Playwright, real component code) across TotK Dark/Light — the
+> local dev-seed stack was running but had no scheduled sessions in the near-current-date range,
+> so results.html/schedule.html/RegistroView/Criador end-to-end walks were not possible this
+> session; #135/#136 were verified by code review + the green test/lint/build run instead.
+
 *Planned 2026-08-04 alongside plans/63/64/65. **Not executed in that session** — its own session.*
 🔴 **Runs after [plans/65](./65-border-divider-tokens.md)**: #134's fix is a function of the
 `--border`/`--divider` value that plan sets. Running it first means guessing, then redoing.
