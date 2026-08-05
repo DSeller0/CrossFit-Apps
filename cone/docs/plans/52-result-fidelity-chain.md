@@ -1,6 +1,10 @@
 # 52 — Result fidelity chain (#115 → #118)
 
-> ✅ **Step 1 (#115) Done: 2026-07-27** — see BACKLOG.md.
+> ✅ **Done — the WHOLE chain shipped: #115 (2026-07-27) → #118/plans/53 (2026-07-29) → #112/plans/54
+> (2026-07-29) → #117/plans/55 (2026-07-29) → #116/plans/56 (2026-07-30).** See BACKLOG.md.
+> *(Marker corrected 2026-08-05 by [reviews/2026-08-05-full-pass.md](../reviews/2026-08-05-full-pass.md):
+> it read "Step 1 (#115) Done" for six days after the chain completed, i.e. it presented four shipped
+> steps as outstanding. Filed as #151.)*
 >
 > **The remaining steps were planned in full on 2026-07-28 and now have their own plan files.
 > This file is the program record; those four are what a session executes.** Three things changed

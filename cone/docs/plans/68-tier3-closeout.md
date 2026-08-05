@@ -1,5 +1,24 @@
 # 68 — #89 + #97 + #114 + #104(a)(b)(d) + #71 · Tier 3 closeout
 
+> ✅ **Done: `e45f58e` (steps 1–4) + `fa3172f` (step 5) + step 6's commit · 2026-08-05 — see BACKLOG.md.**
+> **Tiers 1–3 are all shipped; the housekeeping program is complete.** Step 6's pass is
+> [reviews/2026-08-05-full-pass.md](../reviews/2026-08-05-full-pass.md) → 5 new rows (#147–#151), a
+> ranked Tier 4, #95 confirmed plannable cold, and ten stale board markers corrected.
+>
+> 🔴 **Two things this plan got wrong, recorded so the next reader doesn't inherit them:**
+> **(1) Step 1's "and on top" landed on ONE of the two pages.** The measured `scroll-margin-top` went
+> into `Results.jsx` (correct: card at `y=95` against an 87px header) and **not** into `Schedule.jsx`,
+> whose mobile sticky stack is **three bars, 193px** — so the deep-linked session lands at `y=0`,
+> entirely underneath it. Caught by step 6 *driving* the link, after the change had passed tests,
+> lint, format and build. Filed as **#147**. **(2) The "multi-session day" acceptance line cannot be
+> exercised on the dev seed** — every multi-session day pairs one untagged with one box-tagged
+> session, and `boxScope` is a partition, so no scope ever shows two at once.
+>
+> 🔑 **Step 5's one substantive deviation:** the re-entrancy guard is a **ref**, not the
+> `checkinSubmitting` state the plan's wording implied. Five taps in one tick all run the same
+> render's closure — measured on the local stack, the state guard let **2 of 5** writes through; the
+> ref lets exactly 1.
+
 *Planned 2026-08-05 alongside [plans/67](./67-per-box-theme.md). **Not executed in that session** —
 its own session.*
 

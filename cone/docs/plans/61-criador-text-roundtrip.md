@@ -1,5 +1,11 @@
 # 61 — Criador text mode: round-trip fidelity, the grammar's blind spots, and one reference
 
+> ✅ **Done — all three sessions shipped: 61·A 2026-08-03, 61·B and 61·C 2026-08-04. See BACKLOG.md.**
+> Closed #120, #121, #126–#131. *(Marker added 2026-08-05 by
+> [reviews/2026-08-05-full-pass.md](../reviews/2026-08-05-full-pass.md) — it was missing entirely, and
+> WORKFLOW.md's plan-lifecycle rule is "no marker = actionable", so this plan had been presenting
+> itself as live work for a day. Filed as #151.)*
+
 > **Planning session, 2026-08-03 (Opus).** Covers #121 · #120 · #126 · #127 · #128 · #129 · #130.
 > Ships as **three ordered execution sessions** — 61·A, 61·B, 61·C — see below. Also files **#138**.
 
