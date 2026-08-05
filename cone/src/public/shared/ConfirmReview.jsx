@@ -34,6 +34,8 @@ export function ReadRow({ label, value, mono = false }) {
 //   onClose           backdrop click / Escape when there's no onEdit
 //   title             default "Revisar registro"
 //   submitting        disables both, primary shows submittingLabel
+//   confirmDisabled   disables the primary ONLY (#71) — for a body that holds an editable
+//                     field the caller can leave empty; "Editar" must stay reachable
 //   error             message under the read-back body
 //   children          the labelled read-back rows
 export default function ConfirmReview({
@@ -46,6 +48,7 @@ export default function ConfirmReview({
   confirmLabel = 'Confirmar',
   submitting = false,
   submittingLabel = 'Enviando…',
+  confirmDisabled = false,
   error = '',
   children,
 }) {
@@ -135,7 +138,7 @@ export default function ConfirmReview({
           <button
             type="button"
             className={`${s.btn} ${s.confirm}`}
-            disabled={submitting || undefined}
+            disabled={submitting || confirmDisabled || undefined}
             onClick={onConfirm}
           >
             {submitting ? submittingLabel : confirmLabel}

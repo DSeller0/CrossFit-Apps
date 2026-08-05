@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Nav, { isNavHidden } from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import { registerSW } from '../registerSW.js'
@@ -11,7 +11,15 @@ import { prBest } from '../lib/goals.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { syncTheme } from '../lib/theme.js'
 import { mergeBlockEntry, clearAthleteKeys } from '../lib/resultEntry.js'
-import { isRoundBlock, progGroups, parseDurMins, onKey } from './scheduleHelpers.js'
+import {
+  isRoundBlock,
+  progGroups,
+  parseDurMins,
+  onKey,
+  GUEST_CAP,
+  findNameCollision,
+  suggestGuestName,
+} from './scheduleHelpers.js'
 import DemoPanel from './DemoPanel.jsx'
 import LogPane from './LogPane.jsx'
 import DeskRegPane from './DeskRegPane.jsx'
@@ -131,6 +139,19 @@ export default function Schedule() {
   const [checkinSearch, setCheckinSearch] = useState('')
   const [checkinDone, setCheckinDone] = useState(false)
   const [checkinSubmitting, setCheckinSubmitting] = useState(false)
+  const [checkinError, setCheckinError] = useState('')
+  // #71 — {typed, match} while the guest is being asked to distinguish themselves from a
+  // name already on the roster; null the rest of the time. `checkinDupeName` is the field
+  // in that dialog, seeded with the suggestion.
+  const [checkinDupe, setCheckinDupe] = useState(null)
+  const [checkinDupeName, setCheckinDupeName] = useState('')
+  // #71 — the re-entrancy latch is a REF, not the `checkinSubmitting` state, and the
+  // difference is not theoretical: five taps in one tick all run the SAME render's closure,
+  // where `checkinSubmitting` is still false however many setState calls are queued behind
+  // it. Measured live on the local stack — a state guard let 2 of 5 taps through (the losers
+  // raced on the roster read); the ref lets exactly 1. `submitLog`'s #50 guard has the same
+  // hole, left alone here as pre-existing and out of #71's scope.
+  const checkinBusyRef = useRef(false)
 
   const [lockedId] = useState(() => new URLSearchParams(location.search).get('id') || '')
   const [box] = useState(() => getBoxScope())
@@ -201,17 +222,82 @@ export default function Schedule() {
       })
   }, [checkinId])
 
+  const CHECKIN_ERR = 'Não foi possível registrar seu check-in. Tente de novo.'
+
+  // #71 — the actual write, reached either straight from the sheet (no name collision) or
+  // from the duplicate-name dialog once the guest has confirmed who they are. Errors were
+  // swallowed here before: every path ended in setCheckinDone(true), so a failed RPC still
+  // told the guest "Check-in feito!".
+  async function doCheckin(args) {
+    setCheckinSubmitting(true)
+    const { error } = await sb.rpc('class_checkin', { p_class_id: checkinId, ...args })
+    setCheckinSubmitting(false)
+    if (error) {
+      setCheckinError(CHECKIN_ERR)
+      return
+    }
+    setCheckinDupe(null)
+    setCheckinDone(true)
+  }
+
   async function submitCheckin() {
+    if (checkinBusyRef.current) return
     if (checkinMode === 'athlete' && !checkinAthId) return
     if (checkinMode === 'anon' && !checkinAnonName.trim()) return
-    setCheckinSubmitting(true)
-    if (checkinMode === 'athlete') {
-      await sb.rpc('class_checkin', { p_class_id: checkinId, p_athlete_id: checkinAthId })
-    } else {
-      await sb.rpc('class_checkin', { p_class_id: checkinId, p_guest_name: checkinAnonName.trim() })
+    checkinBusyRef.current = true
+    try {
+      setCheckinError('')
+      if (checkinMode === 'athlete') {
+        await doCheckin({ p_athlete_id: checkinAthId })
+        return
+      }
+      const typed = checkinAnonName.trim()
+      // Read the roster fresh rather than trusting `checkinExec` (fetched when the sheet
+      // opened — a class fills up while the QR page sits on a phone). class_executions is
+      // anon-readable via ce_select_anon, so this needs no privilege the guest lacks.
+      setCheckinSubmitting(true)
+      const { data, error } = await sb
+        .from('class_executions')
+        .select('anon_names')
+        .eq('id', checkinId)
+        .maybeSingle()
+      setCheckinSubmitting(false)
+      if (error) {
+        setCheckinError(CHECKIN_ERR)
+        return
+      }
+      const existing = data?.anon_names || []
+      // Migration 0008 caps the array server-side and would no-op silently past the cap.
+      if (existing.length >= GUEST_CAP) {
+        setCheckinError('A lista de convidados desta aula está cheia. Fale com o coach.')
+        return
+      }
+      const match = findNameCollision(existing, typed)
+      if (match) {
+        setCheckinDupe({ typed, match })
+        setCheckinDupeName(suggestGuestName(typed, existing) || typed)
+        return
+      }
+      await doCheckin({ p_guest_name: typed })
+    } finally {
+      checkinBusyRef.current = false
     }
-    setCheckinSubmitting(false)
-    setCheckinDone(true)
+  }
+
+  // The guest confirmed who they are — write whatever they settled on, collision or not.
+  // Deliberately no second dedupe check: they have already answered that question, and two
+  // real guests sharing a name must both reach the roster.
+  async function confirmDupeCheckin() {
+    if (checkinBusyRef.current) return
+    const name = checkinDupeName.trim()
+    if (!name) return
+    checkinBusyRef.current = true
+    try {
+      setCheckinError('')
+      await doCheckin({ p_guest_name: name })
+    } finally {
+      checkinBusyRef.current = false
+    }
   }
 
   async function load(attempt = 0) {
@@ -1353,6 +1439,15 @@ export default function Schedule() {
           checkinAnonName={checkinAnonName}
           onCheckinAnonName={setCheckinAnonName}
           checkinSubmitting={checkinSubmitting}
+          checkinError={checkinError}
+          dupe={checkinDupe}
+          dupeName={checkinDupeName}
+          onDupeName={setCheckinDupeName}
+          onDupeConfirm={confirmDupeCheckin}
+          onDupeCancel={() => {
+            setCheckinDupe(null)
+            setCheckinError('')
+          }}
           onSubmit={submitCheckin}
           onClose={() => setCheckinId('')}
         />

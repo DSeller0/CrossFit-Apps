@@ -338,6 +338,24 @@ export default {
               </ConfirmReview>
             </ModalBox>
           </Case>
+          <Case label="confirmDisabled — corpo editável ainda inválido (só o primário desabilita)">
+            <ModalBox>
+              <ConfirmReview
+                open
+                confirmDisabled
+                title="Esse nome já está na lista"
+                editLabel="Voltar"
+                onEdit={NOOP}
+                onConfirm={NOOP}
+                onClose={NOOP}
+              >
+                <ReadBox>
+                  <ReadRow label="Você digitou" value="Fulano da Silva" />
+                  <ReadRow label="Já na lista" value="Fulano da Silva" />
+                </ReadBox>
+              </ConfirmReview>
+            </ModalBox>
+          </Case>
         </Section>
       ),
     },

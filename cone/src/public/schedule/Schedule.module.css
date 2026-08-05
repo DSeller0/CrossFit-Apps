@@ -351,3 +351,8 @@
 .ckRowOn { border-color:var(--teal); color:var(--teal); background:transparent; }
 .ckGo { width:100%; margin-top:14px; padding:11px; font-size:15px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; border:none; cursor:pointer; font-family:inherit; background:var(--green); color:var(--bg); }
 .ckGo:disabled { opacity:.5; cursor:not-allowed; }
+/* #71 — the check-in's only failure surface. Before it, submitCheckin showed "Check-in
+   feito!" unconditionally, including when the RPC errored or (now) the roster is full. */
+.ckErr { font-size:12px; color:var(--err); margin-top:10px; }
+/* #71 — sits above the name field inside the duplicate-name dialog. */
+.ckDupeHint { font-size:12px; color:var(--muted); margin-bottom:8px; line-height:1.4; }
