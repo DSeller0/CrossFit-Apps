@@ -397,6 +397,7 @@ export default function Results() {
       scale: inp.scale,
       rpe: inp.rpe,
       perf,
+      hasPerfTime: !!inp.perfTime,
       btype,
       goalOutcome: goalOutcome(inp, bl),
       exerciseRows: inp.exerciseRows,
@@ -571,11 +572,15 @@ export default function Results() {
               scale,
               rpe,
               perf,
+              hasPerfTime,
               btype,
               goalOutcome: goalOut,
               exerciseRows,
             } = successData
-            const plbl = isTimeBlock(btype) ? 'Tempo' : 'Resultado'
+            // Same expression as the confirm modal above (#136a) — a capped For Time
+            // athlete has no perfTime, so this must read "Resultado" there too, not "Tempo"
+            // over a row containing no time.
+            const plbl = isTimeBlock(btype) ? (hasPerfTime ? 'Tempo' : 'Resultado') : 'Resultado'
             return (
               <>
                 <i className={`ti ti-circle-check ${styles.successIcon}`} aria-hidden="true" />

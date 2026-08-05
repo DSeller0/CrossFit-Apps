@@ -4,7 +4,7 @@ import RankList from '../../shared/RankList.jsx'
 import AccordionCard from '../../shared/AccordionCard.jsx'
 import WodBlockCard from '../../shared/WodBlockCard.jsx'
 import TallyBar from '../../shared/TallyBar.jsx'
-import ScoreFields, { ScaleRow, ScoreInputs } from '../../shared/ScoreFields.jsx'
+import ScoreFields from '../../shared/ScoreFields.jsx'
 import Nav from '../../Nav.jsx'
 import { DEF_INP } from '../../results/resultsHelpers.js'
 import { Case, Section } from '../harness.jsx'
@@ -70,28 +70,6 @@ function ScoreFieldsDemo({ block, initial, disabled }) {
       >
         {JSON.stringify(v)}
       </code>
-    </div>
-  )
-}
-
-function ScoreInputsSmDemo() {
-  const [v, setV] = useState({ ...DEF_INP(), scale: 'RX' })
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, flexWrap: 'wrap' }}>
-      <ScaleRow
-        short
-        size="sm"
-        label={null}
-        value={v.scale}
-        onChange={sc => setV(p => ({ ...p, scale: sc }))}
-      />
-      <ScoreInputs
-        blockType="For Time"
-        size="sm"
-        value={v}
-        onChange={patch => setV(p => ({ ...p, ...patch }))}
-        timeLabel={null}
-      />
     </div>
   )
 }
@@ -449,9 +427,6 @@ export default {
           </Case>
           <Case label="disabled (durante o envio)">
             <ScoreFieldsDemo block={rcBlFT} initial={rcInpDone} disabled />
-          </Case>
-          <Case label="size='sm' + escala curta — a linha de chamada do TvController">
-            <ScoreInputsSmDemo />
           </Case>
         </Section>
       ),

@@ -45,6 +45,11 @@ export function BlockEditor({
   const summary = blockSummary(block)
   const capStr = stationsCapStr(block)
   const customName = block.label && block.label !== block.type ? block.label : ''
+  // Shared between the ¶ button's title and its aria-label (#136c) — a bare glyph with a
+  // title but no aria-label reads its own character as the accessible name.
+  const textToggleLabel = isTextEditable(block)
+    ? 'Editar como texto'
+    : 'Este tipo de bloco não tem forma textual'
 
   // The name field types into a local draft (#140). It used to render `customName`
   // directly while trimming on every keystroke, which made a space UNTYPABLE — the
@@ -269,6 +274,7 @@ export function BlockEditor({
               aria-pressed={!textMode}
               onClick={() => setTextMode(false)}
               title="Editar em campos"
+              aria-label="Editar em campos"
             >
               ▤
             </button>
@@ -278,11 +284,8 @@ export function BlockEditor({
               aria-pressed={textMode}
               disabled={!isTextEditable(block)}
               onClick={() => setTextMode(true)}
-              title={
-                isTextEditable(block)
-                  ? 'Editar como texto'
-                  : 'Este tipo de bloco não tem forma textual'
-              }
+              title={textToggleLabel}
+              aria-label={textToggleLabel}
             >
               ¶
             </button>

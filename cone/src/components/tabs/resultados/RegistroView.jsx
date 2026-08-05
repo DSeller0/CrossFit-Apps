@@ -635,11 +635,13 @@ export function RegistroView({
                         copy was the one with no DNF field and an unmasked time box. Its
                         10-segment RPE bar below stays as-is: that is #57's call, not this.
                         Escala → RPE → score (#122) — the order the athlete answers in. */}
-                    <ScaleRow
-                      value={bl.scale}
-                      onChange={sc => updBlock(i, 'scale', sc)}
-                      label={null}
-                    />
+                    {/* #136b — was label={null}, the only one of the five ScoreFields
+                        surfaces rendering no ESCALA label at all. The RPE row right below
+                        stays its own hand-rolled bar (#57's call, not this one) — it
+                        already carries "RPE" as a permanent prefix in its value text
+                        ("RPE —" / "RPE 7"), so it was never actually unlabelled the way
+                        this was. */}
+                    <ScaleRow value={bl.scale} onChange={sc => updBlock(i, 'scale', sc)} />
                     <div className="rp-rpe-row">
                       <span
                         style={{

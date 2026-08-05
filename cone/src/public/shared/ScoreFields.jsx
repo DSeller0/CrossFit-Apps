@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import { SCALES, scaleLabel, isTimeBlock, blockExercises, repsBefore } from '../lib/wod.js'
 import MaskedTimeInput from './MaskedTimeInput.jsx'
 import s from './ScoreFields.module.css'
@@ -251,18 +252,32 @@ function CheckpointFields({ block, rounds, timeBlock, value, onChange, disabled,
 // permanently empty (the energy_level/#66 failure mode, arrived at from the other
 // direction). `blockExercises(block)` is what already flattens Estações' stations.
 //
+// #134's second half: the per-exercise list itself is gated behind one outer toggle
+// ("O que foi adaptado?", same `.checkpointToggle` language as CheckpointFields' "Não
+// terminei"/"Onde parou") — every non-RX log used to render N always-visible toggle rows
+// even for an athlete who has nothing to note, the same wall of rectangles #116's own
+// comment already argued against one level up. `open` is a derived OR (`showAll ||
+// rows.length > 0`), not a one-time initial state, for the same reason the row-level open
+// state is derived: a mounted form reused for a different athlete/block must never leave a
+// stale section open OR hide real notes behind a closed toggle.
+//
 // A row with a real note is always shown open — derived straight from `value.exerciseRows`,
 // so switching which athlete/block a mounted form is editing can never leave a stale note
 // visible. A row toggled open with nothing typed yet is local-only UI state (`openIds`):
 // closing it, or leaving it empty at submit time, writes nothing — an all-empty
 // `exerciseRows` collapses to `undefined`, never an array of hollow `{note:''}` objects.
+// The outer toggle is UI-only too (`showAll`) — closing it hides the list but never calls
+// `commit`, so notes typed earlier survive being hidden and reappear on reopen.
 function ExerciseNotesRows({ block, value, onChange, disabled, size }) {
   const exs = blockExercises(block)
   const rows = value.exerciseRows || []
   const [openIds, setOpenIds] = useState(() => new Set())
+  const [showAll, setShowAll] = useState(false)
   const dis = disabled || undefined
 
   if (!exs.length || !value.scale || value.scale === 'RX') return null
+
+  const open = showAll || rows.length > 0
 
   function commit(next) {
     onChange({ exerciseRows: next.length ? next : undefined })
@@ -289,37 +304,52 @@ function ExerciseNotesRows({ block, value, onChange, disabled, size }) {
 
   return (
     <div className={`${s.group}${size === 'sm' ? ' ' + s.sm : ''}`}>
-      <span className={s.label}>O que foi adaptado?</span>
-      <div className={s.notesList}>
-        {exs.map((ex, i) => {
-          const exId = ex.id || `i${i}`
-          const row = rows.find(r => r.exId === exId)
-          const open = !!row || openIds.has(exId)
-          return (
-            <div key={exId} className={s.notesRow}>
-              <button
-                type="button"
-                className={s.notesToggle}
-                aria-pressed={open}
-                disabled={dis}
-                onClick={() => toggle(exId)}
-              >
-                {ex.name || `Exercício ${i + 1}`}
-              </button>
-              {open && (
-                <input
-                  className={s.input}
-                  type="text"
-                  placeholder="O que foi adaptado…"
-                  value={row?.note || ''}
+      <button
+        type="button"
+        className={s.checkpointToggle}
+        aria-pressed={open}
+        disabled={dis}
+        onClick={() => setShowAll(v => !v)}
+      >
+        O que foi adaptado?
+      </button>
+      {open && (
+        <div className={s.notesList}>
+          {exs.map((ex, i) => {
+            const exId = ex.id || `i${i}`
+            const row = rows.find(r => r.exId === exId)
+            const rowOpen = !!row || openIds.has(exId)
+            return (
+              <div key={exId} className={s.notesRow}>
+                <button
+                  type="button"
+                  className={s.notesToggle}
+                  aria-pressed={rowOpen}
                   disabled={dis}
-                  onChange={e => setNote(exId, ex.name || '', e.target.value)}
-                />
-              )}
-            </div>
-          )
-        })}
-      </div>
+                  onClick={() => toggle(exId)}
+                >
+                  {ex.name || `Exercício ${i + 1}`}
+                  {rowOpen ? (
+                    <IconChevronUp size={14} className={s.notesChev} aria-hidden="true" />
+                  ) : (
+                    <IconChevronDown size={14} className={s.notesChev} aria-hidden="true" />
+                  )}
+                </button>
+                {rowOpen && (
+                  <input
+                    className={s.input}
+                    type="text"
+                    placeholder="O que foi adaptado…"
+                    value={row?.note || ''}
+                    disabled={dis}
+                    onChange={e => setNote(exId, ex.name || '', e.target.value)}
+                  />
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

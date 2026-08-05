@@ -208,8 +208,15 @@
 
 /* Same visual language as .scaleBtn/.checkpointToggle — a toggle, not a submit action.
    Left-aligned and full-width (unlike those two) since the label is an exercise name,
-   not a short code, and rows stack one per line. */
+   not a short code, and rows stack one per line. A trailing chevron (#134) is the
+   affordance that keeps this reading as a disclosure control rather than a text field
+   once --border/--divider genuinely differ (#137) — same convention as AccordionCard's
+   IconChevronUp/Down, flipped by aria-pressed instead of a separate expanded prop. */
 .notesToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   align-self: stretch;
   text-align: left;
   padding: 4px 10px;
@@ -233,6 +240,11 @@
   color: var(--gold);
 }
 
+/* currentColor — follows .notesToggle's own color (muted/gold) with no rule of its own. */
+.notesChev {
+  flex-shrink: 0;
+}
+
 /* ── Shared disabled + focus contract ────────────────────────────────────── */
 
 .rpeBtn:focus-visible,
@@ -253,55 +265,15 @@
   cursor: not-allowed;
 }
 
-/* ── size="sm" — the TvController roster row, where a full form does not fit ── */
-
-.sm .rpeBtn {
-  width: 22px;
-  height: 22px;
-  font-size: 10px;
-}
-
+/* ── size="sm" — the TvController roster row, where a full form does not fit ──
+   #135 (2026-08-04): only ClassPanel.jsx's `<ScaleRow size="sm">` calls exist in
+   production — the other 10 `.sm` rules this section used to carry had zero consumers
+   (no `size="sm"` `ScoreInputs`/`RpeRow` anywhere) and were deleted, along with the
+   gallery's `ScoreInputsSmDemo` case that had been rendering a state the app doesn't.
+   ClassPanel's compact time input is NOT `.sm .timeField` — `TimeField` takes no `size`
+   prop at all, and that row styles it directly via tvController.module.css's
+   `.editTimeInput`. That's the drift this row noticed; it's a stated choice now. */
 .sm .scaleBtn {
   padding: 2px 7px;
   font-size: 10px;
-}
-
-.sm .input {
-  padding: 4px 7px;
-  font-size: 12px;
-}
-
-.sm .inputSm {
-  width: 68px;
-}
-
-.sm .timeField {
-  max-width: 92px;
-}
-
-.sm .checkpointToggle {
-  padding: 2px 7px;
-  font-size: 10px;
-}
-
-.sm .notesToggle {
-  padding: 2px 7px;
-  font-size: 10px;
-}
-
-.sm .notesList {
-  gap: 4px;
-}
-
-.sm .checkpointBody {
-  padding: 7px;
-  gap: 6px;
-}
-
-.sm .numRow {
-  gap: 8px;
-}
-
-.sm .scoreWrap {
-  gap: 6px;
 }

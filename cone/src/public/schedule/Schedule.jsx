@@ -1112,7 +1112,9 @@ export default function Schedule() {
                               >
                                 <div className={styles.deskSCardName}>{sessName(sess, dk)}</div>
                                 <div className={styles.deskSCardFoot}>
-                                  <span className={styles.deskSCardLogLbl}>{logCount} logs</span>
+                                  <span className={styles.deskSCardLogLbl}>
+                                    {logCount === 1 ? '1 registro' : `${logCount} registros`}
+                                  </span>
                                   <span
                                     className={`${styles.deskSCardDot}${logCount > 0 ? ' ' + styles.deskSCardDotFilled : ''}`}
                                   />
