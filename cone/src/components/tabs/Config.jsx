@@ -1,8 +1,18 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { loadSettings, saveSettings, loadLocations } from '../../utils/storage'
+import { useSync } from '../../context/SyncContext'
+import { APP_CONFIG } from '../../utils/config'
 import { THEMES, applyTheme, getAppliedTheme } from '../../public/lib/theme.js'
+import {
+  buildSnapshot,
+  stateFileName,
+  parseStateFile,
+  downloadSnapshot,
+  applyState,
+} from './config/stateBackup.js'
 import Button from '../ui/Button'
 import Input from '../ui/Input'
+import ConfirmReview from '../../public/shared/ConfirmReview'
 import s from './Config.module.css'
 
 // THEMES itself is canonical in public/lib/theme.js since #143 (it was duplicated here, in
@@ -29,6 +39,55 @@ export default function ConfigTab() {
   const [gymTheme, setGymTheme] = useState(init.theme || '')
   const [boxThemes, setBoxThemes] = useState(init.boxThemes || {})
   const [boxes] = useState(() => loadLocations().filter(l => l.type === 'box'))
+
+  // ── Dados (#95/plans/69) — Salvar/Carregar/Limpar estado, relocated here from
+  // the App.jsx chrome. sessions/setSessions/setEvents come straight from
+  // useSync() rather than storage's loadLS() — Config renders inside SyncProvider,
+  // and the live in-memory value is what a coach mid-edit actually expects backed up.
+  const { sessions, setSessions, setEvents } = useSync()
+  const [saveFileName, setSaveFileName] = useState('')
+  const [showSaveName, setShowSaveName] = useState(false)
+  const fileInputRef = useRef(null)
+  const [dataMsg, setDataMsg] = useState(null) // { text, err } | null
+  const [pendingClear, setPendingClear] = useState(false)
+
+  const flashData = (text, err = false) => {
+    setDataMsg({ text, err })
+    setTimeout(() => setDataMsg(null), 2800)
+  }
+
+  const doSaveState = () => {
+    downloadSnapshot(buildSnapshot(sessions), stateFileName(saveFileName, APP_CONFIG.gymName))
+    setSaveFileName('')
+    setShowSaveName(false)
+    flashData('Estado salvo — compartilhe o arquivo .json com o professor.')
+  }
+
+  const doLoadState = e => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev => {
+      try {
+        const { needsReload } = applyState(parseStateFile(ev.target.result), {
+          setSessions,
+          setEvents,
+        })
+        flashData('Estado carregado com sucesso.')
+        if (needsReload) setTimeout(() => window.location.reload(), 300)
+      } catch {
+        flashData('Não foi possível carregar o arquivo — verifique se é um .json válido.', true)
+      }
+      e.target.value = ''
+    }
+    reader.readAsText(file)
+  }
+
+  const doClearState = () => {
+    setSessions({})
+    setPendingClear(false)
+    flashData('Estado limpo.')
+  }
 
   const save = () => {
     saveSettings({
@@ -191,6 +250,87 @@ export default function ConfigTab() {
         </Button>
         {flash && <span className={s.flash}>Configurações salvas e sincronizadas.</span>}
       </div>
+
+      {/* Dados stays AFTER .saveRow, not among the three form sections above — `save()`
+          only persists gym+tema, so a backup section placed above the footer would read
+          as part of that form. This one is a separate concern: export/import the whole
+          app state as a .json file, independent of Salvar. */}
+      <div className={s.section}>
+        <div className={s.sectionTitle}>
+          <i className="ti ti-database" /> Dados
+        </div>
+        <p className={s.hint}>Backup em arquivo .json. Não depende do Salvar acima.</p>
+
+        <div className={s.dataRow}>
+          {showSaveName ? (
+            <>
+              <Input
+                label="Nome do arquivo (opcional)"
+                value={saveFileName}
+                onChange={e => setSaveFileName(e.target.value)}
+                placeholder={stateFileName('', APP_CONFIG.gymName)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') doSaveState()
+                  if (e.key === 'Escape') {
+                    setShowSaveName(false)
+                    setSaveFileName('')
+                  }
+                }}
+                autoFocus
+              />
+              <Button variant="secondary" onClick={doSaveState}>
+                <i className="ti ti-check" /> Confirmar
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowSaveName(false)
+                  setSaveFileName('')
+                }}
+              >
+                Cancelar
+              </Button>
+            </>
+          ) : (
+            <Button variant="secondary" onClick={() => setShowSaveName(true)}>
+              <i className="ti ti-download" /> Salvar estado
+            </Button>
+          )}
+          <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
+            <i className="ti ti-folder-open" /> Carregar estado
+          </Button>
+          <Button variant="destructive" onClick={() => setPendingClear(true)}>
+            <i className="ti ti-trash" /> Limpar estado
+          </Button>
+        </div>
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept=".json,application/json"
+          onChange={doLoadState}
+          style={{ display: 'none' }}
+        />
+
+        {dataMsg && <p className={dataMsg.err ? s.dataErr : s.hint}>{dataMsg.text}</p>}
+      </div>
+
+      <ConfirmReview
+        open={pendingClear}
+        title="Limpar estado"
+        editLabel="Cancelar"
+        confirmLabel="Limpar"
+        onEdit={() => setPendingClear(false)}
+        onClose={() => setPendingClear(false)}
+        onConfirm={doClearState}
+      >
+        <div style={{ fontSize: 13, color: 'var(--sub)', lineHeight: 1.5 }}>
+          Apaga <strong style={{ color: 'var(--cream)' }}>todos os treinos</strong> salvos. A
+          mudança <strong style={{ color: 'var(--cream)' }}>sincroniza para o servidor</strong> e
+          vale para todos os aparelhos. Atletas, resultados e o catálogo de exercícios não são
+          afetados.
+        </div>
+      </ConfirmReview>
     </div>
   )
 }

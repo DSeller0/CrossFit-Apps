@@ -50,7 +50,7 @@ Living inventory of every user-facing capability: where it lives, who consumes i
 | Live class ops: start/end class, roster, live registration, guest results | Quadro ao Vivo | `class_executions`, `results_v2`, `tv_state` | Gate: Pro (TV system) |
 | TV slide control + timer push + group rotation | Quadro ao Vivo | `tv_state` | Gate: Pro (TV system) |
 | Gym identity (name/modalidade/logo) + theme selection (4 themes; #43 adds 4 more) | Configurações | `settings` | core / themes = Pro candidate |
-| State backup/restore (Salvar/Carregar/Limpar estado, Sincronizar) | header | all blobs | core |
+| State backup/restore (Salvar/Carregar/Limpar estado, Sincronizar) | Configurações → Dados | all blobs | core |
 
 ## Infrastructure capabilities (invisible but gateable)
 

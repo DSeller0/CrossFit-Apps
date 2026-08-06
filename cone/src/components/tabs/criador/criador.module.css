@@ -17,13 +17,14 @@
 
 /* ── Week bar / box tabs / collapsed day strip ───────────────────────────── */
 /* The two controls that decide WHAT the grid shows stay pinned while it scrolls.
-   --spa-sticky-top (index.css) is the bottom of the app chrome, and it is a
-   variable because that chrome has two layouts — the flat 88px the other sticky
-   bars use is 39px too low once the sidebar replaces the tab bar, which parks
-   this block on top of Avisos. Below the tab bar's z-index, above the grid.
-   The toolbar and Avisos are content, not navigation — they scroll away. */
+   --spa-sticky-top (index.css) is the bottom of the app chrome (AppChrome.jsx,
+   #95/plans/69) — one 49px row at both widths since that pass, so the fallback
+   below is the same value, not a second layout to reconcile. It only fires in
+   the gallery and the design-cards SSR, where no :root token exists. Below the
+   nav's z-index, above the grid. The toolbar and Avisos are content, not
+   navigation — they scroll away. */
 .stickyHead {
-  position: sticky; top: var(--spa-sticky-top, 88px); z-index: 40;
+  position: sticky; top: var(--spa-sticky-top, 49px); z-index: 40;
   background: var(--bg); padding-top: var(--sp-1);
 }
 .weekBar {

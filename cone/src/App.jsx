@@ -1,28 +1,11 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { useAuth } from './context/AuthContext'
 import { useSync } from './context/SyncContext'
-import {
-  loadLS,
-  loadAthletes,
-  saveAthletes,
-  loadResults,
-  saveResults,
-  loadSettings,
-  saveSettings,
-  loadGoalsData,
-  saveGoalsData,
-  loadRegistry,
-  saveRegistry,
-  loadEvents,
-  loadLocations,
-  saveLocations,
-  loadCoach,
-  saveCoach,
-  toISO,
-} from './utils/storage'
+import { loadLS, loadResults, loadAthletes, loadSettings, saveSettings } from './utils/storage'
 import { supabase } from './utils/supabase'
-import { APP_CONFIG, normaliseType, normaliseZone, GF } from './utils/config'
+import { APP_CONFIG, GF } from './utils/config'
 import LoginScreen from './components/LoginScreen'
+import AppChrome from './components/chrome/AppChrome'
 
 const CriadorTab = lazy(() => import('./components/tabs/Criador'))
 const AtletasTab = lazy(() => import('./components/tabs/Atletas'))
@@ -35,18 +18,6 @@ const AgendaView = lazy(() =>
   import('./components/tabs/publicador/AgendaView').then(m => ({ default: m.AgendaView })),
 )
 const TvControllerTab = lazy(() => import('./components/tabs/TvController'))
-
-const TABS = [
-  ['creator', 'ti-edit', 'Criador de Treinos'],
-  ['athletes', 'ti-chart-radar', 'Atletas'],
-  ['exercises', 'ti-tool', 'Exercícios'],
-  ['locations', 'ti-map-pin', 'Serviços'],
-  ['results', 'ti-chart-bar', 'Resultados'],
-  ['agenda', 'ti-calendar', 'Agenda'],
-  ['publisher', 'ti-layout-grid', 'Publicador de Grade'],
-  ['tv', 'ti-device-tv', 'Quadro ao Vivo'],
-  ['config', 'ti-settings', 'Configurações'],
-]
 
 // Reads the ?tab= / ?editSession= + ?editDate= deep-link. Called once from a lazy
 // useState initializer so the URL seeds the first render rather than being applied
@@ -77,15 +48,11 @@ export default function App() {
   const [creatorPreload, setCreatorPreload] = useState(deepLink.preload)
   const [resultsPreload, setResultsPreload] = useState(null)
   const [saved, setSaved] = useState(false)
-  const [toast, setToast] = useState(null)
   const [blockNames, setBlockNames] = useState(APP_CONFIG.blockNames)
-  const [saveFileName, setSaveFileName] = useState('')
-  const [showSaveName, setShowSaveName] = useState(false)
   // A run-once guard for the config fetch below, never read while rendering — so a ref,
   // not state. As state its setter fired inside the effect that reads it, which is both a
   // cascading render and a self-referential deps array (react-hooks/set-state-in-effect).
   const configLoadedRef = useRef(false)
-  const fileInputRef = useRef()
   const savedMount = useRef(true)
 
   // ── Apply CSS variables from APP_CONFIG on mount ──────────────────────────
@@ -224,94 +191,6 @@ export default function App() {
     return () => clearTimeout(t)
   }, [sessions])
 
-  const showToast = (msg, type = 'ok') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 2800)
-  }
-
-  // ── Export state as .json ─────────────────────────────────────────────────
-  const handleSaveState = customName => {
-    const state = {
-      version: 2,
-      exportedAt: new Date().toISOString(),
-      sessions,
-      settings: loadSettings(),
-      results: loadResults(),
-      athletes: loadAthletes(),
-      exerciseRegistry: loadRegistry() || {},
-      athleteGoalsData: loadGoalsData(),
-      events: loadEvents(),
-      locations: loadLocations(),
-      coachProfile: loadCoach(),
-    }
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
-    const a = document.createElement('a')
-    const name = (customName || saveFileName || '')
-      .trim()
-      .replace(/[^a-zA-Z0-9À-ɏ\-_]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-    const gymSlug = (APP_CONFIG.gymName || '')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-    a.download = `${name || (gymSlug ? `grade-${gymSlug}` : 'grade-treino') + '-' + toISO(new Date())}.json`
-    a.href = URL.createObjectURL(blob)
-    a.click()
-    URL.revokeObjectURL(a.href)
-    setSaveFileName('')
-    setShowSaveName(false)
-    showToast('Estado salvo — compartilhe o arquivo .json com o professor.')
-  }
-
-  // ── Import state from .json ───────────────────────────────────────────────
-  const handleLoadState = e => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev => {
-      try {
-        const parsed = JSON.parse(ev.target.result)
-        const incoming = parsed.version && parsed.sessions ? parsed.sessions : parsed
-        if (typeof incoming !== 'object' || Array.isArray(incoming))
-          throw new Error('Invalid format')
-        const migrated = {}
-        Object.keys(incoming).forEach(dateKey => {
-          migrated[dateKey] = (incoming[dateKey] || []).map(session => ({
-            ...session,
-            blocks: (session.blocks || []).map(bl => ({
-              ...bl,
-              type: normaliseType(bl.type),
-              zone: normaliseZone(bl.zone),
-            })),
-          }))
-        })
-        setSessions(migrated)
-        if (parsed.exerciseRegistry && typeof parsed.exerciseRegistry === 'object')
-          saveRegistry(parsed.exerciseRegistry)
-        if (parsed.athleteGoalsData && typeof parsed.athleteGoalsData === 'object')
-          saveGoalsData(parsed.athleteGoalsData)
-        if (parsed.athletes?.length) saveAthletes(parsed.athletes)
-        if (parsed.results) saveResults(parsed.results)
-        if (parsed.events && typeof parsed.events === 'object') setEvents(parsed.events)
-        if (parsed.locations) saveLocations(parsed.locations)
-        if (parsed.coachProfile && typeof parsed.coachProfile === 'object')
-          saveCoach(parsed.coachProfile)
-        if (parsed.settings && typeof parsed.settings === 'object') {
-          saveSettings(parsed.settings)
-          setTimeout(() => window.location.reload(), 300)
-        }
-        showToast('Estado carregado com sucesso.')
-      } catch {
-        showToast('Não foi possível carregar o arquivo — verifique se é um .json válido.', 'err')
-      }
-      e.target.value = ''
-    }
-    reader.readAsText(file)
-  }
-
   if (authLoading)
     return (
       <div
@@ -336,226 +215,16 @@ export default function App() {
 
   return (
     <div>
-      <div className="spa-sidebar">
-        <div className="spa-sb-brand">
-          <div className="spa-sb-logo">C O N E</div>
-          {spaGymName && <div className="spa-sb-gym">{spaGymName}</div>}
-        </div>
-        <nav className="spa-sb-nav">
-          {TABS.map(([id, icon, lbl]) => (
-            <button
-              key={id}
-              type="button"
-              className={`spa-sb-item${tab === id ? ' on' : ''}`}
-              onClick={() => setTab(id)}
-            >
-              <i className={`ti ${icon}`} aria-hidden="true" />
-              {lbl}
-            </button>
-          ))}
-        </nav>
-        <div className="spa-sb-extra">
-          <a href="../index.html" className="spa-sb-link">
-            <i className="ti ti-home" aria-hidden="true" />
-            Início
-          </a>
-        </div>
-      </div>
-
-      <input
-        type="file"
-        id="state-file-input"
-        ref={fileInputRef}
-        accept=".json,application/json"
-        onChange={handleLoadState}
-        style={{ display: 'none' }}
+      <AppChrome
+        tab={tab}
+        onTabChange={setTab}
+        gymName={spaGymName}
+        userEmail={session.user.email}
+        syncState={syncState}
+        onSync={handleSync}
+        onSignOut={() => supabase.auth.signOut()}
+        autoSaved={saved}
       />
-
-      {toast && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: 20,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: toast.type === 'err' ? '#3a1010' : '#102010',
-            border: `1px solid ${toast.type === 'err' ? '#8a3030' : '#306030'}`,
-            color: toast.type === 'err' ? '#e08080' : '#80c080',
-            padding: '10px 18px',
-            borderRadius: 8,
-            fontSize: 13,
-            zIndex: 9999,
-            whiteSpace: 'nowrap',
-            boxShadow: '0 4px 20px rgba(0,0,0,.6)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
-          <i
-            className={`ti ti-${toast.type === 'err' ? 'alert-circle' : 'circle-check'}`}
-            aria-hidden="true"
-          />
-          {toast.msg}
-        </div>
-      )}
-
-      <div className="topbar">
-        <a
-          href="../index.html"
-          className="tb-btn tb-inicio"
-          title="Ir para o início"
-          style={{ textDecoration: 'none' }}
-        >
-          <i className="ti ti-home" aria-hidden="true" /> Início
-        </a>
-        <span className="topbar-title">{TABS.find(([id]) => id === tab)?.[2] || 'Cone'}</span>
-        <div className="topbar-right">
-          <span className="saved-badge" style={{ color: 'var(--muted, #888)' }}>
-            <i className="ti ti-user" aria-hidden="true" style={{ fontSize: 12 }} />{' '}
-            {session.user.email}
-          </span>
-          <button
-            type="button"
-            className="tb-btn"
-            onClick={() => supabase.auth.signOut()}
-            title="Sair da conta"
-          >
-            <i className="ti ti-logout" aria-hidden="true" /> Sair
-          </button>
-          <button
-            type="button"
-            className={`tb-btn${syncState === 'conflict' ? ' tb-sync-warn' : ''}`}
-            onClick={handleSync}
-            disabled={syncState === 'syncing'}
-            title="Sincronizar dados com o servidor"
-          >
-            <i
-              className={`ti ${syncState === 'syncing' ? 'ti-loader-2 spin' : syncState === 'synced' ? 'ti-check' : syncState === 'conflict' ? 'ti-alert-triangle' : 'ti-refresh'}`}
-              aria-hidden="true"
-            />
-            {syncState === 'syncing'
-              ? ' Sincronizando...'
-              : syncState === 'synced'
-                ? ' Sincronizado'
-                : syncState === 'conflict'
-                  ? ' Conflito!'
-                  : ' Sincronizar'}
-          </button>
-          {saved && (
-            <span className="saved-badge">
-              <i className="ti ti-device-floppy" aria-hidden="true" style={{ fontSize: 12 }} />{' '}
-              Salvo automaticamente
-            </span>
-          )}
-          <button
-            type="button"
-            className="tb-btn"
-            style={{ borderColor: '#6a1a1a', color: '#d05050' }}
-            onClick={() => {
-              if (
-                !window.confirm(
-                  'Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.',
-                )
-              )
-                return
-              setSessions({})
-              showToast('Estado limpo.')
-            }}
-            title="Apagar todos os treinos do estado atual"
-          >
-            <i className="ti ti-trash" aria-hidden="true" /> Limpar estado
-          </button>
-          <button
-            type="button"
-            className="tb-btn tb-load"
-            onClick={() => fileInputRef.current?.click()}
-            title="Carregar um arquivo .json salvo anteriormente"
-          >
-            <i className="ti ti-folder-open" aria-hidden="true" /> Carregar estado
-          </button>
-          {showSaveName ? (
-            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-              <input
-                placeholder={`grade-treino-${toISO(new Date())}`}
-                value={saveFileName}
-                onChange={e => setSaveFileName(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') handleSaveState()
-                  if (e.key === 'Escape') {
-                    setShowSaveName(false)
-                    setSaveFileName('')
-                  }
-                }}
-                autoFocus
-                style={{
-                  fontSize: 12,
-                  padding: '5px 8px',
-                  borderRadius: 5,
-                  border: '1px solid #2e2e2e',
-                  background: '#111',
-                  color: '#e0e0e0',
-                  width: 200,
-                  outline: 'none',
-                }}
-              />
-              <button
-                type="button"
-                className="tb-btn tb-save"
-                style={{ minWidth: 'unset', padding: '5px 10px' }}
-                onClick={() => handleSaveState()}
-              >
-                <i className="ti ti-check" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className="tb-btn"
-                style={{ minWidth: 'unset', padding: '5px 10px' }}
-                onClick={() => {
-                  setShowSaveName(false)
-                  setSaveFileName('')
-                }}
-              >
-                <i className="ti ti-x" aria-hidden="true" />
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              className="tb-btn tb-save"
-              onClick={() => setShowSaveName(true)}
-              title="Salvar estado como arquivo .json"
-            >
-              <i className="ti ti-download" aria-hidden="true" /> Salvar estado
-            </button>
-          )}
-        </div>
-      </div>
-
-      {syncState === 'conflict' && (
-        <div className="sync-conflict-banner">
-          <i className="ti ti-alert-triangle" aria-hidden="true" />
-          Sessões foram alteradas em outro dispositivo desde que você abriu o app. Sincronize antes
-          de salvar para não perder dados.
-          <button type="button" className="sync-conflict-btn" onClick={handleSync}>
-            Sincronizar agora
-          </button>
-        </div>
-      )}
-
-      <div className="tab-bar">
-        {TABS.map(([id, icon, lbl]) => (
-          <button
-            key={id}
-            type="button"
-            className={`tab3 ${tab === id ? 'on' : ''}`}
-            onClick={() => setTab(id)}
-          >
-            <i className={`ti ${icon}`} aria-hidden="true" />
-            {lbl}
-          </button>
-        ))}
-      </div>
 
       <div className="pane">
         <Suspense fallback={null}>

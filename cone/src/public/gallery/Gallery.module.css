@@ -108,3 +108,13 @@
    breakpoint above; LogPane's own `width:400px` still slightly exceeds a
    bare 390px viewport by design, same as it would on an actual phone). */
 @media (max-width: 480px) { .frameSide { width: 100%; } }
+
+/* ── AppChrome's desktop gutter — the real app reserves the fixed sidebar's
+   220px lane via index.css's #root{margin-left:220px}; the gallery has no
+   #root to offset. Without this, .frame's transform contains the sidebar
+   (good — it doesn't escape to the real viewport) but reserves no space for
+   it, so at 768px+ it sits ON TOP of the bar's left edge — hiding Início —
+   instead of beside it. Scoped to AppChrome's own cases only: other
+   .frame consumers (LogPane, DemoPanel, CheckinSheet) have no fixed sidebar
+   and would just get dead space on the left. */
+@media (min-width: 768px) { .chromeGutter { padding-left: 220px; } }

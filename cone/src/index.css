@@ -12,32 +12,13 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
    rules (grepped for zero consumers in src) are removed outright rather
    than tagged. ── */
 
-/* chrome — GLOBAL */
-.topbar{background:var(--stone,#161210);border-bottom:1px solid var(--divider,#2a231c);padding:9px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:100}
-.topbar-title{font-size:15px;font-weight:700;color:var(--cream,#f0e8d0);white-space:nowrap}
-.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.saved-badge{font-size:11px;color:#50a050;display:flex;align-items:center;gap:4px;white-space:nowrap}
-.tb-btn{font-family:inherit;font-size:12px;padding:6px 11px;border-radius:5px;border:1px solid var(--divider);background:transparent;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:all .12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.tb-btn:hover{background:var(--stone);color:var(--cream);border-color:var(--dim)}
-.tb-btn:active{opacity:.65}
-.tb-btn.tb-load{border-color:#1a3a6a;color:#5090e0}
-.tb-btn.tb-load:hover{background:#0e1a32}
-.tb-btn.tb-save{border-color:#2a4a1a;color:#80c040}
-.tb-btn.tb-save:hover{background:#1a2a10}
-#state-file-input{display:none}
-.tab-bar{display:flex;background:var(--stone,#161210);border-bottom:1px solid var(--divider,#2a231c);overflow-x:auto;-webkit-overflow-scrolling:touch;position:sticky;top:44px;z-index:99}
-/* Where a tab's own sticky content has to start, i.e. the bottom of the app chrome.
-   Two values because the chrome itself has two layouts: below 768px the topbar sits
-   above a 49px tab bar pinned at 44; at 768px and up the tab bar is display:none and
-   the sidebar takes over, leaving only the 49px topbar. Hardcoding 88px — which
-   .sync-conflict-banner and Resultados' .rp-sticktop still do — is right for the
-   narrow layout and 39px too low for the wide one, where it pushes the sticky
-   block down over the content that follows it. Both get a top:44px override in
-   the ≥768px layout switch below, so this is only a narrow-layout concern. */
-:root{--spa-sticky-top:93px}
-.tab3{padding:11px 18px;font-size:13px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted,#806850);font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;transition:color .15s}
-.tab3.on{color:var(--cream,#f0e8d0);border-bottom-color:var(--cream,#f0e8d0)}
-.tab3:hover:not(.on){color:var(--sub,#c8b090)}
+/* chrome — GLOBAL. The topbar/tab-bar/tab3/tb-btn/sidebar zoo moved to
+   src/components/chrome/AppChrome.jsx + AppChrome.module.css in #95/plans/69 —
+   one 49px row at both widths instead of two stacked rows (up to 226px on
+   mobile, wrapped into ~6 rows by .topbar-right's flex-wrap). Left here: the
+   one token every sticky block under the chrome reads, and .pane (still
+   rendered directly by App.jsx, not chrome). */
+:root{--spa-sticky-top:49px}
 .pane{padding:14px}
 
 /* ── Themed panes — Resultados (#57) + Publicador/Agenda (#59) — TAB-OWNED.
@@ -394,7 +375,6 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
   .pane{padding:10px}.sc-card{padding:12px}
   .g2,.g4{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
   .ex-row{grid-template-columns:1fr 1fr}
-  .topbar{padding:10px 12px}.tab3{padding:10px 13px;font-size:12px}
 }
 
 /* ── "Results tab" — actually Resultados #57 too, TAB-OWNED. The section map
@@ -496,22 +476,8 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 
 /* Config tab styles moved to Config.module.css (#55/C1). */
 
-/* ── Sync / conflict — GLOBAL (app-wide sync state, not owned by one tab) ── */
-.tb-btn.tb-sync-warn{border-color:#7a4a10;color:#e87820;animation:sync-pulse 2s ease-in-out infinite}
-@keyframes sync-pulse{0%,100%{opacity:1}50%{opacity:.6}}
-.sync-conflict-banner{
-  background:#1a0e04;border-bottom:1px solid #7a4a10;
-  color:#e8a060;font-size:13px;padding:10px 16px;
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  position:sticky;top:88px;z-index:98
-}
-.sync-conflict-btn{
-  font-family:inherit;font-size:12px;font-weight:700;
-  background:#7a4a10;color:#f0d0a0;border:none;border-radius:5px;
-  padding:5px 12px;cursor:pointer;transition:background .12s;white-space:nowrap;
-  margin-left:auto
-}
-.sync-conflict-btn:hover{background:#a06010}
+/* Sync / conflict chrome (the sync button pulse + the conflict banner) moved to
+   AppChrome.module.css in #95/plans/69, tokenised onto --red — see that file. */
 
 /* ── Criador redesign — TAB-OWNED → Criador #58, through the end of this block
    (Block type picker · benchmark list · block bar/body · exercise row ·
@@ -693,7 +659,12 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .rp-p2{border-right:1px solid #2a231c}
 .rp-p3{}
 @media(max-width:800px){.rp-layout{grid-template-columns:1fr;margin:0;border:none}}
-.rp-sticktop{position:sticky;top:88px;z-index:10;background:#0d0b09;border-bottom:1px solid #2a231c}
+/* .rp-sticktop itself is NOT single-tab-owned like the rest of this block — it has
+   four consumers in two tabs (resultados/RegistroView.jsx ×3, #57; and
+   publicador/AgendaView.jsx, #59), so #95/plans/69 tokenises it onto
+   --spa-sticky-top rather than leaving its hardcoded 88px (39px too low once the
+   sidebar replaces the tab bar at 768px+) for #57 to inherit as dead work. */
+.rp-sticktop{position:sticky;top:var(--spa-sticky-top);z-index:10;background:#0d0b09;border-bottom:1px solid #2a231c}
 .rp-month-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 12px}
 .rp-month-label{font-size:12px;font-weight:700;color:#c8b090;letter-spacing:.04em}
 .rp-nav-btn{background:none;border:1px solid #2a231c;color:#806850;cursor:pointer;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:16px;font-family:inherit;line-height:1;padding:0;transition:all .12s}
@@ -768,33 +739,13 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .pub-chip-aula{color:#c8b090;background:rgba(200,176,144,.06);border:1px solid #2a231c}
 .pub-chip-pers{color:#d8a840;background:rgba(216,168,64,.08);border:1px solid rgba(216,168,64,.25)}
 
-/* ── SPA Desktop Sidebar — GLOBAL (app chrome, not owned by one tab). Already
-   fully var()-based (var(--x,#hex) fallbacks only) — nothing to tokenise. ── */
-.spa-sidebar{display:none;position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--stone,#161210);border-right:1px solid var(--divider,#2a231c);flex-direction:column;z-index:200;overflow:hidden}
-.spa-sb-brand{padding:14px 16px;min-height:52px;display:flex;flex-direction:column;justify-content:center;gap:3px;position:relative;flex-shrink:0}
-.spa-sb-brand::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(to right,var(--divider,#2a231c) 65%,transparent)}
-.spa-sb-logo{font-size:16px;font-weight:900;letter-spacing:6px;color:var(--cream,#f0e8d0)}
-.spa-sb-gym{font-size:9px;font-weight:700;color:var(--gold,#d8a840);letter-spacing:.22em;text-transform:uppercase}
-.spa-sb-nav{flex:1;overflow-y:auto;display:flex;flex-direction:column}
-.spa-sb-item{display:flex;align-items:center;gap:14px;width:100%;padding:12px 20px;background:color-mix(in srgb,var(--bg,#0d0b09) 55%,transparent);border:none;color:var(--dim,#554a3a);font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.04em;cursor:pointer;text-align:left;transition:color .15s,background .15s;position:relative;-webkit-tap-highlight-color:transparent}
-.spa-sb-item:hover{background:var(--stone2,#1e1a16);color:var(--muted,#806850)}
-.spa-sb-item.on{background:color-mix(in srgb,var(--teal,#4ac8c0) 10%,transparent);color:var(--teal,#4ac8c0);border-left:3px solid var(--teal,#4ac8c0);padding-left:17px}
-.spa-sb-item i{font-size:20px;flex-shrink:0}
-.spa-sb-item::before{content:'';position:absolute;top:0;left:0;width:6px;height:6px;border-top:1px solid var(--divider,#2a231c);border-left:1px solid var(--divider,#2a231c);transition:border-color .15s}
-.spa-sb-item::after{content:'';position:absolute;bottom:0;right:0;width:6px;height:6px;border-bottom:1px solid var(--divider,#2a231c);border-right:1px solid var(--divider,#2a231c);transition:border-color .15s}
-.spa-sb-item:hover::before,.spa-sb-item:hover::after{border-color:var(--muted,#806850)}
-.spa-sb-item.on::before{border-top-color:var(--teal,#4ac8c0);border-left-color:var(--teal,#4ac8c0)}
-.spa-sb-item.on::after{border-bottom-color:var(--teal,#4ac8c0);border-right-color:var(--teal,#4ac8c0)}
-.spa-sb-extra{border-top:1px solid var(--divider,#2a231c);flex-shrink:0}
-.spa-sb-link{display:flex;align-items:center;gap:14px;padding:12px 20px;color:var(--dim,#554a3a);font-size:11px;font-weight:600;text-decoration:none;transition:color .15s,background .15s;position:relative}
-.spa-sb-link:hover{color:var(--muted,#806850);background:var(--stone2,#1e1a16)}
-.spa-sb-link i{font-size:20px;flex-shrink:0}
+/* SPA desktop sidebar moved to AppChrome.module.css (#95/plans/69) — this was
+   its own GLOBAL section, already var()-based; only the ≥768px layout switch
+   (#root's margin for the now-fixed sidebar) is still App-wide CSS that a
+   :global() module selector can't own (CSS Modules localises #id selectors
+   too, so a #root rule inside AppChrome.module.css would silently stop
+   matching). --spa-sticky-top is a single 49px value now (declared above) —
+   the chrome is one height at both widths, so there's no override left here. */
 @media(min-width:768px){
-  :root{--spa-sticky-top:49px}
-  .spa-sidebar{display:flex}
   #root{margin-left:220px;margin-right:0;max-width:none}
-  .tab-bar{display:none}
-  .tb-inicio{display:none}
-  .sync-conflict-banner{top:44px}
-  .rp-sticktop{top:44px}
 }

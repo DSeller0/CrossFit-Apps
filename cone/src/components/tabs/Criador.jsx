@@ -96,7 +96,7 @@ export default function CriadorTab({
       parseInt(
         getComputedStyle(document.documentElement).getPropertyValue('--spa-sticky-top'),
         10,
-      ) || 88
+      ) || 49
     const stuck = weekGridRef.current?.getBoundingClientRect().height || 0
     const safeTop = chrome + stuck + 8 // first row of pixels the pinned chrome doesn't cover
     const { top } = el.getBoundingClientRect()

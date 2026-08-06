@@ -69,3 +69,27 @@ export function TallModalBox({ children }) {
     </div>
   )
 }
+
+// Same transform:translateZ(0) containment as ModalBox/FixedFrame (needed for
+// AppChrome's position:fixed sidebar), but scrollable with tall filler content
+// below the children — the one case (AppChrome's "Fixa na rolagem") that needs a
+// real scrollport to demonstrate a position:sticky element actually sticking,
+// rather than just render once and sit still.
+export function ScrollFrame({ children }) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        transform: 'translateZ(0)',
+        height: 420,
+        overflow: 'auto',
+        border: '1px solid var(--divider)',
+      }}
+    >
+      {children}
+      <div style={{ height: 900, padding: 16, fontSize: 12, color: 'var(--dim)' }}>
+        Role para ver a barra fixa…
+      </div>
+    </div>
+  )
+}

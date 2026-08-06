@@ -85,10 +85,14 @@ pendingDate · pendingClose · sessionMode, + start/new/close/commitMeta/**saveS
   strip whenever `editorOpen` — were both rejected on the same ground.
 - **`cr.stickyHead` pins week arrows + box tabs + the strip; the toolbar and Avisos
   scroll.** Two traps, both hit live:
-  - **Offset is `var(--spa-sticky-top)`** (`index.css`), not the flat `88px` that
-    `.ql-sess-bar`/`.sync-conflict-banner` still hardcode: that figure is topbar +
-    tab bar, and at ≥768px the tab bar is `display:none` and the sidebar takes over,
-    so 88px parks the block 39px *below* its own flow position, on top of Avisos.
+  - **Offset is `var(--spa-sticky-top)`** (`index.css`, a single `49px` since `AppChrome`
+    collapsed the two-layout chrome to one row at both widths — #95/plans/69). Hardcoding
+    `88px` — which `.sync-conflict-banner` and Resultados'/Agenda's `.rp-sticktop` both used
+    to do — was wrong even before that pass: the flat figure was topbar + tab bar, 39px too
+    low once the sidebar replaced the tab bar at ≥768px, parking the block on top of Avisos.
+    Both now read the token too (`AppChrome.module.css`'s `.banner`; `index.css`'s
+    `.rp-sticktop`), so this is no longer a live trap anywhere in the app — recorded here
+    because `scrollToEditor` below still measures the token itself, independently.
   - **`WeekGrid` returns a FRAGMENT, not a wrapper div.** `position: sticky` is
     clipped by its parent's box, so while the component owned a div the header could
     only travel that div's height and scrolled away as soon as you reached the block
@@ -274,6 +278,27 @@ Entry: `src/App.jsx`. All tabs lazy-loaded with `React.lazy()`:
 Criador, Atletas, Exercícios, Serviços, Resultados, Agenda, Publicador, Configurações, TvController.  
 Providers: `AuthContext` (session), `SyncContext` (sessions + events + Supabase sync).
 
+**AppChrome (#95 · plans/69, 2026-08-06)** — `src/components/chrome/AppChrome.jsx` +
+`AppChrome.module.css` + `tabs.js` replaced `App.jsx`'s inline topbar/tab-bar/sidebar (two stacked
+layouts, up to 226px tall on mobile — `.topbar-right`'s `flex-wrap` broke six chrome controls into
+~6 rows, and the account email drove `document.scrollWidth` past `clientWidth`) with **one 49px row
+at both widths** (`.bar`, no `flex-wrap` — that single removal was the bug fix). Desktop keeps the
+220px fixed sidebar for nav; mobile gets a horizontal-scroll tab strip instead (active tab
+auto-scrolled into view via `useEffect([tab])`, `block:'nearest'`). **Fully props-in and
+client-free** — no Supabase/storage/context import, direct or transitive; every handler arrives as a
+prop, which is what makes it render in the gallery unmodified. Returns a **Fragment, not a wrapper
+div** — `position:sticky` is clipped by its parent's box, the same trap this file records for
+Criador's `WeekGrid`. `Salvar`/`Carregar`/`Limpar estado` moved out of the chrome entirely into a new
+"Dados" section in Configurações (`src/components/tabs/config/stateBackup.js` — pure
+`buildSnapshot`/`stateFileName`/`parseStateFile` + the two with real side effects,
+`downloadSnapshot`/`applyState`; `applyState` returns `{needsReload}` rather than reloading itself,
+the same "reader returns a flag" shape as `initRegistry`'s `{registry, needsSave}`); Limpar now goes
+through `ConfirmReview` with copy that states the server-sync + sessions-only scope, replacing a
+`window.confirm` that was wrong on both counts. **`--spa-sticky-top` (`index.css`) is now a single
+`49px` declaration with no `@media` override** — the chrome is one height at both widths by
+construction (`min-height:48px`, no wrap), so every consumer (Criador's `cr.stickyHead`,
+Resultados'/Agenda's `.rp-sticktop`, the sync-conflict banner) reads the same token unconditionally.
+
 **Publicador (#25 · plans/39, pure move — no behavior change)** —
 `src/components/tabs/Publicador.jsx` is the `SchedulePublisher` shell only (~660 lines); the rest
 lives in `src/components/tabs/publicador/`: `exportHelpers.js` (pure formatters + the `useSpeech`
@@ -396,7 +421,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 - Font: `var(--font)` → Cinzel (TotK themes) or Amarante (Spirit Blossom themes). Loaded weights (`src/fonts.js`): Cinzel **400/500/600/700/800/900** (500 + 800 added in #52, the first session to touch a weight-800 use), Crimson Pro 400/600, Amarante 400 **only** — Amarante ships no bold upstream, so its synthesized bolds are by design.
 - All UI strings: pt-BR.
 - **Design process is component-driven, two lanes (WORKFLOW.md "Design work"):** the all-states source of truth is the **in-app component gallery** (`gallery.html`, dev-only), which renders the *real* components — Lane A (changing existing UI) is gallery-first, no static mockup; Lane B (net-new) does a Claude Design ideation mockup first, then the built component enters the gallery. The moment code exists, the gallery is the truth — never hand-maintain a mirror. Claude Design (`cone/design/` → "Cone Design System" project) is token canon + **generated component cards** + Lane-B ideation + a screenshot archive, not a mirror.
-- **Component gallery:** `gallery.html` (repo root) + `cone/src/public/gallery/` — theme switcher + width toggle rendering the real components in every state from mock fixtures. **Decomposed #74/plans/41 (2026-07-26, pure move — `Gallery.jsx` had grown to 1790 lines, the fastest-growing file in the repo, and every design pass edits it):** `Gallery.jsx` is now the ~95-line shell (theme `<select>`, width toggle, sidebar) that imports and composes `GROUPS` from `gallery/groups/*.jsx`; `gallery/fixtures.js` holds the pure-data mock fixtures shared across groups (exercise/session/result shapes); `gallery/harness.jsx` holds the 5 generic render shells (`Case`/`Section`/`FixedFrame`/`ModalBox`/`TallModalBox`); each of the 8 groups (`spa.jsx`/`criador.jsx`/`shared.jsx`/`results.jsx`/`leaderboard.jsx`/`me.jsx`/`schedule.jsx`/`index.jsx`) owns its own items array plus any fixtures/stateful demo wrappers used only by that group (e.g. `MeSheetHarness`, `LbMobileDemo`, `StubTypePicker`) — co-located with their sole consumer rather than centralized, since every demo wrapper turned out to be single-group. `GROUPS` holds 46 items across **SPA**/**Criador**/Shared/Results/Leaderboard/Me/Schedule/**Index** (the **SPA** group = the #54/C0 primitives `Button`/`Input`/`MaskedTimeInput`/`Card`/`ConfirmReview`; the **Criador** group = #92's text mode (`SessionTextPane`/`BlockTextEditor`/`WeekSessionCard`/`WeekImportModal`) plus #58's `GoalInput`/`SessionMetaModal`; the Index group = the #53 landing-page pieces: `WeekGrid`/`DaySessionCard`/`DayRanking`/`BoxWarnings`, all from `src/public/index/rail.jsx` — `WeekGrid` carries a second case for its Criador day-strip use, `filter`+`showCount`), picked from a sidebar. (The SPA group's card generates as `design/components/spa.html` — `design:cards` derives the filename from `group.toLowerCase()`, so that group name is a single clean token, not "SPA / UI".) **Dev-only:** NOT in `vite.public.config.js` `input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built/deployed. Grows page-by-page as components are extracted (#17).
+- **Component gallery:** `gallery.html` (repo root) + `cone/src/public/gallery/` — theme switcher + width toggle rendering the real components in every state from mock fixtures. **Decomposed #74/plans/41 (2026-07-26, pure move — `Gallery.jsx` had grown to 1790 lines, the fastest-growing file in the repo, and every design pass edits it):** `Gallery.jsx` is now the ~95-line shell (theme `<select>`, width toggle, sidebar) that imports and composes `GROUPS` from `gallery/groups/*.jsx`; `gallery/fixtures.js` holds the pure-data mock fixtures shared across groups (exercise/session/result shapes); `gallery/harness.jsx` holds the 6 generic render shells (`Case`/`Section`/`FixedFrame`/`ModalBox`/`TallModalBox`/`ScrollFrame` — the last one added with `AppChrome`, #95/plans/69: same `transform:translateZ(0)` containment as `ModalBox`, but scrollable with tall filler so a `position:sticky` element can demonstrate actually sticking); each of the 8 groups (`spa.jsx`/`criador.jsx`/`shared.jsx`/`results.jsx`/`leaderboard.jsx`/`me.jsx`/`schedule.jsx`/`index.jsx`) owns its own items array plus any fixtures/stateful demo wrappers used only by that group (e.g. `MeSheetHarness`, `LbMobileDemo`, `StubTypePicker`) — co-located with their sole consumer rather than centralized, since every demo wrapper turned out to be single-group. `GROUPS` holds 46 items across **SPA**/**Criador**/Shared/Results/Leaderboard/Me/Schedule/**Index** (the **SPA** group = the #54/C0 primitives `Button`/`Input`/`MaskedTimeInput`/`Card`/`ConfirmReview` plus **`AppChrome`** (#95/plans/69 — the SPA chrome bar + sidebar, 7 cases incl. sync states, the conflict banner and the sticky-scroll pin); the **Criador** group = #92's text mode (`SessionTextPane`/`BlockTextEditor`/`WeekSessionCard`/`WeekImportModal`) plus #58's `GoalInput`/`SessionMetaModal`; the Index group = the #53 landing-page pieces: `WeekGrid`/`DaySessionCard`/`DayRanking`/`BoxWarnings`, all from `src/public/index/rail.jsx` — `WeekGrid` carries a second case for its Criador day-strip use, `filter`+`showCount`), picked from a sidebar. (The SPA group's card generates as `design/components/spa.html` — `design:cards` derives the filename from `group.toLowerCase()`, so that group name is a single clean token, not "SPA / UI".) **Dev-only:** NOT in `vite.public.config.js` `input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built/deployed. Grows page-by-page as components are extracted (#17).
 - **`npm run design:cards`** (`vite.design.config.js` + `scripts/build-design-cards.mjs`) SSRs the gallery's exported `GROUPS` into the self-contained Claude Design cards — real markup + real CSS + inlined themes/fonts + a 4-theme switcher — so Claude Design can read and compose from actual component markup. Cards are a **build artifact: never hand-edit one**, change the component and re-run (Lane A ends with regenerate + sync). Cards can't load the `ti` webfont or any external URL (CSP), so `results`/`schedule` cards show blank icon gaps — expected, noted on the card itself. `tokens/palette.html` is generated from `themes.css`, which is what finally killed its 13-vs-29 token drift. Details: `cone/design/README.md`.
 - Design-pass program (restructured #27/#28, sessions #49–#59): `docs/plans/16-design-pass-program.md`. Product docs: `docs/FEATURES.md` (feature catalog + gate candidates), `docs/PRODUCT.md` (personas/tiers), `docs/MOBILE.md` (Android/iOS assessment — do nothing until a trigger fires). Consolidated interactive view: `docs/site/cone-docs.html` (open via `file://` — repo-only, NOT in the deploy whitelist by design; interactive tier board + coach-services worksheet for the tier meeting, full screenshot baseline in `docs/site/img/`; snapshot of the .md docs, regenerate on request).
 

@@ -23,6 +23,10 @@
 
 .hint{ font-size:11px; color:var(--muted); line-height:1.5; margin:-6px 0 0 }
 
+/* Dados section (#95/plans/69) — Salvar/Carregar/Limpar estado. */
+.dataRow{ display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap }
+.dataErr{ font-size:11px; color:var(--red); line-height:1.5; margin:-6px 0 0 }
+
 .themeGrid{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
 
 /* Per-box theme rows (#143). A label + a native select — Config has no Select primitive

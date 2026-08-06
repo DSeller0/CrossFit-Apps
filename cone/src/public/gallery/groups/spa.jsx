@@ -2,9 +2,10 @@ import { useState } from 'react'
 import Button from '../../../components/ui/Button.jsx'
 import Input from '../../../components/ui/Input.jsx'
 import Card from '../../../components/ui/Card.jsx'
+import AppChrome from '../../../components/chrome/AppChrome.jsx'
 import MaskedTimeInput from '../../shared/MaskedTimeInput.jsx'
 import ConfirmReview, { ReadBox, ReadRow } from '../../shared/ConfirmReview.jsx'
-import { Case, Section, ModalBox } from '../harness.jsx'
+import { Case, Section, ModalBox, FixedFrame, ScrollFrame } from '../harness.jsx'
 import { NOOP } from '../fixtures.js'
 import s from '../Gallery.module.css'
 
@@ -82,6 +83,32 @@ const crBody = (
     <ReadRow label="Tempo" value="11:42" mono />
   </ReadBox>
 )
+// Same shape as MaskedTimeDemo above — the one interactive case (#1) owns its
+// own tab state so clicking a nav button actually switches the active tab.
+const CHROME_FIXTURE = { userEmail: 'coach@cone.com.br', gymName: 'Cone' }
+function ChromeDemo() {
+  const [tab, setTab] = useState('creator')
+  return <AppChrome tab={tab} onTabChange={setTab} {...CHROME_FIXTURE} />
+}
+
+// AppChrome's fixed sidebar needs FixedFrame/ScrollFrame's transform containment
+// PLUS a reserved 220px lane at 768px+ (s.chromeGutter — see Gallery.module.css)
+// or it renders on top of the bar instead of beside it.
+function ChromeFixed({ children }) {
+  return (
+    <FixedFrame variant="frameBottom">
+      <div className={s.chromeGutter}>{children}</div>
+    </FixedFrame>
+  )
+}
+function ChromeScroll({ children }) {
+  return (
+    <ScrollFrame>
+      <div className={s.chromeGutter}>{children}</div>
+    </ScrollFrame>
+  )
+}
+
 function ConfirmReviewDemo() {
   const [open, setOpen] = useState(false)
   return (
@@ -355,6 +382,62 @@ export default {
                 </ReadBox>
               </ConfirmReview>
             </ModalBox>
+          </Case>
+        </Section>
+      ),
+    },
+    {
+      id: 'spa-chrome',
+      label: 'AppChrome',
+      render: () => (
+        <Section
+          title="AppChrome"
+          sub="src/components/chrome/AppChrome.jsx — a barra de 49px + sidebar da SPA (#95/plans/69). Substitui o topbar + tab-bar de duas linhas (até 226px no mobile, quebrado em ~6 linhas por causa do flex-wrap de .topbar-right) por UMA barra sem quebra, nos dois larguras. Totalmente props-in e client-free (sem Supabase/storage/context) — por isso renderiza aqui sem mocks."
+        >
+          <Case label="Padrão · idle (interativo — clique nas abas, dê Tab)">
+            <ChromeFixed>
+              <ChromeDemo />
+            </ChromeFixed>
+          </Case>
+          <Case label="Sincronizando (spinner + botão desabilitado)">
+            <ChromeFixed>
+              <AppChrome {...CHROME_FIXTURE} tab="creator" syncState="syncing" onTabChange={NOOP} />
+            </ChromeFixed>
+          </Case>
+          <Case label="Sincronizado">
+            <ChromeFixed>
+              <AppChrome {...CHROME_FIXTURE} tab="creator" syncState="synced" onTabChange={NOOP} />
+            </ChromeFixed>
+          </Case>
+          <Case label="Conflito — botão destrutivo + pulso + faixa fixa sob a barra">
+            <ChromeFixed>
+              <AppChrome
+                {...CHROME_FIXTURE}
+                tab="creator"
+                syncState="conflict"
+                onTabChange={NOOP}
+              />
+            </ChromeFixed>
+          </Case>
+          <Case label="Salvo automaticamente (badge — só aparece em 768px+)">
+            <ChromeFixed>
+              <AppChrome {...CHROME_FIXTURE} tab="creator" autoSaved onTabChange={NOOP} />
+            </ChromeFixed>
+          </Case>
+          <Case label="Overflow — e-mail e nome de academia longos (prova o truncamento)">
+            <ChromeFixed>
+              <AppChrome
+                tab="config"
+                userEmail="treinador.principal.crossfit@academiacomnomeextremamentelongo.com.br"
+                gymName="Academia CrossFit Zona Sul — Unidade Extremamente Comprida"
+                onTabChange={NOOP}
+              />
+            </ChromeFixed>
+          </Case>
+          <Case label="Fixa na rolagem — a barra gruda no topo do scrollport">
+            <ChromeScroll>
+              <AppChrome {...CHROME_FIXTURE} tab="creator" onTabChange={NOOP} />
+            </ChromeScroll>
           </Case>
         </Section>
       ),
