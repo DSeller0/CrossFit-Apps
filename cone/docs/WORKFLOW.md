@@ -32,7 +32,7 @@ An item enters **Ready** only when its plan file exists. Keep **only 2-3 items i
 2. Claude reads `CLAUDE.md` (auto) + that one plan + the relevant code.
 3. Execute → commit + push.
 4. Move the row to **Done** in `BACKLOG.md`.
-5. Mark the plan file done: prepend `> ✅ Done: <commit> · <date> — see BACKLOG.md` under its title (see "Plan lifecycle" below).
+5. Mark the plan file done: prepend `> ✅ Done: <commit> · <date> — see BACKLOG.md` under its title (see "Plan lifecycle" below). Then run **`node scripts/audit-backlog-markers.mjs`** (from `cone/`, #151/plans/70) — it cross-references every row's marker against its plan's Done marker and flags the four drift shapes steps 4–5 exist to prevent. Advisory only (not a CI gate): a clean table confirms 4–5 landed correctly; any hit is something to fix inline before ending the session, same as the check that follows it.
 
 One item per session for size **S/M**. Large items (e.g. SPA standardization) get a dedicated *planning* session first, then *execution* session(s).
 
