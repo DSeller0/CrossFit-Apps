@@ -1,5 +1,14 @@
 # 69 — #95 · The SPA chrome becomes one 49px row, extracted as a real component
 
+> ✅ Done: `9a24ee8` · 2026-08-06 — see BACKLOG.md
+>
+> Two defects surfaced live in the gallery review that the plan didn't anticipate — the
+> `FixedFrame`/`ScrollFrame` containment reserved no lane for `AppChrome`'s fixed sidebar (it
+> rendered on top of the bar, hiding Início) and the two `ui/Button` icon controls stretched to
+> ~47px against Início's fixed 40px for lack of `align-self:center`. Both user-caught during
+> review, both fixed. Everything else shipped as planned, including the "Open at the approval
+> gate" item below (left as the deliberate cosmetic step it was flagged as).
+
 *Planned 2026-08-05 alongside plans/70 and plans/71 — the first Tier 4 refill after the housekeeping
 program closed. **Not executed in that session** — its own session. **Sonnet · M · Lane A
 (gallery-first).** Tier 4 rank 3; ranks 1–2 (#147, #150) shipped 2026-08-05.*
