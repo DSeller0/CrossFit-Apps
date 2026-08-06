@@ -1,6 +1,6 @@
 # 70 — #151 · Board/plan marker drift, made mechanical
 
-> ✅ Done: `pending` · 2026-08-06 — see BACKLOG.md
+> ✅ Done: `37c3ffb` · 2026-08-06 — see BACKLOG.md
 
 *Planned 2026-08-05 alongside plans/69 and plans/71. **Not executed in that session** — its own
 session. **Sonnet · XS.** Tier 4 rank 4. Independent of 69 and 71 — no gate either way.*
