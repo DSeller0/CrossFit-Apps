@@ -8,6 +8,16 @@
 }
 /* The hand-rolled .hdr/.brand/.gym header is gone — the page uses the shared
    Header.jsx now, which is what gives it a real <header> (#14). */
+
+/* #144 — Header + `.selBar` + `.weekNav` as one sticky block instead of three
+   individually-offset ones. `Header.jsx`'s own `position:sticky` becomes a harmless
+   no-op nested in here (its containing block is then exactly its own height) — left
+   alone since it's shared with five other pages. Must stay a direct child of
+   `.pageRoot`: `position:sticky` is clipped by an ancestor's box, the same trap
+   CLAUDE.md records for Criador's `WeekGrid` fragment and Schedule's `.stickyHead`. */
+.stickyHead { position:sticky; top:0; z-index:20; }
+@media(min-width:768px) { .stickyHead { flex-shrink:0; } }
+
 .main { }
 @media(min-width:768px) { .main { display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; } }
 

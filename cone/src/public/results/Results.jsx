@@ -114,6 +114,9 @@ export default function Results() {
   const [errMsg, setErrMsg] = useState('')
   const didUrlScroll = useRef(false)
   const didAutoSelect = useRef(false)
+  // #144 — the one pinned block (header + `.selBar` + `.weekNav`). Measured, not assumed:
+  // its height varies with `lockedId`, which decides whether `.selBar` renders at all.
+  const stickyHeadRef = useRef(null)
 
   // Mount-only: `load` is this page's whole Supabase fetch and is redefined every render,
   // so listing it would re-fetch the page on every render. Same call as Me.jsx's.
@@ -228,13 +231,14 @@ export default function Results() {
         const el = document.querySelector(`[data-card-id="${urlSid}"]`)
         if (!el) return
         // `block: 'start'` (not 'nearest') so the card actually lands at the top of
-        // the viewport instead of merely "close enough" — but the sticky Header
-        // (Header.module.css, `position:sticky; top:0`) would then cover it, so the
-        // scroll target needs its own scroll-margin-top matching the header's live
-        // rendered height (measured, not hardcoded — it differs at the ≥768px
-        // breakpoint where brand/sub font sizes step up).
-        const header = document.querySelector('header')
-        if (header) el.style.scrollMarginTop = `${header.getBoundingClientRect().height + 8}px`
+        // the viewport instead of merely "close enough" — but the sticky head
+        // (`.stickyHead`, Header + `.selBar` + `.weekNav`) would then cover it, so the
+        // scroll target needs its own scroll-margin-top matching that block's live
+        // rendered height (measured, not hardcoded — `.selBar` renders only when
+        // `!lockedId`, so the height differs by link, same reason as `Schedule.jsx`'s
+        // `stickyHeadRef`).
+        const head = stickyHeadRef.current
+        if (head) el.style.scrollMarginTop = `${head.getBoundingClientRect().height + 8}px`
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       })
     }
@@ -646,10 +650,13 @@ export default function Results() {
       </div>
 
       <div className={styles.pageRoot}>
-        <Header brand={gymName.toUpperCase()} sub="RESULTADOS" />
-        <main className={styles.main}>
-          <h1 className={styles.srOnly}>Resultados</h1>
-
+        {/* #144 — the header and `.selBar`/`.weekNav` are ONE sticky block, not three
+            individually-offset ones (that was #147's bug on Schedule, landed here from the
+            start instead). `.weekNav` is NOT `.mobileOnly` here — unlike Schedule, it's
+            Results' only desktop week control, so hoisting it out of `<main>` is a real
+            desktop layout change, not a no-op. */}
+        <div className={styles.stickyHead} ref={stickyHeadRef}>
+          <Header brand={gymName.toUpperCase()} sub="RESULTADOS" />
           {status !== 'loading' && (
             <>
               {!lockedId && (
@@ -691,6 +698,9 @@ export default function Results() {
               </div>
             </>
           )}
+        </div>
+        <main className={styles.main}>
+          <h1 className={styles.srOnly}>Resultados</h1>
 
           {status === 'loading' && (
             <div className={styles.loading} aria-live="polite">
