@@ -29,6 +29,28 @@ carried prerequisites that were long satisfied and an Agenda assignment that mov
 all 2026-07-26). None of the three C-sessions is blocked technically or by the user's code-health-first call
 any more; nothing has been picked from Ready yet.
 
+> 🔑 **RESUME POINT — user instruction, 2026-08-07: "go back to the last design pass we were dealing
+> with."** This program was **parked, not finished.** The 2026-07-26 scope call put the whole
+> housekeeping program ahead of it; that program closed 2026-08-05
+> ([plans/68](./68-tier3-closeout.md), Tiers 1–3 all shipped) and its Tier 4 successor closed
+> 2026-08-06. **The last session actually worked here was C4 · Criador ·
+> [plans/37](./37-design-c4-criador.md) · `aea2e9d` · 2026-07-22.**
+>
+> **The next planning session resumes this table in program order: C2 (#56) → C3 (#57) → C5 (#59).**
+> Ready currently holds [plans/72](./72-results-sticky-selectors.md)/[73](./73-pr-card-layout.md)/[74](./74-ios-input-zoom.md)
+> (the user's phone rows, 2026-08-07); this instruction applies to the refill *after* those.
+>
+> ⚠️ **BACKLOG.md's Tier 4 ranking does not contain C2/C3/C5 at all** — it announced that the design
+> program *"is the queue now"* and then ranked only #96 and #14 out of the nine rows it named. Two
+> consequences, both recorded on the board 2026-08-07: **#14 was ranked 8 despite its own row stating
+> it runs after C5** (rule 5 below is why), and **#96 is a layout follow-up to C1, not a C-session** —
+> it does not substitute for resuming this table.
+>
+> ⚠️ **Re-measure before quoting this table.** Its own header says it went stale once already, and the
+> raw-line figures in the C5 row predate `9b82015`'s repo-wide reformat (BACKLOG.md's unit-discontinuity
+> note): `AgendaView.jsx` is **1598** raw today, not the 408 recorded below, and `Servicos.jsx` — C2's
+> real weight, with **no `.module.css` at all** — is **1199**.
+
 ## Rules for every session
 1. **Two lanes (WORKFLOW "Design work")** — this rule used to read "mockup-first: ASCII → `cone/design/` card → DesignSync → approval → implement", which the 2026-07-10 process reform (plans/19) superseded; plans/20 and plans/21 had already overridden it locally. Every remaining **B session and C1–C5 is Lane A**: the surfaces exist, so work **gallery-first — no static mockup**. Adjust the real component → all states in the gallery across 4 themes + both widths → `npm run design:cards` + sync → **stop at the approval gate**. Only **C0** (defines a net-new standard) and **#43** (net-new themes) are Lane B, i.e. actually mockup-first.
 2. Fold-ins for the surface's own files: hex→vars (except jsPDF/print literals + `config.js` data colors), rounded-rects→square (circles `50%` exempt, pills are rects — policy in CLAUDE.md), click-divs get role/tabIndex/keyboard, icon-only buttons get aria-label, `<main>`/heading where the page lacks one.
