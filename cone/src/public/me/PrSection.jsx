@@ -96,16 +96,19 @@ function MovTile({ name, pr, color, bt, onOpen, onClear }) {
         <span className={styles.tileNum}>{parts?.num ?? '—'}</span>
         {parts && <span className={styles.tileUnit}>{parts.unit}</span>}
       </div>
-      {(pct !== null || delta) && (
+      {pct !== null && (
         <div className={styles.barRow}>
-          {pct !== null && (
-            <span className={styles.barGrow}>
-              <TallyBar pct={pct} color={color} size="sm" grow />
-            </span>
-          )}
-          <Delta delta={delta} />
+          <span className={styles.barGrow}>
+            <TallyBar pct={pct} color={color} size="sm" grow />
+          </span>
         </div>
       )}
+      {/* Delta gets its own row here (a flex-column child of .tile, so it falls onto its
+          own line for free) — unlike BenchTile below, whose Delta stays inline in
+          .benchBottom. BenchTile has no .barRow/TallyBar to protect from the squeeze
+          #145 fixed here, and lifting its delta out would break the baseline-aligned
+          time/unit/delta run it's part of. Not matched for symmetry on purpose. */}
+      <Delta delta={delta} />
       {pr.target && <div className={styles.tileMeta}>meta {prValLabel(pr.target, pr)}</div>}
     </div>
   )

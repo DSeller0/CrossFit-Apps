@@ -182,7 +182,14 @@
 .famChev { color: var(--dim); font-size: 11px; width: 12px; text-align: center; flex-shrink: 0; }
 
 .famBody { padding: 0 13px 13px; }
-.tileGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tileGrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+/* Not merged into the `:6` layout fork above: that block's rules sit EARLIER in this
+   file than this one, so a same-specificity `.tileGrid` declared here would still
+   cascade-win at ≥768px and silently cancel the two-column override. Same breakpoint,
+   local to keep base + override next to each other. */
+@media (min-width: 768px) {
+  .tileGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 /* PR tile (movement: load / reps / dist) */
 .tile { background: var(--stone2); border: 1px solid var(--divider); padding: 10px 11px 11px; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
