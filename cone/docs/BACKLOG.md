@@ -620,7 +620,7 @@ section lists what was checked and found **clean**, so it isn't re-raised next p
 
 ## ✅ Done (recent)
 
-**2026-08-06 — #149 + #104(c) The billing pair: extract and test `calcTotal`, then snapshot the rate** · [plans/71](./plans/71-billing-extraction.md) · `pending`. Tier 4's fifth and last row — **Tier 4 is now fully shipped (ranks 1–5)**.
+**2026-08-06 — #149 + #104(c) The billing pair: extract and test `calcTotal`, then snapshot the rate** · [plans/71](./plans/71-billing-extraction.md) · `f5b8c97`. Tier 4's fifth and last row — **Tier 4 is now fully shipped (ranks 1–5)**.
 
 New `src/components/tabs/publicador/billing.js` — `calcTotal`/`sumByCurrency`/`fmtDur`/`fmtDate`, imports nothing (no React, no client, no storage), deliberately **not** `exportHelpers.js` as #149's row said: that module reads `window.SpeechRecognition` at module-evaluation time, `vite.config.js` runs tests under `environment: 'node'` with no `setupFiles`, and jsdom isn't a devDependency — importing it under vitest throws before any test runs. 20 new tests (`billing.test.js`) pin every edge nobody had asserted, including the two behaviors plans/68 shipped unpinned on 2026-08-05: `per_hour` bills fractional hours (90min → 1.5h) with a one-hour minimum (30min → 1h, 0/missing → 1h default), `per_session` ignores duration entirely, `rate: 0` yields no total row (pinned as arguably-wrong, not changed here), and `sumByCurrency` keeps `'R$'`/`'R$ '` as distinct buckets (currency is free text with no validation).
 

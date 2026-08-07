@@ -1,6 +1,6 @@
 # 71 — #149 + #104(c) · The billing pair: extract and test `calcTotal`, then snapshot the rate
 
-> ✅ Done: `pending` · 2026-08-06 — see BACKLOG.md
+> ✅ Done: `f5b8c97` · 2026-08-06 — see BACKLOG.md
 >
 > ⚠️ **The plan's "drive the real thing" live-verification steps were not run** — Docker (needed
 > for the local Supabase stack) wasn't available in the execution environment. Unit tests, lint,
