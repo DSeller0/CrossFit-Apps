@@ -1,5 +1,12 @@
 # 71 — #149 + #104(c) · The billing pair: extract and test `calcTotal`, then snapshot the rate
 
+> ✅ Done: `pending` · 2026-08-06 — see BACKLOG.md
+>
+> ⚠️ **The plan's "drive the real thing" live-verification steps were not run** — Docker (needed
+> for the local Supabase stack) wasn't available in the execution environment. Unit tests, lint,
+> format and build all pass; run the Verification section's checklist against the local stack
+> before treating this as fully proven in the browser.
+
 *Planned 2026-08-05 alongside plans/69 and plans/70. **Not executed in that session** — its own
 session. **Sonnet · S.** Tier 4 rank 5. Independent of 69 and 70.*
 

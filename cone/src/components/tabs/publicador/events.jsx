@@ -3,6 +3,7 @@ import { loadAthletes, loadSettings, loadLocations, loadCoach, toISO } from '../
 import { buildPixPayload, pixClean } from '../../../utils/pix'
 import { MONTH_PT } from '../../../public/lib/week.js'
 import { sessName } from '../../../public/lib/sessions.js'
+import { fmtDate, fmtDur, calcTotal, sumByCurrency } from './billing.js'
 
 // ── EventFormInner — standalone so inputs don't lose focus ───────────────────
 export function EventFormInner({ showForm, sessions, athletes, initialData, onSave, onCancel }) {
@@ -20,17 +21,47 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
         : [...(p.athleteIds || []), id],
     }))
   const selSvc = !isPers && fd.locationId ? locs.find(l => l.id === fd.locationId) : null
+  // #104(c) — the personal-location reverse lookup, same shape as the per-athlete one the
+  // picker below already does at render time (:210-212), keyed off whichever athlete is
+  // first selected. A personal location's rate is shared by every athlete in its
+  // athleteIds[] (CLAUDE.md/plans/71), so the athletes on one event are practically always
+  // on the same location — the first one is representative, not a guess.
+  const persSvc =
+    isPers && (fd.athleteIds || []).length
+      ? locs.find(l => l.type === 'personal' && (l.athleteIds || []).includes(fd.athleteIds[0]))
+      : null
+  // #104(c) — freeze the rate at booking time so a later change in Serviços can't
+  // retroactively re-price an event already booked; `rate: 0`/no service resolves to no
+  // snapshot at all, matching calcTotal's own "no rate → no total" behavior (billing.js).
+  // ⚠️ DELIBERATE LIMIT (user decision, 2026-08-05): this is a SNAPSHOT, not a versioned
+  // HISTORY — it can never re-price an event booked before it shipped, and a rate change
+  // today never reaches an event that already has one. What WOULD reach those is
+  // `loc.rateHistory = [{rate, rateUnit, currency, from}, …]` resolved by the event's own
+  // date, but that reaches into Servicos.jsx's saveLoc/startEdit/rateLabel and every rate
+  // reader — deferred to #59 (the Agenda/Publicador design pass), filed as its own Icebox
+  // row rather than dropped.
+  const svc = selSvc || persSvc
+  const rateSnapshot = svc?.rate
+    ? { rate: svc.rate, rateUnit: svc.rateUnit, currency: svc.currency || 'R$' }
+    : null
   const [rec, setRec] = useState({
     enabled: false,
     freq: 'weekly',
     days: [new Date(showForm.date + 'T12:00:00').getDay()],
     until: '',
   })
+  // react-hooks/purity false-fires on this: `_uid` is never called during render (only from
+  // handleSave, itself only reachable via the Salvar button's onClick below) — the same
+  // "Date.now() inside a handler-only function" exemption CLAUDE.md already documents for
+  // this rule. Confirmed by bisection: the trigger is `rateSnapshot`'s ternary object literal
+  // above flowing into `base`'s spread in the same object literal as `_uid()` two blocks down
+  // — unrelated to whether `_uid` itself is reachable during render.
+  // eslint-disable-next-line react-hooks/purity
   const _uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
   const toggleRecDay = i =>
     setRec(r => ({ ...r, days: r.days.includes(i) ? r.days.filter(x => x !== i) : [...r.days, i] }))
   const handleSave = () => {
-    const base = { ...fd }
+    const base = { ...fd, ...(rateSnapshot ? { rateSnapshot } : {}) }
     if (!rec.enabled || !rec.until || (rec.freq === 'weekly' && rec.days.length === 0)) {
       onSave([base])
       return
@@ -38,6 +69,9 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
     const results = []
     const until = new Date(rec.until + 'T12:00:00')
     let cur = new Date(showForm.date + 'T12:00:00')
+    // Every recurring instance clones `base`, so all N dated events freeze TODAY's rate —
+    // even the ones dated months out. Defensible (it's the quoted price at booking time),
+    // not a bug; stated here because it would otherwise be easy to mistake for one.
     while (cur <= until) {
       if (rec.freq === 'daily' || rec.days.includes(cur.getDay()))
         results.push({
@@ -637,24 +671,29 @@ export function ReportModal({ events, sessions, onClose }) {
     return groups
   }
 
-  function fmtDate(iso) {
-    const d = new Date(iso + 'T12:00:00')
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
+  // The one `locForCalc` resolution, used by all four calcTotal call sites below — a
+  // personal group resolves through the athlete (a personal location's rate is shared by
+  // every athlete in its athleteIds[]); anything else already has its own `loc`.
+  function resolveLocForCalc(loc, athGroup) {
+    return athGroup
+      ? locations.find(l => l.type === 'personal' && (l.athleteIds || []).includes(athGroup.id))
+      : loc
   }
-  function fmtDur(min) {
-    return min >= 60 ? `${Math.floor(min / 60)}h${min % 60 ? (min % 60) + 'min' : ''}` : min + 'min'
-  }
-  function calcTotal(evs, loc) {
-    if (!loc || !loc.rate) return null
-    const total = evs.reduce((sum, ev) => {
-      // #104(a) — fractional hours, not Math.floor: a 90-minute per_hour class billed as
-      // one hour flat (fmtDur two lines up already prints "1h30min" for the same event,
-      // so the PDF disagreed with itself about how long the class was). Math.max(1, …)
-      // is kept — a session under an hour still bills a minimum of one.
-      const hrs = loc.rateUnit === 'per_hour' ? Math.max(1, (ev.durationMin || 60) / 60) : 1
-      return sum + (loc.rateUnit === 'per_hour' ? hrs * loc.rate : loc.rate)
-    }, 0)
-    return { total, currency: loc.currency || 'R$' }
+
+  // The report-wide grand total: every group's per-currency buckets, flattened and re-summed
+  // by sumByCurrency — the same primitive calcTotal itself uses per-event. Called identically
+  // by generatePDF's footer and the on-screen preview below, so the two can't independently
+  // drift the way the on-screen total once did (#149).
+  function grandTotal(evs) {
+    const entries = []
+    Object.entries(groupByLocation(evs)).forEach(([locId, levs]) => {
+      const loc = locations.find(l => l.id === locId)
+      const athGroupId = locId.startsWith('__ath__') ? locId.slice(7) : null
+      const athGroup = athGroupId ? loadAthletes().find(a => a.id === athGroupId) : null
+      const t = calcTotal(levs, resolveLocForCalc(loc, athGroup))
+      Object.entries(t.totals).forEach(([currency, total]) => entries.push({ total, currency }))
+    })
+    return sumByCurrency(entries)
   }
 
   async function qrToBase64(text, size = 200) {
@@ -712,10 +751,6 @@ export function ReportModal({ events, sessions, onClose }) {
         doc.text('Relatório — ' + period, 14, y)
         y += 8
         const summaryRows = []
-        // #104(b) — per-currency subtotals, not one grand total: two locations with
-        // different `currency` strings used to sum into a single meaningless number
-        // (grandCurrency was just whichever group happened to run last).
-        const grandTotals = {}
         Object.entries(groups).forEach(([locId, levs]) => {
           const loc = locations.find(l => l.id === locId)
           const athGroupId2 = locId.startsWith('__ath__') ? locId.slice(7) : null
@@ -728,30 +763,21 @@ export function ReportModal({ events, sessions, onClose }) {
                 ? 'Sem local'
                 : locId
           const totalMin = levs.reduce((s, ev) => s + (ev.durationMin || 60), 0)
-          const locForCalc = athGroup2
-            ? locations.find(
-                l => l.type === 'personal' && (l.athleteIds || []).includes(athGroup2.id),
-              )
-            : loc
-          const t = calcTotal(levs, locForCalc)
-          if (t) {
-            grandTotals[t.currency] = (grandTotals[t.currency] || 0) + t.total
-          }
+          const t = calcTotal(levs, resolveLocForCalc(loc, athGroup2))
           summaryRows.push([
             name,
             loc?.type === 'box' ? 'Box' : 'Personal',
             String(levs.length),
             fmtDur(totalMin),
-            t ? t.currency + ' ' + t.total.toLocaleString('pt-BR') : '-',
+            t.currencies.length ? t.label : '-',
           ])
         })
-        // One row per currency actually seen (almost always just one) rather than a
-        // single combined figure, so a report spanning R$ and, say, US$ locations never
-        // prints a total that silently added the two together.
-        const grandCurrencies = Object.keys(grandTotals).filter(c => grandTotals[c] > 0)
-        const grandLabel = grandCurrencies
-          .map(c => `${c} ${grandTotals[c].toLocaleString('pt-BR')}`)
-          .join(' + ')
+        // #104(b) — per-currency subtotals, not one grand total: two locations with
+        // different `currency` strings used to sum into a single meaningless number
+        // (grandCurrency was just whichever group happened to run last). One row per
+        // currency actually seen (almost always just one), so a report spanning R$ and, say,
+        // US$ locations never prints a total that silently added the two together.
+        const { currencies: grandCurrencies, label: grandLabel } = grandTotal(evs)
         autoTable(doc, {
           startY: y,
           head: [['Local', 'Tipo', 'Sessões', 'Tempo Total', 'Valor']],
@@ -800,7 +826,13 @@ export function ReportModal({ events, sessions, onClose }) {
               : ''
             const row = [fmtDate(ev.date), ev.time, fmtDur(ev.durationMin || 60), ev.label || name]
             if (showDetails) row.push(blockLabels || '-')
-            if (showRate && loc?.rate) row.push((loc.currency || 'R$') + ' ' + loc.rate)
+            // #104(c) — the event's own frozen rate, not the location's current one; the
+            // group-level total below resolves the same way (calcTotal), so this per-event
+            // figure can no longer silently disagree with it.
+            if (showRate && loc?.rate) {
+              const src = ev.rateSnapshot ?? loc
+              row.push((src.currency || 'R$') + ' ' + src.rate)
+            }
             return row
           })
           const head = [['Data', 'Hora', 'Duração', 'Sessão']]
@@ -815,25 +847,26 @@ export function ReportModal({ events, sessions, onClose }) {
             margin: { left: 14, right: 14 },
           })
           y = doc.lastAutoTable.finalY + 4
-          const locForCalc = athGroup2
-            ? locations.find(
-                l => l.type === 'personal' && (l.athleteIds || []).includes(athGroup2.id),
-              )
-            : loc
-          const t = calcTotal(levs, locForCalc)
+          const t = calcTotal(levs, resolveLocForCalc(loc, athGroup2))
           const totalMin = levs.reduce((s, ev) => s + (ev.durationMin || 60), 0)
           doc.setFontSize(9)
           doc.setFont('helvetica', 'italic')
           doc.setTextColor(100, 100, 100)
           let sub = `${levs.length} ${levs.length !== 1 ? 'sessões' : 'sessão'} · ${fmtDur(totalMin)}`
-          if (t && showRate) sub += ` · ${t.currency} ${t.total.toLocaleString('pt-BR')}`
+          if (t.currencies.length && showRate) sub += ` · ${t.label}`
           doc.text(sub, 14, y)
           y += 8
-          if (showPix && coach.pixEnabled && coach.pixKey && t && t.total > 0) {
+          // Pix needs one amount + one currency — a group whose booked events snapshotted
+          // two different currencies (the location's currency changed between them) has no
+          // single QR/EMV payload that can represent both, so Pix is skipped for it rather
+          // than silently picking one.
+          const pixCurrency = t.currencies.length === 1 ? t.currencies[0] : null
+          const pixTotal = pixCurrency ? t.totals[pixCurrency] : 0
+          if (showPix && coach.pixEnabled && coach.pixKey && pixCurrency && pixTotal > 0) {
             const cap =
               coach.pixTestCap && Number(coach.pixTestCap) > 0 ? Number(coach.pixTestCap) : null
-            const payAmount = cap && t.total > cap ? cap : t.total
-            const isCapped = cap && t.total > cap
+            const payAmount = cap && pixTotal > cap ? cap : pixTotal
+            const isCapped = cap && pixTotal > cap
             const prd = useRange
               ? `${fmtDate(rangeFrom)}-${fmtDate(rangeTo)}`
               : (MONTH_PT[mo].substring(0, 3) + yr).replace(/\s/g, '')
@@ -865,7 +898,7 @@ export function ReportModal({ events, sessions, onClose }) {
               doc.setFontSize(10)
               doc.setFont('helvetica', 'bold')
               doc.text(
-                `${t.currency} ${payAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+                `${pixCurrency} ${payAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
                 46,
                 y + 11,
               )
@@ -884,7 +917,7 @@ export function ReportModal({ events, sessions, onClose }) {
                 doc.setFontSize(8)
                 doc.setTextColor(180, 80, 0)
                 doc.text(
-                  `⚠ Valor limitado a ${t.currency} ${payAmount.toFixed(2)} (modo teste)`,
+                  `⚠ Valor limitado a ${pixCurrency} ${payAmount.toFixed(2)} (modo teste)`,
                   14,
                   y + 31,
                 )
@@ -1465,20 +1498,16 @@ export function ReportModal({ events, sessions, onClose }) {
                 : locId === '__unlabelled__'
                   ? 'Sem local'
                   : locId
-            const locForCalc =
-              loc ||
-              (athGroup
-                ? locations.find(
-                    l => l.type === 'personal' && (l.athleteIds || []).includes(athGroup.id),
-                  )
-                : null)
-            const t = calcTotal(levs, locForCalc)
+            const t = calcTotal(levs, resolveLocForCalc(loc, athGroup))
             const totalMin = levs.reduce((s, ev) => s + (ev.durationMin || 60), 0)
+            // Pix needs one amount + one currency — see the same guard in generatePDF.
+            const previewCurrency = t.currencies.length === 1 ? t.currencies[0] : null
+            const previewTotal = previewCurrency ? t.totals[previewCurrency] : 0
             const previewCap =
               coach.pixTestCap && Number(coach.pixTestCap) > 0 ? Number(coach.pixTestCap) : null
-            const previewAmt = t ? (previewCap && t.total > previewCap ? previewCap : t.total) : 0
+            const previewAmt = previewCap && previewTotal > previewCap ? previewCap : previewTotal
             const previewPayload =
-              showPix && coach.pixEnabled && coach.pixKey && t && t.total > 0
+              showPix && coach.pixEnabled && coach.pixKey && previewCurrency && previewTotal > 0
                 ? buildPixPayload({
                     pixKey: coach.pixKey,
                     merchantName: coach.name || gymCfg.gymName || 'COACH',
@@ -1513,11 +1542,11 @@ export function ReportModal({ events, sessions, onClose }) {
                 levs.length + (levs.length !== 1 ? ' sessões' : ' sessão'),
               ),
               React.createElement('span', { style: { color: '#887060' } }, fmtDur(totalMin)),
-              t && showRate
+              t.currencies.length && showRate
                 ? React.createElement(
                     'span',
                     { style: { color: '#d8a840', fontWeight: 700 } },
-                    t.currency + ' ' + t.total.toLocaleString('pt-BR'),
+                    t.label,
                   )
                 : null,
               previewPayload &&
@@ -1567,22 +1596,12 @@ export function ReportModal({ events, sessions, onClose }) {
                   color: '#68d8a0',
                 },
               },
-              'Total: ' +
-                Object.entries(groups)
-                  .reduce((acc, [locId, levs]) => {
-                    const loc = locations.find(l => l.id === locId)
-                    const gid = locId.startsWith('__ath__') ? locId.slice(7) : null
-                    const gath = gid ? loadAthletes().find(a => a.id === gid) : null
-                    const locForCalc = gath
-                      ? locations.find(
-                          l => l.type === 'personal' && (l.athleteIds || []).includes(gath.id),
-                        )
-                      : loc
-                    const t = calcTotal(levs, locForCalc)
-                    if (t) acc += t.total
-                    return acc
-                  }, 0)
-                  .toLocaleString('pt-BR'),
+              // #149 — this used to be its own naive `acc += t.total` sum with no currency
+              // key or label, so a two-currency report showed a correct per-currency footer
+              // in the generated PDF and a meaningless combined number right above it in
+              // this same preview. `grandTotal` is the exact function generatePDF's footer
+              // calls, so the two can no longer independently drift.
+              'Total: ' + (grandTotal(evs).label || '0'),
             ),
         ),
       evs.length === 0 &&
