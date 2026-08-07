@@ -1,5 +1,9 @@
 # 74 — #155 · iOS Safari zooms the page when logging a result
 
+> 🟡 Shipped: `793ee45` · 2026-08-07 — **pending on-device iPhone re-test before this moves to
+> Done** (see BACKLOG.md). The font-size fix is in; whether the zoom (and the `ConfirmReview`
+> off-centre symptom that rides on it) is actually gone can only be confirmed on the real device.
+
 *Planned 2026-08-07 alongside plans/72 and plans/73. **Not executed in that session** — its own
 session. **Sonnet · S.** Independent of 72 and 73 — no gate either way.*
 
