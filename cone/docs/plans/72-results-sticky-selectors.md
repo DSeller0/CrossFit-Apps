@@ -1,5 +1,7 @@
 # 72 — #144 · `results.html`'s athlete + week selectors scroll away
 
+> ✅ Done: `5aa1811` · 2026-08-07 — see BACKLOG.md
+
 *Planned 2026-08-07 alongside plans/73 and plans/74, the refill after Tier 4 ranks 1–5 shipped.
 **Not executed in that session** — its own session. **Sonnet · S.** Independent of 73 and 74 — no gate
 either way. **Run it first of the three**: it is the only one carrying a latent correctness bug.*
