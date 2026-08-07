@@ -1,5 +1,7 @@
 # 73 — #145 + #146 · PR cards on a phone
 
+> ✅ Done: `47972da` · 2026-08-07 — see BACKLOG.md
+
 *Planned 2026-08-07 alongside plans/72 and plans/74. **Not executed in that session** — its own
 session. **Sonnet · XS + XS.** Independent of 72 and 74 — no gate either way.*
 
@@ -49,6 +51,14 @@ hand-edited).
 inside the file's **existing** `@media (min-width: 768px)` layout fork at `:6` — do not add a third
 media query. The file has two (`:6` layout, `:321` typography); the row's *"no media query anywhere in
 the file"* is false as written, and its defensible form is *"nothing overrides `.tileGrid`"*.
+
+🔴 **Correction found live, executed differently than planned:** putting the override in the `:6`
+fork doesn't work. That fork's rules sit *earlier* in the file than `.tileGrid`'s own base rule
+(`:185`), so at ≥768px both rules match with equal specificity and the later one — `.tileGrid`'s own
+single-column base — wins the cascade, silently cancelling the two-column override; verified via
+`document.styleSheets` rule order in the actual served CSS, not by inspection. Shipped instead as a
+small `@media (min-width: 768px)` block declared immediately after `.tileGrid`'s base rule at `:185`
+(same breakpoint value, just not textually merged into the `:6` fork), with a comment recording why.
 
 **2 — lift `<Delta>` out of `.barRow`.** In `MovTile`, render the delta as its own row between the bar
 and the `tileMeta` goal line (`PrSection.jsx:109`). The `{(pct !== null || delta) && …}` guard
