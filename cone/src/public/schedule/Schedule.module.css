@@ -157,13 +157,13 @@
 .rmChip:hover { background:color-mix(in srgb,var(--gold) 15%,transparent); }
 .rmChipHasRm { border-color:var(--gold); color:var(--gold); background:color-mix(in srgb,var(--gold) 10%,transparent); }
 .rmInputWrap { display:flex; align-items:center; gap:6px; margin:6px 0 4px; flex-wrap:wrap; }
-.rmInput { font-size:13px; padding:5px 8px; border:1px solid var(--gold2); background:var(--stone2); color:var(--cream); width:76px; outline:none; font-family:inherit; }
+.rmInput { font-size:16px; padding:5px 8px; border:1px solid var(--gold2); background:var(--stone2); color:var(--cream); width:76px; outline:none; font-family:inherit; }
 .rmInput:focus { border-color:var(--gold); }
 .rmUnitSel { font-size:11px; padding:5px 6px; border:1px solid var(--divider); background:var(--stone2); color:var(--sub); outline:none; cursor:pointer; font-family:inherit; }
 .rmConfirmBtn { font-size:12px; font-weight:900; padding:5px 10px; border:1px solid var(--teal); background:transparent; color:var(--teal); cursor:pointer; font-family:inherit; }
 .rmConfirmBtn:hover,.rmConfirmBtn:active { background:var(--teal); color:var(--accent-text); }
 .rmVolRow { display:flex; flex-direction:column; align-items:flex-start; gap:5px; margin-top:6px; }
-@media(min-width:768px){ .rmInput{font-size:16px} .rmUnitSel{font-size:13px} }
+@media(min-width:768px){ .rmUnitSel{font-size:13px} }
 
 /* ── Demo button ── */
 .demoBtn { font-size:11px; font-weight:900; padding:2px 8px; border:1px solid var(--divider); background:transparent; color:var(--muted); cursor:pointer; letter-spacing:.05em; text-transform:uppercase; font-family:inherit; transition:all .12s; flex-shrink:0; line-height:1.4; }
@@ -206,7 +206,7 @@
 .lpSectionTitle { font-size:10px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.09em; margin-bottom:10px; }
 /* The lpLbl / lpRpe* / lpScale* / lpInput / lpRow2 score-field rules moved to
    shared/ScoreFields.module.css in #115 — this pane's copy was one of five. */
-.lpSelect { font-family:inherit; font-size:13px; padding:8px 10px; border:1px solid var(--divider); background:var(--stone2); color:var(--text); width:100%; outline:none; }
+.lpSelect { font-family:inherit; font-size:16px; padding:8px 10px; border:1px solid var(--divider); background:var(--stone2); color:var(--text); width:100%; outline:none; }
 .lpSelect:focus { border-color:var(--accent); }
 .lpBlock { padding:10px 0; margin-bottom:8px; }
 .lpBlock:last-child { margin-bottom:0; }
@@ -219,7 +219,7 @@
 .lpSuccessIcon { font-size:44px; color:var(--green); }
 .lpSuccessTitle { font-size:18px; font-weight:900; color:var(--cream); }
 .lpSuccessSub { font-size:13px; color:var(--muted); }
-@media(min-width:768px){ .lpTitle{font-size:17px} .lpSubmit{font-size:17px} .lpSelect,.lpInput{font-size:16px} .lpRpeBtn,.lpScaleBtn{font-size:13px} }
+@media(min-width:768px){ .lpTitle{font-size:17px} .lpSubmit{font-size:17px} .lpRpeBtn,.lpScaleBtn{font-size:13px} }
 
 /* ── Round counter ── */
 .bCounter { width:30px; height:30px; border:1px solid var(--divider); background:transparent; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900; font-family:inherit; transition:all .12s; margin-top:1px; user-select:none; line-height:1; }
