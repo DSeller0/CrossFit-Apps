@@ -2,10 +2,16 @@
 
 > ✅ Done: `f5b8c97` · 2026-08-06 — see BACKLOG.md
 >
-> ⚠️ **The plan's "drive the real thing" live-verification steps were not run** — Docker (needed
-> for the local Supabase stack) wasn't available in the execution environment. Unit tests, lint,
-> format and build all pass; run the Verification section's checklist against the local stack
-> before treating this as fully proven in the browser.
+> ✅ **Live-verified 2026-08-07 against the local Supabase stack** (deferred from the first session —
+> Docker wasn't available then). Two test locations (Eagles, R$/per_hour; a new USD Test Box,
+> US$/per_session), two events booked through the real `EventFormInner` form, Eagles' rate changed
+> from 150→200 between the booking and the report. Confirmed live: both events wrote a `rateSnapshot`
+> (`{rate:150,…}`/`{rate:50,…}`) via direct DB read; the report's on-screen preview and the generated
+> PDF both showed **`Total: R$ 2.025 + US$ 50`**, byte-identical; Eagles' 9 pre-snapshot 2026-08 events
+> re-priced to the new live rate (R$ 200 each in the PDF) while the one snapshotted event held its
+> booked R$ 150 (90min × 1.5h → R$ 225, folding into R$ 2.025 = 9×200+225); the Pix payload's EMV
+> amount field read `2025.00` for Eagles and `50.00` for USD Test Box, matching each group's subtotal
+> exactly. Zero console errors, PDF generated cleanly. See BACKLOG.md's Done entry for the full record.
 
 *Planned 2026-08-05 alongside plans/69 and plans/70. **Not executed in that session** — its own
 session. **Sonnet · S.** Tier 4 rank 5. Independent of 69 and 70.*
