@@ -220,17 +220,20 @@
   text-overflow:ellipsis;
   white-space:nowrap;
 }
-.goalCount{font-size:11px;color:var(--dim);flex-shrink:0;font-family:var(--font-mono)}
 .goalActions{display:flex;gap:4px;flex-shrink:0}
 
 .goalToggle{
-  display:block;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
   width:100%;
   padding:0;
   background:transparent;
   border:none;
   cursor:pointer;
 }
+/* Caption under the bar it describes — same treatment as PrRow's .prTarget. */
+.goalCount{font-size:11px;color:var(--dim);flex-shrink:0;font-family:var(--font-mono);text-align:right}
 .goalToggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .msTicks{position:relative;height:12px;margin-top:2px}
 .msTick{

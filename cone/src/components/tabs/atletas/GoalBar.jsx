@@ -43,9 +43,6 @@ export default function GoalBar({
         <span className={s.goalName} title={goal.name}>
           {goal.name}
         </span>
-        <span className={s.goalCount}>
-          {goal.completedSessions}/{goal.totalSessions}
-        </span>
         <div className={s.goalActions}>
           <Button
             variant="secondary"
@@ -77,6 +74,11 @@ export default function GoalBar({
         </div>
       </div>
 
+      {/* Bar first, count below it — the same convention as PrRow's .prBarCol
+          (TallyBar, then a small caption underneath). The count used to sit
+          beside the name in the header; a fraction is the bar's own caption,
+          not part of the athlete's name, so it reads better attached to what
+          it describes. */}
       <button
         type="button"
         className={s.goalToggle}
@@ -85,6 +87,9 @@ export default function GoalBar({
         onClick={() => setExpanded(e => !e)}
       >
         <TallyBar pct={pct} color={color} ticks={ticks} size="lg" />
+        <span className={s.goalCount}>
+          {goal.completedSessions}/{goal.totalSessions}
+        </span>
       </button>
 
       {ms.length > 0 && (
