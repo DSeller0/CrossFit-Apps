@@ -214,7 +214,7 @@ export default function ConfigTab() {
         </label>
 
         {boxes.length === 0 ? (
-          <p className={s.hint}>Nenhum box cadastrado ainda — crie um em Serviços.</p>
+          <p className={s.hint}>Nenhum box cadastrado ainda — crie um em Afiliados.</p>
         ) : (
           boxes.map(b => (
             <label key={b.id} className={s.themeRow}>

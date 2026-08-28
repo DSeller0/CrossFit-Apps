@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useIsMobile } from '../../../hooks/useIsMobile'
 import { loadRegistry } from '../../../utils/storage'
 import IntensityInput from '../../shared/IntensityInput'
-import { ExerciseCombobox } from './ExerciseCombobox'
+import ExerciseCombobox from '../../shared/ExerciseCombobox.jsx'
 import {
   emptyMovement,
   isCardioRegistered,

@@ -6,7 +6,7 @@ const KEYS = {
   eagles_athletes_v1: 'Atletas',
   eagles_results_v1: 'Resultados',
   eagles_events_v1: 'Eventos / agenda',
-  eagles_locations_v1: 'Serviços / locais',
+  eagles_locations_v1: 'Afiliados / locais',
   eagles_coach_v1: 'Perfil do professor',
   eagles_settings_v1: 'Configurações',
   eagles_lb_colors_v1: 'Cores do leaderboard',

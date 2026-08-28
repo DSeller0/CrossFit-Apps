@@ -304,9 +304,9 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .kpi-sub{font-size:12px;color:var(--sub);margin-top:3px}
 
 /* Grab-bag, all TAB-OWNED, no header comment of their own in the original —
-   mic-pulse: Publicador's MicButton (#59). drag-handle/ex-suggestion/ex-input:
-   shared Criador ExerciseCombobox (#58) + Atletas (#56's neighbour, no plan
-   number of its own). collapse-btn/blk-collapsed/collapse-all-row/-btn/blk-body-drag/
+   mic-pulse: Publicador's MicButton (#59). drag-handle/ex-suggestion: the shared
+   ExerciseCombobox (components/shared/, promoted from Criador by #56/C2/plans/75
+   Part 0). collapse-btn/blk-collapsed/collapse-all-row/-btn/blk-body-drag/
    blk-ex-chip(+name): Criador BlockEditor (#58). settings- shell: shared modal,
    Publicador (#59) + Atletas. Pruned 2026-07-26 (#99): .blk-wrap.drag-over/
    .ex-card.drag-over/.sc-card.drag-over-session were dead (no component ever
@@ -320,9 +320,6 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .drag-handle:hover{color:var(--muted)}
 .ex-suggestion:focus{background:var(--divider);outline:none;}
 .ex-suggestion:hover{background:var(--divider);}
-.ex-input{font-family:inherit;font-size:13px;border:1px solid var(--divider,#2a231c);border-radius:6px;padding:8px 11px;background:var(--bg,#0d0b09);color:var(--sub,#c8b090);outline:none;width:100%;-webkit-appearance:none;appearance:none;transition:border-color .15s}
-.ex-input:focus{border-color:var(--dim)}
-.ex-input::placeholder{color:var(--dim)}
 .collapse-btn{font-family:inherit;font-size:13px;background:transparent;border:none;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .12s;flex-shrink:0;line-height:1;display:flex;align-items:center}
 .collapse-btn:hover{color:var(--cream)}
 .blk-collapsed .blk-body{display:none}

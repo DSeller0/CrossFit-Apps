@@ -1,0 +1,26 @@
+/* ── Exercise combobox (#56/C2 · plans/75) ───────────────────────────────────
+   Moved from criador/criador.module.css when the component itself was promoted
+   to components/shared/ — Atletas' PR name field needed it and its own private
+   fork (Atletas.jsx's old ExerciseCombobox) had none of the a11y this one has
+   (role="combobox", click-outside close, scroll close). One implementation. */
+.comboWrap { position: relative; flex: 1 }
+.comboInput {
+  width: 100%; font-family: inherit; font-size: 15px; padding: 9px 11px;
+  border: 1px solid var(--divider); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--text); outline: none; transition: border-color .15s;
+}
+.comboInput::placeholder { color: var(--dim) }
+.comboInput:focus-visible { border-color: var(--sub); outline: 2px solid var(--accent); outline-offset: 1px }
+.comboDrop {
+  position: fixed; z-index: 9999; max-height: 180px; overflow-y: auto;
+  background: var(--stone2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0,0,0,.5);
+}
+.comboItem {
+  padding: 6px 10px; font-size: 13px; color: var(--sub); cursor: pointer;
+  display: flex; align-items: center; gap: var(--sp-2);
+  border-bottom: 1px solid var(--divider);
+}
+.comboItem:last-child { border-bottom: 0 }
+.comboItem:hover, .comboItem:focus-visible { background: var(--stone); color: var(--cream); outline: none }
+.comboDot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; display: inline-block }

@@ -19,7 +19,10 @@
 .detailPane{flex:1;min-width:0;display:flex;flex-direction:column}
 
 .tabMobile{background:var(--bg);min-height:100%;padding-bottom:70px}
-.paneMobile{height:calc(100vh - 120px)}
+.paneMobile{height:calc(100vh - 120px);display:flex;flex-direction:column}
+/* Replaces the global .rp-mobile-back (still used by resultados/*, Publicador —
+   C2 stops using it here, per plans/75, but must not delete it there). */
+.mobileBack{padding:6px 12px;border-bottom:1px solid var(--divider);flex-shrink:0}
 
 /* ── athlete list ────────────────────────────────────────────────────────── */
 .list{display:flex;flex-direction:column;height:100%}
@@ -268,30 +271,8 @@
 .msEditRow > :first-child{flex:1;min-width:0}
 .msEditPct{width:72px;flex-shrink:0}
 
-/* ── modal shell (C0 shape) ──────────────────────────────────────────────── */
-/* One backdrop opacity, matching ConfirmReview's rgba(0,0,0,.7) contract. */
-.overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  z-index:500;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:var(--sp-4);
-}
-.modal{width:100%;max-height:88vh;overflow-y:auto;display:flex;flex-direction:column;gap:0}
-.modalHdr{
-  display:flex;
-  align-items:center;
-  gap:var(--sp-2);
-  padding:12px 16px;
-  background:var(--stone);
-  border-bottom:1px solid var(--divider);
-  border-radius:var(--radius-md) var(--radius-md) 0 0;
-}
-.modalTitle{font-size:13px;font-weight:700;color:var(--cream);margin:0;flex:1;min-width:0}
-.modalBody{padding:14px 16px;display:flex;flex-direction:column;gap:var(--sp-3)}
+/* GoalConfigPanel's modal shell is the real ui/Modal.jsx, wired by the container —
+   not a hand-rolled overlay (removed here, unused: #56/C2 replaces, never wraps). */
 
 .readback{
   font-size:12px;

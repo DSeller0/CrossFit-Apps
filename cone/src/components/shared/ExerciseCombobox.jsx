@@ -1,10 +1,26 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { loadRegistry } from '../../../utils/storage'
-import { ECOL } from '../../../utils/config'
-import s from './criador.module.css'
+import { loadRegistry } from '../../utils/storage'
+import { ECOL } from '../../utils/config'
+import s from './ExerciseCombobox.module.css'
 
-// ── ExerciseCombobox ──────────────────────────────────────────────────────────
-export function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
+// The one exercise-name combobox (#56/C2 · plans/75). Was private to Criador
+// (`criador/ExerciseCombobox.jsx`) until Atletas' PR form needed the same thing and
+// grew its own fork — strictly worse: no `role="combobox"`/listbox semantics, no
+// click-outside close, no scroll close, and a `useState(fn, [value])` prop-resync
+// that was never real (`useState` ignores its second argument, so that effect never
+// ran). This is Criador's copy, promoted, with `excludeNames` added for the PR case
+// (a coach shouldn't be offered a name the athlete already has a PR row for).
+//
+// Reads the registry itself via `loadRegistry()` (the SPA Supabase client) — so it is
+// NOT client-free and does not render in the gallery, same footing as
+// `shared/IntensityInput.jsx`.
+export default function ExerciseCombobox({
+  value,
+  onChange,
+  blockLabel,
+  placeholder,
+  excludeNames,
+}) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState(value || '')
   const [dropRect, setDropRect] = useState(null)
@@ -35,8 +51,11 @@ export function ExerciseCombobox({ value, onChange, blockLabel, placeholder }) {
         ...others.filter(n => n.toLowerCase().includes(q)).sort((a, b) => a.localeCompare(b, 'pt')),
       ]
     }
-    return names.map(name => ({ name, blockType: typeMap[name] || blockLabel || '' }))
-  }, [blockLabel, query])
+    const excluded = new Set((excludeNames || []).map(n => n.toLowerCase()))
+    return names
+      .filter(name => !excluded.has(name.toLowerCase()))
+      .map(name => ({ name, blockType: typeMap[name] || blockLabel || '' }))
+  }, [blockLabel, query, excludeNames])
 
   // `query` is local (the coach types freely before committing a name), so it re-syncs
   // when the committed `value` changes underneath — e.g. the row is re-keyed to another

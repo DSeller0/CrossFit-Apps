@@ -10,7 +10,7 @@ export const TABS = [
   { id: 'creator', icon: 'ti-edit', label: 'Criador de Treinos', short: 'Criador' },
   { id: 'athletes', icon: 'ti-chart-radar', label: 'Atletas' },
   { id: 'exercises', icon: 'ti-tool', label: 'Exercícios' },
-  { id: 'locations', icon: 'ti-map-pin', label: 'Serviços' },
+  { id: 'locations', icon: 'ti-map-pin', label: 'Afiliados' },
   { id: 'results', icon: 'ti-chart-bar', label: 'Resultados' },
   { id: 'agenda', icon: 'ti-calendar', label: 'Agenda' },
   { id: 'publisher', icon: 'ti-layout-grid', label: 'Publicador de Grade', short: 'Publicador' },

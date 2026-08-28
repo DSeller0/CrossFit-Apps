@@ -1251,7 +1251,7 @@ export function ReportModal({ events, sessions, onClose }) {
                 marginBottom: '6px',
               },
             },
-            'Serviços',
+            'Afiliados',
           ),
           React.createElement(
             'div',

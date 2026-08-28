@@ -10,7 +10,7 @@ import AppChrome from './components/chrome/AppChrome'
 const CriadorTab = lazy(() => import('./components/tabs/Criador'))
 const AtletasTab = lazy(() => import('./components/tabs/Atletas'))
 const ExerciciosTab = lazy(() => import('./components/tabs/Exercicios'))
-const ServicosTab = lazy(() => import('./components/tabs/Servicos'))
+const AfiliadosTab = lazy(() => import('./components/tabs/afiliados/Afiliados'))
 const ResultadosTab = lazy(() => import('./components/tabs/Resultados'))
 const ConfigTab = lazy(() => import('./components/tabs/Config'))
 const PublicadorTab = lazy(() => import('./components/tabs/Publicador'))
@@ -253,7 +253,7 @@ export default function App() {
             />
           )}
           {tab === 'exercises' && <ExerciciosTab />}
-          {tab === 'locations' && <ServicosTab />}
+          {tab === 'locations' && <AfiliadosTab />}
           {tab === 'results' && (
             <div className="res-pane">
               <ResultadosTab
