@@ -3,6 +3,8 @@ import MobileFrame from './MobileFrame.jsx'
 import { THEMES } from './fixtures.js'
 import spa from './groups/spa.jsx'
 import criador from './groups/criador.jsx'
+import atletas from './groups/atletas.jsx'
+import afiliados from './groups/afiliados.jsx'
 import shared from './groups/shared.jsx'
 import results from './groups/results.jsx'
 import leaderboard from './groups/leaderboard.jsx'
@@ -26,7 +28,22 @@ import s from './Gallery.module.css'
 
 // Exported for scripts/design-cards-entry.jsx: `npm run design:cards` SSRs these same
 // items into the Claude Design cards, so the cards cannot drift from the gallery.
-export const GROUPS = [spa, criador, shared, results, leaderboard, me, schedule, index, tema]
+// ⚠️ A group's name becomes its generated card's FILENAME (`components/${group
+// .toLowerCase()}.html` in scripts/build-design-cards.mjs), so it must stay a single
+// clean ASCII token — which is why C2's group is "Afiliados" and never "Serviços".
+export const GROUPS = [
+  spa,
+  criador,
+  atletas,
+  afiliados,
+  shared,
+  results,
+  leaderboard,
+  me,
+  schedule,
+  index,
+  tema,
+]
 
 const ALL_ITEMS = GROUPS.flatMap(g => g.items)
 

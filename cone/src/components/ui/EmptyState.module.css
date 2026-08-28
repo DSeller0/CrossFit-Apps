@@ -1,0 +1,27 @@
+/* SPA EmptyState (#56/C2). Token-only. */
+.empty{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:var(--sp-3);
+  padding:var(--sp-5) var(--sp-4);
+  text-align:center;
+}
+.pane{height:100%}
+
+.icon{font-size:26px;line-height:1;color:var(--dim)}
+.icon svg{width:26px;height:26px}
+
+.title{font-size:13px;font-weight:700;color:var(--sub)}
+.text{font-size:12px;color:var(--muted);max-width:34ch;line-height:1.5}
+
+/* Inside a Card section: one line + its action, never a screenful. */
+.inline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--sp-3);
+  padding:var(--sp-2) 0;
+}
+.inlineText{font-size:12px;color:var(--muted)}

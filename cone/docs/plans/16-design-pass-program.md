@@ -18,11 +18,36 @@ carried prerequisites that were long satisfied and an Agenda assignment that mov
 | B4 | index.html + timer.html + tv.html + recover.html | #53 | M→L | ✅ [plans/31](./31-design-b4-public-finale.md) | index desktop width, icon-language decision (emoji vs Tabler) applied to Nav, tv font-scale idea, radius squares |
 | C0 | SPA design standard | #54 | M | ✅ [plans/33](./33-design-c0-spa-standard.md) | Card/button/input/spacing standard from theme tokens; button hierarchy; confirm-modal policy; masked mm:ss input (#35 absorbed) — **gates C1–C5** |
 | C1 | Exercícios + Configurações | #55/#87 | M→L | ✅ [plans/38](./38-design-c1-exercicios-config.md) | Apply standard; remove "Salvar config.json". **Agenda moved OFF this bundle to C5 on 2026-07-22** — it is `AgendaView`, which C5 restructures, so design-passing it here then immediately restructuring it was wasted work. |
-| C2 | Atletas + Serviços | #56 | M→L | ⏳ open | Apply standard; empty states; Serviços pane overflow; reserve #39 card slot. **Now also absorbs the Serviços → Afiliados restructure** ([plans/42](./42-afiliados-direction.md)). ⚠️ [plans/45](./45-effect-write-sweep.md) touches `Servicos.jsx` first. |
+| C2 | Atletas + Afiliados | #56 | M→L | 🔜 [plans/75](./75-design-c2-atletas-servicos.md) — **built to its approval gate 2026-08-13, wiring pending** | Apply standard; empty states; Serviços pane overflow; reserve #39 card slot. **Now also absorbs the Serviços → Afiliados restructure** ([plans/42](./42-afiliados-direction.md)). ⚠️ [plans/45](./45-effect-write-sweep.md) touches `Servicos.jsx` first. |
 | C3 | Resultados (SPA) | #57 | M | ⏳ open | Apply standard; 51 hex. ✅ **[plans/44](./44-resultados-decomposition.md) shipped 2026-07-26** — `Resultados.jsx` 912 → 27-line shell over `resultados/`. |
 | C4 | Criador | #58 | L | ✅ [plans/37](./37-design-c4-criador.md) | #26 decomposition ([plans/35](./35-criador-decomposition.md)) + #92 text mode ([plans/36](./36-criador-text-mode.md)) ran first, as required. Standard + the 2026-07-21 layout brief. |
 | C5 | Publicador **+ Agenda** | #59 | L | ⏳ open | ✅ **#25 decomposition prerequisite SATISFIED** ([plans/39](./39-publicador-decomposition.md), `e957b57`) — this now inherits `publicador/AgendaView.jsx` (408 raw) instead of 838 lines buried in 2125. Then standard; `createElement`→JSX; JULY→pt-BR export fix; dedupe "Mobile Semanal" labels; classify jsPDF hex as exempt. |
 | — | #43 themes | #43 | L | ⏳ open | Only after B/C: token-clean codebase, verified under 4 themes per page |
+
+> 🔑 **C2 GREW A TAIL — three follow-on rows, added 2026-08-28.** C2 was planned and built to its
+> gate, at which point the user took the two design directions to a coach and settled on **mockup 51
+> · Atletas Fichas** and **mockup 60 · Afiliados completo**. Those are product surfaces, not
+> restyles, so they are *not* folded back into #56 — C2 stays what it was (tokens, primitives, the
+> Serviços → Afiliados rename) and the new layouts sit on top of it:
+>
+> | row | surface | plan | size |
+> |---|---|---|---|
+> | **#160** | Atletas → Fichas (grade by next session + 1:1 ficha) | [plans/76](./76-atletas-fichas.md) | L |
+> | **#161** | Afiliados → Meus afiliados + Meu perfil (rail, 3 columns) | [plans/77](./77-afiliados-paineis-coach.md) | M |
+> | **#162** | Fechamento + Minha semana + the invoice status stamp | [plans/78](./78-fechamento-semana.md) | L |
+>
+> **Run order is a real gate:** #56 → #160 / #161 (either order) → #162.
+>
+> ⚠️ **This does not change the program's own order** — C3 (#57) and C5 (#59) are still the next
+> *C-sessions*, and they are unblocked. The three rows above are a design-direction branch off C2,
+> ranked with the rest of the board, not a fourth C-session.
+>
+> 🔑 **The measurement worth carrying forward:** mockup 51 is **~35% buildable** and mockup 60
+> **~20%** against today's data. Both mockups' gaps are *data* gaps. That is why rule 1's "the
+> surfaces exist, so work gallery-first" held for C2 but only half-holds for its tail: the
+> components exist, the **fields behind them mostly do not**. Any future session that adopts a
+> mockup wholesale should measure it against the schema first — this is the first time in the
+> program that a design direction outran the data model, and it will not be the last.
 
 **The housekeeping pass that held back all three remaining C-sessions is now fully shipped**
 ([43](./43-lint-floor-ci-gate.md), [44](./44-resultados-decomposition.md), [45](./45-effect-write-sweep.md) —
@@ -36,9 +61,19 @@ any more; nothing has been picked from Ready yet.
 > 2026-08-06. **The last session actually worked here was C4 · Criador ·
 > [plans/37](./37-design-c4-criador.md) · `aea2e9d` · 2026-07-22.**
 >
-> **The next planning session resumes this table in program order: C2 (#56) → C3 (#57) → C5 (#59).**
-> Ready currently holds [plans/72](./72-results-sticky-selectors.md)/[73](./73-pr-card-layout.md)/[74](./74-ios-input-zoom.md)
-> (the user's phone rows, 2026-08-07); this instruction applies to the refill *after* those.
+> ✅ **EXECUTED 2026-08-13/28 — C2 is done as far as a planning session can take it.** #56 was
+> planned ([plans/75](./75-design-c2-atletas-servicos.md)) and **built to its approval gate**;
+> the wiring is queued in Ready and is an **S**. Then the user reviewed the two design
+> directions with a coach and picked mockups **51** and **60**, which produced #160/#161/#162
+> ([plans/76](./76-atletas-fichas.md)/[77](./77-afiliados-paineis-coach.md)/[78](./78-fechamento-semana.md))
+> — see the note under the table.
+>
+> **The resume point is now C3 (#57) → C5 (#59).** Both are unblocked: plans/44 left
+> `Resultados.jsx` a 27-line shell over `resultados/`, and plans/39 left C5 inheriting
+> `publicador/AgendaView.jsx` directly. ⚠️ **C3 has a prerequisite the board records but this
+> table did not:** **#157** (Registro's Salvar is all-or-nothing) lives in
+> `resultados/RegistroView.jsx:753` — the very file C3 rewrites — so it ships **before or
+> inside** C3, never after.
 >
 > ⚠️ **BACKLOG.md's Tier 4 ranking does not contain C2/C3/C5 at all** — it announced that the design
 > program *"is the queue now"* and then ranked only #96 and #14 out of the nine rows it named. Two

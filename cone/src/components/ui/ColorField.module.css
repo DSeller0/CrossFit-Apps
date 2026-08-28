@@ -1,0 +1,65 @@
+/* SPA ColorField (#56/C2). Token-only; matches Input's label + focus contract. */
+.field{display:flex;flex-direction:column;gap:5px}
+
+.label{
+  font-size:10px;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:600;
+}
+
+.row{display:flex;align-items:center;gap:var(--sp-2)}
+
+/* ⚠️ `.swatch[type='color']` is (0,2,0) and deliberately outranks src/index.css's
+   global `input[type=color]{width:0;height:0;opacity:0;position:absolute}` (0,1,1),
+   which exists only for the retired hidden-input proxy this component replaces.
+   Weakening this to a bare `.swatch` would tie on specificity and hand the result
+   to stylesheet order. */
+.swatch[type='color']{
+  width:34px;
+  height:34px;
+  flex-shrink:0;
+  padding:2px;
+  position:static;
+  opacity:1;
+  pointer-events:auto;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  -webkit-appearance:none;
+  appearance:none;
+  transition:border-color .15s;
+}
+.swatch[type='color']:hover:not(:disabled){border-color:var(--dim)}
+.swatch[type='color']:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.swatch[type='color']:disabled{opacity:.5;cursor:not-allowed}
+
+/* The native swatch fills the control; both vendor pseudo-elements are needed. */
+.swatch[type='color']::-webkit-color-swatch-wrapper{padding:0}
+.swatch[type='color']::-webkit-color-swatch{border:none;border-radius:2px}
+.swatch[type='color']::-moz-color-swatch{border:none;border-radius:2px}
+
+/* Same contract as Input's .control — 16px value, --border outline, one focus ring.
+   --font-mono because the value is a hex code, the same reason TV's numeric
+   readouts use it. */
+.hex{
+  flex:1;
+  min-width:0;
+  font-family:var(--font-mono);
+  font-size:16px;
+  padding:9px 11px;
+  background:var(--bg);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  outline:none;
+  -webkit-appearance:none;
+  appearance:none;
+  transition:border-color .15s;
+}
+.hex::placeholder{color:var(--dim)}
+.hex:hover:not(:disabled){border-color:var(--dim)}
+.hex:focus-visible{border-color:var(--sub);outline:2px solid var(--accent);outline-offset:1px}
+.hex:disabled{opacity:.5;cursor:not-allowed}
