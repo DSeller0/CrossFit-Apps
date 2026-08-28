@@ -1,10 +1,9 @@
 import { toISO, todayISO } from '../lib/week.js'
 import { WOD_TYPES, toSecs, fmtSecs } from '../lib/wod.js'
 import { prBest } from '../lib/goals.js'
-import { getTargets, matchesAthlete } from '../lib/sessions.js'
-import { inBoxScope } from '../lib/boxScope.js'
+import { getTargets, matchesAthlete, calcBlockStats } from '../lib/sessions.js'
 
-export { getTargets, matchesAthlete }
+export { getTargets, matchesAthlete, calcBlockStats }
 
 // me.html's pure helpers, pulled out of the 907-line Me.jsx (#52) so that the
 // component split can't fork them — same move as schedule/scheduleHelpers.js (#50)
@@ -78,36 +77,6 @@ export function calcMaxStreak(present) {
     } else cur = 1
   }
   return mx
-}
-
-// Planned (from the sessions blob) vs executed (from results) block counts per type,
-// inside a date window. Only public sessions the athlete was assigned to count as planned.
-export function calcBlockStats(sessions, present, name, types, start, end, box = null) {
-  const ts = new Set(types),
-    planned = {},
-    executed = {}
-  types.forEach(t => {
-    planned[t] = 0
-    executed[t] = 0
-  })
-  Object.keys(sessions).forEach(date => {
-    if (date < start || date > end) return
-    ;(sessions[date] || [])
-      .filter(s => s.public !== false && inBoxScope(s, box))
-      .forEach(s => {
-        if (!matchesAthlete(s, name)) return
-        ;(s.blocks || []).forEach(b => {
-          if (ts.has(b.type)) planned[b.type]++
-        })
-      })
-  })
-  present.forEach(r => {
-    if (r.date < start || r.date > end) return
-    ;(r.blocks || []).forEach(b => {
-      if (ts.has(b.blockType)) executed[b.blockType]++
-    })
-  })
-  return { planned, executed }
 }
 
 // The 5 most recent "something good happened" moments: PR improvements and

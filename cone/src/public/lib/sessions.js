@@ -5,6 +5,7 @@
 
 import { dayNameFull } from './week.js'
 import { uid } from './wod.js'
+import { inBoxScope } from './boxScope.js'
 
 // Sessions created before mid-June 2026 carry a numeric Date.now()+Math.random()
 // id; uid() has returned a base36 string since. results_v2.session_id is `text`
@@ -52,4 +53,37 @@ export function sessName(sess, dateKey) {
   if (sess?.sessionName || sess?.name) return sess.sessionName || sess.name
   const targets = getTargets(sess)
   return (targets.length ? targets.join(', ') : null) || (dateKey ? dayNameFull(dateKey) : 'Sessão')
+}
+
+// Planned (from the sessions blob) vs executed (from results) block counts per type,
+// inside a date window. Only public sessions the athlete was assigned to count as
+// planned. Promoted from public/me/meHelpers.js (#160/plans/76 — same move #70 made
+// for getTargets/matchesAthlete): it's session-domain, and Atletas (SPA-side) is now
+// a second consumer alongside me.html.
+export function calcBlockStats(sessions, present, name, types, start, end, box = null) {
+  const ts = new Set(types),
+    planned = {},
+    executed = {}
+  types.forEach(t => {
+    planned[t] = 0
+    executed[t] = 0
+  })
+  Object.keys(sessions).forEach(date => {
+    if (date < start || date > end) return
+    ;(sessions[date] || [])
+      .filter(s => s.public !== false && inBoxScope(s, box))
+      .forEach(s => {
+        if (!matchesAthlete(s, name)) return
+        ;(s.blocks || []).forEach(b => {
+          if (ts.has(b.type)) planned[b.type]++
+        })
+      })
+  })
+  present.forEach(r => {
+    if (r.date < start || r.date > end) return
+    ;(r.blocks || []).forEach(b => {
+      if (ts.has(b.blockType)) executed[b.blockType]++
+    })
+  })
+  return { planned, executed }
 }

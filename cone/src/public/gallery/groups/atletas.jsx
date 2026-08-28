@@ -1,6 +1,11 @@
 import { useState } from 'react'
-import AthleteList from '../../../components/tabs/atletas/AthleteList.jsx'
-import AthleteDetail from '../../../components/tabs/atletas/AthleteDetail.jsx'
+import AthleteGrid from '../../../components/tabs/atletas/AthleteGrid.jsx'
+import AthleteCard from '../../../components/tabs/atletas/AthleteCard.jsx'
+import DayGroupHeader from '../../../components/tabs/atletas/DayGroupHeader.jsx'
+import Ficha from '../../../components/tabs/atletas/Ficha.jsx'
+import PresenceGrid from '../../../components/tabs/atletas/PresenceGrid.jsx'
+import SinceLastOneOnOne from '../../../components/tabs/atletas/SinceLastOneOnOne.jsx'
+import CoachNotePanel from '../../../components/tabs/atletas/CoachNotePanel.jsx'
 import PrRow from '../../../components/tabs/atletas/PrRow.jsx'
 import GoalBar from '../../../components/tabs/atletas/GoalBar.jsx'
 import GoalConfigPanel from '../../../components/tabs/atletas/GoalConfigPanel.jsx'
@@ -12,8 +17,10 @@ import { groupPrsByCategory } from '../../../components/tabs/atletas/atletasHelp
 import { Case, Section, ModalBox, TallModalBox } from '../harness.jsx'
 import { NOOP } from '../fixtures.js'
 
-// #56/C2 · plans/75 — the Atletas design pass. Every component here is client-free:
-// the tab's own storage reads stay in the container, so these render unmodified.
+// #160/plans/76 — the Atletas grade + ficha design pass. Every component here is
+// client-free: the tab's own storage reads/date arithmetic (nextSessionGroups,
+// adherence, presenceGrid, sinceLastNote…) stay in the container, so these render
+// unmodified from precomputed props.
 
 const TODAY = '2026-08-04'
 
@@ -22,13 +29,6 @@ const athletes = [
   { id: 'a2', name: 'Bruno Sacchetto', color: '#4ac8c0', level: 'Avançado' },
   { id: 'a3', name: 'Carla Nepomuceno de Albuquerque', color: '#a878d8', level: 'Iniciante' },
 ]
-const goalsByAthlete = {
-  a1: [{ id: 'g1', totalSessions: 10, completedSessions: 4 }],
-  a2: [
-    { id: 'g2', totalSessions: 10, completedSessions: 10 },
-    { id: 'g3', totalSessions: 6, completedSessions: 3 },
-  ],
-}
 
 const prLoad = {
   id: 'p1',
@@ -129,37 +129,142 @@ const athMinimal = { id: 'a9', name: 'Novo Atleta', color: '#4ac8c0' }
 const LEVELS = ['Iniciante', 'Intermediário', 'Avançado', 'Competidor']
 const GOALS = ['Saúde geral', 'Força', 'Condicionamento', 'Competição']
 
+// ── AthleteCard signal fixtures (each covers one state the card must render) ─
+const signalDefault = {
+  lastSession: { days: 1, label: '1 d' },
+  adherence: { pct: 58, trend: 'down' },
+  daysSinceFeedback: { days: 21, label: '3 sem' },
+  goal: {
+    goal: { name: 'Primeira competição', completedSessions: 7, totalSessions: 12 },
+    pct: 70,
+    stalledWeeks: 5,
+  },
+}
+const signalNeverTrained = {
+  lastSession: null,
+  adherence: null,
+  daysSinceFeedback: null,
+  goal: null,
+}
+const signalNoNotes = {
+  lastSession: { days: 0, label: 'hoje' },
+  adherence: { pct: 82, trend: 'up' },
+  daysSinceFeedback: null,
+  goal: {
+    goal: { name: 'Muscle-up estrito', completedSessions: 4, totalSessions: 10 },
+    pct: 40,
+    stalledWeeks: null,
+  },
+}
+const signalFlat = {
+  lastSession: { days: 2, label: '2 d' },
+  adherence: { pct: 100, trend: 'flat' },
+  daysSinceFeedback: { days: 0, label: 'hoje' },
+  goal: null,
+}
+
+const groupHoje = {
+  date: TODAY,
+  time: '18:00',
+  label: 'Hoje',
+  athletes: [athletes[0], athletes[1]],
+}
+const groupAmanha = { date: '2026-08-05', time: null, label: 'Amanhã', athletes: [athletes[2]] }
+const groupNoSession = {
+  date: null,
+  time: null,
+  label: 'Sem sessão marcada',
+  athletes: [{ id: 'a4', name: 'Diego Rezende', color: '#4878d8', level: 'Iniciante' }],
+}
+
+const signalsByAthlete = {
+  a1: signalDefault,
+  a2: signalNoNotes,
+  a3: signalFlat,
+  a4: signalNeverTrained,
+}
+
+// ── presence / since-1:1 / coach-note fixtures ───────────────────────────────
+function makeWeek(states) {
+  return states.map((state, i) => ({ date: `2026-07-2${i}`, state }))
+}
+const presenceFull = Array.from({ length: 4 }, () => makeWeek(Array(7).fill('presente')))
+const presenceSparse = [
+  makeWeek(['none', 'presente', 'unlogged', 'presente', 'none', 'presente', 'none']),
+  makeWeek(['none', 'presente', 'presente', 'unlogged', 'none', 'presente', 'none']),
+  makeWeek(['none', 'unlogged', 'presente', 'presente', 'none', 'none', 'none']),
+  makeWeek(['none', 'presente', 'presente', 'presente', 'none', 'unlogged', 'none']),
+]
+const presenceEmpty = Array.from({ length: 4 }, () => makeWeek(Array(7).fill('none')))
+
+const sinceWithAnchor = {
+  anchorDate: '2026-07-20',
+  items: [
+    {
+      kind: 'event',
+      date: '2026-08-01',
+      title: 'PR — Back Squat',
+      sub: 'Anterior: 110 kg · melhora de +10 kg',
+    },
+    { kind: 'missed', date: '2026-07-28', session: { sessionName: 'Treino B · Condicionamento' } },
+  ],
+}
+const sinceNoItems = { anchorDate: '2026-07-30', items: [] }
+const sinceNoAnchor = { anchorDate: null, items: [] }
+
+const notesNone = []
+const notesOne = [
+  { id: 'n1', date: '2026-07-20', text: 'Focar em técnica de recepção do snatch — cotovelos.' },
+]
+
 // ── stateful demo wrappers (single-group, so they live here) ────────────────
-function ListDemo({ items = athletes, showChevron = false }) {
-  const [sel, setSel] = useState(items[0]?.id ?? null)
-  const [added, setAdded] = useState(items)
+function GridDemo({ initialGroups = [groupHoje, groupAmanha, groupNoSession] }) {
+  const [sel, setSel] = useState(initialGroups[0]?.athletes[0]?.id ?? null)
+  const [groups, setGroups] = useState(initialGroups)
   return (
-    <div style={{ width: 240, height: 330, border: '1px solid var(--divider)' }}>
-      <AthleteList
-        athletes={added}
-        goalsByAthlete={goalsByAthlete}
+    <div style={{ width: 480, height: 420, border: '1px solid var(--divider)' }}>
+      <AthleteGrid
+        groups={groups}
+        signalsByAthlete={signalsByAthlete}
         selectedId={sel}
-        showChevron={showChevron}
         onSelect={setSel}
-        onAdd={name => setAdded(a => [...a, { id: 'n' + a.length, name, color: '#e87820' }])}
+        onAdd={name =>
+          setGroups(gs => {
+            const added = { id: 'novo-' + Date.now(), name, color: '#e87820' }
+            const rest = gs.filter(g => g.label !== 'Sem sessão marcada')
+            const existing = gs.find(g => g.label === 'Sem sessão marcada')
+            return [
+              ...rest,
+              {
+                date: null,
+                time: null,
+                label: 'Sem sessão marcada',
+                athletes: [...(existing?.athletes || []), added],
+              },
+            ]
+          })
+        }
       />
     </div>
   )
 }
 
-function DetailDemo({
+function FichaDemo({
   athlete = athFull,
   compact = false,
   groups = prGroups,
   goals = [goalMs],
   sessions = sessionItems,
-  height = 640,
+  since = sinceWithAnchor,
+  presence = presenceSparse,
+  notes = notesOne,
+  height = 900,
 }) {
   return (
     // overflow:auto, not hidden — the pane's own sticky header only reads correctly
-    // against a real scrollport, and the reviewer needs to reach the #39 slot.
+    // against a real scrollport, and the reviewer needs to reach both ▢ slots.
     <div style={{ height, overflow: 'auto', border: '1px solid var(--divider)' }}>
-      <AthleteDetail
+      <Ficha
         athlete={athlete}
         compact={compact}
         sessionItems={sessions}
@@ -167,9 +272,13 @@ function DetailDemo({
         prGroups={groups}
         prCount={groups.reduce((n, [, ps]) => n + ps.length, 0)}
         goals={goals}
+        sinceLastNote={since}
+        presenceWeeks={presence}
+        notes={notes}
         onEditProfile={NOOP}
         onAddPr={NOOP}
         onAddGoal={NOOP}
+        onSaveNote={NOOP}
       />
     </div>
   )
@@ -246,25 +355,98 @@ function PrModalDemo({ editPr = null }) {
   )
 }
 
+function CoachNoteDemo({ notes }) {
+  return <CoachNotePanel notes={notes} onSave={NOOP} />
+}
+
 export default {
   group: 'Atletas',
   items: [
     {
-      id: 'atl-list',
-      label: 'AthleteList',
+      id: 'atl-grid',
+      label: 'AthleteGrid',
       render: () => (
         <Section
-          title="AthleteList"
-          sub="tabs/atletas/AthleteList.jsx — cada linha era um <div onClick> sem caminho de teclado; agora é <button> (Enter/Espaço, anel de foco). A cor da faixa e do ponto é a cor do atleta: DATA color, fica inline. O estado vazio leva a ação junto, em vez de uma linha em itálico no meio do nada."
+          title="AthleteGrid"
+          sub="tabs/atletas/AthleteGrid.jsx — a grade que abre a aba (#160/plans/76). Substitui a AthleteList: os atletas agrupam pela PRÓXIMA sessão (Hoje/Amanhã/data/Sem sessão marcada), não por ordem alfabética — a pergunta do coach ao abrir a aba é 'com quem preciso falar antes da próxima turma', não 'quem está na lista'."
         >
-          <Case label="Com atletas · selecionado (interativo — clique, dê Tab)">
-            <ListDemo />
+          <Case label="Vários grupos · interativo (clique num card, adicione um atleta)">
+            <GridDemo />
+          </Case>
+          <Case label="Um grupo só — Hoje">
+            <GridDemo initialGroups={[groupHoje]} />
           </Case>
           <Case label="Vazio — a ação está no próprio estado vazio">
-            <ListDemo items={[]} />
+            <GridDemo initialGroups={[]} />
           </Case>
-          <Case label="Mobile — chevron por linha">
-            <ListDemo showChevron />
+        </Section>
+      ),
+    },
+    {
+      id: 'atl-card',
+      label: 'AthleteCard',
+      render: () => (
+        <Section
+          title="AthleteCard"
+          sub="tabs/atletas/AthleteCard.jsx — 4 sinais + uma TallyBar de largura total, com a legenda ABAIXO da barra (nunca ao lado — numa grade 2-up a mesma % rende larguras diferentes se dividir espaço com um rótulo). Qualquer sinal pode faltar (atleta novo: nunca treinou, nunca foi anotado, sem objetivo aberto) e some para '—', nunca um 0/hoje/0% enganoso."
+        >
+          <Case label="Padrão — objetivo parado há 5 sem">
+            <div style={{ width: 220 }}>
+              <AthleteCard athlete={athletes[0]} signals={signalDefault} onClick={NOOP} />
+            </div>
+          </Case>
+          <Case label="Selecionado">
+            <div style={{ width: 220 }}>
+              <AthleteCard athlete={athletes[0]} signals={signalDefault} selected onClick={NOOP} />
+            </div>
+          </Case>
+          <Case label="Nunca treinou — todos os sinais em —">
+            <div style={{ width: 220 }}>
+              <AthleteCard athlete={athMinimal} signals={signalNeverTrained} onClick={NOOP} />
+            </div>
+          </Case>
+          <Case label="Sem nota ainda (sem feedback em —) · aderência subindo">
+            <div style={{ width: 220 }}>
+              <AthleteCard athlete={athletes[1]} signals={signalNoNotes} onClick={NOOP} />
+            </div>
+          </Case>
+          <Case label="Sem objetivo aberto — a barra some inteira">
+            <div style={{ width: 220 }}>
+              <AthleteCard athlete={athletes[2]} signals={signalFlat} onClick={NOOP} />
+            </div>
+          </Case>
+          <Case label="Nome longo — trunca, o resto não encolhe">
+            <div style={{ width: 220 }}>
+              <AthleteCard
+                athlete={{
+                  id: 'a5',
+                  name: 'Carla Nepomuceno de Albuquerque Santos',
+                  color: '#a878d8',
+                }}
+                signals={signalDefault}
+                onClick={NOOP}
+              />
+            </div>
+          </Case>
+        </Section>
+      ),
+    },
+    {
+      id: 'atl-daygroupheader',
+      label: 'DayGroupHeader',
+      render: () => (
+        <Section
+          title="DayGroupHeader"
+          sub="tabs/atletas/DayGroupHeader.jsx — um horário só aparece quando um evento da agenda vincula a sessão."
+        >
+          <Case label="Com horário — vinculado por um evento da agenda">
+            <DayGroupHeader label="Hoje" time="18:00" />
+          </Case>
+          <Case label="Sem horário — nenhum evento vinculado ainda">
+            <DayGroupHeader label="Sex 05/09" />
+          </Case>
+          <Case label="Sem sessão marcada">
+            <DayGroupHeader label="Sem sessão marcada" />
           </Case>
         </Section>
       ),
@@ -410,27 +592,103 @@ export default {
       ),
     },
     {
-      id: 'atl-detail',
-      label: 'AthleteDetail',
+      id: 'atl-presencegrid',
+      label: 'PresenceGrid',
       render: () => (
         <Section
-          title="AthleteDetail"
-          sub="tabs/atletas/AthleteDetail.jsx — a pilha plana de SecLabel virou três Cards com <h2> real e a ação no cabeçalho da seção. Abaixo de Objetivos há um SLOT reservado e vazio para as Adaptações (#39) — sem placeholder na tela, de propósito."
+          title="PresenceGrid"
+          sub="tabs/atletas/PresenceGrid.jsx — 4 semanas × 7 dias, início no DOMINGO. 'Sem registro' é uma INFERÊNCIA (nenhuma linha de results_v2), nunca 'faltou' — não existe linha para uma falta até o #102 (join de presença) existir."
         >
-          <Case label="Completo — 1280 (Sessões · PRs · Objetivos + slot #39)">
-            <DetailDemo />
-          </Case>
-          <Case label="Vazio — nenhum atleta selecionado (era itálico centralizado num painel inteiro)">
-            <div style={{ height: 300, border: '1px solid var(--divider)' }}>
-              <AthleteDetail athlete={null} />
+          <Case label="Cheio — presença consistente">
+            <div style={{ width: 260 }}>
+              <PresenceGrid weeks={presenceFull} />
             </div>
           </Case>
-          <Case label="Atleta novo — as três seções vazias, cada uma levando a ação">
-            <DetailDemo athlete={athMinimal} groups={[]} goals={[]} sessions={[]} height={420} />
+          <Case label="Esparso — mistura presente/sem registro/sem sessão">
+            <div style={{ width: 260 }}>
+              <PresenceGrid weeks={presenceSparse} />
+            </div>
+          </Case>
+          <Case label="Vazio — nenhuma sessão no período">
+            <div style={{ width: 260 }}>
+              <PresenceGrid weeks={presenceEmpty} />
+            </div>
+          </Case>
+        </Section>
+      ),
+    },
+    {
+      id: 'atl-since',
+      label: 'SinceLastOneOnOne',
+      render: () => (
+        <Section
+          title="SinceLastOneOnOne"
+          sub="tabs/atletas/SinceLastOneOnOne.jsx — 'Desde o último 1:1'. A âncora é a nota mais recente de goals_data.coachNotes; cada linha já existia como dado (PR, marco, sessão sem resultado) — só a âncora é nova."
+        >
+          <Case label="Com âncora e itens">
+            <SinceLastOneOnOne since={sinceWithAnchor} />
+          </Case>
+          <Case label="Com âncora, nada mudou desde então">
+            <SinceLastOneOnOne since={sinceNoItems} />
+          </Case>
+          <Case label="Sem 1:1 registrado ainda — sem âncora">
+            <SinceLastOneOnOne since={sinceNoAnchor} />
+          </Case>
+        </Section>
+      ),
+    },
+    {
+      id: 'atl-coachnote',
+      label: 'CoachNotePanel',
+      render: () => (
+        <Section
+          title="CoachNotePanel"
+          sub="tabs/atletas/CoachNotePanel.jsx — a única escrita nova da ficha. Salvar zera 'sem feedback' para hoje e vira a âncora de 'Desde o último 1:1' na próxima abertura — os dois leem a MESMA entrada. Escreve pelo mutator (persist), nunca por um efeito de montagem."
+        >
+          <Case label="Primeira nota — sem anterior">
+            <div style={{ maxWidth: 420 }}>
+              <CoachNoteDemo notes={notesNone} />
+            </div>
+          </Case>
+          <Case label="Com nota anterior, somente leitura acima do campo">
+            <div style={{ maxWidth: 420 }}>
+              <CoachNoteDemo notes={notesOne} />
+            </div>
+          </Case>
+        </Section>
+      ),
+    },
+    {
+      id: 'atl-ficha',
+      label: 'Ficha',
+      render: () => (
+        <Section
+          title="Ficha"
+          sub="tabs/atletas/Ficha.jsx — supersede a composição da AthleteDetail. 7 seções vivas; os dois slots ▢ (Limitações #39, Atributos plans/22) renderizam NADA de propósito — sem placeholder 'em breve'. Precedente oposto: locations[].coachName, campo escrito por um formulário que nada lia."
+        >
+          <Case label="Completo — 1280 (as 7 seções + os 2 slots ausentes + o fold Missões)">
+            <FichaDemo />
+          </Case>
+          <Case label="Vazio — nenhum atleta selecionado">
+            <div style={{ height: 300, border: '1px solid var(--divider)' }}>
+              <Ficha athlete={null} />
+            </div>
+          </Case>
+          <Case label="Atleta novo — todas as seções vazias, cada uma levando a ação">
+            <FichaDemo
+              athlete={athMinimal}
+              groups={[]}
+              goals={[]}
+              sessions={[]}
+              since={sinceNoAnchor}
+              presence={presenceEmpty}
+              notes={notesNone}
+              height={620}
+            />
           </Case>
           <Case label="compact (390px)">
             <div style={{ width: 390 }}>
-              <DetailDemo compact />
+              <FichaDemo compact />
             </div>
           </Case>
         </Section>

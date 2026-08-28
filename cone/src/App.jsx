@@ -242,6 +242,7 @@ export default function App() {
             <AtletasTab
               sessions={sessions}
               results={loadResults()}
+              events={events}
               onEditSession={s => {
                 setCreatorPreload(s)
                 setTab('creator')

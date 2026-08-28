@@ -17,8 +17,8 @@ import ConfirmReview from '../../public/shared/ConfirmReview'
 import Button from '../ui/Button.jsx'
 import Modal from '../ui/Modal.jsx'
 import ExerciseCombobox from '../shared/ExerciseCombobox.jsx'
-import AthleteList from './atletas/AthleteList.jsx'
-import AthleteDetail from './atletas/AthleteDetail.jsx'
+import AthleteGrid from './atletas/AthleteGrid.jsx'
+import Ficha from './atletas/Ficha.jsx'
 import AthleteProfileModal from './atletas/AthleteProfileModal.jsx'
 import GoalConfigPanel from './atletas/GoalConfigPanel.jsx'
 import PrModal from './atletas/PrModal.jsx'
@@ -26,6 +26,13 @@ import AddResultModal from './atletas/AddResultModal.jsx'
 import {
   groupPrsByCategory,
   sessionStrip,
+  nextSessionGroups,
+  lastSessionSignal,
+  adherence,
+  daysSinceNote,
+  goalSignal,
+  presenceGrid,
+  sinceLastNote,
   DEFAULT_ATHLETE_COLOR,
 } from './atletas/atletasHelpers.js'
 import s from './atletas/Atletas.module.css'
@@ -42,7 +49,7 @@ const getGoals = () =>
 // App.jsx also passes `onEditSession`/`onLogResult` — unused here, same as in the
 // file this replaces: nothing in either the old or new tab wires a session-strip
 // row to navigate away yet, so they aren't destructured.
-export default function AtletasTab({ sessions, results }) {
+export default function AtletasTab({ sessions, results, events = {} }) {
   const [athletes, setAthletes] = useState(loadAthletes)
   const [goalsData, setGoalsData] = useState(loadGoalsData)
   const [selAthlete, setSelAthlete] = useState(null)
@@ -87,6 +94,10 @@ export default function AtletasTab({ sessions, results }) {
     [goalsData.athleteGoals, selAthlete],
   )
   const athPrs = useMemo(() => (goalsData.prs || {})[selAthlete] || [], [goalsData.prs, selAthlete])
+  const athNotes = useMemo(
+    () => (goalsData.coachNotes || {})[selAthlete] || [],
+    [goalsData.coachNotes, selAthlete],
+  )
   const athResults = useMemo(
     () => (results || []).filter(r => String(r.athleteId) === String(selAthlete)),
     [results, selAthlete],
@@ -111,6 +122,67 @@ export default function AtletasTab({ sessions, results }) {
   const prCategories = useMemo(
     () => (prName.trim() ? resolveExercise(prName, registryIndex)?.categories || [] : []),
     [prName, registryIndex],
+  )
+
+  // The grade's grouping (#160/plans/76) — every athlete under the earliest
+  // session (today or later) they're assigned to, or under "Sem sessão marcada".
+  const groups = useMemo(
+    () => nextSessionGroups(sessions, athletes, events, todayKey),
+    [sessions, athletes, events, todayKey],
+  )
+
+  // One signals object per athlete — the grade's 4-signal card reads this map,
+  // never the raw sessions/results/goalsData itself.
+  const signalsByAthlete = useMemo(() => {
+    const map = {}
+    athletes.forEach(a => {
+      const aGoals = (goalsData.athleteGoals || {})[a.id] || []
+      const aNotes = (goalsData.coachNotes || {})[a.id] || []
+      map[a.id] = {
+        lastSession: lastSessionSignal(results, a.id, todayKey),
+        adherence: adherence(sessions, results, a, todayKey),
+        daysSinceFeedback: daysSinceNote(aNotes, todayKey),
+        goal: goalSignal(aGoals, todayKey),
+      }
+    })
+    return map
+  }, [athletes, goalsData, results, sessions, todayKey])
+
+  // Mobile collapses the date-based grade into a 3-bucket signal list — same
+  // AthleteGrid, a differently-shaped `groups` (no date/time, so the header just
+  // shows the bucket name). "Precisa de atenção" wins over "Próxima": a stalled
+  // athlete whose next session happens to be today still needs the flag.
+  const mobileGroups = useMemo(() => {
+    if (!isMobile) return null
+    const groupByAthleteId = {}
+    groups.forEach(g => g.athletes.forEach(a => (groupByAthleteId[a.id] = g)))
+    const atencao = [],
+      proxima = [],
+      emDia = []
+    athletes.forEach(a => {
+      const sig = signalsByAthlete[a.id]
+      const needsAttention =
+        sig.adherence?.trend === 'down' || (sig.daysSinceFeedback?.days ?? Infinity) > 14
+      const g = groupByAthleteId[a.id]
+      if (needsAttention) atencao.push(a)
+      else if (g && (g.label === 'Hoje' || g.label === 'Amanhã')) proxima.push(a)
+      else emDia.push(a)
+    })
+    return [
+      { date: null, time: null, label: 'Precisa de atenção', athletes: atencao },
+      { date: null, time: null, label: 'Próxima', athletes: proxima },
+      { date: null, time: null, label: 'Em dia', athletes: emDia },
+    ].filter(g => g.athletes.length)
+  }, [isMobile, athletes, signalsByAthlete, groups])
+
+  const presenceWeeks = useMemo(
+    () => (ath ? presenceGrid(sessions, results, ath, todayKey) : []),
+    [ath, sessions, results, todayKey],
+  )
+  const sinceLast = useMemo(
+    () =>
+      ath ? sinceLastNote(ath, athNotes, athPrs, athGoals, sessions, results, todayKey) : null,
+    [ath, athNotes, athPrs, athGoals, sessions, results, todayKey],
   )
 
   const goToAthlete = athId => {
@@ -177,6 +249,11 @@ export default function AtletasTab({ sessions, results }) {
       totalSessions: 10,
       completedSessions: 0,
       milestones: [],
+      // A real pace calculation needs a start date, which goals never carried
+      // before (#160/plans/76) — one field, no migration/backfill. Goals created
+      // before this fall back to the milestone-hitDate "parado" signal, which was
+      // already stamped.
+      createdAt: todayISO(),
     }
     persist({
       ...goalsData,
@@ -273,6 +350,17 @@ export default function AtletasTab({ sessions, results }) {
     setConfirmDeletePr(null)
   }
 
+  // ── Coach note (#160/plans/76) ──────────────────────────────────────────────
+  // Writes straight from the mutator, not a mount effect — the #76/#109/#111 bug
+  // class (a load path that writes back on mount/every render).
+  const saveNote = text => {
+    const note = { id: uid(), date: todayKey, text }
+    persist({
+      ...goalsData,
+      coachNotes: { ...(goalsData.coachNotes || {}), [selAthlete]: [...athNotes, note] },
+    })
+  }
+
   const excludeNames = editingPr
     ? athPrs.map(p => p.name).filter(n => n.toLowerCase() !== editingPr.name.toLowerCase())
     : athPrs.map(p => p.name)
@@ -281,19 +369,18 @@ export default function AtletasTab({ sessions, results }) {
   const confirmDeletePrName = athPrs.find(p => p.id === confirmDeletePr)?.name || ''
   const goalBeingConfigured = athGoals.find(g => g.id === configuringGoal) || null
 
-  const list = (
-    <AthleteList
-      athletes={athletes}
-      goalsByAthlete={goalsData.athleteGoals || {}}
+  const grade = (
+    <AthleteGrid
+      groups={isMobile ? mobileGroups : groups}
+      signalsByAthlete={signalsByAthlete}
       selectedId={selAthlete}
       onSelect={goToAthlete}
       onAdd={addAthlete}
-      showChevron={isMobile}
     />
   )
 
-  const detail = (
-    <AthleteDetail
+  const ficha = (
+    <Ficha
       athlete={ath}
       compact={isMobile}
       sessionItems={sessionItems}
@@ -301,6 +388,9 @@ export default function AtletasTab({ sessions, results }) {
       prGroups={prGroups}
       prCount={athPrs.length}
       goals={athGoals}
+      sinceLastNote={sinceLast}
+      presenceWeeks={presenceWeeks}
+      notes={athNotes}
       onEditProfile={() => setShowProfileModal(true)}
       onAddPr={openNewPr}
       onAddGoal={addGoal}
@@ -311,6 +401,7 @@ export default function AtletasTab({ sessions, results }) {
       onMilestoneHit={hitMilestone}
       onConfigureGoal={goalId => setConfiguringGoal(goalId)}
       onDeleteGoal={goalId => setConfirmDeleteGoal(goalId)}
+      onSaveNote={saveNote}
     />
   )
 
@@ -419,7 +510,7 @@ export default function AtletasTab({ sessions, results }) {
   if (isMobile)
     return (
       <div className={s.tabMobile}>
-        {pane === 0 && <div className={s.paneMobile}>{list}</div>}
+        {pane === 0 && <div className={s.paneMobile}>{grade}</div>}
         {pane === 1 && (
           <div className={s.paneMobile}>
             <div className={s.mobileBack}>
@@ -434,7 +525,7 @@ export default function AtletasTab({ sessions, results }) {
                 <IconChevronLeft size={16} /> Atletas
               </Button>
             </div>
-            <div style={{ flex: 1, minHeight: 0 }}>{detail}</div>
+            <div style={{ flex: 1, minHeight: 0 }}>{ficha}</div>
           </div>
         )}
         {modals}
@@ -443,8 +534,8 @@ export default function AtletasTab({ sessions, results }) {
 
   return (
     <div className={s.tab}>
-      <div className={s.listPane}>{list}</div>
-      <div className={s.detailPane}>{detail}</div>
+      <div className={s.gradePane}>{grade}</div>
+      <div className={s.fichaPane}>{ficha}</div>
       {modals}
     </div>
   )

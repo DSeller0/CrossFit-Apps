@@ -192,12 +192,14 @@ export const saveRegistry = d => {
 }
 
 // ── Goals & PRs ───────────────────────────────────────────────────────────────
+// coachNotes (#160/plans/76) lives on this same blob, keyed by athlete id like
+// athleteGoals/prs: { [athleteId]: [{ id, date, text }] }. No migration, no new table.
 export const loadGoalsData = () => {
   try {
     const d = localStorage.getItem(LS_GOALS)
-    return d ? JSON.parse(d) : { athleteGoals: {}, prs: {} }
+    return d ? JSON.parse(d) : { athleteGoals: {}, prs: {}, coachNotes: {} }
   } catch {
-    return { athleteGoals: {}, prs: {} }
+    return { athleteGoals: {}, prs: {}, coachNotes: {} }
   }
 }
 export const cacheGoalsDataLS = d => cacheLS(LS_GOALS, d)
