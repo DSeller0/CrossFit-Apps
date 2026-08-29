@@ -6,9 +6,12 @@ import {
   centavosDisplay,
   digitsToCentavos,
   boxLink,
+  monthBounds,
+  eventsForAffiliate,
 } from './affiliateHelpers.js'
 
-// affiliateHelpers has no imports at all, so no utils/supabase mock is needed.
+// affiliateHelpers imports only public/lib/week.js (also client-free), so no
+// utils/supabase mock is needed.
 
 describe('typeLabel', () => {
   it('names both affiliate kinds', () => {
@@ -79,5 +82,81 @@ describe('boxLink', () => {
     expect(boxLink('abc123', 'https://dseller0.github.io')).toBe(
       'https://dseller0.github.io/CrossFit-Apps/index.html?box=abc123',
     )
+  })
+})
+
+describe('monthBounds', () => {
+  it('spans the whole calendar month, leap year included', () => {
+    expect(monthBounds(new Date(2026, 1, 15))).toEqual({
+      from: '2026-02-01',
+      to: '2026-02-28',
+      label: 'Fevereiro',
+    })
+    expect(monthBounds(new Date(2028, 1, 3))).toEqual({
+      from: '2028-02-01',
+      to: '2028-02-29',
+      label: 'Fevereiro',
+    })
+  })
+  it('defaults to the current date', () => {
+    const now = new Date()
+    expect(monthBounds().label).toBe(
+      [
+        'Janeiro',
+        'Fevereiro',
+        'Março',
+        'Abril',
+        'Maio',
+        'Junho',
+        'Julho',
+        'Agosto',
+        'Setembro',
+        'Outubro',
+        'Novembro',
+        'Dezembro',
+      ][now.getMonth()],
+    )
+  })
+})
+
+describe('eventsForAffiliate', () => {
+  const box = { id: 'l1', type: 'box' }
+  const personal = { id: 'l2', type: 'personal', athleteIds: ['a1', 'a2'] }
+  const events = {
+    '2026-08-05': [
+      { type: 'aula', locationId: 'l1', time: '18:00' },
+      { type: 'aula', locationId: 'l9', time: '19:00' },
+    ],
+    '2026-08-12': [{ type: 'personal', athleteIds: ['a2'], time: '07:00' }],
+    '2026-09-01': [{ type: 'aula', locationId: 'l1', time: '18:00' }],
+  }
+
+  it('matches a box affiliate on locationId, within range, stamping the date', () => {
+    const rows = eventsForAffiliate(events, box, '2026-08-01', '2026-08-31')
+    expect(rows).toEqual([{ type: 'aula', locationId: 'l1', time: '18:00', date: '2026-08-05' }])
+  })
+
+  it('matches a personal affiliate on a shared athleteId, never on locationId', () => {
+    const rows = eventsForAffiliate(events, personal, '2026-08-01', '2026-08-31')
+    expect(rows).toEqual([
+      { type: 'personal', athleteIds: ['a2'], time: '07:00', date: '2026-08-12' },
+    ])
+  })
+
+  it('excludes dates outside [from, to] and is empty-safe', () => {
+    expect(eventsForAffiliate(events, box, '2026-08-01', '2026-08-11')).toHaveLength(1)
+    expect(eventsForAffiliate({}, box, '2026-08-01', '2026-08-31')).toEqual([])
+    expect(eventsForAffiliate(undefined, box, '2026-08-01', '2026-08-31')).toEqual([])
+  })
+
+  it('sorts by date then time', () => {
+    const evs = {
+      '2026-08-05': [
+        { type: 'aula', locationId: 'l1', time: '19:00' },
+        { type: 'aula', locationId: 'l1', time: '08:00' },
+      ],
+    }
+    const rows = eventsForAffiliate(evs, box, '2026-08-01', '2026-08-31')
+    expect(rows.map(r => r.time)).toEqual(['08:00', '19:00'])
   })
 })

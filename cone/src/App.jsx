@@ -254,7 +254,7 @@ export default function App() {
             />
           )}
           {tab === 'exercises' && <ExerciciosTab />}
-          {tab === 'locations' && <AfiliadosTab />}
+          {tab === 'locations' && <AfiliadosTab events={events} />}
           {tab === 'results' && (
             <div className="res-pane">
               <ResultadosTab

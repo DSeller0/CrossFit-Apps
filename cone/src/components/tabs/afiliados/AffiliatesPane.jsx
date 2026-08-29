@@ -1,21 +1,42 @@
-import { IconPlus, IconMapPin, IconBuildingStore } from '@tabler/icons-react'
+import {
+  IconPlus,
+  IconMapPin,
+  IconBuildingStore,
+  IconPencil,
+  IconQrcode,
+} from '@tabler/icons-react'
 import Button from '../../ui/Button.jsx'
 import EmptyState from '../../ui/EmptyState.jsx'
 import AffiliateRow from './AffiliateRow.jsx'
 import AthleteAssignment from './AthleteAssignment.jsx'
-import { rateLabel, typeLabel } from './affiliateHelpers.js'
+import DirectionPair from './DirectionPair.jsx'
+import AffiliateSessions from './AffiliateSessions.jsx'
+import ReceivableRail from './ReceivableRail.jsx'
+import { rateLabel, typeLabel, eventsForAffiliate } from './affiliateHelpers.js'
 import s from './Afiliados.module.css'
 
-// The Afiliados pane: the list and the selected affiliate's roster (#56/C2).
+// "Meus afiliados" (#56/C2; three columns + the two-direction pair #161/plans/77,
+// mockup 60): the list ("Onde eu trabalho") · the selected affiliate's detail
+// (money in both directions, this month's sessions, the roster, the QR) · "A
+// receber" across every affiliate.
 //
-// The list column holds ONLY the list now — the coach profile that used to sit on
-// top of it moved to its own "Meu negócio" pane, which is what stops the list from
+// The list column holds ONLY the list — the coach profile that used to sit on top
+// of it moved to its own pane back in C2, which is what stops the list from
 // starting below the fold on a short window.
+//
+// `events` is the raw blob; `eventsForAffiliate` resolves the selected affiliate's
+// own slice for the detail column, `ReceivableRail` resolves all of them itself
+// (it takes `events`/`from`/`to` directly — see its own file).
 //
 // CLIENT-FREE.
 export default function AffiliatesPane({
   locs = [],
   athletes = [],
+  events = {},
+  from,
+  to,
+  monthLabel = '',
+  pixKey = '',
   selectedId = null,
   expandedId = null,
   compact = false,
@@ -65,19 +86,32 @@ export default function AffiliatesPane({
                 onEdit={onEdit}
                 onDelete={onDelete}
               >
-                <AthleteAssignment loc={l} athletes={athletes} onToggle={onToggleAthlete} />
+                <div className={s.mobileDetailStack}>
+                  <DirectionPair
+                    loc={l}
+                    events={eventsForAffiliate(events, l, from, to)}
+                    pixKey={pixKey}
+                    monthLabel={monthLabel}
+                  />
+                  <AffiliateSessions
+                    loc={l}
+                    events={eventsForAffiliate(events, l, from, to)}
+                    monthLabel={monthLabel}
+                  />
+                  <AthleteAssignment loc={l} athletes={athletes} onToggle={onToggleAthlete} />
+                </div>
               </AffiliateRow>
             ))}
       </div>
     )
   }
 
-  // ── desktop: list + roster ────────────────────────────────────────────────
+  // ── desktop: list + detail + receivable ─────────────────────────────────────
   return (
     <div className={s.paneBody}>
       <div className={s.listPane}>
         <div className={s.listHdr}>
-          <h2 className={s.listTitle}>Afiliados</h2>
+          <h2 className={s.listTitle}>Onde eu trabalho</h2>
           <Button variant="primary" size="xs" onClick={onNew}>
             <IconPlus /> Novo
           </Button>
@@ -103,20 +137,74 @@ export default function AffiliatesPane({
             pane
             icon={<IconMapPin />}
             title="Selecione um afiliado"
-            text="Escolha um box ou personal na lista para vincular atletas."
+            text="Escolha um box ou personal na lista para ver o que ele paga, o que você cobra e quem está vinculado."
           />
         ) : (
           <>
             <div className={s.detailHdr}>
-              <h2 className={s.detailName}>{sel.name}</h2>
-              <div className={s.detailSub}>
-                {typeLabel(sel.type)} · {rateLabel(sel)}
+              <div className={s.detailHdrTop}>
+                <div>
+                  <h2 className={s.detailName}>{sel.name}</h2>
+                  <div className={s.detailSub}>
+                    {typeLabel(sel.type)} · {rateLabel(sel)}
+                  </div>
+                </div>
+                <div className={s.detailActions}>
+                  {sel.type === 'box' && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      iconOnly
+                      aria-label={`QR e link público de ${sel.name}`}
+                      onClick={() => onQr?.(sel)}
+                    >
+                      <IconQrcode />
+                    </Button>
+                  )}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    iconOnly
+                    aria-label={`Editar ${sel.name}`}
+                    onClick={() => onEdit?.(sel)}
+                  >
+                    <IconPencil />
+                  </Button>
+                </div>
               </div>
             </div>
-            <AthleteAssignment loc={sel} athletes={athletes} onToggle={onToggleAthlete} />
+
+            <DirectionPair
+              loc={sel}
+              events={eventsForAffiliate(events, sel, from, to)}
+              pixKey={pixKey}
+              monthLabel={monthLabel}
+            />
+
+            <div className={s.detailSection}>
+              <AffiliateSessions
+                loc={sel}
+                events={eventsForAffiliate(events, sel, from, to)}
+                monthLabel={monthLabel}
+              />
+            </div>
+
+            <div className={s.detailSection}>
+              <AthleteAssignment loc={sel} athletes={athletes} onToggle={onToggleAthlete} />
+            </div>
           </>
         )}
       </div>
+
+      <ReceivableRail
+        locs={locs}
+        events={events}
+        from={from}
+        to={to}
+        monthLabel={monthLabel}
+        selectedId={selectedId}
+        onSelect={id => onSelect?.(id)}
+      />
     </div>
   )
 }

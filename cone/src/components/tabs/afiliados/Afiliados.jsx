@@ -10,12 +10,12 @@ import {
 } from '../../../utils/storage'
 import { useIsMobile } from '../../../hooks/useIsMobile'
 import ConfirmReview from '../../../public/shared/ConfirmReview'
-import PaneTabs from './PaneTabs.jsx'
+import AffiliateRail from './AffiliateRail.jsx'
 import AffiliatesPane from './AffiliatesPane.jsx'
-import MeuNegocioPane from './MeuNegocioPane.jsx'
+import MeuPerfilPane from './MeuPerfilPane.jsx'
 import AffiliateFormModal from './AffiliateFormModal.jsx'
 import BoxQrModal from './BoxQrModal.jsx'
-import { boxLink } from './affiliateHelpers.js'
+import { boxLink, monthBounds } from './affiliateHelpers.js'
 import s from './Afiliados.module.css'
 
 const EMPTY_FORM = {
@@ -28,20 +28,15 @@ const EMPTY_FORM = {
   coachName: '',
 }
 
-// panes[] is deliberately an array of two today — Coaches (#103) and Turmas (#40)
-// have no data behind them yet, so each appends a row here rather than a placeholder
-// tab shipping now (see PaneTabs.jsx). plans/77/78 extend this same array.
-const PANES = [
-  { id: 'afiliados', label: 'Afiliados' },
-  { id: 'negocio', label: 'Meu negócio' },
-]
-
-// Container for the Afiliados tab (#56/C2 · plans/75) — was ServicosTab. Owns all
-// storage reads/writes and QR generation; every rendered component is client-free.
+// Container for the Afiliados tab (#56/C2 · plans/75; rail + 3-column "Meus
+// afiliados" #161/plans/77, mockup 60) — was ServicosTab. Owns all storage
+// reads/writes and QR generation; every rendered component is client-free.
 //
 // `id:'locations'` (tabs.js) and the `locations` blob are UNCHANGED — this is a
-// rename + restructure, not a new entity (plans/42 decision 1).
-export default function AfiliadosTab() {
+// rename + restructure, not a new entity (plans/42 decision 1). `events` is a NEW
+// prop (App.jsx, from `useSync()`) — read-only, the same pattern AtletasTab
+// already uses, needed to resolve each affiliate's monthly total.
+export default function AfiliadosTab({ events = {} }) {
   const [locs, setLocs] = useState(loadLocations)
   const [coach, setCoach] = useState(loadCoach)
   const [pane, setPane] = useState('afiliados')
@@ -56,7 +51,26 @@ export default function AfiliadosTab() {
   const [copied, setCopied] = useState(false)
 
   const athletes = useMemo(() => loadAthletes(), [])
+  // The affiliates pane's own list/detail/receivable layout collapses at 600px
+  // (AffiliatesPane's existing `compact`, unchanged); the RAIL collapses to a
+  // horizontal strip separately, at 768px — a 214px rail leaves nothing for the
+  // stage below that (Approach 1, plans/77).
   const isMobile = useIsMobile()
+  const railCompact = useIsMobile(768)
+  const { from, to, label: monthLabel } = monthBounds()
+
+  // panes[] is array-driven so a new panel is one more row — Fechamento and Minha
+  // semana (plans/78) append to "Painéis", and the mockup's role switch (4 more
+  // panels behind "Sou dono do box") is dropped outright: no role model exists to
+  // switch on (plans/42; see AffiliateRail.jsx). `count` is live so the rail shows
+  // how many affiliates exist without opening the pane.
+  const panes = useMemo(
+    () => [
+      { id: 'afiliados', label: 'Meus afiliados', group: 'Painéis', count: locs.length },
+      { id: 'perfil', label: 'Meu perfil', group: 'Conta' },
+    ],
+    [locs.length],
+  )
 
   // Coach profile persists on its own debounced effect (many small field writes)
   // rather than from a mutator per field. Skips the mount run so merely opening the
@@ -159,32 +173,50 @@ export default function AfiliadosTab() {
 
   const confirmLocName = locs.find(l => l.id === confirmDel)?.name || ''
 
-  return (
-    <div className={s.tab}>
-      <PaneTabs panes={PANES} active={pane} onChange={setPane} />
+  const goToAffiliate = locId => {
+    setPane('afiliados')
+    setSelectedId(locId)
+    setExpandedId(locId)
+  }
 
-      {pane === 'afiliados' ? (
-        <AffiliatesPane
-          locs={locs}
-          athletes={athletes}
-          compact={isMobile}
-          selectedId={selectedId}
-          expandedId={expandedId}
-          onSelect={setSelectedId}
-          onToggleExpand={id => setExpandedId(e => (e === id ? null : id))}
-          onNew={openNew}
-          onQr={loc => {
-            setQrLoc(loc)
-            setQr('')
-            setCopied(false)
-          }}
-          onEdit={startEdit}
-          onDelete={loc => setConfirmDel(loc.id)}
-          onToggleAthlete={toggleAthlete}
-        />
-      ) : (
-        <MeuNegocioPane coach={coach} setCoach={setCoach} />
-      )}
+  return (
+    <div className={`${s.shell}${railCompact ? ' ' + s.shellCol : ' ' + s.shellRow}`}>
+      <AffiliateRail panes={panes} active={pane} onChange={setPane} compact={railCompact} />
+
+      <div className={s.stage}>
+        {pane === 'afiliados' ? (
+          <AffiliatesPane
+            locs={locs}
+            athletes={athletes}
+            events={events}
+            from={from}
+            to={to}
+            monthLabel={monthLabel}
+            pixKey={coach.pixKey}
+            compact={isMobile}
+            selectedId={selectedId}
+            expandedId={expandedId}
+            onSelect={setSelectedId}
+            onToggleExpand={id => setExpandedId(e => (e === id ? null : id))}
+            onNew={openNew}
+            onQr={loc => {
+              setQrLoc(loc)
+              setQr('')
+              setCopied(false)
+            }}
+            onEdit={startEdit}
+            onDelete={loc => setConfirmDel(loc.id)}
+            onToggleAthlete={toggleAthlete}
+          />
+        ) : (
+          <MeuPerfilPane
+            coach={coach}
+            setCoach={setCoach}
+            locs={locs}
+            onSelectAffiliate={goToAffiliate}
+          />
+        )}
+      </div>
 
       {/* Conditionally mounted, not always-rendered with `open` — the form's own
           `touched` (validation-gate) state must reset on each new open, the same

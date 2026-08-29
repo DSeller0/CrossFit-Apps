@@ -2,10 +2,13 @@ import { IconToggleLeft, IconToggleRight, IconInfoCircle } from '@tabler/icons-r
 import Card from '../../ui/Card.jsx'
 import Button from '../../ui/Button.jsx'
 import Input from '../../ui/Input.jsx'
+import EmptyState from '../../ui/EmptyState.jsx'
 import CurrencyInput from './CurrencyInput.jsx'
+import { rateLabel } from './affiliateHelpers.js'
 import s from './Afiliados.module.css'
 
-// "Meu negócio" — the coach's own identity, Pix and test cap (#56/C2).
+// "Meu perfil" — the coach's own identity, Pix and rate summary (#56/C2, renamed +
+// extended #161/plans/77, mockup 60).
 //
 // This is `CoachProfileForm`, promoted from a slab wedged above the affiliate list
 // into its own pane. That promotion IS the left-pane-overflow fix on #56's row: the
@@ -13,15 +16,22 @@ import s from './Afiliados.module.css'
 // below the fold. It also retires the `compact` prop — two hand-written style
 // objects differing only in padding and one background.
 //
-// Why it is a pane and not a field on the affiliate record: `locations[].rate` is
+// Why Pix is a pane and not a field on the affiliate record: `locations[].rate` is
 // what the coach charges a box, and `coach_profile.pixKey` is stamped on the
 // invoice HE issues. A box charging its own athletes is the opposite arrow — one
 // field name and one Pix identity for two directions is how a wrong invoice gets
 // generated silently (plans/42 decision 2).
 //
+// "Taxas por afiliado" is READ-ONLY — the rate is edited where it belongs, on the
+// affiliate record (`onSelectAffiliate` jumps there). "Quem vê o quê" (mockup 60)
+// is NOT built: it would describe per-affiliate visibility no layer of the app
+// implements (plans/42's tenancy sequencing puts real isolation dead last) —
+// shipping it would assert a guarantee that does not exist, to the person best
+// placed to rely on it (plans/77 Approach 4).
+//
 // CLIENT-FREE — `coach`/`setCoach` are props; the debounced save stays in the
 // container (#109: merely opening the tab must perform zero writes).
-export default function MeuNegocioPane({ coach, setCoach }) {
+export default function MeuPerfilPane({ coach, setCoach, locs = [], onSelectAffiliate }) {
   const set = (k, v) => setCoach(p => ({ ...p, [k]: v }))
   const pixOn = !!coach.pixEnabled
 
@@ -107,6 +117,30 @@ export default function MeuNegocioPane({ coach, setCoach }) {
               — não é cobrança do box para os atletas.
             </p>
           </div>
+        </Card>
+
+        <Card pad="sm" title="Taxas por afiliado">
+          {locs.length === 0 ? (
+            <EmptyState inline title="Nenhum afiliado ainda" />
+          ) : (
+            <div className={s.tariffList}>
+              {locs.map(l => (
+                <button
+                  key={l.id}
+                  type="button"
+                  className={s.tariffRow}
+                  onClick={() => onSelectAffiliate?.(l.id)}
+                >
+                  <span className={s.dot} style={{ background: l.color || 'var(--muted)' }} />
+                  <span className={s.tariffName}>{l.name}</span>
+                  <span className={s.tariffValue}>{rateLabel(l)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          <p className={s.bizNote}>
+            Somente leitura — a taxa é editada no próprio afiliado, em Meus afiliados.
+          </p>
         </Card>
       </div>
     </div>

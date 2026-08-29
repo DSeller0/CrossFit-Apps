@@ -1,4 +1,4 @@
-import { IconInfoCircle, IconUsers } from '@tabler/icons-react'
+import { IconInfoCircle, IconUsers, IconX } from '@tabler/icons-react'
 import EmptyState from '../../ui/EmptyState.jsx'
 import s from './Afiliados.module.css'
 
@@ -8,9 +8,16 @@ import s from './Afiliados.module.css'
 // Gained a real zero-athletes state: with no athletes registered the old version
 // rendered an empty <div>, so the pane looked broken rather than empty.
 //
+// ⚠️ `athleteIds` can hold a deleted athlete's id — no database can enforce
+// integrity inside a JSONB array (plans/42 decision 7). `orphanIds` renders those
+// as a removable "atleta removido" row instead of silently dropping them off the
+// list, which would have looked like the assignment was never saved.
+//
 // CLIENT-FREE — `athletes` arrives as a prop (it was `loadAthletes()` inside the tab).
 export default function AthleteAssignment({ loc, athletes = [], onToggle }) {
   const ids = loc.athleteIds || []
+  const knownIds = new Set(athletes.map(a => a.id))
+  const orphanIds = ids.filter(id => !knownIds.has(id))
 
   return (
     <div>
@@ -23,7 +30,7 @@ export default function AthleteAssignment({ loc, athletes = [], onToggle }) {
         </p>
       )}
 
-      {athletes.length === 0 ? (
+      {athletes.length === 0 && orphanIds.length === 0 ? (
         <EmptyState
           icon={<IconUsers />}
           title="Nenhum atleta cadastrado"
@@ -52,6 +59,20 @@ export default function AthleteAssignment({ loc, athletes = [], onToggle }) {
               </label>
             )
           })}
+          {orphanIds.map(id => (
+            <div key={id} className={`${s.assignRow} ${s.assignRowOrphan}`}>
+              <span className={s.dot} style={{ background: 'var(--dim)' }} aria-hidden="true" />
+              <span className={s.assignName}>Atleta removido</span>
+              <button
+                type="button"
+                className={s.assignRemove}
+                aria-label="Remover atleta excluído deste afiliado"
+                onClick={() => onToggle?.(loc.id, id)}
+              >
+                <IconX size={14} />
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

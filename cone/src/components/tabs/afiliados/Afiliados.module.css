@@ -6,7 +6,7 @@
    ⚠️ var(--accent), NEVER var(--theme-accent) — that alias lives in src/index.css,
    which gallery.html does not load. */
 
-/* ── pane switcher ───────────────────────────────────────────────────────── */
+/* ── pane switcher (horizontal — mobile strip, orientation='horizontal') ───── */
 /* plans/42's information architecture is four panes: Afiliados · Coaches · Turmas ·
    Meu negócio. Two ship (#56); Coaches is #103 and Turmas is #40, and neither has
    any data yet — so the SHELL is built to take a pane as a row in an array and the
@@ -41,15 +41,74 @@
 .paneTab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .paneTabOn{color:var(--accent);border-bottom-color:var(--accent)}
 
+/* ── rail (vertical — desktop, orientation='vertical', #161/plans/77) ──────── */
+.rail{
+  width:214px;
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+  padding:var(--sp-3) var(--sp-2);
+  border-right:1px solid var(--divider);
+  overflow-y:auto;
+}
+.railGroup{
+  font-size:10px;
+  font-weight:700;
+  color:var(--dim);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  padding:var(--sp-3) var(--sp-2) 4px;
+}
+.railGroup:first-child{padding-top:var(--sp-1)}
+.railItem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--sp-2);
+  width:100%;
+  font-family:var(--font);
+  font-size:13px;
+  font-weight:600;
+  padding:9px 10px;
+  background:transparent;
+  color:var(--sub);
+  border:none;
+  border-radius:var(--radius-sm);
+  text-align:left;
+  cursor:pointer;
+  transition:background .12s,color .12s;
+}
+.railItem:hover{background:var(--stone);color:var(--cream)}
+.railItem:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.railItemOn{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
+.railLabel{flex:1;min-width:0}
+.railCount{
+  font-size:10px;
+  font-weight:700;
+  color:var(--muted);
+  background:var(--stone2);
+  border-radius:var(--radius-sm);
+  padding:1px 6px;
+  flex-shrink:0;
+}
+.railItemOn .railCount{color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+
 /* ── shell ───────────────────────────────────────────────────────────────── */
-.tab{display:flex;flex-direction:column;height:100%;min-height:500px;background:var(--bg)}
+/* `shellRow` (desktop, rail on the left) / `shellCol` (mobile, strip on top) —
+   the container picks one based on the SAME 768px check that decides AffiliateRail's
+   own orientation, so the two never disagree about which layout is on screen. */
+.shell{display:flex;height:100%;min-height:500px;background:var(--bg)}
+.shellRow{flex-direction:row}
+.shellCol{flex-direction:column}
+.stage{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
 .paneBody{flex:1;min-height:0;display:flex}
 
 /* The affiliate list no longer shares this column with the coach profile — that
    stacking is what pushed the list below the fold on a short window (#56's
-   "Serviços left-pane overflow"). Meu negócio is its own pane now. */
+   "Serviços left-pane overflow"). Meu negócio/Meu perfil is its own pane now. */
 .listPane{
-  width:260px;
+  width:232px;
   flex-shrink:0;
   border-right:1px solid var(--divider);
   display:flex;
@@ -78,11 +137,107 @@
 }
 .detailPane{flex:1;min-width:0;padding:var(--sp-4);overflow-y:auto}
 .detailHdr{margin-bottom:var(--sp-4)}
+.detailHdrTop{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-3)}
+.detailActions{display:flex;gap:6px;flex-shrink:0}
 .detailName{font-size:14px;font-weight:700;color:var(--cream);margin:0 0 4px}
 .detailSub{font-size:11px;color:var(--muted)}
+.detailSection{margin-top:var(--sp-4)}
 
 .mobileWrap{padding:var(--sp-3);padding-bottom:70px;display:flex;flex-direction:column;gap:var(--sp-2)}
 .mobileHdr{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);margin:var(--sp-2) 0}
+.mobileDetailStack{display:flex;flex-direction:column;gap:var(--sp-4)}
+
+/* ── two-direction pair (#161/plans/77) ──────────────────────────────────── */
+.directionPair{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)}
+.dirRows{display:flex;flex-direction:column;gap:6px}
+.dirRow{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-2)}
+.dirRowLabel{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.dirRowValue{font-size:13px;font-weight:600;color:var(--cream);text-align:right}
+.dirNote{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
+
+/* ── affiliate sessions (#161/plans/77) ──────────────────────────────────── */
+.sessHdr{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-2);margin-bottom:var(--sp-2)}
+.sessSummary{font-size:11px;color:var(--muted);font-family:var(--font-mono);flex-shrink:0}
+.sessList{display:flex;flex-direction:column;gap:2px}
+.sessRow{
+  display:grid;
+  grid-template-columns:44px 1fr 44px 56px 72px;
+  align-items:center;
+  gap:var(--sp-2);
+  padding:6px 8px;
+  border-bottom:1px solid var(--divider);
+  font-size:11px;
+}
+.sessRowPending{opacity:.6}
+.sessDate{color:var(--muted)}
+.sessLabel{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sessTime{color:var(--muted);font-family:var(--font-mono)}
+.sessDur{color:var(--muted);font-family:var(--font-mono)}
+.sessValue{color:var(--cream);font-weight:600;text-align:right;font-family:var(--font-mono)}
+.sessBadge{
+  grid-column:1 / -1;
+  font-size:9px;
+  font-weight:700;
+  color:var(--gold);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+
+/* ── receivable rail (#161/plans/77) ─────────────────────────────────────── */
+.receivableRail{
+  width:262px;
+  flex-shrink:0;
+  border-left:1px solid var(--divider);
+  display:flex;
+  flex-direction:column;
+  gap:var(--sp-3);
+  padding:var(--sp-3);
+  overflow-y:auto;
+}
+.receivableTotal{font-size:20px;font-weight:800;color:var(--cream)}
+.receivableCount{font-size:11px;color:var(--muted);margin-top:2px}
+.receivableList{display:flex;flex-direction:column;gap:2px}
+.receivableRow{
+  display:flex;
+  align-items:center;
+  gap:var(--sp-2);
+  width:100%;
+  padding:8px 10px;
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  text-align:left;
+  transition:background .12s,border-color .12s;
+}
+.receivableRow:hover{background:var(--stone)}
+.receivableRow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.receivableRowOn{
+  background:color-mix(in srgb,var(--accent) 7%,transparent);
+  border-color:color-mix(in srgb,var(--accent) 30%,var(--divider));
+}
+.receivableName{flex:1;min-width:0;font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.receivableValue{font-size:11px;color:var(--muted);font-family:var(--font-mono);flex-shrink:0}
+
+/* ── taxas por afiliado (Meu perfil, read-only, #161/plans/77) ──────────────── */
+.tariffList{display:flex;flex-direction:column;gap:2px;margin-bottom:var(--sp-2)}
+.tariffRow{
+  display:flex;
+  align-items:center;
+  gap:var(--sp-2);
+  width:100%;
+  padding:7px 8px;
+  background:transparent;
+  border:none;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  text-align:left;
+  transition:background .12s;
+}
+.tariffRow:hover{background:var(--stone)}
+.tariffRow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tariffName{flex:1;min-width:0;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tariffValue{font-size:11px;color:var(--muted)}
 
 /* ── affiliate row (desktop list) ────────────────────────────────────────── */
 /* The select control and the actions are siblings inside .rowWrap — see the
@@ -214,6 +369,26 @@
 .assignName{font-size:13px;color:var(--text);flex:1;min-width:0}
 .assignLevel{font-size:11px;color:var(--muted);flex-shrink:0}
 
+/* An athleteIds entry pointing at a deleted athlete (plans/42 decision 7) — cursor
+   default, not pointer: the row itself isn't a toggle, only its ✕ button is. */
+.assignRowOrphan{cursor:default;font-style:italic}
+.assignRowOrphan .assignName{color:var(--dim)}
+.assignRemove{
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:22px;
+  height:22px;
+  background:transparent;
+  color:var(--muted);
+  border:none;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+}
+.assignRemove:hover{color:var(--red);background:color-mix(in srgb,var(--red) 10%,transparent)}
+.assignRemove:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
 /* ── Meu negócio ─────────────────────────────────────────────────────────── */
 .bizPane{flex:1;min-width:0;overflow-y:auto;padding:var(--sp-4)}
 .bizGrid{display:flex;flex-direction:column;gap:var(--sp-4);max-width:560px}
@@ -298,4 +473,14 @@
 @media (max-width:600px){
   .formGrid2{grid-template-columns:1fr}
   .rateRow{grid-template-columns:64px 1fr;row-gap:var(--sp-3)}
+  .directionPair{grid-template-columns:1fr}
+  .sessRow{grid-template-columns:40px 1fr 60px;row-gap:2px}
+  .sessTime,.sessDur{display:none}
+}
+
+/* Between the rail's 768px break and a full desktop width, list(232)+receivable(262)
+   leaves too little for the detail column — drop the receivable rail first, it is a
+   summary of numbers the detail column already shows for the selected affiliate. */
+@media (max-width:960px){
+  .receivableRail{display:none}
 }
