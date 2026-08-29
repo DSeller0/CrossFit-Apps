@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { fmtDate, fmtDur, calcTotal, sumByCurrency } from './billing.js'
+import { fmtDateNum, fmtDur, fmtMoney, calcTotal, sumByCurrency } from './billing.js'
 
 // #149/#104(c) · plans/71 — calcTotal is the only money arithmetic in the app and had zero
 // tests before this row, including the two behavior changes plans/68 shipped unpinned on
@@ -7,9 +7,15 @@ import { fmtDate, fmtDur, calcTotal, sumByCurrency } from './billing.js'
 // pin what the code already does, not what it should do — see the plan for the two edges
 // flagged as "arguably wrong, not changed here."
 
-describe('fmtDate', () => {
+describe('fmtDateNum', () => {
   it('renders an ISO date as dd/mm/yy', () => {
-    expect(fmtDate('2026-08-06')).toBe('06/08/26')
+    expect(fmtDateNum('2026-08-06')).toBe('06/08/26')
+  })
+})
+
+describe('fmtMoney', () => {
+  it('renders a currency + amount with two decimal places', () => {
+    expect(fmtMoney(150, 'R$')).toBe('R$ 150,00')
   })
 })
 

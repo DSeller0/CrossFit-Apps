@@ -371,7 +371,11 @@
 
 /* ── ficha: presence grid ────────────────────────────────────────────────── */
 .presence{display:flex;flex-direction:column;gap:4px}
-.pgRow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+/* Fixed track size, not 1fr — a 1fr column stretches to fill whatever the ficha
+   pane's width happens to be (68.6px at ~530px), which reads as a stray column
+   grid, not a calendar. 16px keeps it a compact heatmap next to its 9px day
+   letters, at any pane width, mobile included (#167). */
+.pgRow{display:grid;grid-template-columns:repeat(7,16px);justify-content:start;gap:4px}
 .pgDow{font-size:9px;color:var(--dim);text-align:center;text-transform:uppercase}
 .pgCell{aspect-ratio:1;border-radius:var(--radius-sm);background:var(--stone2)}
 .pgPresente{background:var(--green)}

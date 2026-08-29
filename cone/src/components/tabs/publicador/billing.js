@@ -5,9 +5,19 @@
 // any test runs. This module imports nothing (no React, no client, no storage) — keep it that
 // way so it stays trivially testable.
 
-export function fmtDate(iso) {
+// Named `fmtDateNum` (not `fmtDate`) so it doesn't shadow `public/lib/week.js`'s
+// `fmtDate` ("Dom 5 Jul") — this one returns dd/mm/yy, a different format for a
+// different surface (#166).
+export function fmtDateNum(iso) {
   const d = new Date(iso + 'T12:00:00')
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
+}
+
+export function fmtMoney(total, currency) {
+  return `${currency} ${total.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
 }
 
 export function fmtDur(min) {

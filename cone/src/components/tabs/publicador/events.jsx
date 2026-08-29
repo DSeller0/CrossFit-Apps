@@ -3,7 +3,7 @@ import { loadAthletes, loadSettings, loadLocations, loadCoach, toISO } from '../
 import { buildPixPayload, pixClean } from '../../../utils/pix'
 import { MONTH_PT } from '../../../public/lib/week.js'
 import { sessName } from '../../../public/lib/sessions.js'
-import { fmtDate, fmtDur, calcTotal, sumByCurrency } from './billing.js'
+import { fmtDateNum, fmtDur, calcTotal, sumByCurrency } from './billing.js'
 import { qrToBase64 } from './pixQr.js'
 
 // ── EventFormInner — standalone so inputs don't lose focus ───────────────────
@@ -707,7 +707,7 @@ export function ReportModal({ events, sessions, onClose }) {
         const evs = filteredEvents()
         const groups = groupByLocation(evs)
         const period = useRange
-          ? `${fmtDate(rangeFrom)} – ${fmtDate(rangeTo)}`
+          ? `${fmtDateNum(rangeFrom)} – ${fmtDateNum(rangeTo)}`
           : MONTH_PT[mo] + ' ' + yr
         const gymName = gymCfg.gymName || 'Cone'
         let y = 15
@@ -816,7 +816,12 @@ export function ReportModal({ events, sessions, onClose }) {
                   .map(b => (b.label && b.label !== '-' ? b.label : b.type))
                   .join(' · ')
               : ''
-            const row = [fmtDate(ev.date), ev.time, fmtDur(ev.durationMin || 60), ev.label || name]
+            const row = [
+              fmtDateNum(ev.date),
+              ev.time,
+              fmtDur(ev.durationMin || 60),
+              ev.label || name,
+            ]
             if (showDetails) row.push(blockLabels || '-')
             // #104(c) — the event's own frozen rate, not the location's current one; the
             // group-level total below resolves the same way (calcTotal), so this per-event
@@ -860,7 +865,7 @@ export function ReportModal({ events, sessions, onClose }) {
             const payAmount = cap && pixTotal > cap ? cap : pixTotal
             const isCapped = cap && pixTotal > cap
             const prd = useRange
-              ? `${fmtDate(rangeFrom)}-${fmtDate(rangeTo)}`
+              ? `${fmtDateNum(rangeFrom)}-${fmtDateNum(rangeTo)}`
               : (MONTH_PT[mo].substring(0, 3) + yr).replace(/\s/g, '')
             const desc = `${name} ${prd}`.slice(0, 72)
             const txid = (

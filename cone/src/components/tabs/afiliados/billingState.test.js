@@ -8,6 +8,7 @@ import {
   setStamp,
   singleTotal,
   advance,
+  isReceivable,
   columnOf,
 } from './billingState.js'
 
@@ -177,6 +178,41 @@ describe('advance', () => {
     // the stamp instead of live events once status !== 'draft'.
     const recomputed = advance(sentOnce, 'sent', { total: 999, currency: 'R$' }, NOW)
     expect(recomputed.total).toBe(999)
+  })
+
+  it('#165 reopen: reverting a sent stamp to draft discards the frozen total/currency/sentAt', () => {
+    const sent = { status: 'sent', sentAt: '2026-08-20T00:00:00.000Z', total: 1480, currency: 'R$' }
+    expect(advance(sent, 'draft', null, NOW)).toEqual({ status: 'draft' })
+  })
+
+  it('#165 reopen: reverting a paid stamp to draft discards the frozen total/currency/sentAt/paidAt', () => {
+    const paid = {
+      status: 'paid',
+      sentAt: '2026-08-20T00:00:00.000Z',
+      total: 1480,
+      currency: 'R$',
+      paidAt: '2026-08-25T00:00:00.000Z',
+    }
+    expect(advance(paid, 'draft', null, NOW)).toEqual({ status: 'draft' })
+  })
+})
+
+describe('isReceivable', () => {
+  it('is true for a missing stamp — nothing invoiced yet is still owed', () => {
+    expect(isReceivable(null)).toBe(true)
+    expect(isReceivable(undefined)).toBe(true)
+  })
+
+  it('is true for a draft stamp', () => {
+    expect(isReceivable({ status: 'draft' })).toBe(true)
+  })
+
+  it('is true for a sent stamp — invoiced and waiting is exactly "a receber"', () => {
+    expect(isReceivable({ status: 'sent' })).toBe(true)
+  })
+
+  it('is false for a paid stamp — already received, not owed', () => {
+    expect(isReceivable({ status: 'paid' })).toBe(false)
   })
 })
 

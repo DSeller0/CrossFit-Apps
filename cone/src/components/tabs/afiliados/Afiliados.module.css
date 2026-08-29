@@ -218,6 +218,8 @@
 }
 .receivableName{flex:1;min-width:0;font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .receivableValue{font-size:11px;color:var(--muted);font-family:var(--font-mono);flex-shrink:0}
+.receivableValuePaid{color:var(--dim)}
+.receivablePaidTag{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;flex-shrink:0}
 
 /* ── taxas por afiliado (Meu perfil, read-only, #161/plans/77) ──────────────── */
 .tariffList{display:flex;flex-direction:column;gap:2px;margin-bottom:var(--sp-2)}
@@ -622,6 +624,26 @@
   background:color-mix(in srgb,var(--accent) 12%,transparent);
   color:var(--accent);
   border-color:var(--accent);
+}
+/* Wraps 4-up instead of side-scrolling (#168) — same shape + rationale as
+   Criador's .boxTabs (criador.module.css): a side-scrolling strip gives no
+   visual hint there's more to the right, and 4 columns never grows past this.
+   `shortLabel` (FechamentoPane.jsx) is what keeps "Sessões abertas" from
+   clipping at 25% of a 390px strip — the full label only ever renders on the
+   desktop column header, which has room; `white-space:normal` here is a second
+   safety net so a tab that's still too narrow wraps to two lines instead of
+   clipping. Declared AFTER the base .fechColTab rule (same specificity) so its
+   overrides actually win at a matching viewport. */
+@media (max-width:600px){
+  .fechColTabs{flex-wrap:wrap;overflow-x:visible}
+  .fechColTab{
+    flex:1 1 calc(25% - 5px);
+    justify-content:center;
+    padding:7px 4px;
+    white-space:normal;
+    text-align:center;
+    line-height:1.2;
+  }
 }
 .fechMobileDetail{padding:var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-3)}
 .fechBack{

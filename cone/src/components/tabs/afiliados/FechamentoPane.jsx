@@ -7,11 +7,14 @@ import { eventsForAffiliate } from './affiliateHelpers.js'
 import { periodKey, periodBounds, allStamps, stampFor, columnOf } from './billingState.js'
 import s from './Afiliados.module.css'
 
+// `shortLabel` is for the mobile column-strip tabs only (#168) — the desktop
+// column headers have room for the full label, the 4-up wrapped strip at 390px
+// doesn't fit "Sessões abertas" without clipping it.
 const COLUMNS = [
-  { id: 'open', label: 'Sessões abertas' },
-  { id: 'draft', label: 'Rascunho' },
-  { id: 'sent', label: 'Enviada' },
-  { id: 'paid', label: 'Paga' },
+  { id: 'open', label: 'Sessões abertas', shortLabel: 'Abertas' },
+  { id: 'draft', label: 'Rascunho', shortLabel: 'Rascunho' },
+  { id: 'sent', label: 'Enviada', shortLabel: 'Enviada' },
+  { id: 'paid', label: 'Paga', shortLabel: 'Paga' },
 ]
 
 // Builds every card the board shows. 'open' is scoped to the CURRENT period only
@@ -95,7 +98,7 @@ export default function FechamentoPane({
                 onSelect?.(null, null)
               }}
             >
-              {c.label}
+              {c.shortLabel}
               <span className={s.fechColCount}>{board[c.id].length}</span>
             </button>
           ))}

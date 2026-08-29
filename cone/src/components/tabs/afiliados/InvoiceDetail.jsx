@@ -1,18 +1,11 @@
 import { useState, useEffect } from 'react'
 import Button from '../../ui/Button.jsx'
 import ConfirmReview from '../../../public/shared/ConfirmReview.jsx'
-import { calcTotal, fmtDur, fmtDate } from '../publicador/billing.js'
+import { calcTotal, fmtDur, fmtDateNum, fmtMoney } from '../publicador/billing.js'
 import { buildPixPayload } from '../../../utils/pix.js'
 import { qrToBase64 } from '../publicador/pixQr.js'
 import { periodLabel, singleTotal } from './billingState.js'
 import s from './Afiliados.module.css'
-
-function fmtMoney(total, currency) {
-  return `${currency} ${total.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
-}
 
 const STATUS_LABEL = { open: 'Sem fatura', draft: 'Rascunho', sent: 'Enviada', paid: 'Paga' }
 
@@ -88,7 +81,7 @@ function Trail({ stamp }) {
         <div key={st.key} className={`${s.invTrailStep}${st.done ? ' ' + s.invTrailStepOn : ''}`}>
           <span className={s.invTrailDot} aria-hidden="true" />
           <span className={s.invTrailLabel}>{st.label}</span>
-          {st.at && <span className={s.invTrailDate}>{fmtDate(st.at.slice(0, 10))}</span>}
+          {st.at && <span className={s.invTrailDate}>{fmtDateNum(st.at.slice(0, 10))}</span>}
         </div>
       ))}
     </div>
@@ -142,12 +135,23 @@ export default function InvoiceDetail({ loc, period, stamp, events = [], coach, 
       body: `Confirmar o recebimento de ${fmtMoney(stamp.total, stamp.currency)} de ${loc.name}?`,
       confirmLabel: 'Marcar como paga',
     }),
+    // Same target status as `draft` above ('draft' is what `open` transitions to),
+    // but a different copy — this is `sent`/`paid` going BACKWARDS, which is the
+    // #162 freeze rule running in reverse: the frozen total/currency/sentAt/paidAt
+    // are discarded and the amount goes live again. That consequence isn't
+    // obvious from a "Reabrir" button label alone, so the copy states it.
+    reopen: () => ({
+      title: 'Reabrir fatura',
+      body: `O valor volta a ser calculado ao vivo — o total congelado de ${fmtMoney(stamp.total, stamp.currency)} é descartado.`,
+      confirmLabel: 'Reabrir',
+    }),
   }
   const confirmCopy = confirmTo ? CONFIRM_COPY[confirmTo]() : null
 
   const doAdvance = () => {
+    const to = confirmTo === 'reopen' ? 'draft' : confirmTo
     const computed = confirmTo === 'sent' ? liveSingle : null
-    onAdvance?.(confirmTo, computed)
+    onAdvance?.(to, computed)
     setConfirmTo(null)
   }
 
@@ -175,7 +179,7 @@ export default function InvoiceDetail({ loc, period, stamp, events = [], coach, 
         )}
       </div>
 
-      {!mixedCurrency && amount > 0 && (
+      {!mixedCurrency && amount > 0 && status !== 'paid' && (
         <PixBlock coach={coach} loc={loc} period={period} amount={amount} currency={currency} />
       )}
 
@@ -200,6 +204,11 @@ export default function InvoiceDetail({ loc, period, stamp, events = [], coach, 
       {status === 'sent' && (
         <Button variant="primary" size="sm" full onClick={() => setConfirmTo('paid')}>
           Marcar como paga
+        </Button>
+      )}
+      {(status === 'sent' || status === 'paid') && (
+        <Button variant="secondary" size="sm" full onClick={() => setConfirmTo('reopen')}>
+          Reabrir
         </Button>
       )}
 

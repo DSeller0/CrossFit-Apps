@@ -232,6 +232,7 @@ export default function AfiliadosTab({ events = {} }) {
             locs={locs}
             athletes={athletes}
             events={events}
+            billing={coach.billing}
             from={from}
             to={to}
             monthLabel={monthLabel}

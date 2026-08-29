@@ -98,6 +98,16 @@ export function advance(stamp, to, computed, now = new Date().toISOString()) {
 }
 
 /**
+ * Whether a stamp's status still counts as "a receber" (#163) — true for
+ * everything except 'paid' (money already received). A missing/null stamp
+ * (nothing invoiced yet — the live 'open'/'draft' state) is still owed, same as
+ * 'sent'; only 'paid' is excluded.
+ */
+export function isReceivable(stamp) {
+  return stamp?.status !== 'paid'
+}
+
+/**
  * Which Fechamento column an affiliate belongs to for one period — 'open' (has
  * events, no stamp), 'draft'/'sent'/'paid' (the stamp's own status), or null
  * (nothing to show: no stamp and no events).

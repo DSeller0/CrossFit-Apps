@@ -6,16 +6,10 @@ import EmptyState from '../../ui/EmptyState.jsx'
 import CurrencyInput from './CurrencyInput.jsx'
 import { rateLabel } from './affiliateHelpers.js'
 import { allStamps, periodLabel } from './billingState.js'
+import { fmtMoney } from '../publicador/billing.js'
 import s from './Afiliados.module.css'
 
 const STATUS_LABEL = { draft: 'Rascunho', sent: 'Enviada', paid: 'Paga' }
-
-function fmtMoney(total, currency) {
-  return `${currency} ${total.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
-}
 
 // "Cobranças emitidas" (#162/plans/78) — the stamp history as a table: period ·
 // quem paga · direção · estado · valor. Only `sent`/`paid` rows: a `draft` has

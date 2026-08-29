@@ -209,6 +209,15 @@ const STAMP_OVERDUE = {
   total: 2580,
   currency: 'R$',
 }
+// #163 fixture — a stamp paid WITHIN the fixed FROM/TO window (August 2026), so
+// ReceivableRail's own period resolution (periodKey(from)) actually finds it.
+const STAMP_PAID_AUG = {
+  status: 'paid',
+  sentAt: '2026-08-02T10:00:00.000Z',
+  paidAt: '2026-08-10T10:00:00.000Z',
+  total: 630,
+  currency: 'R$',
+}
 
 const CARD_EVENTS = [EVENTS['2026-08-05'][0], EVENTS['2026-08-12'][0]]
 
@@ -715,7 +724,7 @@ export default {
       render: () => (
         <Section
           title="ReceivableRail"
-          sub="tabs/afiliados/ReceivableRail.jsx — o total do mês por afiliado, e o grande total. Recebe o blob de events cru e resolve cada afiliado sozinho (eventsForAffiliate) — a galeria entrega um único fixture, sem o container pré-calcular nada. O grande total é POR MOEDA (sumByCurrency), nunca achatado — a mesma razão pela qual o Relatório da Agenda nunca soma R$ com US$ num número só."
+          sub="tabs/afiliados/ReceivableRail.jsx — o total do mês por afiliado, e o grande total. Recebe o blob de events cru e resolve cada afiliado sozinho (eventsForAffiliate) — a galeria entrega um único fixture, sem o container pré-calcular nada. O grande total é POR MOEDA (sumByCurrency), nunca achatado — a mesma razão pela qual o Relatório da Agenda nunca soma R$ com US$ num número só. #163: um afiliado com fatura PAGA no mês entra na lista mesmo assim (esmaecido, com a marca 'paga') mas sai do total e da contagem — sumir a linha por completo o tornaria indistinguível de um afiliado sem sessão nenhuma."
         >
           <Case label="Uma moeda">
             <div style={{ width: 280, display: 'flex', border: '1px solid var(--divider)' }}>
@@ -735,6 +744,19 @@ export default {
               <ReceivableRail
                 locs={[locBox, locUsd]}
                 events={{ ...EVENTS, ...EVENTS_USD }}
+                from={FROM}
+                to={TO}
+                monthLabel={MONTH_LABEL}
+                onSelect={NOOP}
+              />
+            </div>
+          </Case>
+          <Case label="Um afiliado já pago no mês — some do total, não da lista (#163)">
+            <div style={{ width: 280, display: 'flex', border: '1px solid var(--divider)' }}>
+              <ReceivableRail
+                locs={LOCS}
+                events={EVENTS}
+                billing={{ l1: { '2026-08': STAMP_PAID_AUG } }}
                 from={FROM}
                 to={TO}
                 monthLabel={MONTH_LABEL}
@@ -869,7 +891,7 @@ export default {
       render: () => (
         <Section
           title="InvoiceDetail"
-          sub="tabs/afiliados/InvoiceDetail.jsx — o painel direito do Fechamento: a mesma fonte de dado do InvoiceCard (ao vivo vs congelado), o QR Pix (buildPixPayload + qrToBase64 compartilhados com o Relatório, respeitando pixTestCap), a trilha de status e a UMA ação que avança o carimbo — sempre atrás de um ConfirmReview, e 'Enviar fatura' é a única cuja cópia declara o congelamento explicitamente."
+          sub="tabs/afiliados/InvoiceDetail.jsx — o painel direito do Fechamento: a mesma fonte de dado do InvoiceCard (ao vivo vs congelado), o QR Pix (buildPixPayload + qrToBase64 compartilhados com o Relatório, respeitando pixTestCap), a trilha de status e as ações que avançam o carimbo — sempre atrás de um ConfirmReview, e 'Enviar fatura' é a única cuja cópia declara o congelamento explicitamente. #165: 'Enviada' e 'Paga' ganham 'Reabrir' (secundário, volta pra 'draft' e descarta o total congelado — a cópia do ConfirmReview diz isso) e 'Paga' perde o QR Pix (não faz sentido cobrar de novo algo já recebido)."
         >
           <Case label="Sessões abertas — ainda sem carimbo">
             <TallModalBox>
@@ -913,7 +935,7 @@ export default {
               </div>
             </TallModalBox>
           </Case>
-          <Case label="Paga — trilha completa, sem mais ações">
+          <Case label="Paga — sem QR Pix, com Reabrir (#165)">
             <TallModalBox>
               <div style={{ width: 292, padding: 12 }}>
                 <InvoiceDetail

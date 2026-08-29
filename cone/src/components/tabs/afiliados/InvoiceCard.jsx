@@ -1,4 +1,4 @@
-import { calcTotal, fmtDur } from '../publicador/billing.js'
+import { calcTotal, fmtDur, fmtMoney } from '../publicador/billing.js'
 import { periodLabel } from './billingState.js'
 import s from './Afiliados.module.css'
 
@@ -18,13 +18,6 @@ const isOverdue = stamp =>
   stamp?.status === 'sent' &&
   stamp.sentAt &&
   Date.now() - new Date(stamp.sentAt).getTime() > OVERDUE_MS
-
-function fmtMoney(total, currency) {
-  return `${currency} ${total.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
-}
 
 // One card on the Fechamento board (#162/plans/78) — 'open' (no stamp yet, hours
 // summed live) or a stamp's own draft/sent/paid. `events` arrives PRE-FILTERED to

@@ -26,13 +26,16 @@ import s from './Afiliados.module.css'
 //
 // `events` is the raw blob; `eventsForAffiliate` resolves the selected affiliate's
 // own slice for the detail column, `ReceivableRail` resolves all of them itself
-// (it takes `events`/`from`/`to` directly — see its own file).
+// (it takes `events`/`from`/`to` directly — see its own file). `billing` is
+// forwarded straight through to `ReceivableRail` (#163) so a `paid` invoice can
+// be excluded from "a receber" without this pane resolving any stamps itself.
 //
 // CLIENT-FREE.
 export default function AffiliatesPane({
   locs = [],
   athletes = [],
   events = {},
+  billing = {},
   from,
   to,
   monthLabel = '',
@@ -199,6 +202,7 @@ export default function AffiliatesPane({
       <ReceivableRail
         locs={locs}
         events={events}
+        billing={billing}
         from={from}
         to={to}
         monthLabel={monthLabel}
