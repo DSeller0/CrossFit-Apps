@@ -11,6 +11,38 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 
 ## 🟢 Ready (planned — pick from the top)
 
+> 🟢 **REFILLED 2026-08-29 — one plan, five rows, from the full pass that ran the same day.**
+> The [2026-08-29 review](./reviews/2026-08-29.md) found seven rows in the surfaces #160/#161/#162
+> shipped. **[plans/79](./plans/79-post-162-cleanup.md) batches the five small ones** — #163 · #165 ·
+> #166 · #167 · #168 — on the plans/68 precedent (five S rows batched safely because none blocked
+> another). **Then C3 (#57), which is now re-measured and ready to plan cold.**
+>
+> ⚠️ **This jumps C3, and the reason is on the record.** The standing instruction is still "resume the
+> design pass at C3 → C5", and C3 is still next after this. But **#163 misreports money in a feature
+> that shipped two days ago** — mark an invoice paid in Fechamento and the rail in the neighbouring
+> pane still counts it as owed — and this board's own principle is *"found-in-live-use and
+> small-and-visible first"*. #147 and #150 jumped the design program on exactly that ground.
+> **User decision 2026-08-29**, taken with the four options on the table.
+>
+> 🔑 **The two rows deliberately NOT in this batch:**
+> **#164** (three of the Atletas grade's four signals are dead on real data) is **M · Opus and needs a
+> decision before it needs code** — what "prescribed for this athlete" means when the coach never
+> assigns sessions individually. It gets its own planning session; do not fold it in here.
+> **#169**'s `‹`/`›` labels ride **#57**, not this batch — they are in `RegistroView.jsx`, the file C3
+> rewrites.
+
+- 🟢 **[→ Ready · plans/79](./plans/79-post-162-cleanup.md)** — **#163 + #165 + #166 + #167 + #168 ·
+  post-#162 cleanup** · **S–M** · **Sonnet** · the five small rows from the 2026-08-29 pass, four of
+  them in Afiliados. **#163** threads `billing` into `ReceivableRail` so a `paid` invoice stops
+  counting as owed (⚠️ a `sent` one must keep counting); **#165** gives the paid state a way back
+  (`advance(stamp,'draft')` already exists — it is a missing button, not a model change) and stops
+  rendering a scannable Pix QR on an invoice already paid; **#166** collapses three byte-identical
+  `fmtMoney`s into `billing.js` and renames its colliding `fmtDate`; **#167** caps the 68.6px presence
+  cells; **#168** wraps the mobile column strip per `criador.module.css:35-44`'s recorded rationale.
+  🔴 **Two traps are written into the plan** — reopening an invoice **discards the frozen total**, so
+  the confirm copy must say so; and #168's naive fix **clips "Sessões abertas"** at 25% of a 370px
+  strip, where Criador's short box names fit.
+
 > 🟢 **REFILLED 2026-08-28 — the design pass resumed, and it grew.** The standing instruction
 > below ("go back to the design pass") was executed: **C2/#56 was planned
 > ([plans/75](./plans/75-design-c2-atletas-servicos.md)) and built to its approval gate**, then the
@@ -472,7 +504,7 @@ new write sites obey the "a load/read path never writes" rule, `coach_profile` (
 billing blob) is anon-locked by `0006`, `qrcode` is a genuinely separate 23.46 kB chunk, gates are
 885/0/clean/clean, and the marker audit found zero drift for the first time ever.*
 
-- 🔴 **#163 A paid invoice is still counted as money owed** · **XS** · Sonnet · **the two panels of
+- 🟢 **PLANNED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)** (see Ready) — 🔴 **#163 A paid invoice is still counted as money owed** · **XS** · Sonnet · **the two panels of
   the Afiliados tab contradict each other on money.** `afiliados/AffiliatesPane.jsx:199-207` renders
   `<ReceivableRail>` with `locs`/`events`/`from`/`to` and **never passes `billing`**, so
   `ReceivableRail.jsx:29` sums `calcTotal(eventsForAffiliate(...))` for the whole month regardless of
@@ -502,7 +534,7 @@ billing blob) is anon-locked by `0006`, `qrcode` is a genuinely separate 23.46 k
   attendance instead — which is **#102**, and would make this row wait. Do not pick the one-liner
   without deciding which; the honest interim is to render the card's absent state rather than a `—`
   that reads as zero. Related: **#39** and **plans/22** both plan to hang more off this same slot.
-- **#165 Fechamento's paid state is a dead end, and still shows a live Pix QR** · **S** · Sonnet ·
+- 🟢 **PLANNED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)** (see Ready) — **#165 Fechamento's paid state is a dead end, and still shows a live Pix QR** · **S** · Sonnet ·
   **two halves, one file, ship together.** **(a)** `billingState.js`'s `advance` only moves
   `open → draft → sent → paid` and the `paid` detail renders **zero actions** (confirmed live) — a
   misclick on "Marcar como paga" is unrecoverable short of editing the DB. 🔑 **The reducer already
@@ -512,7 +544,7 @@ billing blob) is anon-locked by `0006`, `qrcode` is a genuinely separate 23.46 k
   #162 correctness argument — the confirm copy has to say so. **(b)** `InvoiceDetail.jsx:115-119`
   keeps rendering the Pix QR after `paid` — screenshotted at 390 with "Agosto 2026 · Paga" directly
   above a scannable R$ 2.025,00 code, which invites a second payment.
-- **#166 `fmtMoney` is byte-identical in three sibling files, and `fmtDate` names two different
+- 🟢 **PLANNED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)** (see Ready) — **#166 `fmtMoney` is byte-identical in three sibling files, and `fmtDate` names two different
   formats** · **XS** · Sonnet · **the money half first.** `afiliados/InvoiceCard.jsx:22`,
   `InvoiceDetail.jsx:10` and `MeuPerfilPane.jsx:13` each declare the same `fmtMoney`, all three from
   #162 on the same day, and **all three already import from `publicador/billing.js`** — the canonical
@@ -522,13 +554,13 @@ billing blob) is anon-locked by `0006`, `qrcode` is a genuinely separate 23.46 k
   different output, and `week.js` already owns `fmtDateShort`/`fmtDateYear` besides. ⚠️ **Rename
   `billing.js`'s (e.g. `fmtDateNum`), do NOT merge them** — that module deliberately imports nothing
   so it stays trivially testable under vitest (the #149 constraint).
-- **#167 The presence heatmap has no cell-size cap — 4 weeks render as a ~280px slab** · **XS** ·
+- 🟢 **PLANNED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)** (see Ready) — **#167 The presence heatmap has no cell-size cap — 4 weeks render as a ~280px slab** · **XS** ·
   Sonnet · `atletas/Atletas.module.css:374-376`: `.pgRow{grid-template-columns:repeat(7,1fr)}` +
   `.pgCell{aspect-ratio:1}` with no `max-width`, inside the ficha's ~530px pane, computes to
   **68.6 × 68.6px per cell** (measured live). The 9px day letters (`.pgDow`) show the intended scale
   is a compact calendar. ⚠️ **Independent of #164** — fixing the data would render 69px green blocks
   rather than a heatmap, so this needs fixing whether or not that row lands.
-- **#168 Fechamento's mobile column strip side-scrolls, against a recorded decision** · **XS** ·
+- 🟢 **PLANNED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)** (see Ready) — **#168 Fechamento's mobile column strip side-scrolls, against a recorded decision** · **XS** ·
   Sonnet · at 390 the four board columns become a chip strip with `overflow-x:auto` (`scrollWidth
   430` vs `clientWidth 370`, measured), leaving the 4th chip ("Paga") clipped mid-word. CLAUDE.md
   records the **opposite** call for the identical shape: *"Mobile box tabs wrap 4-per-row instead of
