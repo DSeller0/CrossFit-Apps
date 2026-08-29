@@ -4,7 +4,7 @@ Process: see [WORKFLOW.md](./WORKFLOW.md). Row format: `#Priority Title · size 
 Status columns: **Icebox → Ready → In Progress → Done**. Only items with a `plans/NN-*.md` are Ready. A shipped plan keeps a `> ✅ Done: <commit>` marker under its title and stays in `plans/` (see WORKFLOW.md "Plan lifecycle").
 **Line counts on this board are RAW lines, blanks included** (`(Get-Content f).Count`) — adopted 2026-07-26 because rows had been mixing raw and non-blank counts, which manufactured phantom "it grew" edits (#99 read 846 in one row and 892 in another for the same file; `Servicos.jsx` is **412 non-blank / 452 raw**, re-measured 2026-07-26 — this worked example was itself stale within hours of being written, which is the point). ⚠️ **`Measure-Object -Line` DROPS blank lines** and is what produces the low "phantom" numbers — use `(Get-Content f).Count`. Re-measure before quoting.
 🔴 **UNIT DISCONTINUITY, 2026-07-27 — a raw-line figure written before that date is NOT comparable to one written after.** `9b82015` ([plans/49](./plans/49-prettier-format-baseline.md), #24) reformatted 166 files at `printWidth: 100`, taking `cone/src/**/*.{js,jsx}` from **24,259 to 42,837 raw lines — ×1.77 repo-wide — with zero behaviour change.** Nothing rebased this board's numbers at the time, so until 2026-08-04 the #74 watch claimed *"No file is over 800"* while **15 files were**, and `Servicos.jsx`'s worked example directly above ("412 non-blank / 452 raw", 2026-07-26) reads **1199** today. ⚠️ **The multiplier is NOT uniform, so old figures cannot be scaled — only re-measured**: `Publicador.jsx` ×3.34 · `Atletas.jsx` ×2.27 · `Timer.jsx` ×1.37. The spread is structural, not noise — `React.createElement` files (Publicador, AgendaView, events) inflate most because each nested call argument lands on its own line, already-narrow JSX least. This is the second time a stale size figure cost a session: [plans/62](./plans/62-criador-decomposition.md) opened against a recorded "840 raw" and found 1198.
-Review findings feeding this board: [reviews/2026-07-02.md](./reviews/2026-07-02.md), [reviews/2026-07-03-rls-probe.md](./reviews/2026-07-03-rls-probe.md), [reviews/2026-07-04-feature-ideas.md](./reviews/2026-07-04-feature-ideas.md), [reviews/2026-07-04-full-pass.md](./reviews/2026-07-04-full-pass.md), [reviews/2026-07-05-full-pass.md](./reviews/2026-07-05-full-pass.md), [reviews/2026-07-05-fourth-pass.md](./reviews/2026-07-05-fourth-pass.md), [reviews/2026-07-09-design-benchmark.md](./reviews/2026-07-09-design-benchmark.md), [reviews/2026-07-16-full-pass.md](./reviews/2026-07-16-full-pass.md), [reviews/2026-07-18.md](./reviews/2026-07-18.md), [reviews/2026-07-26.md](./reviews/2026-07-26.md), [reviews/2026-08-03-criador-text-logging.md](./reviews/2026-08-03-criador-text-logging.md), **[reviews/2026-08-05-full-pass.md](./reviews/2026-08-05-full-pass.md)** (the Tier 3 closeout gate — closed the housekeeping program and ranked Tier 4).
+Review findings feeding this board: [reviews/2026-07-02.md](./reviews/2026-07-02.md), [reviews/2026-07-03-rls-probe.md](./reviews/2026-07-03-rls-probe.md), [reviews/2026-07-04-feature-ideas.md](./reviews/2026-07-04-feature-ideas.md), [reviews/2026-07-04-full-pass.md](./reviews/2026-07-04-full-pass.md), [reviews/2026-07-05-full-pass.md](./reviews/2026-07-05-full-pass.md), [reviews/2026-07-05-fourth-pass.md](./reviews/2026-07-05-fourth-pass.md), [reviews/2026-07-09-design-benchmark.md](./reviews/2026-07-09-design-benchmark.md), [reviews/2026-07-16-full-pass.md](./reviews/2026-07-16-full-pass.md), [reviews/2026-07-18.md](./reviews/2026-07-18.md), [reviews/2026-07-26.md](./reviews/2026-07-26.md), [reviews/2026-08-03-criador-text-logging.md](./reviews/2026-08-03-criador-text-logging.md), [reviews/2026-08-05-full-pass.md](./reviews/2026-08-05-full-pass.md) (the Tier 3 closeout gate — closed the housekeeping program and ranked Tier 4), **[reviews/2026-08-29.md](./reviews/2026-08-29.md)** (the post-#160/#161/#162 pass — 7 rows, #163–#169).
 Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.md) · [PRODUCT.md](./PRODUCT.md) · [MOBILE.md](./MOBILE.md). Design-pass program umbrella: [plans/16](./plans/16-design-pass-program.md).
 
 ---
@@ -98,7 +98,7 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 > **[#56](#) C2 Atletas + Serviços** (M→L; absorbs the Serviços → Afiliados restructure,
 > [plans/42](./plans/42-afiliados-direction.md); ⚠️ `Servicos.jsx` has **no `.module.css` at all** —
 > 1199 raw lines of inline styles, 75 hex, 31 literal radii) → **#57 C3 Resultados** (M; prerequisite
-> satisfied — [plans/44](./plans/44-resultados-decomposition.md) left a 27-line shell over
+> satisfied — [plans/44](./plans/44-resultados-decomposition.md) left a 49-line shell over
 > `resultados/`) → **#59 C5 Publicador + Agenda** (L · Opus; real target `publicador/AgendaView.jsx`,
 > **1598** raw, still `React.createElement`; also owns **#154** rate history on top of plans/71's
 > `billing.js`). ⚠️ **#96 is therefore NOT the next refill's top** — it is the Exercícios *follow-up*
@@ -460,6 +460,90 @@ then the planning-session inputs, then everything else.
 
 ## 🧊 Icebox (captured + prioritized — no plan yet)
 
+### From the 2026-08-29 full pass ([reviews/2026-08-29.md](./reviews/2026-08-29.md))
+
+*Ran because Ready emptied **and** three L items shipped (#56 · #160 · #162) — WORKFLOW's cadence
+fires on both. Scope was the four surfaces #160/#161/#162 shipped and no pass had ever reviewed.
+**Seven new rows. Both 🔴s came from DRIVING the app against the prod snapshot, not from reading it**
+— H2 needs a paid invoice to exist before it is visible, and H1 needs a real session blob to notice a
+required field is absent from every row. Third pass running where that half produced the findings the
+static half could not. Everything else measured clean: the #162 freeze holds at every consumer, both
+new write sites obey the "a load/read path never writes" rule, `coach_profile` (which now holds the
+billing blob) is anon-locked by `0006`, `qrcode` is a genuinely separate 23.46 kB chunk, gates are
+885/0/clean/clean, and the marker audit found zero drift for the first time ever.*
+
+- 🔴 **#163 A paid invoice is still counted as money owed** · **XS** · Sonnet · **the two panels of
+  the Afiliados tab contradict each other on money.** `afiliados/AffiliatesPane.jsx:199-207` renders
+  `<ReceivableRail>` with `locs`/`events`/`from`/`to` and **never passes `billing`**, so
+  `ReceivableRail.jsx:29` sums `calcTotal(eventsForAffiliate(...))` for the whole month regardless of
+  invoice status. **Driven end to end on the local stack:** Eagles' August advanced `open → draft →
+  sent → paid` in Fechamento, and "A receber · agosto" still read **R$ 2.025** for Eagles with a
+  grand total of **R$ 2.025 + US$ 50**. ⚠️ **A `sent` invoice must KEEP counting** — it is still
+  owed; only `paid` should drop out, so this is not "filter out anything stamped". 🔑 **Cause is
+  sequencing, not oversight:** #161 shipped `ReceivableRail` before #162 invented the stamp, and #162
+  never revisited it — the same shape as #150 inheriting #81's unfinished half. Fix is to pass
+  `billing` down and skip `paid` periods; `billingState.js`'s `stampFor` already gives the lookup.
+- 🔴 **#164 Three of the Atletas grade's four signals are structurally dead on real data** · **M** ·
+  **Opus** · **a data-contract question before it is a fix.** `public/lib/sessions.js:34-41` —
+  `matchesAthlete(s, name)` is true only when `s.mainTraining` names the athlete, and **all 55
+  sessions in the last 30 days of the prod snapshot have no `mainTraining` at all**. The gym's real
+  sessions are gym-wide, so every consumer defined as "sessions assigned to this athlete" resolves to
+  zero. Three confirmed symptoms, all on one screen: `atletasHelpers.js:239-261` `adherence()` gets
+  `planned = 0` and returns `null`, so **ADERÊNCIA is `—` on 100% of cards** even for an athlete with
+  a result logged two days ago (80 `results_v2` rows exist, newest 2026-08-27); `:329-340`
+  `presenceCellState()` returns `'none'` for **all 28 cells**, so Presença · 4 semanas is a blank
+  slab advertising two legend states it never shows; and `SessionStrip` lists **16–17/07** sessions
+  on a card whose own "últ. sessão" reads **2 d**. ⚠️ **NOT a #160 regression** — `calcBlockStats`
+  was promoted from `me/meHelpers.js` with this definition intact, so me.html's adherence bars have
+  been equally empty for as long; #160 just gave it a prominent surface. 🔑 **The decision to take
+  first: what does "prescribed for this athlete" mean when the coach never assigns sessions
+  individually?** Either an untargeted session counts as prescribed for everyone in scope (one-line
+  change in `matchesAthlete`, but it silently redefines me.html's bars too), or the signal keys off
+  attendance instead — which is **#102**, and would make this row wait. Do not pick the one-liner
+  without deciding which; the honest interim is to render the card's absent state rather than a `—`
+  that reads as zero. Related: **#39** and **plans/22** both plan to hang more off this same slot.
+- **#165 Fechamento's paid state is a dead end, and still shows a live Pix QR** · **S** · Sonnet ·
+  **two halves, one file, ship together.** **(a)** `billingState.js`'s `advance` only moves
+  `open → draft → sent → paid` and the `paid` detail renders **zero actions** (confirmed live) — a
+  misclick on "Marcar como paga" is unrecoverable short of editing the DB. 🔑 **The reducer already
+  supports the fix**: `advance(stamp, 'draft')` returns `{status:'draft'}`, so this is a missing
+  affordance, not a model change — add a "Reabrir" behind `ConfirmReview` like every other advance.
+  ⚠️ Reverting a `sent`/`paid` stamp **discards its frozen `total`/`currency`**, which is the whole
+  #162 correctness argument — the confirm copy has to say so. **(b)** `InvoiceDetail.jsx:115-119`
+  keeps rendering the Pix QR after `paid` — screenshotted at 390 with "Agosto 2026 · Paga" directly
+  above a scannable R$ 2.025,00 code, which invites a second payment.
+- **#166 `fmtMoney` is byte-identical in three sibling files, and `fmtDate` names two different
+  formats** · **XS** · Sonnet · **the money half first.** `afiliados/InvoiceCard.jsx:22`,
+  `InvoiceDetail.jsx:10` and `MeuPerfilPane.jsx:13` each declare the same `fmtMoney`, all three from
+  #162 on the same day, and **all three already import from `publicador/billing.js`** — the canonical
+  home (pure, dependency-free, unit-tested, already exporting `fmtDate`/`fmtDur`). Duplicated money
+  formatting is the exact shape that produced #104's four money bugs. Second half: `billing.js:8`'s
+  `fmtDate` returns `dd/mm/yy` while `public/lib/week.js:51`'s returns `"Dom 5 Jul"` — same name,
+  different output, and `week.js` already owns `fmtDateShort`/`fmtDateYear` besides. ⚠️ **Rename
+  `billing.js`'s (e.g. `fmtDateNum`), do NOT merge them** — that module deliberately imports nothing
+  so it stays trivially testable under vitest (the #149 constraint).
+- **#167 The presence heatmap has no cell-size cap — 4 weeks render as a ~280px slab** · **XS** ·
+  Sonnet · `atletas/Atletas.module.css:374-376`: `.pgRow{grid-template-columns:repeat(7,1fr)}` +
+  `.pgCell{aspect-ratio:1}` with no `max-width`, inside the ficha's ~530px pane, computes to
+  **68.6 × 68.6px per cell** (measured live). The 9px day letters (`.pgDow`) show the intended scale
+  is a compact calendar. ⚠️ **Independent of #164** — fixing the data would render 69px green blocks
+  rather than a heatmap, so this needs fixing whether or not that row lands.
+- **#168 Fechamento's mobile column strip side-scrolls, against a recorded decision** · **XS** ·
+  Sonnet · at 390 the four board columns become a chip strip with `overflow-x:auto` (`scrollWidth
+  430` vs `clientWidth 370`, measured), leaving the 4th chip ("Paga") clipped mid-word. CLAUDE.md
+  records the **opposite** call for the identical shape: *"Mobile box tabs wrap 4-per-row instead of
+  scrolling — a side-scrolling filter row gives no visual hint there's more to the right; wrapping
+  doesn't."* Same four items, two opposite solutions in one app. Decide one and note it, rather than
+  fixing whichever page is in front of you.
+- **#169 Five glyph-only buttons have no accessible name** · **XS** · Sonnet ·
+  `public/timer/Timer.jsx` `✕` (cancel get-ready) and `❚❚` (**pause — the most-used control during a
+  live class**), `public/timer/BlockTypePicker.jsx` `✕`, and `resultados/RegistroView.jsx`'s `‹`/`›`
+  month nav. 🔑 **Every `iconOnly` `Button` in the app IS correctly labelled** — swept across all
+  non-gallery `.jsx`, zero misses, so the primitive's convention is holding; these five are raw
+  `<button>`s that bypass it. Filed separately from **#14** for the same reason **#156** was: it is a
+  concrete measured list, not the site-wide contrast residue. ⚠️ The RegistroView pair is in C3's
+  file — ship it inside **#57**, not before.
+
 ### From the 2026-08-05 full pass ([reviews/2026-08-05-full-pass.md](./reviews/2026-08-05-full-pass.md))
 
 *The Tier 3 closeout gate. Five new rows. **Both 🔴s came from driving or from cross-referencing, not
@@ -689,7 +773,7 @@ section lists what was checked and found **clean**, so it isn't re-raised next p
 - ✅ **[shipped 2026-07-19 · plans/33](./plans/33-design-c0-spa-standard.md)** (see Done) — **#54 Design pass C0 — SPA design standard** · M · Opus · button/input/card/spacing standard from theme tokens + shared `ConfirmReview` + `MaskedTimeInput` (#35 absorbed), built into `src/components/ui/` + `src/public/shared/` and gallery-covered; **gates C1–C5** (which now adopt the primitives page-by-page).
 - 🟡 **[Phase A shipped 2026-07-23 · `cab19c8` · plans/38](./plans/38-design-c1-exercicios-config.md)** — **#55 Design pass C1 — Exercícios + Configurações** · **M→L** · Opus · apply C0 standard; remove "Salvar config.json" dev leftover; kill `Exercicios.jsx:8-14`'s frozen totk-dark palette (wrong colors in 3 of 4 themes). **Agenda deferred to C5** (#59 — it's `AgendaView` inside `Publicador.jsx`) and **#87 folded in whole** (see its row). Resized from "M · Sonnet · + Agenda" when #87 folded. **Phase A (both tabs → C0 primitives + a11y + #87 registry search / alpha-canonical ordering; `Exercicios.module.css` + `Config.module.css`) shipped + live-verified 4 themes × 2 widths.** **Phase B (me.html PR board → sub-cards, incl. the #87 benchmark time-PR surface — `Benchmark` carved out of `PR_SKIP` only for the new time-PR card) mockup synced to Claude Design (`mockups/38-me-pr-board-subcards.html`) → AT THE APPROVAL GATE; build in `PrSection.jsx` + `Me.module.css` is post-approval (may be a follow-up session).**
 - ✅ **PROMOTED TO READY 2026-08-28 — planned as [plans/75](./plans/75-design-c2-atletas-servicos.md), built to its approval gate, and followed by three new rows (#160/#161/#162) from mockups 51 + 60. See the Ready refill at the top of this board; the live row is there, this one is the historical capture.** ⚠️ **Its measurements below are STALE — re-measured 2026-08-13:** `Servicos.jsx` is **110** hex lines (not 75) and **34** literal radii (not 31); `Atletas.jsx`'s frozen palette is at **`:20-26`** (not `:14-20`, shifted by `9b82015`'s reformat); and Serviços' inline palette **is not even totk-dark**, so it is wrong in **4 of 4** themes, not 3. — ⏸ **HOLD FULLY LIFTED 2026-07-26** — the housekeeping pass this sat behind (plans/39–45) has shipped in full. **When it runs it also absorbs the Serviços → Afiliados restructure** ([plans/42](./plans/42-afiliados-direction.md) — panes Afiliados · Coaches · Turmas · **Meu negócio**, with **no pricing on the affiliate record**; the rate/Pix half stays intact in its own pane because `locations[].rate` means *coach→box* and the Relatório depends on it). Note for whoever picks it up: **`Servicos.jsx` has no `.module.css` at all** — ⚠️ **1199** raw lines of inline styles + global classes (re-measured 2026-08-04; the 437 this row carried is a pre-`9b82015` figure — see the header's unit note — and the hex/radius counts below were taken in the same pass, so re-run them too), **75 hex lines**, **31 literal radii** — so its slice is "create `Servicos.module.css` + adopt C0", the same shape as C1 Phase A did for Exercícios/Config. ✅ **plans/45 (#109) already fixed this file's mount-write-back** (`saveLoc`/`deleteLoc`/`toggleAthlete` now persist directly; the coach-profile effect is debounced) — nothing left to sequence around there. ✅ **#111** (found while verifying plans/45, a bigger, unrelated write-on-load bug in `SyncContext.jsx`) shipped 2026-07-27 as [plans/47](./plans/47-load-path-writeback.md) — nothing left to sequence around there either. — **#56 Design pass C2 — Atletas + Serviços (+ Afiliados restructure)** · M→L · Sonnet · apply standard; empty-state dead space; Serviços left-pane overflow; reserve the #39 Adaptações card slot; **fix `Atletas.jsx:14-20` — 7 named consts freeze the entire totk-dark palette → wrong colors in 3 of 4 themes (2026-07-18 review; same bug class as retired athletes.html / #53's Index BLOCK_COLORS)**
-- **#57 Design pass C3 — Resultados (SPA)** · M · Sonnet · apply standard; 51 hex. ✅ **Prerequisite satisfied 2026-07-26** — [plans/44](./plans/44-resultados-decomposition.md) shipped: `Resultados.jsx` is now a 27-line shell over `resultados/` (RegistroView/HistoryView/LeaderboardView + resultadosHelpers), so this pass works against small files instead of the old 912-line monolith. Note for whoever picks it up: `getPerformanceStr` in `resultadosHelpers.js` is a known-buggy fork of canonical `perfStr` (`public/lib/wod.js`) — swapping it is a small separate fix, not part of the design pass, and is a good warm-up commit before this one.
+- **#57 Design pass C3 — Resultados (SPA)** · M · Sonnet · apply standard. 🔁 **RE-MEASURED 2026-08-29** (the figures below replace "27-line shell" and "51 hex", both pre-reformat): `resultados/` is **1847 raw lines** — `RegistroView.jsx` **814** · `LeaderboardView.jsx` **493** · `HistoryView.jsx` **339** · `cards.jsx` **32** — with **70 hex** in the directory (63 across the three views), **76 inline `style={{`}** and **15** legacy `.b`/`.bp`/`.bsec`/`.bd`/`.tb-btn` uses. 🔴 **There is NO `.module.css` anywhere in `resultados/`** — the same shape `Servicos.jsx` was in before C2, which is the direct precedent for how this session runs. ⚠️ **There is also no Resultados group in the gallery** (the `results` group is the PUBLIC `results.html` pieces), so this pass extracts the SPA tab's components into a new group first, exactly as C2 did. ⚠️ **#157 ships before or inside this row** (`RegistroView.jsx:753`, confirmed still live 2026-08-29), and **#169**'s `‹`/`›` month-nav labels are in the same file — ride them both. ✅ **Prerequisite satisfied 2026-07-26** — [plans/44](./plans/44-resultados-decomposition.md) shipped: `Resultados.jsx` is now a **49**-line shell over `resultados/` (RegistroView/HistoryView/LeaderboardView + resultadosHelpers), so this pass works against small files instead of the old 912-line monolith. Note for whoever picks it up: `getPerformanceStr` in `resultadosHelpers.js` is a known-buggy fork of canonical `perfStr` (`public/lib/wod.js`) — swapping it is a small separate fix, not part of the design pass, and is a good warm-up commit before this one.
 - ✅ **[shipped 2026-07-22 · plans/37](./plans/37-design-c4-criador.md)** (see Done) — **#58 Design pass C4 — Criador** · L · Opus · **Lane A** · **#26 ([plans/35](./plans/35-criador-decomposition.md)) and #92 ([plans/36](./plans/36-criador-text-mode.md)) run first** — 37 re-lays-out the components 35 extracted and hosts the mode toggle 36 introduced. Beyond the C0 standard + hex/radius/a11y fold-ins, it lands the coach's 2026-07-21 layout brief: **week grid first** (no session form until one is opened/created), new-session **modal** instead of a permanent form, editor with the week kept visible as the collapsed day strip on desktop / a back link on mobile; complex movement rows read **reps before name**; the redundant `✕` on the active Intensidade tab goes; the mobile sheet gains the exercise-name input and opens from the name *or* the gear, with numeric keyboards on all quantity fields. **Absorbs #10 and #90** (both are the same surface). The block **type picker is explicitly kept as-is** — the coach calls it spot on; token/a11y touch-ups only.
 - ⏸ **HOLD LIFTED 2026-07-26 — #25 SHIPPED** ([plans/39](./plans/39-publicador-decomposition.md), `e957b57`), so this row inherits the split files and its scope is now **the design pass only**, plus the `createElement` → JSX conversion plans/39 deliberately left alone. **The housekeeping pass this sat behind (plans/43–45) has shipped in full.** **Agenda's real target is `publicador/AgendaView.jsx` (⚠️ **1598** raw, re-measured 2026-08-04 — the 408 this row carried is a pre-`9b82015` figure, see the header's unit note)**, not the old `Publicador.jsx:1077-2124` range. ⚠️ **When it runs it should inherit, not re-derive, two things:** the filter set — `ReportModal.filteredEvents` (`events.jsx:175-190`) already implements period/type/status/services/athletes, so **#105 lifts it into one shared component rather than writing a second copy**; and #102's derived `status` + real roster, if that has landed. Also fold in **`AgendaView.jsx:25` `BLOCK_C`, a sixth divergent block-family taxonomy** (#53 caught `Index.jsx:16` as the fifth) — its comment forbids collapsing into `blkColor`; confirm that's still intent or record why. — **#59 Design pass C5 — Publicador + Agenda** · L · Opus · #25 first, then standard; **fix "JULY 2026" English month in export grid**; dedupe the two "Mobile Semanal" button labels; preview grid inner scroll; classify jsPDF hex as exempt-from-#15 (PDF has no CSS vars); **spot-check the 45 `rgba()` in `Publicador.jsx` — rgba isn't jsPDF's usual API, so verify none are non-exempt on-screen preview UI (2026-07-18 review)** · **+ Agenda design pass folded in here (2026-07-22): `AgendaView` (`Publicador.jsx:1077-2124`, `React.createElement`) gets its token/a11y/chip-legibility slice as part of #25's agenda+events decomposition — moved off C1 so it isn't design-passed in-place then immediately restructured here.**
 - ✅ **[shipped 2026-07-22 · plans/37](./plans/37-design-c4-criador.md)** (see Done) — **#10 Goals for WOD-type blocks** · M · Sonnet · builder sets a goal/target on WOD blocks; shown wherever WODs render (schedule card slot reserved, TV). **This is the coach's `Meta:` line** — he already writes `Meta: 11-12'` / `Meta: 5 rounds` in his weekly text, so [plans/36](./plans/36-criador-text-mode.md)'s parser produces the shape and plans/37 gives it a type-aware editor (For Time → two `MaskedTimeInput`s de–até, AMRAP → rounds+reps, else free text) plus canonical `goalStr(block)` in `wod.js` rendered on schedule / TV / `WodBlockCard`.

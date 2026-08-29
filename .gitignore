@@ -14,6 +14,19 @@ cone/.playwright-mcp/
 # Supabase Studio's auto-saved "Untitled query NNN.sql" snippets.
 cone/supabase/snippets/
 
+# ── Unused local font downloads ───────────────────────────────────────────────
+# Google Fonts .ttf downloads (~8.8 MB) that nothing in the repo references.
+# Cinzel and Crimson Pro already ship as npm packages (@fontsource/*, see
+# cone/src/fonts.js); 'Cascadia Code' appears in themes.css only as a SYSTEM
+# fallback name inside --font-mono, which is a deliberate system-mono stack —
+# there is no @font-face and no loaded face for any of the three.
+# ⚠️ Ignored BY NAME, never as a blanket `fonts/`: the other 14 files in that
+# directory (hylia-serif, triforce-font, zelda-oracles, RocknRoll_One, …) are
+# tracked TotK/Spirit-Blossom theme source material.
+fonts/Cascadia_Code/
+fonts/Cinzel/
+fonts/Crimson_Pro/
+
 # ── Audit scratch — REAL PROD DATA, never commit (#100) ───────────────────────
 # Pulled down while auditing prod (e.g. scripts/audit-session-registry.mjs).
 # rv2.json holds results_v2 rows keyed by athlete_id; ath.json an athletes blob.
