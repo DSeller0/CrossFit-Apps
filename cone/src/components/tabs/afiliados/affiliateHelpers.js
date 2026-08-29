@@ -88,3 +88,23 @@ export function eventsForAffiliate(events, loc, from, to) {
     (a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''),
   )
 }
+
+/**
+ * The affiliate an event belongs to, regardless of type (#162/plans/78 —
+ * `Minha semana`'s week grid needs to colour a cell by affiliate without
+ * knowing in advance which one). A box event carries `locationId` directly; a
+ * personal one never does (the coach picks an athlete instead), so it resolves
+ * through the first athlete on a personal affiliate that includes them — the
+ * same reverse lookup `publicador/events.jsx`'s `EventFormInner` already does
+ * at booking time (`persSvc`).
+ */
+export function resolveEventLoc(ev, locs) {
+  if (ev.locationId) return locs.find(l => l.id === ev.locationId) || null
+  if (ev.type === 'personal' && (ev.athleteIds || []).length) {
+    return (
+      locs.find(l => l.type === 'personal' && (l.athleteIds || []).includes(ev.athleteIds[0])) ||
+      null
+    )
+  }
+  return null
+}

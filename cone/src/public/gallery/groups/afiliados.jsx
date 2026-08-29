@@ -10,6 +10,12 @@ import AffiliateRail from '../../../components/tabs/afiliados/AffiliateRail.jsx'
 import DirectionPair from '../../../components/tabs/afiliados/DirectionPair.jsx'
 import AffiliateSessions from '../../../components/tabs/afiliados/AffiliateSessions.jsx'
 import ReceivableRail from '../../../components/tabs/afiliados/ReceivableRail.jsx'
+import InvoiceCard from '../../../components/tabs/afiliados/InvoiceCard.jsx'
+import InvoiceDetail from '../../../components/tabs/afiliados/InvoiceDetail.jsx'
+import FechamentoPane from '../../../components/tabs/afiliados/FechamentoPane.jsx'
+import WeekEventGrid from '../../../components/tabs/afiliados/WeekEventGrid.jsx'
+import MinhaSemanaPane from '../../../components/tabs/afiliados/MinhaSemanaPane.jsx'
+import { advance, setStamp, stampFor } from '../../../components/tabs/afiliados/billingState.js'
 import { Case, Section, ModalBox, TallModalBox } from '../harness.jsx'
 import { NOOP } from '../fixtures.js'
 
@@ -157,8 +163,132 @@ const LINK = 'https://dseller0.github.io/CrossFit-Apps/index.html?box=l1'
 
 const PANES = [
   { id: 'afiliados', label: 'Meus afiliados', group: 'Painéis', count: LOCS.length },
+  { id: 'fechamento', label: 'Fechamento', group: 'Painéis' },
+  { id: 'semana', label: 'Minha semana', group: 'Painéis' },
   { id: 'perfil', label: 'Meu perfil', group: 'Conta' },
 ]
+
+// ── #162/plans/78 fixtures — the invoice board + the week grid ─────────────
+// Same fixed-August-2026 rule as the fixtures above: the generated design
+// cards are SSR'd once and must render identically on every regeneration.
+const COACH_NO_CAP = {
+  name: 'Zé Arthur',
+  pixEnabled: true,
+  pixKey: 'joao@cone.fit',
+  cidade: 'Recife',
+  billing: {},
+}
+const COACH_WITH_CAP = { ...COACH_NO_CAP, pixTestCap: 50 }
+
+const STAMP_DRAFT = { status: 'draft' }
+// The ONE deliberate exception to "no new Date() in this file" (see the header
+// note above): whether a `sent` stamp reads as "vencida" is inherently relative
+// to WHENEVER the page is viewed/regenerated (InvoiceCard's own `isOverdue`, 30
+// days) — a fixed historical `sentAt` would eventually cross that threshold as
+// real time advances past it, silently turning this "still on time" case into
+// a second overdue one. `STAMP_OVERDUE` below stays a genuine fixed date on
+// purpose — safely >30 days old FOREVER, since time only moves forward.
+const STAMP_SENT = {
+  status: 'sent',
+  sentAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+  total: 1480,
+  currency: 'R$',
+}
+const STAMP_PAID = {
+  status: 'paid',
+  sentAt: '2026-06-05T10:00:00.000Z',
+  paidAt: '2026-06-20T10:00:00.000Z',
+  total: 1360,
+  currency: 'R$',
+}
+// Far enough in the past that it reads as "vencida" (>30 days) on any future
+// regeneration too, since time only moves forward from a fixed sentAt.
+const STAMP_OVERDUE = {
+  status: 'sent',
+  sentAt: '2026-06-01T10:00:00.000Z',
+  total: 2580,
+  currency: 'R$',
+}
+
+const CARD_EVENTS = [EVENTS['2026-08-05'][0], EVENTS['2026-08-12'][0]]
+
+const BILLING_BOARD = {
+  l1: { '2026-08': STAMP_DRAFT },
+  l2: { '2026-07': STAMP_SENT, '2026-06': STAMP_PAID },
+}
+
+// A Sunday-start week (23–29 ago 2026, matching `week.js`'s `getWeek` — plans/78
+// note in CLAUDE.md) with several class times across several days, so the grid
+// shows more than one row/column populated at once.
+const WEEK_DATES = [23, 24, 25, 26, 27, 28, 29].map(d => new Date(2026, 7, d))
+const WEEK_EVENTS_FULL = {
+  '2026-08-24': [
+    {
+      type: 'aula',
+      locationId: 'l1',
+      time: '12:00',
+      durationMin: 60,
+      label: 'Halterofilismo',
+      status: 'completed',
+    },
+    {
+      type: 'aula',
+      locationId: 'l1',
+      time: '18:00',
+      durationMin: 90,
+      label: 'WOD B',
+      status: 'completed',
+      athleteIds: ['a1', 'a2'],
+    },
+  ],
+  '2026-08-26': [
+    {
+      type: 'aula',
+      locationId: 'l1',
+      time: '12:00',
+      durationMin: 60,
+      label: 'Halterofilismo',
+      status: 'completed',
+    },
+    {
+      type: 'aula',
+      locationId: 'l1',
+      time: '18:00',
+      durationMin: 90,
+      label: 'WOD B',
+      status: 'completed',
+      athleteIds: ['a1'],
+    },
+    {
+      type: 'aula',
+      locationId: 'l2',
+      time: '20:00',
+      durationMin: 60,
+      label: 'Força',
+      status: 'scheduled',
+    },
+  ],
+  '2026-08-27': [
+    {
+      type: 'aula',
+      locationId: 'l1',
+      time: '18:00',
+      durationMin: 90,
+      label: 'WOD B',
+      status: 'completed',
+    },
+  ],
+  '2026-08-29': [
+    {
+      type: 'personal',
+      athleteIds: ['a3'],
+      time: '07:00',
+      durationMin: 60,
+      label: 'Personal manhã',
+      status: 'completed',
+    },
+  ],
+}
 
 // ── stateful demo wrappers ─────────────────────────────────────────────────
 function PaneTabsDemo() {
@@ -237,7 +367,61 @@ function PerfilDemo({ initial, height = 620 }) {
     // overflow:auto — the pane scrolls in the app too, and with Pix on the cap field
     // sits below a clipped box.
     <div style={{ height, overflow: 'auto', border: '1px solid var(--divider)', display: 'flex' }}>
-      <MeuPerfilPane coach={coach} setCoach={setCoach} locs={LOCS} onSelectAffiliate={NOOP} />
+      <MeuPerfilPane
+        coach={coach}
+        setCoach={setCoach}
+        locs={LOCS}
+        onSelectAffiliate={NOOP}
+        onSelectInvoice={NOOP}
+      />
+    </div>
+  )
+}
+
+function FechamentoDemo({ compact = false, height = 640 }) {
+  const [coach, setCoach] = useState({ ...COACH_WITH_CAP, billing: BILLING_BOARD })
+  const [selId, setSelId] = useState(null)
+  const [selPeriod, setSelPeriod] = useState(null)
+  return (
+    <div style={{ height, overflow: 'auto', border: '1px solid var(--divider)', display: 'flex' }}>
+      <FechamentoPane
+        locs={LOCS}
+        events={EVENTS}
+        coach={coach}
+        selectedAffiliateId={selId}
+        selectedPeriod={selPeriod}
+        onSelect={(id, period) => {
+          setSelId(id)
+          setSelPeriod(period)
+        }}
+        onAdvance={(locId, period, to, computed) => {
+          setCoach(c => ({
+            ...c,
+            billing: setStamp(
+              c.billing,
+              locId,
+              period,
+              advance(stampFor(c.billing, locId, period), to, computed),
+            ),
+          }))
+        }}
+        compact={compact}
+      />
+    </div>
+  )
+}
+
+function MinhaSemanaDemo({ compact = false, height = 700 }) {
+  return (
+    <div style={{ height, overflow: 'auto', border: '1px solid var(--divider)', display: 'flex' }}>
+      <MinhaSemanaPane
+        locs={LOCS}
+        athletes={athletes}
+        events={WEEK_EVENTS_FULL}
+        onGoToInvoice={NOOP}
+        compact={compact}
+        weekDatesOverride={WEEK_DATES}
+      />
     </div>
   )
 }
@@ -613,16 +797,221 @@ export default {
       ),
     },
     {
+      id: 'afl-invoicecard',
+      label: 'InvoiceCard',
+      render: () => (
+        <Section
+          title="InvoiceCard"
+          sub="tabs/afiliados/InvoiceCard.jsx — um cartão do quadro de Fechamento (#162/plans/78). 'Sessões abertas' e 'Rascunho' leem o total AO VIVO (calcTotal sobre os eventos pré-filtrados); 'Enviada' e 'Paga' leem o total CONGELADO do próprio carimbo — essa bifurcação É a regra de congelamento (billingState.js), este componente só mostra qual dos dois se aplica. 'Vencida' é um aviso calculado (mais de 30 dias enviada sem pagamento), não um campo persistido — não existe data de vencimento no carimbo."
+        >
+          <Case label="Sessões abertas — sem carimbo, total ao vivo">
+            <div style={{ width: 240 }}>
+              <InvoiceCard
+                loc={locBox}
+                period="2026-08"
+                stamp={null}
+                events={CARD_EVENTS}
+                onSelect={NOOP}
+              />
+            </div>
+          </Case>
+          <Case label="Rascunho — selecionado">
+            <div style={{ width: 240 }}>
+              <InvoiceCard
+                loc={locBox}
+                period="2026-08"
+                stamp={STAMP_DRAFT}
+                events={CARD_EVENTS}
+                selected
+                onSelect={NOOP}
+              />
+            </div>
+          </Case>
+          <Case label="Enviada — total congelado">
+            <div style={{ width: 240 }}>
+              <InvoiceCard
+                loc={locBox2}
+                period="2026-07"
+                stamp={STAMP_SENT}
+                events={[]}
+                onSelect={NOOP}
+              />
+            </div>
+          </Case>
+          <Case label="Paga">
+            <div style={{ width: 240 }}>
+              <InvoiceCard
+                loc={locBox2}
+                period="2026-06"
+                stamp={STAMP_PAID}
+                events={[]}
+                onSelect={NOOP}
+              />
+            </div>
+          </Case>
+          <Case label="Vencida — enviada há mais de 30 dias, ainda sem pagamento">
+            <div style={{ width: 240 }}>
+              <InvoiceCard
+                loc={locBox2}
+                period="2026-06"
+                stamp={STAMP_OVERDUE}
+                events={[]}
+                onSelect={NOOP}
+              />
+            </div>
+          </Case>
+        </Section>
+      ),
+    },
+    {
+      id: 'afl-invoicedetail',
+      label: 'InvoiceDetail',
+      render: () => (
+        <Section
+          title="InvoiceDetail"
+          sub="tabs/afiliados/InvoiceDetail.jsx — o painel direito do Fechamento: a mesma fonte de dado do InvoiceCard (ao vivo vs congelado), o QR Pix (buildPixPayload + qrToBase64 compartilhados com o Relatório, respeitando pixTestCap), a trilha de status e a UMA ação que avança o carimbo — sempre atrás de um ConfirmReview, e 'Enviar fatura' é a única cuja cópia declara o congelamento explicitamente."
+        >
+          <Case label="Sessões abertas — ainda sem carimbo">
+            <TallModalBox>
+              <div style={{ width: 292, padding: 12 }}>
+                <InvoiceDetail
+                  loc={locBox}
+                  period="2026-08"
+                  stamp={null}
+                  events={CARD_EVENTS}
+                  coach={COACH_NO_CAP}
+                  onAdvance={NOOP}
+                />
+              </div>
+            </TallModalBox>
+          </Case>
+          <Case label="Rascunho — total ao vivo, Pix sem cap de teste">
+            <TallModalBox>
+              <div style={{ width: 292, padding: 12 }}>
+                <InvoiceDetail
+                  loc={locBox}
+                  period="2026-08"
+                  stamp={STAMP_DRAFT}
+                  events={CARD_EVENTS}
+                  coach={COACH_NO_CAP}
+                  onAdvance={NOOP}
+                />
+              </div>
+            </TallModalBox>
+          </Case>
+          <Case label="Enviada — total congelado, Pix com cap de teste (valor limitado)">
+            <TallModalBox>
+              <div style={{ width: 292, padding: 12 }}>
+                <InvoiceDetail
+                  loc={locBox2}
+                  period="2026-07"
+                  stamp={STAMP_SENT}
+                  events={[]}
+                  coach={COACH_WITH_CAP}
+                  onAdvance={NOOP}
+                />
+              </div>
+            </TallModalBox>
+          </Case>
+          <Case label="Paga — trilha completa, sem mais ações">
+            <TallModalBox>
+              <div style={{ width: 292, padding: 12 }}>
+                <InvoiceDetail
+                  loc={locBox2}
+                  period="2026-06"
+                  stamp={STAMP_PAID}
+                  events={[]}
+                  coach={COACH_NO_CAP}
+                  onAdvance={NOOP}
+                />
+              </div>
+            </TallModalBox>
+          </Case>
+        </Section>
+      ),
+    },
+    {
+      id: 'afl-fechamento',
+      label: 'FechamentoPane',
+      render: () => (
+        <Section
+          title="FechamentoPane"
+          sub="tabs/afiliados/FechamentoPane.jsx — o quadro (#162/plans/78, mockup 60): Sessões abertas → Rascunho → Enviada → Paga. 'Sessões abertas' é sempre o mês CORRENTE (uma fatura nova só nasce das sessões deste mês); as outras três colunas mostram todo carimbo que existe, de qualquer período — uma 'Paga' de junho e uma 'Enviada' de julho convivem lado a lado, como no mockup. O carimbo decide a coluna; calcTotal decide o número."
+        >
+          <Case label="Desktop — quadro + detalhe (interativo: clique num cartão, avance o status)">
+            <FechamentoDemo />
+          </Case>
+          <Case label="Mobile — abas de coluna + lista (< 768px, interativo)">
+            <div style={{ width: 390 }}>
+              <FechamentoDemo compact height={640} />
+            </div>
+          </Case>
+        </Section>
+      ),
+    },
+    {
+      id: 'afl-weekgrid',
+      label: 'WeekEventGrid',
+      render: () => (
+        <Section
+          title="WeekEventGrid"
+          sub="tabs/afiliados/WeekEventGrid.jsx — a grade de Minha semana: linhas são os horários DISTINTOS que de fato existem na semana (não uma escala fixa de 24h), colunas são os 7 dias, domingo primeiro. Cada célula é colorida por resolveEventLoc, já que um evento personal não carrega locationId próprio. Uma sessão ainda não `completed` fica esmaecida — não existe status 'cancelada' no schema, só scheduled/completed (mesma honestidade da AffiliateSessions)."
+        >
+          <Case label="Semana cheia — vários dias e horários, uma sessão ainda agendada">
+            <WeekEventGrid
+              weekDates={WEEK_DATES}
+              events={WEEK_EVENTS_FULL}
+              locs={LOCS}
+              onSelect={NOOP}
+            />
+          </Case>
+          <Case label="Vazia">
+            <WeekEventGrid weekDates={WEEK_DATES} events={{}} locs={LOCS} onSelect={NOOP} />
+          </Case>
+          <Case label="Mobile — lista por dia (< 600px)">
+            <div style={{ width: 358 }}>
+              <WeekEventGrid
+                weekDates={WEEK_DATES}
+                events={WEEK_EVENTS_FULL}
+                locs={LOCS}
+                compact
+                onSelect={NOOP}
+              />
+            </div>
+          </Case>
+        </Section>
+      ),
+    },
+    {
+      id: 'afl-semana',
+      label: 'MinhaSemanaPane',
+      render: () => (
+        <Section
+          title="MinhaSemanaPane"
+          sub="tabs/afiliados/MinhaSemanaPane.jsx — não precisa de dado novo (time/durationMin/locationId/athleteIds já existem). Cada estatística é rotulada pelo que ela de fato conta: 'atletas marcados' (não 'presentes' — athleteIds é uma lista de checkbox, não presença real; class_executions é quem sabe isso e não tem chave de junção com nenhum dos dois, #102) e 'a lançar' (eventos ainda não marcados completed). 'Ver na fatura →' é o link cruzado para o Fechamento — o que faz os dois painéis valerem mais juntos do que separados."
+        >
+          <Case label="Desktop — grade + detalhe (interativo: selecione um evento)">
+            <MinhaSemanaDemo />
+          </Case>
+          <Case label="Mobile — lista por dia + detalhe empilhado (< 600px, interativo)">
+            <div style={{ width: 390 }}>
+              <MinhaSemanaDemo compact height={780} />
+            </div>
+          </Case>
+        </Section>
+      ),
+    },
+    {
       id: 'afl-perfil',
       label: 'MeuPerfilPane',
       render: () => (
         <Section
           title="MeuPerfilPane"
-          sub="tabs/afiliados/MeuPerfilPane.jsx (era MeuNegocioPane, #161/plans/77) — ganhou o card 'Taxas por afiliado', só leitura: a taxa é editada no próprio afiliado, clicar numa linha leva pra lá (onSelectAffiliate). 'Quem vê o quê' do mockup 60 NÃO entra — descreveria uma visibilidade por afiliado que nenhuma camada do app implementa (plans/42, plans/77 Approach 4)."
+          sub="tabs/afiliados/MeuPerfilPane.jsx (era MeuNegocioPane, #161/plans/77) — ganhou o card 'Taxas por afiliado', só leitura: a taxa é editada no próprio afiliado, clicar numa linha leva pra lá (onSelectAffiliate). #162/plans/78 acrescentou 'Cobranças emitidas' — o histórico de carimbos enviados/pagos, clicar numa linha leva pro Fechamento (onSelectInvoice); só mostra sent/paid, um rascunho ainda não foi 'emitido'. 'Quem vê o quê' do mockup 60 NÃO entra — descreveria uma visibilidade por afiliado que nenhuma camada do app implementa (plans/42, plans/77 Approach 4)."
         >
-          <Case label="Pix ativado — chave, cidade e cap de teste">
+          <Case label="Pix ativado — chave, cidade, cap de teste e cobranças emitidas (#162/plans/78)">
             <PerfilDemo
-              height={760}
+              height={900}
               initial={{
                 name: 'Zé Arthur',
                 contact: 'ze@exemplo.com',
@@ -631,6 +1020,7 @@ export default {
                 pixKey: 'ze@exemplo.com',
                 cidade: 'São Paulo',
                 pixTestCap: 1,
+                billing: BILLING_BOARD,
               }}
             />
           </Case>

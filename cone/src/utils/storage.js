@@ -239,12 +239,17 @@ export const saveLocations = d => {
 }
 
 // ── Coach profile ─────────────────────────────────────────────────────────────
+// `billing` (#162/plans/78) lives on this same blob, keyed
+// `[affiliateId][period] = {status, sentAt?, paidAt?, total?, currency?}` — same
+// convention as goalsData's `coachNotes`. Defaulted here only for a brand-new
+// profile; every reader still treats it as optional (`coach.billing || {}`), the
+// same as `athleteIds`/`goalsData` sub-objects elsewhere.
 export const loadCoach = () => {
   try {
     const d = localStorage.getItem(LS_COACH)
-    return d ? JSON.parse(d) : { name: '', contact: '', phone: '' }
+    return d ? JSON.parse(d) : { name: '', contact: '', phone: '', billing: {} }
   } catch {
-    return { name: '', contact: '', phone: '' }
+    return { name: '', contact: '', phone: '', billing: {} }
   }
 }
 export const cacheCoachLS = d => cacheLS(LS_COACH, d)

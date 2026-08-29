@@ -304,12 +304,16 @@ Resultados'/Agenda's `.rp-sticktop`, the sync-conflict banner) reads the same to
 lives in `src/components/tabs/publicador/`: `exportHelpers.js` (pure formatters + the `useSpeech`
 hook), `MicButton.jsx`, `exportViews.jsx` (`DailyExportView`/`WeeklyExportView`/
 `WeeklyCalendarExportView`/`CalendarExportView`), `mobileExportViews.jsx` (the mobile export
-views), `events.jsx` (`EventFormInner` + `ReportModal`), and **`AgendaView.jsx`** — the file
-**#59**'s Agenda design pass will own. `App.jsx` lazy-loads `AgendaView` straight from
-`publicador/AgendaView`, not through `Publicador.jsx`, so opening Agenda no longer drags in the
-export/PDF graph (`jspdf`/`html2canvas`/`qrcode` stay Publicador-only chunks — verified via
-`npm run build` chunk list). Still **`React.createElement`, not JSX** — kept that way on purpose
-so #59's eventual rewrite is the first JSX pass over this markup, not a second one.
+views), `events.jsx` (`EventFormInner` + `ReportModal`), `pixQr.js` (#162/plans/78 — `qrToBase64`
+extracted from `ReportModal`'s own closure so `afiliados/InvoiceDetail.jsx` can render an
+identical Pix QR without a second hand-rolled copy; `jspdf`/`html2canvas` stay Publicador-only
+chunks, but `qrcode` is now reachable from Afiliados too via `pixQr.js`'s own lazy chunk —
+confirmed separate from both tabs' bundles via `npm run build` chunk list), and
+**`AgendaView.jsx`** — the file **#59**'s Agenda design pass will own. `App.jsx` lazy-loads
+`AgendaView` straight from `publicador/AgendaView`, not through `Publicador.jsx`, so opening
+Agenda no longer drags in the export/PDF graph. Still **`React.createElement`, not JSX** — kept
+that way on purpose so #59's eventual rewrite is the first JSX pass over this markup, not a
+second one.
 
 **Atletas + Afiliados (#56 · C2 · plans/75, shipped 2026-08-28)** — the old
 `Atletas.jsx` (1795 lines, 7 frozen totk-dark palette consts) and `Servicos.jsx` (1199
@@ -403,6 +407,51 @@ asserting an isolation guarantee that does not exist (plans/42's tenancy sequenc
 isolation dead last; the panel becomes buildable once #31 lands). **Zero change to the
 `locations[]` shape** — every existing reader (`Config.jsx`, `Criador.jsx`, `AgendaView.jsx`,
 `events.jsx`, `billing.js`, `stateBackup.js`) is unaffected.
+
+**Fechamento + Minha semana (#162 · mockup 60 · plans/78, shipped 2026-08-29)** — the rail's
+last two "Painéis" rows. `Fechamento` (`FechamentoPane.jsx`) is the invoice board — **Sessões
+abertas → Rascunho → Enviada → Paga** — bought with the smallest possible persistence: **a
+status stamp, not an invoice entity**. Line items stay computed on the fly by `publicador/
+billing.js`'s `calcTotal`; only the *state* is stored, at
+**`coach_profile.value.billing[affiliateId][period] = {status, sentAt?, paidAt?, total?,
+currency?}`** (`period` a `'YYYY-MM'` key) — on `coach_profile` because it's already
+anon-locked by `0006` for this class of data (it holds the Pix key too), not `settings`
+(anon-readable, why `boxWarnings` lives there) and not `locations`. **No migration** — a new
+key inside an existing JSONB blob; `storage.js`'s `loadCoach` defaults it to `{}` for a
+brand-new profile, every reader still treats it as optional. 🔴 **The freeze is the whole
+correctness argument, and it's enforced by which data source each consumer reads, not by
+anything in the reducer:** `billingState.js`'s pure `periodKey`/`periodBounds`/`periodLabel`/
+`stampFor`/`allStamps`/`setStamp`/`singleTotal`/`advance`/`columnOf` (unit-tested,
+`billingState.test.js`) never touch `events` for `sent`/`paid` — `InvoiceCard`/`InvoiceDetail`
+read `stamp.total`/`stamp.currency` (frozen the moment `advance(stamp,'sent',computed)` runs)
+for those two statuses and `calcTotal(events, loc)` (LIVE) for `open`/`draft` — so editing a
+past event moves a draft's number and can never move a sent one. `FechamentoPane`'s board
+enumerates `open` from the CURRENT period only (a fresh invoice always starts from this
+month's unbilled sessions) but `draft`/`sent`/`paid` from every stamped period at once — a July
+"Paga" and an August "Enviada" sit side by side, matching the mockup. Every advance
+(`Afiliados.jsx`'s `advanceInvoice` mutator, direct-save like `saveLoc`/`toggleAthlete` — #109's
+shape, not the debounced coach-profile effect) is behind a `ConfirmReview`; `Enviar fatura`'s
+copy is the one that states the freeze explicitly. The Pix QR is the Relatório's own code, not
+a second copy: **`publicador/pixQr.js`'s `qrToBase64`** was extracted from `events.jsx`'s
+`ReportModal` (a second hand-rolled EMV/QR path is how the four money bugs in #104 happened) and
+both now call the same `buildPixPayload` (`utils/pix.js`), honouring `pixTestCap` identically.
+`Minha semana` (`MinhaSemanaPane.jsx` + `WeekEventGrid.jsx`) needed no new data at all —
+`events` already carry `time`/`durationMin`/`locationId`/`athleteIds`. The grid's rows are every
+DISTINCT time that actually occurs that week (not a fixed 24h scale), columns are the 7 days
+Sunday-start (`week.js`'s `getWeek`); a cell's colour resolves via **`affiliateHelpers.js`'s new
+`resolveEventLoc`** (a personal event carries no `locationId` of its own — same reverse lookup
+`events.jsx`'s `EventFormInner` already does at booking time). ⚠️ **No stat here may claim
+attendance** — `events[].status` is a manual `scheduled`/`completed` toggle and `athleteIds` is a
+checkbox list the coach ticks; `class_executions` is what actually knows who checked in and has
+no join key to either (#102). So the stats strip says "atletas **marcados**", never "presentes",
+and "a lançar" counts events not yet toggled `completed` rather than claiming to know who
+showed up — same honesty rule `AffiliateSessions.jsx`'s "Agendada" badge already follows (no
+`cancelled` status exists in the schema either). **`MeuPerfilPane.jsx`** gained **"Cobranças
+emitidas"** — the stamp history (`billingState.js`'s `allStamps`), `sent`/`paid` rows only (a
+`draft` hasn't actually been "emitida" yet), each row jumping back into `Fechamento` at that
+exact invoice (`onSelectInvoice`, mirroring `onSelectAffiliate`). "Ver na fatura →" (Minha
+semana's event detail) is the same cross-pane link in the other direction — together they're why
+the two panels are worth more built than either alone.
 
 ---
 
@@ -515,7 +564,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 - Font: `var(--font)` → Cinzel (TotK themes) or Amarante (Spirit Blossom themes). Loaded weights (`src/fonts.js`): Cinzel **400/500/600/700/800/900** (500 + 800 added in #52, the first session to touch a weight-800 use), Crimson Pro 400/600, Amarante 400 **only** — Amarante ships no bold upstream, so its synthesized bolds are by design.
 - All UI strings: pt-BR.
 - **Design process is component-driven, two lanes (WORKFLOW.md "Design work"):** the all-states source of truth is the **in-app component gallery** (`gallery.html`, dev-only), which renders the *real* components — Lane A (changing existing UI) is gallery-first, no static mockup; Lane B (net-new) does a Claude Design ideation mockup first, then the built component enters the gallery. The moment code exists, the gallery is the truth — never hand-maintain a mirror. Claude Design (`cone/design/` → "Cone Design System" project) is token canon + **generated component cards** + Lane-B ideation + a screenshot archive, not a mirror.
-- **Component gallery:** `gallery.html` (repo root) + `cone/src/public/gallery/` — theme switcher + width toggle rendering the real components in every state from mock fixtures. **Decomposed #74/plans/41 (2026-07-26, pure move — `Gallery.jsx` had grown to 1790 lines, the fastest-growing file in the repo, and every design pass edits it):** `Gallery.jsx` is now the ~95-line shell (theme `<select>`, width toggle, sidebar) that imports and composes `GROUPS` from `gallery/groups/*.jsx`; `gallery/fixtures.js` holds the pure-data mock fixtures shared across groups (exercise/session/result shapes); `gallery/harness.jsx` holds the 6 generic render shells (`Case`/`Section`/`FixedFrame`/`ModalBox`/`TallModalBox`/`ScrollFrame` — the last one added with `AppChrome`, #95/plans/69: same `transform:translateZ(0)` containment as `ModalBox`, but scrollable with tall filler so a `position:sticky` element can demonstrate actually sticking); each of the 11 groups (`spa.jsx`/`criador.jsx`/`atletas.jsx`/`afiliados.jsx`/`shared.jsx`/`results.jsx`/`leaderboard.jsx`/`me.jsx`/`schedule.jsx`/`index.jsx`/`tema.jsx`) owns its own items array plus any fixtures/stateful demo wrappers used only by that group (e.g. `MeSheetHarness`, `LbMobileDemo`, `StubTypePicker`) — co-located with their sole consumer rather than centralized, since every demo wrapper turned out to be single-group. `GROUPS` holds **75** items (re-measured 2026-08-29; #161 grew the `Afiliados` group 7 → 11 adding the rail + the two-direction pair + the month's sessions + the receivable rail) across **SPA**/**Criador**/**Atletas**/**Afiliados**/Shared/Results/Leaderboard/Me/Schedule/**Index**/Tema (the **SPA** group = the #54/C0 primitives `Button`/`Input`/`MaskedTimeInput`/`Card`/`ConfirmReview` plus **`AppChrome`** (#95/plans/69 — the SPA chrome bar + sidebar, 7 cases incl. sync states, the conflict banner and the sticky-scroll pin); the **Criador** group = #92's text mode (`SessionTextPane`/`BlockTextEditor`/`WeekSessionCard`/`WeekImportModal`) plus #58's `GoalInput`/`SessionMetaModal`; the **Atletas** group = #160's `AthleteGrid`/`AthleteCard`/`DayGroupHeader`/`Ficha`/`SinceLastOneOnOne`/`PresenceGrid`/`CoachNotePanel` plus C2's surviving `PrRow`/`GoalBar`/`GoalConfigPanel` + its 3 modals; the **Afiliados** group = `PaneTabs`/`AffiliateRail`/`AffiliatesPane`/`DirectionPair`/`AffiliateSessions`/`ReceivableRail` (#161) plus C2's surviving `AffiliateRow`/`AthleteAssignment`/`MeuPerfilPane` + its 2 modals; the Index group = the #53 landing-page pieces: `WeekGrid`/`DaySessionCard`/`DayRanking`/`BoxWarnings`, all from `src/public/index/rail.jsx` — `WeekGrid` carries a second case for its Criador day-strip use, `filter`+`showCount`), picked from a sidebar. (The SPA group's card generates as `design/components/spa.html` — `design:cards` derives the filename from `group.toLowerCase()`, so that group name is a single clean token, not "SPA / UI".) **Dev-only:** NOT in `vite.public.config.js` `input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built/deployed. Grows page-by-page as components are extracted (#17).
+- **Component gallery:** `gallery.html` (repo root) + `cone/src/public/gallery/` — theme switcher + width toggle rendering the real components in every state from mock fixtures. **Decomposed #74/plans/41 (2026-07-26, pure move — `Gallery.jsx` had grown to 1790 lines, the fastest-growing file in the repo, and every design pass edits it):** `Gallery.jsx` is now the ~95-line shell (theme `<select>`, width toggle, sidebar) that imports and composes `GROUPS` from `gallery/groups/*.jsx`; `gallery/fixtures.js` holds the pure-data mock fixtures shared across groups (exercise/session/result shapes); `gallery/harness.jsx` holds the 6 generic render shells (`Case`/`Section`/`FixedFrame`/`ModalBox`/`TallModalBox`/`ScrollFrame` — the last one added with `AppChrome`, #95/plans/69: same `transform:translateZ(0)` containment as `ModalBox`, but scrollable with tall filler so a `position:sticky` element can demonstrate actually sticking); each of the 11 groups (`spa.jsx`/`criador.jsx`/`atletas.jsx`/`afiliados.jsx`/`shared.jsx`/`results.jsx`/`leaderboard.jsx`/`me.jsx`/`schedule.jsx`/`index.jsx`/`tema.jsx`) owns its own items array plus any fixtures/stateful demo wrappers used only by that group (e.g. `MeSheetHarness`, `LbMobileDemo`, `StubTypePicker`) — co-located with their sole consumer rather than centralized, since every demo wrapper turned out to be single-group. `GROUPS` holds **80** items (re-measured 2026-08-29; #162 grew the `Afiliados` group 11 → 16 adding `InvoiceCard`/`InvoiceDetail`/`FechamentoPane`/`WeekEventGrid`/`MinhaSemanaPane` — #161 before it grew 7 → 11 adding the rail + the two-direction pair + the month's sessions + the receivable rail) across **SPA**/**Criador**/**Atletas**/**Afiliados**/Shared/Results/Leaderboard/Me/Schedule/**Index**/Tema (the **SPA** group = the #54/C0 primitives `Button`/`Input`/`MaskedTimeInput`/`Card`/`ConfirmReview` plus **`AppChrome`** (#95/plans/69 — the SPA chrome bar + sidebar, 7 cases incl. sync states, the conflict banner and the sticky-scroll pin); the **Criador** group = #92's text mode (`SessionTextPane`/`BlockTextEditor`/`WeekSessionCard`/`WeekImportModal`) plus #58's `GoalInput`/`SessionMetaModal`; the **Atletas** group = #160's `AthleteGrid`/`AthleteCard`/`DayGroupHeader`/`Ficha`/`SinceLastOneOnOne`/`PresenceGrid`/`CoachNotePanel` plus C2's surviving `PrRow`/`GoalBar`/`GoalConfigPanel` + its 3 modals; the **Afiliados** group = `PaneTabs`/`AffiliateRail`/`AffiliatesPane`/`DirectionPair`/`AffiliateSessions`/`ReceivableRail` (#161) plus **`InvoiceCard`/`InvoiceDetail`/`FechamentoPane`/`WeekEventGrid`/`MinhaSemanaPane`** (#162) plus C2's surviving `AffiliateRow`/`AthleteAssignment`/`MeuPerfilPane` + its 2 modals; the Index group = the #53 landing-page pieces: `WeekGrid`/`DaySessionCard`/`DayRanking`/`BoxWarnings`, all from `src/public/index/rail.jsx` — `WeekGrid` carries a second case for its Criador day-strip use, `filter`+`showCount`), picked from a sidebar. (The SPA group's card generates as `design/components/spa.html` — `design:cards` derives the filename from `group.toLowerCase()`, so that group name is a single clean token, not "SPA / UI".) **Dev-only:** NOT in `vite.public.config.js` `input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built/deployed. Grows page-by-page as components are extracted (#17).
 - **`npm run design:cards`** (`vite.design.config.js` + `scripts/build-design-cards.mjs`) SSRs the gallery's exported `GROUPS` into the self-contained Claude Design cards — real markup + real CSS + inlined themes/fonts + a 4-theme switcher — so Claude Design can read and compose from actual component markup. Cards are a **build artifact: never hand-edit one**, change the component and re-run (Lane A ends with regenerate + sync). Cards can't load the `ti` webfont or any external URL (CSP), so `results`/`schedule` cards show blank icon gaps — expected, noted on the card itself. `tokens/palette.html` is generated from `themes.css`, which is what finally killed its 13-vs-29 token drift. Details: `cone/design/README.md`.
 - Design-pass program (restructured #27/#28, sessions #49–#59): `docs/plans/16-design-pass-program.md`. Product docs: `docs/FEATURES.md` (feature catalog + gate candidates), `docs/PRODUCT.md` (personas/tiers), `docs/MOBILE.md` (Android/iOS assessment — do nothing until a trigger fires). Consolidated interactive view: `docs/site/cone-docs.html` (open via `file://` — repo-only, NOT in the deploy whitelist by design; interactive tier board + coach-services worksheet for the tier meeting, full screenshot baseline in `docs/site/img/`; snapshot of the .md docs, regenerate on request).
 
@@ -555,7 +604,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 
 - Dev: `supabase start` (once per Docker session) then `npm run dev` inside `cone/` — talks to the local stack, never prod
 - Build: `npm run build` → `dist/`
-- Tests: `npm test` (**851 tests across 25 files**, re-measured 2026-08-29 — #161/plans/77 added 6 tests to `affiliateHelpers.test.js` covering the new `monthBounds`/`eventsForAffiliate` — no new file, an existing suite extended; #160/plans/76 before it added 52 tests to `atletasHelpers.test.js` (the 6 grade/ficha helpers: `nextSessionGroups`/`adherence`/`daysSinceNote`/`goalSignal`/`presenceGrid`/`sinceLastNote`, plus `agoLabel`/`lastSessionSignal`) and moved `calcBlockStats` to `public/lib/sessions.js` (still tested via `meHelpers.js`'s re-export)): wod, week, sessions, goals, registry, boxScope, exerciseGroups, resultEntry, theme (`public/lib/`) · entries (`public/`) · meHelpers (`public/me/`) · scheduleHelpers (`public/schedule/`) · pix, resultMappers, storage, config (`utils/`) · blockModel, textFormat (`criador/`) · exerciciosHelpers, resultadosHelpers, stateBackup, billing, atletasHelpers, affiliateHelpers (`components/tabs/`) · useClassTracking (`hooks/`))
+- Tests: `npm test` (**885 tests across 26 files**, re-measured 2026-08-29 — #162/plans/78 added `billingState.test.js` (29 tests: `periodKey`/`periodBounds`/`periodLabel`/`stampFor`/`allStamps`/`setStamp`/`singleTotal`/`advance`/`columnOf`, incl. the freeze pinned explicitly) and 5 more to `affiliateHelpers.test.js` for the new `resolveEventLoc`; #161/plans/77 before it added 6 tests to `affiliateHelpers.test.js` covering the new `monthBounds`/`eventsForAffiliate` — no new file, an existing suite extended; #160/plans/76 before that added 52 tests to `atletasHelpers.test.js` (the 6 grade/ficha helpers: `nextSessionGroups`/`adherence`/`daysSinceNote`/`goalSignal`/`presenceGrid`/`sinceLastNote`, plus `agoLabel`/`lastSessionSignal`) and moved `calcBlockStats` to `public/lib/sessions.js` (still tested via `meHelpers.js`'s re-export)): wod, week, sessions, goals, registry, boxScope, exerciseGroups, resultEntry, theme (`public/lib/`) · entries (`public/`) · meHelpers (`public/me/`) · scheduleHelpers (`public/schedule/`) · pix, resultMappers, storage, config (`utils/`) · blockModel, textFormat (`criador/`) · exerciciosHelpers, resultadosHelpers, stateBackup, billing, atletasHelpers, affiliateHelpers, billingState (`components/tabs/`) · useClassTracking (`hooks/`))
 - Lint: `npm run lint` (`eslint.config.js`) — gated in CI (below), **clean at `--max-warnings 0`** since #108/plans/51 took the react-hooks correctness cluster 84 → 0 (2026-07-27). The five rules (`set-state-in-effect`/`refs`/`immutability`/`purity`/`static-components`) are back on the plugin's default `error`; there is no floor left to ratchet, so **a new warning fails CI**. Every surviving instance carries an inline disable with a written reason at the site — see the `eslint-disable` policy below
 - CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder); also runs `npm test` then `npm run lint` (plans/43, #32) — a lint regression fails the build same as a test failure
 

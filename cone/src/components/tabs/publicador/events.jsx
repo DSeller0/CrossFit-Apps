@@ -4,6 +4,7 @@ import { buildPixPayload, pixClean } from '../../../utils/pix'
 import { MONTH_PT } from '../../../public/lib/week.js'
 import { sessName } from '../../../public/lib/sessions.js'
 import { fmtDate, fmtDur, calcTotal, sumByCurrency } from './billing.js'
+import { qrToBase64 } from './pixQr.js'
 
 // ── EventFormInner — standalone so inputs don't lose focus ───────────────────
 export function EventFormInner({ showForm, sessions, athletes, initialData, onSave, onCancel }) {
@@ -694,15 +695,6 @@ export function ReportModal({ events, sessions, onClose }) {
       Object.entries(t.totals).forEach(([currency, total]) => entries.push({ total, currency }))
     })
     return sumByCurrency(entries)
-  }
-
-  async function qrToBase64(text, size = 200) {
-    try {
-      const QRCode = (await import('qrcode')).default
-      return await QRCode.toDataURL(text, { width: size, margin: 1, errorCorrectionLevel: 'M' })
-    } catch {
-      return null
-    }
   }
 
   async function generatePDF() {

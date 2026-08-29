@@ -5,7 +5,61 @@ import Input from '../../ui/Input.jsx'
 import EmptyState from '../../ui/EmptyState.jsx'
 import CurrencyInput from './CurrencyInput.jsx'
 import { rateLabel } from './affiliateHelpers.js'
+import { allStamps, periodLabel } from './billingState.js'
 import s from './Afiliados.module.css'
+
+const STATUS_LABEL = { draft: 'Rascunho', sent: 'Enviada', paid: 'Paga' }
+
+function fmtMoney(total, currency) {
+  return `${currency} ${total.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
+
+// "Cobranças emitidas" (#162/plans/78) — the stamp history as a table: period ·
+// quem paga · direção · estado · valor. Only `sent`/`paid` rows: a `draft` has
+// no frozen total yet and hasn't actually been "emitida" (issued) — it's still
+// live in Fechamento's Rascunho column. `direção` reads `loc.type` the same way
+// `DirectionPair` does (plans/42 decision 2) — a box stamp means the box paid
+// the coach, a personal stamp means the coach charged the athlete directly. A
+// stamp pointing at a since-deleted affiliate renders "Afiliado removido"
+// instead of throwing (same defensive posture as `AthleteAssignment`'s orphan
+// rows) — no DB enforces integrity inside a JSONB array.
+function InvoiceHistory({ billing, locs, onSelectInvoice }) {
+  const rows = allStamps(billing)
+    .filter(({ stamp }) => stamp.status === 'sent' || stamp.status === 'paid')
+    .sort((a, b) => b.period.localeCompare(a.period))
+  if (rows.length === 0) {
+    return <EmptyState inline title="Nenhuma cobrança emitida ainda" />
+  }
+  return (
+    <div className={s.tariffList}>
+      {rows.map(({ affiliateId, period, stamp }) => {
+        const loc = locs.find(l => l.id === affiliateId)
+        const direction = loc ? (loc.type === 'box' ? 'box → você' : 'você → atleta') : '—'
+        return (
+          <button
+            key={`${affiliateId}-${period}`}
+            type="button"
+            className={s.tariffRow}
+            onClick={() => onSelectInvoice?.(affiliateId, period)}
+          >
+            <span className={s.dot} style={{ background: loc?.color || 'var(--dim)' }} />
+            <span className={s.tariffName}>
+              {loc?.name || 'Afiliado removido'} · {periodLabel(period).toLowerCase()}
+            </span>
+            <span className={s.histDirection}>{direction}</span>
+            <span className={s.histStatus}>{STATUS_LABEL[stamp.status] || stamp.status}</span>
+            <span className={s.tariffValue}>
+              {stamp.total != null ? fmtMoney(stamp.total, stamp.currency) : '—'}
+            </span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
 
 // "Meu perfil" — the coach's own identity, Pix and rate summary (#56/C2, renamed +
 // extended #161/plans/77, mockup 60).
@@ -31,7 +85,13 @@ import s from './Afiliados.module.css'
 //
 // CLIENT-FREE — `coach`/`setCoach` are props; the debounced save stays in the
 // container (#109: merely opening the tab must perform zero writes).
-export default function MeuPerfilPane({ coach, setCoach, locs = [], onSelectAffiliate }) {
+export default function MeuPerfilPane({
+  coach,
+  setCoach,
+  locs = [],
+  onSelectAffiliate,
+  onSelectInvoice,
+}) {
   const set = (k, v) => setCoach(p => ({ ...p, [k]: v }))
   const pixOn = !!coach.pixEnabled
 
@@ -140,6 +200,13 @@ export default function MeuPerfilPane({ coach, setCoach, locs = [], onSelectAffi
           )}
           <p className={s.bizNote}>
             Somente leitura — a taxa é editada no próprio afiliado, em Meus afiliados.
+          </p>
+        </Card>
+
+        <Card pad="sm" title="Cobranças emitidas">
+          <InvoiceHistory billing={coach.billing} locs={locs} onSelectInvoice={onSelectInvoice} />
+          <p className={s.bizNote}>
+            Faturas enviadas ou pagas — clique numa linha para abrir em Fechamento.
           </p>
         </Card>
       </div>

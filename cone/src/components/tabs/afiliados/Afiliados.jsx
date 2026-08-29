@@ -13,9 +13,12 @@ import ConfirmReview from '../../../public/shared/ConfirmReview'
 import AffiliateRail from './AffiliateRail.jsx'
 import AffiliatesPane from './AffiliatesPane.jsx'
 import MeuPerfilPane from './MeuPerfilPane.jsx'
+import FechamentoPane from './FechamentoPane.jsx'
+import MinhaSemanaPane from './MinhaSemanaPane.jsx'
 import AffiliateFormModal from './AffiliateFormModal.jsx'
 import BoxQrModal from './BoxQrModal.jsx'
 import { boxLink, monthBounds } from './affiliateHelpers.js'
+import { stampFor, advance, setStamp } from './billingState.js'
 import s from './Afiliados.module.css'
 
 const EMPTY_FORM = {
@@ -42,6 +45,8 @@ export default function AfiliadosTab({ events = {} }) {
   const [pane, setPane] = useState('afiliados')
   const [selectedId, setSelectedId] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
+  const [fechAffiliateId, setFechAffiliateId] = useState(null)
+  const [fechPeriod, setFechPeriod] = useState(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editId, setEditId] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
@@ -60,13 +65,16 @@ export default function AfiliadosTab({ events = {} }) {
   const { from, to, label: monthLabel } = monthBounds()
 
   // panes[] is array-driven so a new panel is one more row — Fechamento and Minha
-  // semana (plans/78) append to "Painéis", and the mockup's role switch (4 more
-  // panels behind "Sou dono do box") is dropped outright: no role model exists to
-  // switch on (plans/42; see AffiliateRail.jsx). `count` is live so the rail shows
-  // how many affiliates exist without opening the pane.
+  // semana (#162/plans/78) are the two more rows plans/77 anticipated, and the
+  // mockup's role switch (4 more panels behind "Sou dono do box") is dropped
+  // outright: no role model exists to switch on (plans/42; see
+  // AffiliateRail.jsx). `count` is live so the rail shows how many affiliates
+  // exist without opening the pane.
   const panes = useMemo(
     () => [
       { id: 'afiliados', label: 'Meus afiliados', group: 'Painéis', count: locs.length },
+      { id: 'fechamento', label: 'Fechamento', group: 'Painéis' },
+      { id: 'semana', label: 'Minha semana', group: 'Painéis' },
       { id: 'perfil', label: 'Meu perfil', group: 'Conta' },
     ],
     [locs.length],
@@ -76,10 +84,22 @@ export default function AfiliadosTab({ events = {} }) {
   // rather than from a mutator per field. Skips the mount run so merely opening the
   // tab doesn't re-upsert `coach_profile` (#109) — same disease #76 fixed for
   // `results_v2`, which cost a migration (`0007`) to undo.
+  //
+  // `skipCoachEffectRef` (#162/plans/78) covers the one OTHER writer of `coach`:
+  // `advanceInvoice` below saves `billing` directly and immediately (a deliberate
+  // one-off action, not keystrokes) — but it still calls `setCoach`, which this
+  // same effect watches, so without the flag it would schedule a second, redundant
+  // save of the identical data 500ms later. Same pull-suppression shape
+  // `SyncContext.jsx` uses for its own two auto-save effects.
   const coachMounted = useRef(false)
+  const skipCoachEffectRef = useRef(false)
   useEffect(() => {
     if (!coachMounted.current) {
       coachMounted.current = true
+      return
+    }
+    if (skipCoachEffectRef.current) {
+      skipCoachEffectRef.current = false
       return
     }
     const t = setTimeout(() => saveCoach(coach), 500)
@@ -179,6 +199,29 @@ export default function AfiliadosTab({ events = {} }) {
     setExpandedId(locId)
   }
 
+  const goToInvoice = (locId, period) => {
+    setPane('fechamento')
+    setFechAffiliateId(locId)
+    setFechPeriod(period)
+  }
+
+  // Billing stamps persist directly from this mutator (not the debounced
+  // `coach`-profile effect above) — advancing an invoice is a deliberate,
+  // one-off action, not a stream of keystrokes, so it should land immediately
+  // the same way `saveLoc`/`toggleAthlete` do (CLAUDE.md's "prefer saving from
+  // the mutators that actually change state" — #109's fix shape). `coach` is
+  // one state slot shared with the Pix-profile form fields, so `setCoach` here
+  // still re-triggers that effect — `skipCoachEffectRef` is what stops it from
+  // scheduling a redundant second save of the same data.
+  const advanceInvoice = (locId, period, to, computed) => {
+    const stamp = stampFor(coach.billing, locId, period)
+    const nextBilling = setStamp(coach.billing, locId, period, advance(stamp, to, computed))
+    const next = { ...coach, billing: nextBilling }
+    skipCoachEffectRef.current = true
+    setCoach(next)
+    saveCoach(next)
+  }
+
   return (
     <div className={`${s.shell}${railCompact ? ' ' + s.shellCol : ' ' + s.shellRow}`}>
       <AffiliateRail panes={panes} active={pane} onChange={setPane} compact={railCompact} />
@@ -208,12 +251,35 @@ export default function AfiliadosTab({ events = {} }) {
             onDelete={loc => setConfirmDel(loc.id)}
             onToggleAthlete={toggleAthlete}
           />
+        ) : pane === 'fechamento' ? (
+          <FechamentoPane
+            locs={locs}
+            events={events}
+            coach={coach}
+            selectedAffiliateId={fechAffiliateId}
+            selectedPeriod={fechPeriod}
+            onSelect={(id, period) => {
+              setFechAffiliateId(id)
+              setFechPeriod(period)
+            }}
+            onAdvance={advanceInvoice}
+            compact={isMobile}
+          />
+        ) : pane === 'semana' ? (
+          <MinhaSemanaPane
+            locs={locs}
+            athletes={athletes}
+            events={events}
+            onGoToInvoice={goToInvoice}
+            compact={isMobile}
+          />
         ) : (
           <MeuPerfilPane
             coach={coach}
             setCoach={setCoach}
             locs={locs}
             onSelectAffiliate={goToAffiliate}
+            onSelectInvoice={goToInvoice}
           />
         )}
       </div>

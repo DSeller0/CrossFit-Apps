@@ -8,6 +8,7 @@ import {
   boxLink,
   monthBounds,
   eventsForAffiliate,
+  resolveEventLoc,
 } from './affiliateHelpers.js'
 
 // affiliateHelpers imports only public/lib/week.js (also client-free), so no
@@ -158,5 +159,32 @@ describe('eventsForAffiliate', () => {
     }
     const rows = eventsForAffiliate(evs, box, '2026-08-01', '2026-08-31')
     expect(rows.map(r => r.time)).toEqual(['08:00', '19:00'])
+  })
+})
+
+describe('resolveEventLoc', () => {
+  const locs = [
+    { id: 'l1', type: 'box' },
+    { id: 'l2', type: 'personal', athleteIds: ['a1', 'a2'] },
+  ]
+
+  it('resolves a box event by its own locationId', () => {
+    expect(resolveEventLoc({ type: 'aula', locationId: 'l1' }, locs)).toBe(locs[0])
+  })
+
+  it('resolves a personal event through the first matching athlete', () => {
+    expect(resolveEventLoc({ type: 'personal', athleteIds: ['a2'] }, locs)).toBe(locs[1])
+  })
+
+  it('returns null for a locationId that matches nothing', () => {
+    expect(resolveEventLoc({ type: 'aula', locationId: 'l9' }, locs)).toBeNull()
+  })
+
+  it('returns null for a personal event whose athlete matches no affiliate', () => {
+    expect(resolveEventLoc({ type: 'personal', athleteIds: ['a9'] }, locs)).toBeNull()
+  })
+
+  it('returns null for a personal event with no athletes at all', () => {
+    expect(resolveEventLoc({ type: 'personal', athleteIds: [] }, locs)).toBeNull()
   })
 })
