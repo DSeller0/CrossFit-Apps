@@ -19,7 +19,7 @@ carried prerequisites that were long satisfied and an Agenda assignment that mov
 | C0 | SPA design standard | #54 | M | ✅ [plans/33](./33-design-c0-spa-standard.md) | Card/button/input/spacing standard from theme tokens; button hierarchy; confirm-modal policy; masked mm:ss input (#35 absorbed) — **gates C1–C5** |
 | C1 | Exercícios + Configurações | #55/#87 | M→L | ✅ [plans/38](./38-design-c1-exercicios-config.md) | Apply standard; remove "Salvar config.json". **Agenda moved OFF this bundle to C5 on 2026-07-22** — it is `AgendaView`, which C5 restructures, so design-passing it here then immediately restructuring it was wasted work. |
 | C2 | Atletas + Afiliados | #56 | M→L | ✅ [plans/75](./75-design-c2-atletas-servicos.md), shipped 2026-08-28 (planned + gated 2026-08-13, wired + verified live 2026-08-28) | Apply standard; empty states; Serviços pane overflow; reserve #39 card slot. **Absorbed the Serviços → Afiliados restructure** ([plans/42](./42-afiliados-direction.md)). Grew a tail — see the note below the table (#160/#161/#162). |
-| C3 | Resultados (SPA) | #57 | M | ⏳ open | Apply standard; 51 hex. ✅ **[plans/44](./44-resultados-decomposition.md) shipped 2026-07-26** — `Resultados.jsx` 912 → a shell over `resultados/` (**49 raw lines** today; the "27" was a pre-reformat figure, re-measured 2026-08-29). |
+| C3 | Resultados (SPA) | #57 | ~~M~~ **L** | 🟢 [plans/80](./80-design-c3-resultados.md), planned 2026-08-29 | ⚠️ **LANE B — the only C-session that is** (see the correction under rule 1). Not a restyle: the user reports two of the three sub-tabs are unfound in live use, so **Leaderboard is deleted** (a second copy of `leaderboard.html`) and **Histórico is dissolved** into the Atletas ficha + a class read-back on the session. Rides #157 and #169. ✅ **[plans/44](./44-resultados-decomposition.md) shipped 2026-07-26** — `Resultados.jsx` 912 → a shell over `resultados/` (**49 raw lines** today; the "27" was a pre-reformat figure, re-measured 2026-08-29). |
 | C4 | Criador | #58 | L | ✅ [plans/37](./37-design-c4-criador.md) | #26 decomposition ([plans/35](./35-criador-decomposition.md)) + #92 text mode ([plans/36](./36-criador-text-mode.md)) ran first, as required. Standard + the 2026-07-21 layout brief. |
 | C5 | Publicador **+ Agenda** | #59 | L | ⏳ open | ✅ **#25 decomposition prerequisite SATISFIED** ([plans/39](./39-publicador-decomposition.md), `e957b57`) — this now inherits `publicador/AgendaView.jsx` (408 raw) instead of 838 lines buried in 2125. Then standard; `createElement`→JSX; JULY→pt-BR export fix; dedupe "Mobile Semanal" labels; classify jsPDF hex as exempt. |
 | — | #43 themes | #43 | L | ⏳ open | Only after B/C: token-clean codebase, verified under 4 themes per page |
@@ -68,6 +68,10 @@ any more; nothing has been picked from Ready yet.
 > ([plans/76](./76-atletas-fichas.md)/[77](./77-afiliados-paineis-coach.md)/[78](./78-fechamento-semana.md))
 > — see the note under the table.
 >
+> ✅ **C3 PLANNED 2026-08-29 → [plans/80](./80-design-c3-resultados.md)** (Lane B, L; Phase 0
+> ships alone, then a design gate, then the build). **After it closes — including any bugs it
+> causes — the next item is C5 (#59), user-confirmed the same day.**
+>
 > **The resume point is now C3 (#57) → C5 (#59).** Both are unblocked: plans/44 left
 > `Resultados.jsx` a 27-line shell over `resultados/`, and plans/39 left C5 inheriting
 > `publicador/AgendaView.jsx` directly. ⚠️ **C3 has a prerequisite the board records but this
@@ -88,6 +92,15 @@ any more; nothing has been picked from Ready yet.
 
 ## Rules for every session
 1. **Two lanes (WORKFLOW "Design work")** — this rule used to read "mockup-first: ASCII → `cone/design/` card → DesignSync → approval → implement", which the 2026-07-10 process reform (plans/19) superseded; plans/20 and plans/21 had already overridden it locally. Every remaining **B session and C1–C5 is Lane A**: the surfaces exist, so work **gallery-first — no static mockup**. Adjust the real component → all states in the gallery across 4 themes + both widths → `npm run design:cards` + sync → **stop at the approval gate**. Only **C0** (defines a net-new standard) and **#43** (net-new themes) are Lane B, i.e. actually mockup-first.
+   > 🔴 **CORRECTED 2026-08-29 — "C1–C5 is Lane A" is no longer true. C3 is Lane B.**
+   > The rule's premise is *"the surfaces exist, so the real component is the truth"* — which
+   > silently assumes the surfaces are **used**. For Resultados they are not: the user reports
+   > that of its three sub-tabs, *"after the app running for some time not even I remember they
+   > exist"*. Gallery-first would have repainted two surfaces nobody opens and called it a
+   > design pass. **The test to apply from here on: Lane A when the surface is used and only its
+   > execution is wrong; Lane B when the surface's own existence or structure is what is in
+   > question.** C5 has not been assessed against this yet — do it when C5 is planned, rather
+   > than inheriting "Lane A" from this sentence.
 2. Fold-ins for the surface's own files: hex→vars (except jsPDF/print literals + `config.js` data colors), rounded-rects→square (circles `50%` exempt, pills are rects — policy in CLAUDE.md), click-divs get role/tabIndex/keyboard, icon-only buttons get aria-label, `<main>`/heading where the page lacks one.
 3. Verify at 1280×800 + 390×844 **under all 4 themes**; `npm test` + `npm run build:all`; `/verify` live; `/code-review` (M/L).
 4. First session that touches a font-weight 500/800 use adds `@fontsource/cinzel/500.css` + `/800.css` to `src/fonts.js` (policy: load real Cinzel weights; Amarante stays synthesized — it only ships 400).
