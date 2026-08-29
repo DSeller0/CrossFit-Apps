@@ -1,5 +1,7 @@
 # 79 — Post-#162 cleanup batch (#163 · #165 · #166 · #167 · #168)
 
+> ✅ Done: `5fa2fb2` · 2026-08-29 — see BACKLOG.md
+
 ## Context
 
 The [2026-08-29 full pass](../reviews/2026-08-29.md) reviewed the four surfaces #160/#161/#162

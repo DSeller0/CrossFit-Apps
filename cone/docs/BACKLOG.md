@@ -30,18 +30,10 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 > assigns sessions individually. It gets its own planning session; do not fold it in here.
 > **#169**'s `‹`/`›` labels ride **#57**, not this batch — they are in `RegistroView.jsx`, the file C3
 > rewrites.
-
-- 🟢 **[→ Ready · plans/79](./plans/79-post-162-cleanup.md)** — **#163 + #165 + #166 + #167 + #168 ·
-  post-#162 cleanup** · **S–M** · **Sonnet** · the five small rows from the 2026-08-29 pass, four of
-  them in Afiliados. **#163** threads `billing` into `ReceivableRail` so a `paid` invoice stops
-  counting as owed (⚠️ a `sent` one must keep counting); **#165** gives the paid state a way back
-  (`advance(stamp,'draft')` already exists — it is a missing button, not a model change) and stops
-  rendering a scannable Pix QR on an invoice already paid; **#166** collapses three byte-identical
-  `fmtMoney`s into `billing.js` and renames its colliding `fmtDate`; **#167** caps the 68.6px presence
-  cells; **#168** wraps the mobile column strip per `criador.module.css:35-44`'s recorded rationale.
-  🔴 **Two traps are written into the plan** — reopening an invoice **discards the frozen total**, so
-  the confirm copy must say so; and #168's naive fix **clips "Sessões abertas"** at 25% of a 370px
-  strip, where Criador's short box names fit.
+>
+> ✅ **#163 + #165 + #166 + #167 + #168 shipped 2026-08-29** — planned and shipped in one session;
+> verified live in the gallery (Playwright, 4 themes, 390 + 1280); see Done. **Next up: C3 (#57)**,
+> unless something else jumps it again the way #163 just did.
 
 > 🟢 **REFILLED 2026-08-28 — the design pass resumed, and it grew.** The standing instruction
 > below ("go back to the design pass") was executed: **C2/#56 was planned
@@ -504,7 +496,7 @@ new write sites obey the "a load/read path never writes" rule, `coach_profile` (
 billing blob) is anon-locked by `0006`, `qrcode` is a genuinely separate 23.46 kB chunk, gates are
 885/0/clean/clean, and the marker audit found zero drift for the first time ever.*
 
-- 🟢 **PLANNED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)** (see Ready) — 🔴 **#163 A paid invoice is still counted as money owed** · **XS** · Sonnet · **the two panels of
+- ✅ **SHIPPED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)**, `5fa2fb2`. See Done. — 🔴 **#163 A paid invoice is still counted as money owed** · **XS** · Sonnet · **the two panels of
   the Afiliados tab contradict each other on money.** `afiliados/AffiliatesPane.jsx:199-207` renders
   `<ReceivableRail>` with `locs`/`events`/`from`/`to` and **never passes `billing`**, so
   `ReceivableRail.jsx:29` sums `calcTotal(eventsForAffiliate(...))` for the whole month regardless of
@@ -534,7 +526,7 @@ billing blob) is anon-locked by `0006`, `qrcode` is a genuinely separate 23.46 k
   attendance instead — which is **#102**, and would make this row wait. Do not pick the one-liner
   without deciding which; the honest interim is to render the card's absent state rather than a `—`
   that reads as zero. Related: **#39** and **plans/22** both plan to hang more off this same slot.
-- 🟢 **PLANNED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)** (see Ready) — **#165 Fechamento's paid state is a dead end, and still shows a live Pix QR** · **S** · Sonnet ·
+- ✅ **SHIPPED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)**, `5fa2fb2`. See Done. — **#165 Fechamento's paid state is a dead end, and still shows a live Pix QR** · **S** · Sonnet ·
   **two halves, one file, ship together.** **(a)** `billingState.js`'s `advance` only moves
   `open → draft → sent → paid` and the `paid` detail renders **zero actions** (confirmed live) — a
   misclick on "Marcar como paga" is unrecoverable short of editing the DB. 🔑 **The reducer already
@@ -544,7 +536,7 @@ billing blob) is anon-locked by `0006`, `qrcode` is a genuinely separate 23.46 k
   #162 correctness argument — the confirm copy has to say so. **(b)** `InvoiceDetail.jsx:115-119`
   keeps rendering the Pix QR after `paid` — screenshotted at 390 with "Agosto 2026 · Paga" directly
   above a scannable R$ 2.025,00 code, which invites a second payment.
-- 🟢 **PLANNED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)** (see Ready) — **#166 `fmtMoney` is byte-identical in three sibling files, and `fmtDate` names two different
+- ✅ **SHIPPED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)**, `5fa2fb2`. See Done. — **#166 `fmtMoney` is byte-identical in three sibling files, and `fmtDate` names two different
   formats** · **XS** · Sonnet · **the money half first.** `afiliados/InvoiceCard.jsx:22`,
   `InvoiceDetail.jsx:10` and `MeuPerfilPane.jsx:13` each declare the same `fmtMoney`, all three from
   #162 on the same day, and **all three already import from `publicador/billing.js`** — the canonical
@@ -554,13 +546,13 @@ billing blob) is anon-locked by `0006`, `qrcode` is a genuinely separate 23.46 k
   different output, and `week.js` already owns `fmtDateShort`/`fmtDateYear` besides. ⚠️ **Rename
   `billing.js`'s (e.g. `fmtDateNum`), do NOT merge them** — that module deliberately imports nothing
   so it stays trivially testable under vitest (the #149 constraint).
-- 🟢 **PLANNED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)** (see Ready) — **#167 The presence heatmap has no cell-size cap — 4 weeks render as a ~280px slab** · **XS** ·
+- ✅ **SHIPPED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)**, `5fa2fb2`. See Done. — **#167 The presence heatmap has no cell-size cap — 4 weeks render as a ~280px slab** · **XS** ·
   Sonnet · `atletas/Atletas.module.css:374-376`: `.pgRow{grid-template-columns:repeat(7,1fr)}` +
   `.pgCell{aspect-ratio:1}` with no `max-width`, inside the ficha's ~530px pane, computes to
   **68.6 × 68.6px per cell** (measured live). The 9px day letters (`.pgDow`) show the intended scale
   is a compact calendar. ⚠️ **Independent of #164** — fixing the data would render 69px green blocks
   rather than a heatmap, so this needs fixing whether or not that row lands.
-- 🟢 **PLANNED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)** (see Ready) — **#168 Fechamento's mobile column strip side-scrolls, against a recorded decision** · **XS** ·
+- ✅ **SHIPPED 2026-08-29 → [plans/79](./plans/79-post-162-cleanup.md)**, `5fa2fb2`. See Done. — **#168 Fechamento's mobile column strip side-scrolls, against a recorded decision** · **XS** ·
   Sonnet · at 390 the four board columns become a chip strip with `overflow-x:auto` (`scrollWidth
   430` vs `clientWidth 370`, measured), leaving the 4th chip ("Paga") clipped mid-word. CLAUDE.md
   records the **opposite** call for the identical shape: *"Mobile box tabs wrap 4-per-row instead of
@@ -871,6 +863,22 @@ section lists what was checked and found **clean**, so it isn't re-raised next p
 - ✅ **#94 Audit prod: exercise names used in sessions but absent from the registry** · **S** · **DONE 2026-07-25 (58.5% → 11.9%)** → [`docs/reviews/94-session-registry-audit.md`](./reviews/94-session-registry-audit.md) (regenerate: `node scripts/audit-session-registry.mjs`). **775 name occurrences · 453 unresolved (58.5%) · 343 distinct misses**, bucketed: **130 likely-registerable movements** (the actionable list — Wall Ball ×9, Thruster, Lunge ×6, Squat Clean/Snatch, bare Pull-up, GHD, Devil's Press, Burpee Box Jump Over…), **179 prescription-in-the-name** ("800m Run", "15 GHD", "30 Wall Ball" — the movement is fine, a leading distance/count leaked in; `stripVolumeNoise` only strips a bare leading count, not "800m"/"200m Row" — extend it, don't register these), **26 compound/complex notation** (registry-unfixable by design), **8 structural noise** ("Rest"/"Then"/"Rounds"/"Bloco …" leaked into name fields — data hygiene, not a registry gap). **ROUND 1 SHIPPED 2026-07-25** (coach reviewed the report inline and signed off R1–R5): unresolved **58.5% → 43.4% from resolver changes alone**, and **→ 34.8%** once the registry additions land. Four generalizations in `registry.js` rather than a bigger alias table — extended `stripVolumeNoise` (distance/duration/rep-scheme/per-side/cal/zone/`heavy`), auto-indexed `Movement (SH)` shorthand entries, spaced spellings of every hyphenated entry, and a guarded plural fallback (see CLAUDE.md's `registry.js` bullet for the contract). Root cause of the "Corrida" miss was **not** a backwards alias but a **dangling pointer**: `'run'/'sprint'` both targeted a "Corrida" entry the registry has never had (the real one is `Run`) — two test fixtures had the same fiction baked in and were corrected to prod reality. `scripts/audit-session-registry.mjs` now reports **dangling aliases** against live prod every run, so the class can't recur silently. **Registry additions APPLIED to prod 2026-07-25** ([`docs/reviews/94-registry-additions.sql`](./reviews/94-registry-additions.sql), idempotent/alphabetical) — prod confirmed at Cardio 18 · Skill 27 · Força 24 · Acessórios 31, audit re-run reports **0 dangling aliases**, bucket 1 130 → 102 and bucket 2 179 → 106. **Round 1 closed at 34.8% unresolved (277/795).** **ROUND 2 (2026-07-25)** → [`docs/reviews/94-round2-decisions.md`](./reviews/94-round2-decisions.md). Code half shipped (slot letters `A- 3 Snatch Balance` · trailing tempo/pause notes · trailing parens · alternating suffix · misspellings · audit classifier now files structural labels as noise instead of "register me"), plus the coach's decision batches as aliases: **34.8% → 28.1%**. **Round-2 additions APPLIED to prod 2026-07-25** ([`94-round2-registry-additions.sql`](./reviews/94-round2-registry-additions.sql), 71 entries) — prod confirmed at Core 35 · LPO 34 · Força 33 · Acessórios 51 · Skill 41 · Cardio 19. **#94 CLOSED at 11.9% (95/795), 0 dangling aliases**, bucket 1 130 → 16 and bucket 2 179 → 19. That is effectively the floor: 51 of the 95 remaining are bucket 3 (compound notation) + bucket 4 (structural noise), unresolvable by design, and the rest are deliberately-skipped complex fragments and one-off singles. Going further means changing how compound lines are ENTERED (#92 already flags them `complex-detected`), not growing the registry. Related to #62.
 
 ## ✅ Done (recent)
+
+**2026-08-29 — #163 + #165 + #166 + #167 + #168 post-#162 Afiliados cleanup** · [plans/79](./plans/79-post-162-cleanup.md) · `5fa2fb2`. The five small rows the 2026-08-29 review found in #160/#161/#162's surfaces, batched on the plans/68 precedent (none blocked another) — planned and shipped in one session, jumping the standing "resume the design pass at C3" instruction because **#163 misreports money in a feature that had shipped two days earlier.**
+
+**#163** — `AffiliatesPane.jsx` now threads `billing={coach.billing}` down to `ReceivableRail`, which derives the period once (`periodKey(from)`) and looks up each affiliate's stamp (`stampFor`). A new pure predicate, **`billingState.js`'s `isReceivable(stamp)`**, decides the filter (`true` for everything except `paid`) — extracted rather than left inline in the component so #163's actual logic is unit-testable without rendering React. A `paid` row is excluded from `grand` and `activeCount` but **stays on screen**, muted, with a "paga" marker — blanking it would make a paid month indistinguishable from an affiliate with no sessions at all, a different state the rail also needs to represent. `sent` keeps counting, since invoiced-and-waiting is exactly what "a receber" means.
+
+**#165** — `InvoiceDetail.jsx` gains a secondary **"Reabrir"** action for `sent`/`paid`, reusing `advance(stamp, 'draft')` (already existed, unreachable from the UI) behind its own `ConfirmReview` copy — not the same confirm as `open → draft`, since reopening actively **discards** the frozen `total`/`currency`/`sentAt`/`paidAt`, the #162 freeze rule running backwards. Reverts to `draft`, not `open`, because `open` is the *absence* of a stamp and `columnOf` only enumerates it from the current period — reopening a July invoice to `open` would have made it vanish from the board. The Pix QR is now gated on `status !== 'paid'`: charging for something already received made no sense on screen.
+
+**#166** — `publicador/billing.js` now exports `fmtMoney` (was duplicated byte-for-byte in `InvoiceCard.jsx`/`InvoiceDetail.jsx`/`MeuPerfilPane.jsx`, all three already importing from this module) and its `fmtDate` is renamed **`fmtDateNum`** so it stops shadowing `public/lib/week.js`'s differently-formatted `fmtDate` — call sites in `InvoiceDetail.jsx` and `publicador/events.jsx` (3 uses) updated.
+
+**#167** — `Atletas.module.css`'s `.pgRow` moved from `grid-template-columns:repeat(7,1fr)` (which stretched each cell to whatever the ~530px ficha pane happened to be, 68.6px) to `repeat(7,16px)` + `justify-content:start` — a fixed track size that reads as a compact calendar at any pane width, mobile included, next to its 9px day letters.
+
+**#168** — `Afiliados.module.css`'s `.fechColTabs` wraps 4-up instead of side-scrolling below 600px, the same shape (and written rationale) as `criador.module.css`'s `.boxTabs`. The trap the plan flagged was real: "Sessões abertas" does not fit at 25% of a 390px strip — `FechamentoPane.jsx`'s `COLUMNS` gained a `shortLabel` ("Abertas") for the mobile tabs only, plus `white-space:normal` as a second safety net so a still-too-narrow label wraps rather than clips. The mobile-only override had to be declared *after* the base `.fechColTab` rule in the stylesheet — same specificity, source order decides, and the first attempt (media query before the base rule) silently lost the cascade.
+
+New tests: `billingState.test.js` gained `isReceivable` (4 cases) and two `advance()` reopen cases (`sent`→`draft` and `paid`→`draft`, both pinning that the frozen fields are dropped); `billing.test.js` renamed its `fmtDate` describe block to `fmtDateNum` and added one for `fmtMoney`. Gallery: `ReceivableRail` gained a paid-in-window fixture (`STAMP_PAID_AUG`), `InvoiceDetail`'s existing "Paga" case relabeled to show the new Reabrir action.
+
+**Verified live in the gallery (Playwright), not just built** — `npm run dev:public` → `/CrossFit-Apps/gallery.html`, no auth needed since this is the client-free review path: drove `ReceivableRail`'s new paid case and confirmed the total dropped by exactly the excluded row's amount (R$345 → R$165) while the row itself stayed visible with a "R$ 180 PAGA" muted marker, in both totk-light and spirit-blossom-dark; clicked "Reabrir" on `InvoiceDetail`'s paid case and confirmed the dialog reads *"O valor volta a ser calculado ao vivo — o total congelado de R$ 1.360,00 é descartado"* — the exact number from the fixture's own frozen stamp, not a placeholder; measured `PresenceGrid`'s live cell size at `getBoundingClientRect()` → 16×16px (target was 14–18px); resized the real browser viewport to 390px (not just the gallery's own width-toggle, which doesn't change `@media` — a real gotcha, since the demo wrapper forces `compact` via a prop independent of viewport) and confirmed `FechamentoPane`'s mobile strip: `scrollWidth (381) <= clientWidth (381)`, all four labels ("Abertas 2", "Rascunho 1", "Enviada 1", "Paga 1") fully readable across two wrapped rows. `npm test` (892/892, 26 files, +7 new) · `npm run lint` (0 at `--max-warnings 0`) · `npm run format:check` · `npm run build:all` · `npm run design:cards` all clean.
 
 **2026-08-28 — #56 Design pass C2 — Atletas + Afiliados** · [plans/75](./plans/75-design-c2-atletas-servicos.md) · `87aeeb1`. Planned and built to its approval gate 2026-08-13; the follow-on scope session that produced #160/#161/#162 ran earlier the same day, then this session wired and verified it live.
 
