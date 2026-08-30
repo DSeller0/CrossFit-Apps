@@ -346,8 +346,9 @@ Not designed here. This is the problem list each mockup is judged against.
 - `MicButton.jsx` deleted; `useSpeech` + the module-scope `SpeechRecognition` deleted from
   `exportHelpers.js`; `@keyframes mic-pulse` (`index.css:293`) and its comment reference (`:282`)
   deleted; nothing imports any of them; `npm run build:all` still produces the same **10** public pages.
-- `publicador/exportHelpers.test.js` exists and covers all six surviving exports —
-  `getWeeksOfMonth` first, since it is a month-grid contract two view families depend on.
+- `publicador/exportHelpers.test.js` exists and covers the five genuinely local exports;
+  **`monthGridCells` gains direct tests in `week.test.js`**, where it belongs — it is canonical, has
+  three consumers, and is currently only exercised indirectly (see Phase 0 step 2).
 - `exportViews.jsx:409` uses `MONTH_PT`; a repo-wide grep for `toLocale\w*String\('default'`
   returns **zero**.
 - The four `.slice(0, 15)` truncations no longer collapse the two Mobile Semanal labels.
@@ -423,7 +424,8 @@ Not designed here. This is the problem list each mockup is judged against.
 - `src/App.jsx:269,287` — the two `.pub-pane` wrappers.
 
 **New**
-- `src/components/tabs/publicador/exportHelpers.test.js` (Phase 0).
+- `src/components/tabs/publicador/exportHelpers.test.js` (Phase 0). ⚠️ `monthGridCells`'s tests go
+  in the **existing** `src/public/lib/week.test.js`, not here — see Phase 0 step 2.
 - `src/components/tabs/publicador/Agenda.module.css` + `publicador/agenda/` components — shape
   follows the approved mockup; expect roughly `MonthGrid` · `CellDay` · `DayPane` · `EventCard` ·
   `EventFilters` (the shared one) · `AgendaStats` · `WeekList`.
@@ -467,10 +469,21 @@ deletion of code that is already not rendered.
    and `:80-121`, the now-unused `useState`/`useRef`/`useCallback`/`useEffect` imports, and the
    `mic-pulse` keyframes + its comment (`index.css:282,293`). ⚠️ Do **not** touch `legacy/*.html` — it is kept deliberately as the
    `exerciseRows` reference (plans/48) and is never built.
-2. **Add `publicador/exportHelpers.test.js`.** This is the payoff of step 1 and the reason it goes
-   first. Cover `getWeeksOfMonth` (month grids: a month starting Sunday, one starting Saturday, a
-   28-day February, a 6-row month), then `buildProgressionLines` (the unit re-derivation is the
-   subtle half), `exLine`, `complexLine`, `buildMobileSession`, `mfs`.
+2. **Add the tests step 1 unlocks — but split them by ownership, not by file.** 🔑
+   `getWeeksOfMonth` is a **three-line wrapper over canonical `monthGridCells`** (`week.js:99`), and
+   *that* is the function actually worth pinning: it has **three consumers** (`exportHelpers`,
+   `resultados/resultadosHelpers.js:24`, and Agenda through the first) and **no direct test** —
+   C3's `resultadosHelpers.test.js:19-21` only asserts *against* it, so a bug in it moves the
+   assertion and the expectation together.
+   - → **`week.test.js`**: direct `monthGridCells` cases — a month starting Sunday, one starting
+     Saturday, a 28-day February, a 6-row month, and `inMonth` correctness on the leading/trailing
+     padding days. This is canonical-utility coverage that outlives C5.
+   - → **new `publicador/exportHelpers.test.js`**: the genuinely local logic —
+     `buildProgressionLines` (**the highest-value target**: its per-group unit re-derivation is the
+     half #45 deliberately kept local), `exLine`, `complexLine`, `buildMobileSession` (⚠️ its
+     fallback loop is `for (let i = 1; i <= 5; i++)` over a **Sunday-start** week, i.e. Mon–Fri —
+     assert that Saturday and Sunday are really skipped rather than off-by-one), `mfs`, and one thin
+     case for `getWeeksOfMonth` proving it unwraps `monthGridCells` to bare `Date`s.
 3. **Fix `exportViews.jsx:409` → pt-BR** (user decision, correction 2). Replace the
    `toLocaleString('default')` call with `MONTH_PT[month] + ' ' + year` — the **exact expression
    `:602` already uses** in the same file. The rendered header keeps its current look and only
