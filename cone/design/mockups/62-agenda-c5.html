@@ -1,0 +1,1697 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — Agenda 62 · C5·a (#59) Lane-B — a Agenda é o editor</title>
+<style>
+  :root{
+    --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
+    --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
+    --red:#fa3c3c;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+    --font:'Cinzel',Georgia,serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
+    --divider:#2a231c;--border:#4a3e30;--accent:#4ac8c0;--accent-text:#000;
+    --text:#f0e8d0;--err:#fa3c3c;
+    --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--radius-sm:4px;--radius-md:6px;
+    /* DATA colours — an affiliate's loc.color and an athlete's ath.color are user
+       choices persisted in the blob, so they are literal on purpose and exempt from
+       #15, exactly as SCALE_COL and blkColor are. Nothing else here is literal. */
+    --dataVila:#4ac8c0;--dataNorte:#e87820;--dataAna:#c884f0;--dataBruno:#68d8a0;--dataCaio:#64b5f6;
+  }
+  html.theme-totk-light{
+    --bg:#ede8dc;--stone:#f5f1e8;--stone2:#e8e2d4;--div:#d4cab8;
+    --gold:#9a6c14;--gold2:#7a5008;--teal:#1c6860;--green:#1a6830;--red:#b83020;
+    --cream:#1c1508;--sub:#503828;--muted:#7a6448;--dim:#a89070;
+    --font:'Cinzel',Georgia,serif;--divider:#d4cab8;--border:#b4a490;
+    --accent:#1c6860;--accent-text:#fff;--text:#1c1508;--err:#b83020;
+  }
+  html.theme-spirit-blossom{
+    --bg:#09070f;--stone:#100d1c;--stone2:#17122a;--div:#221638;
+    --gold:#e05490;--gold2:#b83872;--teal:#38c4d0;--green:#50d890;--red:#f03060;
+    --cream:#ede4f8;--sub:#c4a0d0;--muted:#7d5090;--dim:#4a2d60;
+    --font:'Amarante',Georgia,serif;--divider:#221638;--border:#4a3060;
+    --accent:#38c4d0;--accent-text:#09070f;--text:#ede4f8;--err:#f03060;
+  }
+  html.theme-spirit-blossom-light{
+    --bg:#f4eefb;--stone:#ffffff;--stone2:#f0e8f8;--div:#e2d4f0;
+    --gold:#c83070;--gold2:#a02258;--teal:#0f727e;--green:#28a064;--red:#c02040;
+    --cream:#1a0828;--sub:#4a2460;--muted:#7840a0;--dim:#9070b0;
+    --font:'Amarante',Georgia,serif;--divider:#e2d4f0;--border:#c4a8d8;
+    --accent:#0f727e;--accent-text:#fff;--text:#1a0828;--err:#c02040;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 22px 70px;background:var(--bg);color:var(--text);font-family:var(--font)}
+  h1{font-size:16px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 4px}
+  h1 b{color:var(--gold)}
+  h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+    margin:38px 0 4px;padding-bottom:6px;border-bottom:1px solid var(--divider);max-width:1180px}
+  p.note{font-size:12.5px;color:var(--muted);margin:0 0 16px;font-family:Georgia,serif;
+    max-width:1010px;line-height:1.65}
+  p.note b{color:var(--sub)}
+  p.note code{font-family:var(--font-mono);color:var(--sub);font-size:11.5px}
+  p.note .warn{color:var(--err);font-weight:700}
+  p.note .ok{color:var(--accent);font-weight:700}
+  .themebar{display:flex;gap:6px;margin:0 0 22px;flex-wrap:wrap}
+  .themebar button{font-family:var(--font);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 12px;background:var(--stone);color:var(--sub);border:1px solid var(--divider);cursor:pointer}
+  .themebar button:hover{color:var(--cream);border-color:var(--dim)}
+  .cap{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    margin:16px 0 7px;font-weight:700}
+  .cap i{font-style:normal;color:var(--dim);letter-spacing:.04em;text-transform:none;font-weight:400}
+
+  /* ── overlap map ──────────────────────────────────────────────────────── */
+  .omap{display:grid;grid-template-columns:196px 1fr 120px;gap:1px;background:var(--divider);
+    border:1px solid var(--divider);max-width:1180px;margin-bottom:10px;font-size:11.5px}
+  .omap>div{background:var(--stone);padding:9px 12px;letter-spacing:.03em;color:var(--sub)}
+  .omap>div.h{background:var(--stone2);color:var(--muted);font-size:9.5px;text-transform:uppercase;
+    letter-spacing:.11em;font-weight:700}
+  .omap .who{color:var(--cream);font-weight:700}
+  .omap .who.hot{color:var(--accent)}
+  .omap .w-no{color:var(--dim)}
+  .omap .w-yes{color:var(--accent);font-weight:700}
+  .omap .w-part{color:var(--gold)}
+  .omap .q{font-family:Georgia,serif;font-style:italic}
+  .omap .hot-row{background:color-mix(in srgb,var(--accent) 8%,var(--stone))}
+
+  /* ── before/after structure ───────────────────────────────────────────── */
+  .struct{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap;max-width:1180px;margin-bottom:8px}
+  .stBox{background:var(--stone);border:1px solid var(--divider);padding:13px 15px;min-width:236px;flex:1}
+  .stBox h3{font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 9px;color:var(--muted)}
+  .stRow{font-size:11.5px;color:var(--sub);padding:3px 0;letter-spacing:.03em}
+  .stRow.gone{color:var(--dim);text-decoration:line-through}
+  .stRow.kid{padding-left:15px;color:var(--dim);font-size:11px}
+  .stRow.new{color:var(--accent);font-weight:700}
+  .stArrow{align-self:center;font-size:22px;color:var(--gold)}
+  .stBox.after{border-color:var(--accent)}
+
+  /* ── app frame ────────────────────────────────────────────────────────── */
+  .app{display:grid;grid-template-columns:1fr 396px;gap:1px;background:var(--divider);
+    border:1px solid var(--divider);max-width:1180px;height:648px;overflow:hidden}
+  .app.one{grid-template-columns:1fr}
+  .app.short{height:452px}
+  .pane{background:var(--stone);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+
+  /* ── header: ONE real heading, month nav, views, Relatório ────────────── */
+  .agHdr{border-bottom:1px solid var(--divider);flex-shrink:0;background:var(--bg)}
+  .agHdrTop{display:flex;align-items:center;gap:var(--sp-2);padding:7px 12px}
+  .agTitle{font-size:14px;font-weight:700;color:var(--cream);letter-spacing:.05em;margin:0;
+    display:flex;align-items:baseline;gap:8px;flex:1;min-width:0}
+  .agTitle .kicker{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+    font-weight:700}
+  .navBtn{width:24px;height:24px;background:none;border:1px solid var(--border);color:var(--muted);
+    cursor:pointer;font-family:inherit;font-size:15px;line-height:1;display:flex;flex-shrink:0;
+    align-items:center;justify-content:center;padding:0;border-radius:var(--radius-sm)}
+  .navBtn:hover{color:var(--cream);border-color:var(--dim)}
+  .todayBtn{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:10px;
+    padding:4px 9px;font-family:inherit;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+    cursor:pointer;border-radius:var(--radius-sm);flex-shrink:0}
+  .todayBtn:hover{color:var(--accent);border-color:var(--accent)}
+  .viewSeg{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;
+    flex-shrink:0}
+  .viewSeg button{background:transparent;border:none;color:var(--muted);font-family:inherit;font-size:10px;
+    letter-spacing:.09em;text-transform:uppercase;font-weight:700;padding:5px 12px;cursor:pointer}
+  .viewSeg button.on{background:var(--accent);color:var(--accent-text)}
+  .btnSec{background:transparent;border:1px solid var(--border);color:var(--sub);font-family:inherit;
+    font-size:11px;font-weight:700;letter-spacing:.04em;padding:5px 11px;cursor:pointer;flex-shrink:0;
+    border-radius:var(--radius-sm);display:flex;align-items:center;gap:5px}
+  .btnSec:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ── stats strip ──────────────────────────────────────────────────────── */
+  .agStats{display:flex;gap:var(--sp-4);padding:5px 12px 7px;border-top:1px solid var(--divider);
+    flex-wrap:wrap;align-items:baseline}
+  .stItem{display:flex;align-items:baseline;gap:4px}
+  .stVal{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--cream)}
+  .stVal.aula{color:var(--accent)}
+  .stVal.pers{color:var(--gold)}
+  .stLbl{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+  /* ── the ONE filter row (layout="row") ────────────────────────────────── */
+  .fRow{display:flex;gap:var(--sp-2);padding:6px 12px;border-top:1px solid var(--divider);
+    flex-wrap:wrap;align-items:center}
+  .fGrp{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+  .fGrp button{background:transparent;border:none;border-right:1px solid var(--divider);color:var(--muted);
+    font-family:inherit;font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+    padding:4px 9px;cursor:pointer}
+  .fGrp button:last-child{border-right:none}
+  .fGrp button.on{background:var(--accent);color:var(--accent-text)}
+  .fGrp button.on.g{background:var(--gold);color:var(--bg)}
+  .fPop{background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);
+    color:var(--muted);font-family:inherit;font-size:10px;letter-spacing:.05em;font-weight:700;
+    padding:4px 9px;cursor:pointer;display:flex;align-items:center;gap:5px;text-transform:uppercase}
+  .fPop:hover{border-color:var(--dim);color:var(--sub)}
+  .fPop.on{border-color:var(--accent);color:var(--accent);
+    background:color-mix(in srgb,var(--accent) 12%,transparent)}
+  .fPop .car{font-size:8px;opacity:.7}
+  .fClear{margin-left:auto;display:flex;align-items:center;gap:9px}
+  .fCount{font-size:10px;color:var(--sub);letter-spacing:.05em}
+  .fCount b{color:var(--accent)}
+  .fClearBtn{background:none;border:none;color:var(--muted);font-family:inherit;font-size:10px;
+    letter-spacing:.06em;text-transform:uppercase;font-weight:700;cursor:pointer;
+    text-decoration:underline;padding:2px}
+  .fClearBtn:hover{color:var(--err)}
+
+  /* ── month grid ───────────────────────────────────────────────────────── */
+  .mGrid{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+  .mHdrs{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--divider);
+    position:sticky;top:0;background:var(--bg);z-index:2;flex-shrink:0}
+  .mHdrs div{padding:5px 4px;font-size:9px;font-weight:700;color:var(--accent);text-transform:uppercase;
+    letter-spacing:.08em;text-align:center;border-right:1px solid var(--divider)}
+  .mHdrs div:last-child{border-right:none}
+  .mWeek{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--divider);
+    min-height:98px}
+  .mCell{border:none;border-right:1px solid var(--divider);padding:4px 4px 5px;cursor:pointer;
+    background:transparent;display:flex;flex-direction:column;gap:2px;text-align:left;
+    font-family:inherit;min-width:0}
+  .mCell:last-child{border-right:none}
+  .mCell:hover{background:var(--stone2)}
+  .mCell.sel{background:color-mix(in srgb,var(--accent) 10%,transparent);
+    box-shadow:inset 0 0 0 1px var(--accent)}
+  .mCell.out{opacity:.28;cursor:default}
+  .mCellTop{display:flex;align-items:center;justify-content:space-between;min-height:20px}
+  .mNum{font-size:11px;color:var(--sub)}
+  .mNum.past{color:var(--dim)}
+  .mNum.today{width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--accent-text);
+    display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900}
+  .mCount{font-size:9px;color:var(--dim);font-family:var(--font-mono)}
+  .chip{font-size:9px;line-height:1.4;padding:1px 4px;border-left:2px solid var(--dim);
+    background:var(--stone2);color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    display:flex;align-items:center;gap:3px}
+  .chip .t{font-family:var(--font-mono);color:var(--muted);flex-shrink:0}
+  .chip.aula{border-left-color:var(--accent)}
+  .chip.pers{border-left-color:var(--gold)}
+  .chip.sess{border-left-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);
+    color:var(--accent);font-weight:700}
+  .chip.done{opacity:.6}
+  .chip .ck{color:var(--green);font-size:9px;flex-shrink:0}
+  .mMore{font-size:8.5px;color:var(--dim);padding-left:3px;letter-spacing:.04em}
+
+  /* ── day pane ─────────────────────────────────────────────────────────── */
+  .dpHdr{padding:9px 13px;border-bottom:1px solid var(--divider);flex-shrink:0;background:var(--bg)}
+  .dpTop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+  .dpDate{font-size:13px;font-weight:700;color:var(--accent);margin:0;
+    letter-spacing:.03em}
+  .dpAdds{display:flex;gap:6px;flex-wrap:wrap}
+  .addBtn{display:flex;align-items:center;gap:5px;padding:7px 12px;background:transparent;
+    border:1px solid var(--border);color:var(--sub);border-radius:var(--radius-sm);cursor:pointer;
+    font-size:12px;font-weight:700;font-family:inherit;letter-spacing:.03em}
+  .addBtn .pl{font-size:13px;line-height:1}
+  .addBtn.aula{border-color:color-mix(in srgb,var(--accent) 55%,transparent);color:var(--accent)}
+  .addBtn.aula:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+  .addBtn.pers{border-color:color-mix(in srgb,var(--gold) 55%,transparent);color:var(--gold)}
+  .addBtn.pers:hover{background:color-mix(in srgb,var(--gold) 12%,transparent)}
+  .addBtn.sess:hover{background:var(--stone2);color:var(--cream)}
+  .dpBody{flex:1;overflow-y:auto;padding:10px 13px 16px}
+  .dpSecLbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.11em;
+    margin:0 0 7px;font-weight:700}
+  .dpSecLbl.mt{margin-top:15px}
+
+  /* ── the session-of-the-day card (from Criador, not an event) ─────────── */
+  .sessCard{background:var(--stone2);border:1px solid var(--divider);border-top:2px solid var(--accent);
+    border-radius:var(--radius-md);padding:8px 10px;margin-bottom:6px}
+  .sessTop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+  .sessName{font-size:12px;font-weight:700;color:var(--cream)}
+  .blkRow{display:flex;gap:3px;flex-wrap:wrap}
+  .blk{font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;border:1px solid;
+    letter-spacing:.03em}
+
+  /* ── event card ───────────────────────────────────────────────────────── */
+  .evWrap{display:flex;gap:9px;margin-bottom:11px}
+  .evTime{min-width:42px;flex-shrink:0;text-align:center;padding-top:9px}
+  .evTimeH{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--sub)}
+  .evTimeD{font-family:var(--font-mono);font-size:9px;color:var(--dim);margin-top:1px}
+  .evTimeLine{width:1px;background:var(--divider);margin:6px auto 0;min-height:18px;height:calc(100% - 44px)}
+  .evCard{flex:1;min-width:0;background:var(--stone2);border:1px solid var(--divider);
+    border-top:2px solid var(--accent);border-radius:var(--radius-md);overflow:hidden}
+  .evCard.pers{border-top-color:var(--gold)}
+  .evCard.done{opacity:.86}
+  .evCard.focusdemo{outline:2px solid var(--accent);outline-offset:2px}
+  .evBody{padding:9px 11px;background:transparent;border:none;width:100%;text-align:left;
+    font-family:inherit;cursor:pointer;display:block}
+  .evBody:hover{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+  .evTitleRow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+  .evName{font-size:13px;font-weight:700;color:var(--cream);letter-spacing:.02em}
+  .tag{font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;text-transform:uppercase;
+    letter-spacing:.06em;border:1px solid}
+  .tag.aula{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 50%,transparent);
+    background:color-mix(in srgb,var(--accent) 10%,transparent)}
+  .tag.pers{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 50%,transparent);
+    background:color-mix(in srgb,var(--gold) 10%,transparent)}
+  .tag.aff{border-color:currentColor;background:transparent}
+  .tag.noaff{color:var(--muted);border-color:var(--border);border-style:dashed;background:transparent}
+  .tag.serie{color:var(--sub);border-color:var(--border);background:transparent;text-transform:none;
+    letter-spacing:.02em;display:inline-flex;align-items:center;gap:3px}
+  .evMeta{font-size:11px;color:var(--muted);letter-spacing:.03em}
+  .evLine{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-top:5px}
+  .evLine .ic{color:var(--dim);font-size:10px;flex-shrink:0}
+  .evAths{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px;align-items:center}
+  .athPill{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--sub)}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+  .evNote{font-size:11px;color:var(--muted);margin-top:6px;font-family:Georgia,serif;font-style:italic;
+    padding-left:8px;border-left:2px solid var(--divider)}
+  .evBar{display:flex;border-top:1px solid var(--divider)}
+  .evBar button{background:transparent;border:none;border-right:1px solid var(--divider);
+    color:var(--muted);padding:8px 10px;cursor:pointer;font-family:inherit;font-size:11px;
+    font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;letter-spacing:.04em}
+  .evBar button:last-child{border-right:none}
+  .evBar button:hover{background:var(--stone);color:var(--cream)}
+  .evBar .statusBtn{flex:1;justify-content:flex-start}
+  .evBar .statusBtn.on{color:var(--green);
+    background:color-mix(in srgb,var(--green) 10%,transparent)}
+  .evBar .statusBtn .box{width:12px;height:12px;border:1.5px solid currentColor;display:inline-flex;
+    align-items:center;justify-content:center;font-size:9px;line-height:1;flex-shrink:0}
+  .evBar .del:hover{color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
+  .evBar .icb{width:36px;padding:8px 0;font-size:13px}
+
+  /* ── the reserved #102 slot ───────────────────────────────────────────── */
+  .slot102{margin-top:8px;border:1px dashed var(--border);padding:6px 8px;
+    font-size:10px;color:var(--dim);letter-spacing:.05em;display:flex;gap:7px;align-items:center}
+  .slot102 b{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:.1em}
+
+  /* ── list view ────────────────────────────────────────────────────────── */
+  .lst{flex:1;overflow-y:auto}
+  .lstDay{display:flex;gap:11px;padding:9px 13px;border-bottom:1px solid var(--divider);
+    background:transparent;border-left:none;border-right:none;border-top:none;width:100%;
+    text-align:left;font-family:inherit;cursor:pointer;align-items:flex-start}
+  .lstDay:hover{background:var(--stone2)}
+  .lstDay.sel{background:color-mix(in srgb,var(--accent) 8%,transparent);
+    box-shadow:inset 2px 0 0 var(--accent)}
+  .lstDay.rest{cursor:default}
+  .lstLeft{width:44px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+  .lstDow{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .lstDow.today{color:var(--accent)}
+  .lstNum{font-size:17px;font-weight:900;color:var(--sub);line-height:1.1;margin-top:1px}
+  .lstNum.today{width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-text);
+    display:flex;align-items:center;justify-content:center;font-size:13px;margin-top:2px}
+  .lstMon{font-size:8.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+  .lstRows{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding-top:2px}
+  .lstRow{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--sub);
+    border-left:2px solid var(--dim);padding:2px 0 2px 7px;min-width:0}
+  .lstRow.aula{border-left-color:var(--accent)}
+  .lstRow.pers{border-left-color:var(--gold)}
+  .lstRow.sess{border-left-color:var(--accent)}
+  .lstRow.done{opacity:.62}
+  .lstT{font-family:var(--font-mono);font-size:11px;color:var(--muted);width:38px;flex-shrink:0}
+  .lstNm{font-weight:700;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lstNm.sess{color:var(--accent);font-weight:700}
+  .lstSub{color:var(--muted);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lstAths{display:flex;gap:2px;margin-left:auto;flex-shrink:0}
+  .lstRest{font-size:11px;color:var(--dim);font-family:Georgia,serif;font-style:italic;padding-top:5px}
+  .lstWkHdr{padding:5px 13px;font-size:9px;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.12em;font-weight:700;background:var(--bg);border-bottom:1px solid var(--divider);
+    position:sticky;top:0;z-index:1}
+
+  /* ── empty states ─────────────────────────────────────────────────────── */
+  .empty{padding:34px 22px;text-align:center;color:var(--muted)}
+  .empty .eIc{font-size:26px;color:var(--dim);display:block;margin-bottom:9px}
+  .empty .eT{font-size:12.5px;font-weight:700;color:var(--sub);letter-spacing:.05em;margin-bottom:5px}
+  .empty .eX{font-size:11.5px;font-family:Georgia,serif;line-height:1.6;max-width:270px;
+    margin:0 auto 12px}
+
+  /* ── filter column layout (ReportModal) ───────────────────────────────── */
+  .fcol{background:var(--stone);border:1px solid var(--divider);padding:13px 15px;width:270px;
+    flex-shrink:0}
+  .fcolSec{margin-bottom:13px}
+  .fcolLbl{font-size:9px;font-weight:700;color:var(--accent);text-transform:uppercase;
+    letter-spacing:.11em;margin-bottom:6px}
+  .fcolLbl.g{color:var(--gold)}
+  .fcolRow{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--sub);
+    margin-bottom:4px;cursor:pointer}
+  .radio{width:11px;height:11px;border:1px solid var(--border);border-radius:50%;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center}
+  .radio.on{border-color:var(--accent)}
+  .radio.on::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent)}
+  .cbx{width:11px;height:11px;border:1px solid var(--border);flex-shrink:0;display:inline-flex;
+    align-items:center;justify-content:center;font-size:8px;color:var(--accent);line-height:1}
+  .cbx.on{border-color:var(--accent)}
+  .pillWrap{display:flex;flex-wrap:wrap;gap:5px}
+  .pill{padding:3px 9px;border:1px solid var(--border);border-radius:var(--radius-sm);
+    font-size:10.5px;font-weight:700;color:var(--muted);background:transparent;cursor:pointer;
+    font-family:inherit;letter-spacing:.03em}
+  .pill.on{border-color:var(--accent);color:var(--accent);
+    background:color-mix(in srgb,var(--accent) 12%,transparent)}
+  .monthPick{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .monthPick .lbl{flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--cream)}
+
+  /* ── ConfirmReview (the one dialog shell) ─────────────────────────────── */
+  .cr{background:var(--stone);border:1px solid var(--border);border-radius:var(--radius-md);
+    width:404px;box-shadow:0 12px 34px rgba(0,0,0,.42)}
+  .crHdr{padding:12px 15px 9px;border-bottom:1px solid var(--divider)}
+  .crTitle{font-size:13px;font-weight:700;color:var(--cream);letter-spacing:.05em;margin:0}
+  .crBody{padding:13px 15px}
+  .crText{font-size:12px;color:var(--muted);font-family:Georgia,serif;line-height:1.6;margin:0 0 12px}
+  .crText b{color:var(--sub)}
+  .crOpt{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--divider);
+    border-radius:var(--radius-sm);margin-bottom:5px;cursor:pointer;font-size:12px;color:var(--sub)}
+  .crOpt.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);
+    color:var(--cream)}
+  .crOpt .n{margin-left:auto;font-family:var(--font-mono);font-size:10.5px;color:var(--muted)}
+  .crFoot{display:flex;gap:8px;justify-content:flex-end;padding:11px 15px;
+    border-top:1px solid var(--divider)}
+  .btn{font-family:inherit;font-size:11.5px;font-weight:700;letter-spacing:.05em;padding:7px 15px;
+    border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);background:transparent;
+    color:var(--sub)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+  .btn.destructive{background:var(--err);border-color:var(--err);color:#fff}
+
+  /* ── mobile frame ─────────────────────────────────────────────────────── */
+  .phones{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+  .phone{width:390px;height:720px;border:1px solid var(--divider);background:var(--stone);
+    display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+  .chrome{height:34px;flex-shrink:0;background:var(--bg);border-bottom:1px solid var(--divider);
+    display:flex;align-items:center;gap:10px;padding:0 11px;font-size:10px;color:var(--dim);
+    letter-spacing:.1em;text-transform:uppercase}
+  .chrome b{color:var(--accent);font-weight:700}
+  .mobBack{display:flex;align-items:center;gap:6px;padding:9px 12px;font-size:10.5px;color:var(--muted);
+    background:var(--bg);border:none;border-bottom:1px solid var(--divider);font-family:inherit;
+    width:100%;text-align:left;text-transform:uppercase;letter-spacing:.07em;cursor:pointer;
+    font-weight:700}
+  .mWeekStrip{display:flex;gap:4px;padding:5px 11px;flex-wrap:wrap;border-top:1px solid var(--divider)}
+
+  /* ── decision / boundary diagram ──────────────────────────────────────── */
+  .diag{background:var(--stone);border:1px solid var(--divider);padding:14px 17px;max-width:1180px;white-space:pre;
+    font-family:var(--font-mono);font-size:11.5px;line-height:1.85;color:var(--sub);overflow-x:auto}
+  .diag .k{color:var(--accent);font-weight:700}
+  .diag .g{color:var(--gold);font-weight:700}
+  .diag .c{color:var(--dim)}
+  .diag .x{color:var(--err);font-weight:700}
+
+  .kills{max-width:1180px;display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:1px;
+    background:var(--divider);border:1px solid var(--divider)}
+  .kill{background:var(--stone);padding:11px 13px}
+  .kill h4{margin:0 0 5px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--err)}
+  .kill h4.keep{color:var(--accent)}
+  .kill p{margin:0;font-size:11.5px;color:var(--muted);font-family:Georgia,serif;line-height:1.6}
+  .kill code{font-family:var(--font-mono);font-size:10.5px;color:var(--sub)}
+</style>
+
+<h1>Cone — Agenda · <b>Mockup 62</b> · C5·a (#59) Lane B</h1>
+<p class="note">
+  <b>A pergunta é estrutural.</b> O #162 tirou três dos trabalhos da Agenda e os pôs em Afiliados:
+  <code>MinhaSemanaPane</code> mostra a semana, <code>AffiliateSessions</code> mostra o mês de um
+  afiliado, <code>Fechamento</code> fatura tudo isso. <b>A resposta desta proposta:</b> os três são
+  <b>projeções de leitura por dinheiro</b> — por afiliado, por período. A Agenda é a única superfície
+  que <b>escreve</b>, e a única onde os dois lados de um dia se encontram: o <i>compromisso</i>
+  (<code>events</code>) e o <i>treino</i> que o usuário escreveu no Criador (<code>sessions</code>).
+  <span class="ok">A Agenda é o editor.</span> Tudo aqui decorre disso.
+</p>
+
+<div class="themebar">
+  <button onclick="document.documentElement.className=''">TotK Dark</button>
+  <button onclick="document.documentElement.className='theme-totk-light'">TotK Light</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom'">Spirit Blossom</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom-light'">SB Light</button>
+</div>
+<p class="note" style="margin-top:-8px">
+  <span class="warn">Sobre os ícones:</span> os cards do Claude Design não carregam webfont externa
+  (CSP), então este mockup usa glifos Unicode onde o app usa <code>ti-*</code> / Tabler — igual aos
+  cards <code>results</code>/<code>schedule</code>. A forma é a mesma; o desenho não depende do ícone.
+</p>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">1 · O mapa de sobreposição — quem pergunta o quê sobre o mesmo <code>events</code></h2>
+<p class="note">
+  Quatro superfícies leem o mesmo blob. Só uma escreve nele. Isso não é redundância a limpar — é uma
+  divisão que já se resolveu sozinha, e que só precisa ser <b>dita</b> para que o desenho pare de
+  hesitar entre "calendário" e "ferramenta".
+</p>
+
+<div class="omap">
+  <div class="h">Superfície</div><div class="h">A pergunta que ela responde</div><div class="h">Escreve em events?</div>
+
+  <div class="hot-row who hot">Agenda <span style="color:var(--muted);font-weight:400">(#59 · esta)</span></div>
+  <div class="hot-row q">"O que acontece neste dia — e o que ainda falta marcar?"</div>
+  <div class="hot-row w-yes">SIM · a única</div>
+
+  <div class="who">Minha semana <span style="color:var(--muted);font-weight:400">(Afiliados)</span></div>
+  <div class="q">"Qual é a forma da minha semana?" — grade de horários × 7 dias</div>
+  <div class="w-no">não</div>
+
+  <div class="who">Sessões do afiliado</div>
+  <div class="q">"O que eu fiz por este afiliado neste mês?"</div>
+  <div class="w-no">não</div>
+
+  <div class="who">Fechamento</div>
+  <div class="q">"Quanto isso vira de fatura?"</div>
+  <div class="w-part">só o carimbo</div>
+</div>
+
+<p class="note">
+  <b>E há um segundo trabalho que nenhuma das outras três tem:</b> a Agenda é a única superfície onde
+  <code>events</code> encontra <code>sessions</code>. <code>dayGymSessions</code>,
+  <code>linkedSession</code>, <code>onEditSession</code> e <code>onLogResult</code> só existem aqui —
+  é daqui que se abre o WOD do dia no Criador e daqui que se lança o resultado. As panes de Afiliados
+  não sabem que <code>sessions</code> existe.
+</p>
+<p class="note">
+  <span class="ok">Corolário que paga o próprio custo:</span> um evento <b>sem afiliado</b> não gera
+  linha nenhuma no <code>calcTotal</code> — o Fechamento simplesmente não o vê. Hoje a Agenda também
+  não diz nada: <code>svcLoc</code> nulo renderiza <i>nenhuma</i> tag. Como a Agenda é o editor, ela é
+  o único lugar onde esse buraco pode ser <b>visto e consertado</b>. Por isso "sem afiliado" vira uma
+  tag explícita neste desenho (§5), não uma ausência silenciosa.
+</p>
+
+<div class="struct">
+  <div class="stBox">
+    <h3>Hoje</h3>
+    <div class="stRow">Cabeçalho: ‹ · <b style="color:var(--err)">Relatório</b> · MÊS · › · Hoje · stats · filtro</div>
+    <div class="stRow kid">o Relatório fica <i>entre</i> a seta e o mês</div>
+    <div class="stRow">Grade do mês <b>100%</b> → <b>60%</b> ao clicar num dia</div>
+    <div class="stRow kid">a tela reflui a cada clique</div>
+    <div class="stRow">Painel do dia condicional — 40% de tela em itálico cinza</div>
+    <div class="stRow kid">"Clique num dia para ver detalhes"</div>
+    <div class="stRow">1 filtro tri-estado (all/scheduled/completed)</div>
+    <div class="stRow kid">em <b>duas</b> cópias à mão, com bordas diferentes</div>
+    <div class="stRow gone">Nenhuma visão de lista / corrida de dias</div>
+    <div class="stRow gone">Grade do mês inexistente no celular</div>
+    <div class="stRow gone">Série recorrente: só um ícone, 13 exclusões</div>
+    <div class="stRow gone">window.confirm · click-div · sem heading</div>
+  </div>
+  <div class="stArrow">&#8594;</div>
+  <div class="stBox after">
+    <h3>Proposta</h3>
+    <div class="stRow new">Uma <b>&lt;h1&gt;</b> real: "Agenda · Agosto 2026"</div>
+    <div class="stRow">Cabeçalho: ‹ · h1 · › · Hoje &nbsp;|&nbsp; [Mês][Lista] · Relatório</div>
+    <div class="stRow new">Painel do dia <b>sempre presente</b> — 60/40 fixo</div>
+    <div class="stRow kid">a seleção é sempre um dia real; nada reflui</div>
+    <div class="stRow new">Duas visões: <b>Mês</b> (navegar) e <b>Lista</b> (agir)</div>
+    <div class="stRow kid">a Lista já existia — só no celular (§2)</div>
+    <div class="stRow new">UM <code>EventFilter</code>, superset dos dois conjuntos</div>
+    <div class="stRow kid">linha na Agenda, coluna no Relatório</div>
+    <div class="stRow new">Série operável: 3 escopos no mesmo ConfirmReview</div>
+    <div class="stRow new">Slot #102 reservado, vazio, sem afirmar presença</div>
+    <div class="stRow new">Grade do mês também no celular</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">2 · A visão de Lista já existe — só que só no celular</h2>
+<p class="note">
+  <b>#105 pede "uma corrida de dias".</b> A tentação é copiar a <code>WeekEventGrid</code> do
+  <code>MinhaSemanaPane</code>, e seria errado: aquilo é uma <b>grade de horários</b> (linhas = os
+  horários que de fato ocorrem, colunas = 7 dias) e responde <i>"como está a forma da semana"</i>. Uma
+  <b>lista</b> responde outra coisa — <i>"o que vem, em ordem, e me deixe agir em cada item"</i>. São
+  perguntas diferentes; não há duplicação.
+</p>
+<p class="note">
+  <span class="ok">E ela já está escrita.</span> <code>renderMobileDayList</code>
+  (<code>AgendaView.jsx:1229</code>, as regras <code>.pub-day-row</code>) é exatamente essa lista —
+  dias empilhados, chips por dia, tap abre o dia. Ela só nunca chegou ao desktop, porque está do lado
+  <code>isMobile</code> de um <code>if</code>. Promovê-la a visão de primeira classe é <b>apagar um
+  fork</b>, não abrir uma superfície nova.
+</p>
+<p class="note">
+  <span class="warn">O mesmo <code>if</code> na direção contrária:</span> <code>useIsMobile(800)</code>
+  garante que a grade do mês <b>nunca</b> renderiza abaixo de 800px — e mesmo assim o
+  <code>index.css</code> carrega <code>@media(max-width:480px)</code> para
+  <code>.cell-card-mini</code>, <code>.agenda-cell</code> a 46px e <code>.agenda-day-hdr</code> a 8px
+  (<code>:193-204</code>). São <b>regras inalcançáveis</b>: alguém desenhou a grade para o celular e o
+  fork a escondeu. Com o seletor de visão, o celular ganha <b>Mês</b> de graça — o CSS já existe.
+</p>
+
+<div class="diag">
+<span class="c">// duas visões, uma seleção, um filtro — nenhuma delas é uma segunda WeekEventGrid</span>
+
+  <span class="k">Mês</span>     grade 7×N   <span class="c">·  navegar, ver densidade, escolher o dia</span>
+  <span class="k">Lista</span>   corrida de dias  <span class="c">·  ler e agir em sequência (a de hoje, no celular)</span>
+  <span class="g">Minha semana</span> (Afiliados)  <span class="c">·  grade de HORÁRIOS × 7 dias — leitura, outra pergunta</span>
+
+  <span class="c">as duas primeiras compartilham:</span>  selDay  ·  EventFilter  ·  DayPane
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">3 · Desktop 1280 · <b>Mês</b> — dia denso (5 eventos), aula + personal, série, sessão vinculada</h2>
+<p class="note">
+  60/40 fixo. <b>O painel do dia não é condicional</b> — ele sempre mostra um dia real (hoje, ou o dia
+  1 do mês navegado). Isso mata dois problemas de uma vez: a tela que reflui de 100% para 60% a cada
+  clique, e 40% de superfície gasta com <i>"Clique num dia para ver detalhes"</i> em itálico cinza.
+  Num editor, o objeto que se edita está sempre em tela.
+</p>
+
+<div class="app">
+  <div class="pane">
+    <div class="agHdr">
+      <div class="agHdrTop">
+        <button class="navBtn" aria-label="Mês anterior">&#8249;</button>
+        <h1 class="agTitle"><span class="kicker">Agenda</span> Agosto 2026</h1>
+        <button class="navBtn" aria-label="Próximo mês">&#8250;</button>
+        <button class="todayBtn">Hoje</button>
+        <div class="viewSeg">
+          <button class="on">Mês</button><button>Lista</button>
+        </div>
+        <button class="btnSec">&#9635; Relatório</button>
+      </div>
+      <div class="agStats">
+        <div class="stItem"><span class="stVal">30</span><span class="stLbl">eventos no mês</span></div>
+        <div class="stItem"><span class="stVal aula">24</span><span class="stLbl">aulas</span></div>
+        <div class="stItem"><span class="stVal pers">6</span><span class="stLbl">personal</span></div>
+        <div class="stItem"><span class="stVal">9</span><span class="stLbl">a lançar</span></div>
+      </div>
+      <div class="fRow">
+        <div class="fGrp">
+          <button class="on">Todos</button><button>Aula</button><button>Personal</button>
+        </div>
+        <div class="fGrp">
+          <button class="on">Todos</button><button>A lançar</button><button>Feitas</button>
+        </div>
+        <button class="fPop">Afiliado <span class="car">&#9662;</span></button>
+        <button class="fPop">Atleta <span class="car">&#9662;</span></button>
+      </div>
+    </div>
+
+    <div class="mGrid">
+      <div class="mHdrs">
+        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+      </div>
+
+      <div class="mWeek">
+        <div class="mCell out"><div class="mCellTop"><span class="mNum past">26</span></div></div>
+        <button class="mCell"><div class="mCellTop"><span class="mNum past">27</span><span class="mCount">3</span></div>
+          <span class="chip sess">&#9635; WOD A</span>
+          <span class="chip aula done"><span class="ck">&#10003;</span><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip aula done"><span class="ck">&#10003;</span><span class="t">19:00</span>Turma Noite</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum past">28</span><span class="mCount">2</span></div>
+          <span class="chip aula done"><span class="ck">&#10003;</span><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip pers done"><span class="ck">&#10003;</span><span class="t">17:00</span>Ana</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum past">29</span><span class="mCount">3</span></div>
+          <span class="chip sess">&#9635; WOD B</span>
+          <span class="chip aula done"><span class="ck">&#10003;</span><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip aula done"><span class="ck">&#10003;</span><span class="t">19:00</span>Turma Noite</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum past">30</span><span class="mCount">1</span></div>
+          <span class="chip aula done"><span class="ck">&#10003;</span><span class="t">07:00</span>Turma Manhã</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum past">31</span><span class="mCount">2</span></div>
+          <span class="chip aula done"><span class="ck">&#10003;</span><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip pers done"><span class="ck">&#10003;</span><span class="t">18:00</span>Bruno</span>
+        </button>
+        <div class="mCell out"><div class="mCellTop"><span class="mNum past">1</span></div></div>
+      </div>
+
+      <div class="mWeek">
+        <button class="mCell"><div class="mCellTop"><span class="mNum">2</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">3</span><span class="mCount">3</span></div>
+          <span class="chip sess">&#9635; WOD A</span>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip aula"><span class="t">19:00</span>Turma Noite</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">4</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip pers"><span class="t">17:00</span>Ana</span>
+        </button>
+        <button class="mCell sel" aria-current="date">
+          <div class="mCellTop"><span class="mNum today">5</span><span class="mCount">6</span></div>
+          <span class="chip sess">&#9635; WOD C</span>
+          <span class="chip aula done"><span class="ck">&#10003;</span><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip pers"><span class="t">10:00</span>Ana</span>
+          <div class="mMore">+3 mais</div>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">6</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip aula"><span class="t">19:00</span>Turma Noite</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">7</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip pers"><span class="t">18:00</span>Bruno</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">8</span></div></button>
+      </div>
+
+      <div class="mWeek">
+        <button class="mCell"><div class="mCellTop"><span class="mNum">9</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">10</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip aula"><span class="t">19:00</span>Turma Noite</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">11</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip pers"><span class="t">17:00</span>Ana</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">12</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip aula"><span class="t">19:00</span>Turma Noite</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">13</span><span class="mCount">1</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">14</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip pers"><span class="t">18:00</span>Bruno</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">15</span></div></button>
+      </div>
+
+      <div class="mWeek">
+        <button class="mCell"><div class="mCellTop"><span class="mNum">16</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">17</span><span class="mCount">3</span></div>
+          <span class="chip sess">&#9635; WOD D</span>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip aula"><span class="t">19:00</span>Turma Noite</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">18</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip pers"><span class="t">17:00</span>Ana</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">19</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip aula"><span class="t">19:00</span>Turma Noite</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">20</span><span class="mCount">1</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">21</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip pers"><span class="t">18:00</span>Bruno</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">22</span></div></button>
+      </div>
+
+      <div class="mWeek">
+        <button class="mCell"><div class="mCellTop"><span class="mNum">23</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">24</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip aula"><span class="t">19:00</span>Turma Noite</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">25</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip pers"><span class="t">17:00</span>Ana</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">26</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip aula"><span class="t">19:00</span>Turma Noite</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">27</span><span class="mCount">1</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">28</span><span class="mCount">1</span></div>
+          <span class="chip pers"><span class="t">18:00</span>Bruno</span>
+        </button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">29</span></div></button>
+      </div>
+
+      <div class="mWeek">
+        <button class="mCell"><div class="mCellTop"><span class="mNum">30</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">31</span><span class="mCount">2</span></div>
+          <span class="chip aula"><span class="t">07:00</span>Turma Manhã</span>
+          <span class="chip aula"><span class="t">19:00</span>Turma Noite</span>
+        </button>
+        <div class="mCell out"><div class="mCellTop"><span class="mNum">1</span></div></div>
+        <div class="mCell out"><div class="mCellTop"><span class="mNum">2</span></div></div>
+        <div class="mCell out"><div class="mCellTop"><span class="mNum">3</span></div></div>
+        <div class="mCell out"><div class="mCellTop"><span class="mNum">4</span></div></div>
+        <div class="mCell out"><div class="mCellTop"><span class="mNum">5</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── day pane ── -->
+  <div class="pane">
+    <div class="dpHdr">
+      <div class="dpTop">
+        <h2 class="dpDate">Quarta, 5 de agosto</h2>
+        <span style="font-size:10px;color:var(--muted);letter-spacing:.06em">6 ITENS</span>
+      </div>
+      <div class="dpAdds">
+        <button class="addBtn aula"><span class="pl">+</span> Aula</button>
+        <button class="addBtn pers"><span class="pl">+</span> Personal</button>
+        <button class="addBtn sess">&#9635; Sessão</button>
+      </div>
+    </div>
+    <div class="dpBody">
+      <div class="dpSecLbl">Treino do dia · Criador</div>
+      <div class="sessCard">
+        <div class="sessTop">
+          <span class="sessName">WOD C — Fran retest</span>
+          <button class="btnSec" style="font-size:10px;padding:3px 8px">Editar</button>
+        </div>
+        <div class="blkRow">
+          <span class="blk" style="color:#68d8a0;border-color:#68d8a044;background:#68d8a022">Aquecimento</span>
+          <span class="blk" style="color:#e87820;border-color:#e8782044;background:#e8782022">For Time</span>
+          <span class="blk" style="color:#c884f0;border-color:#c884f044;background:#c884f022">Acessórios</span>
+        </div>
+      </div>
+
+      <div class="dpSecLbl mt">Agenda do dia</div>
+
+      <!-- aula · feita · série · afiliado · sessão vinculada -->
+      <div class="evWrap">
+        <div class="evTime">
+          <div class="evTimeH">07:00</div><div class="evTimeD">60m</div>
+          <div class="evTimeLine"></div>
+        </div>
+        <div class="evCard done">
+          <button class="evBody">
+            <div class="evTitleRow">
+              <span class="evName">Turma Manhã</span>
+              <span class="tag aula">Aula</span>
+              <span class="tag aff" style="color:var(--dataVila)">CrossFit Vila</span>
+              <span class="tag serie">&#8635; série · 6/13</span>
+            </div>
+            <div class="evMeta">07:00 · 60 min</div>
+            <div class="evLine"><span class="ic">&#9635;</span> WOD C — Fran retest</div>
+            <div class="evAths">
+              <span class="athPill"><span class="dot" style="background:var(--dataAna)"></span>Ana</span>
+              <span class="athPill"><span class="dot" style="background:var(--dataBruno)"></span>Bruno</span>
+              <span class="athPill"><span class="dot" style="background:var(--dataCaio)"></span>Caio</span>
+              <span class="athPill" style="color:var(--muted)">+3 marcados</span>
+            </div>
+            <div class="slot102"><b>#102</b> slot reservado — no app renderiza nada</div>
+          </button>
+          <div class="evBar">
+            <button class="statusBtn on"><span class="box">&#10003;</span> Feita</button>
+            <button class="icb" aria-label="Lançar resultado">&#9776;</button>
+            <button class="icb" aria-label="Abrir sessão vinculada">&#9635;</button>
+            <button class="icb" aria-label="Editar evento">&#9998;</button>
+            <button class="icb del" aria-label="Excluir evento">&#9003;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- personal · agendada · com afiliado -->
+      <div class="evWrap">
+        <div class="evTime">
+          <div class="evTimeH">10:00</div><div class="evTimeD">50m</div>
+          <div class="evTimeLine"></div>
+        </div>
+        <div class="evCard pers">
+          <button class="evBody">
+            <div class="evTitleRow">
+              <span class="evName">Ana — força</span>
+              <span class="tag pers">Personal</span>
+              <span class="tag aff" style="color:var(--dataNorte)">Studio Norte</span>
+            </div>
+            <div class="evMeta">10:00 · 50 min</div>
+            <div class="evAths">
+              <span class="athPill"><span class="dot" style="background:var(--dataAna)"></span>Ana Prado</span>
+            </div>
+            <div class="evLine"><span class="ic">&#9906;</span> Studio Norte — sala 2</div>
+            <div class="evNote">Levar as bandas leves. Ombro direito ainda sensível.</div>
+            <div class="slot102"><b>#102</b> slot reservado — no app renderiza nada</div>
+          </button>
+          <div class="evBar">
+            <button class="statusBtn"><span class="box"></span> A lançar</button>
+            <button class="icb" aria-label="Lançar resultado">&#9776;</button>
+            <button class="icb" aria-label="Criar sessão para este dia">&#9635;</button>
+            <button class="icb" aria-label="Editar evento">&#9998;</button>
+            <button class="icb del" aria-label="Excluir evento">&#9003;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- aula · agendada · SEM afiliado -->
+      <div class="evWrap">
+        <div class="evTime">
+          <div class="evTimeH">19:00</div><div class="evTimeD">60m</div>
+          <div class="evTimeLine"></div>
+        </div>
+        <div class="evCard">
+          <button class="evBody">
+            <div class="evTitleRow">
+              <span class="evName">Turma Noite</span>
+              <span class="tag aula">Aula</span>
+              <span class="tag noaff">sem afiliado</span>
+              <span class="tag serie">&#8635; série · 6/13</span>
+            </div>
+            <div class="evMeta">19:00 · 60 min</div>
+            <div class="evLine" style="color:var(--sub)">
+              <span class="ic" style="color:var(--gold)">&#9888;</span> Sem afiliado, esta aula não entra em nenhuma fatura.
+            </div>
+            <div class="slot102"><b>#102</b> slot reservado — no app renderiza nada</div>
+          </button>
+          <div class="evBar">
+            <button class="statusBtn"><span class="box"></span> A lançar</button>
+            <button class="icb" aria-label="Lançar resultado">&#9776;</button>
+            <button class="icb" aria-label="Criar sessão para este dia">&#9635;</button>
+            <button class="icb" aria-label="Editar evento">&#9998;</button>
+            <button class="icb del" aria-label="Excluir evento">&#9003;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="note" style="margin-top:14px">
+  <b>Contraste, decidido e não empurrado para o #14.</b> Aula = <code>var(--accent)</code>, personal =
+  <code>var(--gold)</code> — distintos nos 4 temas. Mas o #14 registra que <code>--gold</code>
+  <b>reprova</b> como texto nos dois temas claros (3,79 / 4,49) e <code>--green</code> reprova no
+  sb-light (2,93). Então <span class="ok">nenhum dos dois carrega texto pequeno</span>: a identidade
+  do personal está na <b>borda superior</b> e no <b>ponto</b> (elementos gráficos, régua de 3:1) e o
+  nome fica em <code>--cream</code>; o "feita" está no <b>quadrado com o check</b> e o rótulo fica no
+  verde só quando ele já passou de gráfico a estado ativo com fundo tingido. É exatamente o tratamento
+  que o #57 deu à pílula RX — a cor de identidade é gráfica, o texto é do token que passa.
+</p>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">4 · Desktop 1280 · <b>Lista</b> — a segunda metade do #105</h2>
+<p class="note">
+  Mesma seleção, mesmo filtro, mesmo painel do dia. A lista mostra uma <b>corrida de dias</b> com cada
+  item já legível — hora, nome, afiliado, atletas — e o dia de descanso dito por extenso em vez de
+  ficar em branco. É a promoção literal da <code>renderMobileDayList</code> do celular, agora com
+  espaço para a segunda linha que lá não cabia.
+</p>
+
+<div class="app short">
+  <div class="pane">
+    <div class="agHdr">
+      <div class="agHdrTop">
+        <button class="navBtn" aria-label="Mês anterior">&#8249;</button>
+        <h1 class="agTitle"><span class="kicker">Agenda</span> Agosto 2026</h1>
+        <button class="navBtn" aria-label="Próximo mês">&#8250;</button>
+        <button class="todayBtn">Hoje</button>
+        <div class="viewSeg"><button>Mês</button><button class="on">Lista</button></div>
+        <button class="btnSec">&#9635; Relatório</button>
+      </div>
+      <div class="fRow">
+        <div class="fGrp"><button class="on">Todos</button><button>Aula</button><button>Personal</button></div>
+        <div class="fGrp"><button>Todos</button><button class="on">A lançar</button><button>Feitas</button></div>
+        <button class="fPop">Afiliado <span class="car">&#9662;</span></button>
+        <button class="fPop">Atleta <span class="car">&#9662;</span></button>
+        <div class="fClear">
+          <span class="fCount"><b>1</b> filtro ativo</span>
+          <button class="fClearBtn">Limpar</button>
+        </div>
+      </div>
+    </div>
+    <div class="lst">
+      <div class="lstWkHdr">Semana de 2 – 8 de agosto</div>
+
+      <button class="lstDay">
+        <div class="lstLeft"><span class="lstDow">Dom</span><span class="lstNum">2</span><span class="lstMon">ago</span></div>
+        <div class="lstRows"><div class="lstRest">— descanso</div></div>
+      </button>
+
+      <button class="lstDay">
+        <div class="lstLeft"><span class="lstDow">Seg</span><span class="lstNum">3</span><span class="lstMon">ago</span></div>
+        <div class="lstRows">
+          <div class="lstRow sess"><span class="lstT">&#9635;</span><span class="lstNm sess">WOD A — Diane</span><span class="lstSub">3 blocos</span></div>
+          <div class="lstRow aula"><span class="lstT">07:00</span><span class="lstNm">Turma Manhã</span><span class="lstSub">CrossFit Vila · 60min</span>
+            <span class="lstAths"><span class="dot" style="background:var(--dataAna)"></span><span class="dot" style="background:var(--dataBruno)"></span><span class="dot" style="background:var(--dataCaio)"></span></span></div>
+          <div class="lstRow aula"><span class="lstT">19:00</span><span class="lstNm">Turma Noite</span><span class="lstSub">CrossFit Vila · 60min</span></div>
+        </div>
+      </button>
+
+      <button class="lstDay">
+        <div class="lstLeft"><span class="lstDow">Ter</span><span class="lstNum">4</span><span class="lstMon">ago</span></div>
+        <div class="lstRows">
+          <div class="lstRow aula"><span class="lstT">07:00</span><span class="lstNm">Turma Manhã</span><span class="lstSub">CrossFit Vila · 60min</span></div>
+          <div class="lstRow pers"><span class="lstT">17:00</span><span class="lstNm">Ana — força</span><span class="lstSub">Studio Norte · 50min</span>
+            <span class="lstAths"><span class="dot" style="background:var(--dataAna)"></span></span></div>
+        </div>
+      </button>
+
+      <button class="lstDay sel" aria-current="date">
+        <div class="lstLeft"><span class="lstDow today">Qua</span><span class="lstNum today">5</span><span class="lstMon">ago</span></div>
+        <div class="lstRows">
+          <div class="lstRow sess"><span class="lstT">&#9635;</span><span class="lstNm sess">WOD C — Fran retest</span><span class="lstSub">3 blocos</span></div>
+          <div class="lstRow aula done"><span class="lstT">07:00</span><span class="lstNm">Turma Manhã</span><span class="lstSub">CrossFit Vila · feita</span></div>
+          <div class="lstRow pers"><span class="lstT">10:00</span><span class="lstNm">Ana — força</span><span class="lstSub">Studio Norte · 50min</span>
+            <span class="lstAths"><span class="dot" style="background:var(--dataAna)"></span></span></div>
+          <div class="lstRow aula"><span class="lstT">19:00</span><span class="lstNm">Turma Noite</span><span class="lstSub" style="color:var(--gold)">sem afiliado · 60min</span></div>
+        </div>
+      </button>
+
+      <button class="lstDay">
+        <div class="lstLeft"><span class="lstDow">Qui</span><span class="lstNum">6</span><span class="lstMon">ago</span></div>
+        <div class="lstRows">
+          <div class="lstRow aula"><span class="lstT">07:00</span><span class="lstNm">Turma Manhã</span><span class="lstSub">CrossFit Vila · 60min</span></div>
+          <div class="lstRow aula"><span class="lstT">19:00</span><span class="lstNm">Turma Noite</span><span class="lstSub">CrossFit Vila · 60min</span></div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div class="pane">
+    <div class="dpHdr">
+      <div class="dpTop"><h2 class="dpDate">Quarta, 5 de agosto</h2>
+        <span style="font-size:10px;color:var(--muted);letter-spacing:.06em">6 ITENS</span></div>
+      <div class="dpAdds">
+        <button class="addBtn aula"><span class="pl">+</span> Aula</button>
+        <button class="addBtn pers"><span class="pl">+</span> Personal</button>
+        <button class="addBtn sess">&#9635; Sessão</button>
+      </div>
+    </div>
+    <div class="dpBody">
+      <div class="dpSecLbl">Agenda do dia · filtrada</div>
+      <div class="evWrap">
+        <div class="evTime"><div class="evTimeH">10:00</div><div class="evTimeD">50m</div><div class="evTimeLine"></div></div>
+        <div class="evCard pers">
+          <button class="evBody">
+            <div class="evTitleRow"><span class="evName">Ana — força</span>
+              <span class="tag pers">Personal</span>
+              <span class="tag aff" style="color:var(--dataNorte)">Studio Norte</span></div>
+            <div class="evMeta">10:00 · 50 min</div>
+          </button>
+          <div class="evBar">
+            <button class="statusBtn"><span class="box"></span> A lançar</button>
+            <button class="icb" aria-label="Lançar resultado">&#9776;</button>
+            <button class="icb" aria-label="Editar evento">&#9998;</button>
+            <button class="icb del" aria-label="Excluir evento">&#9003;</button>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);font-family:Georgia,serif;font-style:italic;
+                border-top:1px solid var(--divider);padding-top:9px;margin-top:2px">
+        2 itens deste dia estão ocultos pelo filtro <b style="color:var(--sub)">A lançar</b>.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">5 · O card do evento — todos os estados numa casca só</h2>
+<p class="note">
+  Uma casca, seis eixos: <b>tipo</b> (aula/personal) · <b>status</b> (a lançar/feita) · <b>afiliado</b>
+  (com/sem) · <b>série</b> (avulso/recorrente) · <b>sessão</b> (vinculada/não) · <b>atletas</b>
+  (marcados/nenhum). Nenhum deles esconde outro: a linha do título acumula tags e quebra.
+</p>
+<p class="note">
+  <span class="ok">Acessibilidade, o corte inteiro:</span> o corpo do card deixa de ser um
+  <code>&lt;div onClick&gt;</code> — vira controle real (<code>role="button"</code>,
+  <code>tabIndex</code>, Enter/Espaço), e a barra de ações continua <b>irmã</b> dele, não aninhada,
+  então cada ação é um <code>&lt;button&gt;</code> de verdade. Todo botão só-ícone ganha
+  <code>aria-label</code> ("Excluir evento", não "Remover"). O painel do dia ganha um
+  <code>&lt;h2&gt;</code> com a data, sob o <code>&lt;h1&gt;</code> do cabeçalho.
+  <span class="warn">E o rótulo do status muda:</span> "Ag." / "Feito" viram
+  <b>"A lançar" / "Feita"</b> — o vocabulário que o <code>MinhaSemanaPane</code> já usa, e que nunca
+  se aproxima de "presente".
+</p>
+
+<div class="cap">A · aula · feita · série · com afiliado · sessão vinculada · 6 atletas</div>
+<div style="max-width:560px">
+  <div class="evWrap">
+    <div class="evTime"><div class="evTimeH">07:00</div><div class="evTimeD">60m</div><div class="evTimeLine"></div></div>
+    <div class="evCard done">
+      <button class="evBody">
+        <div class="evTitleRow"><span class="evName">Turma Manhã</span>
+          <span class="tag aula">Aula</span>
+          <span class="tag aff" style="color:var(--dataVila)">CrossFit Vila</span>
+          <span class="tag serie">&#8635; série · 6/13</span></div>
+        <div class="evMeta">07:00 · 60 min</div>
+        <div class="evLine"><span class="ic">&#9635;</span> WOD C — Fran retest</div>
+        <div class="evAths">
+          <span class="athPill"><span class="dot" style="background:var(--dataAna)"></span>Ana</span>
+          <span class="athPill"><span class="dot" style="background:var(--dataBruno)"></span>Bruno</span>
+          <span class="athPill" style="color:var(--muted)">+4 marcados</span></div>
+        <div class="slot102"><b>#102</b> slot reservado — no app renderiza nada</div>
+      </button>
+      <div class="evBar">
+        <button class="statusBtn on"><span class="box">&#10003;</span> Feita</button>
+        <button class="icb" aria-label="Lançar resultado">&#9776;</button>
+        <button class="icb" aria-label="Abrir sessão vinculada">&#9635;</button>
+        <button class="icb" aria-label="Editar evento">&#9998;</button>
+        <button class="icb del" aria-label="Excluir evento">&#9003;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cap">B · personal · a lançar · sem afiliado <i>— o buraco que o Fechamento não vê</i></div>
+<div style="max-width:560px">
+  <div class="evWrap">
+    <div class="evTime"><div class="evTimeH">18:00</div><div class="evTimeD">50m</div><div class="evTimeLine"></div></div>
+    <div class="evCard pers">
+      <button class="evBody">
+        <div class="evTitleRow"><span class="evName">Caio — avaliação</span>
+          <span class="tag pers">Personal</span>
+          <span class="tag noaff">sem afiliado</span></div>
+        <div class="evMeta">18:00 · 50 min</div>
+        <div class="evAths"><span class="athPill"><span class="dot" style="background:var(--dataCaio)"></span>Caio Reis</span></div>
+        <div class="evLine" style="color:var(--sub)">
+          <span class="ic" style="color:var(--gold)">&#9888;</span>
+          Nenhum afiliado tem este atleta — sem taxa, sem valor na fatura.</div>
+        <div class="slot102"><b>#102</b> slot reservado — no app renderiza nada</div>
+      </button>
+      <div class="evBar">
+        <button class="statusBtn"><span class="box"></span> A lançar</button>
+        <button class="icb" aria-label="Lançar resultado">&#9776;</button>
+        <button class="icb" aria-label="Criar sessão para este dia">&#9635;</button>
+        <button class="icb" aria-label="Editar evento">&#9998;</button>
+        <button class="icb del" aria-label="Excluir evento">&#9003;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cap">C · aula avulsa · a lançar · nenhum atleta marcado · <i>foco de teclado no corpo do card</i></div>
+<div style="max-width:560px">
+  <div class="evWrap">
+    <div class="evTime"><div class="evTimeH">12:00</div><div class="evTimeD">45m</div><div class="evTimeLine"></div></div>
+    <div class="evCard focusdemo">
+      <button class="evBody">
+        <div class="evTitleRow"><span class="evName">Open box</span>
+          <span class="tag aula">Aula</span>
+          <span class="tag aff" style="color:var(--dataVila)">CrossFit Vila</span></div>
+        <div class="evMeta">12:00 · 45 min</div>
+        <div class="evAths"><span class="athPill" style="color:var(--dim)">Nenhum atleta marcado</span></div>
+        <div class="slot102"><b>#102</b> slot reservado — no app renderiza nada</div>
+      </button>
+      <div class="evBar">
+        <button class="statusBtn"><span class="box"></span> A lançar</button>
+        <button class="icb" aria-label="Lançar resultado">&#9776;</button>
+        <button class="icb" aria-label="Criar sessão para este dia">&#9635;</button>
+        <button class="icb" aria-label="Editar evento">&#9998;</button>
+        <button class="icb del" aria-label="Excluir evento">&#9003;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="note">
+  <span class="warn">O slot #102, dito com precisão.</span> A caixa tracejada acima é
+  <b>documentação deste mockup</b>. No app enviado o slot é um comentário e <b>nada mais</b> — o mesmo
+  dispositivo que o <code>atletas/Ficha.jsx</code> já usa duas vezes para o #39 e o plans/22, e que o
+  C2 e o C3 honraram. Ele fica <b>abaixo dos atletas marcados</b> porque é exatamente ali que o roster
+  real vai entrar, ao lado do que hoje é uma lista de checkboxes.
+  <b>O estado vazio dele é o vazio.</b> Não é "0 presentes", não é "sem check-ins" — porque
+  <code>events</code> não sabe quem apareceu, e um zero seria uma afirmação. Enquanto o #102 não
+  chegar, quem quiser saber presença abre a TV.
+  <span class="ok">E nada neste desenho depende de <code>status</code> ser um toggle manual:</span>
+  <code>evStatus</code> atravessa <b>verbatim</b>; o botão diz "a lançar"/"feita" — o que o coach fez
+  com o registro, nunca o que o atleta fez com o corpo. Quando o #102 derivar <code>status</code> do
+  <code>class_executions</code>, este botão troca de fonte sem trocar de forma.
+</p>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">6 · UM filtro — o superset, e a fronteira com o agrupamento</h2>
+<p class="note">
+  <b>#105 diz "levante, não copie".</b> Os dois conjuntos não são o mesmo filtro: o da Agenda
+  (<code>AgendaView.jsx:13</code>) é tri-estado <code>all/scheduled/completed</code>; o do
+  <code>ReportModal.filteredEvents</code> tem período + tipo + status + afiliados + atletas — mas o
+  status dele <b>só estreita para <code>completed</code></b> (não existe ramo "só agendadas") e o de
+  atletas <b>só se aplica a <code>ev.type === 'personal'</code></b>. O componente levantado é o
+  <b>superset</b>: 5 eixos, status com os 3 valores, e cada chamador declara quais eixos rende.
+</p>
+
+<div class="diag">
+<span class="c">// publicador/eventFilter.js — PURO, testado, sem React, sem cliente</span>
+  <span class="k">DEFAULT_FILTER</span>      = { period:{mode:'month',yr,mo}|{mode:'range',from,to},
+                          types:{aula:true,personal:true}, status:'all'|'scheduled'|'completed',
+                          affiliates:null|Set, athletes:null|Set }   <span class="c">// null = "todos"</span>
+
+  <span class="k">matchesEvent</span>(ev, date, f)   &#8594; boolean    <span class="c">"este EVENTO passa?"</span>
+  <span class="k">matchingAthleteIds</span>(ev, f)   &#8594; string[]   <span class="c">"quais ATLETAS dele passam?"</span>
+  <span class="k">filterEvents</span>(events, f)     &#8594; [{...ev,date}]  <span class="c">o loop que os dois chamadores usam</span>
+  <span class="k">activeCount</span>(f)              &#8594; number     <span class="c">alimenta "N filtros · limpar"</span>
+
+<span class="c">// publicador/agenda/EventFilter.jsx — componente, CLIENT-FREE, no gallery</span>
+  &lt;EventFilter value onChange <span class="g">axes</span>=[...] <span class="g">layout</span>="row"|"column" locs athletes /&gt;
+  <span class="c">Agenda   : axes=['type','status','affiliate','athlete']        layout="row"</span>
+  <span class="c">Relatório: axes=['period','type','status','affiliate','athlete'] layout="column"</span>
+  <span class="x">não sabe agrupar. Só estado + UI.</span>
+
+<span class="c">// events.jsx — groupByLocation(evs, f)</span>
+  personal &#8594; <span class="k">matchingAthleteIds(ev, f)</span>.forEach(id =&gt; groups['__ath__'+id].push(ev))
+  <span class="x">deixa de reimplementar</span> <span class="c">athAll || athSelected.has(id)</span>
+</div>
+
+<p class="note">
+  <span class="ok">A fronteira, decidida aqui e não no meio do build:</span> o predicado de atleta é
+  usado em <b>duas granularidades</b> — no nível do evento (<i>este evento sobrevive?</i>) e no nível
+  do atleta (<i>quais dos atletas dele sobrevivem?</i>), porque o Relatório <b>abre</b> um personal com
+  3 atletas em 3 grupos e um filtro por atleta tem de deixar o evento em <b>um</b> deles.
+  <b>O filtro é dono do predicado nas duas granularidades; o relatório é dono do agrupamento.</b>
+  <code>groupByLocation</code> continua em <code>events.jsx</code> (é de relatório, não de filtro),
+  passa a receber <code>f</code> e chama <code>matchingAthleteIds</code>. Nenhuma segunda cópia da
+  regra, e nenhum filtro que saiba o que é um grupo.
+</p>
+
+<div class="cap">layout="row" — Agenda · quatro estados</div>
+<div style="max-width:1180px;background:var(--stone);border:1px solid var(--divider)">
+  <div class="fRow" style="border-top:none">
+    <div class="fGrp"><button class="on">Todos</button><button>Aula</button><button>Personal</button></div>
+    <div class="fGrp"><button class="on">Todos</button><button>A lançar</button><button>Feitas</button></div>
+    <button class="fPop">Afiliado <span class="car">&#9662;</span></button>
+    <button class="fPop">Atleta <span class="car">&#9662;</span></button>
+  </div>
+  <div class="fRow">
+    <div class="fGrp"><button>Todos</button><button class="on">Aula</button><button>Personal</button></div>
+    <div class="fGrp"><button>Todos</button><button class="on">A lançar</button><button>Feitas</button></div>
+    <button class="fPop on">Afiliado: CrossFit Vila <span class="car">&#9662;</span></button>
+    <button class="fPop">Atleta <span class="car">&#9662;</span></button>
+    <div class="fClear"><span class="fCount"><b>3</b> filtros ativos</span>
+      <button class="fClearBtn">Limpar</button></div>
+  </div>
+  <div class="fRow">
+    <div class="fGrp"><button>Todos</button><button>Aula</button><button class="on g">Personal</button></div>
+    <div class="fGrp"><button class="on">Todos</button><button>A lançar</button><button>Feitas</button></div>
+    <button class="fPop on">2 afiliados <span class="car">&#9662;</span></button>
+    <button class="fPop on">Atleta: Ana <span class="car">&#9662;</span></button>
+    <div class="fClear"><span class="fCount"><b>3</b> filtros ativos</span>
+      <button class="fClearBtn">Limpar</button></div>
+  </div>
+  <div class="fRow">
+    <div class="fGrp"><button>Todos</button><button>Aula</button><button class="on g">Personal</button></div>
+    <div class="fGrp"><button>Todos</button><button>A lançar</button><button class="on">Feitas</button></div>
+    <button class="fPop on">Afiliado: Studio Norte <span class="car">&#9662;</span></button>
+    <button class="fPop on">Atleta: Caio <span class="car">&#9662;</span></button>
+    <div class="fClear"><span class="fCount"><b>4</b> filtros ativos</span>
+      <button class="fClearBtn">Limpar</button></div>
+  </div>
+  <div class="empty" style="border-top:1px solid var(--divider)">
+    <span class="eIc">&#9675;</span>
+    <div class="eT">Nenhum evento com estes filtros</div>
+    <div class="eX">Agosto tem 30 eventos. Os quatro filtros acima escondem todos eles.</div>
+    <button class="btn">Limpar filtros</button>
+  </div>
+</div>
+<p class="note" style="margin-top:10px">
+  <b>Dois eixos são pílulas, dois são popovers</b>, e a razão é cardinalidade: tipo e status têm 3
+  valores cada e ficam sempre visíveis; afiliado e atleta crescem sem limite e viram um botão que
+  <b>diz o que está escolhido</b> ("Afiliado: CrossFit Vila", "2 afiliados"). A linha
+  <b>quebra, nunca rola lateralmente</b> — a mesma chamada que o Criador já registrou para as abas de
+  box: uma fileira que rola de lado não dá nenhuma pista visual de que há mais à direita.<br>
+  <span class="ok">"N filtros ativos · Limpar" só aparece quando há algo ligado.</span> Com um
+  tri-estado sempre visível isso era dispensável; com cinco eixos, um filtro que você não lembra ter
+  ligado é como se perde um evento — e o <b>estado vazio precisa dizer <i>por quê</i></b>
+  ("nenhum evento com estes filtros"), nunca o mesmo "sem eventos" de um mês realmente vazio.
+</p>
+
+<div class="cap">layout="column" — o mesmo componente dentro do Relatório <i>(a coluna tem altura, então nada vira popover)</i></div>
+<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+  <div class="fcol">
+    <div class="fcolSec">
+      <div class="fcolLbl">Período</div>
+      <div class="monthPick">
+        <button class="navBtn" aria-label="Mês anterior">&#8249;</button>
+        <span class="lbl">Agosto 2026</span>
+        <button class="navBtn" aria-label="Próximo mês">&#8250;</button>
+      </div>
+      <label class="fcolRow"><span class="cbx"></span> Intervalo personalizado</label>
+    </div>
+    <div class="fcolSec">
+      <div class="fcolLbl">Tipo</div>
+      <label class="fcolRow"><span class="cbx on">&#10003;</span> Aulas</label>
+      <label class="fcolRow"><span class="cbx on">&#10003;</span> Personal</label>
+    </div>
+    <div class="fcolSec">
+      <div class="fcolLbl">Status</div>
+      <label class="fcolRow"><span class="radio"></span> Todas</label>
+      <label class="fcolRow"><span class="radio"></span> A lançar</label>
+      <label class="fcolRow"><span class="radio on"></span> Feitas</label>
+    </div>
+    <div class="fcolSec">
+      <div class="fcolLbl">Afiliados</div>
+      <div class="pillWrap">
+        <button class="pill on">Todos</button>
+        <button class="pill">CrossFit Vila</button>
+        <button class="pill">Studio Norte</button>
+      </div>
+    </div>
+    <div class="fcolSec" style="margin-bottom:0">
+      <div class="fcolLbl g">Atletas <span style="color:var(--dim);font-weight:400;text-transform:none;letter-spacing:0">· só personal</span></div>
+      <div class="pillWrap">
+        <button class="pill on">Todos</button>
+        <button class="pill">Ana</button><button class="pill">Bruno</button><button class="pill">Caio</button>
+      </div>
+    </div>
+  </div>
+  <p class="note" style="max-width:560px;margin:0">
+    <b>O eixo "A lançar" é novo no Relatório e sai de graça</b> — hoje o status dele só sabe
+    <code>completed</code> ou <code>all</code>. O superset dá a terceira opção sem código extra, e ela
+    é útil: "o que eu ainda não lancei neste mês" é a lista que o usuário mais quer imprimir antes de
+    fechar.<br><br>
+    <b>O rótulo "só personal" fica visível.</b> Hoje a regra de que o filtro de atletas ignora aulas
+    está enterrada em <code>filteredEvents</code> e não aparece em lugar nenhum da tela — quem filtra
+    por "Ana" e vê aulas aparecendo não tem como saber se é bug.<br><br>
+    <span class="warn">O que NÃO se move:</span> o <code>groupByLocation</code>, o
+    <code>resolveLocForCalc</code>, o <code>grandTotal</code> e as chamadas de cor do jsPDF
+    (triplas RGB, isenção legítima de impressão). O C5·a só troca a fonte do predicado; o Relatório
+    inteiro é do C5·c.
+  </p>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">7 · #106 — a série vira operável, e cabe no mesmo diálogo</h2>
+<p class="note">
+  <b>Recomendação do gate: pegar o #106.</b> Não por ser fácil, mas porque o custo dele nunca vai ser
+  mais baixo. <code>recurrenceGroup</code> já é escrito e já é lido; o passo (d) já constrói o
+  <code>ConfirmReview</code> que substitui o <code>window.confirm</code>; e o card já ganhou a tag
+  <b>"&#8635; série · 6/13"</b> nesta proposta. O que falta é um <b>escopo</b> dentro do diálogo que
+  já vai existir. Sem isso, gerar uma turma semanal por um trimestre custa 13 exclusões, uma a uma.
+</p>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+  <div class="cr">
+    <div class="crHdr"><h3 class="crTitle">Excluir evento</h3></div>
+    <div class="crBody">
+      <p class="crText"><b>Turma Manhã</b> · qua, 5 de agosto, 07:00 — faz parte de uma série
+        <b>semanal</b> de 13 eventos (3 de agosto a 26 de outubro).</p>
+      <label class="crOpt"><span class="radio"></span> Só este evento <span class="n">1</span></label>
+      <label class="crOpt on"><span class="radio on"></span> Este e os seguintes <span class="n">8</span></label>
+      <label class="crOpt"><span class="radio"></span> Toda a série <span class="n">13</span></label>
+    </div>
+    <div class="crFoot">
+      <button class="btn">Editar</button>
+      <button class="btn destructive">Excluir 8 eventos</button>
+    </div>
+  </div>
+
+  <div class="cr">
+    <div class="crHdr"><h3 class="crTitle">Salvar alteração</h3></div>
+    <div class="crBody">
+      <p class="crText">Você mudou <b>horário</b> (07:00 &#8594; 06:30) e <b>afiliado</b>
+        (sem afiliado &#8594; CrossFit Vila). Aplicar a:</p>
+      <label class="crOpt on"><span class="radio on"></span> Só este evento <span class="n">1</span></label>
+      <label class="crOpt"><span class="radio"></span> Este e os seguintes <span class="n">8</span></label>
+      <label class="crOpt"><span class="radio"></span> Toda a série <span class="n">13</span></label>
+      <p class="crText" style="margin:10px 0 0;font-size:11px">
+        A data de cada evento nunca muda — só horário, duração, nome, afiliado, atletas e observações.
+      </p>
+    </div>
+    <div class="crFoot">
+      <button class="btn">Editar</button>
+      <button class="btn primary">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<p class="note" style="margin-top:14px">
+  <b>Três decisões dentro do #106, para não virarem discussão no build:</b><br>
+  <b>1.</b> O escopo aparece <b>só quando há série</b>. Um evento avulso vê o
+  <code>ConfirmReview</code> de sempre, com uma linha e dois botões — nada de um seletor de um item.<br>
+  <b>2.</b> <span class="ok">O toggle de status é sempre de um evento só.</span> Marcar a aula de hoje
+  como feita não pode significar marcar o trimestre; "este e os seguintes" sobre um estado que
+  descreve o passado seria mentira. O escopo vale para <b>excluir</b> e <b>editar</b>, nunca para
+  <b>concluir</b>.<br>
+  <b>3.</b> "Este e os seguintes" <b>sobrescreve</b> os campos alterados nos eventos futuros — não
+  faz merge, não tenta preservar edições locais divergentes. É o que a frase significa em qualquer
+  calendário, e é o que mantém a operação definida sem um modelo de conflito.<br>
+  <span class="warn">Se o gate recusar o #106</span>, tudo o que cai é o seletor de escopo dentro
+  destes dois diálogos e a contagem na tag da série ("6/13" vira só "&#8635;"). O resto do desenho
+  não depende dele.
+</p>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">8 · Mês vazio — o calendário vazio é o próprio estado vazio</h2>
+<p class="note">
+  Nenhum <code>EmptyState</code> por cima da grade. Um calendário sem nada já se lê como um calendário
+  sem nada — é a mesma chamada que o Criador registrou para a sua semana ("uma semana vazia é o estado
+  vazio desta página, com as colunas e os seus <code>+ sessão</code>"). O convite à ação está onde ele
+  é acionável: <b>no painel do dia</b>, que agora está sempre em tela justamente por isso.
+</p>
+
+<div class="app short">
+  <div class="pane">
+    <div class="agHdr">
+      <div class="agHdrTop">
+        <button class="navBtn" aria-label="Mês anterior">&#8249;</button>
+        <h1 class="agTitle"><span class="kicker">Agenda</span> Setembro 2026</h1>
+        <button class="navBtn" aria-label="Próximo mês">&#8250;</button>
+        <button class="todayBtn">Hoje</button>
+        <div class="viewSeg"><button class="on">Mês</button><button>Lista</button></div>
+        <button class="btnSec">&#9635; Relatório</button>
+      </div>
+      <div class="agStats">
+        <div class="stItem"><span class="stVal" style="color:var(--dim)">0</span><span class="stLbl">eventos no mês</span></div>
+      </div>
+      <div class="fRow">
+        <div class="fGrp"><button class="on">Todos</button><button>Aula</button><button>Personal</button></div>
+        <div class="fGrp"><button class="on">Todos</button><button>A lançar</button><button>Feitas</button></div>
+        <button class="fPop">Afiliado <span class="car">&#9662;</span></button>
+        <button class="fPop">Atleta <span class="car">&#9662;</span></button>
+      </div>
+    </div>
+    <div class="mGrid">
+      <div class="mHdrs">
+        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+      </div>
+      <div class="mWeek">
+        <div class="mCell out"><div class="mCellTop"><span class="mNum past">30</span></div></div>
+        <div class="mCell out"><div class="mCellTop"><span class="mNum past">31</span></div></div>
+        <button class="mCell sel"><div class="mCellTop"><span class="mNum">1</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">2</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">3</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">4</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">5</span></div></button>
+      </div>
+      <div class="mWeek">
+        <button class="mCell"><div class="mCellTop"><span class="mNum">6</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">7</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">8</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">9</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">10</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">11</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">12</span></div></button>
+      </div>
+      <div class="mWeek">
+        <button class="mCell"><div class="mCellTop"><span class="mNum">13</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">14</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">15</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">16</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">17</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">18</span></div></button>
+        <button class="mCell"><div class="mCellTop"><span class="mNum">19</span></div></button>
+      </div>
+    </div>
+  </div>
+  <div class="pane">
+    <div class="dpHdr">
+      <div class="dpTop"><h2 class="dpDate">Terça, 1 de setembro</h2></div>
+      <div class="dpAdds">
+        <button class="addBtn aula"><span class="pl">+</span> Aula</button>
+        <button class="addBtn pers"><span class="pl">+</span> Personal</button>
+        <button class="addBtn sess">&#9635; Sessão</button>
+      </div>
+    </div>
+    <div class="dpBody">
+      <div class="empty">
+        <span class="eIc">&#9634;</span>
+        <div class="eT">Nada marcado neste dia</div>
+        <div class="eX">Use os botões acima, ou copie o último evento que você criou.</div>
+        <button class="btn">&#9092; Copiar último evento</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">9 · Mobile 390×844 — a mesma estrutura, e o Mês que o celular nunca teve</h2>
+<p class="note">
+  O celular mantém o cabeçalho fixo (<code>rp-sticktop</code>, em <code>var(--spa-sticky-top)</code> —
+  <span class="warn">nunca 88px</span>, valor que está errado desde que o #95 colapsou o chrome numa
+  linha de 49px), a tira de semanas e a lista. O que muda: o seletor <b>Mês / Lista</b> vale nas duas
+  larguras, então a grade compacta finalmente aparece — e o CSS de 46px que já existe no
+  <code>index.css</code> deixa de ser inalcançável.
+</p>
+
+<div class="phones">
+  <div>
+    <div class="cap">Lista <i>· o padrão no celular</i></div>
+    <div class="phone">
+      <div class="chrome"><b>Cone</b> · Agenda</div>
+      <div class="agHdr">
+        <div class="agHdrTop" style="padding:6px 10px">
+          <button class="navBtn" aria-label="Mês anterior">&#8249;</button>
+          <h1 class="agTitle" style="font-size:12.5px"><span class="kicker">Agenda</span> Ago 2026</h1>
+          <button class="navBtn" aria-label="Próximo mês">&#8250;</button>
+          <div class="viewSeg"><button>Mês</button><button class="on">Lista</button></div>
+        </div>
+        <div class="mWeekStrip">
+          <button class="pill">1</button><button class="pill on">2–8</button>
+          <button class="pill">9–15</button><button class="pill">16–22</button>
+          <button class="pill">23–29</button><button class="pill">30–31</button>
+        </div>
+        <div class="agStats" style="padding:4px 10px 6px">
+          <div class="stItem"><span class="stVal aula">6</span><span class="stLbl">aulas</span></div>
+          <div class="stItem"><span class="stVal pers">2</span><span class="stLbl">personal</span></div>
+          <div class="stItem"><span class="stVal">3</span><span class="stLbl">a lançar</span></div>
+        </div>
+        <div class="fRow" style="padding:5px 10px">
+          <div class="fGrp"><button class="on">Todos</button><button>Aula</button><button>Personal</button></div>
+          <div class="fGrp"><button class="on">Todos</button><button>A lançar</button><button>Feitas</button></div>
+          <button class="fPop">Mais <span class="car">&#9662;</span></button>
+          <button class="btnSec" style="margin-left:auto;font-size:10px;padding:4px 8px">&#9635; Relatório</button>
+        </div>
+      </div>
+      <div class="lst">
+        <button class="lstDay">
+          <div class="lstLeft"><span class="lstDow">Dom</span><span class="lstNum">2</span></div>
+          <div class="lstRows"><div class="lstRest">— descanso</div></div>
+        </button>
+        <button class="lstDay">
+          <div class="lstLeft"><span class="lstDow">Seg</span><span class="lstNum">3</span></div>
+          <div class="lstRows">
+            <div class="lstRow sess"><span class="lstT">&#9635;</span><span class="lstNm sess">WOD A</span></div>
+            <div class="lstRow aula"><span class="lstT">07:00</span><span class="lstNm">Turma Manhã</span></div>
+            <div class="lstRow aula"><span class="lstT">19:00</span><span class="lstNm">Turma Noite</span></div>
+          </div>
+        </button>
+        <button class="lstDay">
+          <div class="lstLeft"><span class="lstDow">Ter</span><span class="lstNum">4</span></div>
+          <div class="lstRows">
+            <div class="lstRow aula"><span class="lstT">07:00</span><span class="lstNm">Turma Manhã</span></div>
+            <div class="lstRow pers"><span class="lstT">17:00</span><span class="lstNm">Ana</span>
+              <span class="lstAths"><span class="dot" style="background:var(--dataAna)"></span></span></div>
+          </div>
+        </button>
+        <button class="lstDay sel" aria-current="date">
+          <div class="lstLeft"><span class="lstDow today">Qua</span><span class="lstNum today">5</span></div>
+          <div class="lstRows">
+            <div class="lstRow sess"><span class="lstT">&#9635;</span><span class="lstNm sess">WOD C</span></div>
+            <div class="lstRow aula done"><span class="lstT">07:00</span><span class="lstNm">Turma Manhã</span><span class="lstSub">feita</span></div>
+            <div class="lstRow pers"><span class="lstT">10:00</span><span class="lstNm">Ana</span></div>
+            <div class="lstRow aula"><span class="lstT">19:00</span><span class="lstNm">Turma Noite</span><span class="lstSub" style="color:var(--gold)">sem afiliado</span></div>
+          </div>
+        </button>
+        <button class="lstDay">
+          <div class="lstLeft"><span class="lstDow">Qui</span><span class="lstNum">6</span></div>
+          <div class="lstRows">
+            <div class="lstRow aula"><span class="lstT">07:00</span><span class="lstNm">Turma Manhã</span></div>
+            <div class="lstRow aula"><span class="lstT">19:00</span><span class="lstNm">Turma Noite</span></div>
+          </div>
+        </button>
+        <button class="lstDay">
+          <div class="lstLeft"><span class="lstDow">Sex</span><span class="lstNum">7</span></div>
+          <div class="lstRows">
+            <div class="lstRow aula"><span class="lstT">07:00</span><span class="lstNm">Turma Manhã</span></div>
+            <div class="lstRow pers"><span class="lstT">18:00</span><span class="lstNm">Bruno</span>
+              <span class="lstAths"><span class="dot" style="background:var(--dataBruno)"></span></span></div>
+          </div>
+        </button>
+        <button class="lstDay">
+          <div class="lstLeft"><span class="lstDow">Sáb</span><span class="lstNum">8</span></div>
+          <div class="lstRows"><div class="lstRest">— descanso</div></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="cap">Mês <i>· inédito no celular — o CSS de 46px já existia e era inalcançável</i></div>
+    <div class="phone">
+      <div class="chrome"><b>Cone</b> · Agenda</div>
+      <div class="agHdr">
+        <div class="agHdrTop" style="padding:6px 10px">
+          <button class="navBtn" aria-label="Mês anterior">&#8249;</button>
+          <h1 class="agTitle" style="font-size:12.5px"><span class="kicker">Agenda</span> Ago 2026</h1>
+          <button class="navBtn" aria-label="Próximo mês">&#8250;</button>
+          <div class="viewSeg"><button class="on">Mês</button><button>Lista</button></div>
+        </div>
+        <div class="fRow" style="padding:5px 10px">
+          <div class="fGrp"><button class="on">Todos</button><button>Aula</button><button>Personal</button></div>
+          <div class="fGrp"><button class="on">Todos</button><button>A lançar</button><button>Feitas</button></div>
+          <button class="fPop">Mais <span class="car">&#9662;</span></button>
+        </div>
+      </div>
+      <div class="mGrid" style="flex:none">
+        <div class="mHdrs">
+          <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+        </div>
+        <div class="mWeek" style="min-height:52px">
+          <div class="mCell out"><div class="mCellTop" style="min-height:14px"><span class="mNum past" style="font-size:10px">26</span></div></div>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum past" style="font-size:10px">27</span></div>
+            <span class="chip aula done" style="padding:0 2px"><span class="ck">&#10003;</span></span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum past" style="font-size:10px">28</span></div>
+            <span class="chip aula done" style="padding:0 2px"><span class="ck">&#10003;</span></span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum past" style="font-size:10px">29</span></div>
+            <span class="chip aula done" style="padding:0 2px"><span class="ck">&#10003;</span></span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum past" style="font-size:10px">30</span></div>
+            <span class="chip aula done" style="padding:0 2px"><span class="ck">&#10003;</span></span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum past" style="font-size:10px">31</span></div>
+            <span class="chip pers done" style="padding:0 2px"><span class="ck">&#10003;</span></span></button>
+          <div class="mCell out"><div class="mCellTop" style="min-height:14px"><span class="mNum past" style="font-size:10px">1</span></div></div>
+        </div>
+        <div class="mWeek" style="min-height:52px">
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">2</span></div></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">3</span><span class="mCount">3</span></div>
+            <span class="chip sess" style="padding:0 2px">&#9635;</span>
+            <span class="chip aula" style="padding:0 2px">&#9679;&#9679;</span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">4</span><span class="mCount">2</span></div>
+            <span class="chip aula" style="padding:0 2px">&#9679;</span>
+            <span class="chip pers" style="padding:0 2px">&#9679;</span></button>
+          <button class="mCell sel"><div class="mCellTop" style="min-height:14px"><span class="mNum today" style="width:17px;height:17px;font-size:9px">5</span><span class="mCount">6</span></div>
+            <span class="chip sess" style="padding:0 2px">&#9635;</span>
+            <span class="chip aula" style="padding:0 2px">&#9679;&#9679;&#9679;</span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">6</span><span class="mCount">2</span></div>
+            <span class="chip aula" style="padding:0 2px">&#9679;&#9679;</span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">7</span><span class="mCount">2</span></div>
+            <span class="chip aula" style="padding:0 2px">&#9679;</span>
+            <span class="chip pers" style="padding:0 2px">&#9679;</span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">8</span></div></button>
+        </div>
+        <div class="mWeek" style="min-height:52px">
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">9</span></div></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">10</span><span class="mCount">2</span></div>
+            <span class="chip aula" style="padding:0 2px">&#9679;&#9679;</span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">11</span><span class="mCount">2</span></div>
+            <span class="chip aula" style="padding:0 2px">&#9679;</span>
+            <span class="chip pers" style="padding:0 2px">&#9679;</span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">12</span><span class="mCount">2</span></div>
+            <span class="chip aula" style="padding:0 2px">&#9679;&#9679;</span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">13</span><span class="mCount">1</span></div>
+            <span class="chip aula" style="padding:0 2px">&#9679;</span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">14</span><span class="mCount">2</span></div>
+            <span class="chip aula" style="padding:0 2px">&#9679;</span>
+            <span class="chip pers" style="padding:0 2px">&#9679;</span></button>
+          <button class="mCell"><div class="mCellTop" style="min-height:14px"><span class="mNum" style="font-size:10px">15</span></div></button>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--divider);padding:9px 11px;background:var(--bg)">
+        <div class="dpSecLbl" style="margin-bottom:5px">Quarta, 5 de agosto · 6 itens</div>
+        <div class="dpAdds">
+          <button class="addBtn aula" style="font-size:11px;padding:6px 10px"><span class="pl">+</span> Aula</button>
+          <button class="addBtn pers" style="font-size:11px;padding:6px 10px"><span class="pl">+</span> Personal</button>
+          <button class="addBtn sess" style="font-size:11px;padding:6px 10px">&#9635; Sessão</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="cap">Detalhe do dia <i>· o mesmo DayPane, um único link de volta</i></div>
+    <div class="phone">
+      <div class="chrome"><b>Cone</b> · Agenda</div>
+      <button class="mobBack">&#8249; &nbsp;Agosto 2026</button>
+      <div class="dpHdr">
+        <div class="dpTop"><h2 class="dpDate" style="font-size:14px">Quarta, 5 de agosto</h2></div>
+        <div class="dpAdds">
+          <button class="addBtn aula" style="font-size:11px;padding:6px 10px"><span class="pl">+</span> Aula</button>
+          <button class="addBtn pers" style="font-size:11px;padding:6px 10px"><span class="pl">+</span> Personal</button>
+          <button class="addBtn sess" style="font-size:11px;padding:6px 10px">&#9635; Sessão</button>
+        </div>
+      </div>
+      <div class="dpBody">
+        <div class="dpSecLbl">Treino do dia · Criador</div>
+        <div class="sessCard">
+          <div class="sessTop"><span class="sessName">WOD C — Fran retest</span>
+            <button class="btnSec" style="font-size:10px;padding:3px 8px">Editar</button></div>
+          <div class="blkRow">
+            <span class="blk" style="color:#68d8a0;border-color:#68d8a044;background:#68d8a022">Aquecimento</span>
+            <span class="blk" style="color:#e87820;border-color:#e8782044;background:#e8782022">For Time</span>
+            <span class="blk" style="color:#c884f0;border-color:#c884f044;background:#c884f022">Acessórios</span>
+          </div>
+        </div>
+        <div class="dpSecLbl mt">Agenda do dia</div>
+        <div class="evWrap">
+          <div class="evTime" style="min-width:38px"><div class="evTimeH" style="font-size:11px">07:00</div>
+            <div class="evTimeD">60m</div><div class="evTimeLine"></div></div>
+          <div class="evCard done">
+            <button class="evBody">
+              <div class="evTitleRow"><span class="evName" style="font-size:12.5px">Turma Manhã</span>
+                <span class="tag aula">Aula</span>
+                <span class="tag serie">&#8635; 6/13</span></div>
+              <div class="evMeta">07:00 · 60 min · CrossFit Vila</div>
+              <div class="evLine"><span class="ic">&#9635;</span> WOD C — Fran retest</div>
+              <div class="evAths">
+                <span class="athPill"><span class="dot" style="background:var(--dataAna)"></span>Ana</span>
+                <span class="athPill"><span class="dot" style="background:var(--dataBruno)"></span>Bruno</span>
+                <span class="athPill" style="color:var(--muted)">+4</span></div>
+              <div class="slot102"><b>#102</b> reservado</div>
+            </button>
+            <div class="evBar">
+              <button class="statusBtn on"><span class="box">&#10003;</span> Feita</button>
+              <button class="icb" aria-label="Lançar resultado">&#9776;</button>
+              <button class="icb" aria-label="Abrir sessão vinculada">&#9635;</button>
+              <button class="icb" aria-label="Editar evento">&#9998;</button>
+              <button class="icb del" aria-label="Excluir evento">&#9003;</button>
+            </div>
+          </div>
+        </div>
+        <div class="evWrap">
+          <div class="evTime" style="min-width:38px"><div class="evTimeH" style="font-size:11px">10:00</div>
+            <div class="evTimeD">50m</div><div class="evTimeLine"></div></div>
+          <div class="evCard pers">
+            <button class="evBody">
+              <div class="evTitleRow"><span class="evName" style="font-size:12.5px">Ana — força</span>
+                <span class="tag pers">Personal</span></div>
+              <div class="evMeta">10:00 · 50 min · Studio Norte</div>
+              <div class="evAths"><span class="athPill"><span class="dot" style="background:var(--dataAna)"></span>Ana Prado</span></div>
+              <div class="slot102"><b>#102</b> reservado</div>
+            </button>
+            <div class="evBar">
+              <button class="statusBtn"><span class="box"></span> A lançar</button>
+              <button class="icb" aria-label="Lançar resultado">&#9776;</button>
+              <button class="icb" aria-label="Editar evento">&#9998;</button>
+              <button class="icb del" aria-label="Excluir evento">&#9003;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">10 · O que este desenho apaga — e o que ele deliberadamente não toca</h2>
+
+<div class="kills">
+  <div class="kill"><h4>A paleta congelada</h4>
+    <p><b>97</b> literais hex do totk-dark cravados (24 distintos) no <code>AgendaView.jsx</code> — <code>#c8b090</code>,
+    <code>#554a3a</code>, <code>#2a2318</code>, e o <code>#0d0b08</code> que é o <code>--bg</code>
+    copiado à mão errado por um dígito. A Agenda renderiza errado em 3 dos 4 temas hoje. Vai tudo para
+    <code>Agenda.module.css</code>, tokenizado ao mover.</p></div>
+
+  <div class="kill"><h4>--theme-accent</h4>
+    <p>Alias de <code>:root</code> do <code>src/index.css</code>, que o <code>gallery.html</code> não
+    carrega. <b>76 sites</b> nos três arquivos. Tudo que entra no gallery usa
+    <code>var(--accent)</code> / <code>var(--accent-text)</code>, ou renderiza sem estilo no card.</p></div>
+
+  <div class="kill"><h4>Duas cópias da linha de filtro</h4>
+    <p>Mobile <code>:1176-1203</code> e desktop <code>:1468-1497</code>, com <b>duas cores de borda
+    diferentes para o mesmo controle</b> (<code>#2a231c</code> vs <code>#2a2318</code>) e
+    <code>className</code> só em uma. Vira um <code>EventFilter</code>, dois layouts.</p></div>
+
+  <div class="kill"><h4>window.confirm</h4>
+    <p><code>:969</code> — <i>"Remover este evento?"</i>, destrutivo, sem revisão, sem foco preso, sem
+    tema. Vira <code>ConfirmReview</code>, que já é a casca única do app e que agora também carrega o
+    escopo da série.</p></div>
+
+  <div class="kill"><h4>CellDay e DayPane no corpo do componente</h4>
+    <p><code>:160-372</code> e <code>:374-1098</code> — <b>725 linhas</b> definidas dentro do render.
+    O lint passa só porque o <code>DayPane</code> não tem estado; qualquer estado adicionado ali
+    remonta a cada render do pai. Sobem <b>primeiro</b>, como movimento puro.</p></div>
+
+  <div class="kill"><h4>uid2 / toISO2</h4>
+    <p><code>:106-111</code> — cópias locais com <b>forma diferente</b> do <code>uid()</code>
+    canônico, e esses ids vão para o blob e são para onde <code>recurrenceGroup</code> aponta. É a
+    família do #110 uma porta ao lado. Viram <code>uid</code> / <code>toISO</code> de
+    <code>public/lib/</code>.</p></div>
+
+  <div class="kill"><h4>O painel condicional</h4>
+    <p>40% de tela mostrando <i>"Clique num dia para ver detalhes"</i> em itálico cinza, e a grade
+    refluindo 100%&#8596;60% a cada clique. A seleção passa a ser sempre um dia real.</p></div>
+
+  <div class="kill"><h4>O Relatório no meio da navegação</h4>
+    <p>Hoje ele fica <b>entre</b> a seta "‹" e o rótulo do mês. Vai para a direita do cabeçalho, ao
+    lado do seletor de visão — onde estão as ações, e não a navegação.</p></div>
+
+  <div class="kill"><h4>"Quarta-Feira, 05 De Agosto"</h4>
+    <p>O título do dia é <code>toLocaleDateString('pt-BR',{weekday:'long',…})</code> com
+    <code>textTransform:'capitalize'</code> por cima (<code>:394-424</code>) — o CSS capitaliza
+    <b>toda palavra</b>, então o "de" vira "De" e o hífen de "quarta-feira" vira "Quarta-Feira".
+    Reproduzido neste mockup antes de ser corrigido. Só a primeira letra sobe; e o dia vem de
+    <code>DAY_PT_TITLE</code>/<code>MONTH_PT</code>, que é a fonte pt-BR do app.</p></div>
+
+  <div class="kill keep"><h4>Fica: evStatus, verbatim</h4>
+    <p><code>:50-52</code> atravessa sem uma linha de diferença, e <b>nada aqui assume que
+    <code>status</code> seja um toggle manual</b> (plans/81, decisão 1). O #102 troca a semântica
+    depois; o slot reservado já está no lugar certo.</p></div>
+
+  <div class="kill keep"><h4>Fica: BLOCK_C</h4>
+    <p>O arco-íris por <i>tipo</i> de bloco continua — o Phase 0 já corrigiu a divergência entre os
+    dois consumidores e reescreveu o comentário. É a última taxonomia de família divergente do repo, e
+    é deliberada: no tamanho do chip o tipo é o sinal útil, não o agrupamento de 4 famílias.</p></div>
+
+  <div class="kill keep"><h4>Fica: as 7 regras rp-*</h4>
+    <p><code>rp-sticktop</code> · <code>rp-month-nav</code> · <code>rp-nav-btn</code> ·
+    <code>rp-month-label</code> · <code>rp-weeks</code> · <code>rp-week-btn</code> ·
+    <code>rp-mobile-back</code> — mas <b>mudam de casa</b>: saem do <code>index.css</code> para o
+    <code>Agenda.module.css</code>. <span style="color:var(--err);font-weight:700">O
+    <code>top</code> continua <code>var(--spa-sticky-top)</code>.</span></p></div>
+
+  <div class="kill keep"><h4>Fica de fora: o C5·b e o C5·c</h4>
+    <p>Nada do <code>Publicador.jsx</code>, nada das views de exportação (<b>paleta isenta</b> — um
+    PNG não muda de cor com o tema), nada do <code>rateAsOf</code>/#154, nenhum build do #102. O
+    <code>ReportModal</code> só é tocado no ponto em que consome o filtro.</p></div>
+</div>
+
+<p class="note" style="margin-top:20px">
+  <b>Duas perguntas para o gate, e uma recomendação em cada.</b><br>
+  <b>1 · A visão de Lista entra?</b> <span class="ok">Recomendo que sim.</span> É a segunda metade
+  declarada do #105, o código já existe no lado celular do <code>if</code>, e ela não é uma segunda
+  <code>WeekEventGrid</code> — responde outra pergunta. Se cair, o #105 fecha só pela metade do filtro
+  e a segunda metade volta para o board.<br>
+  <b>2 · O #106 entra?</b> <span class="ok">Recomendo que sim.</span> É UI sobre dados que já são
+  escritos e lidos, e ela cabe dentro do <code>ConfirmReview</code> que o passo (d) já vai construir —
+  o custo dele nunca vai ser mais baixo do que nesta sessão. Se cair, sai só o seletor de escopo dos
+  dois diálogos; o resto do desenho não muda.
+</p>
