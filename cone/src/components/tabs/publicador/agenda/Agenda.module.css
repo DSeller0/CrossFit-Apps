@@ -261,3 +261,1001 @@
   font-size: 12px;
   padding: 5px 7px;
 }
+
+/* ══ Shell ═════════════════════════════════════════════════════════════════ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ══ Header — one real <h1>, month nav, view toggle, Relatório ═════════════ */
+
+.hdr {
+  border-bottom: 1px solid var(--divider);
+  flex-shrink: 0;
+  background: var(--bg);
+}
+/* Was `.rp-sticktop` in index.css. The 88px it once hardcoded was topbar + tab
+   bar, wrong since #95 collapsed the SPA chrome to a single 49px row. */
+.hdrSticky {
+  position: sticky;
+  top: var(--spa-sticky-top);
+  z-index: 10;
+}
+.hdrTop {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 7px 12px;
+  flex-wrap: wrap;
+}
+.title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cream);
+  letter-spacing: 0.05em;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex: 1 1 120px;
+  min-width: 0;
+  text-transform: uppercase;
+}
+.titleKicker {
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.navBtn {
+  width: 26px;
+  height: 26px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: var(--radius-sm);
+}
+.navBtn:hover {
+  color: var(--cream);
+  border-color: var(--dim);
+}
+.viewSeg {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.viewSeg button {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 6px 12px;
+  cursor: pointer;
+  min-height: 30px;
+}
+.viewSeg button.on {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+/* ══ Stats — every number labelled for exactly what it counts ══════════════
+   ⚠️ `status` is a manual toggle and `athleteIds` a checkbox list; neither is
+   attendance (#102). Nothing here may read "presentes". */
+.stats {
+  display: flex;
+  gap: var(--sp-4);
+  padding: 4px 12px 7px;
+  border-top: 1px solid var(--divider);
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+.statItem {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.statVal {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cream);
+}
+.statVal.aula {
+  color: var(--accent);
+}
+.statVal.pers {
+  color: var(--gold);
+}
+.statVal.zero {
+  color: var(--dim);
+}
+.statLbl {
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ══ Body — 60/40, and the day pane is NOT conditional ════════════════════ */
+
+.body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.gridCol {
+  flex: 0 0 60%;
+  min-width: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+}
+.paneCol {
+  flex: 1 1 40%;
+  min-width: 0;
+  overflow-y: auto;
+  background: var(--bg);
+}
+@media (max-width: 1100px) {
+  .gridCol {
+    flex: 0 0 55%;
+  }
+}
+
+/* ══ Month grid ═══════════════════════════════════════════════════════════ */
+
+.mHdrs {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--divider);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 2;
+  flex-shrink: 0;
+}
+.mHdr {
+  padding: 5px 4px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  border-right: 1px solid var(--divider);
+}
+.mHdr:last-child {
+  border-right: none;
+}
+.mWeek {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--divider);
+  min-height: 92px;
+}
+.mCell {
+  border: none;
+  border-right: 1px solid var(--divider);
+  padding: 4px;
+  cursor: pointer;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  font-family: inherit;
+  min-width: 0;
+  align-items: stretch;
+}
+.mCell:last-child {
+  border-right: none;
+}
+.mCell:hover {
+  background: var(--stone2);
+}
+.mCell.sel {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.mCellOut {
+  border: none;
+  border-right: 1px solid var(--divider);
+  opacity: 0.28;
+  padding: 4px;
+}
+.mCellOut:last-child {
+  border-right: none;
+}
+.mCellTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 20px;
+}
+.mNum {
+  font-size: 11px;
+  color: var(--sub);
+}
+.mNum.past {
+  color: var(--dim);
+}
+/* border-radius:50% is the exempt shape primitive — a true circle, not a pill. */
+.mNum.today {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+}
+.mCount {
+  font-size: 9px;
+  color: var(--dim);
+  font-family: var(--font-mono);
+}
+.mMore {
+  font-size: 8.5px;
+  color: var(--dim);
+  padding-left: 3px;
+  letter-spacing: 0.04em;
+}
+
+/* Chips — aula = --accent, personal = --gold. ⚠️ #14 records that --gold fails as
+   text on both light themes and --green fails on sb-light, so identity is carried
+   by the BORDER (a graphic, 3:1 rule) and the label stays on --sub. Same
+   treatment #57 gave the RX pill. */
+.chip {
+  font-size: 9px;
+  line-height: 1.4;
+  padding: 1px 4px;
+  border-left: 2px solid var(--dim);
+  background: var(--stone2);
+  color: var(--sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.chipT {
+  font-family: var(--font-mono);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.chip.aula {
+  border-left-color: var(--accent);
+}
+.chip.pers {
+  border-left-color: var(--gold);
+}
+.chip.sess {
+  border-left-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  font-weight: 700;
+}
+.chip.done {
+  opacity: 0.6;
+}
+.chipCk {
+  color: var(--green);
+  flex-shrink: 0;
+  display: inline-flex;
+}
+
+/* Below 540px the chips drop their text and become coloured stubs — the compact
+   month a phone can read. These rules existed in index.css and were UNREACHABLE:
+   useIsMobile(800) meant the grid never rendered at that width at all. The view
+   toggle is what makes them live. */
+@media (max-width: 540px) {
+  .mWeek {
+    min-height: 54px;
+  }
+  .mCell,
+  .mCellOut {
+    padding: 2px;
+  }
+  .mCellTop {
+    min-height: 15px;
+  }
+  .mNum {
+    font-size: 10px;
+  }
+  .mNum.today {
+    width: 17px;
+    height: 17px;
+    font-size: 9px;
+  }
+  .chip {
+    padding: 0 2px;
+    gap: 2px;
+  }
+  .chipText {
+    display: none;
+  }
+  .mHdr {
+    padding: 3px 2px;
+    font-size: 8px;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* ══ Week strip (mobile Lista) ════════════════════════════════════════════
+   Was `.rp-weeks` / `.rp-week-btn`. Wraps rather than side-scrolling — the same
+   call Criador made for its box tabs, and the one #57 had to make live for its
+   own week strip: a row that scrolls sideways gives no hint there is more. */
+.weekStrip {
+  display: flex;
+  gap: 4px;
+  padding: 5px 11px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--divider);
+}
+.weekBtn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-family: inherit;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-sm);
+  min-height: 26px;
+}
+.weekBtn:hover {
+  color: var(--sub);
+  border-color: var(--dim);
+}
+.weekBtn.on {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+
+/* ══ Lista — the run of days (#105 second half) ════════════════════════════
+   Promoted out of the isMobile fork: `renderMobileDayList` already WAS this list,
+   it just never reached the desktop. Deliberately NOT a second WeekEventGrid —
+   that is a time-grid (rows = the times that occur) answering a different
+   question, and it lives in Afiliados. */
+
+.lst {
+  flex: 1;
+  overflow-y: auto;
+}
+.lstWkHdr {
+  padding: 5px 13px;
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  background: var(--bg);
+  border-bottom: 1px solid var(--divider);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.lstDay {
+  display: flex;
+  gap: 11px;
+  padding: 9px 13px;
+  border: none;
+  border-bottom: 1px solid var(--divider);
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  align-items: flex-start;
+}
+.lstDay:hover {
+  background: var(--stone2);
+}
+.lstDay.sel {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.lstDay.out {
+  opacity: 0.4;
+}
+.lstLeft {
+  width: 44px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.lstDow {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.lstDow.today {
+  color: var(--accent);
+}
+.lstNum {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--sub);
+  line-height: 1.1;
+  margin-top: 1px;
+}
+.lstNum.today {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  margin-top: 2px;
+}
+.lstMon {
+  font-size: 8.5px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+.lstRows {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 2px;
+}
+.lstRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--sub);
+  border-left: 2px solid var(--dim);
+  padding: 2px 0 2px 7px;
+  min-width: 0;
+}
+.lstRow.aula {
+  border-left-color: var(--accent);
+}
+.lstRow.pers {
+  border-left-color: var(--gold);
+}
+.lstRow.sess {
+  border-left-color: var(--accent);
+}
+.lstRow.done {
+  opacity: 0.62;
+}
+.lstT {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  width: 38px;
+  flex-shrink: 0;
+}
+.lstNm {
+  font-weight: 700;
+  color: var(--cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lstNm.sess {
+  color: var(--accent);
+}
+.lstSub {
+  color: var(--muted);
+  font-size: 10.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lstSub.warn {
+  color: var(--gold);
+}
+.lstAths {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.lstRest {
+  font-size: 11px;
+  color: var(--dim);
+  font-family: Georgia, serif;
+  font-style: italic;
+  padding-top: 5px;
+}
+
+/* ══ Day pane ═════════════════════════════════════════════════════════════ */
+
+.dp {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.dpHdr {
+  padding: 9px 13px;
+  border-bottom: 1px solid var(--divider);
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.dpTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+/* No text-transform:capitalize. Applied to a toLocaleDateString string it
+   capitalised EVERY word — "Quarta-Feira, 05 De Agosto". The label is built from
+   DAY_PT_TITLE/MONTH_PT instead, which is the app's own pt-BR source. */
+.dpDate {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+.dpCount {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.dpAdds {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.dpBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 13px 16px;
+}
+.dpSecLbl {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  margin: 0 0 7px;
+  font-weight: 700;
+}
+.dpSecLbl.mt {
+  margin-top: 15px;
+}
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--sub);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 0.03em;
+  min-height: 34px;
+}
+.addBtn.aula {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  color: var(--accent);
+}
+.addBtn.aula:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.addBtn.pers {
+  border-color: color-mix(in srgb, var(--gold) 55%, transparent);
+  color: var(--gold);
+}
+.addBtn.pers:hover {
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+}
+.addBtn.sess:hover {
+  background: var(--stone2);
+  color: var(--cream);
+}
+
+/* ── the day's Criador session — events meet sessions ONLY here ────────── */
+.sessCard {
+  background: var(--stone2);
+  border: 1px solid var(--divider);
+  border-top: 2px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  margin-bottom: 6px;
+}
+.sessTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin-bottom: 6px;
+}
+.sessName {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cream);
+}
+.blkRow {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+/* BLOCK_C's per-type hues are DATA colours; they arrive as inline style. */
+.blk {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 2px;
+  border: 1px solid;
+  letter-spacing: 0.03em;
+}
+
+/* ══ Event card ═══════════════════════════════════════════════════════════ */
+
+.evWrap {
+  display: flex;
+  gap: 9px;
+  margin-bottom: 11px;
+}
+.evTime {
+  min-width: 42px;
+  flex-shrink: 0;
+  text-align: center;
+  padding-top: 9px;
+}
+.evTimeH {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sub);
+}
+.evTimeD {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--dim);
+  margin-top: 1px;
+}
+.evTimeLine {
+  width: 1px;
+  background: var(--divider);
+  margin: 6px auto 0;
+  min-height: 18px;
+  height: calc(100% - 44px);
+}
+.evCard {
+  flex: 1;
+  min-width: 0;
+  background: var(--stone2);
+  border: 1px solid var(--divider);
+  border-top: 2px solid var(--accent);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.evCard.pers {
+  border-top-color: var(--gold);
+}
+.evCard.done {
+  opacity: 0.86;
+}
+.evBody {
+  padding: 9px 11px;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  display: block;
+  color: inherit;
+}
+.evBody:hover {
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+.evTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.evName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cream);
+  letter-spacing: 0.02em;
+}
+.tag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid;
+}
+.tag.aula {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.tag.pers {
+  color: var(--gold);
+  border-color: color-mix(in srgb, var(--gold) 50%, transparent);
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+}
+/* The affiliate tag's colour is loc.color — user data, inline, exempt. */
+.tag.aff {
+  border-color: currentColor;
+  background: transparent;
+}
+/* An event with no affiliate produces no line in calcTotal, so Fechamento never
+   sees it. Agenda is the only surface that can show AND fix that, so the absence
+   is stated rather than rendered as nothing (which is what it was). */
+.tag.noaff {
+  color: var(--muted);
+  border-color: var(--border);
+  border-style: dashed;
+  background: transparent;
+}
+.tag.serie {
+  color: var(--sub);
+  border-color: var(--border);
+  background: transparent;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.evMeta {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+.evLine {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+.evLine.warn {
+  color: var(--sub);
+}
+.evLine .ic {
+  color: var(--dim);
+  flex-shrink: 0;
+  display: inline-flex;
+}
+.evLine.warn .ic {
+  color: var(--gold);
+}
+.evAths {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  align-items: center;
+}
+.athPill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--sub);
+}
+.athPill.none {
+  color: var(--dim);
+}
+.athPill.more {
+  color: var(--muted);
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.dotSm {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.evNote {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+  font-family: Georgia, serif;
+  font-style: italic;
+  padding-left: 8px;
+  border-left: 2px solid var(--divider);
+}
+
+.evBar {
+  display: flex;
+  border-top: 1px solid var(--divider);
+}
+.evBar button {
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--divider);
+  color: var(--muted);
+  padding: 8px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  letter-spacing: 0.04em;
+  min-height: 34px;
+}
+.evBar button:last-child {
+  border-right: none;
+}
+.evBar button:hover {
+  background: var(--stone);
+  color: var(--cream);
+}
+/* "A lançar" / "Feita" — the vocabulary MinhaSemanaPane already uses. Never
+   "presente": this is what the coach did with the record, not what the athlete
+   did with their body (#102). */
+.statusBtn {
+  flex: 1;
+  justify-content: flex-start;
+}
+.statusBtn.on {
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 10%, transparent);
+}
+.statusBox {
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid currentColor;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.icb {
+  width: 36px;
+  padding: 8px 0;
+}
+.del:hover {
+  color: var(--err);
+  background: color-mix(in srgb, var(--err) 10%, transparent);
+}
+
+/* ══ Reserved #102 attendance slot ════════════════════════════════════════
+   Deliberately empty — see EventCard.jsx. No styling is built around it. */
+
+/* ══ Empty states ═════════════════════════════════════════════════════════ */
+
+.empty {
+  padding: 30px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+.emptyIc {
+  color: var(--dim);
+  display: block;
+  margin: 0 auto 9px;
+}
+.emptyT {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--sub);
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+}
+.emptyX {
+  font-size: 11.5px;
+  font-family: Georgia, serif;
+  line-height: 1.6;
+  max-width: 270px;
+  margin: 0 auto 12px;
+}
+/* A day whose events are hidden by the filter must say so — it is not the same
+   state as a day with nothing in it. */
+.hiddenNote {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: Georgia, serif;
+  font-style: italic;
+  border-top: 1px solid var(--divider);
+  padding-top: 9px;
+  margin: 2px 0 0;
+}
+.hiddenNote b {
+  color: var(--sub);
+}
+
+/* ══ Mobile ═══════════════════════════════════════════════════════════════ */
+
+/* Was `.rp-mobile-back`. */
+.mobBack {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  font-size: 10.5px;
+  color: var(--muted);
+  background: var(--bg);
+  border: none;
+  border-bottom: 1px solid var(--divider);
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  cursor: pointer;
+  font-weight: 700;
+  flex-shrink: 0;
+  min-height: 38px;
+}
+.mobBack:hover {
+  color: var(--cream);
+}
+/* On mobile the two columns stack and the whole surface scrolls once, replacing
+   the old `.agenda-pane` fixed 96%-wide overlay at z-index 500. */
+@media (max-width: 800px) {
+  .body {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .gridCol,
+  .paneCol {
+    flex: none;
+    border-right: none;
+    overflow: visible;
+  }
+  .gridCol {
+    border-bottom: 1px solid var(--divider);
+  }
+}
