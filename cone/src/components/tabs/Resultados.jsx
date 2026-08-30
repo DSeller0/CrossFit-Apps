@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { loadResults, loadAthletes } from '../../utils/storage'
 import { RegistroView } from './resultados/RegistroView.jsx'
 import { HistoryView } from './resultados/HistoryView.jsx'
-import { LeaderboardView } from './resultados/LeaderboardView.jsx'
 
 // ── ResultadosTab (root) ──────────────────────────────────────────────────────
 export default function ResultadosTab({ sessions, preload, onPreloadConsumed }) {
@@ -16,7 +15,6 @@ export default function ResultadosTab({ sessions, preload, onPreloadConsumed }) 
         {[
           ['registro', 'ti-pencil', 'Registro'],
           ['history', 'ti-chart-bar', 'Histórico / KPIs'],
-          ['leaderboard', 'ti-trophy', 'Leaderboard'],
         ].map(([id, icon, lbl]) => (
           <button
             key={id}
@@ -40,9 +38,6 @@ export default function ResultadosTab({ sessions, preload, onPreloadConsumed }) 
       )}
       {subView === 'history' && (
         <HistoryView athletes={athletes} sessions={sessions} results={results} />
-      )}
-      {subView === 'leaderboard' && (
-        <LeaderboardView athletes={athletes} sessions={sessions} results={results} />
       )}
     </div>
   )

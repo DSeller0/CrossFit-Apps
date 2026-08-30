@@ -141,7 +141,7 @@ function SchedulePublisher({ sessions }) {
   // BLIND OVERWRITE, not a merge — so every key Publicador doesn't know about was deleted
   // from the blob: `gymSub`, `logo`, `boxWarnings` (#53, a shipped feature), `customBenchmarks`
   // and `theme`. Every other caller compensates by read-merging at the call site (Config.jsx,
-  // useBoxWarnings.js, BlockEditor.jsx, App.jsx, LeaderboardView.jsx) — this one didn't.
+  // useBoxWarnings.js, BlockEditor.jsx, App.jsx) — this one didn't.
   // Fixed with the same `...loadSettings()` spread they use. ⚠️ Do NOT "fix" this by making
   // saveSettings merge: that would make deleting a key impossible for every caller.
   //

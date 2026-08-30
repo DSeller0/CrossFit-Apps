@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getWeeksInMonth, weekLabel, calcKPIs, calcSessionKPIs } from './resultadosHelpers.js'
 import { monthGridCells } from '../../../public/lib/week.js'
-import { perfStr } from '../../../public/lib/wod.js'
 
 // Resultados.jsx's helpers had zero tests before #74-B/plans/44 — they lived as
 // module-level functions inside a 912-line tab. Extracted verbatim (pure move,
@@ -121,23 +120,5 @@ describe('calcSessionKPIs', () => {
   it('has no rxPct when nobody logged a scale (not a flattering 0%)', () => {
     const k = calcSessionKPIs('2026-07-01', [R('a1', '2026-07-01', 'Presente', [{ rpe: 5 }])])
     expect(k.rxPct).toBeNull()
-  })
-})
-
-// The old `getPerformanceStr` fork was deleted in #115 and LeaderboardView now renders
-// canonical `perfStr`. These assert the divergence is actually gone rather than merely
-// untested — the capped case is the one that used to differ.
-describe('SPA leaderboard renders canonical perfStr (fork deleted, #115)', () => {
-  it('a capped For Time result shows its rounds, not a dash', () => {
-    expect(perfStr({ perfTime: '', perfRounds: '4' }, 'For Time')).toBe('4 rds (DNF)')
-  })
-  it('a For Time result with nothing logged is still a dash', () => {
-    expect(perfStr({ perfTime: '' }, 'For Time')).toBe('—')
-  })
-  it('renders perfTime as-is for a completed For Time result', () => {
-    expect(perfStr({ perfTime: '12:34' }, 'For Time')).toBe('12:34')
-  })
-  it('joins rounds + reps for a non-time block', () => {
-    expect(perfStr({ perfRounds: '5', perfReps: '10' }, 'AMRAP')).toBe('5 rds + 10 reps')
   })
 })
