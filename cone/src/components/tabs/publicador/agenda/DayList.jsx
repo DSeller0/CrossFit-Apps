@@ -2,7 +2,7 @@ import { IconCalendarEvent } from '@tabler/icons-react'
 import { DAY_PT_TITLE, MONTH_PT_SHORT } from '../../../../public/lib/week.js'
 import { sessName } from '../../../../public/lib/sessions.js'
 import { evStatus } from '../eventFilter.js'
-import { weekRangeLabel } from './agendaHelpers.js'
+import { dayTitle, weekRangeLabel } from './agendaHelpers.js'
 import s from './Agenda.module.css'
 
 // ── DayList — the Lista view: a run of days (#105, second half) ──────────────
@@ -59,6 +59,7 @@ export default function DayList({
             type="button"
             className={`${s.lstDay}${isSel ? ' ' + s.sel : ''}${inMonth ? '' : ' ' + s.out}`}
             aria-current={isToday ? 'date' : undefined}
+            aria-label={dayTitle(iso)}
             onClick={() => onSelect(iso)}
           >
             <div className={s.lstLeft}>

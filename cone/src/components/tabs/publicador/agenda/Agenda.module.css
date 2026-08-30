@@ -1259,3 +1259,42 @@
     border-bottom: 1px solid var(--divider);
   }
 }
+
+/* ══ Series scope picker (#106) ═══════════════════════════════════════════
+   Rides inside the ConfirmReview that step (d) had to build anyway. Shown only
+   when a real series exists (2+ events) — a one-item scope list is noise. */
+.scopeList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: var(--sp-3);
+}
+.scopeOpt {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--sub);
+}
+.scopeOpt:hover {
+  border-color: var(--dim);
+}
+.scopeOpt.on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--cream);
+}
+.scopeOpt input {
+  accent-color: var(--accent);
+  margin: 0;
+}
+.scopeN {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted);
+}

@@ -1,4 +1,5 @@
 import { IconPlus, IconCalendarPlus, IconCopy, IconCalendarOff } from '@tabler/icons-react'
+import Button from '../../../ui/Button.jsx'
 import { sessName } from '../../../../public/lib/sessions.js'
 import { dayTitle, hiddenCount, seriesEvents } from './agendaHelpers.js'
 import EventCard from './EventCard.jsx'
@@ -88,16 +89,16 @@ export default function DayPane({
                 <div className={s.sessTop}>
                   <span className={s.sessName}>{sessName(sess, iso)}</span>
                   {onEditSession && (
-                    <button
-                      type="button"
-                      className={s.weekBtn}
+                    <Button
+                      variant="secondary"
+                      size="xs"
                       onClick={e => {
                         e.stopPropagation()
                         onEditSession(sess)
                       }}
                     >
                       Editar
-                    </button>
+                    </Button>
                   )}
                 </div>
                 <div className={s.blkRow}>
@@ -177,21 +178,16 @@ export default function DayPane({
             <div className={s.emptyX}>
               Use os botões acima, ou copie o último evento que você criou.
             </div>
-            <button type="button" className={s.addBtn} onClick={() => copyLastEvent(iso)}>
-              <IconCopy size={13} aria-hidden="true" /> Copiar último evento
-            </button>
+            <Button variant="secondary" size="sm" onClick={() => copyLastEvent(iso)}>
+              <IconCopy size={13} /> Copiar último evento
+            </Button>
           </div>
         )}
 
         {!nothingAtAll && evs.length > 0 && (
-          <button
-            type="button"
-            className={s.addBtn}
-            style={{ marginTop: '4px' }}
-            onClick={() => copyLastEvent(iso)}
-          >
-            <IconCopy size={13} aria-hidden="true" /> Copiar último evento
-          </button>
+          <Button variant="ghost" size="sm" onClick={() => copyLastEvent(iso)}>
+            <IconCopy size={13} /> Copiar último evento
+          </Button>
         )}
       </div>
     </div>

@@ -2,13 +2,16 @@ import { useState, useEffect, useMemo } from 'react'
 import { IconChevronLeft, IconChevronRight, IconFileAnalytics } from '@tabler/icons-react'
 import { loadLocations, getTargets, toISO } from '../../../utils/storage'
 import { MONTH_PT, DAY_PT_TITLE, monthGridCells } from '../../../public/lib/week.js'
+import { uid } from '../../../public/lib/wod.js'
 import { useIsMobile } from '../../../hooks/useIsMobile'
+import Button from '../../ui/Button.jsx'
 import { EventFormInner, ReportModal } from './events'
 import EventFilter from './agenda/EventFilter.jsx'
 import { agendaFilter, filterDay } from './eventFilter.js'
 import CellDay from './agenda/CellDay.jsx'
 import DayList from './agenda/DayList.jsx'
 import DayPane from './agenda/DayPane.jsx'
+import DeleteEventConfirm from './agenda/DeleteEventConfirm.jsx'
 import { monthStats, weekRangeLabel } from './agenda/agendaHelpers.js'
 import s from './agenda/Agenda.module.css'
 
@@ -68,6 +71,7 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
   const [filter, setFilter] = useState(agendaFilter)
   const [showReport, setShowReport] = useState(false)
   const [showForm, setShowForm] = useState(null)
+  const [pendingDelete, setPendingDelete] = useState(null) // { ev, iso } | null
   const [formData, setFormData] = useState({})
   const [viewWeekIdx, setViewWeekIdx] = useState(0)
   const isMobile = useIsMobile(800)
@@ -99,14 +103,6 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
     }
   }, [year, month, weeks])
 
-  // Handler-only (its sole caller is `openForm`). The react-hooks/purity disable
-  // step (a) needed here is gone: with the render tree in its own files the rule no
-  // longer traces this as render-reachable. Step (f) deletes the function outright
-  // for canonical `uid` (public/lib/wod.js).
-  function uid2() {
-    return Math.random().toString(36).slice(2) + Date.now().toString(36)
-  }
-
   function saveEvent(ev) {
     setEvents(prev => {
       const d = { ...prev }
@@ -118,14 +114,6 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
       return { ...d, [ev.date]: list }
     })
   }
-  function deleteEvent(date, id) {
-    setEvents(prev => {
-      const d = { ...prev }
-      d[date] = (d[date] || []).filter(e => e.id !== id)
-      if (!d[date].length) delete d[date]
-      return { ...d }
-    })
-  }
   function toggleStatus(date, id) {
     setEvents(prev => {
       const list = prev[date] || []
@@ -135,14 +123,34 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
       return { ...prev, [date]: list.map(e => (e.id === id ? updated : e)) }
     })
   }
+  // Was `window.confirm('Remover este evento?')` — destructive, unreviewable,
+  // untrapped and unthemed. Now the app's one dialog shell, which is also where
+  // #106's series scope lives (DeleteEventConfirm.jsx).
   function requestDelete(ev, iso) {
-    if (window.confirm('Remover este evento?')) deleteEvent(iso, ev.id)
+    setPendingDelete({ ev, iso })
   }
+  function confirmDelete(list) {
+    setEvents(prev => {
+      const d = { ...prev }
+      list.forEach(({ date, id }) => {
+        d[date] = (d[date] || []).filter(e => e.id !== id)
+        if (!d[date].length) delete d[date]
+      })
+      return d
+    })
+    setPendingDelete(null)
+  }
+  // ⚠️ Ids come from canonical `uid` (public/lib/wod.js), not the local `uid2` this
+  // file used to hand-roll. That copy returned a DIFFERENT SHAPE from `uid()`, and
+  // these ids go into the `events` blob and are what `recurrenceGroup` points at —
+  // the #110 session-id type-mismatch family one door down, where a numeric id never
+  // `===` its own rows. `events.jsx`'s `_uid` (which minted every recurrence
+  // occurrence) was the same copy and went with it.
   function openForm(type, date, existingEv) {
     const defaults = existingEv
-      ? { ...existingEv, id: existingEv.id || uid2() }
+      ? { ...existingEv, id: existingEv.id || uid() }
       : {
-          id: uid2(),
+          id: uid(),
           date,
           time: '07:00',
           durationMin: 60,
@@ -209,30 +217,32 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
   const header = (
     <div className={`${s.hdr}${isMobile ? ' ' + s.hdrSticky : ''}`}>
       <div className={s.hdrTop}>
-        <button
-          type="button"
-          className={s.navBtn}
+        <Button
+          variant="ghost"
+          size="sm"
+          iconOnly
           aria-label="Mês anterior"
           onClick={() => goMonth(-1)}
         >
-          <IconChevronLeft size={15} aria-hidden="true" />
-        </button>
+          <IconChevronLeft size={15} />
+        </Button>
         {/* The surface's one real heading. */}
         <h1 className={s.title}>
           <span className={s.titleKicker}>Agenda</span>
           {MONTH_PT[month]} {year}
         </h1>
-        <button
-          type="button"
-          className={s.navBtn}
+        <Button
+          variant="ghost"
+          size="sm"
+          iconOnly
           aria-label="Próximo mês"
           onClick={() => goMonth(1)}
         >
-          <IconChevronRight size={15} aria-hidden="true" />
-        </button>
-        <button type="button" className={s.weekBtn} onClick={goToday}>
+          <IconChevronRight size={15} />
+        </Button>
+        <Button variant="secondary" size="xs" onClick={goToday}>
           Hoje
-        </button>
+        </Button>
         <div className={s.viewSeg} role="group" aria-label="Visão">
           <button
             type="button"
@@ -253,9 +263,9 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
         </div>
         {/* Actions live on the right, with the view toggle — not between the "‹"
             and the month label, which is where Relatório used to sit. */}
-        <button type="button" className={s.weekBtn} onClick={() => setShowReport(true)}>
-          <IconFileAnalytics size={13} aria-hidden="true" /> Relatório
-        </button>
+        <Button variant="secondary" size="xs" onClick={() => setShowReport(true)}>
+          <IconFileAnalytics size={13} /> Relatório
+        </Button>
       </div>
 
       {/* ⚠️ Every number says exactly what it counts. `status` is a manual toggle
@@ -388,6 +398,13 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
           />
         </div>
       </div>
+
+      <DeleteEventConfirm
+        target={pendingDelete}
+        events={events}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+      />
 
       {showReport && (
         <ReportModal events={events} sessions={sessions} onClose={() => setShowReport(false)} />

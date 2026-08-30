@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { loadAthletes, loadSettings, loadLocations, loadCoach } from '../../../utils/storage'
 import { buildPixPayload, pixClean } from '../../../utils/pix'
-import { MONTH_PT } from '../../../public/lib/week.js'
+import { MONTH_PT, toISO } from '../../../public/lib/week.js'
+import { uid } from '../../../public/lib/wod.js'
 import { sessName } from '../../../public/lib/sessions.js'
 import { fmtDateNum, fmtDur, calcTotal, sumByCurrency } from './billing.js'
 import { qrToBase64 } from './pixQr.js'
@@ -53,14 +54,6 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
     days: [new Date(showForm.date + 'T12:00:00').getDay()],
     until: '',
   })
-  // react-hooks/purity false-fires on this: `_uid` is never called during render (only from
-  // handleSave, itself only reachable via the Salvar button's onClick below) — the same
-  // "Date.now() inside a handler-only function" exemption CLAUDE.md already documents for
-  // this rule. Confirmed by bisection: the trigger is `rateSnapshot`'s ternary object literal
-  // above flowing into `base`'s spread in the same object literal as `_uid()` two blocks down
-  // — unrelated to whether `_uid` itself is reachable during render.
-  // eslint-disable-next-line react-hooks/purity
-  const _uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
   const toggleRecDay = i =>
     setRec(r => ({ ...r, days: r.days.includes(i) ? r.days.filter(x => x !== i) : [...r.days, i] }))
   const handleSave = () => {
@@ -79,8 +72,12 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
       if (rec.freq === 'daily' || rec.days.includes(cur.getDay()))
         results.push({
           ...base,
-          id: _uid(),
-          date: cur.toISOString().slice(0, 10),
+          id: uid(),
+          // `toISO`, not `cur.toISOString().slice(0,10)`. The latter converts to UTC,
+          // so east of UTC+12 a midday-local date lands on the PREVIOUS day — the bug
+          // class `week.js`'s toISO exists to prevent. Harmless from Brazil today,
+          // which is exactly why it would have gone on being harmless until it wasn't.
+          date: toISO(cur),
           recurrenceGroup: base.id,
         })
       cur.setDate(cur.getDate() + 1)
@@ -93,7 +90,7 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
       { style: { marginBottom: '10px' } },
       React.createElement(
         'label',
-        { style: { fontSize: '11px', color: '#554a3a', display: 'block', marginBottom: '3px' } },
+        { style: { fontSize: '11px', color: 'var(--dim)', display: 'block', marginBottom: '3px' } },
         label,
       ),
       children,
@@ -105,9 +102,9 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
       onChange,
       style: {
         width: '100%',
-        background: '#111',
-        border: '1px solid #2a2318',
-        color: '#c8b090',
+        background: 'var(--bg)',
+        border: '1px solid var(--divider)',
+        color: 'var(--sub)',
         padding: '6px 8px',
         borderRadius: '5px',
         fontSize: '12px',
@@ -123,9 +120,9 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
         onChange,
         style: {
           width: '100%',
-          background: '#111',
-          border: '1px solid #2a2318',
-          color: '#c8b090',
+          background: 'var(--bg)',
+          border: '1px solid var(--divider)',
+          color: 'var(--sub)',
           padding: '6px 8px',
           borderRadius: '5px',
           fontSize: '12px',
@@ -150,8 +147,8 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
       'div',
       {
         style: {
-          background: '#0d0b08',
-          border: '1px solid #2a2318',
+          background: 'var(--bg)',
+          border: '1px solid var(--divider)',
           borderRadius: '10px',
           padding: '18px',
           width: '340px',
@@ -175,12 +172,12 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
           null,
           React.createElement(
             'div',
-            { style: { fontSize: '13px', fontWeight: 700, color: '#c8b090' } },
+            { style: { fontSize: '13px', fontWeight: 700, color: 'var(--sub)' } },
             (showForm.eventId ? 'Editar' : 'Novo') + ' ' + (isPers ? 'Personal' : 'Aula'),
           ),
           React.createElement(
             'div',
-            { style: { fontSize: '10px', color: '#554a3a', marginTop: '1px' } },
+            { style: { fontSize: '10px', color: 'var(--dim)', marginTop: '1px' } },
             new Date(showForm.date + 'T12:00:00').toLocaleDateString('pt-BR', {
               weekday: 'short',
               day: '2-digit',
@@ -195,7 +192,7 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
             style: {
               background: 'transparent',
               border: 'none',
-              color: '#554a3a',
+              color: 'var(--dim)',
               cursor: 'pointer',
               fontSize: '16px',
             },
@@ -224,7 +221,7 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
             selSvc &&
               React.createElement(
                 'div',
-                { style: { fontSize: '10px', color: '#887060', marginTop: '3px' } },
+                { style: { fontSize: '10px', color: 'var(--muted)', marginTop: '3px' } },
                 `${selSvc.currency || 'R$'} ${selSvc.rate || 0}/${selSvc.rateUnit === 'per_hour' ? 'hora' : 'sessão'}`,
               ),
           ),
@@ -257,7 +254,7 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
                     gap: '6px',
                     cursor: 'pointer',
                     fontSize: '12px',
-                    color: '#a89880',
+                    color: 'var(--sub)',
                   },
                 },
                 React.createElement('input', {
@@ -279,7 +276,7 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
                 svc &&
                   React.createElement(
                     'span',
-                    { style: { fontSize: '10px', color: '#554a3a' } },
+                    { style: { fontSize: '10px', color: 'var(--dim)' } },
                     `${svc.currency || 'R$'}${svc.rate || 0}`,
                   ),
               )
@@ -314,7 +311,12 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
           React.createElement(
             'label',
             {
-              style: { fontSize: '11px', color: '#554a3a', display: 'block', marginBottom: '3px' },
+              style: {
+                fontSize: '11px',
+                color: 'var(--dim)',
+                display: 'block',
+                marginBottom: '3px',
+              },
             },
             'Horário',
           ),
@@ -324,9 +326,9 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
             onChange: e => set('time', e.target.value),
             style: {
               width: '100%',
-              background: '#111',
-              border: '1px solid #2a2318',
-              color: '#c8b090',
+              background: 'var(--bg)',
+              border: '1px solid var(--divider)',
+              color: 'var(--sub)',
               padding: '6px 8px',
               borderRadius: '5px',
               fontSize: '12px',
@@ -339,7 +341,12 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
           React.createElement(
             'label',
             {
-              style: { fontSize: '11px', color: '#554a3a', display: 'block', marginBottom: '3px' },
+              style: {
+                fontSize: '11px',
+                color: 'var(--dim)',
+                display: 'block',
+                marginBottom: '3px',
+              },
             },
             'Duração (min)',
           ),
@@ -352,9 +359,9 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
             step: 15,
             style: {
               width: '100%',
-              background: '#111',
-              border: '1px solid #2a2318',
-              color: '#c8b090',
+              background: 'var(--bg)',
+              border: '1px solid var(--divider)',
+              color: 'var(--sub)',
               padding: '6px 8px',
               borderRadius: '5px',
               fontSize: '12px',
@@ -387,7 +394,7 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
                     gap: '6px',
                     cursor: 'pointer',
                     fontSize: '12px',
-                    color: '#a89880',
+                    color: 'var(--sub)',
                   },
                 },
                 React.createElement('input', {
@@ -429,9 +436,9 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
           placeholder: 'Observações...',
           style: {
             width: '100%',
-            background: '#111',
-            border: '1px solid #2a2318',
-            color: '#c8b090',
+            background: 'var(--bg)',
+            border: '1px solid var(--divider)',
+            color: 'var(--sub)',
             padding: '6px 8px',
             borderRadius: '5px',
             fontSize: '12px',
@@ -442,7 +449,13 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
       !showForm.eventId &&
         React.createElement(
           'div',
-          { style: { borderTop: '1px solid #2a2318', paddingTop: '10px', marginBottom: '10px' } },
+          {
+            style: {
+              borderTop: '1px solid var(--divider)',
+              paddingTop: '10px',
+              marginBottom: '10px',
+            },
+          },
           React.createElement(
             'label',
             {
@@ -452,7 +465,7 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
                 gap: '7px',
                 cursor: 'pointer',
                 fontSize: '12px',
-                color: '#887060',
+                color: 'var(--muted)',
                 userSelect: 'none',
               },
             },
@@ -460,7 +473,7 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
               type: 'checkbox',
               checked: rec.enabled,
               onChange: e => setRec(r => ({ ...r, enabled: e.target.checked })),
-              style: { accentColor: 'var(--theme-accent)' },
+              style: { accentColor: 'var(--accent)' },
             }),
             React.createElement('i', { className: 'ti ti-refresh', style: { fontSize: '13px' } }),
             'Repetir evento',
@@ -487,9 +500,9 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
                         borderRadius: '5px',
                         cursor: 'pointer',
                         border: '1px solid',
-                        background: rec.freq === f ? 'var(--theme-accent)' : 'transparent',
-                        color: rec.freq === f ? 'var(--theme-accent-text)' : '#887060',
-                        borderColor: rec.freq === f ? 'var(--theme-accent)' : '#2a2318',
+                        background: rec.freq === f ? 'var(--accent)' : 'transparent',
+                        color: rec.freq === f ? 'var(--accent-text)' : 'var(--muted)',
+                        borderColor: rec.freq === f ? 'var(--accent)' : 'var(--divider)',
                       },
                     },
                     f === 'weekly' ? 'Semanal' : 'Diário',
@@ -516,9 +529,9 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
                           borderRadius: '4px',
                           cursor: 'pointer',
                           border: '1px solid',
-                          background: on ? 'var(--theme-accent)' : 'transparent',
-                          color: on ? 'var(--theme-accent-text)' : '#887060',
-                          borderColor: on ? 'var(--theme-accent)' : '#2a2318',
+                          background: on ? 'var(--accent)' : 'transparent',
+                          color: on ? 'var(--accent-text)' : 'var(--muted)',
+                          borderColor: on ? 'var(--accent)' : 'var(--divider)',
                           minWidth: 0,
                         },
                       },
@@ -534,7 +547,7 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
                   {
                     style: {
                       fontSize: '11px',
-                      color: '#554a3a',
+                      color: 'var(--dim)',
                       display: 'block',
                       marginBottom: '3px',
                     },
@@ -548,9 +561,9 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
                   min: showForm.date,
                   style: {
                     width: '100%',
-                    background: '#111',
-                    border: '1px solid #2a2318',
-                    color: '#c8b090',
+                    background: 'var(--bg)',
+                    border: '1px solid var(--divider)',
+                    color: 'var(--sub)',
                     padding: '6px 8px',
                     borderRadius: '5px',
                     fontSize: '12px',
@@ -569,8 +582,8 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
             onClick: handleSave,
             style: {
               flex: 1,
-              background: 'var(--theme-accent)',
-              color: 'var(--theme-accent-text)',
+              background: 'var(--accent)',
+              color: 'var(--accent-text)',
               border: 'none',
               padding: '8px',
               borderRadius: '5px',
@@ -587,8 +600,8 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
             onClick: onCancel,
             style: {
               background: 'transparent',
-              border: '1px solid #2a2318',
-              color: '#554a3a',
+              border: '1px solid var(--divider)',
+              color: 'var(--dim)',
               padding: '8px 14px',
               borderRadius: '5px',
               cursor: 'pointer',

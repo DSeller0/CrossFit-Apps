@@ -1,4 +1,4 @@
-import { DAY_PT_FULL, MONTH_PT, MONTH_PT_SHORT } from '../../../../public/lib/week.js'
+import { DAY_PT_FULL, DAY_PT_TITLE, MONTH_PT, MONTH_PT_SHORT } from '../../../../public/lib/week.js'
 import { evStatus } from '../eventFilter.js'
 
 // ── Agenda's pure helpers (#59 · plans/81 C5·a) ──────────────────────────────
@@ -18,6 +18,12 @@ import { evStatus } from '../eventFilter.js'
 export function dayTitle(iso) {
   const d = new Date(iso + 'T12:00:00')
   return `${DAY_PT_FULL[d.getDay()]}, ${d.getDate()} de ${MONTH_PT[d.getMonth()].toLowerCase()}`
+}
+
+/** "Seg, 3 de ago" — the compact form, for a labelled row that must not wrap. */
+export function dayTitleShort(iso) {
+  const d = new Date(iso + 'T12:00:00')
+  return `${DAY_PT_TITLE[d.getDay()]}, ${d.getDate()} de ${MONTH_PT_SHORT[d.getMonth()].toLowerCase()}`
 }
 
 /** "2 – 8 ago" / "30 ago – 5 set" — the mobile week-strip button label. */

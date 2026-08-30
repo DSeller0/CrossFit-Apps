@@ -71,7 +71,10 @@ export default function EventCard({
       </div>
 
       <div className={`${s.evCard}${isPers ? ' ' + s.pers : ''}${done ? ' ' + s.done : ''}`}>
-        <button type="button" className={s.evBody} onClick={() => onEdit(ev)}>
+        {/* A real <button>, not a click-<div> with role/tabIndex bolted on. Its
+            accessible NAME stays the card's own content (the event's name, tags and
+            time); `title` supplies the action without stealing that name. */}
+        <button type="button" className={s.evBody} title="Editar evento" onClick={() => onEdit(ev)}>
           <div className={s.evTitleRow}>
             <span className={s.evName}>{ev.label || (isPers ? 'Personal' : 'Aula')}</span>
             <span className={`${s.tag} ${isPers ? s.pers : s.aula}`}>
