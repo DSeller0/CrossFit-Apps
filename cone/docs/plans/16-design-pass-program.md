@@ -19,7 +19,7 @@ carried prerequisites that were long satisfied and an Agenda assignment that mov
 | C0 | SPA design standard | #54 | M | ✅ [plans/33](./33-design-c0-spa-standard.md) | Card/button/input/spacing standard from theme tokens; button hierarchy; confirm-modal policy; masked mm:ss input (#35 absorbed) — **gates C1–C5** |
 | C1 | Exercícios + Configurações | #55/#87 | M→L | ✅ [plans/38](./38-design-c1-exercicios-config.md) | Apply standard; remove "Salvar config.json". **Agenda moved OFF this bundle to C5 on 2026-07-22** — it is `AgendaView`, which C5 restructures, so design-passing it here then immediately restructuring it was wasted work. |
 | C2 | Atletas + Afiliados | #56 | M→L | ✅ [plans/75](./75-design-c2-atletas-servicos.md), shipped 2026-08-28 (planned + gated 2026-08-13, wired + verified live 2026-08-28) | Apply standard; empty states; Serviços pane overflow; reserve #39 card slot. **Absorbed the Serviços → Afiliados restructure** ([plans/42](./42-afiliados-direction.md)). Grew a tail — see the note below the table (#160/#161/#162). |
-| C3 | Resultados (SPA) | #57 | ~~M~~ **L** | 🟢 [plans/80](./80-design-c3-resultados.md), planned 2026-08-29 | ⚠️ **LANE B — the only C-session that is** (see the correction under rule 1). Not a restyle: the user reports two of the three sub-tabs are unfound in live use, so **Leaderboard is deleted** (a second copy of `leaderboard.html`) and **Histórico is dissolved** into the Atletas ficha + a class read-back on the session. Rides #157 and #169. ✅ **[plans/44](./44-resultados-decomposition.md) shipped 2026-07-26** — `Resultados.jsx` 912 → a shell over `resultados/` (**49 raw lines** today; the "27" was a pre-reformat figure, re-measured 2026-08-29). |
+| C3 | Resultados (SPA) | #57 | ~~M~~ **L** | ✅ [plans/80](./80-design-c3-resultados.md), shipped 2026-08-30 | ⚠️ **LANE B — the only C-session that is** (see the correction under rule 1). Not a restyle: the user reports two of the three sub-tabs are unfound in live use, so **Leaderboard is deleted** (a second copy of `leaderboard.html`) and **Histórico is dissolved** into the Atletas ficha + a class read-back on the session. Rides #157 and #169 — **both closed with it.** ✅ **SHIPPED: the sub-tab bar is gone and Resultados is ONE surface** (a 260px week rail + THE CLASS), because the roster became the form container. Histórico's halves landed as the ficha's "Histórico de resultados" Card and as `ClassHeader`/`SessionKpis`. ✅ **[plans/44](./44-resultados-decomposition.md) shipped 2026-07-26** — `Resultados.jsx` 912 → a shell over `resultados/` (**49 raw lines** today; the "27" was a pre-reformat figure, re-measured 2026-08-29). |
 | C4 | Criador | #58 | L | ✅ [plans/37](./37-design-c4-criador.md) | #26 decomposition ([plans/35](./35-criador-decomposition.md)) + #92 text mode ([plans/36](./36-criador-text-mode.md)) ran first, as required. Standard + the 2026-07-21 layout brief. |
 | C5 | Publicador **+ Agenda** | #59 | L | ⏳ open | ✅ **#25 decomposition prerequisite SATISFIED** ([plans/39](./39-publicador-decomposition.md), `e957b57`) — this now inherits `publicador/AgendaView.jsx` (408 raw) instead of 838 lines buried in 2125. Then standard; `createElement`→JSX; JULY→pt-BR export fix; dedupe "Mobile Semanal" labels; classify jsPDF hex as exempt. |
 | — | #43 themes | #43 | L | ⏳ open | Only after B/C: token-clean codebase, verified under 4 themes per page |
@@ -68,11 +68,12 @@ any more; nothing has been picked from Ready yet.
 > ([plans/76](./76-atletas-fichas.md)/[77](./77-afiliados-paineis-coach.md)/[78](./78-fechamento-semana.md))
 > — see the note under the table.
 >
-> ✅ **C3 PLANNED 2026-08-29 → [plans/80](./80-design-c3-resultados.md)** (Lane B, L; Phase 0
+> ✅ **C3 SHIPPED 2026-08-30 → [plans/80](./80-design-c3-resultados.md)** (Lane B, L; Phase 0
 > ships alone, then a design gate, then the build). **After it closes — including any bugs it
 > causes — the next item is C5 (#59), user-confirmed the same day.**
 >
-> **The resume point is now C3 (#57) → C5 (#59).** Both are unblocked: plans/44 left
+> 🔑 **THE RESUME POINT IS NOW C5 (#59) — the LAST design-pass session.** C3 closed 2026-08-30.
+> ~~**The resume point is now C3 (#57) → C5 (#59).**~~ Both were unblocked: plans/44 left
 > `Resultados.jsx` a 27-line shell over `resultados/`, and plans/39 left C5 inheriting
 > `publicador/AgendaView.jsx` directly. ⚠️ **C3 has a prerequisite the board records but this
 > table did not:** **#157** (Registro's Salvar is all-or-nothing) lives in

@@ -1,44 +1,28 @@
 import { useState } from 'react'
 import { loadResults, loadAthletes } from '../../utils/storage'
 import { RegistroView } from './resultados/RegistroView.jsx'
-import { HistoryView } from './resultados/HistoryView.jsx'
 
 // ── ResultadosTab (root) ──────────────────────────────────────────────────────
+// #57/plans/80 (C3) removed the sub-tab bar entirely. It had three entries: Leaderboard
+// was a second copy of leaderboard.html (deleted in Phase 0), and Histórico's two halves
+// moved to where they are actually looked for — "Por atleta" into the Atletas ficha,
+// "Por sessão" onto the session itself inside the class header. Nothing was left behind
+// it, and a bar of one tab is not a bar.
+//
+// What survives here is the data ownership: this component holds `athletes`/`results`
+// (the two storage reads) so RegistroView's own tree takes everything as props.
 export default function ResultadosTab({ sessions, preload, onPreloadConsumed }) {
-  const [subView, setSubView] = useState('registro')
   const [athletes] = useState(loadAthletes)
   const [results, setResults] = useState(loadResults)
 
   return (
-    <div>
-      <div className="res-tabs">
-        {[
-          ['registro', 'ti-pencil', 'Registro'],
-          ['history', 'ti-chart-bar', 'Histórico / KPIs'],
-        ].map(([id, icon, lbl]) => (
-          <button
-            key={id}
-            type="button"
-            className={`res-tab ${subView === id ? 'on' : ''}`}
-            onClick={() => setSubView(id)}
-          >
-            <i className={`ti ${icon}`} /> {lbl}
-          </button>
-        ))}
-      </div>
-      {subView === 'registro' && (
-        <RegistroView
-          athletes={athletes}
-          sessions={sessions}
-          results={results}
-          setResults={setResults}
-          preload={preload}
-          onPreloadConsumed={onPreloadConsumed}
-        />
-      )}
-      {subView === 'history' && (
-        <HistoryView athletes={athletes} sessions={sessions} results={results} />
-      )}
-    </div>
+    <RegistroView
+      athletes={athletes}
+      sessions={sessions}
+      results={results}
+      setResults={setResults}
+      preload={preload}
+      onPreloadConsumed={onPreloadConsumed}
+    />
   )
 }

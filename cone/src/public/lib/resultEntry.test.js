@@ -143,6 +143,7 @@ describe('clearAthleteKeys', () => {
       finished: null,
       checkpoint: null,
       exerciseRows: null,
+      skipped: null,
     })
     expect(clearAthleteKeys(undefined)).toEqual({
       rpe: null,
@@ -153,6 +154,22 @@ describe('clearAthleteKeys', () => {
       finished: null,
       checkpoint: null,
       exerciseRows: null,
+      skipped: null,
     })
+  })
+})
+
+describe('skipped (#157)', () => {
+  test('is a declared athlete key, so every reset site clears it automatically', () => {
+    expect(ATHLETE_KEYS).toContain('skipped')
+    expect(clearAthleteKeys({ blockId: 'b1', skipped: true }).skipped).toBe(null)
+  })
+
+  test('survives a re-merge from another surface that does not know the key', () => {
+    // The #118 guarantee applied to the newest field: results.html re-logging the same
+    // block must not silently destroy a "não fez" the coach set in the SPA.
+    const persisted = { blockId: 'b1', skipped: true }
+    const fromOtherSurface = { blockId: 'b1', blockType: 'EMOM', blockLabel: 'EMOM 12' }
+    expect(mergeBlockEntry(persisted, fromOtherSurface).skipped).toBe(true)
   })
 })

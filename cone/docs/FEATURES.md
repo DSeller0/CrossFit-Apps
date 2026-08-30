@@ -40,11 +40,12 @@ Living inventory of every user-facing capability: where it lives, who consumes i
 | Templates save/apply | Criador | `templates` | Gate: Pro |
 | Publish/visibility (`session.public`), per-athlete sessions (`mainTraining`) | Criador | `sessions` | core / personal-training = Pro |
 | Athlete CRUD, levels, colors, PR/goal editing | Atletas | `athletes`, `goals_data` | core |
+| Ficha "Histórico de resultados" — RPE médio + sparkline · Taxa RX · Evolução de carga · the logged-result list (migrated out of Resultados' retired Histórico sub-tab, #57) | Atletas | `results_v2` | Pro |
 | (#39 planned: per-athlete adaptations) | Atletas | `goals_data.adaptations` | Gate: Pro |
 | Exercise registry CRUD (**248** entries after #94's two rounds of prod additions — measured live 2026-07-26, see #96; the old "146" predated them: categories, video, defaults) | Exercícios | `exercise_registry` | core |
 | Coach profile + Pix payment config | Serviços | `coach_profile` | Gate: business |
 | Locations ("boxes") w/ hourly rates + per-local athletes | Serviços | `locations` | Gate: business |
-| Result registration for any athlete; Histórico/KPIs; leaderboard | Resultados | `results_v2` | core / KPIs = Pro |
+| Log a whole class: pick the session, log each athlete in place, read the class back (RPE médio · Taxa RX · Flags · Distribuição). Per-block **"não fez"** (#157) keeps absence distinct from a zero score | Resultados | `results_v2` | core / class read-back = Pro |
 | Coach calendar: classes + personal sessions, completion stats, Relatório | Agenda | `events` blob | Gate: business |
 | Grade exports: Diário/Semanal/Calendário/Mobile ×2/Mobile Semanal ×2 + Apresentar (PDF/img) | Publicador | `sessions` + jsPDF | Gate: Pro |
 | Live class ops: start/end class, roster, live registration, guest results | Quadro ao Vivo | `class_executions`, `results_v2`, `tv_state` | Gate: Pro (TV system) |

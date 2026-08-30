@@ -21,16 +21,18 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 :root{--spa-sticky-top:49px}
 .pane{padding:14px}
 
-/* ── Themed panes — Resultados (#57) + Publicador/Agenda (#59) — TAB-OWNED.
+/* ── Themed panes — Publicador/Agenda (#59) — TAB-OWNED. The .res-pane halves went
+   with #57/plans/80 (C3): Resultados is on ui/Button + its own module now, so App.jsx's
+   .res-pane wrapper existed only to accent-fill these three and was removed with them.
    Pruned 2026-07-26 (#99): the .log-block-title/.pub-section-title, .kpi-val,
    .athlete-chip.active, .rpe-hp-slider thumb, .sc-card.drag-over-session/
    .blk-wrap.drag-over and bare `a` rules were dead (grepped zero consumers —
    the current Resultados/Publicador markup never renders those classes) and
    the .res-pane half of the input[type=range] rule was too (no range input
    in Resultados; Publicador's export-scale sliders set accent-color inline). ── */
-.res-pane .b.bp,.pub-pane .b.bp{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
-.res-pane .b.bsec,.pub-pane .b.bsec{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
-.res-pane .res-tab.on,.pub-pane .pvt.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
+.pub-pane .b.bp{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
+.pub-pane .b.bsec{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
+.pub-pane .pvt.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
 .pub-pane input[type=range]{accent-color:var(--theme-accent)}
 
 /* ── form + buttons — TAB-OWNED (shared, pending C1–C5). Pre-C0 zoo: every
@@ -59,14 +61,6 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .bfull{width:100%}
 .bsec{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
 .bsec:hover{background:#c86010}
-
-/* session card → moves to Resultados.module.css in #57. (The section map's
-   "nominally Criador-owned" guess was wrong — grepped 2026-07-26: sc-card/
-   sc-hdr/sc-title are used only by Resultados.jsx, Criador's week-grid cards
-   are .wg-sc, below.) */
-.sc-card{background:var(--stone2,#1e1a16);border:1px solid var(--divider,#2a231c);border-radius:10px;padding:16px;margin-bottom:12px}
-.sc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.sc-title{font-size:14px;font-weight:700;color:var(--cream,#f0e8d0)}
 
 /* block → moves to Criador's criador.module.css in #58 (BlockEditor.jsx) */
 .blk-wrap{border-radius:8px;overflow:hidden;border:1px solid var(--divider,#2a231c);margin-bottom:10px}
@@ -284,23 +278,6 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .empty2{text-align:center;padding:3rem;color:var(--muted);font-size:13px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── Resultados tab (#57) — TAB-OWNED. Pruned 2026-07-26 (#99): .res-card/
-   .res-section/.res-section-title/.athlete-chip(+variants)/.rpe-track/
-   .rpe-btn(+.active)/.scale-row/.scale-btn(+variants)/.res-block/
-   .res-block-hdr/.mini-bar(+fill)/.athlete-row/.attendance-dot/
-   .history-entry/.tag(+rx/inter/sc/adap) were all dead — grepped zero
-   consumers, this tab's current markup uses KpiCard/level-badge/scale-badge/
-   history-row instead (below, in the "Results tab" section — same tab, an
-   older CSS pass under a different name). .kpi-val was dead too (the
-   .kpi-value used today lives only in that later section); .kpi-grid/
-   .kpi-card/.kpi-label/.kpi-sub stay — both this definition and the later
-   one apply via cascade (overlapping, not shadowed: e.g. .kpi-label's
-   margin-top here isn't re-set there). Don't consolidate now, that's #57's call. ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px}
-.kpi-card{background:var(--bg);border:1px solid var(--divider);border-radius:8px;padding:12px}
-.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
-.kpi-sub{font-size:12px;color:var(--sub);margin-top:3px}
-
 /* Grab-bag, all TAB-OWNED, no header comment of their own in the original —
    mic-pulse: Publicador's MicButton (#59). drag-handle/ex-suggestion: the shared
    ExerciseCombobox (components/shared/, promoted from Criador by #56/C2/plans/75
@@ -367,52 +344,9 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
    table's "add step" control is a <Button> (#54/C0) now, not this class. */
 
 @media(max-width:600px){
-  .pane{padding:10px}.sc-card{padding:12px}
+  .pane{padding:10px}
   .ex-row{grid-template-columns:1fr 1fr}
 }
-
-/* ── "Results tab" — actually Resultados #57 too, TAB-OWNED. The section map
-   inherited from the old public results.html naming, but grepped 2026-07-26
-   (#99): every surviving class here (kpi-value, level-badge, scale-badge,
-   presence-dot, sparkline, history-row, empty-state…) is used only by
-   Resultados.jsx — public results.html has its own Results.module.css.
-   Pruned: .athlete-card/.athlete-name/.athlete-meta/.rpe-display/
-   .rpe-bar-wrap/.rpe-bar/.log-block-section/.log-block-title/.rpe-slider/
-   .rpe-hp-* were dead (zero consumers anywhere in src/). ── */
-.res-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.res-tab{font-family:inherit;font-size:12px;padding:6px 14px;border-radius:5px;border:1px solid var(--divider);background:transparent;color:var(--sub);cursor:pointer;transition:all .12s}
-.res-tab.on{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700}
-.level-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em}
-.lv-ini{background:#1a2e14;color:#60a840;border:1px solid #3a5820}
-.lv-int{background:#162240;color:#5090e0;border:1px solid #1e3870}
-.lv-adv{background:#2a1a04;color:#e0a030;border:1px solid #604010}
-.lv-comp{background:#3a1010;color:#e05050;border:1px solid #601818}
-.scale-badge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase}
-.sc-rx{background:#1a3a10;color:#60a840;border:1px solid #2a5018}
-.sc-inter{background:#1a2a3a;color:#4a90d0;border:1px solid #1a3a5a}
-.sc-sc{background:#2a2010;color:#e0a030;border:1px solid #4a3818}
-.sc-adap{background:#1a1a2a;color:#888;border:1px solid #2a2a3a}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px}
-.kpi-card{background:var(--stone2);border:1px solid var(--divider);border-radius:8px;padding:12px}
-.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;font-weight:600}
-.kpi-value{font-size:26px;font-weight:900;color:var(--cream);line-height:1}
-.kpi-sub{font-size:11px;color:var(--muted);margin-top:4px}
-.kpi-good{color:#60a840}
-.kpi-warn{color:#e0a030}
-.kpi-bad{color:#e05050}
-.kpi-value.kpi-good{color:#60a840}
-.kpi-value.kpi-warn{color:#e0a030}
-.kpi-value.kpi-bad{color:#e05050}
-.presence-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
-.pd-presente{background:#60a840}
-.pd-ausente{background:#e05050}
-.pd-atrasado{background:#e0a030}
-.flag-icon{color:#e05050;font-size:13px}
-.sparkline{display:flex;align-items:flex-end;gap:2px;height:32px}
-.sparkline-bar{background:#e87820;border-radius:2px 2px 0 0;min-width:6px;transition:height .2s}
-.history-row{padding:8px 0;border-bottom:1px solid var(--divider);display:flex;align-items:flex-start;gap:10px}
-.history-row:last-child{border-bottom:none}
-.empty-state{text-align:center;padding:2rem;color:var(--muted);font-size:13px}
 
 /* ── Leaderboard — pruned entirely 2026-07-26 (#99): dead. .lb-empty and every
    --lb-* variable had zero consumers in src/ — the SPA has no Leaderboard tab
@@ -639,25 +573,15 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 /* wg-sc-name flex tweak for new delete-in-header layout */
 .wg-sc-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* ── Registro 3-panel (TotK warm-dark) — TAB-OWNED → Resultados #57 (primary;
-   also used by a slice of Atletas + AgendaView). Pre-existing bug, NOT fixed
-   here: its hex is frozen to totk-dark's values (#2a231c=--divider,
-   #f0e8d0=--cream, #806850=--muted, etc.) rather than var()s, so it only
-   renders correctly in that one theme — same class of bug as TallyBar/TV-ring/
-   scrollbars elsewhere in this file, just not yet caught by a theme switch.
-   Left alone per the TAB-OWNED rule (tokenising work Resultados' own pass
-   would immediately delete) — flagging it here so #57 inherits the fix, not
-   just the move. ── */
-.rp-layout{display:grid;grid-template-columns:260px 220px 1fr;margin:0 -14px -14px;border-top:1px solid #2a231c;align-items:start}
-.rp-p1{border-right:1px solid #2a231c}
-.rp-p2{border-right:1px solid #2a231c}
-.rp-p3{}
-@media(max-width:800px){.rp-layout{grid-template-columns:1fr;margin:0;border:none}}
-/* .rp-sticktop itself is NOT single-tab-owned like the rest of this block — it has
-   four consumers in two tabs (resultados/RegistroView.jsx ×3, #57; and
-   publicador/AgendaView.jsx, #59), so #95/plans/69 tokenises it onto
-   --spa-sticky-top rather than leaving its hardcoded 88px (39px too low once the
-   sidebar replaces the tab bar at 768px+) for #57 to inherit as dead work. */
+/* ── Month/week nav — TAB-OWNED → Publicador/Agenda #59 (AgendaView.jsx).
+   ⚠️ These 7 rules are ALL that survives the old "Registro 3-panel" block. #57/plans/80
+   (C3) rewrote Resultados onto resultados/Resultados.module.css and deleted the other
+   ~67 rules, but these are SHARED with publicador/AgendaView.jsx (rp-sticktop ·
+   rp-month-nav · rp-nav-btn · rp-month-label · rp-weeks · rp-week-btn · rp-mobile-back),
+   so they stay here and must NOT be moved into a tab module until #59 owns them.
+   Same frozen-to-totk-dark hex caveat the block always carried — not fixed here,
+   inherited by #59. .rp-sticktop is already on --spa-sticky-top (#95/plans/69); do not
+   re-hardcode the 88px. ── */
 .rp-sticktop{position:sticky;top:var(--spa-sticky-top);z-index:10;background:#0d0b09;border-bottom:1px solid #2a231c}
 .rp-month-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 12px}
 .rp-month-label{font-size:12px;font-weight:700;color:#c8b090;letter-spacing:.04em}
@@ -667,50 +591,6 @@ input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:no
 .rp-weeks::-webkit-scrollbar{display:none}
 .rp-week-btn{flex-shrink:0;background:transparent;border:1px solid #2a231c;color:#806850;font-size:10px;cursor:pointer;padding:3px 7px;font-family:inherit;letter-spacing:.04em;transition:all .12s}
 .rp-week-btn.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
-.rp-day-hdr{padding:4px 12px 3px;font-size:9px;color:#554a3a;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #1e1a16}
-.rp-sess-card{padding:8px 12px;cursor:pointer;border-left:3px solid transparent;border-bottom:1px solid #161210;transition:all .12s}
-.rp-sess-card:hover{background:#161210}
-.rp-sess-card.on{border-left-color:var(--theme-accent);background:#1a1408}
-.rp-sess-name{font-size:11px;font-weight:700;color:#c8b090;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rp-sess-sub{font-size:10px;color:#806850;margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.rp-rest-day{padding:5px 12px;color:#3a3020;font-size:10px;border-bottom:1px solid #161210;font-style:italic}
-.rp-p2-empty,.rp-p3-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:40px 16px;color:#554a3a;font-size:12px;text-align:center}
-.rp-p2-hdr{padding:9px 12px}
-.rp-p2-title{font-size:11px;font-weight:700;color:#c8b090;text-transform:uppercase;letter-spacing:.05em}
-.rp-p2-meta{font-size:10px;color:#806850;margin-top:2px}
-.rp-ath-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #161210;cursor:pointer;transition:background .12s}
-.rp-ath-row:hover{background:#161210}
-.rp-ath-row.on{background:#1a1408}
-.rp-ath-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.rp-ath-info{flex:1;min-width:0}
-.rp-ath-name{font-size:11px;font-weight:700;color:#c8b090;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rp-ath-logged{font-size:9px;color:#4ac8c0;margin-top:1px}
-.rp-del-inline{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.rp-add-btn{background:transparent;border:1px dashed #2a231c;color:#806850;font-family:inherit;font-size:11px;cursor:pointer;padding:8px 0;display:flex;align-items:center;justify-content:center;gap:6px;margin:10px 12px 0;width:calc(100% - 24px);transition:all .12s}
-.rp-add-btn:hover{border-color:#554a3a;color:#c8b090}
-.rp-add-dropdown{margin:4px 12px 12px;border:1px solid #2a231c;background:#0d0b09}
-.rp-add-item{padding:7px 10px;cursor:pointer;font-size:11px;color:#806850;border-bottom:1px solid #1e1a16;display:flex;align-items:center;gap:7px;transition:all .12s}
-.rp-add-item:hover{background:#161210;color:#f0e8d0}
-.rp-add-item:last-child{border-bottom:none}
-.rp-p3-hdr{display:flex;align-items:center;gap:8px;padding:8px 14px}
-.rp-p3-name{font-size:13px;font-weight:700;color:#f0e8d0;text-transform:uppercase;letter-spacing:.05em}
-.rp-p3-body{padding:12px 14px}
-.rp-block-card{border:1px solid #2a231c;margin-bottom:10px}
-.rp-block-label{padding:6px 10px;background:#161210;font-size:10px;font-weight:700;color:#806850;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #1e1a16}
-.rp-block-body{padding:10px}
-.rp-scale-row{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap}
-.rp-scale-btn{flex:1;min-width:44px;padding:5px 4px;background:transparent;border:1px solid #2a231c;color:#806850;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent}
-.rp-scale-btn:hover{border-color:#554a3a;color:#c8b090}
-.rp-scale-btn.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
-.rp-perf-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
-.rp-perf-lbl{font-size:10px;color:#806850;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
-.rp-perf-input{background:transparent;border:none;border-bottom:1px solid #2a231c;color:#f0e8d0;font-family:inherit;font-size:14px;outline:none;padding:2px 4px;width:72px;text-align:center}
-.rp-rpe-row{display:flex;align-items:center;gap:6px;margin-bottom:2px}
-.rp-rpe-bar{display:flex;gap:2px;flex:1;height:16px}
-.rp-rpe-seg{flex:1;border-radius:2px;background:#1e1a16;border:1px solid #2a231c;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .1s}
-.rp-wod-summary{margin-bottom:8px;padding:6px 8px;background:#0d0b09;border:1px solid #1e1a16}
-.rp-wod-ex{font-size:10px;color:#806850;display:flex;gap:6px;margin-bottom:2px;line-height:1.4}
-.rp-wod-ex:last-child{margin-bottom:0}
 .rp-mobile-back{display:none;align-items:center;gap:6px;padding:8px 12px;font-size:11px;color:#806850;cursor:pointer;background:#0d0b09;border-bottom:1px solid #2a231c;font-family:inherit;border:none;width:100%;text-align:left;text-transform:uppercase;letter-spacing:.05em}
 @media(max-width:800px){.rp-mobile-back{display:flex}}
 

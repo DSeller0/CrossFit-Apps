@@ -47,7 +47,10 @@ export function blockEntries(results, athletes, sid, bid) {
     .filter(r => r.sessionId === sid && r.presence === 'Presente')
     .map(r => {
       const br = (r.blocks || []).find(b => b.blockId === bid)
-      if (!br) return null
+      // #157 — `skipped` is "present but did not do this block", so it is not an entry:
+      // it must not reach the ranking, the KPI tiles or the scale split. Treated exactly
+      // like a missing block entry, which is what it is from this block's point of view.
+      if (!br || br.skipped) return null
       const ath = (athletes || []).find(a => String(a.id) === String(r.athleteId))
       return {
         ...br,

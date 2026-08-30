@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import { getWeeksInMonth, weekLabel, calcKPIs, calcSessionKPIs } from './resultadosHelpers.js'
+import {
+  getWeeksInMonth,
+  weekLabel,
+  calcSessionKPIs,
+  isBlockResolved,
+  saveGate,
+  resultSummary,
+  topScale,
+  sessionProgress,
+} from './resultadosHelpers.js'
 import { monthGridCells } from '../../../public/lib/week.js'
 
 // Resultados.jsx's helpers had zero tests before #74-B/plans/44 — they lived as
@@ -40,63 +49,6 @@ describe('weekLabel', () => {
 
 const R = (athleteId, date, presence, blocks = []) => ({ athleteId, date, presence, blocks })
 
-describe('calcKPIs', () => {
-  it('returns zeroed/null KPIs for an athlete with no results', () => {
-    const k = calcKPIs('a1', [])
-    expect(k).toEqual({
-      freq: 0,
-      avgRpe: null,
-      rxRate: null,
-      rxCount: 0,
-      scaleCount: 0,
-      loadTrend: null,
-      lastRpes: [],
-      totalSessions: 0,
-    })
-  })
-
-  it('computes attendance frequency from Presente vs total results', () => {
-    const results = [
-      R('a1', '2026-07-01', 'Presente'),
-      R('a1', '2026-07-02', 'Presente'),
-      R('a1', '2026-07-03', 'Ausente'),
-    ]
-    const k = calcKPIs('a1', results)
-    expect(k.totalSessions).toBe(2)
-    expect(k.freq).toBe(67) // Math.round(2/3*100)
-  })
-
-  it('averages rpe across all logged blocks, and only counts athlete-picked scales', () => {
-    const results = [
-      R('a1', '2026-07-01', 'Presente', [{ rpe: 6, scale: 'RX' }]),
-      R('a1', '2026-07-02', 'Presente', [{ rpe: 8, scale: null }]), // never-picked scale drops out
-    ]
-    const k = calcKPIs('a1', results)
-    expect(k.avgRpe).toBe('7.0')
-    expect(k.scaleCount).toBe(1) // only the RX entry counts
-    expect(k.rxRate).toBe(100)
-  })
-
-  it('has no rxRate when no scale was ever picked (not a flattering 0%)', () => {
-    const results = [R('a1', '2026-07-01', 'Presente', [{ rpe: 5, scale: null }])]
-    expect(calcKPIs('a1', results).rxRate).toBeNull()
-  })
-
-  it('surfaces the biggest load trend across exercises with >=3 logged entries', () => {
-    const results = [
-      R('a1', '2026-07-01', 'Presente', [{ exerciseName: 'Back Squat', load: '80' }]),
-      R('a1', '2026-07-08', 'Presente', [{ exerciseName: 'Back Squat', load: '85' }]),
-      R('a1', '2026-07-15', 'Presente', [{ exerciseName: 'Back Squat', load: '100' }]),
-      R('a1', '2026-07-01', 'Presente', [{ exerciseName: 'Deadlift', load: '100' }]),
-      R('a1', '2026-07-08', 'Presente', [{ exerciseName: 'Deadlift', load: '101' }]),
-      R('a1', '2026-07-15', 'Presente', [{ exerciseName: 'Deadlift', load: '102' }]),
-    ]
-    const k = calcKPIs('a1', results)
-    expect(k.loadTrend.name).toBe('Back Squat') // 25% swing beats Deadlift's 2%
-    expect(k.loadTrend.diff).toBe(25)
-  })
-})
-
 describe('calcSessionKPIs', () => {
   it('returns null when nobody was Presente on that date', () => {
     expect(calcSessionKPIs('2026-07-01', [R('a1', '2026-07-01', 'Ausente')])).toBeNull()
@@ -120,5 +72,145 @@ describe('calcSessionKPIs', () => {
   it('has no rxPct when nobody logged a scale (not a flattering 0%)', () => {
     const k = calcSessionKPIs('2026-07-01', [R('a1', '2026-07-01', 'Presente', [{ rpe: 5 }])])
     expect(k.rxPct).toBeNull()
+  })
+})
+
+// ── #157 · the save gate ──────────────────────────────────────────────────────
+// Tested as a pure predicate rather than through the component, per plans/80: the gate
+// is the whole reason #157 exists, and "does Salvar light up" must not depend on
+// rendering a form.
+describe('isBlockResolved', () => {
+  it('is false for an untouched block — scale and RPE start unselected on purpose (#61a)', () => {
+    expect(isBlockResolved({ scale: null, rpe: null })).toBe(false)
+  })
+
+  it('needs BOTH scale and RPE, not either', () => {
+    expect(isBlockResolved({ scale: 'RX', rpe: null })).toBe(false)
+    expect(isBlockResolved({ scale: null, rpe: 8 })).toBe(false)
+    expect(isBlockResolved({ scale: 'RX', rpe: 8 })).toBe(true)
+  })
+
+  it('is true for a skipped block, which carries no scale or RPE at all', () => {
+    expect(isBlockResolved({ skipped: true, scale: null, rpe: null })).toBe(true)
+  })
+})
+
+describe('saveGate', () => {
+  it('lets an absent athlete save with nothing scored', () => {
+    const g = saveGate('Ausente', [{ blockType: 'For Time' }])
+    expect(g.canSave).toBe(true)
+    expect(g.missing).toEqual([])
+  })
+
+  it('blocks a 3-WOD session until every block is complete OR skipped', () => {
+    const logs = [
+      { blockType: 'For Time', blockLabel: 'Fran', scale: 'RX', rpe: 8 },
+      { blockType: 'EMOM', blockLabel: 'EMOM 12', skipped: true },
+      { blockType: 'Força', blockLabel: 'Back Squat' },
+    ]
+    const g = saveGate('Presente', logs)
+    expect(g.canSave).toBe(false)
+    expect(g.missing).toEqual(['Back Squat'])
+  })
+
+  it('opens once the last block is resolved — by skipping, not only by scoring', () => {
+    const logs = [
+      { blockType: 'For Time', blockLabel: 'Fran', scale: 'RX', rpe: 8 },
+      { blockType: 'Força', blockLabel: 'Back Squat', skipped: true },
+    ]
+    expect(saveGate('Presente', logs).canSave).toBe(true)
+  })
+
+  it('names the block by its type when it carries no custom label', () => {
+    expect(saveGate('Presente', [{ blockType: 'AMRAP' }]).missing).toEqual(['AMRAP'])
+  })
+
+  it('saves a session with no WOD blocks at all', () => {
+    expect(saveGate('Presente', []).canSave).toBe(true)
+  })
+})
+
+// ── row read-back ─────────────────────────────────────────────────────────────
+describe('resultSummary', () => {
+  it('reports the presence word for an absent athlete', () => {
+    expect(resultSummary(R('a1', '2026-07-01', 'Ausente'))).toBe('Ausente')
+  })
+
+  it('renders canonical perfStr — a capped For Time reads as DNF, never as a dash', () => {
+    const r = R('a1', '2026-07-01', 'Presente', [
+      { blockType: 'For Time', perfRounds: '3', rpe: 9, scale: 'RX' },
+    ])
+    expect(resultSummary(r)).toBe('3 rds (DNF) · RPE 9')
+  })
+
+  it('counts skipped blocks separately and never averages their (absent) RPE', () => {
+    const r = R('a1', '2026-07-01', 'Presente', [
+      { blockType: 'For Time', perfTime: '4:12', rpe: 8, scale: 'RX' },
+      { blockType: 'EMOM', skipped: true },
+    ])
+    expect(resultSummary(r)).toBe('4:12 · RPE 8 · 1 não fez')
+  })
+})
+
+describe('topScale', () => {
+  it('takes the first real scale, skipping a skipped block', () => {
+    const r = R('a1', '2026-07-01', 'Presente', [
+      { skipped: true, scale: null },
+      { scale: 'Inter' },
+    ])
+    expect(topScale(r)).toBe('Inter')
+  })
+
+  it('is null when nothing was scaled', () => {
+    expect(topScale(R('a1', '2026-07-01', 'Presente', [{ rpe: 5 }]))).toBeNull()
+  })
+})
+
+describe('sessionProgress', () => {
+  const sess = { id: 's1' }
+
+  it('counts an Ausente row as progress — it IS a decision the coach recorded', () => {
+    const results = [
+      { date: '2026-07-01', sessionId: 's1', athleteId: 'a1', presence: 'Presente' },
+      { date: '2026-07-01', sessionId: 's1', athleteId: 'a2', presence: 'Ausente' },
+    ]
+    expect(sessionProgress(results, '2026-07-01', sess, 4)).toEqual({
+      logged: 2,
+      total: 4,
+      pct: 50,
+    })
+  })
+
+  it('does not count another session on the same day', () => {
+    const results = [{ date: '2026-07-01', sessionId: 's2', athleteId: 'a1' }]
+    expect(sessionProgress(results, '2026-07-01', sess, 4).logged).toBe(0)
+  })
+
+  it('is 0% rather than NaN with no athletes', () => {
+    expect(sessionProgress([], '2026-07-01', sess, 0).pct).toBe(0)
+  })
+})
+
+describe('calcSessionKPIs · #157', () => {
+  it('drops skipped blocks from the class RPE and the scale distribution', () => {
+    const results = [
+      R('a1', '2026-07-01', 'Presente', [
+        { rpe: 6, scale: 'RX' },
+        { skipped: true, rpe: null, scale: null },
+      ]),
+    ]
+    const k = calcSessionKPIs('2026-07-01', results)
+    expect(k.avgRpe).toBe('6.0')
+    expect(k.scaleTotal).toBe(1)
+  })
+
+  it('scopes to one session when a sessionId is given', () => {
+    const results = [
+      { ...R('a1', '2026-07-01', 'Presente', [{ rpe: 6, scale: 'RX' }]), sessionId: 's1' },
+      { ...R('a2', '2026-07-01', 'Presente', [{ rpe: 10, scale: 'SC' }]), sessionId: 's2' },
+    ]
+    expect(calcSessionKPIs('2026-07-01', results, 's1').avgRpe).toBe('6.0')
+    expect(calcSessionKPIs('2026-07-01', results, 's2').avgRpe).toBe('10.0')
+    expect(calcSessionKPIs('2026-07-01', results).avgRpe).toBe('8.0') // unscoped: both
   })
 })

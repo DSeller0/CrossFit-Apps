@@ -342,38 +342,49 @@ export function expandMMSS(v) {
 
 export function rankResults(results, blType) {
   const isForTime = isTimeBlock(blType)
-  return [...results].sort((a, b) => {
-    if (isForTime) {
-      const ta = toSecs(a.perfTime),
-        tb = toSecs(b.perfTime)
-      if (ta !== tb) return ta - tb
-      if (ta !== Infinity) return 0
-      // Both capped — a bare `Infinity - Infinity` is NaN, which Array.sort treats as
-      // "equal", so every DNF used to tie regardless of how far each athlete actually got
-      // (#112). The checkpoint (#112) breaks the tie by real progress: rounds completed,
-      // then how far into the stopping exercise, then reps within it. A row logged before
-      // #112 has no checkpoint — its perfRounds is read in checkpoint's place so an old
-      // and a new DNF row still compare sanely against each other.
-      const roundsOf = r =>
-        r.checkpoint ? Number(r.checkpoint.roundsDone) || 0 : parseInt(r.perfRounds) || 0
-      const exIdxOf = r => (r.checkpoint ? Number(r.checkpoint.exIdx) : -1)
-      const exRepsOf = r => (r.checkpoint ? Number(r.checkpoint.exReps) || 0 : 0)
-      const ra = roundsOf(a),
-        rb = roundsOf(b)
+  // #157 — a block the athlete explicitly did NOT do never ranks. Filtered HERE rather
+  // than at each call site because several of them (Index, Leaderboard, TV slides) build
+  // their entry arrays independently of blockEntries, so a per-caller filter would have to
+  // be found and repeated six times. A skipped entry carries no scale/RPE/perf at all, so
+  // without this it sorts as an empty result and lands ahead of every real DNF.
+  return results
+    .filter(r => !r.skipped)
+    .sort((a, b) => {
+      if (isForTime) {
+        const ta = toSecs(a.perfTime),
+          tb = toSecs(b.perfTime)
+        if (ta !== tb) return ta - tb
+        if (ta !== Infinity) return 0
+        // Both capped — a bare `Infinity - Infinity` is NaN, which Array.sort treats as
+        // "equal", so every DNF used to tie regardless of how far each athlete actually got
+        // (#112). The checkpoint (#112) breaks the tie by real progress: rounds completed,
+        // then how far into the stopping exercise, then reps within it. A row logged before
+        // #112 has no checkpoint — its perfRounds is read in checkpoint's place so an old
+        // and a new DNF row still compare sanely against each other.
+        const roundsOf = r =>
+          r.checkpoint ? Number(r.checkpoint.roundsDone) || 0 : parseInt(r.perfRounds) || 0
+        const exIdxOf = r => (r.checkpoint ? Number(r.checkpoint.exIdx) : -1)
+        const exRepsOf = r => (r.checkpoint ? Number(r.checkpoint.exReps) || 0 : 0)
+        const ra = roundsOf(a),
+          rb = roundsOf(b)
+        if (ra !== rb) return rb - ra
+        const xa = exIdxOf(a),
+          xb = exIdxOf(b)
+        if (xa !== xb) return xb - xa
+        return exRepsOf(b) - exRepsOf(a)
+      }
+      const ra = parseInt(a.perfRounds) || 0,
+        rb = parseInt(b.perfRounds) || 0
       if (ra !== rb) return rb - ra
-      const xa = exIdxOf(a),
-        xb = exIdxOf(b)
-      if (xa !== xb) return xb - xa
-      return exRepsOf(b) - exRepsOf(a)
-    }
-    const ra = parseInt(a.perfRounds) || 0,
-      rb = parseInt(b.perfRounds) || 0
-    if (ra !== rb) return rb - ra
-    return (parseInt(b.perfReps) || 0) - (parseInt(a.perfReps) || 0)
-  })
+      return (parseInt(b.perfReps) || 0) - (parseInt(a.perfReps) || 0)
+    })
 }
 
 export function perfStr(r, blType) {
+  // #157 — a skipped block has no performance to render. rankResults already drops these
+  // before any list is built, so this is the safety net for a surface that reads a block
+  // entry directly (a summary row, a ficha history line) rather than through a ranking.
+  if (r.skipped) return '—'
   // For Time with no time but with rounds = capped before finishing. The three
   // Results copies rendered that as "N rds (DNF)" while this canonical one
   // returned '—', silently hiding the work a capped athlete actually did

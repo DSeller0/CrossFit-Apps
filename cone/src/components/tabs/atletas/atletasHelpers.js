@@ -374,3 +374,112 @@ export function sinceLastNote(athlete, notes, prs, goals, sessions, results, tod
 
   return { anchorDate: anchor, items }
 }
+
+/**
+ * The three unique "Por atleta" KPIs, migrated out of Resultados' Histórico sub-tab
+ * (#57/plans/80 · C3) — that sub-tab went months without being opened even by its own
+ * author, so its content moved to where the coach already prepares a 1:1.
+ *
+ * ⚠️ `freq` did NOT come across, deliberately. Its denominator was "result rows that
+ * exist", so an athlete with one logged session scored 100% (the #164 family). The
+ * ficha's own "Presença · 4 semanas" already answers attendance honestly, two Cards up.
+ *
+ * Takes ALREADY-FILTERED results for one athlete (Atletas.jsx's `athResults`), matching
+ * how every other ficha helper is fed. Every value degrades to `null` rather than to a
+ * flattering zero: 0% RX reads as "logged, all scaled", which is a different claim from
+ * "nothing logged yet" (plans/22 rules 1, 5).
+ */
+export function resultKpis(athResults) {
+  const ar = athResults || []
+  // #157 — a skipped block is absence, not effort. It carries no rpe/scale to begin
+  // with, but filtering here keeps that guarantee local instead of assumed.
+  const liveBlocks = r => (r.blocks || []).filter(b => !b.skipped)
+
+  const rpes = ar.flatMap(r =>
+    liveBlocks(r)
+      .map(b => b.rpe)
+      .filter(Boolean),
+  )
+  const avgRpe = rpes.length > 0 ? (rpes.reduce((a, b) => a + b, 0) / rpes.length).toFixed(1) : null
+
+  // Only scales an athlete actually chose count (plans/22 rules 1, 3, 5): a null
+  // (never-picked, or nulled pre-#61 fabricated) scale is dropped from both sides.
+  const scales = ar.flatMap(r =>
+    liveBlocks(r)
+      .map(b => b.scale)
+      .filter(Boolean),
+  )
+  const rxCount = scales.filter(s => s === 'RX').length
+  const rxRate = scales.length > 0 ? Math.round((rxCount / scales.length) * 100) : null
+
+  const loadMap = {}
+  ar.forEach(r => {
+    liveBlocks(r).forEach(b => {
+      if (b.exerciseName && b.load) {
+        if (!loadMap[b.exerciseName]) loadMap[b.exerciseName] = []
+        loadMap[b.exerciseName].push({ date: r.date, load: parseFloat(b.load) })
+      }
+    })
+  })
+  let loadTrend = null
+  Object.entries(loadMap).forEach(([name, entries]) => {
+    if (entries.length >= 3) {
+      const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date))
+      const first = sorted[0].load
+      const last = sorted[sorted.length - 1].load
+      if (!first) return
+      const diff = parseFloat((((last - first) / first) * 100).toFixed(1))
+      if (!loadTrend || Math.abs(diff) > Math.abs(loadTrend.diff))
+        loadTrend = { name, first, last, diff }
+    }
+  })
+
+  // The sparkline: one mean RPE per session, newest 8, oldest-first so the bars read
+  // left-to-right as time. Sorted explicitly rather than trusting array order — results
+  // arrive from a blob whose order is insertion, not date.
+  const lastRpes = [...ar]
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+    .slice(-8)
+    .map(r => {
+      const rs = liveBlocks(r)
+        .map(b => b.rpe)
+        .filter(Boolean)
+      return rs.length > 0 ? rs.reduce((a, b) => a + b, 0) / rs.length : null
+    })
+    .filter(Boolean)
+
+  return { avgRpe, rxRate, rxCount, scaleCount: scales.length, loadTrend, lastRpes }
+}
+
+/**
+ * The chronological logged-result list for the ficha — the history the ficha lacked
+ * ("Últimas sessões" lists sessions ASSIGNED to the athlete, not results LOGGED).
+ *
+ * ⚠️ The session name comes from the row's own `sessionId`, resolved through canonical
+ * `sessName` (injected, so this file stays free of a sessions.js import cycle). The old
+ * Histórico read `sessions[r.date][0].mainTraining` — the FIRST session of that day
+ * regardless of which one the result belonged to, so on any day with two classes it
+ * named the wrong one, and blank whenever the coach used a different name field.
+ */
+export function resultHistory(athResults, sessions, sessName) {
+  return [...(athResults || [])]
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+    .map(r => {
+      const daySessions = (sessions || {})[r.date] || []
+      const sess = daySessions.find(s => String(s.id) === String(r.sessionId)) || null
+      const live = (r.blocks || []).filter(b => !b.skipped)
+      const rpes = live.map(b => b.rpe).filter(Boolean)
+      return {
+        id: r.id,
+        date: r.date,
+        presence: r.presence,
+        sessionName: sess ? sessName(sess, r.date) : '',
+        scale: live.map(b => b.scale).filter(Boolean)[0] || null,
+        blocks: live,
+        skippedCount: (r.blocks || []).filter(b => b.skipped).length,
+        avgRpe: rpes.length ? (rpes.reduce((a, b) => a + b, 0) / rpes.length).toFixed(1) : null,
+        flagged: !!r.flagForReview,
+        note: r.coachNote || '',
+      }
+    })
+}

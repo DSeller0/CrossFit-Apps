@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
+  resultKpis,
+  resultHistory,
   snapPct,
   goalPct,
   combinedPct,
@@ -490,5 +492,130 @@ describe('sinceLastNote', () => {
     const notes = [{ id: 'n1', date: '2026-08-03', text: 'x' }]
     const out = sinceLastNote(athlete, notes, prs, goals, sessions, results, todayKey)
     expect(out.items).toEqual([])
+  })
+})
+
+// ── #57/plans/80 · the migrated "Por atleta" KPIs + the logged-result history ──
+// These arrived from resultadosHelpers' calcKPIs when Resultados' Histórico sub-tab was
+// retired. `freq` deliberately did NOT come with them (its denominator was result rows
+// that exist — the #164 family), so there is no test for it: there is no such output.
+const RR = (date, presence, blocks = [], extra = {}) => ({
+  id: date + presence,
+  athleteId: 'a1',
+  date,
+  presence,
+  blocks,
+  ...extra,
+})
+
+describe('resultKpis', () => {
+  it('returns all-null KPIs, never zeros, for an athlete with no results', () => {
+    expect(resultKpis([])).toEqual({
+      avgRpe: null,
+      rxRate: null,
+      rxCount: 0,
+      scaleCount: 0,
+      loadTrend: null,
+      lastRpes: [],
+    })
+  })
+
+  it('reports no freq field at all — Presença · 4 semanas owns attendance now', () => {
+    expect(resultKpis([])).not.toHaveProperty('freq')
+    expect(resultKpis([])).not.toHaveProperty('totalSessions')
+  })
+
+  it('averages rpe across logged blocks and only counts athlete-picked scales', () => {
+    const k = resultKpis([
+      RR('2026-07-01', 'Presente', [{ rpe: 6, scale: 'RX' }]),
+      RR('2026-07-02', 'Presente', [{ rpe: 8, scale: null }]),
+    ])
+    expect(k.avgRpe).toBe('7.0')
+    expect(k.scaleCount).toBe(1)
+    expect(k.rxRate).toBe(100)
+  })
+
+  it('has no rxRate when no scale was ever picked (not a flattering 0%)', () => {
+    expect(resultKpis([RR('2026-07-01', 'Presente', [{ rpe: 5, scale: null }])]).rxRate).toBeNull()
+  })
+
+  it('surfaces the biggest load trend across exercises with >=3 logged entries', () => {
+    const k = resultKpis([
+      RR('2026-07-01', 'Presente', [{ exerciseName: 'Back Squat', load: '80' }]),
+      RR('2026-07-08', 'Presente', [{ exerciseName: 'Back Squat', load: '85' }]),
+      RR('2026-07-15', 'Presente', [{ exerciseName: 'Back Squat', load: '100' }]),
+      RR('2026-07-02', 'Presente', [{ exerciseName: 'Deadlift', load: '100' }]),
+      RR('2026-07-09', 'Presente', [{ exerciseName: 'Deadlift', load: '101' }]),
+      RR('2026-07-16', 'Presente', [{ exerciseName: 'Deadlift', load: '102' }]),
+    ])
+    expect(k.loadTrend.name).toBe('Back Squat')
+    expect(k.loadTrend.diff).toBe(25)
+  })
+
+  it('#157 — a skipped block contributes no rpe and no scale', () => {
+    const k = resultKpis([
+      RR('2026-07-01', 'Presente', [
+        { rpe: 6, scale: 'RX' },
+        { skipped: true, rpe: null, scale: null },
+      ]),
+    ])
+    expect(k.avgRpe).toBe('6.0')
+    expect(k.scaleCount).toBe(1)
+  })
+
+  it('orders the sparkline oldest-first by DATE, not by array order', () => {
+    const k = resultKpis([
+      RR('2026-07-09', 'Presente', [{ rpe: 9 }]),
+      RR('2026-07-01', 'Presente', [{ rpe: 4 }]),
+    ])
+    expect(k.lastRpes).toEqual([4, 9])
+  })
+})
+
+describe('resultHistory', () => {
+  const sessions = {
+    '2026-07-01': [
+      { id: 's1', mainTraining: 'Turma 07h' },
+      { id: 's2', mainTraining: 'Turma 19h' },
+    ],
+  }
+  const stubSessName = sess => sess.mainTraining
+
+  it("names the session the result BELONGS to, not the day's first (finding 12)", () => {
+    const h = resultHistory(
+      [RR('2026-07-01', 'Presente', [{ scale: 'RX' }], { sessionId: 's2' })],
+      sessions,
+      stubSessName,
+    )
+    expect(h[0].sessionName).toBe('Turma 19h')
+  })
+
+  it('leaves the name blank rather than guessing when the session is gone', () => {
+    const h = resultHistory(
+      [RR('2026-07-01', 'Presente', [], { sessionId: 'deleted' })],
+      sessions,
+      stubSessName,
+    )
+    expect(h[0].sessionName).toBe('')
+  })
+
+  it('sorts newest first', () => {
+    const h = resultHistory(
+      [RR('2026-07-01', 'Presente'), RR('2026-07-09', 'Presente')],
+      sessions,
+      stubSessName,
+    )
+    expect(h.map(x => x.date)).toEqual(['2026-07-09', '2026-07-01'])
+  })
+
+  it('#157 — counts skipped blocks separately and keeps them out of the live blocks', () => {
+    const h = resultHistory(
+      [RR('2026-07-01', 'Presente', [{ scale: 'RX', rpe: 8 }, { skipped: true }])],
+      sessions,
+      stubSessName,
+    )
+    expect(h[0].skippedCount).toBe(1)
+    expect(h[0].blocks).toHaveLength(1)
+    expect(h[0].avgRpe).toBe('8.0')
   })
 })

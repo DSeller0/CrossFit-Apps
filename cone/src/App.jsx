@@ -255,14 +255,15 @@ export default function App() {
           )}
           {tab === 'exercises' && <ExerciciosTab />}
           {tab === 'locations' && <AfiliadosTab events={events} />}
+          {/* No .res-pane wrapper since #57/plans/80 — it existed only to accent-fill
+              .b.bp/.b.bsec/.res-tab.on, all three of which are gone with the tab's C0
+              adoption. (.pub-pane below is still real: Publicador/Agenda #59 owns it.) */}
           {tab === 'results' && (
-            <div className="res-pane">
-              <ResultadosTab
-                sessions={sessions}
-                preload={resultsPreload}
-                onPreloadConsumed={() => setResultsPreload(null)}
-              />
-            </div>
+            <ResultadosTab
+              sessions={sessions}
+              preload={resultsPreload}
+              onPreloadConsumed={() => setResultsPreload(null)}
+            />
           )}
           {tab === 'agenda' && (
             <div className="pub-pane">

@@ -24,6 +24,13 @@ const ATHLETE_KEY_DEFAULTS = {
   // #116 — per-exercise adaptation notes, written by ScoreFields.jsx's ExerciseNotesRows
   // whenever the athlete's scale isn't RX. Same "null, never a hollow array" convention.
   exerciseRows: null,
+  // #157 — the athlete was present but did NOT do this block. An explicit toggle, never
+  // an inferred empty: absence and a zero score must stay distinguishable in results_v2,
+  // which is why this is a key of its own rather than a relaxed scale/RPE gate. A skipped
+  // entry carries NO fabricated scale/RPE (that was #61a's whole point), so every reader
+  // that counts or ranks a block must drop it — rankResults (wod.js), blockEntries
+  // (results/resultsHelpers.js) and calcBlockStats (lib/sessions.js) all do.
+  skipped: null,
 }
 
 export const ATHLETE_KEYS = Object.keys(ATHLETE_KEY_DEFAULTS)

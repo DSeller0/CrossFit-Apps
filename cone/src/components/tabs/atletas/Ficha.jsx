@@ -9,6 +9,7 @@ import GoalBar from './GoalBar.jsx'
 import SinceLastOneOnOne from './SinceLastOneOnOne.jsx'
 import PresenceGrid from './PresenceGrid.jsx'
 import CoachNotePanel from './CoachNotePanel.jsx'
+import ResultHistoryCard from './ResultHistoryCard.jsx'
 import { DEFAULT_ATHLETE_COLOR, goalPct } from './atletasHelpers.js'
 import s from './Atletas.module.css'
 
@@ -35,6 +36,8 @@ export default function Ficha({
   goals = [],
   sinceLastNote,
   presenceWeeks = [],
+  resultKpis = null,
+  resultHistory = [],
   notes = [],
   onEditProfile,
   onAddPr,
@@ -47,6 +50,7 @@ export default function Ficha({
   onConfigureGoal,
   onDeleteGoal,
   onSaveNote,
+  onGoToResultados,
 }) {
   if (!athlete) {
     return (
@@ -90,6 +94,19 @@ export default function Ficha({
             <h2 className={s.secTitle}>Presença · 4 semanas</h2>
           </div>
           <PresenceGrid weeks={presenceWeeks} />
+        </Card>
+
+        {/* #57/plans/80 — position 4, right after Presença: assigned → showed up →
+            actually did. The three attendance-shaped Cards read in sequence. */}
+        <Card pad="sm">
+          <div className={s.secHdr}>
+            <h2 className={s.secTitle}>Histórico de resultados</h2>
+          </div>
+          <ResultHistoryCard
+            kpis={resultKpis}
+            history={resultHistory}
+            onGoToResultados={onGoToResultados}
+          />
         </Card>
 
         <Card pad="sm">

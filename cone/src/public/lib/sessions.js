@@ -82,6 +82,10 @@ export function calcBlockStats(sessions, present, name, types, start, end, box =
   present.forEach(r => {
     if (r.date < start || r.date > end) return
     ;(r.blocks || []).forEach(b => {
+      // #157 — a block marked "não fez" was prescribed but not executed, so it counts
+      // towards `planned` (via the session above) and never towards `executed`. Without
+      // this the adherence bars read a skipped block as done.
+      if (b.skipped) return
       if (ts.has(b.blockType)) executed[b.blockType]++
     })
   })

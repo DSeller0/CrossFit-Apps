@@ -414,3 +414,150 @@
   .overlay{padding:0;align-items:flex-end}
   .modal{max-height:90vh}
 }
+
+/* ── Histórico de resultados (#57/plans/80 · C3) ─────────────────────────────
+   The Card the retired Resultados > Histórico > Por atleta sub-tab became. Token-only;
+   the scale pill uses canonical RankList treatment (no fill, border in currentColor —
+   a color-mix fill washes the label out on both light themes). */
+.rhKpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--divider);
+  border: 1px solid var(--divider);
+  margin-bottom: var(--sp-3);
+}
+@media (max-width: 520px) {
+  .rhKpis {
+    grid-template-columns: 1fr;
+  }
+}
+.rhKpi {
+  background: var(--stone2);
+  padding: 9px 10px 10px;
+}
+.rhLbl {
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.rhVal {
+  font-size: 19px;
+  font-weight: 900;
+  color: var(--cream);
+  line-height: 1;
+  font-family: var(--font-mono);
+}
+.rhValMuted {
+  color: var(--dim);
+}
+.rhSub {
+  font-size: 9.5px;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.35;
+}
+.rhBar {
+  margin-top: var(--sp-2);
+}
+.rhSpark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 26px;
+  margin-top: 7px;
+}
+.rhSpark span {
+  flex: 1;
+  background: var(--accent);
+  min-width: 3px;
+}
+.rhRow {
+  display: flex;
+  gap: 10px;
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--divider);
+  align-items: flex-start;
+}
+.rhRow:last-child {
+  border-bottom: none;
+}
+.rhDate {
+  font-size: 10.5px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  width: 62px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+.rhBody {
+  flex: 1;
+  min-width: 0;
+}
+.rhTop {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.rhSess {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sub);
+  letter-spacing: 0.03em;
+}
+.rhPill {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid currentColor;
+  flex-shrink: 0;
+}
+.rhFlag {
+  color: var(--err);
+  flex-shrink: 0;
+}
+.rhPerf {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.rhPerf b {
+  color: var(--cream);
+  font-weight: 700;
+}
+.rhSkipped {
+  color: var(--dim);
+}
+.rhAbsent {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 3px;
+}
+.rhNote {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 3px;
+}
+.rhLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+}

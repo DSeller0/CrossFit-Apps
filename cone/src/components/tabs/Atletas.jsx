@@ -12,6 +12,7 @@ import {
 import { APP_CONFIG } from '../../utils/config'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { isWodBlock } from '../../public/lib/wod.js'
+import { sessName } from '../../public/lib/sessions.js'
 import { buildRegistryIndex, resolveExercise } from '../../public/lib/registry.js'
 import ConfirmReview from '../../public/shared/ConfirmReview'
 import Button from '../ui/Button.jsx'
@@ -33,6 +34,8 @@ import {
   goalSignal,
   presenceGrid,
   sinceLastNote,
+  resultKpis,
+  resultHistory,
   DEFAULT_ATHLETE_COLOR,
 } from './atletas/atletasHelpers.js'
 import s from './atletas/Atletas.module.css'
@@ -174,6 +177,16 @@ export default function AtletasTab({ sessions, results, events = {} }) {
       { date: null, time: null, label: 'Em dia', athletes: emDia },
     ].filter(g => g.athletes.length)
   }, [isMobile, athletes, signalsByAthlete, groups])
+
+  // #57/plans/80 — the migrated "Por atleta" KPIs + the logged-result history. sessName
+  // is INJECTED so atletasHelpers stays free of a sessions.js import; it is also the
+  // fix for finding 12 (the old Histórico named the day's FIRST session, not the one the
+  // result belonged to).
+  const athResultKpis = useMemo(() => resultKpis(athResults), [athResults])
+  const athResultHistory = useMemo(
+    () => resultHistory(athResults, sessions, sessName),
+    [athResults, sessions],
+  )
 
   const presenceWeeks = useMemo(
     () => (ath ? presenceGrid(sessions, results, ath, todayKey) : []),
@@ -390,6 +403,8 @@ export default function AtletasTab({ sessions, results, events = {} }) {
       goals={athGoals}
       sinceLastNote={sinceLast}
       presenceWeeks={presenceWeeks}
+      resultKpis={athResultKpis}
+      resultHistory={athResultHistory}
       notes={athNotes}
       onEditProfile={() => setShowProfileModal(true)}
       onAddPr={openNewPr}

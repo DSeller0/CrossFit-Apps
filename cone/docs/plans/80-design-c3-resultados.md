@@ -1,5 +1,13 @@
 # 80 — #57 · Design pass C3 — Resultados (SPA)
 
+> ✅ Done: #57 · #157 · #169 — 2026-08-30 — see BACKLOG.md
+>
+> **All three phases shipped.** Phase 0 `4772250`+`77585d4` · Phase 1 `aa8ba87`
+> (mockup 61, approved by the user) · Phase 2 (this commit). Closed **#57**, **#157**, **#169**;
+> **#170** filed. Outcome: the sub-tab bar did NOT survive — Resultados is one surface. See
+> BACKLOG.md's Done entry for the full account, and the "Phase 1 output" section below for the
+> design decisions the gate approved.
+
 > C3 in the [design-pass program](./16-design-pass-program.md). ⚠️ **Lane B, not Lane A** — the
 > first C-session that is, and plans/16 rule 1 is corrected for it. Two of the three sub-tabs are
 > unfound after months of live use, so the tab's own structure is the finding, not its tokens.

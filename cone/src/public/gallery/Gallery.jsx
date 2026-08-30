@@ -5,6 +5,7 @@ import spa from './groups/spa.jsx'
 import criador from './groups/criador.jsx'
 import atletas from './groups/atletas.jsx'
 import afiliados from './groups/afiliados.jsx'
+import resultados from './groups/resultados.jsx'
 import shared from './groups/shared.jsx'
 import results from './groups/results.jsx'
 import leaderboard from './groups/leaderboard.jsx'
@@ -36,6 +37,7 @@ export const GROUPS = [
   criador,
   atletas,
   afiliados,
+  resultados,
   shared,
   results,
   leaderboard,
