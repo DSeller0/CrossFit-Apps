@@ -939,7 +939,7 @@ section lists what was checked and found **clean**, so it isn't re-raised next p
 
 ## ✅ Done (recent)
 
-**2026-08-30 — #59 · C5·a — Agenda (Lane B)** · [plans/81 §C5·a](./plans/81-design-c5-publicador-agenda.md) · mockup `2e363c0` (approved by the user) → `62f6d8e` · `e77bb72` · `c402e12` · `214cdef` · gallery + cards (this commit). Closed **#105** and **#106**.
+**2026-08-30 — #59 · C5·a — Agenda (Lane B)** · [plans/81 §C5·a](./plans/81-design-c5-publicador-agenda.md) · mockup `2e363c0` (approved by the user) → `62f6d8e` · `e77bb72` · `c402e12` · `214cdef` · gallery + cards `435fc39`. Closed **#105** and **#106**.
 
 **The structural answer, and everything follows from it: AGENDA IS THE EDITOR.** #162 had moved three of this tab's jobs into Afiliados three days earlier — `MinhaSemanaPane` shows the week, `AffiliateSessions` an affiliate's month, `Fechamento` bills them — so the brief's question was what is left. All three are **read-projections by money** (per affiliate, per period) and **none of them writes**. Agenda is the only surface that writes `events`, and the only one where `events` meets `sessions`: `dayGymSessions`, `linkedSession`, `onEditSession` and `onLogResult` exist nowhere else, and no Afiliados pane knows `sessions` exists. **Corollary that paid for itself:** an event with no affiliate produces no line in `calcTotal`, so Fechamento cannot see it — and Agenda rendered *nothing* for a null `svcLoc`, making the one condition that breaks billing invisible on the only surface that can fix it. It is now an explicit "sem afiliado" tag with a line saying what it costs.
 

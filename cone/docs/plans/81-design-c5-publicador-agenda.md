@@ -516,7 +516,7 @@ Ship. No gate, no mockup.
 
 > ✅ **Done 2026-08-30** · mockup `2e363c0` (approved by the user) → build `62f6d8e` (hoist) ·
 > `e77bb72` (filter, closes #105) · `c402e12` (module CSS + structure) · `214cdef` (primitives,
-> a11y, #102 slot, uid, #106) · gallery + cards (this commit). See BACKLOG.md's Done entry.
+> a11y, #102 slot, uid, #106) · gallery + cards `435fc39`. See BACKLOG.md's Done entry.
 > **The mockup's structural answer: AGENDA IS THE EDITOR** — the three surfaces #162 built over the
 > same `events` blob are read-projections by money, and Agenda is the only one that writes it, and
 > the only one where `events` meets `sessions`. Both gate questions went the recommended way: the
