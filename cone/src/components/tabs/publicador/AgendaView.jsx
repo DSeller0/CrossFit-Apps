@@ -5,6 +5,8 @@ import { sessName } from '../../../public/lib/sessions.js'
 import { useIsMobile } from '../../../hooks/useIsMobile'
 import { getWeeksOfMonth } from './exportHelpers'
 import { EventFormInner, ReportModal } from './events'
+import EventFilter from './agenda/EventFilter.jsx'
+import { agendaFilter, evStatus, filterDay } from './eventFilter.js'
 import CellDay from './agenda/CellDay.jsx'
 import DayPane from './agenda/DayPane.jsx'
 
@@ -12,7 +14,10 @@ import DayPane from './agenda/DayPane.jsx'
 export function AgendaView({ sessions, events, setEvents, athletes, onEditSession, onLogResult }) {
   const [year, setYear] = useState(new Date().getFullYear())
   const [month, setMonth] = useState(new Date().getMonth())
-  const [filter, setFilter] = useState('all')
+  // #105 — the one shared filter object, superset of this tab's old tri-state and
+  // ReportModal's five axes. `agendaFilter()` opens with no period axis: the month
+  // nav below IS the period.
+  const [filter, setFilter] = useState(agendaFilter)
   const [selDay, setSelDay] = useState(null)
   const [showReport, setShowReport] = useState(false)
   const [showForm, setShowForm] = useState(null)
@@ -49,15 +54,8 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
     const svc = ev.locationId ? locs.find(l => l.id === ev.locationId) : null
     return svc?.name || 'Aula'
   }
-  function evStatus(ev) {
-    return ev.status === 'completed' ? 'completed' : 'scheduled'
-  }
   function dayEvents(iso) {
-    const evs = (events[iso] || []).filter(ev => {
-      if (filter === 'all') return true
-      return filter === evStatus(ev)
-    })
-    return evs.sort((a, b) => a.time.localeCompare(b.time))
+    return filterDay(events, iso, filter)
   }
   function dayGymSessions(iso) {
     return (sessions[iso] || []).filter(s => getTargets(s).length === 0)
@@ -244,32 +242,6 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
           ),
         ),
         React.createElement(
-          'div',
-          { style: { display: 'flex', gap: '4px', flexShrink: 0 } },
-          ['all', 'scheduled', 'completed'].map(f =>
-            React.createElement(
-              'button',
-              {
-                key: f,
-                type: 'button',
-                onClick: () => setFilter(f),
-                style: {
-                  background: filter === f ? 'var(--theme-accent)' : 'transparent',
-                  color: filter === f ? 'var(--theme-accent-text)' : '#806850',
-                  border: `1px solid ${filter === f ? 'var(--theme-accent)' : '#2a231c'}`,
-                  padding: '2px 6px',
-                  cursor: 'pointer',
-                  fontSize: '9px',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  fontFamily: 'inherit',
-                },
-              },
-              f === 'all' ? 'Todos' : f === 'scheduled' ? 'Agendado' : 'Completo',
-            ),
-          ),
-        ),
-        React.createElement(
           'button',
           {
             type: 'button',
@@ -293,6 +265,14 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
           'Relatório',
         ),
       ),
+      React.createElement(EventFilter, {
+        value: filter,
+        onChange: setFilter,
+        axes: ['type', 'status', 'affiliate', 'athlete'],
+        layout: 'row',
+        locs,
+        athletes,
+      }),
     )
   }
 
@@ -422,159 +402,145 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
   // ── Desktop render helpers ───────────────────────────────────────────────────
   function renderDesktopHeader() {
     return React.createElement(
-      'div',
-      {
-        className: 'agenda-header',
-        style: {
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '8px 12px',
-          borderBottom: '1px solid #2a2318',
-          flexWrap: 'wrap',
-          flexShrink: 0,
-        },
-      },
+      React.Fragment,
+      null,
       React.createElement(
-        'button',
+        'div',
         {
-          onClick: prevMonth,
+          className: 'agenda-header',
           style: {
-            background: 'transparent',
-            border: '1px solid #2a2318',
-            color: '#887060',
-            padding: '6px 12px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            lineHeight: 1,
-          },
-        },
-        '‹',
-      ),
-      React.createElement(
-        'button',
-        {
-          onClick: () => setShowReport(true),
-          style: {
-            background: 'rgba(216,168,64,.1)',
-            border: '1px solid rgba(216,168,64,.3)',
-            color: '#d8a840',
-            padding: '6px 12px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '12px',
-            fontWeight: 700,
             display: 'flex',
             alignItems: 'center',
-            gap: '4px',
+            gap: '8px',
+            padding: '8px 12px',
+            borderBottom: '1px solid #2a2318',
+            flexWrap: 'wrap',
+            flexShrink: 0,
           },
-        },
-        React.createElement('i', { className: 'ti ti-file-analytics' }),
-        ' Relatório',
-      ),
-      React.createElement(
-        'span',
-        {
-          style: {
-            fontSize: '14px',
-            fontWeight: 700,
-            color: '#c8b090',
-            flex: '1 1 100px',
-            minWidth: '80px',
-            textTransform: 'uppercase',
-            letterSpacing: '.03em',
-          },
-        },
-        `${MONTH_PT[month]} ${year}`,
-      ),
-      React.createElement(
-        'button',
-        {
-          onClick: nextMonth,
-          style: {
-            background: 'transparent',
-            border: '1px solid #2a2318',
-            color: '#887060',
-            padding: '6px 12px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            lineHeight: 1,
-          },
-        },
-        '›',
-      ),
-      React.createElement(
-        'button',
-        {
-          onClick: () => {
-            const now = new Date()
-            setMonth(now.getMonth())
-            setYear(now.getFullYear())
-            setSelDay(now.toISOString().slice(0, 10))
-          },
-          style: {
-            background: 'transparent',
-            border: '1px solid #2a2318',
-            color: '#887060',
-            padding: '4px 8px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '11px',
-            fontWeight: 700,
-          },
-        },
-        'Hoje',
-      ),
-      React.createElement(
-        'div',
-        {
-          className: 'agenda-stats',
-          style: { display: 'flex', gap: '8px', fontSize: '11px', flexWrap: 'wrap' },
         },
         React.createElement(
-          'span',
-          { style: { color: 'var(--theme-accent)' } },
-          [completedAulas, '/', totalAulas, ' aulas'].join(''),
-        ),
-        React.createElement(
-          'span',
-          { style: { color: '#d8a840' } },
-          [completedPersonal, '/', totalPersonal, ' personal'].join(''),
-        ),
-        React.createElement(
-          'span',
-          { style: { color: '#68d8a0' } },
-          [totalCompleted, '/', totalEvs, ' concluídas'].join(''),
-        ),
-      ),
-      React.createElement(
-        'div',
-        { style: { display: 'flex', gap: '4px' } },
-        ['all', 'scheduled', 'completed'].map(f =>
-          React.createElement(
-            'button',
-            {
-              key: f,
-              onClick: () => setFilter(f),
-              className: 'agenda-filter-btn',
-              style: {
-                background: filter === f ? 'var(--theme-accent)' : 'transparent',
-                color: filter === f ? 'var(--theme-accent-text)' : '#887060',
-                border: `1px solid ${filter === f ? 'var(--theme-accent)' : '#2a2318'}`,
-                padding: '3px 7px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '10px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-              },
+          'button',
+          {
+            onClick: prevMonth,
+            style: {
+              background: 'transparent',
+              border: '1px solid #2a2318',
+              color: '#887060',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              lineHeight: 1,
             },
-            f === 'all' ? 'Todos' : f === 'scheduled' ? 'Agendado' : 'Completo',
+          },
+          '‹',
+        ),
+        React.createElement(
+          'button',
+          {
+            onClick: () => setShowReport(true),
+            style: {
+              background: 'rgba(216,168,64,.1)',
+              border: '1px solid rgba(216,168,64,.3)',
+              color: '#d8a840',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            },
+          },
+          React.createElement('i', { className: 'ti ti-file-analytics' }),
+          ' Relatório',
+        ),
+        React.createElement(
+          'span',
+          {
+            style: {
+              fontSize: '14px',
+              fontWeight: 700,
+              color: '#c8b090',
+              flex: '1 1 100px',
+              minWidth: '80px',
+              textTransform: 'uppercase',
+              letterSpacing: '.03em',
+            },
+          },
+          `${MONTH_PT[month]} ${year}`,
+        ),
+        React.createElement(
+          'button',
+          {
+            onClick: nextMonth,
+            style: {
+              background: 'transparent',
+              border: '1px solid #2a2318',
+              color: '#887060',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              lineHeight: 1,
+            },
+          },
+          '›',
+        ),
+        React.createElement(
+          'button',
+          {
+            onClick: () => {
+              const now = new Date()
+              setMonth(now.getMonth())
+              setYear(now.getFullYear())
+              setSelDay(now.toISOString().slice(0, 10))
+            },
+            style: {
+              background: 'transparent',
+              border: '1px solid #2a2318',
+              color: '#887060',
+              padding: '4px 8px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '11px',
+              fontWeight: 700,
+            },
+          },
+          'Hoje',
+        ),
+        React.createElement(
+          'div',
+          {
+            className: 'agenda-stats',
+            style: { display: 'flex', gap: '8px', fontSize: '11px', flexWrap: 'wrap' },
+          },
+          React.createElement(
+            'span',
+            { style: { color: 'var(--theme-accent)' } },
+            [completedAulas, '/', totalAulas, ' aulas'].join(''),
+          ),
+          React.createElement(
+            'span',
+            { style: { color: '#d8a840' } },
+            [completedPersonal, '/', totalPersonal, ' personal'].join(''),
+          ),
+          React.createElement(
+            'span',
+            { style: { color: '#68d8a0' } },
+            [totalCompleted, '/', totalEvs, ' concluídas'].join(''),
           ),
         ),
       ),
+      React.createElement(EventFilter, {
+        value: filter,
+        onChange: setFilter,
+        axes: ['type', 'status', 'affiliate', 'athlete'],
+        layout: 'row',
+        locs,
+        athletes,
+      }),
     )
   }
 

@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
-import { loadAthletes, loadSettings, loadLocations, loadCoach, toISO } from '../../../utils/storage'
+import { loadAthletes, loadSettings, loadLocations, loadCoach } from '../../../utils/storage'
 import { buildPixPayload, pixClean } from '../../../utils/pix'
 import { MONTH_PT } from '../../../public/lib/week.js'
 import { sessName } from '../../../public/lib/sessions.js'
 import { fmtDateNum, fmtDur, calcTotal, sumByCurrency } from './billing.js'
 import { qrToBase64 } from './pixQr.js'
+import EventFilter from './agenda/EventFilter.jsx'
+import { reportFilter, filterEvents, matchingAthleteIds } from './eventFilter.js'
 
 // ── EventFormInner — standalone so inputs don't lose focus ───────────────────
 export function EventFormInner({ showForm, sessions, athletes, initialData, onSave, onCancel }) {
@@ -606,17 +608,15 @@ export function ReportModal({ events, sessions, onClose }) {
   const coach = loadCoach()
   const gymCfg = loadSettings()
   const now = new Date()
-  const [yr, setYr] = useState(now.getFullYear())
-  const [mo, setMo] = useState(now.getMonth())
-  const [useRange, setUseRange] = useState(false)
-  const [rangeFrom, setRangeFrom] = useState(toISO(now))
-  const [rangeTo, setRangeTo] = useState(toISO(now))
-  const [typeFilter, setTypeFilter] = useState({ aula: true, personal: true })
-  const [locAll, setLocAll] = useState(true)
-  const [locSelected, setLocSelected] = useState(() => new Set())
-  const [athAll, setAthAll] = useState(true)
-  const [athSelected, setAthSelected] = useState(() => new Set())
-  const [statusFilter, setStatusFilter] = useState('completed')
+  // #105 — eleven pieces of filter state became one object, shared with Agenda.
+  // `reportFilter` preserves this modal's own opening position: this month,
+  // completed only.
+  const [filter, setFilter] = useState(() => reportFilter(now.getFullYear(), now.getMonth()))
+  const period = filter.period
+  const useRange = period.mode === 'range'
+  const { yr, mo } = period
+  const rangeFrom = period.from
+  const rangeTo = period.to
   const [showDetails, setShowDetails] = useState(false)
   const [showRate, setShowRate] = useState(true)
   const [showHeader, setShowHeader] = useState(true)
@@ -624,35 +624,18 @@ export function ReportModal({ events, sessions, onClose }) {
   const [showPix, setShowPix] = useState(false)
 
   function filteredEvents() {
-    const from = useRange ? rangeFrom : `${yr}-${String(mo + 1).padStart(2, '0')}-01`
-    const to = useRange
-      ? rangeTo
-      : `${yr}-${String(mo + 1).padStart(2, '0')}-${new Date(yr, mo + 1, 0).getDate()}`
-    const result = []
-    Object.entries(events).forEach(([date, evs]) => {
-      if (date < from || date > to) return
-      evs.forEach(ev => {
-        if (!typeFilter[ev.type]) return
-        if (!locAll) {
-          if (!ev.locationId) return
-          if (!locSelected.has(ev.locationId)) return
-        }
-        if (statusFilter === 'completed' && ev.status !== 'completed') return
-        if (!athAll && ev.type === 'personal') {
-          const hasAth = (ev.athleteIds || []).some(id => athSelected.has(id))
-          if (!hasAth) return
-        }
-        result.push({ ...ev, date })
-      })
-    })
-    return result.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time))
+    return filterEvents(events, filter)
   }
 
   function groupByLocation(evs) {
     const groups = {}
     evs.forEach(ev => {
       if (ev.type === 'personal') {
-        const athIds = (ev.athleteIds || []).filter(id => athAll || athSelected.has(id))
+        // The athlete-level half of the filter, from the same module as the
+        // event-level half — this line used to re-implement the predicate
+        // (`athAll || athSelected.has(id)`) a second time. Grouping stays here;
+        // the rule lives in eventFilter.js. See its header for the boundary.
+        const athIds = matchingAthleteIds(ev, filter)
         if (athIds.length === 0) {
           if (!groups['__unlabelled__']) groups['__unlabelled__'] = []
           groups['__unlabelled__'].push(ev)
@@ -1005,402 +988,19 @@ export function ReportModal({ events, sessions, onClose }) {
           '✕',
         ),
       ),
-      React.createElement(
-        'div',
-        { style: { marginBottom: '12px' } },
-        React.createElement(
-          'div',
-          {
-            style: {
-              fontSize: '10px',
-              fontWeight: 700,
-              color: 'var(--theme-accent)',
-              textTransform: 'uppercase',
-              letterSpacing: '.08em',
-              marginBottom: '6px',
-            },
-          },
-          'Período',
-        ),
-        React.createElement(
-          'div',
-          { style: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' } },
-          React.createElement(
-            'button',
-            {
-              type: 'button',
-              onClick: () => {
-                if (mo === 0) {
-                  setMo(11)
-                  setYr(y => y - 1)
-                } else setMo(m => m - 1)
-              },
-              style: {
-                background: 'transparent',
-                border: '1px solid #2a2318',
-                color: '#887060',
-                padding: '3px 8px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              },
-            },
-            '‹',
-          ),
-          React.createElement(
-            'span',
-            {
-              style: {
-                flex: 1,
-                textAlign: 'center',
-                fontSize: '13px',
-                fontWeight: 700,
-                color: '#c8b090',
-              },
-            },
-            MONTH_PT[mo] + ' ' + yr,
-          ),
-          React.createElement(
-            'button',
-            {
-              type: 'button',
-              onClick: () => {
-                if (mo === 11) {
-                  setMo(0)
-                  setYr(y => y + 1)
-                } else setMo(m => m + 1)
-              },
-              style: {
-                background: 'transparent',
-                border: '1px solid #2a2318',
-                color: '#887060',
-                padding: '3px 8px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              },
-            },
-            '›',
-          ),
-        ),
-        React.createElement(
-          'label',
-          {
-            style: {
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '12px',
-              color: '#887060',
-              cursor: 'pointer',
-            },
-          },
-          React.createElement('input', {
-            type: 'checkbox',
-            checked: useRange,
-            onChange: e => setUseRange(e.target.checked),
-            style: { accentColor: 'var(--theme-accent)' },
-          }),
-          'Intervalo personalizado',
-        ),
-        useRange &&
-          React.createElement(
-            'div',
-            { style: { display: 'flex', gap: '8px', marginTop: '6px' } },
-            React.createElement('input', {
-              type: 'date',
-              value: rangeFrom,
-              onChange: e => setRangeFrom(e.target.value),
-              style: {
-                flex: 1,
-                background: '#111',
-                border: '1px solid #2a2318',
-                color: '#c8b090',
-                padding: '5px 7px',
-                borderRadius: '4px',
-                fontSize: '12px',
-              },
-            }),
-            React.createElement('span', { style: { color: '#555', alignSelf: 'center' } }, '—'),
-            React.createElement('input', {
-              type: 'date',
-              value: rangeTo,
-              onChange: e => setRangeTo(e.target.value),
-              style: {
-                flex: 1,
-                background: '#111',
-                border: '1px solid #2a2318',
-                color: '#c8b090',
-                padding: '5px 7px',
-                borderRadius: '4px',
-                fontSize: '12px',
-              },
-            }),
-          ),
-      ),
-      React.createElement(
-        'div',
-        {
-          style: {
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '12px',
-            marginBottom: '12px',
-          },
-        },
-        React.createElement(
-          'div',
-          null,
-          React.createElement(
-            'div',
-            {
-              style: {
-                fontSize: '10px',
-                fontWeight: 700,
-                color: 'var(--theme-accent)',
-                textTransform: 'uppercase',
-                letterSpacing: '.08em',
-                marginBottom: '6px',
-              },
-            },
-            'Tipo',
-          ),
-          ['aula', 'personal'].map(t =>
-            React.createElement(
-              'label',
-              {
-                key: t,
-                style: {
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '12px',
-                  color: '#c8b090',
-                  cursor: 'pointer',
-                  marginBottom: '4px',
-                },
-              },
-              React.createElement('input', {
-                type: 'checkbox',
-                checked: typeFilter[t],
-                onChange: () => setTypeFilter(p => ({ ...p, [t]: !p[t] })),
-                style: { accentColor: 'var(--theme-accent)' },
-              }),
-              t === 'aula' ? 'Aulas' : 'Personal',
-            ),
-          ),
-        ),
-        React.createElement(
-          'div',
-          null,
-          React.createElement(
-            'div',
-            {
-              style: {
-                fontSize: '10px',
-                fontWeight: 700,
-                color: 'var(--theme-accent)',
-                textTransform: 'uppercase',
-                letterSpacing: '.08em',
-                marginBottom: '6px',
-              },
-            },
-            'Status',
-          ),
-          ['completed', 'all'].map(s =>
-            React.createElement(
-              'label',
-              {
-                key: s,
-                style: {
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '12px',
-                  color: '#c8b090',
-                  cursor: 'pointer',
-                  marginBottom: '4px',
-                },
-              },
-              React.createElement('input', {
-                type: 'radio',
-                name: 'statusF',
-                checked: statusFilter === s,
-                onChange: () => setStatusFilter(s),
-                style: { accentColor: 'var(--theme-accent)' },
-              }),
-              s === 'completed' ? 'Concluídas' : 'Todas',
-            ),
-          ),
-        ),
-      ),
-      locations.length > 0 &&
-        React.createElement(
-          'div',
-          { style: { marginBottom: '12px' } },
-          React.createElement(
-            'div',
-            {
-              style: {
-                fontSize: '10px',
-                fontWeight: 700,
-                color: 'var(--theme-accent)',
-                textTransform: 'uppercase',
-                letterSpacing: '.08em',
-                marginBottom: '6px',
-              },
-            },
-            'Afiliados',
-          ),
-          React.createElement(
-            'div',
-            { style: { display: 'flex', flexWrap: 'wrap', gap: '5px' } },
-            React.createElement(
-              'button',
-              {
-                type: 'button',
-                onClick: () => {
-                  setLocAll(true)
-                  setLocSelected(new Set())
-                },
-                style: {
-                  padding: '3px 10px',
-                  borderRadius: '4px',
-                  border: `1px solid ${locAll ? 'var(--theme-accent)' : '#2a2318'}`,
-                  background: locAll ? 'rgba(74,200,192,.15)' : 'transparent',
-                  cursor: 'pointer',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  color: locAll ? 'var(--theme-accent)' : '#555',
-                },
-              },
-              'Todos',
-            ),
-            locations.map(l => {
-              const active = !locAll && locSelected.has(l.id)
-              return React.createElement(
-                'button',
-                {
-                  key: l.id,
-                  type: 'button',
-                  onClick: () => {
-                    setLocAll(false)
-                    setLocSelected(prev => {
-                      const s = new Set(prev)
-                      if (s.has(l.id)) s.delete(l.id)
-                      else s.add(l.id)
-                      if (s.size === 0) {
-                        setLocAll(true)
-                        return new Set()
-                      }
-                      return s
-                    })
-                  },
-                  style: {
-                    padding: '3px 10px',
-                    borderRadius: '4px',
-                    border: `1px solid ${active ? l.color || 'var(--theme-accent)' : '#2a2318'}`,
-                    background: active ? `${l.color || '#4ac8c0'}22` : 'transparent',
-                    cursor: 'pointer',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    color: active ? l.color || 'var(--theme-accent)' : '#555',
-                  },
-                },
-                l.name,
-              )
-            }),
-          ),
-        ),
-      typeFilter.personal &&
-        React.createElement(
-          'div',
-          { style: { marginBottom: '12px' } },
-          React.createElement(
-            'div',
-            {
-              style: {
-                fontSize: '10px',
-                fontWeight: 700,
-                color: '#d8a840',
-                textTransform: 'uppercase',
-                letterSpacing: '.08em',
-                marginBottom: '6px',
-              },
-            },
-            'Atletas',
-          ),
-          React.createElement(
-            'div',
-            { style: { display: 'flex', flexWrap: 'wrap', gap: '5px' } },
-            React.createElement(
-              'button',
-              {
-                type: 'button',
-                onClick: () => {
-                  setAthAll(true)
-                  setAthSelected(new Set())
-                },
-                style: {
-                  padding: '3px 10px',
-                  borderRadius: '4px',
-                  border: `1px solid ${athAll ? '#d8a840' : '#2a2318'}`,
-                  background: athAll ? 'rgba(216,168,64,.15)' : 'transparent',
-                  cursor: 'pointer',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  color: athAll ? '#d8a840' : '#555',
-                },
-              },
-              'Todos',
-            ),
-            loadAthletes().map(a => {
-              const active = !athAll && athSelected.has(a.id)
-              return React.createElement(
-                'button',
-                {
-                  key: a.id,
-                  type: 'button',
-                  onClick: () => {
-                    setAthAll(false)
-                    setAthSelected(prev => {
-                      const s = new Set(prev)
-                      if (s.has(a.id)) s.delete(a.id)
-                      else s.add(a.id)
-                      if (s.size === 0) {
-                        setAthAll(true)
-                        return new Set()
-                      }
-                      return s
-                    })
-                  },
-                  style: {
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '3px 8px',
-                    borderRadius: '4px',
-                    border: `1px solid ${active ? a.color || '#d8a840' : '#2a2318'}`,
-                    background: active ? `${a.color || '#d8a840'}22` : 'transparent',
-                    cursor: 'pointer',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    color: active ? a.color || '#d8a840' : '#555',
-                  },
-                },
-                React.createElement('span', {
-                  style: {
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    background: a.color || '#555',
-                    display: 'inline-block',
-                    flexShrink: 0,
-                  },
-                }),
-                a.name,
-              )
-            }),
-          ),
-        ),
+      // #105 — the ONE filter. Four hand-rolled sections (period · tipo · status ·
+      // afiliados · atletas, ~395 lines) collapse into the shared component in its
+      // column layout, which is a superset of what was here: `status` gains the
+      // scheduled-only value this modal never had, and the "só personal" rule that
+      // was buried in `filteredEvents` is now visible on screen.
+      React.createElement(EventFilter, {
+        value: filter,
+        onChange: setFilter,
+        axes: ['period', 'type', 'status', 'affiliate', 'athlete'],
+        layout: 'column',
+        locs: locations,
+        athletes: loadAthletes(),
+      }),
       React.createElement(
         'div',
         {
