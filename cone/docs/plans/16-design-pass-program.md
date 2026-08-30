@@ -21,7 +21,7 @@ carried prerequisites that were long satisfied and an Agenda assignment that mov
 | C2 | Atletas + Afiliados | #56 | M→L | ✅ [plans/75](./75-design-c2-atletas-servicos.md), shipped 2026-08-28 (planned + gated 2026-08-13, wired + verified live 2026-08-28) | Apply standard; empty states; Serviços pane overflow; reserve #39 card slot. **Absorbed the Serviços → Afiliados restructure** ([plans/42](./42-afiliados-direction.md)). Grew a tail — see the note below the table (#160/#161/#162). |
 | C3 | Resultados (SPA) | #57 | ~~M~~ **L** | ✅ [plans/80](./80-design-c3-resultados.md), shipped 2026-08-30 | ⚠️ **LANE B — the only C-session that is** (see the correction under rule 1). Not a restyle: the user reports two of the three sub-tabs are unfound in live use, so **Leaderboard is deleted** (a second copy of `leaderboard.html`) and **Histórico is dissolved** into the Atletas ficha + a class read-back on the session. Rides #157 and #169 — **both closed with it.** ✅ **SHIPPED: the sub-tab bar is gone and Resultados is ONE surface** (a 260px week rail + THE CLASS), because the roster became the form container. Histórico's halves landed as the ficha's "Histórico de resultados" Card and as `ClassHeader`/`SessionKpis`. ✅ **[plans/44](./44-resultados-decomposition.md) shipped 2026-07-26** — `Resultados.jsx` 912 → a shell over `resultados/` (**49 raw lines** today; the "27" was a pre-reformat figure, re-measured 2026-08-29). |
 | C4 | Criador | #58 | L | ✅ [plans/37](./37-design-c4-criador.md) | #26 decomposition ([plans/35](./35-criador-decomposition.md)) + #92 text mode ([plans/36](./36-criador-text-mode.md)) ran first, as required. Standard + the 2026-07-21 layout brief. |
-| C5 | Publicador **+ Agenda** | #59 | L | ⏳ open | ✅ **#25 decomposition prerequisite SATISFIED** ([plans/39](./39-publicador-decomposition.md), `e957b57`) — this now inherits `publicador/AgendaView.jsx` (408 raw) instead of 838 lines buried in 2125. Then standard; `createElement`→JSX; JULY→pt-BR export fix; dedupe "Mobile Semanal" labels; classify jsPDF hex as exempt. |
+| C5 | Publicador **+ Agenda** | #59 | L | 🟢 **planned 2026-08-30** — [plans/81](./81-design-c5-publicador-agenda.md), **four sessions**, all in Ready at once | ⚠️ **LANE B, both surfaces** (user-confirmed — see rule 1). ✅ #25 prerequisite satisfied ([plans/39](./39-publicador-decomposition.md), `e957b57`). **Re-measured: 7,674 raw lines across five files**, not the 408+2125 this row used to carry. Split: **Phase 0** (dead `MicButton` + 3 one-line bugs, no gate) → **C5·a Agenda** (closes #105) → **C5·b Publicador** (closes #113, #170, #15; deletes the `.b*` zoo) → **C5·c Relatório + #154**. ⚠️ **JULY→pt-BR is still live** (`toLocaleString('default')`, not an English literal) — user confirmed the fix; **"classify jsPDF hex as exempt" is a no-op** (jsPDF takes RGB triples, so none of the 409 hex literals is its). **#102 is not a gate** — C5·a reserves a slot. |
 | — | #43 themes | #43 | L | ⏳ open | Only after B/C: token-clean codebase, verified under 4 themes per page |
 
 > 🔑 **C2 GREW A TAIL — three follow-on rows, added 2026-08-28.** C2 was planned and built to its
@@ -72,6 +72,11 @@ any more; nothing has been picked from Ready yet.
 > ships alone, then a design gate, then the build). **After it closes — including any bugs it
 > causes — the next item is C5 (#59), user-confirmed the same day.**
 >
+> ✅ **C5 PLANNED 2026-08-30 → [plans/81](./81-design-c5-publicador-agenda.md).** Lane B for both
+> surfaces (user-confirmed), split into **four sessions** — Phase 0 · C5·a Agenda · C5·b Publicador ·
+> C5·c Relatório — **all four in Ready at once, in order, ahead of every other board item** (user).
+> **When row 4 closes, this program has one item left: #43.**
+>
 > 🔑 **THE RESUME POINT IS NOW C5 (#59) — the LAST design-pass session.** C3 closed 2026-08-30.
 > ~~**The resume point is now C3 (#57) → C5 (#59).**~~ Both were unblocked: plans/44 left
 > `Resultados.jsx` a 27-line shell over `resultados/`, and plans/39 left C5 inheriting
@@ -100,8 +105,21 @@ any more; nothing has been picked from Ready yet.
    > exist"*. Gallery-first would have repainted two surfaces nobody opens and called it a
    > design pass. **The test to apply from here on: Lane A when the surface is used and only its
    > execution is wrong; Lane B when the surface's own existence or structure is what is in
-   > question.** C5 has not been assessed against this yet — do it when C5 is planned, rather
-   > than inheriting "Lane A" from this sentence.
+   > question.** ~~C5 has not been assessed against this yet — do it when C5 is planned, rather
+   > than inheriting "Lane A" from this sentence.~~
+   >
+   > ✅ **ASSESSED 2026-08-30 → C5 IS LANE B, BOTH SURFACES** ([plans/81](./81-design-c5-publicador-agenda.md)).
+   > User-confirmed, so this is decided, not inferred — **the deferral is closed and the rule is now
+   > fully resolved for every session in the program.** Final tally: **C0, C3 and C5 are Lane B; B1–B4,
+   > C1, C2 and C4 were Lane A.** The C5 evidence is the interesting half, because unlike C3 there was
+   > no user statement to act on — it was read off the surfaces. **Publicador:** three of its outputs
+   > have been visibly broken for ~7 weeks with none reported (two of eight export buttons render the
+   > *identical* string, `.slice(0, 15)` cutting exactly at the disambiguating digit; Apresentar's
+   > share link 404s in production, #113; the Semanal export prints the month in the *browser's*
+   > locale). **Agenda:** #162 shipped a competing week grid over the same `events` blob into
+   > **Afiliados** three days earlier, while Agenda itself still has no week or list view. 🔑 **The
+   > generalisable test this adds to C3's:** a defect that would be obvious on first use, left
+   > unreported for weeks, is evidence about *usage*, not just about quality.
 2. Fold-ins for the surface's own files: hex→vars (except jsPDF/print literals + `config.js` data colors), rounded-rects→square (circles `50%` exempt, pills are rects — policy in CLAUDE.md), click-divs get role/tabIndex/keyboard, icon-only buttons get aria-label, `<main>`/heading where the page lacks one.
 3. Verify at 1280×800 + 390×844 **under all 4 themes**; `npm test` + `npm run build:all`; `/verify` live; `/code-review` (M/L).
 4. First session that touches a font-weight 500/800 use adds `@fontsource/cinzel/500.css` + `/800.css` to `src/fonts.js` (policy: load real Cinzel weights; Amarante stays synthesized — it only ships 400).

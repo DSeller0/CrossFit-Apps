@@ -2,16 +2,19 @@
 
 > C5 in the [design-pass program](./16-design-pass-program.md). **The last design-pass session.**
 >
-> ⚠️ **Lane B for both surfaces** — plans/16 rule 1's 2026-08-29 correction explicitly deferred this
-> call ("C5 has not been assessed against this yet — do it when C5 is planned"). It is made in
-> `### The lane call` below, on **measured evidence** rather than on a user report, because unlike
-> C3 no user statement exists. The one fact that would flip Publicador to Lane A is named there and
-> is the first thing the gate asks.
+> ✅ **Lane B for both surfaces — user-confirmed 2026-08-30.** plans/16 rule 1's 2026-08-29
+> correction explicitly deferred this call ("C5 has not been assessed against this yet — do it when
+> C5 is planned"). It is argued from **measured evidence** in `### The lane call` below, because
+> unlike C3 no user statement existed — and then the user confirmed it outright. **Rule 1's deferred
+> assessment is now closed.**
 >
 > **Four sessions, not one.** 7,674 raw lines is ~4× C3's 1,847, so this plan's second job is the
 > split: **Phase 0** (dead code + three one-line correctness bugs; no gate, ships alone) →
 > **C5·a Agenda** → **C5·b Publicador** → **C5·c Relatório + #154**. Each of a/b/c is its own
 > execution session with its own mockup and its own approval gate.
+> ✅ **All four enter Ready at once, in order, and are picked before anything else on the board**
+> (user, 2026-08-30 — *"they are big enough to justify being all in ready before any other backlog
+> item is tackled"*).
 >
 > **Rides and closes:** #105 (a) · #106 (a, optional) · #113 (b, decision) · #170 (b, gate
 > question) · #154 (c) · #15 (closes with the program). **Explicitly does NOT wait for #102** — see
@@ -48,12 +51,14 @@ with none**. **No gallery group** either. **Zero adoption of the C0 primitives**
 zero `role:`, zero `tabIndex`** across 81 `onClick:` handlers and 31 click-`<div>`s. This is the
 only SPA tab that has had no C-session at all.
 
-### The lane call
+### The lane call — ✅ **Lane B for both, user-confirmed 2026-08-30**
 
 plans/16 rule 1's test: **Lane A when the surface is used and only its execution is wrong; Lane B
 when the surface's own existence or structure is what is in question.** C3 answered it from a user
-statement. No such statement exists for C5, so it is answered from the surfaces themselves — and the
-answer is the same, for two different reasons.
+statement. No such statement exists for C5, so it was answered from the surfaces themselves — and
+the answer is the same, for two different reasons. **The user then confirmed it outright ("Lane B
+for both", 2026-08-30), which closes rule 1's deferred assessment: plans/16 records C5 as decided,
+not inferred.**
 
 **Publicador → Lane B. Three of its outputs have been visibly broken for ~7 weeks and nobody has
 reported one.**
@@ -101,10 +106,19 @@ same session also added **`AffiliateSessions`** (that affiliate's month of event
 **`Fechamento`** (the invoice board over the same events). Agenda is used — but three of its jobs
 have quietly migrated out, so what is left, and what shape it should be, is a structure question too.
 
-**The single fact that would flip Publicador to Lane A**, and the first question at C5·b's gate:
-*which of the eight export targets have you actually produced and sent to someone in the last few
-months?* If the answer is "most of them", C5·b is a restyle and its scope collapses to tokens +
-a11y + the JSX conversion. Everything else in this plan holds either way.
+✅ **Lane B is a decision now, not a reading of the evidence** (user, 2026-08-30). The usage
+question — *which of the eight export targets have you actually produced and sent to someone in the
+last few months?* — therefore stops being a lane question and becomes a **scoping question inside
+C5·b's mockup**: it decides how many export targets the redesign carries forward, not whether the
+tab gets redesigned. It stays C5·b's opening question for that reason.
+
+### Three decisions taken *with the user*, 2026-08-30 — do not re-litigate
+
+1. **Lane B for both surfaces.** Closes plans/16 rule 1's deferred C5 assessment.
+2. **The Semanal export's month is fixed, in pt-BR** (`MONTH_PT`) — *"to match the rest of the app's
+   interface"* — not struck from the row as stale. Phase 0 step 3.
+3. **All four sessions enter Ready in order and outrank every other board item** until the block is
+   done.
 
 ### Six decisions taken while planning — do not re-litigate
 
@@ -195,7 +209,9 @@ Recorded so no execution session re-derives them, in the spirit of plans/80's fi
    It survives a grep for English month literals and for `'en-US'` because the locale is **not
    hardcoded to English** — it is **unspecified** (`'default'`), so it renders `julho` on a pt-BR
    browser and `July` on an English one. The check that finds it is a grep for
-   `toLocale\w*String\('default'`, not for month names. **Keep the item; it is a Phase 0 one-liner.**
+   `toLocale\w*String\('default'`, not for month names.
+   ✅ **User decision 2026-08-30: keep the item and fix it in pt-BR, "to match the rest of the app's
+   interface."** It is a Phase 0 one-liner — see Phase 0 step 3.
 3. ✅ **"classify jsPDF hex as exempt" is a no-op as written** — see decision 4. Replace the task.
 4. ✅ **"dedupe the two Mobile Semanal labels" is live and root-caused** — `.slice(0, 15)` at four
    sites; the labels themselves are already distinct in `config.js:30`.
@@ -213,6 +229,13 @@ Recorded so no execution session re-derives them, in the spirit of plans/80's fi
    `afiliados/affiliateHelpers.js:18-25` (pure, already tested). And `billing.js` now has **nine**
    importers, not one.
 9. ✅ **#102's migration number is wrong** — `0008` is #71's and `0009` is #150's; #102's is `0010`.
+10. 🔴 **CLAUDE.md gets `MONTH_PT`'s casing wrong, in the very sentence warning about casing.** It
+    says *"`DAY_PT`/`MONTH_PT` are UPPERCASE/full-name"* — correct for `DAY_PT` (`week.js:29`,
+    `['DOM','SEG',…]`) and **wrong for `MONTH_PT`** (`week.js:3`, `['Janeiro','Fevereiro',…]`), which
+    is full-name but **Titlecase**. The same sentence adds *"not drop-in for each other, see #16's
+    casing-hazard note"* — and misstates one of the two constants it is warning about. Found while
+    writing Phase 0 step 3, which is exactly the kind of task that reads that line first. Fix
+    CLAUDE.md in Phase 0.
 
 ### Eight things found while planning that no doc records
 
@@ -448,10 +471,15 @@ deletion of code that is already not rendered.
    first. Cover `getWeeksOfMonth` (month grids: a month starting Sunday, one starting Saturday, a
    28-day February, a 6-row month), then `buildProgressionLines` (the unit re-derivation is the
    subtle half), `exLine`, `complexLine`, `buildMobileSession`, `mfs`.
-3. **Fix `exportViews.jsx:409`** → `MONTH_PT[month] + ' ' + year`, matching `:602` and `:840` in the
-   same file. ⚠️ `MONTH_PT` is **UPPERCASE full names** and `.wk-title` already applies
-   `text-transform:uppercase` — check the rendered header is not doubly shouted or mis-cased; use
-   `MONTH_PT_SHORT`/`DAY_PT_TITLE` only if the mockup later asks.
+3. **Fix `exportViews.jsx:409` → pt-BR** (user decision, correction 2). Replace the
+   `toLocaleString('default')` call with `MONTH_PT[month] + ' ' + year` — the **exact expression
+   `:602` already uses** in the same file. The rendered header keeps its current look and only
+   changes language: **"GRADE DE TREINOS · AGOSTO 2026"**. The toolbar driving the export already
+   reads "Agosto 2026" from the same constant (`Publicador.jsx:11`), so export and control finally
+   agree.
+   ⚠️ **`MONTH_PT` is Titlecase (`'Janeiro'`), NOT uppercase** — CLAUDE.md says otherwise; see
+   correction 10. `.wk-title` supplies `text-transform:uppercase`, so do **not** pre-uppercase it,
+   and do not reach for `MONTH_PT_SHORT`/`DAY_PT_TITLE` unless a mockup later asks.
 4. **Fix the Mobile Semanal labels** — the minimal correct fix is to stop truncating at a width that
    cuts the disambiguator. Prefer removing `.slice(0, 15)` and letting CSS handle overflow at all
    four sites (`Publicador.jsx:985,1004,1193,1206`); if a hard cap is genuinely needed, it must

@@ -11,14 +11,69 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 
 ## 🟢 Ready (planned — pick from the top)
 
-> ✅ **plans/80 (C3 · #57) SHIPPED 2026-08-30** — all three phases. See Done. It closed **#57**,
-> **#157** and **#169**, filed **#170**, and took Resultados from three sub-tabs to one surface.
+> 🟢 **REFILLED 2026-08-30 — one plan, FOUR sessions: C5 · #59 · Publicador + Agenda, the LAST
+> design-pass session.** [plans/81](./plans/81-design-c5-publicador-agenda.md). ✅ **plans/80 (C3 ·
+> #57) SHIPPED 2026-08-30** — all three phases; it closed **#57**, **#157** and **#169**, filed
+> **#170**, and took Resultados from three sub-tabs to one surface. See Done.
 >
-> **Ready is EMPTY again. Next up: C5 · #59 · Publicador + Agenda** (user, 2026-08-29 — program
-> order, confirmed, and reconfirmed as "after C3 closes, including any bugs it causes"). #59 is the
-> LAST design-pass session; it also inherits **#170** (the leaderboard PNG export) and the `.b*`/
-> `.fg`/`.lbl`/`.pub-pane` CSS that C3 deliberately left standing because `Publicador.jsx` builds
-> those class names with `React.createElement`, where a `className="b ` grep cannot see them.
+> 🔑 **All four rows below are Ready at once, in strict order, and the whole block is picked before
+> any other backlog item** — user decision 2026-08-30: *"they are big enough to justify being all in
+> ready before any other backlog item is tackled."* This is a deliberate departure from the usual
+> 2–3-at-a-time refill (WORKFLOW.md); the four are one design pass split for size, not four
+> independent picks.
+>
+> **Two things a picker must NOT re-derive:**
+> - ✅ **The lane is user-confirmed Lane B for BOTH surfaces** (2026-08-30). plans/16 rule 1's
+>   deferred assessment ("C5 has not been assessed against this yet") is **closed**. Publicador —
+>   three outputs visibly broken ~7 weeks with none reported; Agenda — #162 built a competing week
+>   grid over the same `events` blob in Afiliados three days earlier.
+> - 🔴 **#102 is NOT a gate.** C5·a reserves an attendance slot and carries `evStatus` across
+>   verbatim; #102 replaces it later. Four reasons in plans/81 decision 1. ⚠️ #102's own row says
+>   migration `0008` — that number is taken (#71); its migration is **`0010`**.
+>
+> ⚠️ **Every size figure the #59 row carries is pre-`9b82015` and pre-plans/39.** Re-measured
+> 2026-08-30: **7,674 raw lines** across five files · 409 quoted hex literals · 66 `rgba(` (**not
+> 45**) · 441 inline `style: {` · 606 `createElement` · zero `.module.css` · zero gallery group ·
+> zero C0 primitives · zero `aria-label`/`role`/`tabIndex` across 81 `onClick` handlers.
+> **`Publicador.jsx` is provably the last consumer of the `.b*`/`.fg`/`.lbl` zoo** that C3 left
+> standing (28 usages; every other file repo-wide is zero) — C5·b deletes those 12 rules, the 4
+> `.pub-pane` rules and both `App.jsx` wrappers, leaving `index.css` with **no `TAB-OWNED` tag left
+> at all**.
+>
+> 1. **#59 · C5 Phase 0 — dead code + three one-line correctness bugs** · **XS–S** · **Sonnet** ·
+>    [plans/81 §Phase 0](./plans/81-design-c5-publicador-agenda.md). **No gate; ships alone**, and
+>    nothing in it can be invalidated by a later mockup. 🔑 **`MicButton` is dead code** — nothing in
+>    `src/` imports it and `CONE_CONTEXT.md:335` says *"Voice command (MicButton) removed — proved to
+>    have no purpose"* — **and its `useSpeech` hook's module-scope `window.SpeechRecognition` read is
+>    the sole reason `exportHelpers.js` cannot be unit-tested** (the same constraint that made #149
+>    create `billing.js`). Deleting ~62 dead lines unlocks **six pure functions** for their first
+>    tests, incl. `getWeeksOfMonth`, which feeds Agenda's whole month grid and both export view
+>    families. Also: the **"JULY 2026" bug is live** at `exportViews.jsx:409` —
+>    `toLocaleString('default')` is the *browser's* locale, not English, which is why a grep for
+>    English month literals comes back clean; **user decision 2026-08-30: fix it in pt-BR** via
+>    `MONTH_PT`, matching `:602`. Plus the two `Mobile Semanal` labels (`.slice(0, 15)` cuts exactly
+>    at the disambiguating digit, so both buttons read `"Mobile Semanal "`) and `BLOCK_C`'s two
+>    consumers disagreeing on their fallback chain (same block, two colours).
+> 2. **#59 · C5·a — Agenda** · **L** · **Opus** (design) → **Sonnet** (build) ·
+>    [plans/81 §C5·a](./plans/81-design-c5-publicador-agenda.md). Mockup 62 → **approval gate**.
+>    **Closes #105** — ⚠️ the lifted filter must be a **superset**, not a move: `ReportModal`'s status
+>    only narrows to `completed` and its athlete filter applies **only to personal events**.
+>    Optionally absorbs **#106**. Hoist `CellDay`/`DayPane` out of the render body first.
+> 3. **#59 · C5·b — Publicador** · **L** · **Opus** (design) → **Sonnet** (build) ·
+>    [plans/81 §C5·b](./plans/81-design-c5-publicador-agenda.md). Mockup 63 → **approval gate**.
+>    **Closes #113** (Apresentar's dead `log.html` share link — decided at the mockup, not deferred
+>    again), **#170** (a one-line gate question, *not* a pre-emptive build) and **#15** (the program's
+>    census row). ⚠️ The #59 row's *"classify jsPDF hex as exempt"* is a **no-op as written** — jsPDF
+>    lives only in `events.jsx` and takes RGB integer triples, so **none** of the 409 hex literals is
+>    jsPDF's; the real exemption is **"export artifact"** (see plans/81 decision 4).
+> 4. **#59 · C5·c — Relatório + rate history** · **M** · **Sonnet** ·
+>    [plans/81 §C5·c](./plans/81-design-c5-publicador-agenda.md). **Closes #154.** Runs **last** —
+>    it consumes C5·a's shared filter, and #149's whole point is that #154 sits on top of tested
+>    `billing.js`. ⚠️ #154's row names `Servicos.jsx`, which no longer exists (#161 absorbed it), and
+>    `billing.js` now has **nine** importers while `calcTotal` has no date in its contract.
+>
+> **#59 closes with row 4**, plans/16's C5 row flips to ✅, and **#43** (four new themes) becomes the
+> program's only remaining item.
 
 > 🟢 **REFILLED 2026-08-29 — one plan, five rows, from the full pass that ran the same day.**
 > The [2026-08-29 review](./reviews/2026-08-29.md) found seven rows in the surfaces #160/#161/#162
