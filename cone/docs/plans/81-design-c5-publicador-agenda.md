@@ -461,7 +461,7 @@ established pane-width breakpoint now, **not** a rogue value; leave it.
 
 ### Phase 0 — dead code + three one-line bugs (no gate; ships alone) · Sonnet · XS–S
 
-> ✅ Done 2026-08-30 · (this commit) — see BACKLOG.md's Done entry for the full account. All 5
+> ✅ Done 2026-08-30 · `d649f65` + `da5a148` — see BACKLOG.md's Done entry for the full account. All 5
 > steps shipped: `MicButton`/`useSpeech` deleted, `monthGridCells` + `exportHelpers.js`'s six pure
 > functions got their first tests (22 new, 936 total), `exportViews.jsx`'s locale bug fixed to
 > pt-BR, both `Mobile Semanal` labels un-truncated, `BLOCK_C`'s two consumers unified on the same
@@ -514,6 +514,20 @@ Ship. No gate, no mockup.
 
 ### C5·a — Agenda · Lane B · Opus (design) → Sonnet (build)
 
+> ✅ **Done 2026-08-30** · mockup `2e363c0` (approved by the user) → build `62f6d8e` (hoist) ·
+> `e77bb72` (filter, closes #105) · `c402e12` (module CSS + structure) · `214cdef` (primitives,
+> a11y, #102 slot, uid, #106) · gallery + cards (this commit). See BACKLOG.md's Done entry.
+> **The mockup's structural answer: AGENDA IS THE EDITOR** — the three surfaces #162 built over the
+> same `events` blob are read-projections by money, and Agenda is the only one that writes it, and
+> the only one where `events` meets `sessions`. Both gate questions went the recommended way: the
+> **Lista** view shipped (#105's second half, promoted out of the `isMobile` fork rather than
+> written new) and **#106** shipped (three scopes inside the ConfirmReview step (d) had to build
+> anyway). Closes **#105** and **#106**.
+>
+> 🔴 **One finding here corrects finding 5 below and changes C5·b's scope** — see the note at the
+> end of this section.
+
+
 1. **ASCII sketch** answering the Lane-B brief's Agenda block — above all, what Agenda is for now
    that three of its jobs live in Afiliados.
 2. **Mockup card** in `cone/design/mockups/62-agenda-c5.html`, covering the state axes: empty month ·
@@ -537,6 +551,29 @@ Ship. No gate, no mockup.
       exists (`recurrenceGroup` is written and read), and C5·a is rewriting the event form and day
       pane anyway. Drop it without argument if the mockup does not need it.
 5. **Gate:** gallery walk (4 themes × 2 widths) → `npm run design:cards` → DesignSync → **stop**.
+
+#### 🔴 Correction to finding 5 — `--theme-accent` is not an alias, it is a hardcoded cyan
+
+Finding 5 says `--theme-accent` is *"a `:root` alias declared in `src/index.css`, which
+`gallery.html` does not load"*. That is only half of it, and the missing half is the part that
+matters. `src/index.css:15` does declare `--theme-accent: var(--accent, #4ac8c0)` — but
+**`App.jsx:61` then sets it as an INLINE STYLE on `<html>`** from `APP_CONFIG.themeAccent`
+(`utils/config.js:26`), whose default is **`#00b8d4`**. An inline style on the root element beats
+every `html.theme-*` class, so that fallback never resolves: measured live under
+`theme-totk-light`, `--theme-accent` is `#00b8d4` while `--accent` is `#1c6860`.
+
+Three consequences:
+1. **All 76 sites render one cyan in all four themes**, not "the accent". The problem is not only
+   that the gallery can't see the token — it is that the *app* is theme-blind wherever it is used.
+2. **This is where decision 4's unexplained `#00b8d4` comes from** — the 17 in `Publicador.jsx` and
+   8 in `mobileExportViews.jsx` are the same colour as this variable, hand-copied. Classify them
+   together.
+3. **C5·b must decide what `APP_CONFIG.themeAccent` is for.** It is a *persisted user setting*
+   (`Configurações` writes it), so it cannot simply be deleted — but as long as it is applied to
+   `--theme-accent` on the root, it overrides the theme system for every consumer. C5·a took the
+   Agenda files off the token entirely (`var(--accent)`), and tokenized `EventFormInner`'s own 9
+   sites + 39 frozen hex, because otherwise "Agenda renders correctly in all 4 themes" would have
+   been false. The remaining sites are C5·b's.
 
 ### C5·b — Publicador · Lane B · Opus (design) → Sonnet (build)
 
