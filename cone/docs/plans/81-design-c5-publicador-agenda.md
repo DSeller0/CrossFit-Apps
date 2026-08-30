@@ -461,6 +461,12 @@ established pane-width breakpoint now, **not** a rogue value; leave it.
 
 ### Phase 0 — dead code + three one-line bugs (no gate; ships alone) · Sonnet · XS–S
 
+> ✅ Done 2026-08-30 · (this commit) — see BACKLOG.md's Done entry for the full account. All 5
+> steps shipped: `MicButton`/`useSpeech` deleted, `monthGridCells` + `exportHelpers.js`'s six pure
+> functions got their first tests (22 new, 936 total), `exportViews.jsx`'s locale bug fixed to
+> pt-BR, both `Mobile Semanal` labels un-truncated, `BLOCK_C`'s two consumers unified on the same
+> fallback chain. C5·a/b/c are unaffected and stay Ready.
+
 The warm-up commit, independent of every design question. Nothing here can be invalidated by a
 mockup: two of the three bugs are in code that would be wrong under any design, and the third is a
 deletion of code that is already not rendered.

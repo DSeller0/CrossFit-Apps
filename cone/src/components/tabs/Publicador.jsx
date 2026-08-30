@@ -982,7 +982,7 @@ function SchedulePublisher({ sessions }) {
             },
             React.createElement('i', { className: 'ti ti-layout-list', 'aria-hidden': 'true' }),
             ' ',
-            (APP_CONFIG.mobileWeeklyLabels?.[0] || 'Mobile Semanal 01').slice(0, 15),
+            APP_CONFIG.mobileWeeklyLabels?.[0] || 'Mobile Semanal 01',
           ),
           React.createElement(
             'button',
@@ -1001,7 +1001,7 @@ function SchedulePublisher({ sessions }) {
             },
             React.createElement('i', { className: 'ti ti-layout-list', 'aria-hidden': 'true' }),
             ' ',
-            (APP_CONFIG.mobileWeeklyLabels?.[1] || 'Mobile Semanal 02').slice(0, 15),
+            APP_CONFIG.mobileWeeklyLabels?.[1] || 'Mobile Semanal 02',
           ),
           exporting &&
             React.createElement(
@@ -1190,7 +1190,7 @@ function SchedulePublisher({ sessions }) {
                     : { color: 'var(--theme-accent)', borderColor: 'var(--theme-accent)' },
                 onClick: () => setPreviewTarget('mobileWeeklyA'),
               },
-              (APP_CONFIG.mobileWeeklyLabels?.[0] || 'Mobile Semanal 01').slice(0, 15),
+              APP_CONFIG.mobileWeeklyLabels?.[0] || 'Mobile Semanal 01',
             ),
             React.createElement(
               'button',
@@ -1203,7 +1203,7 @@ function SchedulePublisher({ sessions }) {
                     : { color: '#00b8d4', borderColor: '#00b8d4' },
                 onClick: () => setPreviewTarget('mobileWeeklyB'),
               },
-              (APP_CONFIG.mobileWeeklyLabels?.[1] || 'Mobile Semanal 02').slice(0, 15),
+              APP_CONFIG.mobileWeeklyLabels?.[1] || 'Mobile Semanal 02',
             ),
             React.createElement(
               'button',

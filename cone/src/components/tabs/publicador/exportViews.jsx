@@ -406,10 +406,7 @@ export function DailyExportView({
 // ── WeeklyExportView ──────────────────────────────────────────────────────────
 export function WeeklyExportView({ sessions, label, year, month, onDayClick }) {
   const weeks = getWeeksOfMonth(year, month)
-  const monthName = new Date(year, month, 1).toLocaleString('default', {
-    month: 'long',
-    year: 'numeric',
-  })
+  const monthName = MONTH_PT[month] + ' ' + year
   const today = new Date()
   return React.createElement(
     'div',

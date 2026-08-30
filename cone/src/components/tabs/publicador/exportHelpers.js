@@ -1,9 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
 import { exVolStr, groupProgressionSteps } from '../../../public/lib/wod.js'
 import { monthGridCells } from '../../../public/lib/week.js'
 import { toISO } from '../../../utils/storage'
-
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null
 
 export function buildProgressionLines(ex) {
   const steps = ex.intensity?.steps || []
@@ -76,47 +73,3 @@ export function buildMobileSession(sessions, selectedDate, currentWeekDates) {
 }
 
 export const mfs = (px, fs) => `${Math.round(px * fs)}px`
-
-export function useSpeech(onResult, onEnd) {
-  const recRef = useRef(null)
-  const [listening, setListening] = useState(false)
-  const start = useCallback(() => {
-    if (!SpeechRecognition) {
-      alert('Reconhecimento de voz não suportado neste navegador. Use Chrome ou Safari.')
-      return
-    }
-    if (listening) {
-      recRef.current?.stop()
-      return
-    }
-    const rec = new SpeechRecognition()
-    rec.lang = 'pt-BR'
-    rec.continuous = true
-    rec.interimResults = false
-    rec.onresult = e => {
-      const transcript = Array.from(e.results)
-        .slice(e.resultIndex)
-        .filter(r => r.isFinal)
-        .map(r => r[0].transcript)
-        .join(' ')
-      if (transcript.trim()) onResult(transcript.trim())
-    }
-    rec.onend = () => {
-      setListening(false)
-      onEnd && onEnd()
-    }
-    rec.onerror = e => {
-      if (e.error !== 'aborted') console.warn('Speech error:', e.error)
-      setListening(false)
-    }
-    recRef.current = rec
-    rec.start()
-    setListening(true)
-  }, [listening, onResult, onEnd])
-  const stop = useCallback(() => {
-    recRef.current?.stop()
-    setListening(false)
-  }, [])
-  useEffect(() => () => recRef.current?.stop(), [])
-  return { listening, start, stop, supported: !!SpeechRecognition }
-}

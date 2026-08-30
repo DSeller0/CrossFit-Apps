@@ -19,9 +19,11 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
   const isMobile = useIsMobile(800)
 
   const todayISO = toISO(new Date())
-  // Deliberate per-type rainbow for the mini-calendar dots below — distinct color per
-  // block *type*, not the 4-family blkColor taxonomy. Verified #84 — do not collapse
-  // into blkColor; its hardcoded hex is #59's (Publicador design pass), not this one.
+  // Deliberate per-type rainbow that tints the block chips in the day pane and the
+  // mobile day detail — distinct color per block *type*, not the 4-family blkColor
+  // taxonomy, because at chip size the type itself is the useful signal, not the
+  // coarser family grouping. Verified #84 — do not collapse into blkColor; its
+  // hardcoded hex is #59's (Publicador design pass), not this one.
   const BLOCK_C = {
     Força: '#d8a840',
     LPO: '#4ac8c0',
@@ -855,9 +857,9 @@ export function AgendaView({ sessions, events, setEvents, athletes, onEditSessio
                                 fontWeight: 700,
                                 padding: '1px 4px',
                                 borderRadius: '2px',
-                                background: (BLOCK_C[lbl] || '#555') + '22',
-                                color: BLOCK_C[lbl] || '#aaa',
-                                border: `1px solid ${BLOCK_C[lbl] || '#555'}44`,
+                                background: (BLOCK_C[lbl] || BLOCK_C[bl.type] || '#555') + '22',
+                                color: BLOCK_C[lbl] || BLOCK_C[bl.type] || '#aaa',
+                                border: `1px solid ${BLOCK_C[lbl] || BLOCK_C[bl.type] || '#555'}44`,
                               },
                             },
                             lbl,

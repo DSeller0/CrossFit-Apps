@@ -15,6 +15,9 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 > design-pass session.** [plans/81](./plans/81-design-c5-publicador-agenda.md). ✅ **plans/80 (C3 ·
 > #57) SHIPPED 2026-08-30** — all three phases; it closed **#57**, **#157** and **#169**, filed
 > **#170**, and took Resultados from three sub-tabs to one surface. See Done.
+> ✅ **Phase 0 of THIS plan SHIPPED 2026-08-30** too — dead code + three one-line correctness
+> bugs, standalone and gating nothing below. See Done; **three sessions remain: C5·a → C5·b →
+> C5·c.**
 >
 > 🔑 **All four rows below are Ready at once, in strict order, and the whole block is picked before
 > any other backlog item** — user decision 2026-08-30: *"they are big enough to justify being all in
@@ -40,39 +43,27 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 > `.pub-pane` rules and both `App.jsx` wrappers, leaving `index.css` with **no `TAB-OWNED` tag left
 > at all**.
 >
-> 1. **#59 · C5 Phase 0 — dead code + three one-line correctness bugs** · **XS–S** · **Sonnet** ·
->    [plans/81 §Phase 0](./plans/81-design-c5-publicador-agenda.md). **No gate; ships alone**, and
->    nothing in it can be invalidated by a later mockup. 🔑 **`MicButton` is dead code** — nothing in
->    `src/` imports it and `CONE_CONTEXT.md:335` says *"Voice command (MicButton) removed — proved to
->    have no purpose"* — **and its `useSpeech` hook's module-scope `window.SpeechRecognition` read is
->    the sole reason `exportHelpers.js` cannot be unit-tested** (the same constraint that made #149
->    create `billing.js`). Deleting ~62 dead lines unlocks **six pure functions** for their first
->    tests, incl. `getWeeksOfMonth`, which feeds Agenda's whole month grid and both export view
->    families. Also: the **"JULY 2026" bug is live** at `exportViews.jsx:409` —
->    `toLocaleString('default')` is the *browser's* locale, not English, which is why a grep for
->    English month literals comes back clean; **user decision 2026-08-30: fix it in pt-BR** via
->    `MONTH_PT`, matching `:602`. Plus the two `Mobile Semanal` labels (`.slice(0, 15)` cuts exactly
->    at the disambiguating digit, so both buttons read `"Mobile Semanal "`) and `BLOCK_C`'s two
->    consumers disagreeing on their fallback chain (same block, two colours).
-> 2. **#59 · C5·a — Agenda** · **L** · **Opus** (design) → **Sonnet** (build) ·
+> ✅ ~~1. #59 · C5 Phase 0 — dead code + three one-line correctness bugs~~ **SHIPPED 2026-08-30**
+>    — see Done. Three sessions remain, renumbered 1–3 below.
+> 1. **#59 · C5·a — Agenda** · **L** · **Opus** (design) → **Sonnet** (build) ·
 >    [plans/81 §C5·a](./plans/81-design-c5-publicador-agenda.md). Mockup 62 → **approval gate**.
 >    **Closes #105** — ⚠️ the lifted filter must be a **superset**, not a move: `ReportModal`'s status
 >    only narrows to `completed` and its athlete filter applies **only to personal events**.
 >    Optionally absorbs **#106**. Hoist `CellDay`/`DayPane` out of the render body first.
-> 3. **#59 · C5·b — Publicador** · **L** · **Opus** (design) → **Sonnet** (build) ·
+> 2. **#59 · C5·b — Publicador** · **L** · **Opus** (design) → **Sonnet** (build) ·
 >    [plans/81 §C5·b](./plans/81-design-c5-publicador-agenda.md). Mockup 63 → **approval gate**.
 >    **Closes #113** (Apresentar's dead `log.html` share link — decided at the mockup, not deferred
 >    again), **#170** (a one-line gate question, *not* a pre-emptive build) and **#15** (the program's
 >    census row). ⚠️ The #59 row's *"classify jsPDF hex as exempt"* is a **no-op as written** — jsPDF
 >    lives only in `events.jsx` and takes RGB integer triples, so **none** of the 409 hex literals is
 >    jsPDF's; the real exemption is **"export artifact"** (see plans/81 decision 4).
-> 4. **#59 · C5·c — Relatório + rate history** · **M** · **Sonnet** ·
+> 3. **#59 · C5·c — Relatório + rate history** · **M** · **Sonnet** ·
 >    [plans/81 §C5·c](./plans/81-design-c5-publicador-agenda.md). **Closes #154.** Runs **last** —
 >    it consumes C5·a's shared filter, and #149's whole point is that #154 sits on top of tested
 >    `billing.js`. ⚠️ #154's row names `Servicos.jsx`, which no longer exists (#161 absorbed it), and
 >    `billing.js` now has **nine** importers while `calcTotal` has no date in its contract.
 >
-> **#59 closes with row 4**, plans/16's C5 row flips to ✅, and **#43** (four new themes) becomes the
+> **#59 closes with row 3**, plans/16's C5 row flips to ✅, and **#43** (four new themes) becomes the
 > program's only remaining item.
 
 > 🟢 **REFILLED 2026-08-29 — one plan, five rows, from the full pass that ran the same day.**
@@ -945,6 +936,12 @@ section lists what was checked and found **clean**, so it isn't re-raised next p
 - ✅ **#94 Audit prod: exercise names used in sessions but absent from the registry** · **S** · **DONE 2026-07-25 (58.5% → 11.9%)** → [`docs/reviews/94-session-registry-audit.md`](./reviews/94-session-registry-audit.md) (regenerate: `node scripts/audit-session-registry.mjs`). **775 name occurrences · 453 unresolved (58.5%) · 343 distinct misses**, bucketed: **130 likely-registerable movements** (the actionable list — Wall Ball ×9, Thruster, Lunge ×6, Squat Clean/Snatch, bare Pull-up, GHD, Devil's Press, Burpee Box Jump Over…), **179 prescription-in-the-name** ("800m Run", "15 GHD", "30 Wall Ball" — the movement is fine, a leading distance/count leaked in; `stripVolumeNoise` only strips a bare leading count, not "800m"/"200m Row" — extend it, don't register these), **26 compound/complex notation** (registry-unfixable by design), **8 structural noise** ("Rest"/"Then"/"Rounds"/"Bloco …" leaked into name fields — data hygiene, not a registry gap). **ROUND 1 SHIPPED 2026-07-25** (coach reviewed the report inline and signed off R1–R5): unresolved **58.5% → 43.4% from resolver changes alone**, and **→ 34.8%** once the registry additions land. Four generalizations in `registry.js` rather than a bigger alias table — extended `stripVolumeNoise` (distance/duration/rep-scheme/per-side/cal/zone/`heavy`), auto-indexed `Movement (SH)` shorthand entries, spaced spellings of every hyphenated entry, and a guarded plural fallback (see CLAUDE.md's `registry.js` bullet for the contract). Root cause of the "Corrida" miss was **not** a backwards alias but a **dangling pointer**: `'run'/'sprint'` both targeted a "Corrida" entry the registry has never had (the real one is `Run`) — two test fixtures had the same fiction baked in and were corrected to prod reality. `scripts/audit-session-registry.mjs` now reports **dangling aliases** against live prod every run, so the class can't recur silently. **Registry additions APPLIED to prod 2026-07-25** ([`docs/reviews/94-registry-additions.sql`](./reviews/94-registry-additions.sql), idempotent/alphabetical) — prod confirmed at Cardio 18 · Skill 27 · Força 24 · Acessórios 31, audit re-run reports **0 dangling aliases**, bucket 1 130 → 102 and bucket 2 179 → 106. **Round 1 closed at 34.8% unresolved (277/795).** **ROUND 2 (2026-07-25)** → [`docs/reviews/94-round2-decisions.md`](./reviews/94-round2-decisions.md). Code half shipped (slot letters `A- 3 Snatch Balance` · trailing tempo/pause notes · trailing parens · alternating suffix · misspellings · audit classifier now files structural labels as noise instead of "register me"), plus the coach's decision batches as aliases: **34.8% → 28.1%**. **Round-2 additions APPLIED to prod 2026-07-25** ([`94-round2-registry-additions.sql`](./reviews/94-round2-registry-additions.sql), 71 entries) — prod confirmed at Core 35 · LPO 34 · Força 33 · Acessórios 51 · Skill 41 · Cardio 19. **#94 CLOSED at 11.9% (95/795), 0 dangling aliases**, bucket 1 130 → 16 and bucket 2 179 → 19. That is effectively the floor: 51 of the 95 remaining are bucket 3 (compound notation) + bucket 4 (structural noise), unresolvable by design, and the rest are deliberately-skipped complex fragments and one-off singles. Going further means changing how compound lines are ENTERED (#92 already flags them `complex-detected`), not growing the registry. Related to #62.
 
 ## ✅ Done (recent)
+
+**2026-08-30 — #59 · C5 Phase 0 — dead code + three one-line correctness bugs** · [plans/81 §Phase 0](./plans/81-design-c5-publicador-agenda.md) · (this commit). Standalone — gates nothing in C5·a/b/c, which stay Ready.
+
+Five things, all independent of any design question. **`MicButton.jsx` + `useSpeech` deleted** — nothing in `src/` imported it (`CONE_CONTEXT.md:335` already called it dead), and its module-scope `window.SpeechRecognition` read was the sole reason `exportHelpers.js` couldn't run under vitest's `environment:'node'`. That unlocked **22 new tests**: 5 direct `monthGridCells` cases in `week.test.js` (it had three consumers and no direct test before this — C3's `resultadosHelpers.test.js` only asserted *against* it) and a new `publicador/exportHelpers.test.js` (17 tests covering `buildProgressionLines`/`exLine`/`complexLine`/`buildMobileSession`/`getWeeksOfMonth`/`mfs`; had to mock `utils/storage` since it also pulls the SPA Supabase client at module scope). **The "JULY 2026" bug** — `exportViews.jsx:409`'s `toLocaleString('default', …)` read the *browser's* locale, not English, which is why English-literal greps came back clean — replaced with `MONTH_PT[month] + ' ' + year`, the exact expression `:602` already used. **The two "Mobile Semanal" buttons** — `.slice(0, 15)` cut both labels at exactly the disambiguating digit, so both read `"Mobile Semanal "` — the slice is gone at all four `Publicador.jsx` render sites (985/1004/1193/1206); CSS needs no cap since neither button has a width constraint. **`AgendaView.jsx`'s `BLOCK_C`** — the day pane's chip fallback chain (`BLOCK_C[lbl] || BLOCK_C[bl.type] || '#555'`) and the linked-session preview's (`BLOCK_C[lbl] || '#555'`) disagreed, so a custom-labelled block rendered teal in one and grey in the other; both consumers are the same `DayPane` component (shared by desktop and mobile), verified live by linking a Personal event to a session carrying a custom-labelled block and diffing the two chips' computed colour (both `rgb(74,200,192)` after the fix).
+
+Docs: CLAUDE.md's `MONTH_PT`/`DAY_PT` casing line was itself wrong (claimed both were UPPERCASE; only `DAY_PT` is — `MONTH_PT` is Titlecase, which is exactly the bug this row fixed), and its `buildProgressionLines`/#45 note was stale (claimed it still hand-rolled grouping; it now calls canonical `groupProgressionSteps()` and only re-derives the per-group unit locally, which #45 never needed to absorb) — both corrected. Test count 914→936, files 26→27. `npm test`/`lint --max-warnings 0`/`format:check`/`build:all` clean; `audit-backlog-markers.mjs` zero drift.
 
 **2026-08-30 — #57 · Design pass C3 · Resultados (Lane B)** · [plans/80](./plans/80-design-c3-resultados.md) · Phase 0 `4772250`+`77585d4`, Phase 1 `aa8ba87` (mockup 61, approved by the user), Phase 2 `3a3afc6`. Closed **#57**, **#157**, **#169**; filed **#170**.
 

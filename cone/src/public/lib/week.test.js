@@ -1,5 +1,13 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'
-import { toISO, getWeek, dateToWeekOffset, fmtDate, DAY_PT_TITLE, MONTH_PT_SHORT } from './week.js'
+import {
+  toISO,
+  getWeek,
+  dateToWeekOffset,
+  fmtDate,
+  monthGridCells,
+  DAY_PT_TITLE,
+  MONTH_PT_SHORT,
+} from './week.js'
 
 // June 24, 2026 is a Wednesday. Week: Sun Jun 21 – Sat Jun 27.
 
@@ -80,6 +88,54 @@ describe('dateToWeekOffset', () => {
   })
   test('two weeks ahead returns 2', () => {
     expect(dateToWeekOffset('2026-07-05')).toBe(2)
+  })
+})
+
+describe('monthGridCells', () => {
+  test('month starting on Sunday (Feb 2026) begins the grid with day 1, no leading padding', () => {
+    const weeks = monthGridCells(2026, 1) // Feb 1 2026 is a Sunday
+    expect(weeks).toHaveLength(4)
+    expect(weeks[0][0].date.getDate()).toBe(1)
+    expect(weeks[0][0].date.getDay()).toBe(0)
+    expect(weeks[0][0].inMonth).toBe(true)
+  })
+
+  test('month starting on Saturday (Aug 2026) pads the first week with July days', () => {
+    const weeks = monthGridCells(2026, 7) // Aug 1 2026 is a Saturday
+    const firstWeek = weeks[0]
+    expect(firstWeek.slice(0, 6).every(c => c.inMonth === false)).toBe(true)
+    expect(firstWeek[6].inMonth).toBe(true)
+    expect(firstWeek[6].date.getDate()).toBe(1)
+    expect(firstWeek[6].date.getMonth()).toBe(7)
+  })
+
+  test('a 6-row month (Aug 2026) produces 6 weeks of 7 cells each', () => {
+    const weeks = monthGridCells(2026, 7)
+    expect(weeks).toHaveLength(6)
+    weeks.forEach(w => expect(w).toHaveLength(7))
+  })
+
+  test('28-day February (Feb 2027, starts on a Monday) covers exactly days 1-28', () => {
+    const weeks = monthGridCells(2027, 1)
+    expect(weeks).toHaveLength(5)
+    const inMonthDates = weeks
+      .flat()
+      .filter(c => c.inMonth)
+      .map(c => c.date.getDate())
+    expect(inMonthDates).toEqual(Array.from({ length: 28 }, (_, i) => i + 1))
+  })
+
+  test('inMonth is false for padding days before the 1st and after the last day (Apr 2026)', () => {
+    const weeks = monthGridCells(2026, 3) // Apr 1 2026 is a Wednesday, 30 days
+    const firstWeek = weeks[0]
+    const lastWeek = weeks[weeks.length - 1]
+    expect(firstWeek[0].inMonth).toBe(false)
+    expect(firstWeek[0].date.getMonth()).toBe(2) // trails from March
+    expect(firstWeek[3].inMonth).toBe(true)
+    expect(firstWeek[3].date.getDate()).toBe(1)
+    const trailing = lastWeek.filter(c => !c.inMonth)
+    expect(trailing.length).toBeGreaterThan(0)
+    trailing.forEach(c => expect(c.date.getMonth()).toBe(4)) // spills into May
   })
 })
 

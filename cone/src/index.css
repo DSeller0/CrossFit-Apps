@@ -279,18 +279,17 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* Grab-bag, all TAB-OWNED, no header comment of their own in the original —
-   mic-pulse: Publicador's MicButton (#59). drag-handle/ex-suggestion: the shared
-   ExerciseCombobox (components/shared/, promoted from Criador by #56/C2/plans/75
-   Part 0). collapse-btn/blk-collapsed/collapse-all-row/-btn/blk-body-drag/
-   blk-ex-chip(+name): Criador BlockEditor (#58). settings- shell: shared modal,
-   Publicador (#59) + Atletas. Pruned 2026-07-26 (#99): .blk-wrap.drag-over/
-   .ex-card.drag-over/.sc-card.drag-over-session were dead (no component ever
-   adds a literal "drag-over"/"drag-over-session" class to those elements —
-   Criador's block reorder uses an inline outline style instead, and the week-
-   grid's own drag-over toggle targets .wg-sc, which has no matching rule).
+   drag-handle/ex-suggestion: the shared ExerciseCombobox (components/shared/,
+   promoted from Criador by #56/C2/plans/75 Part 0). collapse-btn/blk-collapsed/
+   collapse-all-row/-btn/blk-body-drag/blk-ex-chip(+name): Criador BlockEditor
+   (#58). settings- shell: shared modal, Publicador (#59) + Atletas. Pruned
+   2026-07-26 (#99): .blk-wrap.drag-over/.ex-card.drag-over/
+   .sc-card.drag-over-session were dead (no component ever adds a literal
+   "drag-over"/"drag-over-session" class to those elements — Criador's block
+   reorder uses an inline outline style instead, and the week-grid's own
+   drag-over toggle targets .wg-sc, which has no matching rule).
    .settings-body/.settings-col-title/.settings-title were dead too (the 2-col
    layout + section title styling that shell variant never got adopted). ── */
-@keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,120,32,.5)}50%{box-shadow:0 0 0 6px rgba(232,120,32,0)}}
 .drag-handle{cursor:grab;color:var(--dim);padding:0 6px;display:flex;align-items:center;font-size:16px;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:color .12s}
 .drag-handle:hover{color:var(--muted)}
 .ex-suggestion:focus{background:var(--divider);outline:none;}
