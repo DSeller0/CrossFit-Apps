@@ -891,7 +891,7 @@ section lists what was checked and found **clean**, so it isn't re-raised next p
 
 ## ✅ Done (recent)
 
-**2026-08-30 — #57 · Design pass C3 · Resultados (Lane B)** · [plans/80](./plans/80-design-c3-resultados.md) · Phase 0 `4772250`+`77585d4`, Phase 1 `aa8ba87` (mockup 61, approved by the user), Phase 2 `<hash>`. Closed **#57**, **#157**, **#169**; filed **#170**.
+**2026-08-30 — #57 · Design pass C3 · Resultados (Lane B)** · [plans/80](./plans/80-design-c3-resultados.md) · Phase 0 `4772250`+`77585d4`, Phase 1 `aa8ba87` (mockup 61, approved by the user), Phase 2 `3a3afc6`. Closed **#57**, **#157**, **#169**; filed **#170**.
 
 **The finding was structural, not visual.** The user, 2026-08-29, on two of the three sub-tabs: *"after the app running for some time not even I remember they exist"*. So the pass asked what Resultados is FOR and let the answer delete things. **Leaderboard** was a second copy of `leaderboard.html` (deleted, Phase 0). **Histórico** was redistributed to where each half is actually looked for — *Por atleta* → a new Card in the Atletas ficha, *Por sessão* → the class header on the session itself — which left nothing behind it. A sub-tab bar of one tab is not a bar, so **`Resultados.jsx` now renders one surface**: a 260px week rail and THE CLASS. `HistoryView.jsx` (339) and `cards.jsx` (32) are gone.
 
