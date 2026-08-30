@@ -1,0 +1,1279 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — Resultados 61 · C3 (#57) Lane-B — uma superfície: a turma</title>
+<style>
+  :root{
+    --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
+    --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
+    --red:#fa3c3c;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+    --font:'Cinzel',Georgia,serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
+    --divider:#2a231c;--border:#4a3e30;--accent:#4ac8c0;--accent-text:#000;
+    --text:#f0e8d0;--err:#fa3c3c;
+    --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--radius-sm:4px;--radius-md:6px;
+    /* DATA colours — canonical SCALE_COL (public/lib/wod.js:57). Stable across all 4 themes. */
+    --scRX:#4ac8c0;--scInter:#e87820;--scSC:#9070d8;--scAdap:#a89880;
+  }
+  html.theme-totk-light{
+    --bg:#ede8dc;--stone:#f5f1e8;--stone2:#e8e2d4;--div:#d4cab8;
+    --gold:#9a6c14;--gold2:#7a5008;--teal:#1c6860;--green:#1a6830;--red:#b83020;
+    --cream:#1c1508;--sub:#503828;--muted:#7a6448;--dim:#a89070;
+    --font:'Cinzel',Georgia,serif;--divider:#d4cab8;--border:#b4a490;
+    --accent:#1c6860;--accent-text:#fff;--text:#1c1508;--err:#b83020;
+  }
+  html.theme-spirit-blossom{
+    --bg:#09070f;--stone:#100d1c;--stone2:#17122a;--div:#221638;
+    --gold:#e05490;--gold2:#b83872;--teal:#38c4d0;--green:#50d890;--red:#f03060;
+    --cream:#ede4f8;--sub:#c4a0d0;--muted:#7d5090;--dim:#4a2d60;
+    --font:'Amarante',Georgia,serif;--divider:#221638;--border:#4a3060;
+    --accent:#38c4d0;--accent-text:#09070f;--text:#ede4f8;--err:#f03060;
+  }
+  html.theme-spirit-blossom-light{
+    --bg:#f4eefb;--stone:#ffffff;--stone2:#f0e8f8;--div:#e2d4f0;
+    --gold:#c83070;--gold2:#a02258;--teal:#0f727e;--green:#28a064;--red:#c02040;
+    --cream:#1a0828;--sub:#4a2460;--muted:#7840a0;--dim:#9070b0;
+    --font:'Amarante',Georgia,serif;--divider:#e2d4f0;--border:#c4a8d8;
+    --accent:#0f727e;--accent-text:#fff;--text:#1a0828;--err:#c02040;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 22px 70px;background:var(--bg);color:var(--text);font-family:var(--font)}
+  h1{font-size:16px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 4px}
+  h1 b{color:var(--gold)}
+  h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+    margin:38px 0 4px;padding-bottom:6px;border-bottom:1px solid var(--divider);max-width:1180px}
+  p.note{font-size:12.5px;color:var(--muted);margin:0 0 16px;font-family:Georgia,serif;
+    max-width:1000px;line-height:1.65}
+  p.note b{color:var(--sub)} p.note code{font-family:var(--font-mono);color:var(--sub);font-size:11.5px}
+  p.note .warn{color:var(--err);font-weight:700}
+  .themebar{display:flex;gap:6px;margin:0 0 22px;flex-wrap:wrap}
+  .themebar button{font-family:var(--font);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 12px;background:var(--stone);color:var(--sub);border:1px solid var(--divider);cursor:pointer}
+  .themebar button:hover{color:var(--cream);border-color:var(--dim)}
+  .cap{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    margin:16px 0 7px;font-weight:700}
+  .cap i{font-style:normal;color:var(--dim);letter-spacing:.04em;text-transform:none;font-weight:400}
+
+  /* ── before/after structure diagram ───────────────────────────────────── */
+  .struct{display:flex;gap:20px;align-items:stretch;flex-wrap:wrap;max-width:1180px;margin-bottom:8px}
+  .stBox{background:var(--stone);border:1px solid var(--divider);padding:13px 15px;min-width:250px}
+  .stBox h3{font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 9px;color:var(--muted)}
+  .stRow{font-size:11.5px;color:var(--sub);padding:3px 0;letter-spacing:.03em}
+  .stRow.gone{color:var(--dim);text-decoration:line-through}
+  .stRow.kid{padding-left:15px;color:var(--dim);font-size:11px}
+  .stArrow{align-self:center;font-size:22px;color:var(--gold)}
+  .stBox.after{border-color:var(--accent)}
+  .stMove{font-size:11px;color:var(--muted);padding:3px 0;letter-spacing:.02em}
+  .stMove b{color:var(--accent);font-weight:700}
+
+  /* ── app frame ────────────────────────────────────────────────────────── */
+  .app{display:grid;grid-template-columns:260px 1fr;gap:1px;background:var(--divider);
+    border:1px solid var(--divider);max-width:1180px;height:620px;overflow:hidden}
+  .app.short{height:430px}
+  .pane{background:var(--stone);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+
+  /* ── WeekRail ─────────────────────────────────────────────────────────── */
+  .railTop{border-bottom:1px solid var(--divider);flex-shrink:0;background:var(--bg)}
+  .monthNav{display:flex;align-items:center;justify-content:space-between;padding:8px 11px}
+  .navBtn{width:24px;height:24px;background:none;border:1px solid var(--border);color:var(--muted);
+    cursor:pointer;font-family:inherit;font-size:15px;line-height:1;display:flex;
+    align-items:center;justify-content:center;padding:0}
+  .navBtn:hover{color:var(--cream);border-color:var(--dim)}
+  .monthLbl{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.05em}
+  .weekRow{display:flex;gap:4px;padding:0 10px 8px;align-items:center}
+  .wkBtn{flex-shrink:0;background:transparent;border:1px solid var(--border);color:var(--muted);
+    font-size:10px;padding:3px 7px;font-family:inherit;letter-spacing:.04em;cursor:pointer}
+  .wkBtn.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:700}
+  .todayBtn{margin-left:auto;background:transparent;border:1px solid var(--accent);color:var(--accent);
+    font-size:10px;padding:3px 8px;font-family:inherit;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:700;cursor:pointer}
+  .railScroll{overflow-y:auto;flex:1}
+  .dayHdr{padding:7px 12px 4px;font-size:9px;color:var(--dim);text-transform:uppercase;
+    letter-spacing:.12em;font-weight:700;border-bottom:1px solid var(--divider);background:var(--bg)}
+  .dayHdr.today{color:var(--accent)}
+  .sessCard{padding:9px 12px 10px;cursor:pointer;border-left:3px solid transparent;
+    border-bottom:1px solid var(--divider);display:block;width:100%;text-align:left;
+    background:none;font-family:inherit}
+  .sessCard:hover{background:var(--stone2)}
+  .sessCard.on{border-left-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+  .sessName{font-size:11.5px;font-weight:700;color:var(--sub);text-transform:uppercase;
+    letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sessCard.on .sessName{color:var(--cream)}
+  .sessProg{display:flex;align-items:center;gap:7px;margin-top:6px}
+  .sessProgN{font-size:10px;color:var(--muted);font-family:var(--font-mono);flex-shrink:0}
+  .sessProgN.done{color:var(--accent)}
+  .restDay{padding:7px 12px;color:var(--muted);font-size:10.5px;font-style:italic;
+    border-bottom:1px solid var(--divider);opacity:.8}
+  .outMonth{padding:6px 12px;color:var(--dim);font-size:10px;border-bottom:1px solid var(--divider)}
+
+  /* ── TallyBar (the one bar primitive: 10 blocks, dividers in var(--bg)) ── */
+  .tally{display:flex;gap:1px;background:var(--bg);height:7px;flex:1;min-width:40px}
+  .tally.lg{height:12px}
+  .tb{flex:1;background:var(--stone2);display:flex;gap:0}
+  .tb.full{background:var(--tbc,var(--accent))}
+  .tu{flex:1;background:transparent}
+  .tu.on{background:var(--tbc,var(--accent))}
+
+  /* ── ClassHeader ──────────────────────────────────────────────────────── */
+  .classHdr{background:var(--bg);border-bottom:1px solid var(--border);padding:12px 16px 11px;flex-shrink:0}
+  .chTop{display:flex;align-items:baseline;gap:12px;margin-bottom:9px}
+  .chTitle{font-size:15px;font-weight:700;color:var(--cream);letter-spacing:.05em;
+    text-transform:uppercase;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chDate{font-size:11px;color:var(--muted);flex-shrink:0;letter-spacing:.03em}
+  .chProg{display:flex;align-items:center;gap:11px}
+  .chProgN{font-size:11.5px;color:var(--sub);font-family:var(--font-mono);flex-shrink:0;min-width:132px}
+  .chProgN b{color:var(--cream);font-weight:700}
+  .chKpis{display:flex;align-items:center;gap:9px;margin-top:8px;flex-wrap:wrap}
+  .chKpi{font-size:11px;color:var(--sub);letter-spacing:.03em}
+  .chKpi b{color:var(--cream);font-weight:700;font-family:var(--font-mono)}
+  .chKpi.flag{color:var(--err)}
+  .chSep{color:var(--dim);font-size:11px}
+  .chNodata{font-size:11px;color:var(--muted);margin-top:8px;font-style:italic}
+  .chToggle{margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--muted);
+    font-family:inherit;font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    padding:3px 9px;cursor:pointer;flex-shrink:0}
+  .chToggle:hover{color:var(--cream);border-color:var(--dim)}
+
+  /* the expanded read-back — the old "Por sessão" pane, in place */
+  .kpiPanel{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--divider);
+    border-top:1px solid var(--divider);margin:11px -16px -11px}
+  .kpiCell{background:var(--stone);padding:11px 14px 12px}
+  .kpiLbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    font-weight:700;margin-bottom:6px}
+  .kpiVal{font-size:24px;font-weight:900;color:var(--cream);line-height:1;font-family:var(--font-mono)}
+  .kpiVal.muted{color:var(--dim)}
+  .kpiSub{font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.4}
+  .distBar{display:flex;gap:1px;height:12px;background:var(--bg);margin-bottom:6px;margin-top:2px}
+  .distSeg{background:var(--c)}
+  .distKey{display:flex;gap:9px;flex-wrap:wrap;font-size:10px;color:var(--muted)}
+  .distKey span{display:flex;align-items:center;gap:4px}
+  .dk{width:7px;height:7px;flex-shrink:0}
+
+  /* ── roster ───────────────────────────────────────────────────────────── */
+  .roster{flex:1;overflow-y:auto;padding:10px 14px 18px;display:flex;flex-direction:column;gap:7px}
+  .row{border:1px solid var(--divider);background:var(--stone2)}
+  .row.open{border-color:var(--accent);background:var(--stone)}
+  .rowHead{display:flex;align-items:center;gap:10px;padding:10px 12px;width:100%;
+    background:none;border:none;font-family:inherit;text-align:left;cursor:pointer}
+  .rowHead:hover{background:color-mix(in srgb,var(--cream) 4%,transparent)}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;background:var(--ac)}
+  .dot.hollow{background:transparent;border:2px solid var(--dim);width:9px;height:9px}
+  .rowName{font-size:13px;font-weight:700;color:var(--cream);letter-spacing:.04em;flex-shrink:0}
+  .row.absent .rowName{color:var(--muted)}
+  .lvTag{font-size:9.5px;font-weight:700;padding:2px 7px;letter-spacing:.06em;
+    text-transform:uppercase;background:color-mix(in srgb,var(--ac) 18%,transparent);color:var(--ac)}
+  .rowSum{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--sub);
+    font-family:var(--font-mono);flex:1;min-width:0}
+  /* Canonical pill treatment — RankList.module.css .scale: NO fill, border in currentColor.
+     A color-mix() fill washes the label out on both light themes; this is the shipped shape. */
+  .scPill{font-size:9.5px;font-weight:700;padding:2px 7px;letter-spacing:.06em;text-transform:uppercase;
+    font-family:var(--font);background:transparent;color:var(--c);border:1px solid currentColor;flex-shrink:0}
+  .absTag{font-size:11px;color:var(--muted);font-style:italic;flex:1}
+  .rowFlag{color:var(--err);font-size:13px;flex-shrink:0}
+  .rowActs{margin-left:auto;display:flex;align-items:center;gap:6px;flex-shrink:0}
+  .spacer{flex:1}
+
+  /* buttons (ui/Button shapes) */
+  .b{font-family:inherit;cursor:pointer;letter-spacing:.05em;border:1px solid var(--border);
+    background:transparent;color:var(--sub);display:inline-flex;align-items:center;
+    justify-content:center;gap:5px;white-space:nowrap}
+  .b.xs{font-size:10px;padding:4px 9px}
+  .b.sm{font-size:11px;padding:6px 12px}
+  .b.md{font-size:12px;padding:8px 16px}
+  .b:hover{color:var(--cream);border-color:var(--dim)}
+  .b.prim{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:700}
+  .b.ghost{border-color:transparent;color:var(--muted)}
+  .b.ghost:hover{border-color:var(--border);color:var(--cream)}
+  /* the "não fez" toggle: a real outline, not a ghost — it has to be findable on a
+     block the athlete skipped, which is the one case nobody goes looking for it */
+  .b.tog{border-style:dashed;border-color:var(--dim);color:var(--muted);font-size:10px;padding:4px 9px}
+  .b.tog:hover{border-color:var(--muted);color:var(--cream)}
+  /* background MUST be reset: .b.on's accent fill would otherwise paint the skipped
+     chip as a selected/primary control — the one reading this state must never have. */
+  .b.tog.on{background:transparent;border-style:solid;border-color:var(--muted);
+    color:var(--sub);font-weight:700}
+  .b.menu{border-color:var(--border);color:var(--muted);letter-spacing:.14em;padding:3px 8px}
+  .b.dis{opacity:.42;cursor:not-allowed;background:transparent;color:var(--muted);border-color:var(--border);font-weight:400}
+  .b.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:700}
+  .b.danger{color:var(--err);border-color:color-mix(in srgb,var(--err) 45%,transparent)}
+  .b.flagOn{color:var(--err);border-color:var(--err);background:color-mix(in srgb,var(--err) 14%,transparent);font-weight:700}
+
+  /* ── the log form ─────────────────────────────────────────────────────── */
+  .form{border-top:1px solid var(--divider);padding:13px 14px 14px}
+  .fRow{display:flex;align-items:center;gap:12px;margin-bottom:11px;flex-wrap:wrap}
+  .fLbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    font-weight:700;width:74px;flex-shrink:0}
+  .segs{display:flex;gap:4px;flex-wrap:wrap}
+  .seg{font-family:inherit;font-size:12px;padding:6px 13px;border:1px solid var(--border);
+    background:transparent;color:var(--muted);cursor:pointer;letter-spacing:.04em}
+  .seg:hover{color:var(--cream);border-color:var(--dim)}
+  .seg.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:700}
+  .seg.num{min-width:34px;padding:6px 0;justify-content:center;text-align:center}
+
+  .blk{border:1px solid var(--border);margin-bottom:10px;background:var(--bg)}
+  .blkHead{display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--stone2);
+    border-bottom:1px solid var(--divider)}
+  .blkIdx{font-size:10px;font-weight:900;color:var(--dim);font-family:var(--font-mono);flex-shrink:0}
+  .blkName{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;
+    letter-spacing:.09em;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .blkFam{width:3px;align-self:stretch;background:var(--fam);flex-shrink:0;margin:-8px 0 -8px -11px}
+  .blkBody{padding:11px}
+  .wodSum{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:11px;
+    padding:7px 9px;background:var(--stone);border:1px solid var(--divider)}
+  .wodSum b{color:var(--gold);font-weight:700}
+  .scoreRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:11px}
+  .inp{background:var(--stone);border:1px solid var(--border);color:var(--cream);
+    font-family:var(--font-mono);font-size:16px;padding:7px 10px;width:92px;text-align:center;outline:none}
+  .inp.ph{color:var(--dim)}
+  .inp.w60{width:64px}
+
+  /* skipped */
+  .blk.skipped{border-style:dashed;border-color:var(--dim);background:transparent}
+  .blk.skipped .blkHead{background:transparent;border-bottom:none;border-bottom:1px dashed var(--dim)}
+  .blk.skipped .blkName{color:var(--dim)}
+  .skipBody{padding:12px 11px;font-size:11.5px;color:var(--muted);font-style:italic;letter-spacing:.03em}
+
+  .formFoot{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-top:11px;
+    border-top:1px solid var(--divider);margin-top:2px}
+  .gate{font-size:11px;color:var(--muted);letter-spacing:.03em}
+  .gate b{color:var(--gold);font-weight:700}
+
+  /* ── empty states (ui/EmptyState) ─────────────────────────────────────── */
+  .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:8px;padding:40px 22px;text-align:center}
+  .emptyIcon{font-size:26px;color:var(--dim);line-height:1}
+  .emptyTitle{font-size:13.5px;color:var(--sub);font-weight:700;letter-spacing:.04em}
+  .emptyText{font-size:11.5px;color:var(--muted);max-width:330px;line-height:1.6}
+  .emptyInline{display:flex;align-items:center;gap:11px;padding:11px 2px;
+    font-size:11.5px;color:var(--muted);font-style:italic}
+
+  /* ── detail strips ────────────────────────────────────────────────────── */
+  .strip{background:var(--stone);border:1px solid var(--divider);padding:14px;max-width:760px;
+    display:flex;flex-direction:column;gap:8px}
+  .strip.wide{max-width:1180px}
+  .lbl{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
+    font-weight:700;margin:6px 0 1px}
+  .pair{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;max-width:1180px}
+  .pairCol{flex:1;min-width:330px}
+
+  /* ── mobile ───────────────────────────────────────────────────────────── */
+  .phones{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+  .phone{width:390px;height:640px;background:var(--stone);border:1px solid var(--divider);
+    display:flex;flex-direction:column;overflow:hidden;position:relative}
+  .backLink{display:flex;align-items:center;gap:6px;padding:9px 13px;font-size:12px;
+    color:var(--muted);border-bottom:1px solid var(--divider);background:var(--bg);
+    font-family:inherit;border-left:none;border-right:none;border-top:none;cursor:pointer;text-align:left}
+  .sheet{position:absolute;inset:0;background:var(--stone);display:flex;flex-direction:column;
+    border-left:2px solid var(--accent)}
+  .sheetHead{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg);
+    border-bottom:1px solid var(--border);flex-shrink:0}
+  .sheetTitle{font-size:14px;font-weight:700;color:var(--cream);letter-spacing:.05em;flex:1}
+  .sheetBody{flex:1;overflow-y:auto;padding:12px 14px}
+  .sheetFoot{display:flex;gap:8px;padding:11px 14px;border-top:1px solid var(--border);
+    background:var(--bg);flex-shrink:0}
+
+  /* ── ficha card ───────────────────────────────────────────────────────── */
+  .ficha{width:400px;background:var(--stone);border:1px solid var(--divider);padding:13px 14px 14px}
+  .fichaHdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+  .fichaTitle{font-size:12.5px;font-weight:700;color:var(--cream);letter-spacing:.05em;
+    text-transform:uppercase;margin:0}
+  .miniKpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--divider);
+    border:1px solid var(--divider);margin-bottom:12px}
+  .miniKpi{background:var(--stone2);padding:9px 10px 10px}
+  .mkLbl{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    font-weight:700;margin-bottom:5px}
+  .mkVal{font-size:19px;font-weight:900;color:var(--cream);line-height:1;font-family:var(--font-mono)}
+  .mkVal.muted{color:var(--dim)}
+  .mkSub{font-size:9.5px;color:var(--muted);margin-top:5px;line-height:1.35}
+  .spark{display:flex;align-items:flex-end;gap:2px;height:26px;margin-top:7px}
+  .spark span{flex:1;background:var(--accent);min-width:3px}
+  .hRow{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--divider);align-items:flex-start}
+  .hRow:last-child{border-bottom:none}
+  .hDate{font-size:10.5px;color:var(--muted);font-family:var(--font-mono);width:62px;
+    flex-shrink:0;padding-top:2px}
+  .hBody{flex:1;min-width:0}
+  .hTop{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .hSess{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.03em}
+  .hPerf{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--font-mono)}
+  .hPerf b{color:var(--cream)}
+
+  .slot{border:1px dashed var(--dim);padding:9px 12px;font-size:10.5px;color:var(--dim);
+    letter-spacing:.05em;text-transform:uppercase;font-weight:700}
+  .stackCard{border:1px solid var(--divider);background:var(--stone2);padding:9px 12px;
+    font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+  .stackCard.hot{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);
+    color:var(--cream);font-weight:700}
+  .stack{display:flex;flex-direction:column;gap:5px;width:300px}
+</style>
+
+<h1>Cone — Resultados · <b>Mockup 61</b> · C3 (#57) Lane B</h1>
+<p class="note">
+  <b>A pergunta é estrutural, não de estilo.</b> Duas das três sub-abas ficaram meses sem serem
+  encontradas — <i>"nem eu lembro que existem"</i>. A resposta desta proposta: <b>a barra de sub-abas
+  não sobrevive</b>. Resultados deixa de ser uma pasta com três relatórios e passa a ser aquilo que o
+  usuário abre a aba para fazer — <b>registrar a turma e ler a turma de volta</b>. Nada fica atrás de
+  um nome que ele precise lembrar.
+</p>
+
+<div class="themebar">
+  <button onclick="document.documentElement.className=''">TotK Dark</button>
+  <button onclick="document.documentElement.className='theme-totk-light'">TotK Light</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom'">Spirit Blossom</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom-light'">SB Light</button>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">1 · A decisão de estrutura</h2>
+<p class="note">
+  O mapa de sobreposição do plano esvazia Histórico dos dois lados: <b>Por atleta</b> vai para a ficha
+  do Atletas (o lugar onde o usuário já prepara o 1:1), <b>Por sessão</b> vai para o cabeçalho da
+  turma (a sessão que ele acabou de registrar). Sem nada atrás dela, a barra de sub-abas é uma barra
+  de um item — some. <span class="warn">Frequência não atravessa</span>: o denominador de
+  <code>calcKPIs.freq</code> são linhas de resultado que existem (família #164), e
+  <b>Presença · 4 semanas</b> já cobre o assunto na própria ficha, de forma honesta.
+</p>
+<div class="struct">
+  <div class="stBox">
+    <h3>Antes (pós-Fase 0)</h3>
+    <div class="stRow">▸ Registro <i style="color:var(--dim)">— 3 painéis</i></div>
+    <div class="stRow">▸ Histórico / KPIs</div>
+    <div class="stRow kid">└ Por atleta</div>
+    <div class="stRow kid">└ Por sessão</div>
+    <div class="stRow gone">▸ Leaderboard</div>
+    <div class="stRow" style="color:var(--dim);font-size:10.5px;margin-top:9px">
+      2 sub-abas + 2 sub-sub-abas = 4 lugares para lembrar
+    </div>
+  </div>
+  <div class="stArrow">▶</div>
+  <div class="stBox after">
+    <h3>Depois — uma superfície</h3>
+    <div class="stRow" style="color:var(--cream);font-weight:700">A turma</div>
+    <div class="stRow kid">trilha da semana · a turma</div>
+    <div class="stRow kid">registrar · ler de volta</div>
+    <div class="stRow" style="color:var(--dim);font-size:10.5px;margin-top:9px">
+      0 sub-abas. Nada para lembrar.
+    </div>
+  </div>
+  <div class="stBox" style="flex:1">
+    <h3>Para onde vai o resto</h3>
+    <div class="stMove">Por atleta · RPE + faísca · Taxa RX · Evolução de carga · histórico
+      → <b>Atletas · ficha</b>, um Card novo</div>
+    <div class="stMove">Por sessão · RPE da turma · Taxa RX · Flags · Distribuição
+      → <b>cabeçalho da turma</b>, no lugar</div>
+    <div class="stMove">Por sessão · Resultados da turma
+      → <b>a própria lista de atletas</b> (era duplicata)</div>
+    <div class="stMove">Frequência → <b>descartada</b> (#164)</div>
+    <div class="stMove">Leaderboard → <b>excluída</b> (Fase 0, 4772250)</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">2 · Desktop 1280 — semana com sessões · turma parcialmente registrada · 3 WODs · bloco "não fez" · atleta ausente</h2>
+<p class="note">
+  Dois painéis, não três: <b>a lista de atletas É o formulário</b>. A linha do atleta abre no lugar
+  (acordeão, um por vez), então o formulário ganha a largura inteira em vez de uma coluna de 10–13px,
+  e o <code>Registrar atleta</code> pontilhado — que escondia a turma inteira no caso normal —
+  simplesmente deixa de existir. Todo atleta está sempre na lista.
+</p>
+<div class="app">
+  <!-- ── rail ── -->
+  <div class="pane">
+    <div class="railTop">
+      <div class="monthNav">
+        <button class="navBtn" aria-label="Mês anterior">‹</button>
+        <span class="monthLbl">Agosto 2026</span>
+        <button class="navBtn" aria-label="Próximo mês">›</button>
+      </div>
+      <div class="weekRow">
+        <button class="wkBtn">3–9</button>
+        <button class="wkBtn">10–16</button>
+        <button class="wkBtn on">17–23</button>
+        <button class="todayBtn">Hoje</button>
+      </div>
+    </div>
+    <div class="railScroll">
+      <div class="dayHdr">Qua 20</div>
+      <button class="sessCard">
+        <div class="sessName">Turma 19h</div>
+        <div class="sessProg">
+          <span class="tally" data-pct="100" style="--tbc:var(--accent)"></span>
+          <span class="sessProgN done">10/10</span>
+        </div>
+      </button>
+      <div class="dayHdr today">Qui 21 · hoje</div>
+      <button class="sessCard on">
+        <div class="sessName">WOD A · Fran retest</div>
+        <div class="sessProg">
+          <span class="tally" data-pct="42" style="--tbc:var(--accent)"></span>
+          <span class="sessProgN">5/12</span>
+        </div>
+      </button>
+      <button class="sessCard">
+        <div class="sessName">Turma 19h</div>
+        <div class="sessProg">
+          <span class="tally" data-pct="0"></span>
+          <span class="sessProgN">0/12</span>
+        </div>
+      </button>
+      <div class="dayHdr">Sex 22</div>
+      <div class="restDay">— descanso</div>
+      <div class="dayHdr">Sáb 23</div>
+      <button class="sessCard">
+        <div class="sessName">Sábado open box</div>
+        <div class="sessProg">
+          <span class="tally" data-pct="0"></span>
+          <span class="sessProgN">0/8</span>
+        </div>
+      </button>
+      <div class="outMonth">Dom 24</div>
+    </div>
+  </div>
+
+  <!-- ── class ── -->
+  <div class="pane">
+    <div class="classHdr">
+      <div class="chTop">
+        <h2 class="chTitle">WOD A · Fran retest</h2>
+        <span class="chDate">qui, 21 de agosto</span>
+      </div>
+      <div class="chProg">
+        <span class="tally lg" data-pct="42" style="--tbc:var(--accent)"></span>
+        <span class="chProgN"><b>5</b> de 12 registrados</span>
+      </div>
+      <div class="chKpis">
+        <span class="chKpi">RPE médio <b>7.4</b></span><span class="chSep">·</span>
+        <span class="chKpi">Taxa RX <b>60%</b></span><span class="chSep">·</span>
+        <span class="chKpi flag">⚑ 1 para revisão</span>
+        <button class="chToggle">Ver turma ▾</button>
+      </div>
+    </div>
+
+    <div class="roster">
+      <!-- LOGGED -->
+      <div class="row" style="--ac:#4ac8c0">
+        <button class="rowHead">
+          <span class="dot"></span>
+          <span class="rowName">Marina Souza</span>
+          <span class="rowSum">
+            <span class="scPill" style="--c:var(--scRX)">RX</span>
+            4:12 · RPE 8
+          </span>
+          <span class="rowActs">
+            <span class="b xs menu" aria-label="Ações para Marina Souza">···</span>
+          </span>
+        </button>
+      </div>
+
+      <!-- OPEN -->
+      <div class="row open" style="--ac:#e87820">
+        <button class="rowHead">
+          <span class="dot"></span>
+          <span class="rowName">Rafael Marinho</span>
+          <span class="lvTag">Intermediário</span>
+          <span class="spacer"></span>
+          <span class="rowActs"><span class="b xs">Fechar ^</span></span>
+        </button>
+        <div class="form">
+          <div class="fRow">
+            <span class="fLbl">Presença</span>
+            <span class="segs">
+              <span class="seg on">Presente</span>
+              <span class="seg">Ausente</span>
+              <span class="seg">Justificado</span>
+            </span>
+          </div>
+          <div class="fRow">
+            <span class="fLbl">Energia</span>
+            <span class="segs">
+              <span class="seg num">1</span><span class="seg num">2</span>
+              <span class="seg num on">3</span><span class="seg num">4</span><span class="seg num">5</span>
+            </span>
+          </div>
+
+          <!-- block 1 — complete -->
+          <div class="blk">
+            <div class="blkHead"><span class="blkFam" style="--fam:#d8a840"></span>
+              <span class="blkIdx">1/3</span>
+              <span class="blkName">For Time · 21-15-9</span>
+              <span class="b xs tog">não fez</span>
+            </div>
+            <div class="blkBody">
+              <div class="wodSum"><b>21-15-9</b> Thruster 43 kg · <b>21-15-9</b> Pull-up</div>
+              <div class="fRow" style="margin-bottom:9px">
+                <span class="fLbl">Escala</span>
+                <span class="segs">
+                  <span class="seg on">RX</span><span class="seg">Inter</span>
+                  <span class="seg">SC</span><span class="seg">Adaptado</span>
+                </span>
+              </div>
+              <div class="fRow" style="margin-bottom:0">
+                <span class="fLbl">RPE</span>
+                <span class="segs">
+                  <span class="seg num">1</span><span class="seg num">2</span><span class="seg num">3</span>
+                  <span class="seg num">4</span><span class="seg num">5</span><span class="seg num">6</span>
+                  <span class="seg num">7</span><span class="seg num on">8</span>
+                  <span class="seg num">9</span><span class="seg num">10</span>
+                </span>
+              </div>
+              <div class="scoreRow">
+                <span class="fLbl">Tempo</span>
+                <input class="inp" value="04:12" readonly>
+                <span class="b xs ghost">Não terminei</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- block 2 — SKIPPED (#157) -->
+          <div class="blk skipped">
+            <div class="blkHead"><span class="blkFam" style="--fam:var(--dim)"></span>
+              <span class="blkIdx">2/3</span>
+              <span class="blkName">EMOM 12' · Clean</span>
+              <span class="b xs tog on">✓ não fez</span>
+            </div>
+            <div class="skipBody">Não fez este bloco — nada é registrado.</div>
+          </div>
+
+          <!-- block 3 — incomplete -->
+          <div class="blk">
+            <div class="blkHead"><span class="blkFam" style="--fam:#5090e0"></span>
+              <span class="blkIdx">3/3</span>
+              <span class="blkName">Força · Back Squat</span>
+              <span class="b xs tog">não fez</span>
+            </div>
+            <div class="blkBody">
+              <div class="wodSum"><b>5×5</b> Back Squat <b>80%</b></div>
+              <div class="fRow" style="margin-bottom:9px">
+                <span class="fLbl">Escala</span>
+                <span class="segs">
+                  <span class="seg">RX</span><span class="seg">Inter</span>
+                  <span class="seg">SC</span><span class="seg">Adaptado</span>
+                </span>
+              </div>
+              <div class="fRow" style="margin-bottom:0">
+                <span class="fLbl">RPE</span>
+                <span class="segs">
+                  <span class="seg num">1</span><span class="seg num">2</span><span class="seg num">3</span>
+                  <span class="seg num">4</span><span class="seg num">5</span><span class="seg num">6</span>
+                  <span class="seg num">7</span><span class="seg num">8</span>
+                  <span class="seg num">9</span><span class="seg num">10</span>
+                </span>
+              </div>
+              <div class="scoreRow">
+                <span class="fLbl">Carga</span>
+                <input class="inp w60 ph" value="kg" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="formFoot">
+            <span class="b sm ghost">+ Nota do coach</span>
+            <span class="b sm">⚑ Marcar para revisão</span>
+            <span class="spacer"></span>
+            <span class="gate">Faltam: <b>Força · Back Squat</b></span>
+            <span class="b md dis">Salvar</span>
+            <span class="b md dis">Salvar e próximo ▸</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABSENT -->
+      <div class="row absent" style="--ac:var(--dim)">
+        <button class="rowHead">
+          <span class="dot hollow"></span>
+          <span class="rowName">Bruno Teixeira</span>
+          <span class="absTag">Ausente</span>
+          <span class="rowActs"><span class="b xs menu" aria-label="Ações para Bruno Teixeira">···</span></span>
+        </button>
+      </div>
+
+      <!-- LOGGED + FLAG -->
+      <div class="row" style="--ac:#9070d8">
+        <button class="rowHead">
+          <span class="dot"></span>
+          <span class="rowName">Júlia Ferraz</span>
+          <span class="rowSum">
+            <span class="scPill" style="--c:var(--scInter)">Inter</span>
+            5:48 · RPE 9
+            <span class="rowFlag" aria-label="Marcada para revisão">⚑</span>
+          </span>
+          <span class="rowActs"><span class="b xs menu" aria-label="Ações para Júlia Ferraz">···</span></span>
+        </button>
+      </div>
+
+      <!-- UNLOGGED -->
+      <div class="row" style="--ac:#60a840">
+        <button class="rowHead">
+          <span class="dot"></span>
+          <span class="rowName">Carla Pinto</span>
+          <span class="lvTag">Iniciante</span>
+          <span class="spacer"></span>
+          <span class="rowActs">
+            <span class="b xs ghost">Ausente</span>
+            <span class="b xs">Registrar</span>
+          </span>
+        </button>
+      </div>
+      <div class="row" style="--ac:#e0a030">
+        <button class="rowHead">
+          <span class="dot"></span>
+          <span class="rowName">Diego Alves</span>
+          <span class="lvTag">Avançado</span>
+          <span class="spacer"></span>
+          <span class="rowActs">
+            <span class="b xs ghost">Ausente</span>
+            <span class="b xs">Registrar</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">3 · A leitura da turma — um elemento que cresce, nunca uma grade de KPIs vazia</h2>
+<p class="note">
+  Os quatro KPIs de <b>Por sessão</b> pousam aqui, na sessão que o usuário está olhando. Com 0
+  registros seria uma grade de quatro azulejos em branco exatamente no momento em que ele quer
+  começar a digitar — então <b>a barra ganha altura conforme merece</b>: uma linha quando não há
+  dado, números quando há, e o painel inteiro sob um disclosure.
+  <b>Distribuição de escala vira uma barra empilhada real</b> nas cores canônicas
+  <code>SCALE_COL</code> — <span class="warn">a quarta paleta divergente da SPA
+  (RX verde · Inter azul · SC âmbar) morre aqui</span> (achado 1).
+</p>
+
+<div class="cap">3a · sem dado <i>— 0 de 12 registrados</i></div>
+<div class="strip wide" style="padding:0;background:var(--stone)">
+  <div class="classHdr" style="border-bottom:none">
+    <div class="chTop">
+      <h2 class="chTitle">Turma 19h</h2><span class="chDate">qui, 21 de agosto</span>
+    </div>
+    <div class="chProg">
+      <span class="tally lg" data-pct="0"></span>
+      <span class="chProgN">0 de 12 registrados</span>
+    </div>
+    <div class="chKpis">
+      <span class="chNodata">Os números da turma aparecem conforme você registra.</span>
+      <button class="chToggle">Ver turma ▾</button>
+    </div>
+  </div>
+</div>
+
+<div class="cap">3b · com dado, recolhido <i>— a linha que o usuário lê de relance</i></div>
+<div class="strip wide" style="padding:0;background:var(--stone)">
+  <div class="classHdr" style="border-bottom:none">
+    <div class="chTop">
+      <h2 class="chTitle">WOD A · Fran retest</h2><span class="chDate">qui, 21 de agosto</span>
+    </div>
+    <div class="chProg">
+      <span class="tally lg" data-pct="42" style="--tbc:var(--accent)"></span>
+      <span class="chProgN"><b>5</b> de 12 registrados</span>
+    </div>
+    <div class="chKpis">
+      <span class="chKpi">RPE médio <b>7.4</b></span><span class="chSep">·</span>
+      <span class="chKpi">Taxa RX <b>60%</b></span><span class="chSep">·</span>
+      <span class="chKpi flag">⚑ 1 para revisão</span>
+      <button class="chToggle">Ver turma ▾</button>
+    </div>
+  </div>
+</div>
+
+<div class="cap">3c · com dado, expandido <i>— o antigo painel "Por sessão", no lugar</i></div>
+<div class="strip wide" style="padding:0;background:var(--stone)">
+  <div class="classHdr" style="border-bottom:none">
+    <div class="chTop">
+      <h2 class="chTitle">WOD A · Fran retest</h2><span class="chDate">qui, 21 de agosto</span>
+    </div>
+    <div class="chProg">
+      <span class="tally lg" data-pct="100" style="--tbc:var(--accent)"></span>
+      <span class="chProgN"><b>12</b> de 12 registrados</span>
+    </div>
+    <div class="chKpis">
+      <span class="chKpi">Turma completa</span>
+      <button class="chToggle">Ocultar ▴</button>
+    </div>
+    <div class="kpiPanel">
+      <div class="kpiCell">
+        <div class="kpiLbl">RPE médio da turma</div>
+        <div class="kpiVal">7.4</div>
+        <div class="kpiSub">11 atletas presentes · 1 ausente</div>
+      </div>
+      <div class="kpiCell">
+        <div class="kpiLbl">Taxa RX</div>
+        <div class="kpiVal">60%</div>
+        <div class="kpiSub">RX em 12 de 20 escalas</div>
+      </div>
+      <div class="kpiCell">
+        <div class="kpiLbl">Flags</div>
+        <div class="kpiVal" style="color:var(--err)">1</div>
+        <div class="kpiSub">atleta marcado para revisão</div>
+      </div>
+      <div class="kpiCell">
+        <div class="kpiLbl">Distribuição de escala</div>
+        <div class="distBar">
+          <span class="distSeg" style="--c:var(--scRX);flex:12"></span>
+          <span class="distSeg" style="--c:var(--scInter);flex:5"></span>
+          <span class="distSeg" style="--c:var(--scSC);flex:2"></span>
+          <span class="distSeg" style="--c:var(--scAdap);flex:1"></span>
+        </div>
+        <div class="distKey">
+          <span><i class="dk" style="background:var(--scRX)"></i>12 RX</span>
+          <span><i class="dk" style="background:var(--scInter)"></i>5 Inter</span>
+          <span><i class="dk" style="background:var(--scSC)"></i>2 SC</span>
+          <span><i class="dk" style="background:var(--scAdap)"></i>1 Adap</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">4 · A linha do atleta — quatro estados, UMA casca</h2>
+<p class="note">
+  Hoje <code>rp-ath-row</code> e <code>rp-add-item</code> são duas linguagens visuais e o atleta
+  salta de uma para a outra no instante em que você salva. Aqui é a mesma casca com estados. O ponto
+  colorido e a etiqueta de nível carregam a <b>cor de identidade do atleta</b> via
+  <code>color-mix</code> — o padrão que o C2 já resolveu, então <code>LEVEL_CLS</code> e as quatro
+  regras <code>.lv-*</code> morrem. <b>[Ausente] é uma escrita de um clique</b>: campo único e
+  reversível, mesmo precedente do <code>+1</code> de objetivo que o C2 removeu do confirm.
+  <b>[···]</b> abre Editar / Excluir — e Excluir passa pelo <code>ConfirmReview</code>, o que
+  aposenta os <b>dois</b> confirms inline.
+</p>
+<div class="strip">
+  <div class="lbl">não registrado</div>
+  <div class="row" style="--ac:#60a840"><div class="rowHead">
+    <span class="dot"></span><span class="rowName">Carla Pinto</span>
+    <span class="lvTag">Iniciante</span><span class="spacer"></span>
+    <span class="rowActs"><span class="b xs ghost">Ausente</span><span class="b xs">Registrar</span></span>
+  </div></div>
+
+  <div class="lbl">aberto — um por vez, cabeçalho fixo enquanto o formulário rola</div>
+  <div class="row open" style="--ac:#e87820"><div class="rowHead">
+    <span class="dot"></span><span class="rowName">Rafael Marinho</span>
+    <span class="lvTag">Intermediário</span><span class="spacer"></span>
+    <span class="rowActs"><span class="b xs">Fechar ^</span></span>
+  </div></div>
+
+  <div class="lbl">registrado — resumo em perfStr canônico, pílula em SCALE_COL</div>
+  <div class="row" style="--ac:#4ac8c0"><div class="rowHead">
+    <span class="dot"></span><span class="rowName">Marina Souza</span>
+    <span class="rowSum"><span class="scPill" style="--c:var(--scRX)">RX</span>4:12 · RPE 8</span>
+    <span class="rowActs"><span class="b xs menu">···</span></span>
+  </div></div>
+
+  <div class="lbl">registrado com DNF — perfStr já rende "N rds (DNF)", não um traço</div>
+  <div class="row" style="--ac:#9070d8"><div class="rowHead">
+    <span class="dot"></span><span class="rowName">Júlia Ferraz</span>
+    <span class="rowSum"><span class="scPill" style="--c:var(--scInter)">Inter</span>2 rds (DNF) · RPE 9
+      <span class="rowFlag">⚑</span></span>
+    <span class="rowActs"><span class="b xs menu">···</span></span>
+  </div></div>
+
+  <div class="lbl">ausente — ponto vazado, nunca abre formulário (não há o que registrar)</div>
+  <div class="row absent" style="--ac:var(--dim)"><div class="rowHead">
+    <span class="dot hollow"></span><span class="rowName">Bruno Teixeira</span>
+    <span class="absTag">Ausente</span>
+    <span class="rowActs"><span class="b xs menu">···</span></span>
+  </div></div>
+
+  <div class="lbl">justificado — mesma casca, palavra própria</div>
+  <div class="row absent" style="--ac:var(--dim)"><div class="rowHead">
+    <span class="dot hollow"></span><span class="rowName">Pedro Nunes</span>
+    <span class="absTag">Justificado</span>
+    <span class="rowActs"><span class="b xs menu">···</span></span>
+  </div></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">5 · #157 — "não fez" mora no cabeçalho do bloco</h2>
+<p class="note">
+  O gate de escala+RPE existe de propósito (achado 2 / #61a): um <code>RX @ 7</code> pré-marcado
+  registraria informação que ninguém digitou. O <code>results.html</code> não paga por isso porque
+  envia <b>um bloco por vez</b>; a SPA tem <b>um Salvar para N blocos</b>, então a mesma regra deixa
+  uma sessão de 3 WODs impossível de salvar sem inventar nota. O toggle é o que torna o gate
+  sobrevivível. <b>Os campos são removidos, não desabilitados</b> — um "RPE —" cinza ainda afirma que
+  o campo foi considerado. Borda tracejada + corpo mudo lê como <i>deliberadamente vazio</i>, nunca
+  como <i>ainda não preenchido</i>. Grava <code>skipped:true</code> <b>sem escala nem RPE</b>:
+  ausência e nota zero seguem distinguíveis no <code>results_v2</code>.
+</p>
+<div class="pair">
+  <div class="pairCol">
+    <div class="cap">desligado <i>— o toggle fica no cabeçalho, à direita</i></div>
+    <div class="strip" style="max-width:none">
+      <div class="blk">
+        <div class="blkHead"><span class="blkFam" style="--fam:#d8a840"></span>
+          <span class="blkIdx">2/3</span><span class="blkName">EMOM 12' · Clean</span>
+          <span class="b xs tog">não fez</span>
+        </div>
+        <div class="blkBody">
+          <div class="wodSum">12' EMOM · <b>3</b> Clean 60 kg</div>
+          <div class="fRow" style="margin-bottom:9px">
+            <span class="fLbl">Escala</span>
+            <span class="segs"><span class="seg">RX</span><span class="seg">Inter</span>
+              <span class="seg">SC</span><span class="seg">Adaptado</span></span>
+          </div>
+          <div class="fRow" style="margin-bottom:0">
+            <span class="fLbl">RPE</span>
+            <span class="segs">
+              <span class="seg num">1</span><span class="seg num">2</span><span class="seg num">3</span>
+              <span class="seg num">4</span><span class="seg num">5</span><span class="seg num">6</span>
+              <span class="seg num">7</span><span class="seg num">8</span><span class="seg num">9</span>
+              <span class="seg num">10</span></span>
+          </div>
+          <div class="scoreRow">
+            <span class="fLbl">Rounds</span><input class="inp w60 ph" value="—" readonly>
+            <span class="fLbl" style="width:auto">Reps</span><input class="inp w60 ph" value="—" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pairCol">
+    <div class="cap">ligado <i>— o corpo inteiro sai, o bloco continua identificado</i></div>
+    <div class="strip" style="max-width:none">
+      <div class="blk skipped">
+        <div class="blkHead"><span class="blkFam" style="--fam:var(--dim)"></span>
+          <span class="blkIdx">2/3</span><span class="blkName">EMOM 12' · Clean</span>
+          <span class="b xs tog on">✓ não fez</span>
+        </div>
+        <div class="skipBody">Não fez este bloco — nada é registrado.</div>
+      </div>
+    </div>
+    <div class="cap">o gate do Salvar <i>— desabilitado E dizendo por quê</i></div>
+    <div class="strip" style="max-width:none;gap:12px">
+      <div class="formFoot" style="border-top:none;padding-top:0;margin-top:0">
+        <span class="gate">Faltam: <b>Força · Back Squat</b></span>
+        <span class="spacer"></span>
+        <span class="b md dis">Salvar</span>
+        <span class="b md dis">Salvar e próximo ▸</span>
+      </div>
+      <div class="formFoot" style="border-top:none;padding-top:0;margin-top:0">
+        <span class="gate" style="color:var(--accent)">Todos os blocos resolvidos</span>
+        <span class="spacer"></span>
+        <span class="b md">Salvar</span>
+        <span class="b md prim">Salvar e próximo ▸</span>
+      </div>
+    </div>
+    <p class="note" style="font-size:11.5px;margin-top:10px">
+      <b>Salvar e próximo</b> fecha esta linha e abre a próxima <b>não registrada</b>. É o laço que a
+      aba nunca teve — e é ele que substitui o <code>saveFlash</code>: a linha virando "registrada"
+      já é o retorno. Três mecanismos de feedback viram um.
+    </p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">6 · Desktop 1280 — semana vazia · turma com 0 registros</h2>
+<p class="note">
+  A semana vazia é o estado vazio da própria trilha — os dias continuam listados, com "— descanso",
+  porque a ausência de sessão é informação. O painel da turma usa o <code>EmptyState</code> do C0,
+  que <b>carrega a ação</b> em vez de ser uma frase centralizada.
+</p>
+<div class="app short">
+  <div class="pane">
+    <div class="railTop">
+      <div class="monthNav">
+        <button class="navBtn" aria-label="Mês anterior">‹</button>
+        <span class="monthLbl">Setembro 2026</span>
+        <button class="navBtn" aria-label="Próximo mês">›</button>
+      </div>
+      <div class="weekRow">
+        <button class="wkBtn on">31–6</button><button class="wkBtn">7–13</button>
+        <button class="wkBtn">14–20</button><button class="todayBtn">Hoje</button>
+      </div>
+    </div>
+    <div class="railScroll">
+      <div class="dayHdr">Dom 31</div><div class="restDay">— descanso</div>
+      <div class="dayHdr">Seg 01</div><div class="restDay">— descanso</div>
+      <div class="dayHdr">Ter 02</div><div class="restDay">— descanso</div>
+      <div class="dayHdr">Qua 03</div><div class="restDay">— descanso</div>
+      <div class="dayHdr">Qui 04</div><div class="restDay">— descanso</div>
+      <div class="dayHdr">Sex 05</div><div class="restDay">— descanso</div>
+      <div class="dayHdr">Sáb 06</div><div class="restDay">— descanso</div>
+    </div>
+  </div>
+  <div class="pane">
+    <div class="empty">
+      <div class="emptyIcon">▤</div>
+      <div class="emptyTitle">Nenhuma sessão nesta semana</div>
+      <div class="emptyText">Sem sessão criada não há o que registrar. Monte a semana no Criador
+        ou escolha outra semana na trilha ao lado.</div>
+      <span class="b sm">Abrir o Criador</span>
+    </div>
+  </div>
+</div>
+
+<div class="cap">6b · sessão selecionada, 0 registros <i>— a lista já está aberta; o disclosure pontilhado não existe mais</i></div>
+<div class="app short">
+  <div class="pane">
+    <div class="railTop">
+      <div class="monthNav">
+        <button class="navBtn" aria-label="Mês anterior">‹</button>
+        <span class="monthLbl">Agosto 2026</span>
+        <button class="navBtn" aria-label="Próximo mês">›</button>
+      </div>
+      <div class="weekRow">
+        <button class="wkBtn">10–16</button><button class="wkBtn on">17–23</button>
+        <button class="todayBtn">Hoje</button>
+      </div>
+    </div>
+    <div class="railScroll">
+      <div class="dayHdr today">Qui 21 · hoje</div>
+      <button class="sessCard">
+        <div class="sessName">WOD A · Fran retest</div>
+        <div class="sessProg"><span class="tally" data-pct="42" style="--tbc:var(--accent)"></span>
+          <span class="sessProgN">5/12</span></div>
+      </button>
+      <button class="sessCard on">
+        <div class="sessName">Turma 19h</div>
+        <div class="sessProg"><span class="tally" data-pct="0"></span>
+          <span class="sessProgN">0/12</span></div>
+      </button>
+      <div class="dayHdr">Sex 22</div><div class="restDay">— descanso</div>
+    </div>
+  </div>
+  <div class="pane">
+    <div class="classHdr">
+      <div class="chTop"><h2 class="chTitle">Turma 19h</h2><span class="chDate">qui, 21 de agosto</span></div>
+      <div class="chProg"><span class="tally lg" data-pct="0"></span>
+        <span class="chProgN">0 de 12 registrados</span></div>
+      <div class="chKpis">
+        <span class="chNodata">Os números da turma aparecem conforme você registra.</span>
+        <button class="chToggle">Ver turma ▾</button>
+      </div>
+    </div>
+    <div class="roster">
+      <div class="row" style="--ac:#4ac8c0"><div class="rowHead">
+        <span class="dot"></span><span class="rowName">Marina Souza</span>
+        <span class="lvTag">Avançado</span><span class="spacer"></span>
+        <span class="rowActs"><span class="b xs ghost">Ausente</span><span class="b xs">Registrar</span></span>
+      </div></div>
+      <div class="row" style="--ac:#e87820"><div class="rowHead">
+        <span class="dot"></span><span class="rowName">Rafael Marinho</span>
+        <span class="lvTag">Intermediário</span><span class="spacer"></span>
+        <span class="rowActs"><span class="b xs ghost">Ausente</span><span class="b xs">Registrar</span></span>
+      </div></div>
+      <div class="row" style="--ac:#9070d8"><div class="rowHead">
+        <span class="dot"></span><span class="rowName">Júlia Ferraz</span>
+        <span class="lvTag">Competidor</span><span class="spacer"></span>
+        <span class="rowActs"><span class="b xs ghost">Ausente</span><span class="b xs">Registrar</span></span>
+      </div></div>
+      <div class="row" style="--ac:#60a840"><div class="rowHead">
+        <span class="dot"></span><span class="rowName">Carla Pinto</span>
+        <span class="lvTag">Iniciante</span><span class="spacer"></span>
+        <span class="rowActs"><span class="b xs ghost">Ausente</span><span class="b xs">Registrar</span></span>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">7 · Mobile 390 — três passos viram dois + uma folha, UM link de volta</h2>
+<p class="note">
+  Hoje são três painéis em drilldown com <b>dois textos de volta diferentes</b> ("‹ Semana",
+  "‹ Atletas"). O terceiro painel some junto com a segunda redação. A folha é o mesmo padrão
+  <code>ex-sheet</code> que o Criador já usa no mobile, com rodapé fixo. <b>Todo controle focável
+  ≥16px</b> — abaixo disso o Safari do iOS dá zoom sozinho e <code>user-scalable=no</code> não segura.
+</p>
+<div class="phones">
+  <div>
+    <div class="cap">1 · a semana</div>
+    <div class="phone">
+      <div class="railTop">
+        <div class="monthNav">
+          <button class="navBtn" aria-label="Mês anterior">‹</button>
+          <span class="monthLbl">Agosto 2026</span>
+          <button class="navBtn" aria-label="Próximo mês">›</button>
+        </div>
+        <div class="weekRow">
+          <button class="wkBtn">3–9</button><button class="wkBtn">10–16</button>
+          <button class="wkBtn on">17–23</button><button class="todayBtn">Hoje</button>
+        </div>
+      </div>
+      <div class="railScroll">
+        <div class="dayHdr">Qua 20</div>
+        <button class="sessCard"><div class="sessName">Turma 19h</div>
+          <div class="sessProg"><span class="tally" data-pct="100" style="--tbc:var(--accent)"></span>
+          <span class="sessProgN done">10/10</span></div></button>
+        <div class="dayHdr today">Qui 21 · hoje</div>
+        <button class="sessCard on"><div class="sessName">WOD A · Fran retest</div>
+          <div class="sessProg"><span class="tally" data-pct="42" style="--tbc:var(--accent)"></span>
+          <span class="sessProgN">5/12</span></div></button>
+        <button class="sessCard"><div class="sessName">Turma 19h</div>
+          <div class="sessProg"><span class="tally" data-pct="0"></span>
+          <span class="sessProgN">0/12</span></div></button>
+        <div class="dayHdr">Sex 22</div><div class="restDay">— descanso</div>
+        <div class="dayHdr">Sáb 23</div>
+        <button class="sessCard"><div class="sessName">Sábado open box</div>
+          <div class="sessProg"><span class="tally" data-pct="0"></span>
+          <span class="sessProgN">0/8</span></div></button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="cap">2 · a turma</div>
+    <div class="phone">
+      <button class="backLink">‹ Semana</button>
+      <div class="classHdr">
+        <div class="chTop"><h2 class="chTitle" style="font-size:14px">WOD A · Fran retest</h2></div>
+        <div class="chDate" style="margin-bottom:8px;display:block">qui, 21 de agosto</div>
+        <div class="chProg"><span class="tally lg" data-pct="42" style="--tbc:var(--accent)"></span>
+          <span class="chProgN" style="min-width:118px"><b>5</b> de 12</span></div>
+        <div class="chKpis">
+          <span class="chKpi">RPE <b>7.4</b></span><span class="chSep">·</span>
+          <span class="chKpi">RX <b>60%</b></span><span class="chSep">·</span>
+          <span class="chKpi flag">⚑ 1</span>
+          <button class="chToggle">Ver ▾</button>
+        </div>
+      </div>
+      <div class="roster">
+        <div class="row" style="--ac:#4ac8c0"><div class="rowHead">
+          <span class="dot"></span><span class="rowName">Marina S.</span>
+          <span class="rowSum"><span class="scPill" style="--c:var(--scRX)">RX</span>4:12</span>
+          <span class="rowActs"><span class="b xs menu">···</span></span></div></div>
+        <div class="row" style="--ac:#e87820"><div class="rowHead">
+          <span class="dot"></span><span class="rowName">Rafael M.</span><span class="spacer"></span>
+          <span class="rowActs"><span class="b xs">Registrar</span></span></div></div>
+        <div class="row absent" style="--ac:var(--dim)"><div class="rowHead">
+          <span class="dot hollow"></span><span class="rowName">Bruno T.</span>
+          <span class="absTag">Ausente</span>
+          <span class="rowActs"><span class="b xs menu">···</span></span></div></div>
+        <div class="row" style="--ac:#9070d8"><div class="rowHead">
+          <span class="dot"></span><span class="rowName">Júlia F.</span>
+          <span class="rowSum"><span class="scPill" style="--c:var(--scInter)">Inter</span>5:48
+            <span class="rowFlag">⚑</span></span>
+          <span class="rowActs"><span class="b xs menu">···</span></span></div></div>
+        <div class="row" style="--ac:#60a840"><div class="rowHead">
+          <span class="dot"></span><span class="rowName">Carla P.</span><span class="spacer"></span>
+          <span class="rowActs"><span class="b xs">Registrar</span></span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="cap">3 · a folha de registro <i>— sobre o passo 2</i></div>
+    <div class="phone">
+      <div class="sheet">
+        <div class="sheetHead">
+          <span class="dot" style="--ac:#e87820"></span>
+          <span class="sheetTitle">Rafael Marinho</span>
+          <span class="b sm ghost" aria-label="Fechar">✕</span>
+        </div>
+        <div class="sheetBody">
+          <div class="fRow"><span class="fLbl">Presença</span></div>
+          <div class="segs" style="margin-bottom:13px">
+            <span class="seg on">Presente</span><span class="seg">Ausente</span>
+            <span class="seg">Justificado</span>
+          </div>
+          <div class="fRow"><span class="fLbl">Energia</span>
+            <span class="segs"><span class="seg num">1</span><span class="seg num">2</span>
+            <span class="seg num on">3</span><span class="seg num">4</span><span class="seg num">5</span></span>
+          </div>
+          <div class="blk">
+            <div class="blkHead"><span class="blkFam" style="--fam:#d8a840"></span>
+              <span class="blkIdx">1/3</span><span class="blkName">For Time</span>
+              <span class="b xs tog">não fez</span></div>
+            <div class="blkBody">
+              <div class="wodSum"><b>21-15-9</b> Thruster 43 kg · Pull-up</div>
+              <div class="lbl" style="margin-top:0">Escala</div>
+              <div class="segs" style="margin-bottom:10px">
+                <span class="seg on">RX</span><span class="seg">Inter</span>
+                <span class="seg">SC</span><span class="seg">Adaptado</span></div>
+              <div class="lbl">RPE</div>
+              <div class="segs" style="margin-bottom:11px">
+                <span class="seg num">1</span><span class="seg num">2</span><span class="seg num">3</span>
+                <span class="seg num">4</span><span class="seg num">5</span><span class="seg num">6</span>
+                <span class="seg num">7</span><span class="seg num on">8</span>
+                <span class="seg num">9</span><span class="seg num">10</span></div>
+              <div class="scoreRow" style="margin-top:0">
+                <span class="fLbl">Tempo</span><input class="inp" value="04:12" readonly>
+              </div>
+            </div>
+          </div>
+          <div class="blk skipped">
+            <div class="blkHead"><span class="blkFam" style="--fam:var(--dim)"></span>
+              <span class="blkIdx">2/3</span><span class="blkName">EMOM 12'</span>
+              <span class="b xs tog on">✓ não fez</span></div>
+            <div class="skipBody">Não fez este bloco.</div>
+          </div>
+        </div>
+        <div class="sheetFoot">
+          <span class="b md" style="flex:1">Salvar</span>
+          <span class="b md prim" style="flex:1.4">Salvar e próximo ▸</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">8 · O outro lado — Atletas · ficha, UM Card novo</h2>
+<p class="note">
+  Os três KPIs únicos de <b>Por atleta</b> mais a lista cronológica de resultados registrados viram
+  <b>um</b> Card. Fica na <b>posição 4</b>, logo depois de Presença: <i>o que foi atribuído</i>
+  (Últimas sessões) → <i>se apareceu</i> (Presença · 4 semanas) → <i>o que de fato fez</i>. Os três
+  cartões de mesma natureza ficam juntos, e o Card novo pousa <b>longe dos dois slots reservados</b>.
+  <span class="warn">Sem Frequência</span> — o denominador de <code>calcKPIs.freq</code> são as
+  linhas que existem (#164), e Presença já cobre o assunto duas fileiras acima.
+  <span class="warn">O nome da sessão vem de <code>sessName(sess, dateKey)</code> casado por
+  <code>r.sessionId</code></span> — hoje a lista lê <code>sessions[r.date][0].mainTraining</code>, a
+  sessão <i>errada</i> em qualquer dia com duas turmas (achado 12).
+</p>
+<div class="pair">
+  <div class="stack">
+    <div class="cap">onde entra na ficha</div>
+    <div class="stackCard">Desde o último 1:1</div>
+    <div class="stackCard">Últimas sessões <i style="color:var(--dim);font-style:normal">— atribuídas</i></div>
+    <div class="stackCard">Presença · 4 semanas</div>
+    <div class="stackCard hot">▸ Histórico de resultados <i style="font-style:normal">— NOVO</i></div>
+    <div class="stackCard">Objetivos abertos</div>
+    <div class="stackCard">1RM</div>
+    <div class="slot">▢ #39 Limitações — intocado</div>
+    <div class="stackCard">Nota do coach</div>
+    <div class="slot">▢ plans/22 Atributos — intocado</div>
+    <div class="stackCard">Missões <i style="color:var(--dim);font-style:normal">(fold)</i></div>
+  </div>
+
+  <div>
+    <div class="cap">com dado</div>
+    <div class="ficha">
+      <div class="fichaHdr"><h2 class="fichaTitle">Histórico de resultados</h2></div>
+      <div class="miniKpis">
+        <div class="miniKpi">
+          <div class="mkLbl">RPE médio</div><div class="mkVal">7.4</div>
+          <div class="spark">
+            <span style="height:60%"></span><span style="height:75%"></span><span style="height:85%"></span>
+            <span style="height:55%"></span><span style="height:90%"></span><span style="height:100%"></span>
+            <span style="height:80%"></span><span style="height:70%"></span>
+          </div>
+          <div class="mkSub">últimas 8 sessões</div>
+        </div>
+        <div class="miniKpi">
+          <div class="mkLbl">Taxa RX</div><div class="mkVal">62%</div>
+          <div style="margin-top:8px"><span class="tally" data-pct="62" style="--tbc:var(--scRX)"></span></div>
+          <div class="mkSub">RX em 18 de 29 escalas</div>
+        </div>
+        <div class="miniKpi">
+          <div class="mkLbl">Evolução de carga</div>
+          <div class="mkVal" style="color:var(--green)">+8.5%</div>
+          <div class="mkSub" style="margin-top:9px">Front Squat<br>92 → 100 kg</div>
+        </div>
+      </div>
+      <div class="hRow">
+        <span class="hDate">qui 21/08</span>
+        <div class="hBody">
+          <div class="hTop"><span class="hSess">WOD A · Fran retest</span>
+            <span class="scPill" style="--c:var(--scRX)">RX</span></div>
+          <div class="hPerf"><b>4:12</b> · RPE 8</div>
+        </div>
+      </div>
+      <div class="hRow">
+        <span class="hDate">ter 19/08</span>
+        <div class="hBody">
+          <div class="hTop"><span class="hSess">Turma 19h</span>
+            <span class="scPill" style="--c:var(--scInter)">Inter</span>
+            <span class="rowFlag">⚑</span></div>
+          <div class="hPerf"><b>2 rds (DNF)</b> · RPE 9</div>
+          <div class="hPerf" style="font-family:Georgia,serif;font-style:italic;color:var(--muted)">
+            ombro travando no overhead</div>
+        </div>
+      </div>
+      <div class="hRow">
+        <span class="hDate">seg 18/08</span>
+        <div class="hBody">
+          <div class="hTop"><span class="hSess">Força · Ciclo 3 D2</span>
+            <span class="scPill" style="--c:var(--scRX)">RX</span></div>
+          <div class="hPerf"><b>100 kg</b> · RPE 7</div>
+        </div>
+      </div>
+      <div class="hRow">
+        <span class="hDate">sáb 16/08</span>
+        <div class="hBody">
+          <div class="hTop"><span class="hSess">Sábado open box</span></div>
+          <div class="hPerf" style="color:var(--muted);font-style:italic">Ausente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="cap">sem resultado registrado <i>— os KPIs degradam para —, nunca para 0%</i></div>
+    <div class="ficha">
+      <div class="fichaHdr"><h2 class="fichaTitle">Histórico de resultados</h2></div>
+      <div class="miniKpis">
+        <div class="miniKpi">
+          <div class="mkLbl">RPE médio</div><div class="mkVal muted">—</div>
+          <div class="mkSub">sem esforço registrado</div>
+        </div>
+        <div class="miniKpi">
+          <div class="mkLbl">Taxa RX</div><div class="mkVal muted">—</div>
+          <div class="mkSub">registre uma escala real</div>
+        </div>
+        <div class="miniKpi">
+          <div class="mkLbl">Evolução de carga</div><div class="mkVal muted">—</div>
+          <div class="mkSub">precisa de 3 registros<br>do mesmo movimento</div>
+        </div>
+      </div>
+      <div class="emptyInline">
+        Nenhum resultado registrado ainda.
+        <span class="b xs ghost">Ir para Resultados</span>
+      </div>
+    </div>
+    <p class="note" style="font-size:11.5px;margin-top:12px;max-width:400px">
+      <b>Por que "Histórico de resultados".</b> "Histórico" é exatamente a palavra que o usuário
+      procuraria — e agora ela é uma seção <i>da pessoa</i>, não uma aba que ele precisa lembrar que
+      existe. O modo de falha que este passo corrige é esse, não o estilo.
+    </p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">9 · O que este desenho apaga</h2>
+<p class="note">
+  <b>Estrutura:</b> a barra de sub-abas · <code>HistoryView.jsx</code> (339 linhas) · o terceiro
+  painel do mobile e a sua segunda redação de "voltar" · o disclosure pontilhado "Registrar atleta" ·
+  as duas linguagens visuais de linha de atleta.<br>
+  <b>CSS (≈140 linhas do <code>index.css</code>):</b> <code>.res-tabs</code>/<code>.res-tab</code> ·
+  <code>.level-badge</code>+<code>.lv-*</code> (a etiqueta usa a cor do atleta, padrão C2) ·
+  <code>.scale-badge</code>+<code>.sc-*</code> (a 4ª paleta divergente) · as <b>duas</b> definições
+  de <code>.kpi-*</code> · <code>.presence-dot</code>/<code>.pd-*</code> · <code>.flag-icon</code> ·
+  <code>.sparkline</code> · <code>.history-row</code> · <code>.empty-state</code> ·
+  <code>.sc-card</code>/<code>.sc-hdr</code>/<code>.sc-title</code> · os três seletores
+  <code>.res-pane</code> e o próprio wrapper.<br>
+  <b>Comportamento:</b> a rampa de RPE em <code>rgb()</code> inline (vira o <code>RpeRow</code> do
+  <code>ScoreFields</code>, que já existe, já está no gallery e já é a ordem Escala → RPE → nota) ·
+  os dois confirms inline de exclusão (viram <code>ConfirmReview</code>) · o
+  <code>saveFlash</code> · <code>--theme-accent</code> em favor de <code>var(--accent)</code>.<br>
+  <span class="warn">Contraste, registrado sem ser "consertado" aqui:</span> a pílula RX em
+  <code>#4ac8c0</code> fica fraca sobre os dois temas claros. <code>SCALE_COL</code> é uma
+  <b>cor de dado</b>, explicitamente isenta de tokenização, e a <code>RankList</code> já em produção
+  tem exatamente a mesma pílula — mexer nela aqui criaria uma quinta divergência em vez de fechar a
+  quarta. O tratamento adotado (sem preenchimento, borda em <code>currentColor</code>) é o da
+  <code>RankList</code>; o contraste da cor em si é do #14.<br>
+  <span class="warn">Fica de fora, de propósito:</span> as <b>7</b> regras <code>rp-*</code>
+  compartilhadas com o AgendaView (<code>rp-sticktop</code> · <code>rp-month-nav</code> ·
+  <code>rp-nav-btn</code> · <code>rp-month-label</code> · <code>rp-weeks</code> ·
+  <code>rp-week-btn</code> · <code>rp-mobile-back</code>) — permanecem no <code>index.css</code>,
+  reetiquetadas para o #59, nunca movidas para um módulo. E <code>.b*</code>/<code>.fg</code>/
+  <code>.lbl</code> continuam vivas: o <code>Publicador.jsx</code> as constrói via
+  <code>createElement</code>, onde nenhum grep por <code>className="b </code> as encontra.
+</p>
+
+<script>
+  // TallyBar: 10 blocos de 10%, e o bloco onde o valor cai subdivide em 10 unidades.
+  // Cada divisória é um elemento real em var(--bg) — nunca um repeating-linear-gradient
+  // com o fundo do tema escuro cravado dentro (o bug que os dois temas claros expunham).
+  document.querySelectorAll('.tally').forEach(function (el) {
+    var pct = Math.max(0, Math.min(100, Number(el.dataset.pct) || 0));
+    var full = Math.floor(pct / 10);
+    var partial = full < 10 ? Math.round(pct - full * 10) : 0;
+    var html = '';
+    for (var i = 0; i < 10; i++) {
+      if (i < full) { html += '<span class="tb full"></span>'; }
+      else if (i === full && partial > 0) {
+        html += '<span class="tb">';
+        for (var u = 0; u < 10; u++) html += '<span class="tu' + (u < partial ? ' on' : '') + '"></span>';
+        html += '</span>';
+      } else { html += '<span class="tb"></span>'; }
+    }
+    el.innerHTML = html;
+  });
+</script>

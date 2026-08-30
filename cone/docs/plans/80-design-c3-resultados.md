@@ -279,6 +279,63 @@ does. File **#170** for the lost PNG export.
 3. DesignSync it. 🔴 **Stop. Hand back.** The user reviews and approves — do not self-certify the
    mockup, and do not start building.
 
+### Phase 1 output (2026-08-30) — the proposal at the gate
+
+Card: **`cone/design/mockups/61-resultados-c3.html`** (`@dsCard group="Mockups"`), DesignSync'd.
+Verified rendering across all 4 themes at 1280 and 390 before syncing.
+
+**Structure — the sub-tab bar does NOT survive.** With Por atleta redistributed to the ficha and Por
+sessão redistributed onto the session, `HistoryView` has nothing left; a bar of one tab is not a bar.
+Resultados becomes **one surface: a week rail (260px) + THE CLASS (1fr)** — pick a session, log it,
+read it back.
+
+**The load-bearing move: the roster IS the form container.** Three panes become two because the
+athlete row opens in place (accordion, one at a time) instead of pushing a form into a distant third
+pane. That single change answers five of the brief's Registro complaints at once — the 10–13px form
+column gets the full width; the dashed "Registrar atleta" disclosure that hid the whole roster in the
+normal case ceases to exist; `rp-ath-row`/`rp-add-item`'s two visual languages become one shell with
+four states; mobile's 3-step drilldown with two "back" wordings becomes 2 steps + a sheet with one;
+and the row collapsing into its logged state replaces the `saveFlash` toast.
+
+**What the mockup adds that the brief did not ask for, and why:**
+- **`Salvar e próximo ▸`** — closes this athlete, opens the next *unlogged* one. The logging loop is
+  the thing the coach repeats N times per class and the tab has never had it. It is also what makes
+  the toast redundant.
+- **A `ClassHeader` that grows rather than a KPI grid.** The four Por-sessão KPIs would be four blank
+  tiles at exactly the moment (0 logged) the coach wants to start typing. So: one line + a progress
+  `TallyBar` with no data → an inline `RPE · RX% · flags` run with data → the full 4-KPI panel under
+  a disclosure. This is what covers the "with and without data" axis honestly.
+- **Per-session progress in the rail** (`TallyBar` + `5/12` per session card), answering "which of
+  this week's classes still needs logging" — today the only progress signal anywhere is a `3/12 reg.`
+  string.
+- **A one-click `Ausente`** on an unlogged row. Writes immediately; a single reversible field, same
+  precedent as C2 removing the confirm from the goal `+1`.
+- **The Salvar gate states its reason** (`Faltam: Força · Back Squat`). A disabled Salvar with no
+  explanation on a 3-WOD session is #157's user-facing face.
+
+**#157 — "não fez" sits in the block card header**, right-aligned. When on, the fields are
+**removed, not disabled** (a greyed "RPE —" still asserts the field was considered) and the card goes
+dashed + muted, so it reads as *deliberately empty*, never *not yet filled*. Writes `skipped:true`
+with no scale/RPE.
+
+**Ficha Card — "Histórico de resultados", ficha position 4**, directly after *Presença · 4 semanas*:
+assigned (Últimas sessões) → showed up (Presença) → actually did (this). Three KPIs (RPE médio +
+sparkline · Taxa RX · Evolução de carga) over the logged-result list. Lands nowhere near the #39 or
+plans/22 slots. **No Frequência.** Named "Histórico" deliberately: it is the word the user would go
+looking for, now a section of the *person* rather than a tab he has to remember exists.
+
+**Two corrections made during the pass, both worth carrying into Phase 2:**
+- The scale pill must use canonical **`RankList.module.css`'s `.scale` treatment — no fill, `border:
+  1px solid currentColor`**. A `color-mix()` fill washes the label out on both light themes; the
+  first draft had one, which would have been a *fifth* divergence while closing the fourth.
+- ⚠️ A "skipped" chip built on the shared pressed/`on` style inherits the accent fill and reads as a
+  **selected primary control** — precisely the wrong signal. It must reset `background` explicitly.
+
+Open for the user at the gate: the `Salvar e próximo` loop and the one-click `Ausente` are both net-
+new behaviour, not restyles; and the `RX` teal pill stays low-contrast on the two light themes
+(`SCALE_COL` is an exempt data colour and shipped `RankList` has the same pill — recorded on the
+card, left to #14).
+
 ### Phase 2 — build (post-approval)
 
 1. **Registro.** Decompose `RegistroView.jsx` into the approved components + the module stylesheet.
