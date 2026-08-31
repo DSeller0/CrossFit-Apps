@@ -188,6 +188,20 @@ tab gets redesigned. It stays C5·b's opening question for that reason.
    - The two consumers **disagree**: `:603` falls back `BLOCK_C[lbl] || BLOCK_C[bl.type] || '#555'`,
      `:858` only `BLOCK_C[lbl] || '#555'`. A block with a custom label renders one colour in the day
      pane and grey in the day detail. Same block, two colours — fix in Phase 0.
+6. ⚠️ **CORRECTED 2026-08-31 by C5·a's exit grep — re-read this decision before deleting anything.**
+   Its central claim is half wrong, and acting on it as written would break Criador:
+   - 🔴 **`.fg` and `.lbl` are NOT Publicador-only.** Measured on `c04dfce`, counting real
+     `className` literals rather than substrings: `.fg` = `IntensityInput.jsx` 3 · `ExerciseRow.jsx`
+     2 · `Publicador.jsx` 7; `.lbl` = `IntensityInput.jsx` 4 · `ExerciseRow.jsx` 8 ·
+     `Publicador.jsx` 8. **Deleting them with the zoo would unstyle Criador's intensity inputs.**
+     They are Criador's (`#58`), not #59's — retag, do not remove.
+   - **`.bp` and `.bfull` already have ZERO consumers** and can be deleted now, independent of the
+     redesign. `.pvt` IS live but only via a template literal (`` `pvt ${…}` ``), which is why a
+     plain `className="pvt"` grep misses it — the same blind spot that hid this whole family from
+     C3.
+   - Still true: `.b` (28) · `.bsec` (4) · `.bd` (2) · `.bsm` (23) · `.pvt` (4) · `.pub-controls`
+     are `Publicador.jsx`-only, and both `.pub-pane` wrappers are `App.jsx:269,287`.
+
 6. **The `.b*` zoo dies here, and `Publicador.jsx` is provably its last consumer.** Repo-wide, the
    only file using `.b`/`.bp`/`.bsec`/`.bd`/`.bsm`/`.bfull` is `Publicador.jsx` (28 usages), plus one
    in `events.jsx`; `.fg` (7) and `.lbl` (8) likewise. C3 left them standing because
