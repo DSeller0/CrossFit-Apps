@@ -41,12 +41,33 @@ export function sumByCurrency(groupTotals) {
   return { totals, currencies, label }
 }
 
+// #154 — the versioned half #104(c) deferred. `loc.rateHistory` is
+// `[{rate, rateUnit, currency, from}, …]`, `from` an ISO date the version took
+// effect on, appended in chronological order (never resorted — `saveLoc` in
+// `afiliados/Afiliados.jsx` is the one writer). Returns the entry in effect ON
+// `isoDate` — the last one whose `from` is `<= isoDate` — or `null` when the
+// location has no history at all, or `isoDate` predates every recorded version
+// (a location edited before #154 shipped, or an event dated before tracking
+// started): `calcTotal`'s `?? loc` is what supplies a rate for those, same as
+// pre-#154 behavior. A same-day double-edit resolves to whichever was appended
+// LAST, since a forward scan keeps overwriting `match` on each `from <=` hit.
+export function rateAsOf(loc, isoDate) {
+  const hist = loc?.rateHistory
+  if (!hist || !hist.length || !isoDate) return null
+  let match = null
+  for (const v of hist) {
+    if (v.from <= isoDate) match = v
+  }
+  return match
+}
+
 export function calcTotal(evs, loc) {
   const perEvent = evs.map(ev => {
-    // #104(c) — a booked event's own frozen rate wins over the location's current one; falls
-    // back to the live rate for every event booked before the snapshot existed (permanent
-    // fallback, not a migration path — there is no backfill for pre-snapshot events).
-    const src = ev.rateSnapshot ?? loc
+    // #104(c)/#154 — a booked event's own frozen rate wins over everything; next,
+    // the location's rate AS OF the event's own date (so a rate change today can't
+    // retroactively re-price a past event that never got a snapshot); finally the
+    // location's current rate, for an event dated before any recorded history.
+    const src = ev.rateSnapshot ?? rateAsOf(loc, ev.date) ?? loc
     if (!src || !src.rate) return null
     // #104(a) — fractional hours, not Math.floor: a 90-minute per_hour class billed as one
     // hour flat (fmtDur prints "1h30min" for the same event, so the PDF disagreed with

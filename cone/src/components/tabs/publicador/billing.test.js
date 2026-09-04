@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { fmtDateNum, fmtDur, fmtMoney, calcTotal, sumByCurrency } from './billing.js'
+import { fmtDateNum, fmtDur, fmtMoney, calcTotal, sumByCurrency, rateAsOf } from './billing.js'
 
 // #149/#104(c) · plans/71 — calcTotal is the only money arithmetic in the app and had zero
 // tests before this row, including the two behavior changes plans/68 shipped unpinned on
@@ -100,6 +100,87 @@ describe('calcTotal', () => {
     )
     expect(t.totals).toEqual({ R$: 40, US$: 20 })
     expect(t.currencies.sort()).toEqual(['R$', 'US$'])
+  })
+})
+
+describe('rateAsOf', () => {
+  const hist = [
+    { rate: 40, rateUnit: 'per_session', currency: 'R$', from: '1970-01-01' },
+    { rate: 50, rateUnit: 'per_session', currency: 'R$', from: '2026-06-01' },
+    { rate: 60, rateUnit: 'per_session', currency: 'R$', from: '2026-08-01' },
+  ]
+
+  it('returns null for a location with no rate history', () => {
+    expect(rateAsOf(loc(50), '2026-08-06')).toBeNull()
+  })
+
+  it('returns null for a null location', () => {
+    expect(rateAsOf(null, '2026-08-06')).toBeNull()
+  })
+
+  it('returns null when no date is given', () => {
+    expect(rateAsOf({ rateHistory: hist }, undefined)).toBeNull()
+  })
+
+  it('returns the version in effect on a date between two changes', () => {
+    expect(rateAsOf({ rateHistory: hist }, '2026-07-01').rate).toBe(50)
+  })
+
+  it('returns the version whose `from` exactly matches the date', () => {
+    expect(rateAsOf({ rateHistory: hist }, '2026-08-01').rate).toBe(60)
+  })
+
+  it('returns the latest version for a date after every change', () => {
+    expect(rateAsOf({ rateHistory: hist }, '2099-01-01').rate).toBe(60)
+  })
+
+  it('returns null for a date before every recorded version', () => {
+    const noSentinel = hist.slice(1)
+    expect(rateAsOf({ rateHistory: noSentinel }, '2026-01-01')).toBeNull()
+  })
+
+  it('resolves a same-day double-edit to whichever was appended last', () => {
+    const sameDay = [
+      { rate: 40, rateUnit: 'per_session', currency: 'R$', from: '2026-08-01' },
+      { rate: 45, rateUnit: 'per_session', currency: 'R$', from: '2026-08-01' },
+    ]
+    expect(rateAsOf({ rateHistory: sameDay }, '2026-08-01').rate).toBe(45)
+  })
+})
+
+describe('calcTotal with rate history (#154)', () => {
+  const loc999 = { rate: 999, rateUnit: 'per_session', currency: 'R$' }
+  const hist = [
+    { rate: 40, rateUnit: 'per_session', currency: 'R$', from: '1970-01-01' },
+    { rate: 60, rateUnit: 'per_session', currency: 'R$', from: '2026-08-01' },
+  ]
+
+  it("prices an event by the location's rate AS OF the event's own date", () => {
+    const t = calcTotal([ev(60, { date: '2026-07-15' })], { ...loc999, rateHistory: hist })
+    expect(t.totals['R$']).toBe(40)
+  })
+
+  it('a rate change does not retroactively re-price a past undated-snapshot event', () => {
+    const t = calcTotal(
+      [ev(60, { date: '2026-01-01' })],
+      { ...loc999, rateHistory: hist.slice(1) }, // no version covers this early a date
+    )
+    // Falls back to the location's CURRENT rate — same as pre-#154 behavior, since
+    // there is no recorded history reaching back that far.
+    expect(t.totals['R$']).toBe(999)
+  })
+
+  it('a still-live rateSnapshot beats rate history entirely (#104c precedence)', () => {
+    const t = calcTotal(
+      [
+        ev(60, {
+          date: '2026-08-15',
+          rateSnapshot: { rate: 10, rateUnit: 'per_session', currency: 'R$' },
+        }),
+      ],
+      { ...loc999, rateHistory: hist },
+    )
+    expect(t.totals['R$']).toBe(10)
   })
 })
 
