@@ -2,6 +2,9 @@ import { useState } from 'react'
 import OrigemCores from './OrigemCores'
 import LogoPanel from './LogoPanel'
 import TamanhoPanel from './TamanhoPanel'
+import LayoutPanel from './LayoutPanel'
+import BlocosPanel from './BlocosPanel'
+import TitulosPanel from './TitulosPanel'
 import Button from '../../../ui/Button'
 import s from '../Publicador.module.css'
 
@@ -9,11 +12,15 @@ const PANELS = [
   { id: 'origem', label: 'Origem/Cores' },
   { id: 'logo', label: 'Logo' },
   { id: 'tamanho', label: 'Tamanho' },
+  { id: 'layout', label: 'Layout' },
+  { id: 'blocos', label: 'Blocos' },
+  { id: 'titulos', label: 'Títulos' },
 ]
 
-// Aparência — the third rail column, a 3-panel carousel (#59 C5·b1 step d). b1 carries
-// only Origem/Cores, Logo and Tamanho; Blocos/Layout/Títulos are plans/83's (b2) — do
-// not add tabs here for those, the accordion is built to grow but growing it is b2's job.
+// Aparência — the third rail column, a 6-panel carousel (#59 C5·b1 step d added the
+// first 3 — Origem/Cores · Logo · Tamanho; #59 C5·b2/plans/83 grows it to 6 — Layout ·
+// Blocos · Títulos are the parametric-renderer axes). The carousel was built to grow;
+// this is that growth.
 export default function AparenciaPanel(props) {
   const [idx, setIdx] = useState(0)
   const panel = PANELS[idx]
@@ -85,6 +92,41 @@ export default function AparenciaPanel(props) {
           showZoneControls={props.showZoneControls}
           canvasLabel={props.canvasLabel}
           sizeEstimate={props.sizeEstimate}
+        />
+      )}
+      {panel.id === 'layout' && (
+        <LayoutPanel
+          format={props.format}
+          zoneCount={props.zoneCount}
+          onZoneCount={props.onZoneCount}
+          zoneSplit={props.zoneSplit}
+          onZoneSplit={props.onZoneSplit}
+          zoneCollapseMessage={props.zoneCollapseMessage}
+          visibleDays={props.visibleDays}
+          onToggleDay={props.onToggleDay}
+          mobileModel={props.mobileModel}
+          onMobileModel={props.onMobileModel}
+        />
+      )}
+      {panel.id === 'blocos' && (
+        <BlocosPanel
+          format={props.format}
+          treatment={props.blockTreatment}
+          onTreatment={props.onBlockTreatment}
+          content={props.blockContent}
+          onToggleContent={props.onToggleBlockContent}
+        />
+      )}
+      {panel.id === 'titulos' && (
+        <TitulosPanel
+          gymName={props.gymName}
+          onGymName={props.onGymName}
+          footer={props.footer}
+          onFooter={props.onFooter}
+          format={props.format}
+          title={props.title}
+          onTitleChange={props.onTitleChange}
+          computedDefault={props.computedDefault}
         />
       )}
 

@@ -7,7 +7,7 @@ import {
   toISO,
 } from '../../utils/storage'
 import { APP_CONFIG } from '../../utils/config'
-import { getWeeksOfMonth } from './publicador/exportHelpers'
+import { getWeeksOfMonth, resolveDaySession, buildMobileSession } from './publicador/exportHelpers'
 import {
   resolveExportThemeId,
   resolveExportPalette,
@@ -20,9 +20,26 @@ import {
   getExportCustom,
   setExportCustom,
 } from './publicador/exportSource'
+import {
+  ALL_WEEK_DAYS,
+  distributeZones,
+  zoneCollapseMessage,
+  visibleWeekDates,
+} from './publicador/layoutHelpers'
+import { DEFAULT_BLOCK_TREATMENT, DEFAULT_BLOCK_CONTENT } from './publicador/blockTreatments'
+import { computedTitle } from './publicador/titleHelpers'
+import {
+  measureFit,
+  describeOverflow,
+  FONT_SCALE_FLOOR,
+  FONT_SCALE_CEIL,
+  AUTO_SHRINK_STEP,
+  AUTO_SHRINK_MAX_STEPS,
+} from './publicador/fitCheck'
 import Button from '../ui/Button'
 import Input from '../ui/Input'
 import EmptyState from '../ui/EmptyState'
+import Toast from '../ui/Toast'
 import ConfirmReview, { ReadRow } from '../../public/shared/ConfirmReview'
 import PresenterLauncher from './publicador/publisher/PresenterLauncher'
 import WhenPicker from './publicador/publisher/WhenPicker'
@@ -58,6 +75,26 @@ const MONTH_EN3 = [
   'dez',
 ]
 
+const DEFAULT_FONT_SCALE = 1.5
+
+// `fontScale` used to be one shared number; #59 C5·b2 (T9) makes it per-format so
+// fitting a 9:16 mobile export never shrinks next week's 1920×1080 Semana. A legacy
+// number (saved before this pass) becomes that same number for every format.
+function migrateFontScales(saved) {
+  const defaults = Object.fromEntries(FORMATS.map(f => [f.id, DEFAULT_FONT_SCALE]))
+  if (typeof saved === 'number') return Object.fromEntries(FORMATS.map(f => [f.id, saved]))
+  if (saved && typeof saved === 'object') return { ...defaults, ...saved }
+  return defaults
+}
+
+// `label` (one shared string) migrates into `titles.semana` on first read — no
+// orphaned key, and every other format starts with its own computed default.
+function migrateTitles(saved, legacyLabel) {
+  const base = saved && typeof saved === 'object' ? saved : {}
+  if (!base.semana && legacyLabel) return { ...base, semana: legacyLabel }
+  return base
+}
+
 function fmtBytes(n) {
   if (!n) return ''
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`
@@ -71,7 +108,6 @@ function SchedulePublisher({ sessions, locations }) {
 
   const [format, setFormat] = useState('semana')
   const [gymName, setGymName] = useState(loadSettings().gymName || '')
-  const [label, setLabel] = useState(loadSettings().label || '')
   const [filterAthlete, setFilterAthlete] = useState(null)
   const [logoDataUrl, setLogoDataUrl] = useState(null)
   const [logoScale, setLogoScale] = useState(1)
@@ -81,12 +117,36 @@ function SchedulePublisher({ sessions, locations }) {
   const [selectedDate, setSelectedDate] = useState(null)
   const _savedSettings = loadSettings()
   const [exportScale, setExportScale] = useState(_savedSettings.exportScale || 2)
-  const [fontScale, setFontScale] = useState(_savedSettings.fontScale ?? 1.5)
+  const [fontScaleByFormat, setFontScaleByFormat] = useState(() =>
+    migrateFontScales(_savedSettings.fontScale),
+  )
   const [zoneScales, setZoneScales] = useState(_savedSettings.zoneScales || [1, 1, 1])
   const [blockTitleScales, setBlockTitleScales] = useState(
     _savedSettings.blockTitleScales || [1, 1, 1],
   )
+  const [zoneCount, setZoneCount] = useState(_savedSettings.zoneCount || 3)
+  const [zoneSplit, setZoneSplit] = useState(_savedSettings.zoneSplit || 'iguais')
+  const [visibleDays, setVisibleDays] = useState(_savedSettings.visibleDays || ALL_WEEK_DAYS)
+  const [blockTreatment, setBlockTreatment] = useState(
+    _savedSettings.blockTreatment || DEFAULT_BLOCK_TREATMENT,
+  )
+  const [blockContent, setBlockContent] = useState(
+    _savedSettings.blockContent || DEFAULT_BLOCK_CONTENT,
+  )
+  const [titles, setTitles] = useState(() =>
+    migrateTitles(_savedSettings.titles, _savedSettings.label),
+  )
+  const [footer, setFooter] = useState(_savedSettings.footer || '')
+  const [mobileModel, setMobileModel] = useState(_savedSettings.mobileModel || 'classico')
   const [presenterOpen, setPresenterOpen] = useState(false)
+
+  // Fit (T9) — measured off the ExportFarm's own off-screen node (`previewRef`),
+  // never the transform:scale'd on-screen preview. `autoShrinking` drives a
+  // bounded measure→setState→effect→re-measure cycle scoped to THIS format's
+  // fontScale only (D1/D3) — see the two effects below.
+  const [overflowInfo, setOverflowInfo] = useState(null)
+  const [autoShrinking, setAutoShrinking] = useState(false)
+  const [shrinkToast, setShrinkToast] = useState('')
 
   // ── The colour model (#59 C5·b1 step c/d, plans/82) — device-local, never in
   // `settings`. `origin` is 'tema' (the coach's own resolveTheme) | a locationId
@@ -125,14 +185,35 @@ function SchedulePublisher({ sessions, locations }) {
     }
     saveSettings({
       ...loadSettings(),
-      fontScale,
+      fontScale: fontScaleByFormat,
       zoneScales,
       blockTitleScales,
+      zoneCount,
+      zoneSplit,
+      visibleDays,
+      blockTreatment,
+      blockContent,
+      titles,
+      footer,
+      mobileModel,
       gymName,
-      label,
       exportScale,
     })
-  }, [fontScale, zoneScales, blockTitleScales, gymName, label, exportScale])
+  }, [
+    fontScaleByFormat,
+    zoneScales,
+    blockTitleScales,
+    zoneCount,
+    zoneSplit,
+    visibleDays,
+    blockTreatment,
+    blockContent,
+    titles,
+    footer,
+    mobileModel,
+    gymName,
+    exportScale,
+  ])
 
   const handleLogoUpload = e => {
     const file = e.target.files?.[0]
@@ -202,10 +283,18 @@ function SchedulePublisher({ sessions, locations }) {
     setExportCustom({})
     setOrigin('tema')
     setExportSource('tema')
-    setFontScale(1.5)
+    setFontScaleByFormat(migrateFontScales(null))
     setExportScale(2)
     setZoneScales([1, 1, 1])
     setBlockTitleScales([1, 1, 1])
+    setZoneCount(3)
+    setZoneSplit('iguais')
+    setVisibleDays(ALL_WEEK_DAYS)
+    setBlockTreatment(DEFAULT_BLOCK_TREATMENT)
+    setBlockContent(DEFAULT_BLOCK_CONTENT)
+    setTitles({})
+    setFooter('')
+    setMobileModel('classico')
   }
 
   function handleDayClick(week, date) {
@@ -215,6 +304,26 @@ function SchedulePublisher({ sessions, locations }) {
   function selectWeek(wi, week) {
     setSelectedWeekIdx(wi)
     setSelectedWeek(week)
+  }
+  function stepFontScale(d) {
+    setFontScaleByFormat(m => ({
+      ...m,
+      [format]: Math.max(
+        FONT_SCALE_FLOOR,
+        Math.min(FONT_SCALE_CEIL, +((m[format] ?? DEFAULT_FONT_SCALE) + d * 0.1).toFixed(2)),
+      ),
+    }))
+  }
+  function toggleVisibleDay(i) {
+    setVisibleDays(days =>
+      days.includes(i) ? days.filter(d => d !== i) : [...days, i].sort((a, b) => a - b),
+    )
+  }
+  function toggleBlockContent(key) {
+    setBlockContent(c => ({ ...c, [key]: !c[key] }))
+  }
+  function setCurrentFormatTitle(value) {
+    setTitles(t => ({ ...t, [format]: value }))
   }
 
   function filename() {
@@ -292,6 +401,86 @@ function SchedulePublisher({ sessions, locations }) {
     setTimeout(generateAndPrompt, 0)
   }
 
+  // ── Fit measurement (T9) — reads the off-screen farm node after the DOM has had a
+  // moment to settle from whatever just changed. A short timeout stands in for a
+  // layout-settle signal; comparing against the previous result before setState
+  // avoids re-render churn when nothing actually moved.
+  useEffect(() => {
+    const dims = FORMATS.find(f => f.id === format) || FORMATS[0]
+    const t = setTimeout(() => {
+      const fit = measureFit(previewRef.current, dims)
+      setOverflowInfo(prev =>
+        prev &&
+        fit &&
+        prev.overflowing === fit.overflowing &&
+        prev.cutBlocks === fit.cutBlocks &&
+        prev.contentH === fit.contentH
+          ? prev
+          : fit,
+      )
+    }, 30)
+    return () => clearTimeout(t)
+  }, [
+    format,
+    fontScaleByFormat,
+    zoneCount,
+    zoneSplit,
+    blockTreatment,
+    blockContent,
+    titles,
+    footer,
+    mobileModel,
+    visibleDays,
+    filteredSessions,
+    selectedDate,
+    gymName,
+    logoDataUrl,
+    logoScale,
+    currentWeekDates,
+    year,
+    month,
+    selectedWeekIdx,
+  ])
+
+  // ── Auto-shrink (D3) — MANUAL trigger only (`onAutoShrink` below sets
+  // `autoShrinking`), bounded, and touches ONLY the current format's fontScale
+  // (D1) — never another format's. Each step waits for the fit effect above to
+  // re-measure before deciding whether to take another step.
+  const shrinkStepsRef = useRef(0)
+  // A bounded state machine reacting to a DOM measurement taken by the OTHER effect,
+  // not a mirrored prop — each step below is gated on a fresh `overflowInfo`, never a
+  // synchronous while() (T9: the prototype's loop doesn't port to React as-is). It
+  // deliberately does NOT depend on `fontScaleByFormat`/`format`: advancing only on a
+  // fresh measurement, never on its own state write, is what stops it racing ahead of
+  // the DOM it exists to react to.
+  useEffect(() => {
+    if (!autoShrinking || !overflowInfo) return
+    if (!overflowInfo.overflowing) {
+      // The fit effect above just confirmed this format now fits — end the loop and
+      // announce the result (D3: auto-shrink must never be a silent mutation).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAutoShrinking(false)
+      shrinkStepsRef.current = 0
+      const fmtLabel = (FORMATS.find(f => f.id === format) || {}).label || format
+      setShrinkToast(
+        `Fonte ajustada — ${(fontScaleByFormat[format] ?? DEFAULT_FONT_SCALE).toFixed(2)}× em ${fmtLabel}`,
+      )
+      return
+    }
+    const current = fontScaleByFormat[format] ?? DEFAULT_FONT_SCALE
+    if (current <= FONT_SCALE_FLOOR + 0.001 || shrinkStepsRef.current >= AUTO_SHRINK_MAX_STEPS) {
+      setAutoShrinking(false)
+      shrinkStepsRef.current = 0
+      return
+    }
+    shrinkStepsRef.current++
+    setFontScaleByFormat(m => ({
+      ...m,
+      [format]: Math.max(FONT_SCALE_FLOOR, +(current - AUTO_SHRINK_STEP).toFixed(2)),
+    }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [overflowInfo, autoShrinking])
+
   if (!hasAny)
     return (
       <EmptyState
@@ -314,6 +503,26 @@ function SchedulePublisher({ sessions, locations }) {
 
   const canExport = filteredSessions[_presenterDateKey]?.length || !dayFmt
 
+  // Shared by the Layout panel's zone-collapse fact and the Títulos panel's
+  // computed-default placeholder — the same "which day does Dia show" resolution
+  // DailyExportView itself uses (resolveDaySession), read once here.
+  const _daySession = resolveDaySession(filteredSessions, currentWeekDates, selectedDate)
+  const _zoneDist = _daySession ? distributeZones(_daySession.session.blocks, zoneCount) : null
+  const zoneCollapseMsg = _zoneDist ? zoneCollapseMessage(_zoneDist) : ''
+
+  function computedDefaultForCurrentFormat() {
+    if (format === 'dia') return computedTitle('dia', { date: _daySession?.date })
+    if (format === 'diaMobile') {
+      const found = buildMobileSession(filteredSessions, selectedDate, currentWeekDates)
+      return computedTitle('diaMobile', { date: found?.date })
+    }
+    if (format === 'semana' || format === 'semanaMobile') {
+      const wk = getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates
+      return computedTitle(format, { weekDates: visibleWeekDates(wk, visibleDays) })
+    }
+    return computedTitle('mes', { year, month })
+  }
+
   return (
     <div className={s.wrap}>
       <PresenterLauncher
@@ -321,11 +530,15 @@ function SchedulePublisher({ sessions, locations }) {
         logUrl={_presenterLogUrl}
         onClose={() => setPresenterOpen(false)}
         sessions={filteredSessions}
-        label={label}
+        titles={titles}
         gymName={gymName}
-        fontScale={fontScale}
+        fontScale={fontScaleByFormat.dia ?? DEFAULT_FONT_SCALE}
         zoneScales={zoneScales}
         blockTitleScales={blockTitleScales}
+        zoneCount={zoneCount}
+        zoneSplit={zoneSplit}
+        blockTreatment={blockTreatment}
+        blockContent={blockContent}
         selectedDate={_presenterDateKey}
         logoDataUrl={logoDataUrl}
         logoScale={logoScale}
@@ -382,12 +595,6 @@ function SchedulePublisher({ sessions, locations }) {
           <FormatRail format={format} onSelect={setFormat} />
           <div className={s.detGrp}>
             <Input
-              label="Nome da academia"
-              placeholder="Cone"
-              value={gymName}
-              onChange={e => setGymName(e.target.value)}
-            />
-            <Input
               label="Filtrar por atleta"
               as="select"
               value={filterAthlete?.id || ''}
@@ -404,12 +611,6 @@ function SchedulePublisher({ sessions, locations }) {
                 </option>
               ))}
             </Input>
-            <Input
-              label="Rótulo do período"
-              placeholder="ex: Semana 4"
-              value={label}
-              onChange={e => setLabel(e.target.value)}
-            />
           </div>
         </div>
 
@@ -430,11 +631,19 @@ function SchedulePublisher({ sessions, locations }) {
               currentWeekDates={currentWeekDates}
               selectedDate={selectedDate}
               filteredSessions={filteredSessions}
-              label={label}
+              titles={titles}
               gymName={gymName}
-              fontScale={fontScale}
+              footer={footer}
+              fontScaleByFormat={fontScaleByFormat}
               zoneScales={zoneScales}
               blockTitleScales={blockTitleScales}
+              zoneCount={zoneCount}
+              zoneSplit={zoneSplit}
+              blockTreatment={blockTreatment}
+              blockContent={blockContent}
+              mobileModel={mobileModel}
+              visibleDays={visibleDays}
+              locations={locations}
               logoDataUrl={logoDataUrl}
               logoScale={logoScale}
               palette={exportPalette}
@@ -444,6 +653,9 @@ function SchedulePublisher({ sessions, locations }) {
               onSwitchToWeekFormat={() =>
                 setFormat(dayFmt && format === 'diaMobile' ? 'semanaMobile' : 'semana')
               }
+              overflowInfo={overflowInfo}
+              autoShrinking={autoShrinking}
+              onAutoShrink={() => setAutoShrinking(true)}
             />
           )}
         </div>
@@ -488,10 +700,8 @@ function SchedulePublisher({ sessions, locations }) {
             onLogoScaleStep={d =>
               setLogoScale(v => Math.max(0.25, Math.min(4, +(v + d * 0.05).toFixed(2))))
             }
-            fontScale={fontScale}
-            onFontScaleStep={d =>
-              setFontScale(v => Math.max(0.5, Math.min(3, +(v + d * 0.1).toFixed(2))))
-            }
+            fontScale={fontScaleByFormat[format] ?? DEFAULT_FONT_SCALE}
+            onFontScaleStep={stepFontScale}
             exportScale={exportScale}
             onExportScaleStep={d => setExportScale(v => Math.max(1, Math.min(4, v + d)))}
             zoneScales={zoneScales}
@@ -517,6 +727,27 @@ function SchedulePublisher({ sessions, locations }) {
                 : `${(FORMATS.find(f => f.id === format) || {}).w}×auto`
             }
             onResetDefaults={resetAparencia}
+            format={format}
+            zoneCount={zoneCount}
+            onZoneCount={setZoneCount}
+            zoneSplit={zoneSplit}
+            onZoneSplit={setZoneSplit}
+            zoneCollapseMessage={zoneCollapseMsg}
+            visibleDays={visibleDays}
+            onToggleDay={toggleVisibleDay}
+            mobileModel={mobileModel}
+            onMobileModel={setMobileModel}
+            blockTreatment={blockTreatment}
+            onBlockTreatment={setBlockTreatment}
+            blockContent={blockContent}
+            onToggleBlockContent={toggleBlockContent}
+            gymName={gymName}
+            onGymName={setGymName}
+            footer={footer}
+            onFooter={setFooter}
+            title={titles[format] || ''}
+            onTitleChange={setCurrentFormatTitle}
+            computedDefault={computedDefaultForCurrentFormat()}
           />
         </div>
       </div>
@@ -526,11 +757,19 @@ function SchedulePublisher({ sessions, locations }) {
         previewRef={previewRef}
         palette={exportPalette}
         filteredSessions={filteredSessions}
-        label={label}
+        titles={titles}
         gymName={gymName}
-        fontScale={fontScale}
+        footer={footer}
+        fontScaleByFormat={fontScaleByFormat}
         zoneScales={zoneScales}
         blockTitleScales={blockTitleScales}
+        zoneCount={zoneCount}
+        zoneSplit={zoneSplit}
+        blockTreatment={blockTreatment}
+        blockContent={blockContent}
+        mobileModel={mobileModel}
+        visibleDays={visibleDays}
+        locations={locations}
         selectedDate={selectedDate}
         logoDataUrl={logoDataUrl}
         logoScale={logoScale}
@@ -539,6 +778,8 @@ function SchedulePublisher({ sessions, locations }) {
         month={month}
         selectedWeekIdx={selectedWeekIdx}
       />
+
+      <Toast open={!!shrinkToast} message={shrinkToast} onDismiss={() => setShrinkToast('')} />
 
       <ConfirmReview
         open={!!downloadPrompt}
@@ -551,6 +792,9 @@ function SchedulePublisher({ sessions, locations }) {
       >
         <ReadRow label="Arquivo" value={downloadPrompt?.filename || ''} mono />
         <ReadRow label="Tamanho" value={downloadPrompt ? fmtBytes(downloadPrompt.bytes) : ''} />
+        {overflowInfo?.overflowing && (
+          <ReadRow label="Aviso" value={describeOverflow(overflowInfo)} />
+        )}
       </ConfirmReview>
 
       <ConfirmReview

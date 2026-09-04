@@ -242,6 +242,25 @@
   color: var(--accent);
 }
 
+/* ── Fit warning (#59 C5·b2 T9) ───────────────────────────────────────── */
+.fitWarn {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-sm);
+  background: var(--stone2);
+  font-size: 11px;
+  color: var(--sub);
+  flex-wrap: wrap;
+}
+.fitFloor {
+  color: var(--red);
+  font-style: italic;
+}
+
 /* ── Aparência accordion ──────────────────────────────────────────────── */
 .apNav {
   display: flex;

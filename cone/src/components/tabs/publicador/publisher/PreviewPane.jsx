@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { toISO } from '../../../../utils/storage'
 import { MONTH_PT, DAY_PT } from '../../../../public/lib/week.js'
 import { getWeeksOfMonth } from '../exportHelpers'
+import { describeOverflow, FIT_FLOOR_MESSAGE, FONT_SCALE_FLOOR } from '../fitCheck'
 import { FORMATS, isDayFormat } from './FormatRail'
 import { renderArtefact } from './renderArtefact'
 import { EmptyWeekState, NoSessionThatDayState } from './ExportStates'
+import Button from '../../../ui/Button'
 import s from '../Publicador.module.css'
 
 // ── PreviewPane — the true-ratio, always-on render of whatever format/when is
@@ -19,11 +21,19 @@ export default function PreviewPane({
   currentWeekDates,
   selectedDate,
   filteredSessions,
-  label,
+  titles,
   gymName,
-  fontScale,
+  footer,
+  fontScaleByFormat,
   zoneScales,
   blockTitleScales,
+  zoneCount,
+  zoneSplit,
+  blockTreatment,
+  blockContent,
+  mobileModel,
+  visibleDays,
+  locations,
   logoDataUrl,
   logoScale,
   palette,
@@ -32,6 +42,9 @@ export default function PreviewPane({
   sizeEstimate,
   onPickAltDate,
   onSwitchToWeekFormat,
+  overflowInfo,
+  autoShrinking,
+  onAutoShrink,
 }) {
   const wrapRef = useRef()
   const [wrapW, setWrapW] = useState(800)
@@ -95,11 +108,19 @@ export default function PreviewPane({
           >
             {renderArtefact(format, {
               filteredSessions,
-              label,
+              titles,
               gymName,
-              fontScale,
+              footer,
+              fontScaleByFormat,
               zoneScales,
               blockTitleScales,
+              zoneCount,
+              zoneSplit,
+              blockTreatment,
+              blockContent,
+              mobileModel,
+              visibleDays,
+              locations,
               selectedDate,
               logoDataUrl,
               logoScale,
@@ -124,6 +145,23 @@ export default function PreviewPane({
         <span className={s.pvFname}>{fname}</span>
         {sizeEstimate && <span className={s.pvPush}>~{sizeEstimate}</span>}
       </div>
+      {overflowInfo?.overflowing &&
+        (() => {
+          const atFloor =
+            ((fontScaleByFormat && fontScaleByFormat[format]) || 1) <= FONT_SCALE_FLOOR + 0.001
+          return (
+            <div className={s.fitWarn} role="status">
+              <span>{describeOverflow(overflowInfo)}</span>
+              {atFloor ? (
+                <span className={s.fitFloor}>{FIT_FLOOR_MESSAGE}</span>
+              ) : (
+                <Button variant="ghost" size="sm" onClick={onAutoShrink} disabled={autoShrinking}>
+                  {autoShrinking ? 'Ajustando…' : 'Ajustar automaticamente'}
+                </Button>
+              )}
+            </div>
+          )
+        })()}
     </div>
   )
 }

@@ -58,6 +58,21 @@ export function getWeeksOfMonth(year, month) {
   return monthGridCells(year, month).map(week => week.map(c => c.date))
 }
 
+// Which day/session the Dia (desktop) format shows — selectedDate if it has a
+// session, else the week's first day that has one. Shared by DailyExportView and
+// the container (for the Layout panel's zone-collapse message and the Título
+// panel's computed default, both of which need to know "which day" without
+// duplicating this resolution a second time).
+export function resolveDaySession(sessions, weekDates, selectedDate) {
+  const daysList = (weekDates || [])
+    .map(date => ({ date, dateKey: toISO(date), sessions: sessions[toISO(date)] || [] }))
+    .filter(d => d.sessions.length > 0)
+  const day = selectedDate
+    ? daysList.find(d => d.dateKey === selectedDate) || daysList[0]
+    : daysList[0]
+  return day ? { session: day.sessions[0], date: day.date } : null
+}
+
 export function buildMobileSession(sessions, selectedDate, currentWeekDates) {
   if (selectedDate) {
     const s = (sessions[selectedDate] || [])[0] || null
