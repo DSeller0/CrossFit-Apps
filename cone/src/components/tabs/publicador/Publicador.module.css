@@ -447,6 +447,225 @@
   color: var(--dim);
 }
 
+/* ── EventFormInner (events.jsx) — the Agenda's create/edit form, over `ui/Modal`
+   (#59 C5·c). No outer margins on these — `Modal`'s `.body` is a flex column with
+   its own `gap`, so stacking is free; adding margins here would double it. ── */
+.evfDate {
+  font-size: 10px;
+  color: var(--dim);
+}
+.evfLabel {
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+.evfCheckList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.evfCheckRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--sub);
+}
+.evfDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.evfSvcHint {
+  font-size: 10px;
+  color: var(--dim);
+}
+.evfRow2 {
+  display: flex;
+  gap: var(--sp-2);
+}
+.evfHalf {
+  flex: 1;
+  min-width: 0;
+}
+.evfRecur {
+  border-top: 1px solid var(--divider);
+  padding-top: 10px;
+}
+.evfRecurToggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  user-select: none;
+}
+.evfRecurBody {
+  margin-top: var(--sp-2);
+  padding-left: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.evfFreqRow {
+  display: flex;
+  gap: 6px;
+}
+.evfDayRow {
+  display: flex;
+  gap: 3px;
+}
+.evfPill {
+  flex: 1;
+  padding: 5px 0;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid var(--divider);
+  background: transparent;
+  color: var(--muted);
+}
+.evfDayPill {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 2px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid var(--divider);
+  background: transparent;
+  color: var(--muted);
+}
+/* Declared after both .evfPill and .evfDayPill so it wins the tie either way —
+   equal specificity, so cascade order is what decides. */
+.evfPillOn {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+/* ── Relatório (events.jsx's ReportModal — #59 C5·c). Was 640 lines of
+   React.createElement over hardcoded hex + `var(--theme-accent)`; the shell is
+   now `ui/Modal`, these are just its body. ── */
+.optionsBox {
+  margin-bottom: var(--sp-4);
+  padding: 10px 12px;
+  background: var(--stone);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-md);
+}
+.optionsHdr {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--sp-2);
+}
+.optionRow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--sub);
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+.optionRow:last-child {
+  margin-bottom: 0;
+}
+.optionRow input {
+  accent-color: var(--accent);
+  width: 13px;
+  height: 13px;
+}
+
+.previewBox {
+  margin-bottom: var(--sp-4);
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-md);
+}
+.previewHdr {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 6px;
+}
+.previewRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--divider);
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+.previewName {
+  flex: 1;
+  color: var(--sub);
+  font-weight: 600;
+}
+.previewMeta {
+  color: var(--muted);
+}
+.previewValue {
+  color: var(--gold);
+  font-weight: 700;
+}
+.previewPixBtn {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+.previewTotal {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+}
+.reportEmpty {
+  text-align: center;
+  padding: 16px;
+  font-size: 12px;
+  color: var(--dim);
+  margin-bottom: var(--sp-4);
+}
+.reportError {
+  padding: 8px 10px;
+  margin-bottom: var(--sp-3);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--red) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red) 35%, transparent);
+  color: var(--red);
+  font-size: 12px;
+}
+
 /* ── Export artefact palette — LITERAL by exemption (plans/82). The chrome above
    this line is tokenised; nothing below reads a theme var. ── */
 .art {

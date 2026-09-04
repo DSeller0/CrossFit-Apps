@@ -1,13 +1,21 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { loadAthletes, loadSettings, loadLocations, loadCoach } from '../../../utils/storage'
 import { buildPixPayload, pixClean } from '../../../utils/pix'
 import { MONTH_PT, toISO } from '../../../public/lib/week.js'
 import { uid } from '../../../public/lib/wod.js'
 import { sessName } from '../../../public/lib/sessions.js'
-import { fmtDateNum, fmtDur, calcTotal, sumByCurrency } from './billing.js'
+import { fmtDateNum, fmtDur, calcTotal, sumByCurrency, rateAsOf } from './billing.js'
 import { qrToBase64 } from './pixQr.js'
 import EventFilter from './agenda/EventFilter.jsx'
 import { reportFilter, filterEvents, matchingAthleteIds } from './eventFilter.js'
+import Modal from '../../ui/Modal.jsx'
+import Button from '../../ui/Button.jsx'
+import Input from '../../ui/Input.jsx'
+import Toast from '../../ui/Toast.jsx'
+// Aliased `css`, not the usual `s` — this file uses `s` as a local variable name
+// for individual session objects (`sessions[date].find(s => …)`), same reason
+// exportViews.jsx picked `css` over `s`.
+import css from './Publicador.module.css'
 
 // ── EventFormInner — standalone so inputs don't lose focus ───────────────────
 export function EventFormInner({ showForm, sessions, athletes, initialData, onSave, onCancel }) {
@@ -26,24 +34,20 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
     }))
   const selSvc = !isPers && fd.locationId ? locs.find(l => l.id === fd.locationId) : null
   // #104(c) — the personal-location reverse lookup, same shape as the per-athlete one the
-  // picker below already does at render time (:210-212), keyed off whichever athlete is
-  // first selected. A personal location's rate is shared by every athlete in its
-  // athleteIds[] (CLAUDE.md/plans/71), so the athletes on one event are practically always
-  // on the same location — the first one is representative, not a guess.
+  // picker below already does at render time, keyed off whichever athlete is first
+  // selected. A personal location's rate is shared by every athlete in its athleteIds[]
+  // (CLAUDE.md/plans/71), so the athletes on one event are practically always on the
+  // same location — the first one is representative, not a guess.
   const persSvc =
     isPers && (fd.athleteIds || []).length
       ? locs.find(l => l.type === 'personal' && (l.athleteIds || []).includes(fd.athleteIds[0]))
       : null
-  // #104(c) — freeze the rate at booking time so a later change in Serviços can't
+  // #104(c) — freeze the rate at booking time so a later change in Afiliados can't
   // retroactively re-price an event already booked; `rate: 0`/no service resolves to no
   // snapshot at all, matching calcTotal's own "no rate → no total" behavior (billing.js).
-  // ⚠️ DELIBERATE LIMIT (user decision, 2026-08-05): this is a SNAPSHOT, not a versioned
-  // HISTORY — it can never re-price an event booked before it shipped, and a rate change
-  // today never reaches an event that already has one. What WOULD reach those is
-  // `loc.rateHistory = [{rate, rateUnit, currency, from}, …]` resolved by the event's own
-  // date, but that reaches into Servicos.jsx's saveLoc/startEdit/rateLabel and every rate
-  // reader — deferred to #59 (the Agenda/Publicador design pass), filed as its own Icebox
-  // row rather than dropped.
+  // A rate change AFTER booking is what #154's `rateHistory` covers (billing.js's
+  // `rateAsOf`) — this snapshot still wins over it, unconditionally (calcTotal's
+  // precedence), since a quoted price at booking time should never move either way.
   const svc = selSvc || persSvc
   const rateSnapshot = svc?.rate
     ? { rate: svc.rate, rateUnit: svc.rateUnit, currency: svc.currency || 'R$' }
@@ -84,534 +88,233 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
     }
     onSave(results.length > 0 ? results : [base])
   }
-  const S = (label, children) =>
-    React.createElement(
-      'div',
-      { style: { marginBottom: '10px' } },
-      React.createElement(
-        'label',
-        { style: { fontSize: '11px', color: 'var(--dim)', display: 'block', marginBottom: '3px' } },
-        label,
-      ),
-      children,
-    )
-  const inp = (val, onChange, opts = {}) =>
-    React.createElement('input', {
-      type: 'text',
-      value: val,
-      onChange,
-      style: {
-        width: '100%',
-        background: 'var(--bg)',
-        border: '1px solid var(--divider)',
-        color: 'var(--sub)',
-        padding: '6px 8px',
-        borderRadius: '5px',
-        fontSize: '12px',
-      },
-      ...(opts.style || {}),
-      ...opts,
-    })
-  const sel = (val, onChange, opts) =>
-    React.createElement(
-      'select',
-      {
-        value: val,
-        onChange,
-        style: {
-          width: '100%',
-          background: 'var(--bg)',
-          border: '1px solid var(--divider)',
-          color: 'var(--sub)',
-          padding: '6px 8px',
-          borderRadius: '5px',
-          fontSize: '12px',
-        },
-      },
-      opts,
-    )
-  return React.createElement(
-    'div',
-    {
-      style: {
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,.7)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      },
-    },
-    React.createElement(
-      'div',
-      {
-        style: {
-          background: 'var(--bg)',
-          border: '1px solid var(--divider)',
-          borderRadius: '10px',
-          padding: '18px',
-          width: '340px',
-          maxWidth: '90vw',
-          maxHeight: '85vh',
-          overflowY: 'auto',
-        },
-      },
-      React.createElement(
-        'div',
-        {
-          style: {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '14px',
-          },
-        },
-        React.createElement(
-          'div',
-          null,
-          React.createElement(
-            'div',
-            { style: { fontSize: '13px', fontWeight: 700, color: 'var(--sub)' } },
-            (showForm.eventId ? 'Editar' : 'Novo') + ' ' + (isPers ? 'Personal' : 'Aula'),
-          ),
-          React.createElement(
-            'div',
-            { style: { fontSize: '10px', color: 'var(--dim)', marginTop: '1px' } },
-            new Date(showForm.date + 'T12:00:00').toLocaleDateString('pt-BR', {
-              weekday: 'short',
-              day: '2-digit',
-              month: 'short',
-            }),
-          ),
-        ),
-        React.createElement(
-          'button',
-          {
-            onClick: onCancel,
-            style: {
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--dim)',
-              cursor: 'pointer',
-              fontSize: '16px',
-            },
-          },
-          '✕',
-        ),
-      ),
-      S(
-        isPers ? 'Nome / cliente' : 'Nome da turma',
-        inp(fd.label || '', e => set('label', e.target.value), {
-          placeholder: isPers ? 'Ex: Jinx' : 'Ex: Turma Manhã',
-        }),
-      ),
-      !isPers &&
-        S(
-          'Serviço (cobrança)',
-          React.createElement(
-            React.Fragment,
-            null,
-            sel(fd.locationId || '', e => set('locationId', e.target.value || null), [
-              React.createElement('option', { key: '', value: '' }, 'Sem serviço'),
-              ...boxSvcs.map(l =>
-                React.createElement('option', { key: l.id, value: l.id }, l.name),
-              ),
-            ]),
-            selSvc &&
-              React.createElement(
-                'div',
-                { style: { fontSize: '10px', color: 'var(--muted)', marginTop: '3px' } },
-                `${selSvc.currency || 'R$'} ${selSvc.rate || 0}/${selSvc.rateUnit === 'per_hour' ? 'hora' : 'sessão'}`,
-              ),
-          ),
-        ),
-      isPers &&
-        S(
-          'Atletas',
-          React.createElement(
-            'div',
-            {
-              style: {
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '4px',
-                maxHeight: '120px',
-                overflowY: 'auto',
-              },
-            },
-            athletes.map(a => {
-              const svc = locs.find(
+
+  return (
+    <Modal
+      open
+      title={`${showForm.eventId ? 'Editar' : 'Novo'} ${isPers ? 'Personal' : 'Aula'}`}
+      onClose={onCancel}
+      size="sm"
+      footer={
+        <>
+          <Button variant="primary" onClick={handleSave}>
+            {rec.enabled && rec.until ? 'Criar eventos' : 'Salvar'}
+          </Button>
+          <Button variant="secondary" onClick={onCancel}>
+            Cancelar
+          </Button>
+        </>
+      }
+    >
+      <div className={css.evfDate}>
+        {new Date(showForm.date + 'T12:00:00').toLocaleDateString('pt-BR', {
+          weekday: 'short',
+          day: '2-digit',
+          month: 'short',
+        })}
+      </div>
+
+      <Input
+        label={isPers ? 'Nome / cliente' : 'Nome da turma'}
+        value={fd.label || ''}
+        onChange={e => set('label', e.target.value)}
+        placeholder={isPers ? 'Ex: Jinx' : 'Ex: Turma Manhã'}
+      />
+
+      {!isPers && (
+        <Input
+          as="select"
+          label="Serviço (cobrança)"
+          value={fd.locationId || ''}
+          onChange={e => set('locationId', e.target.value || null)}
+          hint={
+            selSvc
+              ? `${selSvc.currency || 'R$'} ${selSvc.rate || 0}/${selSvc.rateUnit === 'per_hour' ? 'hora' : 'sessão'}`
+              : ''
+          }
+        >
+          <option value="">Sem serviço</option>
+          {boxSvcs.map(l => (
+            <option key={l.id} value={l.id}>
+              {l.name}
+            </option>
+          ))}
+        </Input>
+      )}
+
+      {isPers && (
+        <div>
+          <span className={css.evfLabel}>Atletas</span>
+          <div className={css.evfCheckList}>
+            {athletes.map(a => {
+              const athSvc = locs.find(
                 l => l.type === 'personal' && (l.athleteIds || []).includes(a.id),
               )
-              return React.createElement(
-                'label',
-                {
-                  key: a.id,
-                  style: {
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    color: 'var(--sub)',
-                  },
-                },
-                React.createElement('input', {
-                  type: 'checkbox',
-                  checked: (fd.athleteIds || []).includes(a.id),
-                  onChange: () => toggleAthlete(a.id),
-                  style: { accentColor: a.color },
-                }),
-                React.createElement('span', {
-                  style: {
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: a.color,
-                    flexShrink: 0,
-                  },
-                }),
-                React.createElement('span', { style: { flex: 1 } }, a.name),
-                svc &&
-                  React.createElement(
-                    'span',
-                    { style: { fontSize: '10px', color: 'var(--dim)' } },
-                    `${svc.currency || 'R$'}${svc.rate || 0}`,
-                  ),
+              return (
+                <label key={a.id} className={css.evfCheckRow}>
+                  <input
+                    type="checkbox"
+                    checked={(fd.athleteIds || []).includes(a.id)}
+                    onChange={() => toggleAthlete(a.id)}
+                    style={{ accentColor: a.color }}
+                  />
+                  <span className={css.evfDot} style={{ background: a.color }} />
+                  <span style={{ flex: 1 }}>{a.name}</span>
+                  {athSvc && (
+                    <span
+                      className={css.evfSvcHint}
+                    >{`${athSvc.currency || 'R$'}${athSvc.rate || 0}`}</span>
+                  )}
+                </label>
               )
-            }),
-          ),
-        ),
-      isPers &&
-        S(
-          'Local (opcional)',
-          sel(fd.local || '', e => set('local', e.target.value), [
-            React.createElement('option', { key: '', value: '' }, '—'),
-            ...boxSvcs.map(l =>
-              React.createElement('option', { key: l.id, value: l.name }, l.name),
-            ),
-            React.createElement('option', { key: 'outro', value: '__outro__' }, 'Outro...'),
-          ]),
-        ),
-      isPers &&
-        fd.local === '__outro__' &&
-        S(
-          'Especificar local',
-          inp(fd.localText || '', e => set('localText', e.target.value), {
-            placeholder: 'Ex: Studio Norte',
-          }),
-        ),
-      React.createElement(
-        'div',
-        { style: { display: 'flex', gap: '8px', marginBottom: '10px' } },
-        React.createElement(
-          'div',
-          { style: { flex: 1 } },
-          React.createElement(
-            'label',
-            {
-              style: {
-                fontSize: '11px',
-                color: 'var(--dim)',
-                display: 'block',
-                marginBottom: '3px',
-              },
-            },
-            'Horário',
-          ),
-          React.createElement('input', {
-            type: 'time',
-            value: fd.time || '07:00',
-            onChange: e => set('time', e.target.value),
-            style: {
-              width: '100%',
-              background: 'var(--bg)',
-              border: '1px solid var(--divider)',
-              color: 'var(--sub)',
-              padding: '6px 8px',
-              borderRadius: '5px',
-              fontSize: '12px',
-            },
-          }),
-        ),
-        React.createElement(
-          'div',
-          { style: { flex: 1 } },
-          React.createElement(
-            'label',
-            {
-              style: {
-                fontSize: '11px',
-                color: 'var(--dim)',
-                display: 'block',
-                marginBottom: '3px',
-              },
-            },
-            'Duração (min)',
-          ),
-          React.createElement('input', {
-            type: 'number',
-            value: fd.durationMin || 60,
-            onChange: e => set('durationMin', Number(e.target.value)),
-            min: 15,
-            max: 480,
-            step: 15,
-            style: {
-              width: '100%',
-              background: 'var(--bg)',
-              border: '1px solid var(--divider)',
-              color: 'var(--sub)',
-              padding: '6px 8px',
-              borderRadius: '5px',
-              fontSize: '12px',
-            },
-          }),
-        ),
-      ),
-      !isPers &&
-        S(
-          'Atletas presentes (opcional)',
-          React.createElement(
-            'div',
-            {
-              style: {
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '4px',
-                maxHeight: '100px',
-                overflowY: 'auto',
-              },
-            },
-            athletes.map(a =>
-              React.createElement(
-                'label',
-                {
-                  key: a.id,
-                  style: {
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    color: 'var(--sub)',
-                  },
-                },
-                React.createElement('input', {
-                  type: 'checkbox',
-                  checked: (fd.athleteIds || []).includes(a.id),
-                  onChange: () => toggleAthlete(a.id),
-                  style: { accentColor: a.color },
-                }),
-                React.createElement('span', {
-                  style: {
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: a.color,
-                    flexShrink: 0,
-                  },
-                }),
-                a.name,
-              ),
-            ),
-          ),
-        ),
-      daySessions.length > 0 &&
-        S(
-          'Sessão vinculada',
-          sel(fd.sessionId || '', e => set('sessionId', e.target.value || null), [
-            React.createElement('option', { key: '', value: '' }, 'Nenhuma'),
-            ...daySessions.map(s =>
-              React.createElement('option', { key: s.id, value: s.id }, sessName(s, showForm.date)),
-            ),
-          ]),
-        ),
-      S(
-        'Notas (opcional)',
-        React.createElement('textarea', {
-          value: fd.notes || '',
-          onChange: e => set('notes', e.target.value),
-          rows: 2,
-          placeholder: 'Observações...',
-          style: {
-            width: '100%',
-            background: 'var(--bg)',
-            border: '1px solid var(--divider)',
-            color: 'var(--sub)',
-            padding: '6px 8px',
-            borderRadius: '5px',
-            fontSize: '12px',
-            resize: 'vertical',
-          },
-        }),
-      ),
-      !showForm.eventId &&
-        React.createElement(
-          'div',
-          {
-            style: {
-              borderTop: '1px solid var(--divider)',
-              paddingTop: '10px',
-              marginBottom: '10px',
-            },
-          },
-          React.createElement(
-            'label',
-            {
-              style: {
-                display: 'flex',
-                alignItems: 'center',
-                gap: '7px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                color: 'var(--muted)',
-                userSelect: 'none',
-              },
-            },
-            React.createElement('input', {
-              type: 'checkbox',
-              checked: rec.enabled,
-              onChange: e => setRec(r => ({ ...r, enabled: e.target.checked })),
-              style: { accentColor: 'var(--accent)' },
-            }),
-            React.createElement('i', { className: 'ti ti-refresh', style: { fontSize: '13px' } }),
-            'Repetir evento',
-          ),
-          rec.enabled &&
-            React.createElement(
-              'div',
-              { style: { marginTop: '8px', paddingLeft: '2px' } },
-              React.createElement(
-                'div',
-                { style: { display: 'flex', gap: '6px', marginBottom: '8px' } },
-                ['weekly', 'daily'].map(f =>
-                  React.createElement(
-                    'button',
-                    {
-                      key: f,
-                      type: 'button',
-                      onClick: () => setRec(r => ({ ...r, freq: f })),
-                      style: {
-                        flex: 1,
-                        padding: '5px 0',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        borderRadius: '5px',
-                        cursor: 'pointer',
-                        border: '1px solid',
-                        background: rec.freq === f ? 'var(--accent)' : 'transparent',
-                        color: rec.freq === f ? 'var(--accent-text)' : 'var(--muted)',
-                        borderColor: rec.freq === f ? 'var(--accent)' : 'var(--divider)',
-                      },
-                    },
-                    f === 'weekly' ? 'Semanal' : 'Diário',
-                  ),
-                ),
-              ),
-              rec.freq === 'weekly' &&
-                React.createElement(
-                  'div',
-                  { style: { display: 'flex', gap: '3px', marginBottom: '8px' } },
-                  ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((d, i) => {
-                    const on = rec.days.includes(i)
-                    return React.createElement(
-                      'button',
-                      {
-                        key: i,
-                        type: 'button',
-                        onClick: () => toggleRecDay(i),
-                        style: {
-                          flex: 1,
-                          padding: '5px 2px',
-                          fontSize: '10px',
-                          fontWeight: 700,
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          border: '1px solid',
-                          background: on ? 'var(--accent)' : 'transparent',
-                          color: on ? 'var(--accent-text)' : 'var(--muted)',
-                          borderColor: on ? 'var(--accent)' : 'var(--divider)',
-                          minWidth: 0,
-                        },
-                      },
-                      d,
-                    )
-                  }),
-                ),
-              React.createElement(
-                'div',
-                null,
-                React.createElement(
-                  'label',
-                  {
-                    style: {
-                      fontSize: '11px',
-                      color: 'var(--dim)',
-                      display: 'block',
-                      marginBottom: '3px',
-                    },
-                  },
-                  'Repetir até',
-                ),
-                React.createElement('input', {
-                  type: 'date',
-                  value: rec.until,
-                  onChange: e => setRec(r => ({ ...r, until: e.target.value })),
-                  min: showForm.date,
-                  style: {
-                    width: '100%',
-                    background: 'var(--bg)',
-                    border: '1px solid var(--divider)',
-                    color: 'var(--sub)',
-                    padding: '6px 8px',
-                    borderRadius: '5px',
-                    fontSize: '12px',
-                    boxSizing: 'border-box',
-                  },
-                }),
-              ),
-            ),
-        ),
-      React.createElement(
-        'div',
-        { style: { display: 'flex', gap: '6px' } },
-        React.createElement(
-          'button',
-          {
-            onClick: handleSave,
-            style: {
-              flex: 1,
-              background: 'var(--accent)',
-              color: 'var(--accent-text)',
-              border: 'none',
-              padding: '8px',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: 700,
-            },
-          },
-          rec.enabled && rec.until ? 'Criar eventos' : 'Salvar',
-        ),
-        React.createElement(
-          'button',
-          {
-            onClick: onCancel,
-            style: {
-              background: 'transparent',
-              border: '1px solid var(--divider)',
-              color: 'var(--dim)',
-              padding: '8px 14px',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontSize: '12px',
-            },
-          },
-          'Cancelar',
-        ),
-      ),
-    ),
+            })}
+          </div>
+        </div>
+      )}
+
+      {isPers && (
+        <Input
+          as="select"
+          label="Local (opcional)"
+          value={fd.local || ''}
+          onChange={e => set('local', e.target.value)}
+        >
+          <option value="">—</option>
+          {boxSvcs.map(l => (
+            <option key={l.id} value={l.name}>
+              {l.name}
+            </option>
+          ))}
+          <option value="__outro__">Outro...</option>
+        </Input>
+      )}
+
+      {isPers && fd.local === '__outro__' && (
+        <Input
+          label="Especificar local"
+          value={fd.localText || ''}
+          onChange={e => set('localText', e.target.value)}
+          placeholder="Ex: Studio Norte"
+        />
+      )}
+
+      <div className={css.evfRow2}>
+        <Input
+          className={css.evfHalf}
+          label="Horário"
+          type="time"
+          value={fd.time || '07:00'}
+          onChange={e => set('time', e.target.value)}
+        />
+        <Input
+          className={css.evfHalf}
+          label="Duração (min)"
+          type="number"
+          value={fd.durationMin || 60}
+          onChange={e => set('durationMin', Number(e.target.value))}
+          min={15}
+          max={480}
+          step={15}
+        />
+      </div>
+
+      {!isPers && (
+        <div>
+          <span className={css.evfLabel}>Atletas presentes (opcional)</span>
+          <div className={css.evfCheckList} style={{ maxHeight: 100 }}>
+            {athletes.map(a => (
+              <label key={a.id} className={css.evfCheckRow}>
+                <input
+                  type="checkbox"
+                  checked={(fd.athleteIds || []).includes(a.id)}
+                  onChange={() => toggleAthlete(a.id)}
+                  style={{ accentColor: a.color }}
+                />
+                <span className={css.evfDot} style={{ background: a.color }} />
+                {a.name}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {daySessions.length > 0 && (
+        <Input
+          as="select"
+          label="Sessão vinculada"
+          value={fd.sessionId || ''}
+          onChange={e => set('sessionId', e.target.value || null)}
+        >
+          <option value="">Nenhuma</option>
+          {daySessions.map(sess => (
+            <option key={sess.id} value={sess.id}>
+              {sessName(sess, showForm.date)}
+            </option>
+          ))}
+        </Input>
+      )}
+
+      <Input
+        as="textarea"
+        label="Notas (opcional)"
+        value={fd.notes || ''}
+        onChange={e => set('notes', e.target.value)}
+        rows={2}
+        placeholder="Observações..."
+      />
+
+      {!showForm.eventId && (
+        <div className={css.evfRecur}>
+          <label className={css.evfRecurToggle}>
+            <input
+              type="checkbox"
+              checked={rec.enabled}
+              onChange={e => setRec(r => ({ ...r, enabled: e.target.checked }))}
+              style={{ accentColor: 'var(--accent)' }}
+            />
+            <i className="ti ti-refresh" style={{ fontSize: 13 }} />
+            Repetir evento
+          </label>
+          {rec.enabled && (
+            <div className={css.evfRecurBody}>
+              <div className={css.evfFreqRow}>
+                {['weekly', 'daily'].map(f => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => setRec(r => ({ ...r, freq: f }))}
+                    className={`${css.evfPill}${rec.freq === f ? ' ' + css.evfPillOn : ''}`}
+                  >
+                    {f === 'weekly' ? 'Semanal' : 'Diário'}
+                  </button>
+                ))}
+              </div>
+              {rec.freq === 'weekly' && (
+                <div className={css.evfDayRow}>
+                  {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((d, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => toggleRecDay(i)}
+                      className={`${css.evfDayPill}${rec.days.includes(i) ? ' ' + css.evfPillOn : ''}`}
+                    >
+                      {d}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <Input
+                label="Repetir até"
+                type="date"
+                value={rec.until}
+                onChange={e => setRec(r => ({ ...r, until: e.target.value }))}
+                min={showForm.date}
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </Modal>
   )
 }
 
@@ -635,6 +338,12 @@ export function ReportModal({ events, sessions, onClose }) {
   const [showHeader, setShowHeader] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [showPix, setShowPix] = useState(false)
+  // Replaces the old alert()/prompt() calls (#59 C5·c — zero window.* popups in the
+  // publicador family): a PDF failure is shown inline instead of blocking, and a
+  // clipboard copy — success or failure — is a Toast, never a blocking prompt asking
+  // the coach to select-and-copy a code by hand.
+  const [pdfError, setPdfError] = useState('')
+  const [toastMsg, setToastMsg] = useState('')
 
   function filteredEvents() {
     return filterEvents(events, filter)
@@ -695,6 +404,7 @@ export function ReportModal({ events, sessions, onClose }) {
 
   async function generatePDF() {
     setGenerating(true)
+    setPdfError('')
     try {
       const { jsPDF } = await import('jspdf')
       const { default: autoTable } = await import('jspdf-autotable')
@@ -806,7 +516,7 @@ export function ReportModal({ events, sessions, onClose }) {
           y += 6
           const rows = levs.map(ev => {
             const daySess = sessions[ev.date] || []
-            const linked = ev.sessionId ? daySess.find(s => s.id === ev.sessionId) : null
+            const linked = ev.sessionId ? daySess.find(sess => sess.id === ev.sessionId) : null
             const blockLabels = linked
               ? (linked.blocks || [])
                   .map(b => (b.label && b.label !== '-' ? b.label : b.type))
@@ -819,11 +529,11 @@ export function ReportModal({ events, sessions, onClose }) {
               ev.label || name,
             ]
             if (showDetails) row.push(blockLabels || '-')
-            // #104(c) — the event's own frozen rate, not the location's current one; the
-            // group-level total below resolves the same way (calcTotal), so this per-event
-            // figure can no longer silently disagree with it.
+            // #104(c)/#154 — the event's own frozen rate, else the location's rate AS OF
+            // the event's own date; the group-level total below resolves the same way
+            // (calcTotal), so this per-event figure can no longer silently disagree with it.
             if (showRate && loc?.rate) {
-              const src = ev.rateSnapshot ?? loc
+              const src = ev.rateSnapshot ?? rateAsOf(loc, ev.date) ?? loc
               row.push((src.currency || 'R$') + ' ' + src.rate)
             }
             return row
@@ -932,172 +642,66 @@ export function ReportModal({ events, sessions, onClose }) {
         doc.save(filename)
       } catch (err) {
         console.error('PDF error:', err)
-        alert('Erro ao gerar PDF: ' + err.message)
+        setPdfError('Erro ao gerar PDF: ' + err.message)
       }
     } catch (loadErr) {
-      alert('Erro ao carregar bibliotecas PDF: ' + loadErr.message)
+      setPdfError('Erro ao carregar bibliotecas PDF: ' + loadErr.message)
     }
     setGenerating(false)
+  }
+
+  const copyPix = payload => {
+    navigator.clipboard
+      ?.writeText(payload)
+      .then(() => setToastMsg('Código Pix copiado!'))
+      .catch(() => setToastMsg('Não foi possível copiar — copie o código pelo PDF gerado.'))
   }
 
   const evs = filteredEvents()
   const groups = groupByLocation(evs)
 
-  return React.createElement(
-    'div',
-    {
-      style: {
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,.8)',
-        zIndex: 3000,
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        overflowY: 'auto',
-        padding: '20px 0',
-      },
-    },
-    React.createElement(
-      'div',
-      {
-        style: {
-          background: '#0d0b08',
-          border: '1px solid #2a2318',
-          borderRadius: '10px',
-          width: '540px',
-          maxWidth: '95vw',
-          padding: '20px',
-        },
-        onClick: e => e.stopPropagation(),
-      },
-      React.createElement(
-        'div',
-        {
-          style: {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '16px',
-          },
-        },
-        React.createElement(
-          'span',
-          { style: { fontSize: '14px', fontWeight: 700, color: '#c8b090' } },
-          'Gerar Relatório',
-        ),
-        React.createElement(
-          'button',
-          {
-            onClick: onClose,
-            style: {
-              background: 'transparent',
-              border: 'none',
-              color: '#555',
-              cursor: 'pointer',
-              fontSize: '18px',
-            },
-          },
-          '✕',
-        ),
-      ),
-      // #105 — the ONE filter. Four hand-rolled sections (period · tipo · status ·
-      // afiliados · atletas, ~395 lines) collapse into the shared component in its
-      // column layout, which is a superset of what was here: `status` gains the
-      // scheduled-only value this modal never had, and the "só personal" rule that
-      // was buried in `filteredEvents` is now visible on screen.
-      React.createElement(EventFilter, {
-        value: filter,
-        onChange: setFilter,
-        axes: ['period', 'type', 'status', 'affiliate', 'athlete'],
-        layout: 'column',
-        locs: locations,
-        athletes: loadAthletes(),
-      }),
-      React.createElement(
-        'div',
-        {
-          style: {
-            marginBottom: '16px',
-            padding: '10px 12px',
-            background: 'rgba(255,255,255,.02)',
-            border: '1px solid #2a2318',
-            borderRadius: '6px',
-          },
-        },
-        React.createElement(
-          'div',
-          {
-            style: {
-              fontSize: '10px',
-              fontWeight: 700,
-              color: 'var(--theme-accent)',
-              textTransform: 'uppercase',
-              letterSpacing: '.08em',
-              marginBottom: '8px',
-            },
-          },
-          'Opções',
-        ),
-        [
-          [showDetails, setShowDetails, 'Mostrar detalhes da sessão (blocos/exercícios)'],
-          [showRate, setShowRate, 'Incluir valor por sessão'],
-          [showHeader, setShowHeader, 'Incluir cabeçalho (coach, academia, data)'],
-          ...(coach.pixEnabled && coach.pixKey && showRate
-            ? [[showPix, setShowPix, 'Incluir QR code Pix (por local)']]
-            : []),
-        ].map(([val, setter, lbl], i) =>
-          React.createElement(
-            'label',
-            {
-              key: i,
-              style: {
-                display: 'flex',
-                alignItems: 'center',
-                gap: '7px',
-                fontSize: '12px',
-                color: '#c8b090',
-                cursor: 'pointer',
-                marginBottom: i < 2 ? '6px' : '0',
-              },
-            },
-            React.createElement('input', {
-              type: 'checkbox',
-              checked: val,
-              onChange: () => setter(v => !v),
-              style: { accentColor: 'var(--theme-accent)', width: '13px', height: '13px' },
-            }),
-            lbl,
-          ),
-        ),
-      ),
-      evs.length > 0 &&
-        React.createElement(
-          'div',
-          {
-            style: {
-              marginBottom: '16px',
-              padding: '10px 12px',
-              background: '#0a0908',
-              border: '1px solid #2a2318',
-              borderRadius: '6px',
-            },
-          },
-          React.createElement(
-            'div',
-            {
-              style: {
-                fontSize: '10px',
-                fontWeight: 700,
-                color: '#554a3a',
-                textTransform: 'uppercase',
-                letterSpacing: '.07em',
-                marginBottom: '6px',
-              },
-            },
-            'Pré-visualização',
-          ),
-          Object.entries(groups).map(([locId, levs]) => {
+  return (
+    <Modal open title="Gerar Relatório" onClose={onClose} size="lg">
+      {/* #105 — the ONE filter. Four hand-rolled sections (period · tipo · status ·
+          afiliados · atletas, ~395 lines) collapse into the shared component in its
+          column layout, which is a superset of what was here: `status` gains the
+          scheduled-only value this modal never had, and the "só personal" rule that
+          was buried in `filteredEvents` is now visible on screen. */}
+      <EventFilter
+        value={filter}
+        onChange={setFilter}
+        axes={['period', 'type', 'status', 'affiliate', 'athlete']}
+        layout="column"
+        locs={locations}
+        athletes={loadAthletes()}
+      />
+
+      <div className={css.optionsBox}>
+        <div className={css.optionsHdr}>Opções</div>
+        <label className={css.optionRow}>
+          <input type="checkbox" checked={showDetails} onChange={() => setShowDetails(v => !v)} />
+          Mostrar detalhes da sessão (blocos/exercícios)
+        </label>
+        <label className={css.optionRow}>
+          <input type="checkbox" checked={showRate} onChange={() => setShowRate(v => !v)} />
+          Incluir valor por sessão
+        </label>
+        <label className={css.optionRow}>
+          <input type="checkbox" checked={showHeader} onChange={() => setShowHeader(v => !v)} />
+          Incluir cabeçalho (coach, academia, data)
+        </label>
+        {coach.pixEnabled && coach.pixKey && showRate && (
+          <label className={css.optionRow}>
+            <input type="checkbox" checked={showPix} onChange={() => setShowPix(v => !v)} />
+            Incluir QR code Pix (por local)
+          </label>
+        )}
+      </div>
+
+      {evs.length > 0 && (
+        <div className={css.previewBox}>
+          <div className={css.previewHdr}>Pré-visualização</div>
+          {Object.entries(groups).map(([locId, levs]) => {
             const loc = locations.find(l => l.id === locId)
             const athGroupId = locId.startsWith('__ath__') ? locId.slice(7) : null
             const athGroup = athGroupId ? loadAthletes().find(a => a.id === athGroupId) : null
@@ -1109,7 +713,7 @@ export function ReportModal({ events, sessions, onClose }) {
                   ? 'Sem local'
                   : locId
             const t = calcTotal(levs, resolveLocForCalc(loc, athGroup))
-            const totalMin = levs.reduce((s, ev) => s + (ev.durationMin || 60), 0)
+            const totalMin = levs.reduce((sum, ev) => sum + (ev.durationMin || 60), 0)
             // Pix needs one amount + one currency — see the same guard in generatePDF.
             const previewCurrency = t.currencies.length === 1 ? t.currencies[0] : null
             const previewTotal = previewCurrency ? t.totals[previewCurrency] : 0
@@ -1127,133 +731,60 @@ export function ReportModal({ events, sessions, onClose }) {
                     txid: name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 25) || 'CONE',
                   })
                 : null
-            return React.createElement(
-              'div',
-              {
-                key: locId,
-                style: {
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '4px 0',
-                  borderBottom: '1px solid #1a1610',
-                  fontSize: '12px',
-                  flexWrap: 'wrap',
-                },
-              },
-              React.createElement(
-                'span',
-                { style: { flex: 1, color: '#c8b090', fontWeight: 600 } },
-                name,
-              ),
-              React.createElement(
-                'span',
-                { style: { color: '#887060' } },
-                levs.length + (levs.length !== 1 ? ' sessões' : ' sessão'),
-              ),
-              React.createElement('span', { style: { color: '#887060' } }, fmtDur(totalMin)),
-              t.currencies.length && showRate
-                ? React.createElement(
-                    'span',
-                    { style: { color: '#d8a840', fontWeight: 700 } },
-                    t.label,
-                  )
-                : null,
-              previewPayload &&
-                React.createElement(
-                  'button',
-                  {
-                    type: 'button',
-                    title: 'Copiar código Pix',
-                    onClick: () =>
-                      navigator.clipboard
-                        ?.writeText(previewPayload)
-                        .then(() => alert('Código Pix copiado!'))
-                        .catch(() => prompt('Copie o código Pix:', previewPayload)),
-                    style: {
-                      background: 'rgba(74,200,192,.1)',
-                      border: '1px solid rgba(74,200,192,.25)',
-                      color: 'var(--theme-accent)',
-                      padding: '1px 6px',
-                      borderRadius: '3px',
-                      cursor: 'pointer',
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '3px',
-                      whiteSpace: 'nowrap',
-                    },
-                  },
-                  React.createElement('i', {
-                    className: 'ti ti-copy',
-                    style: { fontSize: '10px' },
-                  }),
-                  ' Pix',
-                ),
+            return (
+              <div key={locId} className={css.previewRow}>
+                <span className={css.previewName}>{name}</span>
+                <span className={css.previewMeta}>
+                  {levs.length + (levs.length !== 1 ? ' sessões' : ' sessão')}
+                </span>
+                <span className={css.previewMeta}>{fmtDur(totalMin)}</span>
+                {t.currencies.length && showRate ? (
+                  <span className={css.previewValue}>{t.label}</span>
+                ) : null}
+                {previewPayload && (
+                  <button
+                    type="button"
+                    title="Copiar código Pix"
+                    className={css.previewPixBtn}
+                    onClick={() => copyPix(previewPayload)}
+                  >
+                    <i className="ti ti-copy" style={{ fontSize: 10 }} />
+                    Pix
+                  </button>
+                )}
+              </div>
             )
-          }),
-          showRate &&
-            React.createElement(
-              'div',
-              {
-                style: {
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  marginTop: '6px',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  color: '#68d8a0',
-                },
-              },
-              // #149 — this used to be its own naive `acc += t.total` sum with no currency
-              // key or label, so a two-currency report showed a correct per-currency footer
-              // in the generated PDF and a meaningless combined number right above it in
-              // this same preview. `grandTotal` is the exact function generatePDF's footer
-              // calls, so the two can no longer independently drift.
-              'Total: ' + (grandTotal(evs).label || '0'),
-            ),
-        ),
-      evs.length === 0 &&
-        React.createElement(
-          'div',
-          {
-            style: {
-              textAlign: 'center',
-              padding: '16px',
-              fontSize: '12px',
-              color: '#554a3a',
-              marginBottom: '16px',
-            },
-          },
-          'Nenhum evento encontrado para os filtros selecionados.',
-        ),
-      React.createElement(
-        'button',
-        {
-          onClick: generatePDF,
-          disabled: evs.length === 0 || generating,
-          style: {
-            width: '100%',
-            background: evs.length === 0 || generating ? '#1a1a1a' : 'var(--theme-accent)',
-            color: evs.length === 0 || generating ? '#333' : 'var(--theme-accent-text)',
-            border: 'none',
-            padding: '10px',
-            borderRadius: '6px',
-            cursor: evs.length === 0 || generating ? 'not-allowed' : 'pointer',
-            fontSize: '13px',
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-          },
-        },
-        React.createElement('i', {
-          className: generating ? 'ti ti-loader' : 'ti ti-file-download',
-        }),
-        generating ? 'Gerando PDF...' : 'Gerar PDF',
-      ),
-    ),
+          })}
+          {showRate && (
+            // #149 — this used to be its own naive `acc += t.total` sum with no currency
+            // key or label, so a two-currency report showed a correct per-currency footer
+            // in the generated PDF and a meaningless combined number right above it in
+            // this same preview. `grandTotal` is the exact function generatePDF's footer
+            // calls, so the two can no longer independently drift.
+            <div className={css.previewTotal}>Total: {grandTotal(evs).label || '0'}</div>
+          )}
+        </div>
+      )}
+
+      {evs.length === 0 && (
+        <div className={css.reportEmpty}>
+          Nenhum evento encontrado para os filtros selecionados.
+        </div>
+      )}
+
+      {pdfError && <div className={css.reportError}>{pdfError}</div>}
+
+      <Button
+        variant="primary"
+        full
+        disabled={evs.length === 0 || generating}
+        onClick={generatePDF}
+      >
+        <i className={generating ? 'ti ti-loader' : 'ti ti-file-download'} />
+        {generating ? 'Gerando PDF...' : 'Gerar PDF'}
+      </Button>
+
+      <Toast open={!!toastMsg} message={toastMsg} onDismiss={() => setToastMsg('')} />
+    </Modal>
   )
 }
