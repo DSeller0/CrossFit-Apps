@@ -48,6 +48,25 @@ times.
    `shared/WodBlockCard.jsx` and TV's `BlockCard` are **token-based screen components** — what these draw
    are visual quotations re-implemented in the artefact CSS, and the names must not send a reader hunting
    for an import that does not exist.
+8. **The rest day is the label `Descanso`, never an icon** — the app's existing standard.
+
+## Open decision inherited from b1 — the Dia mobile pair
+
+b1 collapses `MobileWeekly`'s `variant: 'A'|'B'` (they differed only by colour, which is now `--a-*`).
+🔴 **That does not extend to `MobileEaglesExportView` and `MobileMegaManExportView`.** Measured: 415 lines
+vs 274, `borderBottom` 6 vs 2, `borderRadius` 4 vs 2 — structurally different designs, not two skins.
+
+Once b1 removes the colour distinction they are **two layout treatments of the Dia mobile format with no
+named difference left**, which is this pass's problem. Two ways out:
+
+- **(a) Keep both as a named "modelo" choice** on the Dia mobile format — a second layout axis alongside the
+  zone/day/month ones. Costs a name for each (they are currently named after two gyms) and keeps 690 lines.
+- **(b) Pick one and delete the other.** Consistent with the rest of the programme, and it is ~275–415 lines
+  of dead weight otherwise — but it removes a design the user may prefer for a specific post.
+
+**Recommendation: (a) in b2, deferring deletion** — the usage answer for this tab was "keep and enhance",
+and 690 lines is not what makes this tab hard to use. Name them for what they look like, the way the block
+card treatments were named, and revisit deletion once either one has actually been sent to someone.
 
 ## T5 · Blocos — card treatments and content
 
@@ -110,7 +129,7 @@ Semana · dias no export
                                                           desmarcar remove a coluna
 ┌──────┬──────┬──────┬──────┬──────┬──────┬──────┐
 │ DOM  │ SEG  │ TER  │ QUA  │ QUI  │ SEX  │ SÁB  │
-│  ⏸   │Força │Skill │ LPO  │EMOM  │Estaç │  ⏸   │
+│      │Força │Skill │ LPO  │EMOM  │Estaç │      │
 │Desc. │AMRAP │ FT   │Cond  │      │      │Desc. │
 └──────┴──────┴──────┴──────┴──────┴──────┴──────┘
 ```
@@ -119,11 +138,11 @@ Semana · dias no export
   was only ever a proxy for *hide the empty days*, and the picker says which, explicitly.
 - **Reuse `DAY_PT`** (`week.js` — `['DOM','SEG',…]`, uppercase abbreviated: exactly this shape). Do not
   hardcode a seventh label array; `CAL_DAY_LABELS` is deleted, not extended.
-- **Rest day:** the app's convention is the **label** `'Descanso'` — `public/index/rail.jsx:67` renders
-  `{d.count ? d.name : 'Descanso'}` on the public week grid, and `APP_CONFIG.restDayLabel` makes it
-  configurable. ⚠️ **No dedicated rest-*day* icon exists** in the repo; the nearest precedent is
-  `ti-clock-pause`, used for rest *stations* (`StationEditor.jsx:206`). **Confirm the icon with the user at
-  execution** rather than inventing one.
+- ✅ **Rest day is the LABEL `Descanso`, and no icon** (user, 2026-09-04 — *"use Descanso, keep the app's
+  standard"*). That standard is `public/index/rail.jsx:67`, which renders `{d.count ? d.name : 'Descanso'}`
+  on the public week grid; `APP_CONFIG.restDayLabel` keeps it configurable. **Do not introduce a rest-day
+  icon** — there is none in the repo, and `ti-clock-pause` (`StationEditor.jsx:206`) means a rest *station*,
+  a different thing. An empty day renders the label in the same slot the session name would occupy.
 - ⚠️ Criador's own `WeekGrid.jsx:329` says **"sem sessão"** for the same state — two strings, one condition.
   The export follows the **public** convention (`'Descanso'`), because that is what an athlete sees.
 
@@ -215,7 +234,8 @@ is synchronous; in React it becomes a bounded measure → `setState` → effect 
 - **Zonas:** 1/2/3 render; the 2-zone split offers iguais and 30/70; blocks in a hidden zone **collapse into
   the last visible zone** and the panel states the count. `zoneScales`/`blockTitleScales` still apply per zone.
 - **Day picker:** unchecking a day removes its column; all seven are checked by default; a checked day with
-  no session renders the rest-day treatment (`APP_CONFIG.restDayLabel`), never a blank cell.
+  no session renders the label `APP_CONFIG.restDayLabel` (`Descanso`) — never a blank cell, and **never an
+  icon**.
 - **Mês:** every day cell names its sessions, one row per session, dotted with `loc.color` resolved through
   `sessionBoxIds`; a cell with more than the truncation limit shows `+N mais`.
 - **Blocos:** the five treatments render; both content toggles work; **zero** family-colour code exists.

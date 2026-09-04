@@ -273,8 +273,15 @@ updates and `audit-backlog-markers.mjs`.
 - ⚠️ **`index.css` is outside `format:check`** and hand-compact on purpose; its per-selector triage tags are
   the evidence model. **Never run prettier on it.**
 - ⚠️ **jsPDF's colour calls in `events.jsx` are RGB integer triples** — a genuine print exemption, untouched.
-- ⚠️ **`MobileWeekly`'s `variant: 'A'|'B'` loses its meaning** once colour is central. Check at execution
-  whether A and B differ structurally; if they differ only by colour, collapse them.
+- ✅ **`MobileWeekly`'s `variant: 'A'|'B'` COLLAPSES** (user, 2026-09-04 — *"only by colour"*). The two
+  differ only in colour, and colour is now `--a-*`, so the prop, both call sites and the `isA` branching are
+  deleted. **Semana mobile becomes one view with no variant.** This removes 2 of the 25 `#00b8d4` sites and
+  is the smallest change in the pass.
+- 🔴 **But `MobileEagles` and `MobileMegaMan` do NOT collapse — do not extend the answer above to them.**
+  Measured: 415 lines vs 274, `borderBottom` 6 vs 2, `borderRadius` 4 vs 2. They are structurally different
+  designs, not two skins of one. After b1 removes the colour distinction they become **two layout treatments
+  of the Dia mobile format with no named difference**, which is a decision for b2 (keep both as a "modelo"
+  choice, or pick one and delete the other) — recorded in plans/83, not resolved here.
 
 ## Verification
 
@@ -311,6 +318,7 @@ updates and `audit-backlog-markers.mjs`.
 - The design record is mockup **64**, not 63. 63 established the structure (format × skin × canvas,
   preview-as-surface); 64 is the interactive prototype and is the approved target for everything except the
   colour model, which was redirected after it.
-- Two items to confirm at execution, neither blocking: the **rest-day icon** (`ti-clock-pause` proposed —
-  no dedicated rest-day icon exists; the app's convention is the *label* `'Descanso'`, `rail.jsx:67` +
-  `APP_CONFIG.restDayLabel`), and whether `MobileWeekly`'s A/B variants differ structurally.
+- ✅ **Both open items are now closed** (user, 2026-09-04): the rest day is the **label `Descanso`** and
+  **no icon** — keep the app's standard (`rail.jsx:67` + `APP_CONFIG.restDayLabel`); and `MobileWeekly`'s
+  A/B variants differ **only by colour**, so they collapse. See Constraints for the caveat that this does
+  **not** extend to `MobileEagles`/`MobileMegaMan`.
