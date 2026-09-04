@@ -9,7 +9,11 @@ import { MobileEaglesExportView, MobileMegaManExportView } from '../mobileExport
 
 // ── ExportFarm — the off-screen html2canvas render targets, plus the always-visible
 // on-screen week grid shown when the preview panel is closed. Pure move (#59 C5·b1
-// step b): no behaviour change. ⚠️ Every view here must stay mounted and measurable —
+// step b); step c wired the rasterised targets to `palette` (exportPalette.js's resolved
+// 8-role hex, #59 C5·b1 step c) via inline custom properties on each wrapper — the views
+// themselves take no colour prop any more. ⚠️ `WeeklyExportView` (both mounts below) is
+// screen chrome, never rasterised (see exportViews.jsx's file header) — it does NOT get
+// the palette. ⚠️ Every rasterised view here must stay mounted and measurable —
 // html2canvas cannot rasterise an unmounted or display:none target.
 export default function ExportFarm({
   filteredSessions,
@@ -25,12 +29,7 @@ export default function ExportFarm({
   year,
   month,
   selectedWeekIdx,
-  dvColors,
-  wkColors,
-  eaColors,
-  mmColors,
-  eaglesBg,
-  megaManBg,
+  palette,
   exportDailyRef,
   exportWeeklyRef,
   exportWeeklyCalRef,
@@ -53,7 +52,7 @@ export default function ExportFarm({
           overflow: 'hidden',
         }}
       >
-        <div ref={exportDailyRef}>
+        <div ref={exportDailyRef} style={palette}>
           <DailyExportView
             sessions={filteredSessions}
             label={label}
@@ -65,7 +64,6 @@ export default function ExportFarm({
             logoDataUrl={logoDataUrl}
             logoScale={logoScale}
             weekDates={currentWeekDates}
-            dvColors={dvColors}
           />
         </div>
         <div ref={exportWeeklyRef}>
@@ -77,7 +75,7 @@ export default function ExportFarm({
             onDayClick={() => {}}
           />
         </div>
-        <div ref={exportWeeklyCalRef}>
+        <div ref={exportWeeklyCalRef} style={palette}>
           <WeeklyCalendarExportView
             sessions={filteredSessions}
             label={label}
@@ -88,10 +86,9 @@ export default function ExportFarm({
             logoScale={logoScale}
             fontScale={fontScale}
             weekDates={getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates}
-            wkColors={wkColors}
           />
         </div>
-        <div ref={exportCalendarRef}>
+        <div ref={exportCalendarRef} style={palette}>
           <CalendarExportView
             sessions={filteredSessions}
             label={label}
@@ -101,10 +98,9 @@ export default function ExportFarm({
             logoDataUrl={logoDataUrl}
             logoScale={logoScale}
             fontScale={fontScale}
-            wkColors={wkColors}
           />
         </div>
-        <div ref={exportMobileARef} style={{ width: '1080px' }}>
+        <div ref={exportMobileARef} style={{ ...palette, width: '1080px' }}>
           <MobileEaglesExportView
             sessions={filteredSessions}
             selectedDate={selectedDate}
@@ -113,11 +109,9 @@ export default function ExportFarm({
             logoDataUrl={logoDataUrl}
             logoScale={logoScale}
             fontScale={fontScale}
-            bgOverride={eaglesBg}
-            colors={eaColors}
           />
         </div>
-        <div ref={exportMobileBRef} style={{ width: '1080px' }}>
+        <div ref={exportMobileBRef} style={{ ...palette, width: '1080px' }}>
           <MobileMegaManExportView
             sessions={filteredSessions}
             selectedDate={selectedDate}
@@ -126,8 +120,6 @@ export default function ExportFarm({
             logoDataUrl={logoDataUrl}
             logoScale={logoScale}
             fontScale={fontScale}
-            bgOverride={megaManBg}
-            colors={mmColors}
           />
         </div>
       </div>

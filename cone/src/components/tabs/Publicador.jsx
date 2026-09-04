@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { loadSettings, saveSettings, matchesAthlete, toISO } from '../../utils/storage'
 import { APP_CONFIG } from '../../utils/config'
 import { getWeeksOfMonth } from './publicador/exportHelpers'
+import { resolveExportThemeId, resolveExportPalette } from './publicador/exportPalette'
 import PresenterLauncher from './publicador/publisher/PresenterLauncher'
 import PublisherToolbar from './publicador/publisher/PublisherToolbar'
 import PreviewModal from './publicador/publisher/PreviewModal'
@@ -293,7 +294,7 @@ function SchedulePublisher({ sessions }) {
         H = 1080
       const c = await html2canvas(el, {
         scale: 1,
-        backgroundColor: '#000',
+        backgroundColor: exportPalette['--a-bg'],
         useCORS: true,
         logging: false,
         width: W,
@@ -304,7 +305,7 @@ function SchedulePublisher({ sessions }) {
       out.width = W
       out.height = H
       const ctx = out.getContext('2d')
-      ctx.fillStyle = '#000'
+      ctx.fillStyle = exportPalette['--a-bg']
       ctx.fillRect(0, 0, W, H)
       ctx.drawImage(c, 0, 0, W, H)
       const a = document.createElement('a')
@@ -370,7 +371,7 @@ function SchedulePublisher({ sessions }) {
       const H = el.scrollHeight || 1920
       const c = await html2canvas(el, {
         scale: 2,
-        backgroundColor: '#000',
+        backgroundColor: exportPalette['--a-bg'],
         useCORS: true,
         logging: false,
         width: W,
@@ -381,7 +382,7 @@ function SchedulePublisher({ sessions }) {
       out.width = W * 2
       out.height = H * 2
       const ctx = out.getContext('2d')
-      ctx.fillStyle = '#000'
+      ctx.fillStyle = exportPalette['--a-bg']
       ctx.fillRect(0, 0, out.width, out.height)
       ctx.drawImage(c, 0, 0)
       const DAY_EN = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
@@ -421,10 +422,7 @@ function SchedulePublisher({ sessions }) {
       const H = el.scrollHeight || 3000
       const cv = await html2canvas(el, {
         scale: APP_CONFIG.exportScale || 2,
-        backgroundColor:
-          variant === 'A'
-            ? APP_CONFIG.mobileEaglesBg || '#0d0b09'
-            : APP_CONFIG.mobileMegaManBg || '#000',
+        backgroundColor: exportPalette['--a-bg'],
         useCORS: true,
         logging: false,
         width: W,
@@ -435,10 +433,7 @@ function SchedulePublisher({ sessions }) {
       out.width = W * 2
       out.height = H * 2
       const ctx = out.getContext('2d')
-      ctx.fillStyle =
-        variant === 'A'
-          ? APP_CONFIG.mobileEaglesBg || '#0d0b09'
-          : APP_CONFIG.mobileMegaManBg || '#000'
+      ctx.fillStyle = exportPalette['--a-bg']
       ctx.fillRect(0, 0, out.width, out.height)
       ctx.drawImage(cv, 0, 0)
       const wk = getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates
@@ -513,55 +508,13 @@ function SchedulePublisher({ sessions }) {
 
   const currentWeekDates = selectedWeek || defaultWeek
 
-  const dvColors = {
-    bg: dvBg,
-    gymName: dvGymName,
-    date: dvDate,
-    mainTraining: dvMainTraining,
-    zoneType: dvZoneType,
-    blockLabel: dvBlockLabel,
-    cap: dvCap,
-    rounds: dvRounds,
-    exName: dvExName,
-    intensity: dvIntensity,
-    note: dvNote,
-    blockNotes: dvBlockNotes,
-    divider: dvDivider,
-  }
-  const wkColors = {
-    bg: wkBg,
-    header: wkHeader,
-    dateNum: wkDateNum,
-    mainTraining: wkMainTraining,
-    blockType: wkBlockType,
-    exName: wkExName,
-    divider: wkDivider,
-  }
-  const eaColors = {
-    gymName: eaGymName,
-    date: eaDate,
-    subtitle: eaSubtitle,
-    blockType: eaBlockType,
-    blockMeta: eaBlockMeta,
-    exName: eaExName,
-    intensity: eaIntensity,
-    blockHdr: eaBlockHdr,
-    divider: eaDivider,
-    note: noteColor,
-  }
-  const mmColors = {
-    gymName: mmGymName,
-    date: mmDate,
-    subtitle: mmSubtitle,
-    blockType: mmBlockType,
-    blockMetaBg: mmBlockMetaBg,
-    blockMetaText: mmBlockMetaText,
-    exName: mmExName,
-    intensity: mmIntensity,
-    blockHdr: mmBlockHdr,
-    divider: mmDivider,
-    note: noteColor,
-  }
+  // The 8-role export palette (#59 C5·b1 step c, plans/82). No Origem/Personalizado
+  // picker exists yet (that's step d's Aparência panel) — this resolves box=null through
+  // resolveExportThemeId straight to the coach's own gym-wide theme, exactly what
+  // resolveExportThemeId falls back to with nothing else set.
+  const exportPalette = resolveExportPalette({
+    themeId: resolveExportThemeId({ settings: loadSettings() }),
+  })
   const _presenterDateKey = selectedDate || toISO(currentWeekDates[1])
   const _presenterSess = (filteredSessions[_presenterDateKey] || [])[0]
   const _presenterLogUrl = _presenterSess
@@ -584,7 +537,7 @@ function SchedulePublisher({ sessions }) {
         logoDataUrl={logoDataUrl}
         logoScale={logoScale}
         weekDates={currentWeekDates}
-        dvColors={dvColors}
+        palette={exportPalette}
       />
       <div>
         <PublisherToolbar
@@ -645,12 +598,7 @@ function SchedulePublisher({ sessions }) {
           doExport={doExport}
           doMobileExport={doMobileExport}
           doMobileWeeklyExport={doMobileWeeklyExport}
-          dvColors={dvColors}
-          wkColors={wkColors}
-          eaColors={eaColors}
-          mmColors={mmColors}
-          eaglesBg={eaglesBg}
-          megaManBg={megaManBg}
+          palette={exportPalette}
         />
         <SettingsDrawer
           open={settingsOpen}
@@ -766,12 +714,7 @@ function SchedulePublisher({ sessions }) {
           year={year}
           month={month}
           selectedWeekIdx={selectedWeekIdx}
-          dvColors={dvColors}
-          wkColors={wkColors}
-          eaColors={eaColors}
-          mmColors={mmColors}
-          eaglesBg={eaglesBg}
-          megaManBg={megaManBg}
+          palette={exportPalette}
           exportDailyRef={exportDailyRef}
           exportWeeklyRef={exportWeeklyRef}
           exportWeeklyCalRef={exportWeeklyCalRef}

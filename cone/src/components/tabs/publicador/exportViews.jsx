@@ -1,8 +1,20 @@
-import { ZONES, ECOL, DSHORT, PLC } from '../../../utils/config'
+import { ZONES, DSHORT, PLC, normaliseZone } from '../../../utils/config'
 import { fmtIntensity, blkMeta } from '../../../public/lib/wod.js'
 import { MONTH_PT } from '../../../public/lib/week.js'
 import { toISO } from '../../../utils/storage'
 import { getWeeksOfMonth, exLine, complexLine, buildProgressionLines } from './exportHelpers'
+
+// Every export view in this file is an EXPORT ARTEFACT (plans/82's colour model): it takes
+// no colour prop and reads the 8 `--a-*` custom properties instead, set as literal hex on
+// whatever mounts it via exportPalette.js's resolveExportPalette(). A rasterised PNG must
+// not change colour when the coach's SPA theme changes underneath it — that's the whole
+// point of resolving to hex up front rather than depending on live var() resolution.
+// Family block-colouring (ECOL) is DROPPED here (plans/82 measurement 2: it fails the 3:1
+// bar on both light themes) — every block-header accent is `--a-hdr` now, uniformly.
+// `WeeklyExportView` below is the one exception: it's on-screen chrome (the always-visible
+// week grid, never one of the 6 rasterised export targets — confirmed live, `doExport`
+// never selects `exportWeeklyRef`), not an export artefact, so it keeps its own literal chrome
+// colours rather than adopting `--a-*`.
 
 // ── DailyExportView ───────────────────────────────────────────────────────────
 export function DailyExportView({
@@ -16,9 +28,7 @@ export function DailyExportView({
   selectedDate,
   logoDataUrl,
   logoScale,
-  dvColors,
 }) {
-  const dv = dvColors || {}
   const daysList = weekDates
     .map((date, i) => ({
       date,
@@ -33,7 +43,7 @@ export function DailyExportView({
   const fs = fontScale || 1
   if (!day)
     return (
-      <div className="dv-wrap" style={{ '--fs': fs, background: dv.bg || '#000' }}>
+      <div className="dv-wrap" style={{ '--fs': fs, background: 'var(--a-bg)' }}>
         <div className="dv-empty-zone">Sem sessões nesta semana</div>
       </div>
     )
@@ -50,13 +60,13 @@ export function DailyExportView({
     byZone[z] = []
   })
   ;(s.blocks || []).forEach(bl => {
-    const z = bl.zone || 'Zone 01'
+    const z = normaliseZone(bl.zone) || 'Zona 01'
     if (!byZone[z]) byZone[z] = []
     byZone[z].push(bl)
   })
   return (
     <div className="dv-wrap" style={{ '--fs': fs }}>
-      <div className="dv-topbar" style={{ background: dv.bg || '#0a0a0a' }}>
+      <div className="dv-topbar" style={{ background: 'var(--a-bg)' }}>
         <div className="dv-top-left">
           {logoDataUrl && (
             <div
@@ -80,16 +90,16 @@ export function DailyExportView({
               />
             </div>
           )}
-          <span className="dv-gym-name" style={{ color: dv.gymName || '#fff' }}>
+          <span className="dv-gym-name" style={{ color: 'var(--a-name)' }}>
             {gymName || 'Cone'}
           </span>
         </div>
         <div className="dv-top-right">
-          <div className="dv-date-label" style={{ color: dv.date || '#e87820' }}>
+          <div className="dv-date-label" style={{ color: 'var(--a-hdr)' }}>
             {weekday + ' · ' + dateNum}
           </div>
           {s.mainTraining && (
-            <div className="dv-main-training" style={{ color: dv.mainTraining || '#888' }}>
+            <div className="dv-main-training" style={{ color: 'var(--a-sub)' }}>
               {s.mainTraining}
             </div>
           )}
@@ -112,7 +122,6 @@ export function DailyExportView({
         {ZONES.map((zoneName, zi) => {
           const zoneBlocks = byZone[zoneName] || []
           const primaryBlock = zoneBlocks[0] || null
-          const ec0 = primaryBlock ? ECOL[primaryBlock.type] || ECOL.Strength : null
           return (
             <div
               key={zoneName}
@@ -120,16 +129,13 @@ export function DailyExportView({
               style={{
                 '--zfs': zoneScales?.[zi] || 1,
                 '--bts': blockTitleScales?.[zi] || 1,
-                borderRight: `2px solid ${dv.divider || '#1a1a1a'}`,
+                borderRight: '2px solid var(--a-div)',
               }}
             >
-              <div
-                className="dv-zone-header"
-                style={{ borderBottom: `1px solid ${dv.divider || '#1e1e1e'}` }}
-              >
-                {ec0 ? (
+              <div className="dv-zone-header" style={{ borderBottom: '1px solid var(--a-div)' }}>
+                {primaryBlock ? (
                   <div>
-                    <div className="dv-zone-type" style={{ color: dv.zoneType || '#e87820' }}>
+                    <div className="dv-zone-type" style={{ color: 'var(--a-hdr)' }}>
                       {zoneBlocks[0].label && zoneBlocks[0].label !== '-' ? (
                         <div>
                           <div>{zoneBlocks[0].label}</div>
@@ -138,7 +144,7 @@ export function DailyExportView({
                               fontSize: 'calc(16px * var(--fs,1) * var(--bts,1))',
                               opacity: 0.75,
                               marginTop: '2px',
-                              color: dv.zoneType || '#e87820',
+                              color: 'var(--a-hdr)',
                             }}
                           >
                             {zoneBlocks[0].type}
@@ -148,13 +154,13 @@ export function DailyExportView({
                         zoneBlocks[0].type
                       )}
                     </div>
-                    {primaryBlock && primaryBlock.duration && (
-                      <div className="dv-zone-subtitle" style={{ color: dv.cap || '#e87820' }}>
+                    {primaryBlock.duration && (
+                      <div className="dv-zone-subtitle" style={{ color: 'var(--a-int)' }}>
                         {`CAP ${primaryBlock.duration}'`}
                       </div>
                     )}
-                    {primaryBlock && primaryBlock.rounds && (
-                      <div className="dv-rounds-label" style={{ color: dv.rounds || '#f5c842' }}>
+                    {primaryBlock.rounds && (
+                      <div className="dv-rounds-label" style={{ color: 'var(--a-int)' }}>
                         {`${primaryBlock.rounds} ROUNDS`}
                       </div>
                     )}
@@ -176,24 +182,13 @@ export function DailyExportView({
               ) : (
                 <div className="dv-zone-body">
                   {zoneBlocks.map((bl, bli) => {
-                    const ec = ECOL[bl.type] || ECOL.Strength
                     return (
                       <div key={bl.id} className="dv-block-in-zone">
                         {bli > 0 && (
-                          <div
-                            className="dv-block-type-label"
-                            style={{
-                              color: dv.blockLabel || ec.text || '#e87820',
-                            }}
-                          >
+                          <div className="dv-block-type-label" style={{ color: 'var(--a-hdr)' }}>
                             {bl.type}
                             {(bl.rounds || bl.duration) && (
-                              <span
-                                className="dv-block-cap"
-                                style={{
-                                  color: dv.blockLabel || ec.text || '#e87820',
-                                }}
-                              >
+                              <span className="dv-block-cap" style={{ color: 'var(--a-hdr)' }}>
                                 {blkMeta(bl)}
                               </span>
                             )}
@@ -208,21 +203,16 @@ export function DailyExportView({
                                 <div
                                   key={ex.id}
                                   className="dv-ex-item"
-                                  style={{
-                                    borderBottom: `1px solid ${dv.divider || 'transparent'}`,
-                                  }}
+                                  style={{ borderBottom: '1px solid var(--a-div)' }}
                                 >
-                                  <div
-                                    className="dv-ex-name"
-                                    style={{ color: dv.exName || '#fff' }}
-                                  >
+                                  <div className="dv-ex-name" style={{ color: 'var(--a-name)' }}>
                                     {complexLine(ex)}
                                   </div>
                                   {movs.map((m, mi) => (
                                     <div
                                       key={mi}
                                       className="dv-ex-note"
-                                      style={{ color: dv.note || '#888' }}
+                                      style={{ color: 'var(--a-note)' }}
                                     >
                                       {`· ${[m.reps, m.name].filter(Boolean).join(' ')}`}
                                     </div>
@@ -231,7 +221,7 @@ export function DailyExportView({
                                     <div
                                       key="n"
                                       className="dv-ex-note"
-                                      style={{ color: dv.note || '#888' }}
+                                      style={{ color: 'var(--a-note)' }}
                                     >
                                       {ex.note}
                                     </div>
@@ -248,20 +238,15 @@ export function DailyExportView({
                                   <div
                                     key={ex.id}
                                     className="dv-ex-item"
-                                    style={{
-                                      borderBottom: `1px solid ${dv.divider || 'transparent'}`,
-                                    }}
+                                    style={{ borderBottom: '1px solid var(--a-div)' }}
                                   >
-                                    <div
-                                      className="dv-ex-name"
-                                      style={{ color: dv.exName || '#fff' }}
-                                    >
+                                    <div className="dv-ex-name" style={{ color: 'var(--a-name)' }}>
                                       {line}
                                     </div>
                                     {ex.note && (
                                       <div
                                         className="dv-ex-note"
-                                        style={{ color: dv.note || '#888' }}
+                                        style={{ color: 'var(--a-note)' }}
                                       >
                                         {ex.note}
                                       </div>
@@ -273,15 +258,13 @@ export function DailyExportView({
                                 <div
                                   key={ex.id}
                                   className="dv-ex-item"
-                                  style={{
-                                    borderBottom: `1px solid ${dv.divider || 'transparent'}`,
-                                  }}
+                                  style={{ borderBottom: '1px solid var(--a-div)' }}
                                 >
                                   {progLines.map((pl, si) => (
                                     <div key={si}>
                                       <div
                                         className="dv-ex-name"
-                                        style={{ color: dv.exName || '#fff' }}
+                                        style={{ color: 'var(--a-name)' }}
                                       >
                                         {pl.nameLine}
                                       </div>
@@ -289,7 +272,7 @@ export function DailyExportView({
                                         <div
                                           className="dv-ex-vol"
                                           style={{
-                                            color: dv.intensity || '#f5c842',
+                                            color: 'var(--a-int)',
                                             display: 'inline-block',
                                             marginTop: '2px',
                                           }}
@@ -300,10 +283,7 @@ export function DailyExportView({
                                     </div>
                                   ))}
                                   {ex.note && (
-                                    <div
-                                      className="dv-ex-note"
-                                      style={{ color: dv.note || '#888' }}
-                                    >
+                                    <div className="dv-ex-note" style={{ color: 'var(--a-note)' }}>
                                       {ex.note}
                                     </div>
                                   )}
@@ -314,15 +294,13 @@ export function DailyExportView({
                               <div
                                 key={ex.id}
                                 className="dv-ex-item"
-                                style={{
-                                  borderBottom: `1px solid ${dv.divider || 'transparent'}`,
-                                }}
+                                style={{ borderBottom: '1px solid var(--a-div)' }}
                               >
-                                <div className="dv-ex-name" style={{ color: dv.exName || '#fff' }}>
+                                <div className="dv-ex-name" style={{ color: 'var(--a-name)' }}>
                                   {line}
                                 </div>
                                 {ex.note && (
-                                  <div className="dv-ex-note" style={{ color: dv.note || '#888' }}>
+                                  <div className="dv-ex-note" style={{ color: 'var(--a-note)' }}>
                                     {ex.note}
                                   </div>
                                 )}
@@ -348,10 +326,10 @@ export function DailyExportView({
                               <div
                                 className="dv-block-notes"
                                 style={{
-                                  borderTop: `1px solid ${dv.divider || '#1a1a1a'}`,
+                                  borderTop: '1px solid var(--a-div)',
                                   marginTop: '6px',
                                   paddingTop: '6px',
-                                  color: dv.intensity || '#f5c842',
+                                  color: 'var(--a-int)',
                                   fontStyle: 'normal',
                                   fontWeight: 700,
                                 }}
@@ -365,8 +343,8 @@ export function DailyExportView({
                           <div
                             className="dv-block-notes"
                             style={{
-                              color: dv.blockNotes || '#888',
-                              borderTopColor: dv.divider || '#1a1a1a',
+                              color: 'var(--a-note)',
+                              borderTopColor: 'var(--a-div)',
                             }}
                           >
                             {bl.notes}
@@ -385,7 +363,7 @@ export function DailyExportView({
   )
 }
 
-// ── WeeklyExportView ──────────────────────────────────────────────────────────
+// ── WeeklyExportView — on-screen chrome only (never rasterised, see file header) ─────
 export function WeeklyExportView({ sessions, label, year, month, onDayClick }) {
   const weeks = getWeeksOfMonth(year, month)
   const monthName = MONTH_PT[month] + ' ' + year
@@ -464,9 +442,7 @@ export function WeeklyCalendarExportView({
   logoScale,
   fontScale,
   weekDates,
-  wkColors,
 }) {
-  const wk = wkColors || {}
   const ls = logoScale || 1
   const fs = fontScale || 1
   const today = new Date()
@@ -480,7 +456,7 @@ export function WeeklyCalendarExportView({
   return (
     <div
       style={{
-        background: wk.bg || '#000',
+        background: 'var(--a-bg)',
         color: '#fff',
         width: '1920px',
         height: '1080px',
@@ -493,12 +469,12 @@ export function WeeklyCalendarExportView({
     >
       <div
         style={{
-          background: '#0a0a0a',
+          background: 'var(--a-bg)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '16px 40px',
-          borderBottom: '2px solid #1a1a1a',
+          borderBottom: '2px solid var(--a-div)',
           flexShrink: 0,
         }}
       >
@@ -529,7 +505,7 @@ export function WeeklyCalendarExportView({
             style={{
               fontSize: `calc(32px * var(--fs,1))`,
               fontWeight: 900,
-              color: wk.gymName || '#fff',
+              color: 'var(--a-name)',
               textTransform: 'uppercase',
               letterSpacing: '.1em',
             }}
@@ -542,7 +518,7 @@ export function WeeklyCalendarExportView({
             style={{
               fontSize: `calc(32px * var(--fs,1))`,
               fontWeight: 900,
-              color: wk.header || '#e87820',
+              color: 'var(--a-hdr)',
               textTransform: 'uppercase',
               letterSpacing: '.1em',
               lineHeight: 1,
@@ -553,7 +529,7 @@ export function WeeklyCalendarExportView({
           <div
             style={{
               fontSize: `calc(18px * var(--fs,1))`,
-              color: wk.dateNum || '#666',
+              color: 'var(--a-sub)',
               marginTop: '4px',
               letterSpacing: '.06em',
               textTransform: 'uppercase',
@@ -581,7 +557,7 @@ export function WeeklyCalendarExportView({
           display: 'grid',
           gridTemplateColumns: 'repeat(5,1fr)',
           background: '#0d0d0d',
-          borderBottom: '1px solid #1a1a1a',
+          borderBottom: '1px solid var(--a-div)',
           flexShrink: 0,
         }}
       >
@@ -595,7 +571,7 @@ export function WeeklyCalendarExportView({
               key={ci}
               style={{
                 padding: '10px 20px',
-                borderRight: ci < 4 ? `1px solid ${wk.divider || '#1a1a1a'}` : 'none',
+                borderRight: ci < 4 ? '1px solid var(--a-div)' : 'none',
                 display: 'flex',
                 alignItems: 'baseline',
                 gap: '10px',
@@ -605,7 +581,7 @@ export function WeeklyCalendarExportView({
                 style={{
                   fontSize: `calc(16px * var(--fs,1))`,
                   fontWeight: 900,
-                  color: wk.header || '#e87820',
+                  color: 'var(--a-hdr)',
                   textTransform: 'uppercase',
                   letterSpacing: '.1em',
                 }}
@@ -616,7 +592,7 @@ export function WeeklyCalendarExportView({
                 style={{
                   fontSize: `calc(20px * var(--fs,1))`,
                   fontWeight: 900,
-                  color: isToday ? wk.header || '#e87820' : inMonth ? wk.dateNum || '#555' : '#333',
+                  color: isToday ? 'var(--a-hdr)' : inMonth ? 'var(--a-sub)' : '#333',
                 }}
               >
                 {inMonth ? dateNum : ''}
@@ -643,7 +619,7 @@ export function WeeklyCalendarExportView({
             <div
               key={ci}
               style={{
-                borderRight: ci < 4 ? '1px solid #1a1a1a' : 'none',
+                borderRight: ci < 4 ? '1px solid var(--a-div)' : 'none',
                 padding: '14px 20px',
                 background: s && inMonth ? '#060606' : '#000',
                 display: 'flex',
@@ -670,7 +646,7 @@ export function WeeklyCalendarExportView({
                       lineHeight: 1.2,
                       marginBottom: '10px',
                       flexShrink: 0,
-                      borderBottom: '1px solid #1a1a1a',
+                      borderBottom: '1px solid var(--a-div)',
                       paddingBottom: '8px',
                     }}
                   >
@@ -686,15 +662,13 @@ export function WeeklyCalendarExportView({
                     }}
                   >
                     {(s.blocks || []).map(bl => {
-                      const ec = ECOL[bl.type] || ECOL['Força']
-                      const blCol = wk.blockType || ec.text
                       const meta = blkMeta(bl)
                       const exs = bl.exercises?.filter(e => e.name || e.isComplex) || []
                       return (
                         <div
                           key={bl.id}
                           style={{
-                            borderLeft: `2px solid ${blCol}`,
+                            borderLeft: '2px solid var(--a-hdr)',
                             paddingLeft: '8px',
                             flexShrink: 0,
                           }}
@@ -703,7 +677,7 @@ export function WeeklyCalendarExportView({
                             style={{
                               fontSize: `calc(12px * var(--fs,1))`,
                               fontWeight: 900,
-                              color: blCol,
+                              color: 'var(--a-hdr)',
                               textTransform: 'uppercase',
                               letterSpacing: '.07em',
                               lineHeight: 1.2,
@@ -717,7 +691,7 @@ export function WeeklyCalendarExportView({
                                 style={{
                                   fontSize: `calc(13px * var(--fs,1))`,
                                   fontWeight: 900,
-                                  color: wk.exName || '#fff',
+                                  color: 'var(--a-name)',
                                   textTransform: 'uppercase',
                                   letterSpacing: '.04em',
                                   lineHeight: 1.15,
@@ -777,9 +751,7 @@ export function CalendarExportView({
   logoDataUrl,
   logoScale,
   fontScale,
-  wkColors,
 }) {
-  const wk = wkColors || {}
   const weeks = getWeeksOfMonth(year, month)
   const monthName = MONTH_PT[month]
   const today = new Date()
@@ -790,7 +762,7 @@ export function CalendarExportView({
   return (
     <div
       style={{
-        background: wk.bg || '#000',
+        background: 'var(--a-bg)',
         color: '#fff',
         width: '1920px',
         height: '1080px',
@@ -803,12 +775,12 @@ export function CalendarExportView({
     >
       <div
         style={{
-          background: wk.bg || '#0a0a0a',
+          background: 'var(--a-bg)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '16px 40px',
-          borderBottom: `2px solid ${wk.divider || '#1a1a1a'}`,
+          borderBottom: '2px solid var(--a-div)',
           flexShrink: 0,
         }}
       >
@@ -852,7 +824,7 @@ export function CalendarExportView({
             style={{
               fontSize: `calc(36px * var(--fs,1))`,
               fontWeight: 900,
-              color: wk.header || '#e87820',
+              color: 'var(--a-hdr)',
               textTransform: 'uppercase',
               letterSpacing: '.1em',
               lineHeight: 1,
@@ -891,10 +863,10 @@ export function CalendarExportView({
               padding: '10px 16px',
               fontSize: `calc(16px * var(--fs,1))`,
               fontWeight: 900,
-              color: wk.header || '#e87820',
+              color: 'var(--a-hdr)',
               textTransform: 'uppercase',
               letterSpacing: '.1em',
-              borderRight: i < 4 ? `1px solid ${wk.divider || '#1a1a1a'}` : 'none',
+              borderRight: i < 4 ? '1px solid var(--a-div)' : 'none',
             }}
           >
             {d}
@@ -930,7 +902,7 @@ export function CalendarExportView({
                   <div
                     key={di}
                     style={{
-                      borderRight: ci < 4 ? `1px solid ${wk.divider || '#1a1a1a'}` : 'none',
+                      borderRight: ci < 4 ? '1px solid var(--a-div)' : 'none',
                       padding: '10px 14px',
                       background: inMonth ? (s ? '#080808' : '#000') : '#030303',
                       display: 'flex',
@@ -942,11 +914,7 @@ export function CalendarExportView({
                       style={{
                         fontSize: `calc(22px * var(--fs,1))`,
                         fontWeight: 900,
-                        color: isToday
-                          ? wk.header || '#e87820'
-                          : inMonth
-                            ? wk.dateNum || '#666'
-                            : '#222',
+                        color: isToday ? 'var(--a-hdr)' : inMonth ? 'var(--a-sub)' : '#222',
                         marginBottom: '6px',
                         lineHeight: 1,
                         flexShrink: 0,
@@ -968,7 +936,7 @@ export function CalendarExportView({
                           style={{
                             fontSize: `calc(15px * var(--fs,1))`,
                             fontWeight: 900,
-                            color: wk.mainTraining || '#fff',
+                            color: '#fff',
                             textTransform: 'uppercase',
                             letterSpacing: '.04em',
                             lineHeight: 1.2,
@@ -978,7 +946,6 @@ export function CalendarExportView({
                           {s.mainTraining || '—'}
                         </div>
                         {(s.blocks || []).map(bl => {
-                          const ec = ECOL[bl.type] || ECOL['Força']
                           const exNames = bl.exercises
                             ?.filter(e => e.name)
                             .slice(0, 4)
@@ -988,7 +955,7 @@ export function CalendarExportView({
                             <div
                               key={bl.id}
                               style={{
-                                borderLeft: `2px solid ${ec.text}`,
+                                borderLeft: '2px solid var(--a-hdr)',
                                 paddingLeft: '6px',
                                 marginBottom: '3px',
                               }}
@@ -997,7 +964,7 @@ export function CalendarExportView({
                                 style={{
                                   fontSize: `calc(12px * var(--fs,1))`,
                                   fontWeight: 900,
-                                  color: wk.blockType || ec.text,
+                                  color: 'var(--a-hdr)',
                                   textTransform: 'uppercase',
                                   letterSpacing: '.06em',
                                   lineHeight: 1.2,
@@ -1009,7 +976,7 @@ export function CalendarExportView({
                                 <div
                                   style={{
                                     fontSize: `calc(11px * var(--fs,1))`,
-                                    color: wk.exName || '#666',
+                                    color: 'var(--a-sub)',
                                     lineHeight: 1.3,
                                     marginTop: '1px',
                                   }}

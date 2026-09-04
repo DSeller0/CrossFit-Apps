@@ -9,7 +9,9 @@ import {
 } from '../mobileExportViews'
 
 // ── PreviewModal — the "Pré-visualizar" panel: its own week/day tabs, the size sliders,
-// and the scaled true-ratio render. Pure move (#59 C5·b1 step b): no behaviour change.
+// and the scaled true-ratio render. Pure move (#59 C5·b1 step b); step c wired the render
+// to `palette` (exportPalette.js's resolved 8-role hex, #59 C5·b1 step c) instead of the
+// per-view colour props, which the views no longer accept.
 // Dies in step d — the preview becomes the surface instead of a toggled panel.
 export default function PreviewModal({
   open,
@@ -40,12 +42,7 @@ export default function PreviewModal({
   doExport,
   doMobileExport,
   doMobileWeeklyExport,
-  dvColors,
-  wkColors,
-  eaColors,
-  mmColors,
-  eaglesBg,
-  megaManBg,
+  palette,
 }) {
   if (!open) return null
   return (
@@ -446,6 +443,7 @@ export default function PreviewModal({
       >
         <div
           style={{
+            ...palette,
             transform: `scale(${previewTarget === 'mobileA' || previewTarget === 'mobileB' ? previewMobileScale : previewScale})`,
             transformOrigin: 'top left',
             width: previewTarget === 'mobileA' || previewTarget === 'mobileB' ? '1080px' : '1920px',
@@ -464,7 +462,6 @@ export default function PreviewModal({
               logoDataUrl={logoDataUrl}
               logoScale={logoScale}
               weekDates={currentWeekDates}
-              dvColors={dvColors}
             />
           ) : previewTarget === 'semanal' ? (
             <WeeklyCalendarExportView
@@ -477,9 +474,8 @@ export default function PreviewModal({
               logoScale={logoScale}
               fontScale={fontScale}
               weekDates={getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates}
-              wkColors={wkColors}
             />
-          ) : previewTarget === 'mobileWeeklyA' ? (
+          ) : previewTarget === 'mobileWeeklyA' || previewTarget === 'mobileWeeklyB' ? (
             <MobileWeeklyExportView
               sessions={filteredSessions}
               gymName={gymName}
@@ -487,17 +483,6 @@ export default function PreviewModal({
               logoScale={logoScale}
               fontScale={fontScale}
               weekDates={getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates}
-              variant="A"
-            />
-          ) : previewTarget === 'mobileWeeklyB' ? (
-            <MobileWeeklyExportView
-              sessions={filteredSessions}
-              gymName={gymName}
-              logoDataUrl={logoDataUrl}
-              logoScale={logoScale}
-              fontScale={fontScale}
-              weekDates={getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates}
-              variant="B"
             />
           ) : previewTarget === 'mobileA' ? (
             <MobileEaglesExportView
@@ -508,8 +493,6 @@ export default function PreviewModal({
               logoDataUrl={logoDataUrl}
               logoScale={logoScale}
               fontScale={fontScale}
-              bgOverride={eaglesBg}
-              colors={eaColors}
             />
           ) : previewTarget === 'mobileB' ? (
             <MobileMegaManExportView
@@ -520,8 +503,6 @@ export default function PreviewModal({
               logoDataUrl={logoDataUrl}
               logoScale={logoScale}
               fontScale={fontScale}
-              bgOverride={megaManBg}
-              colors={mmColors}
             />
           ) : (
             <CalendarExportView
@@ -533,7 +514,6 @@ export default function PreviewModal({
               logoDataUrl={logoDataUrl}
               logoScale={logoScale}
               fontScale={fontScale}
-              wkColors={wkColors}
             />
           )}
         </div>

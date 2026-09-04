@@ -2,7 +2,8 @@ import PresenterView from '../../../PresenterView'
 import { DailyExportView } from '../exportViews'
 
 // ── PresenterLauncher — the TV-mode overlay, pulled out of Publicador.jsx's render body.
-// Pure move (#59 C5·b1 step b): same props, same DailyExportView instance, no behaviour change.
+// `palette` is exportPalette.js's resolved 8-role hex object (#59 C5·b1 step c) — set as
+// inline custom properties on the wrapper so DailyExportView's `--a-*` reads resolve.
 export default function PresenterLauncher({
   open,
   logUrl,
@@ -17,24 +18,25 @@ export default function PresenterLauncher({
   logoDataUrl,
   logoScale,
   weekDates,
-  dvColors,
+  palette,
 }) {
   if (!open) return null
   return (
     <PresenterView logUrl={logUrl} onClose={onClose}>
-      <DailyExportView
-        sessions={sessions}
-        label={label}
-        gymName={gymName}
-        fontScale={fontScale}
-        zoneScales={zoneScales}
-        blockTitleScales={blockTitleScales}
-        selectedDate={selectedDate}
-        logoDataUrl={logoDataUrl}
-        logoScale={logoScale}
-        weekDates={weekDates}
-        dvColors={dvColors}
-      />
+      <div style={palette}>
+        <DailyExportView
+          sessions={sessions}
+          label={label}
+          gymName={gymName}
+          fontScale={fontScale}
+          zoneScales={zoneScales}
+          blockTitleScales={blockTitleScales}
+          selectedDate={selectedDate}
+          logoDataUrl={logoDataUrl}
+          logoScale={logoScale}
+          weekDates={weekDates}
+        />
+      </div>
     </PresenterView>
   )
 }

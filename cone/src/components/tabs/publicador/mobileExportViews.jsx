@@ -1,4 +1,4 @@
-import { APP_CONFIG, GF } from '../../../utils/config'
+import { GF } from '../../../utils/config'
 import { fmtIntensity, blkMeta } from '../../../public/lib/wod.js'
 import { DAY_PT, MONTH_PT } from '../../../public/lib/week.js'
 import { toISO } from '../../../utils/storage'
@@ -10,34 +10,33 @@ import {
   buildMobileSession,
 } from './exportHelpers'
 
-// ── MobileBlockA ──────────────────────────────────────────────────────────────
-function MobileBlockA({ bl, fs, bg, colors }) {
-  const col = colors || {}
+// Export artefacts — see exportViews.jsx's file header for the `--a-*` contract these
+// share. `MobileWeeklyExportView`'s `variant` prop is GONE (plans/82 constraint): its two
+// call sites ("Eagles"/"MegaMan") differed only by colour, which is now `--a-*` on both,
+// so there is exactly one Semana mobile view.
+
+// ── MobileBlock — shared block renderer for both Dia mobile artefacts ───────────────
+function MobileBlock({ bl, fs }) {
   const f = fs || 1
   const pad = Math.round(20 * f)
   const _lbl = bl.label && bl.label !== '-' ? bl.label : null
   const _typ = bl.type && bl.type !== '-' ? bl.type : null
   const title = _lbl && _typ && _lbl !== _typ ? `${_lbl} · ${_typ}` : _lbl || _typ || ''
   const meta = blkMeta(bl)
-  const blockBg = bg || APP_CONFIG.mobileEaglesBg || '#000'
   return (
-    <div
-      style={{
-        borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}`,
-      }}
-    >
+    <div style={{ borderBottom: '1px solid var(--a-div)' }}>
       <div
         style={{
-          background: col.blockHdr || 'rgba(0,184,212,0.12)',
+          background: 'color-mix(in srgb, var(--a-hdr) 12%, transparent)',
           padding: `${Math.round(10 * f)}px ${pad}px ${Math.round(6 * f)}px`,
-          borderTop: '2px solid #00b8d4',
+          borderTop: '2px solid var(--a-hdr)',
         }}
       >
         <div
           style={{
             fontSize: mfs(18, f),
             fontWeight: 900,
-            color: col.blockType || '#00b8d4',
+            color: 'var(--a-hdr)',
             textTransform: 'uppercase',
             letterSpacing: '.07em',
             fontFamily: GF(),
@@ -50,7 +49,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
           <div
             style={{
               fontSize: mfs(12, f),
-              color: col.blockMeta || '#00b8d4',
+              color: 'var(--a-hdr)',
               fontWeight: 700,
               textTransform: 'uppercase',
               marginTop: mfs(2, f),
@@ -63,7 +62,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
       </div>
       <div
         style={{
-          background: blockBg,
+          background: 'var(--a-bg)',
           padding: `${Math.round(4 * f)}px ${pad}px ${Math.round(14 * f)}px`,
         }}
       >
@@ -77,14 +76,14 @@ function MobileBlockA({ bl, fs, bg, colors }) {
                   key={ex.id}
                   style={{
                     padding: `${Math.round(6 * f)}px 0`,
-                    borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}`,
+                    borderBottom: '1px solid var(--a-div)',
                   }}
                 >
                   <div
                     style={{
                       fontSize: mfs(17, f),
                       fontWeight: 900,
-                      color: col.exName || '#fff',
+                      color: 'var(--a-name)',
                       textTransform: 'uppercase',
                       letterSpacing: '.04em',
                       fontFamily: GF(),
@@ -98,7 +97,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
                       key={mi}
                       style={{
                         fontSize: mfs(13, f),
-                        color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa',
+                        color: 'var(--a-note)',
                         fontFamily: GF(),
                       }}
                     >
@@ -110,7 +109,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
                       key="n"
                       style={{
                         fontSize: mfs(12, f),
-                        color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa',
+                        color: 'var(--a-note)',
                         fontStyle: 'italic',
                         marginTop: mfs(2, f),
                       }}
@@ -131,14 +130,14 @@ function MobileBlockA({ bl, fs, bg, colors }) {
                     key={ex.id}
                     style={{
                       padding: `${Math.round(6 * f)}px 0`,
-                      borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}`,
+                      borderBottom: '1px solid var(--a-div)',
                     }}
                   >
                     <div
                       style={{
                         fontSize: mfs(17, f),
                         fontWeight: 900,
-                        color: col.exName || '#fff',
+                        color: 'var(--a-name)',
                         textTransform: 'uppercase',
                         letterSpacing: '.04em',
                         fontFamily: GF(),
@@ -154,7 +153,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
                   key={ex.id}
                   style={{
                     padding: `${Math.round(6 * f)}px 0`,
-                    borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}`,
+                    borderBottom: '1px solid var(--a-div)',
                   }}
                 >
                   {progLines.map((pl, si) => (
@@ -163,7 +162,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
                         style={{
                           fontSize: mfs(17, f),
                           fontWeight: 900,
-                          color: col.exName || '#fff',
+                          color: 'var(--a-name)',
                           textTransform: 'uppercase',
                           letterSpacing: '.04em',
                           fontFamily: GF(),
@@ -178,9 +177,9 @@ function MobileBlockA({ bl, fs, bg, colors }) {
                             display: 'inline-block',
                             fontSize: mfs(13, f),
                             fontWeight: 700,
-                            color: '#ffd700',
+                            color: 'var(--a-int)',
                             background: 'rgba(0,0,0,0.35)',
-                            border: '1px solid rgba(255,215,0,0.25)',
+                            border: '1px solid color-mix(in srgb, var(--a-int) 25%, transparent)',
                             borderRadius: '3px',
                             padding: `${Math.round(2 * f)}px ${Math.round(8 * f)}px`,
                             marginTop: mfs(3, f),
@@ -196,7 +195,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
                     <div
                       style={{
                         fontSize: mfs(12, f),
-                        color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa',
+                        color: 'var(--a-note)',
                         fontStyle: 'italic',
                         marginTop: mfs(2, f),
                       }}
@@ -213,14 +212,14 @@ function MobileBlockA({ bl, fs, bg, colors }) {
                 key={ex.id}
                 style={{
                   padding: `${Math.round(6 * f)}px 0`,
-                  borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}`,
+                  borderBottom: '1px solid var(--a-div)',
                 }}
               >
                 <div
                   style={{
                     fontSize: mfs(17, f),
                     fontWeight: 900,
-                    color: col.exName || '#fff',
+                    color: 'var(--a-name)',
                     textTransform: 'uppercase',
                     letterSpacing: '.04em',
                     fontFamily: GF(),
@@ -235,9 +234,9 @@ function MobileBlockA({ bl, fs, bg, colors }) {
                       display: 'inline-block',
                       fontSize: mfs(13, f),
                       fontWeight: 700,
-                      color: '#ffd700',
+                      color: 'var(--a-int)',
                       background: 'rgba(0,0,0,0.35)',
-                      border: '1px solid rgba(255,215,0,0.25)',
+                      border: '1px solid color-mix(in srgb, var(--a-int) 25%, transparent)',
                       borderRadius: '3px',
                       padding: `${Math.round(2 * f)}px ${Math.round(8 * f)}px`,
                       marginTop: mfs(3, f),
@@ -251,7 +250,7 @@ function MobileBlockA({ bl, fs, bg, colors }) {
                   <div
                     style={{
                       fontSize: mfs(12, f),
-                      color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa',
+                      color: 'var(--a-note)',
                       fontStyle: 'italic',
                       marginTop: mfs(2, f),
                     }}
@@ -266,11 +265,11 @@ function MobileBlockA({ bl, fs, bg, colors }) {
           <div
             style={{
               fontSize: mfs(12, f),
-              color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa',
+              color: 'var(--a-note)',
               fontStyle: 'italic',
               marginTop: mfs(5, f),
               paddingTop: mfs(5, f),
-              borderTop: '1px solid rgba(0,184,212,0.15)',
+              borderTop: '1px solid var(--a-div)',
             }}
           >
             {bl.notes}
@@ -290,10 +289,7 @@ export function MobileEaglesExportView({
   logoDataUrl,
   logoScale,
   fontScale,
-  bgOverride,
-  colors,
 }) {
-  const col = colors || {}
   const found = buildMobileSession(sessions, selectedDate, currentWeekDates)
   const f = fontScale || 1
   const pad = Math.round(28 * f)
@@ -301,7 +297,7 @@ export function MobileEaglesExportView({
     return (
       <div
         style={{
-          background: '#000',
+          background: 'var(--a-bg)',
           color: '#555',
           padding: '40px',
           textAlign: 'center',
@@ -319,14 +315,13 @@ export function MobileEaglesExportView({
     year: 'numeric',
   })
   const ls = logoScale || 1
-  const bgA = bgOverride || APP_CONFIG.mobileEaglesBg || '#0d0b09'
   return (
-    <div style={{ background: bgA, width: '1080px', fontFamily: GF() }}>
+    <div style={{ background: 'var(--a-bg)', width: '1080px', fontFamily: GF() }}>
       <div
         style={{
-          background: bgA,
+          background: 'var(--a-bg)',
           padding: `${Math.round(22 * f)}px ${pad}px ${Math.round(18 * f)}px`,
-          borderBottom: `2px solid ${col.date || '#4ac8c0'}`,
+          borderBottom: '2px solid var(--a-hdr)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -348,7 +343,7 @@ export function MobileEaglesExportView({
             style={{
               fontSize: mfs(30, f),
               fontWeight: 900,
-              color: col.gymName || '#fff',
+              color: 'var(--a-name)',
               textTransform: 'uppercase',
               letterSpacing: '.08em',
             }}
@@ -360,7 +355,7 @@ export function MobileEaglesExportView({
           <div
             style={{
               fontSize: mfs(18, f),
-              color: col.date || '#4ac8c0',
+              color: 'var(--a-hdr)',
               fontWeight: 900,
               textTransform: 'uppercase',
               letterSpacing: '.1em',
@@ -372,7 +367,7 @@ export function MobileEaglesExportView({
             <div
               style={{
                 fontSize: mfs(13, f),
-                color: col.subtitle || '#3a8a80',
+                color: 'var(--a-sub)',
                 textTransform: 'uppercase',
                 letterSpacing: '.06em',
                 marginTop: mfs(2, f),
@@ -384,15 +379,125 @@ export function MobileEaglesExportView({
         </div>
       </div>
       {(s.blocks || []).map(bl => (
-        <MobileBlockA key={bl.id} bl={bl} fs={f} bg={bgA} colors={col} />
+        <MobileBlock key={bl.id} bl={bl} fs={f} />
       ))}
     </div>
   )
 }
 
-// ── MobileBlockB ──────────────────────────────────────────────────────────────
-function MobileBlockB({ bl, fs, colors }) {
-  const col = colors || {}
+// ── MobileMegaManExportView ───────────────────────────────────────────────────
+// ⚠️ Kept as its own file/component pair, NOT collapsed into MobileEagles — measured
+// structurally different (415 vs 274 raw lines, 6 vs 2 borderBottom, 4 vs 2 borderRadius
+// before this pass; plans/83 T.o.c. decides what to name the two Dia mobile "modelos").
+// Only the colour distinction (the one thing that WAS identical) is gone here.
+export function MobileMegaManExportView({
+  sessions,
+  selectedDate,
+  currentWeekDates,
+  gymName,
+  logoDataUrl,
+  logoScale,
+  fontScale,
+}) {
+  const found = buildMobileSession(sessions, selectedDate, currentWeekDates)
+  const f = fontScale || 1
+  const pad = Math.round(28 * f)
+  if (!found)
+    return (
+      <div
+        style={{
+          background: 'var(--a-bg)',
+          color: 'var(--a-note)',
+          padding: '40px',
+          textAlign: 'center',
+          fontFamily: GF(),
+        }}
+      >
+        —
+      </div>
+    )
+  const { s, date } = found
+  const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' }).toUpperCase()
+  const dateNum = date.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+  const ls = logoScale || 1
+  return (
+    <div style={{ background: 'var(--a-bg)', width: '1080px', fontFamily: GF() }}>
+      <div
+        style={{
+          background: 'var(--a-bg)',
+          padding: `${Math.round(22 * f)}px ${pad}px ${Math.round(18 * f)}px`,
+          borderBottom: `${Math.max(2, Math.round(3 * f))}px solid var(--a-hdr)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: mfs(16, f) }}>
+          {logoDataUrl && (
+            <img
+              src={logoDataUrl}
+              style={{
+                width: `${Math.round(56 * ls)}px`,
+                height: `${Math.round(56 * ls)}px`,
+                objectFit: 'contain',
+                borderRadius: '4px',
+              }}
+            />
+          )}
+          <span
+            style={{
+              fontSize: mfs(30, f),
+              fontWeight: 900,
+              color: 'var(--a-name)',
+              textTransform: 'uppercase',
+              letterSpacing: '.1em',
+            }}
+          >
+            {gymName || 'Cone'}
+          </span>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div
+            style={{
+              fontSize: mfs(18, f),
+              color: 'var(--a-hdr)',
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              letterSpacing: '.1em',
+            }}
+          >
+            {`${weekday} · ${dateNum}`}
+          </div>
+          {s.mainTraining && (
+            <div
+              style={{
+                fontSize: mfs(12, f),
+                color: 'var(--a-sub)',
+                textTransform: 'uppercase',
+                letterSpacing: '.06em',
+                marginTop: mfs(2, f),
+              }}
+            >
+              {s.mainTraining}
+            </div>
+          )}
+        </div>
+      </div>
+      {(s.blocks || []).map(bl => (
+        <MegaManBlock key={bl.id} bl={bl} fs={f} />
+      ))}
+    </div>
+  )
+}
+
+// MegaMan's block treatment differs from MobileBlock's (a solid meta chip beside the
+// title, not a second line) — that IS the structural difference the comment above
+// names, so it keeps its own renderer rather than sharing MobileBlock.
+function MegaManBlock({ bl, fs }) {
   const f = fs || 1
   const pad = Math.round(20 * f)
   const _lbl = bl.label && bl.label !== '-' ? bl.label : null
@@ -400,16 +505,12 @@ function MobileBlockB({ bl, fs, colors }) {
   const title = _lbl && _typ && _lbl !== _typ ? `${_lbl} · ${_typ}` : _lbl || _typ || ''
   const meta = blkMeta(bl)
   return (
-    <div
-      style={{
-        borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}`,
-      }}
-    >
+    <div style={{ borderBottom: '1px solid var(--a-div)' }}>
       <div
         style={{
-          background: col.blockHdr || 'rgba(0,184,212,0.12)',
+          background: 'color-mix(in srgb, var(--a-hdr) 12%, transparent)',
           padding: `${Math.round(10 * f)}px ${pad}px`,
-          borderTop: `${Math.max(2, Math.round(3 * f))}px solid ${col.blockType || '#00b8d4'}`,
+          borderTop: `${Math.max(2, Math.round(3 * f))}px solid var(--a-hdr)`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -419,7 +520,7 @@ function MobileBlockB({ bl, fs, colors }) {
           style={{
             fontSize: mfs(16, f),
             fontWeight: 900,
-            color: col.blockType || '#00b8d4',
+            color: 'var(--a-hdr)',
             textTransform: 'uppercase',
             letterSpacing: '.1em',
             fontFamily: GF(),
@@ -433,8 +534,8 @@ function MobileBlockB({ bl, fs, colors }) {
             style={{
               fontSize: mfs(12, f),
               fontWeight: 900,
-              color: col.blockMetaText || '#000',
-              background: col.blockMetaBg || '#00b8d4',
+              color: 'var(--a-on-accent)',
+              background: 'var(--a-hdr)',
               padding: `${Math.round(3 * f)}px ${Math.round(10 * f)}px`,
               borderRadius: '2px',
               fontFamily: GF(),
@@ -447,7 +548,7 @@ function MobileBlockB({ bl, fs, colors }) {
       </div>
       <div
         style={{
-          background: APP_CONFIG.mobileMegaManBg || '#000',
+          background: 'var(--a-bg)',
           padding: `${Math.round(8 * f)}px ${pad}px ${Math.round(14 * f)}px`,
         }}
       >
@@ -461,14 +562,14 @@ function MobileBlockB({ bl, fs, colors }) {
                   key={ex.id}
                   style={{
                     padding: `${Math.round(6 * f)}px 0`,
-                    borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}`,
+                    borderBottom: '1px solid var(--a-div)',
                   }}
                 >
                   <div
                     style={{
                       fontSize: mfs(17, f),
                       fontWeight: 900,
-                      color: col.exName || '#fff',
+                      color: 'var(--a-name)',
                       textTransform: 'uppercase',
                       letterSpacing: '.05em',
                       fontFamily: GF(),
@@ -482,7 +583,7 @@ function MobileBlockB({ bl, fs, colors }) {
                       key={mi}
                       style={{
                         fontSize: mfs(13, f),
-                        color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa',
+                        color: 'var(--a-note)',
                         fontFamily: GF(),
                       }}
                     >
@@ -494,7 +595,7 @@ function MobileBlockB({ bl, fs, colors }) {
                       key="n"
                       style={{
                         fontSize: mfs(11, f),
-                        color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa',
+                        color: 'var(--a-note)',
                         fontStyle: 'italic',
                         marginTop: mfs(2, f),
                       }}
@@ -515,14 +616,14 @@ function MobileBlockB({ bl, fs, colors }) {
                     key={ex.id}
                     style={{
                       padding: `${Math.round(6 * f)}px 0`,
-                      borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}`,
+                      borderBottom: '1px solid var(--a-div)',
                     }}
                   >
                     <div
                       style={{
                         fontSize: mfs(17, f),
                         fontWeight: 900,
-                        color: col.exName || '#fff',
+                        color: 'var(--a-name)',
                         textTransform: 'uppercase',
                         letterSpacing: '.05em',
                         fontFamily: GF(),
@@ -538,7 +639,7 @@ function MobileBlockB({ bl, fs, colors }) {
                   key={ex.id}
                   style={{
                     padding: `${Math.round(6 * f)}px 0`,
-                    borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}`,
+                    borderBottom: '1px solid var(--a-div)',
                   }}
                 >
                   {progLines.map((pl, si) => (
@@ -547,7 +648,7 @@ function MobileBlockB({ bl, fs, colors }) {
                         style={{
                           fontSize: mfs(17, f),
                           fontWeight: 900,
-                          color: col.exName || '#fff',
+                          color: 'var(--a-name)',
                           textTransform: 'uppercase',
                           letterSpacing: '.05em',
                           fontFamily: GF(),
@@ -562,9 +663,9 @@ function MobileBlockB({ bl, fs, colors }) {
                             display: 'inline-block',
                             fontSize: mfs(13, f),
                             fontWeight: 700,
-                            color: '#ffd700',
+                            color: 'var(--a-int)',
                             background: 'rgba(0,0,0,0.35)',
-                            border: '1px solid rgba(255,215,0,0.25)',
+                            border: '1px solid color-mix(in srgb, var(--a-int) 25%, transparent)',
                             borderRadius: '3px',
                             padding: `${Math.round(2 * f)}px ${Math.round(8 * f)}px`,
                             marginTop: mfs(3, f),
@@ -580,7 +681,7 @@ function MobileBlockB({ bl, fs, colors }) {
                     <div
                       style={{
                         fontSize: mfs(11, f),
-                        color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa',
+                        color: 'var(--a-note)',
                         fontStyle: 'italic',
                         marginTop: mfs(2, f),
                       }}
@@ -597,14 +698,14 @@ function MobileBlockB({ bl, fs, colors }) {
                 key={ex.id}
                 style={{
                   padding: `${Math.round(6 * f)}px 0`,
-                  borderBottom: `1px solid ${col.divider || 'rgba(0,184,212,0.1)'}`,
+                  borderBottom: '1px solid var(--a-div)',
                 }}
               >
                 <div
                   style={{
                     fontSize: mfs(17, f),
                     fontWeight: 900,
-                    color: col.exName || '#fff',
+                    color: 'var(--a-name)',
                     textTransform: 'uppercase',
                     letterSpacing: '.05em',
                     fontFamily: GF(),
@@ -619,9 +720,9 @@ function MobileBlockB({ bl, fs, colors }) {
                       display: 'inline-block',
                       fontSize: mfs(13, f),
                       fontWeight: 700,
-                      color: '#ffd700',
+                      color: 'var(--a-int)',
                       background: 'rgba(0,0,0,0.35)',
-                      border: '1px solid rgba(255,215,0,0.25)',
+                      border: '1px solid color-mix(in srgb, var(--a-int) 25%, transparent)',
                       borderRadius: '3px',
                       padding: `${Math.round(2 * f)}px ${Math.round(8 * f)}px`,
                       marginTop: mfs(3, f),
@@ -635,7 +736,7 @@ function MobileBlockB({ bl, fs, colors }) {
                   <div
                     style={{
                       fontSize: mfs(11, f),
-                      color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa',
+                      color: 'var(--a-note)',
                       fontStyle: 'italic',
                       marginTop: mfs(2, f),
                     }}
@@ -650,10 +751,10 @@ function MobileBlockB({ bl, fs, colors }) {
           <div
             style={{
               fontSize: mfs(12, f),
-              color: APP_CONFIG.mobileExerciseNoteColor || '#4a9aaa',
+              color: 'var(--a-note)',
               marginTop: mfs(5, f),
               paddingTop: mfs(5, f),
-              borderTop: '1px solid rgba(0,184,212,0.15)',
+              borderTop: '1px solid var(--a-div)',
               fontFamily: GF(),
             }}
           >
@@ -665,117 +766,8 @@ function MobileBlockB({ bl, fs, colors }) {
   )
 }
 
-// ── MobileMegaManExportView ───────────────────────────────────────────────────
-export function MobileMegaManExportView({
-  sessions,
-  selectedDate,
-  currentWeekDates,
-  gymName,
-  logoDataUrl,
-  logoScale,
-  fontScale,
-  bgOverride,
-  colors,
-}) {
-  const col = colors || {}
-  const found = buildMobileSession(sessions, selectedDate, currentWeekDates)
-  const f = fontScale || 1
-  const pad = Math.round(28 * f)
-  if (!found)
-    return (
-      <div
-        style={{
-          background: '#000',
-          color: '#1a4a50',
-          padding: '40px',
-          textAlign: 'center',
-          fontFamily: GF(),
-        }}
-      >
-        —
-      </div>
-    )
-  const { s, date } = found
-  const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' }).toUpperCase()
-  const dateNum = date.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
-  const ls = logoScale || 1
-  const bg = bgOverride || APP_CONFIG.mobileMegaManBg || '#0a1a5c'
-  return (
-    <div style={{ background: bg, width: '1080px', fontFamily: GF() }}>
-      <div
-        style={{
-          background: bg,
-          padding: `${Math.round(22 * f)}px ${pad}px ${Math.round(18 * f)}px`,
-          borderBottom: `${Math.max(2, Math.round(3 * f))}px solid rgba(0,184,212,0.8)`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: mfs(16, f) }}>
-          {logoDataUrl && (
-            <img
-              src={logoDataUrl}
-              style={{
-                width: `${Math.round(56 * ls)}px`,
-                height: `${Math.round(56 * ls)}px`,
-                objectFit: 'contain',
-                borderRadius: '4px',
-              }}
-            />
-          )}
-          <span
-            style={{
-              fontSize: mfs(30, f),
-              fontWeight: 900,
-              color: col.gymName || '#fff',
-              textTransform: 'uppercase',
-              letterSpacing: '.1em',
-            }}
-          >
-            {gymName || 'Cone'}
-          </span>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div
-            style={{
-              fontSize: mfs(18, f),
-              color: col.date || '#00b8d4',
-              fontWeight: 900,
-              textTransform: 'uppercase',
-              letterSpacing: '.1em',
-            }}
-          >
-            {`${weekday} · ${dateNum}`}
-          </div>
-          {s.mainTraining && (
-            <div
-              style={{
-                fontSize: mfs(12, f),
-                color: col.subtitle || '#3a6a80',
-                textTransform: 'uppercase',
-                letterSpacing: '.06em',
-                marginTop: mfs(2, f),
-              }}
-            >
-              {s.mainTraining}
-            </div>
-          )}
-        </div>
-      </div>
-      {(s.blocks || []).map(bl => (
-        <MobileBlockB key={bl.id} bl={bl} fs={f} colors={col} />
-      ))}
-    </div>
-  )
-}
-
 // ── MobileWeeklySingleDay ─────────────────────────────────────────────────────
-function MobileWeeklySingleDay({ date, sessions, f, variant }) {
+function MobileWeeklySingleDay({ date, sessions, f }) {
   const dateKey = toISO(date)
   const s = (sessions[dateKey] || [])[0] || null
   const dow = DAY_PT[date.getDay()]
@@ -783,20 +775,16 @@ function MobileWeeklySingleDay({ date, sessions, f, variant }) {
     day: '2-digit',
     month: '2-digit',
   })
-  const restLabel = APP_CONFIG.restDayLabel || 'Descanso'
+  const restLabel = 'Descanso'
   const pad = Math.round(18 * f)
-  const isA = variant === 'A'
-  const cyan = '#00b8d4'
-  const hdrAccent = isA ? '#4ac8c0' : cyan
   const fontFamily = GF()
-  const bg = isA ? APP_CONFIG.mobileEaglesBg || '#000' : APP_CONFIG.mobileMegaManBg || '#000'
   return (
     <div>
       <div
         style={{
-          background: isA ? '#161412' : '#050e14',
+          background: 'var(--a-bg)',
           padding: `${Math.round(8 * f)}px ${pad}px`,
-          borderTop: `${Math.max(2, Math.round(3 * f))}px solid ${hdrAccent}`,
+          borderTop: `${Math.max(2, Math.round(3 * f))}px solid var(--a-hdr)`,
           display: 'flex',
           alignItems: 'baseline',
           justifyContent: 'space-between',
@@ -806,7 +794,7 @@ function MobileWeeklySingleDay({ date, sessions, f, variant }) {
           style={{
             fontSize: mfs(15, f),
             fontWeight: 900,
-            color: hdrAccent,
+            color: 'var(--a-hdr)',
             textTransform: 'uppercase',
             letterSpacing: '.1em',
             fontFamily,
@@ -818,7 +806,7 @@ function MobileWeeklySingleDay({ date, sessions, f, variant }) {
           style={{
             fontSize: mfs(12, f),
             fontWeight: 700,
-            color: isA ? '#3a8a80' : '#3a6a80',
+            color: 'var(--a-sub)',
             fontFamily,
           }}
         >
@@ -826,22 +814,18 @@ function MobileWeeklySingleDay({ date, sessions, f, variant }) {
         </span>
       </div>
       {s ? (
-        <div style={{ background: bg }}>
+        <div style={{ background: 'var(--a-bg)' }}>
           {(s.blocks || []).map(bl => {
             const _lbl = bl.label && bl.label !== '-' ? bl.label : null
             const _typ = bl.type && bl.type !== '-' ? bl.type : null
             const title = _lbl && _typ && _lbl !== _typ ? `${_lbl} · ${_typ}` : _lbl || _typ || ''
             const meta = blkMeta(bl)
             const exNames = (bl.exercises || []).filter(e => e.name || e.isComplex)
-            const blkBg = isA ? 'rgba(74,200,192,0.12)' : 'rgba(0,184,212,0.12)'
-            const blkDiv = isA
-              ? 'rgba(74,200,192,0.08) 1px solid'
-              : 'rgba(0,184,212,0.08) 1px solid'
             return (
               <div key={bl.id}>
                 <div
                   style={{
-                    background: blkBg,
+                    background: 'color-mix(in srgb, var(--a-hdr) 12%, transparent)',
                     padding: `${Math.round(6 * f)}px ${pad}px`,
                     display: 'flex',
                     alignItems: 'center',
@@ -852,7 +836,7 @@ function MobileWeeklySingleDay({ date, sessions, f, variant }) {
                     style={{
                       fontSize: mfs(13, f),
                       fontWeight: 900,
-                      color: hdrAccent,
+                      color: 'var(--a-hdr)',
                       textTransform: 'uppercase',
                       letterSpacing: '.08em',
                       fontFamily,
@@ -865,8 +849,8 @@ function MobileWeeklySingleDay({ date, sessions, f, variant }) {
                       style={{
                         fontSize: mfs(11, f),
                         fontWeight: 900,
-                        color: '#000',
-                        background: hdrAccent,
+                        color: 'var(--a-on-accent)',
+                        background: 'var(--a-hdr)',
                         padding: `${Math.round(2 * f)}px ${Math.round(7 * f)}px`,
                         borderRadius: '2px',
                         fontFamily,
@@ -883,7 +867,7 @@ function MobileWeeklySingleDay({ date, sessions, f, variant }) {
                       key={ex.id}
                       style={{
                         padding: `${Math.round(5 * f)}px ${pad}px`,
-                        borderBottom: blkDiv,
+                        borderBottom: '1px solid var(--a-div)',
                         fontSize: mfs(14, f),
                         fontWeight: 900,
                         color: '#fff',
@@ -904,7 +888,7 @@ function MobileWeeklySingleDay({ date, sessions, f, variant }) {
       ) : (
         <div
           style={{
-            background: bg,
+            background: 'var(--a-bg)',
             padding: `${Math.round(10 * f)}px ${pad}px`,
             fontSize: mfs(12, f),
             color: '#333',
@@ -928,15 +912,10 @@ export function MobileWeeklyExportView({
   logoScale,
   fontScale,
   weekDates,
-  variant,
 }) {
   const f = fontScale || 1
   const ls = logoScale || 1
   const pad = Math.round(22 * f)
-  const isA = variant === 'A'
-  const cyan = '#00b8d4'
-  const accent = isA ? '#4ac8c0' : cyan
-  const bg = isA ? APP_CONFIG.mobileEaglesBg || '#0d0b09' : APP_CONFIG.mobileMegaManBg || '#000'
   const fontFamily = GF()
   const orderedDays = [1, 2, 3, 4, 5, 6, 0].map(i => weekDates[i])
   const mon = weekDates[1]
@@ -944,12 +923,12 @@ export function MobileWeeklyExportView({
   const weekLabel = `${mon.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} – ${sun.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}`
   const midDate = weekDates[3]
   return (
-    <div style={{ background: bg, width: '1080px', fontFamily }}>
+    <div style={{ background: 'var(--a-bg)', width: '1080px', fontFamily }}>
       <div
         style={{
-          background: bg,
+          background: 'var(--a-bg)',
           padding: `${Math.round(22 * f)}px ${pad}px ${Math.round(16 * f)}px`,
-          borderBottom: `${Math.max(2, Math.round(3 * f))}px solid ${accent}`,
+          borderBottom: `${Math.max(2, Math.round(3 * f))}px solid var(--a-hdr)`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -985,7 +964,7 @@ export function MobileWeeklyExportView({
             style={{
               fontSize: mfs(16, f),
               fontWeight: 900,
-              color: accent,
+              color: 'var(--a-hdr)',
               textTransform: 'uppercase',
               letterSpacing: '.1em',
               fontFamily,
@@ -996,7 +975,7 @@ export function MobileWeeklyExportView({
           <div
             style={{
               fontSize: mfs(12, f),
-              color: isA ? '#3a8a80' : '#3a6a80',
+              color: 'var(--a-sub)',
               marginTop: mfs(2, f),
               textTransform: 'uppercase',
               letterSpacing: '.06em',
@@ -1008,14 +987,7 @@ export function MobileWeeklyExportView({
         </div>
       </div>
       {orderedDays.map((date, i) => (
-        <MobileWeeklySingleDay
-          key={i}
-          date={date}
-          sessions={sessions}
-          f={f}
-          col={{}}
-          variant={variant}
-        />
+        <MobileWeeklySingleDay key={i} date={date} sessions={sessions} f={f} />
       ))}
     </div>
   )
