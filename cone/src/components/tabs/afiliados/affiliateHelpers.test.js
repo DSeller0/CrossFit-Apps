@@ -9,6 +9,7 @@ import {
   monthBounds,
   eventsForAffiliate,
   resolveEventLoc,
+  appendRateVersion,
 } from './affiliateHelpers.js'
 
 // affiliateHelpers imports only public/lib/week.js (also client-free), so no
@@ -36,6 +37,91 @@ describe('rateLabel', () => {
     expect(rateLabel({ rate: 0 })).toBe('Sem taxa configurada')
     expect(rateLabel({})).toBe('Sem taxa configurada')
     expect(rateLabel(undefined)).toBe('Sem taxa configurada')
+  })
+  it('with an isoDate (#154), reads the version in effect on that date', () => {
+    const loc = {
+      rate: 60,
+      rateUnit: 'per_session',
+      currency: 'R$',
+      rateHistory: [
+        { rate: 40, rateUnit: 'per_session', currency: 'R$', from: '1970-01-01' },
+        { rate: 60, rateUnit: 'per_session', currency: 'R$', from: '2026-08-01' },
+      ],
+    }
+    expect(rateLabel(loc, '2026-01-01')).toBe('R$ 40/sessão')
+    expect(rateLabel(loc, '2026-09-01')).toBe('R$ 60/sessão')
+  })
+  it('with no isoDate, ignores history and reads the current head', () => {
+    const loc = {
+      rate: 60,
+      rateUnit: 'per_session',
+      currency: 'R$',
+      rateHistory: [{ rate: 40, rateUnit: 'per_session', currency: 'R$', from: '1970-01-01' }],
+    }
+    expect(rateLabel(loc)).toBe('R$ 60/sessão')
+  })
+})
+
+describe('appendRateVersion', () => {
+  const loc = { rate: 40, rateUnit: 'per_session', currency: 'R$' }
+
+  it('returns undefined history unchanged when the rate did not change', () => {
+    expect(
+      appendRateVersion(loc, { rate: 40, rateUnit: 'per_session', currency: 'R$' }, '2026-08-06'),
+    ).toBe(undefined)
+  })
+
+  it('backfills the OLD rate at the epoch on the first versioned edit', () => {
+    const hist = appendRateVersion(
+      loc,
+      { rate: 50, rateUnit: 'per_session', currency: 'R$' },
+      '2026-08-06',
+    )
+    expect(hist).toEqual([
+      { rate: 40, rateUnit: 'per_session', currency: 'R$', from: '1970-01-01' },
+      { rate: 50, rateUnit: 'per_session', currency: 'R$', from: '2026-08-06' },
+    ])
+  })
+
+  it('appends without re-backfilling once history already exists', () => {
+    const withHist = { ...loc, rateHistory: [{ ...loc, from: '1970-01-01' }] }
+    const hist = appendRateVersion(
+      withHist,
+      { rate: 70, rateUnit: 'per_session', currency: 'R$' },
+      '2026-09-01',
+    )
+    expect(hist).toEqual([
+      { rate: 40, rateUnit: 'per_session', currency: 'R$', from: '1970-01-01' },
+      { rate: 70, rateUnit: 'per_session', currency: 'R$', from: '2026-09-01' },
+    ])
+  })
+
+  it('does not append when only rateUnit/currency changed to the same values', () => {
+    expect(
+      appendRateVersion(loc, { rate: 40, rateUnit: 'per_session', currency: 'R$' }, '2026-08-06'),
+    ).toBe(undefined)
+  })
+
+  it('appends on a rateUnit-only change even when the number stayed the same', () => {
+    const hist = appendRateVersion(
+      loc,
+      { rate: 40, rateUnit: 'per_hour', currency: 'R$' },
+      '2026-08-06',
+    )
+    expect(hist).toHaveLength(2)
+    expect(hist[1]).toEqual({ rate: 40, rateUnit: 'per_hour', currency: 'R$', from: '2026-08-06' })
+  })
+
+  it('treats a location that never had a rate as rate 0 for comparison', () => {
+    const hist = appendRateVersion(
+      {},
+      { rate: 30, rateUnit: 'per_session', currency: 'R$' },
+      '2026-08-06',
+    )
+    expect(hist).toEqual([
+      { rate: 0, rateUnit: 'per_session', currency: 'R$', from: '1970-01-01' },
+      { rate: 30, rateUnit: 'per_session', currency: 'R$', from: '2026-08-06' },
+    ])
   })
 })
 

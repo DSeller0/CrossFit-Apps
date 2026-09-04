@@ -10,15 +10,59 @@
 // sum them.
 
 import { MONTH_PT } from '../../../public/lib/week.js'
+import { rateAsOf } from '../publicador/billing.js'
 
 /** 'box' | 'personal' → the label the coach reads. */
 export const typeLabel = type => (type === 'box' ? 'Aula / Box' : 'Personal')
 
-/** The compact per-row label: "R$ 40/hora", or a stated absence. */
-export function rateLabel(loc) {
-  if (!loc?.rate) return 'Sem taxa configurada'
-  const per = loc.rateUnit === 'per_hour' ? 'hora' : 'sessão'
-  return `${loc.currency || 'R$'} ${loc.rate}/${per}`
+/**
+ * The compact per-row label: "R$ 40/hora", or a stated absence. With `isoDate`
+ * (#154), reads the version that was in effect on that date instead of the
+ * current one — `startEdit`/the affiliate rows still call this with no date,
+ * which is the current/head rate, unchanged from before rate history existed.
+ */
+export function rateLabel(loc, isoDate) {
+  const src = isoDate ? (rateAsOf(loc, isoDate) ?? loc) : loc
+  if (!src?.rate) return 'Sem taxa configurada'
+  const per = src.rateUnit === 'per_hour' ? 'hora' : 'sessão'
+  return `${src.currency || 'R$'} ${src.rate}/${per}`
+}
+
+// #154 — an ISO date old enough to predate any real rate history, used to
+// backfill a location's PRE-versioning rate as its first entry (see
+// `appendRateVersion`).
+const RATE_HISTORY_EPOCH = '1970-01-01'
+
+/**
+ * The `rateHistory` array `saveLoc` should persist after an edit — appends a
+ * version dated `today` ONLY when rate/rateUnit/currency actually changed
+ * (renaming a location or recolouring it shouldn't mint a version). The FIRST
+ * versioned edit on a location with no prior history backfills the OLD values
+ * as one entry dated `RATE_HISTORY_EPOCH` — without that backfill, an event
+ * dated before today has no version covering it and `calcTotal`'s `?? loc`
+ * fallback would read the location's brand-new rate: the exact
+ * retroactive-repricing bug #154 exists to close, on the very first edit.
+ * Returns `loc.rateHistory` unchanged (possibly `undefined`) when nothing
+ * about the rate changed.
+ */
+export function appendRateVersion(loc, next, today) {
+  const changed =
+    next.rate !== (loc.rate || 0) ||
+    next.rateUnit !== loc.rateUnit ||
+    next.currency !== loc.currency
+  if (!changed) return loc.rateHistory
+  const prior =
+    loc.rateHistory && loc.rateHistory.length
+      ? loc.rateHistory
+      : [
+          {
+            rate: loc.rate || 0,
+            rateUnit: loc.rateUnit || 'per_session',
+            currency: loc.currency || 'R$',
+            from: RATE_HISTORY_EPOCH,
+          },
+        ]
+  return [...prior, { ...next, from: today }]
 }
 
 /** Reais (a float, as stored on the location) → integer centavos. */

@@ -11,6 +11,7 @@ import {
   uid,
 } from '../../../utils/storage'
 import { useIsMobile } from '../../../hooks/useIsMobile'
+import { todayISO } from '../../../public/lib/week.js'
 import ConfirmReview from '../../../public/shared/ConfirmReview'
 import AffiliateRail from './AffiliateRail.jsx'
 import AffiliatesPane from './AffiliatesPane.jsx'
@@ -19,7 +20,7 @@ import FechamentoPane from './FechamentoPane.jsx'
 import MinhaSemanaPane from './MinhaSemanaPane.jsx'
 import AffiliateFormModal from './AffiliateFormModal.jsx'
 import BoxQrModal from './BoxQrModal.jsx'
-import { boxLink, monthBounds } from './affiliateHelpers.js'
+import { boxLink, monthBounds, appendRateVersion } from './affiliateHelpers.js'
 import { stampFor, advance, setStamp } from './billingState.js'
 import s from './Afiliados.module.css'
 
@@ -154,11 +155,41 @@ export default function AfiliadosTab({ events = {} }) {
 
   // Locations persist from each mutator directly (not a `useEffect` on `locs`) so
   // that merely opening the tab performs zero writes (#109).
+  //
+  // #154 — an edit APPENDS a rate version instead of overwriting `rate` in
+  // place; `rate`/`rateUnit`/`currency` still get overwritten too (they're the
+  // head every non-versioned reader — rows, DirectionPair, a brand-new
+  // location's own history — expects), `appendRateVersion` just also decides
+  // whether that overwrite needs a new history entry.
   const saveLoc = () => {
     if (!form.name.trim()) return
+    const rate = Number(form.rate) || 0
+    const today = todayISO()
     const next = editId
-      ? locs.map(l => (l.id === editId ? { ...l, ...form, rate: Number(form.rate) || 0 } : l))
-      : [...locs, { ...form, id: uid(), rate: Number(form.rate) || 0, athleteIds: [] }]
+      ? locs.map(l =>
+          l.id === editId
+            ? {
+                ...l,
+                ...form,
+                rate,
+                rateHistory: appendRateVersion(
+                  l,
+                  { rate, rateUnit: form.rateUnit, currency: form.currency },
+                  today,
+                ),
+              }
+            : l,
+        )
+      : [
+          ...locs,
+          {
+            ...form,
+            id: uid(),
+            rate,
+            rateHistory: [{ rate, rateUnit: form.rateUnit, currency: form.currency, from: today }],
+            athleteIds: [],
+          },
+        ]
     setLocs(next)
     saveLocations(next)
     setFormOpen(false)
