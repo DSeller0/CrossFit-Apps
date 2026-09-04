@@ -591,9 +591,21 @@ Three consequences:
 
 ### C5·b — Publicador · Lane B · Opus (design) → Sonnet (build)
 
+> ✅ **Design done 2026-09-04 — and C5·b SPLIT IN TWO.** The gate produced mockup
+> `63-publicador-c5.html` (structure) and the user's interactive draft `64-publicador-WIP.html`
+> (the approved target), then a colour-model redirection that made one pass into two:
+> **[plans/82](./82-c5b1-publicador-shell-e-cores.md)** — the shell + the colour model, and
+> **[plans/83](./83-c5b2-publicador-renderer.md)** — the export renderer (Layout · Blocos · Títulos ·
+> fit). The steps below are superseded by those two files; they are kept as the record of what was
+> planned before the gate. **Both gate questions are answered:** #113 → Apresentar keeps a QR pointing
+> at `schedule.html` (`log.html` stays unbuilt — it reads *and writes* the legacy `results` blob, whose
+> anon read policy and INSERT/UPDATE/DELETE grants were both revoked by `0009`); #170 → **no**.
+> ⚠️ **Decision 4 below is superseded** — see plans/82 § "Two live bugs" and its measurement 1.
+
 1. **Open with the usage question** (the lane call's last paragraph). The answer sets this session's
    size: "most of them" → a restyle; "one or two" → a deletion pass with a redesign around the
-   survivors.
+   survivors. ✅ **Answered: none of the seven had been sent in months — but "keep and enhance", not
+   delete.** So neither branch applied; the form changed and no capability was removed.
 2. **ASCII sketch + mockup** in `63-publicador-c5.html`, answering the brief's Publicador block and
    carrying **two explicit gate questions** — #170 (a Leaderboard image export?) and #113 (Apresentar
    with a working share target, or without the share affordance?).

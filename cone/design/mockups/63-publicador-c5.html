@@ -1,0 +1,998 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone — Publicador 63 · C5·b (#59) Lane-B — formato × skin, e o preview é a superfície</title>
+<style>
+  :root{
+    --bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
+    --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
+    --red:#fa3c3c;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+    --font:'Cinzel',Georgia,serif;--font-mono:ui-monospace,'SF Mono',Consolas,monospace;
+    --divider:#2a231c;--border:#4a3e30;--accent:#4ac8c0;--accent-text:#000;
+    --text:#f0e8d0;--err:#fa3c3c;
+    --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--radius-sm:4px;--radius-md:6px;
+    /* PALETA DE ARTEFATO — ISENTA do #15, e a isenção é o assunto desta tela.
+       Um PNG que vai para o WhatsApp não pode mudar de cor quando o usuário troca de
+       tema. Estes valores são os defaults reais de settings.value.colors (dv/wk/ea/mm)
+       e aparecem aqui literais DE PROPÓSITO, do mesmo jeito que SCALE_COL e blkColor.
+       Tudo que estiver FORA da moldura do preview é token. */
+    --ex-bg:#0d0b09;--ex-hdr:#4ac8c0;--ex-name:#c8b090;--ex-int:#d8a840;
+    --ex-note:#554a3a;--ex-div:#2a2318;--ex-mm-bg:#0a1a5c;--ex-sub:#887060;
+  }
+  html.theme-totk-light{
+    --bg:#ede8dc;--stone:#f5f1e8;--stone2:#e8e2d4;--div:#d4cab8;
+    --gold:#9a6c14;--gold2:#7a5008;--teal:#1c6860;--green:#1a6830;--red:#b83020;
+    --cream:#1c1508;--sub:#503828;--muted:#7a6448;--dim:#a89070;
+    --font:'Cinzel',Georgia,serif;--divider:#d4cab8;--border:#b4a490;
+    --accent:#1c6860;--accent-text:#fff;--text:#1c1508;--err:#b83020;
+  }
+  html.theme-spirit-blossom{
+    --bg:#09070f;--stone:#100d1c;--stone2:#17122a;--div:#221638;
+    --gold:#e05490;--gold2:#b83872;--teal:#38c4d0;--green:#50d890;--red:#f03060;
+    --cream:#ede4f8;--sub:#c4a0d0;--muted:#7d5090;--dim:#4a2d60;
+    --font:'Amarante',Georgia,serif;--divider:#221638;--border:#4a3060;
+    --accent:#38c4d0;--accent-text:#09070f;--text:#ede4f8;--err:#f03060;
+  }
+  html.theme-spirit-blossom-light{
+    --bg:#f4eefb;--stone:#ffffff;--stone2:#f0e8f8;--div:#e2d4f0;
+    --gold:#c83070;--gold2:#a02258;--teal:#0f727e;--green:#28a064;--red:#c02040;
+    --cream:#1a0828;--sub:#4a2460;--muted:#7840a0;--dim:#9070b0;
+    --font:'Amarante',Georgia,serif;--divider:#e2d4f0;--border:#c4a8d8;
+    --accent:#0f727e;--accent-text:#fff;--text:#1a0828;--err:#c02040;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 22px 70px;background:var(--bg);color:var(--text);font-family:var(--font)}
+  h1{font-size:16px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 4px}
+  h1 b{color:var(--gold)}
+  h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+    margin:38px 0 4px;padding-bottom:6px;border-bottom:1px solid var(--divider);max-width:1180px}
+  p.note{font-size:12.5px;color:var(--muted);margin:0 0 16px;font-family:Georgia,serif;
+    max-width:1010px;line-height:1.65}
+  p.note b{color:var(--sub)}
+  p.note code,td code,.omap code{font-family:var(--font-mono);color:var(--sub);font-size:11.5px}
+  p.note .warn{color:var(--err);font-weight:700}
+  p.note .ok{color:var(--accent);font-weight:700}
+  .themebar{display:flex;gap:6px;margin:0 0 22px;flex-wrap:wrap}
+  .themebar button{font-family:var(--font);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 12px;background:var(--stone);color:var(--sub);border:1px solid var(--divider);cursor:pointer}
+  .themebar button:hover{color:var(--cream);border-color:var(--dim)}
+  .cap{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    margin:16px 0 7px;font-weight:700}
+  .cap i{font-style:normal;color:var(--dim);letter-spacing:.04em;text-transform:none;font-weight:400}
+
+  /* tabelas de mapeamento */
+  .omap{display:grid;gap:1px;background:var(--divider);border:1px solid var(--divider);
+    max-width:1180px;margin-bottom:10px;font-size:11.5px}
+  .omap.m5{grid-template-columns:148px 122px 128px 132px 1fr}
+  .omap.m4{grid-template-columns:150px 178px 130px 1fr}
+  .omap>div{background:var(--stone);padding:8px 11px;letter-spacing:.03em;color:var(--sub)}
+  .omap>div.h{background:var(--stone2);color:var(--muted);font-size:9.5px;text-transform:uppercase;
+    letter-spacing:.11em;font-weight:700}
+  .omap .who{color:var(--cream);font-weight:700}
+  .omap .hot{color:var(--accent);font-weight:700}
+  .omap .no{color:var(--dim)}
+  .omap .bad{color:var(--err);font-weight:700}
+  .omap .q{font-family:Georgia,serif;font-style:italic;font-size:11px}
+
+  /* moldura do app */
+  .frame{border:1px solid var(--border);background:var(--bg);max-width:1280px;overflow:hidden}
+  .phone{border:1px solid var(--border);background:var(--bg);width:390px;overflow:hidden}
+  .chrome{display:flex;align-items:center;gap:8px;height:49px;padding:0 12px;
+    background:var(--stone);border-bottom:1px solid var(--divider);font-size:11px;color:var(--muted)}
+  .chrome .brand{color:var(--gold);font-weight:700;letter-spacing:.14em;font-size:11px}
+  .chrome .tab{padding:4px 7px;color:var(--muted);letter-spacing:.04em}
+  .chrome .tab.on{color:var(--accent);border-bottom:2px solid var(--accent)}
+  .chrome .sp{margin-left:auto;font-size:10px;color:var(--dim)}
+
+  .hdr{display:flex;align-items:flex-end;gap:14px;padding:13px 16px 11px;
+    border-bottom:1px solid var(--divider)}
+  .hdr h3{margin:0;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream)}
+  .hdr .sub{font-size:11px;color:var(--muted);font-family:Georgia,serif;font-style:italic}
+  .hdr .acts{margin-left:auto;display:flex;gap:7px}
+
+  /* ui/Button */
+  .btn{font-family:var(--font);font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+    padding:7px 13px;border:1px solid var(--border);background:transparent;color:var(--sub);
+    cursor:pointer;border-radius:var(--radius-sm);white-space:nowrap}
+  .btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:700}
+  .btn.sm{padding:5px 9px;font-size:10px}
+  .btn.gh{border-color:transparent;color:var(--muted)}
+  .btn.dis{opacity:.45}
+
+  /* seletor de quando */
+  .when{display:flex;align-items:center;gap:8px;padding:9px 16px;flex-wrap:wrap;
+    border-bottom:1px solid var(--divider);background:var(--stone)}
+  .when .mo{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--cream);
+    letter-spacing:.1em;text-transform:uppercase}
+  .when .arw{border:1px solid var(--border);color:var(--sub);width:22px;height:22px;
+    display:grid;place-items:center;font-size:11px;border-radius:var(--radius-sm)}
+  .when .wk{font-size:10px;padding:4px 8px;border:1px solid var(--divider);color:var(--muted);
+    border-radius:var(--radius-sm);font-family:var(--font-mono)}
+  .when .wk.on{border-color:var(--accent);color:var(--accent)}
+  .when .sep{width:1px;height:18px;background:var(--divider);margin:0 3px}
+  .when .dy{font-size:10px;padding:4px 7px;border:1px solid transparent;color:var(--dim);
+    border-radius:var(--radius-sm);letter-spacing:.05em}
+  .when .dy.has{color:var(--sub);border-color:var(--divider)}
+  .when .dy.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:700}
+
+  /* corpo */
+  .body3{display:grid;grid-template-columns:236px 1fr 264px}
+  .body2{display:grid;grid-template-columns:236px 1fr}
+  .col{border-right:1px solid var(--divider);padding:12px 12px 16px;min-width:0}
+  .col:last-child{border-right:none}
+  .colh{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    font-weight:700;margin:0 0 9px}
+  .colh span{float:right;color:var(--dim);font-weight:400;letter-spacing:.04em;text-transform:none;
+    font-family:var(--font-mono);font-size:9px}
+
+  .fmt{display:block;width:100%;text-align:left;background:transparent;cursor:pointer;
+    border:1px solid var(--divider);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:6px}
+  .fmt.on{border-color:var(--accent);background:var(--stone2)}
+  .fmt .fn{font-size:12px;color:var(--cream);letter-spacing:.06em;display:flex;align-items:center;gap:7px}
+  .fmt.on .fn{color:var(--accent)}
+  .fmt .fd{font-size:9.5px;color:var(--muted);font-family:var(--font-mono);margin-top:3px;letter-spacing:.02em}
+  .fmt .fs{font-size:9.5px;color:var(--dim);margin-top:3px;font-family:Georgia,serif;font-style:italic}
+  .fmt .ratio{border:1px solid var(--dim);flex-shrink:0}
+  .fmt.on .ratio{border-color:var(--accent)}
+  .r169{width:20px;height:11px}.r916{width:11px;height:20px}.r45{width:15px;height:19px}
+
+  .skinrow{display:flex;gap:6px;margin-top:5px}
+  .skin{flex:1;border:1px solid var(--divider);border-radius:var(--radius-sm);padding:6px 7px;
+    cursor:pointer;background:transparent}
+  .skin.on{border-color:var(--accent)}
+  .skin .sw{height:12px;border:1px solid var(--divider);margin-bottom:5px}
+  .skin .sn{font-size:9.5px;color:var(--sub);letter-spacing:.06em;text-transform:uppercase}
+  .skin.on .sn{color:var(--accent)}
+  .canvasrow{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+  .cvb{font-size:9px;padding:4px 7px;border:1px solid var(--divider);color:var(--muted);
+    border-radius:var(--radius-sm);font-family:var(--font-mono);cursor:pointer}
+  .cvb.on{border-color:var(--accent);color:var(--accent)}
+
+  /* preview */
+  .pvwrap{border:1px solid var(--divider);background:var(--stone);overflow-x:auto;padding:10px}
+  .pvmeta{display:flex;align-items:center;gap:9px;margin-top:8px;font-size:10px;color:var(--muted);
+    font-family:var(--font-mono);flex-wrap:wrap}
+  .pvmeta .fname{color:var(--sub)}
+  .pvmeta .push{margin-left:auto}
+
+  /* ARTEFATO — literal por isenção */
+  .art{background:var(--ex-bg);border:1px solid var(--ex-div);padding:12px 14px;
+    font-family:'Arial Black',Arial,sans-serif}
+  .art.mm{background:var(--ex-mm-bg)}
+  .art .agym{font-size:9px;letter-spacing:.28em;color:var(--ex-name);text-transform:uppercase}
+  .art .adate{font-size:13px;letter-spacing:.1em;color:var(--ex-hdr);text-transform:uppercase;margin-top:2px}
+  .art .acols{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+  .art .acol{border-top:2px solid var(--ex-div);padding-top:6px}
+  .art .ad{font-size:8px;letter-spacing:.14em;color:var(--ex-sub);text-transform:uppercase}
+  .art .ab{font-size:8.5px;letter-spacing:.1em;color:var(--ex-hdr);text-transform:uppercase;margin-top:6px}
+  .art .ax{font-size:8.5px;color:var(--ex-name);margin-top:3px;line-height:1.45}
+  .art .ai{color:var(--ex-int)}
+  .art .an{font-size:7.5px;color:var(--ex-note);font-style:italic;margin-top:2px}
+  .art .arest{font-size:8.5px;color:var(--ex-note);letter-spacing:.1em;text-transform:uppercase;margin-top:6px}
+
+  /* aparência */
+  .grp{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
+    margin:12px 0 5px;font-weight:700}
+  .crow{display:flex;align-items:center;gap:8px;padding:5px 6px;border:1px solid transparent;
+    border-radius:var(--radius-sm)}
+  .crow.hov{border-color:var(--divider);background:var(--stone2)}
+  .crow .chip{width:16px;height:16px;border:1px solid var(--border);flex-shrink:0;border-radius:2px}
+  .crow .cl{font-size:10.5px;color:var(--sub);flex:1;letter-spacing:.03em}
+  .crow .cv{font-size:9px;color:var(--dim);font-family:var(--font-mono)}
+  .scl{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--sub);
+    padding:5px 6px;letter-spacing:.03em}
+  .scl .stp{border:1px solid var(--border);width:20px;height:20px;display:grid;place-items:center;
+    color:var(--sub);font-size:11px;border-radius:var(--radius-sm)}
+  .scl .sv{font-family:var(--font-mono);font-size:10px;color:var(--cream);min-width:34px;text-align:center}
+  .scl .sn{margin-left:auto;color:var(--muted);font-size:9.5px}
+
+  /* estados */
+  .state{border:1px solid var(--divider);background:var(--stone);padding:22px 18px;text-align:center}
+  .state .ic{font-size:24px;color:var(--dim);display:block;margin-bottom:9px}
+  .state .t{font-size:12px;color:var(--sub);letter-spacing:.06em}
+  .state .d{font-size:11px;color:var(--muted);font-family:Georgia,serif;margin-top:5px;line-height:1.55}
+  .state .d b{color:var(--sub)}
+  .state.err{border-color:var(--err)}
+  .state.err .ic,.state.err .t{color:var(--err)}
+  .banner{display:flex;align-items:flex-start;gap:9px;border:1px solid var(--gold);
+    background:var(--stone2);padding:9px 11px;font-size:11px;color:var(--sub);line-height:1.55}
+  .banner .bi{color:var(--gold);flex-shrink:0;font-weight:700}
+  .banner b{color:var(--cream)}
+  .banner code{font-family:var(--font-mono);font-size:10.5px;color:var(--sub)}
+  .banner.bad{border-color:var(--err)}
+  .banner.bad .bi{color:var(--err)}
+
+  /* apresentar */
+  .pres{background:var(--ex-bg);border:1px solid var(--border);padding:14px;position:relative}
+  .pres .close{position:absolute;top:9px;right:11px;font-size:10px;color:var(--ex-sub);
+    border:1px solid var(--ex-div);padding:3px 8px;border-radius:var(--radius-sm)}
+  .qr{width:78px;height:78px;background:
+    repeating-conic-gradient(var(--ex-name) 0% 25%, var(--ex-bg) 0% 50%) 0 0/13px 13px;
+    border:5px solid var(--ex-name)}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:1180px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:1180px;align-items:start}
+  .phones{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+
+  /* prancha de corte */
+  .kills{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:1180px}
+  .kill{border:1px solid var(--divider);border-left:3px solid var(--err);padding:11px 13px;background:var(--stone)}
+  .kill.keep{border-left-color:var(--accent)}
+  .kill.warn{border-left-color:var(--gold)}
+  .kill h4{margin:0 0 5px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream)}
+  .kill p{margin:0;font-size:11.5px;color:var(--muted);font-family:Georgia,serif;line-height:1.6}
+  .kill code{font-family:var(--font-mono);font-size:10.5px;color:var(--sub)}
+  .gate{border:1px solid var(--gold);background:var(--stone);padding:15px 17px;max-width:1180px;margin-top:14px}
+  .gate h4{margin:0 0 7px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+  .gate p{margin:0 0 10px;font-size:12px;color:var(--muted);font-family:Georgia,serif;line-height:1.65}
+  .gate p:last-child{margin-bottom:0}
+  .gate b{color:var(--sub)}
+  .gate .rec{color:var(--accent);font-weight:700}
+  .gate .no{color:var(--err);font-weight:700}
+  .gate code{font-family:var(--font-mono);font-size:11px;color:var(--sub)}
+</style>
+
+<h1>Cone — Publicador · <b>Mockup 63</b> · C5·b (#59) Lane B</h1>
+<p class="note">
+  <b>A resposta do usuário à pergunta de uso muda o tamanho da sessão:</b> nenhum dos sete alvos foi
+  enviado a ninguém nos últimos meses — <i>“mas quero manter e melhorar; hoje não é nada amigável de
+  usar”</i> — e o painel de cores <i>“é bom ter quando o app crescer”</i>. Então isto
+  <b>não é uma passada de deleção</b>: nenhuma capacidade sai. O que sai é a <b>forma</b>.
+  <span class="ok">A tese:</span> os 7 botões são <b>5 formatos × um skin</b>, e essa estrutura
+  <b>já está nos dados persistidos</b> — <code>settings.value.colors</code> guarda exatamente
+  <b>quatro</b> paletas (<code>dv*</code>, <code>wk*</code>, <code>ea*</code>, <code>mm*</code>), não
+  sete. A aba nunca mostrou isso; mostrou uma fileira de botões cinza-sobre-cinza onde dois têm nome
+  de outra academia e dois imprimem a mesma string.
+</p>
+
+<div class="themebar">
+  <button onclick="document.documentElement.className=''">TotK Dark</button>
+  <button onclick="document.documentElement.className='theme-totk-light'">TotK Light</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom'">Spirit Blossom</button>
+  <button onclick="document.documentElement.className='theme-spirit-blossom-light'">SB Light</button>
+</div>
+<p class="note" style="margin-top:-8px">
+  <span class="warn">Sobre os ícones:</span> os cards do Claude Design não carregam webfont externa
+  (CSP), então este mockup usa glifos Unicode onde o app usa <code>ti-*</code> / Tabler — igual aos
+  cards <code>results</code>/<code>schedule</code>.<br>
+  <span class="warn">Sobre as cores dentro da moldura do preview:</span> elas são <b>literais de
+  propósito</b> — são a paleta de artefato, <b>isenta do #15</b> (decisão 4 do plans/81). Troque o
+  tema acima: o <b>chrome</b> muda, o <b>PNG não</b>. Essa é exatamente a regra que o build precisa
+  gravar <i>dentro</i> dos arquivos, do jeito que o <code>SCALE_COL</code> grava.
+</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">1 · Sete botões, quatro paletas — a estrutura já existe, só não aparece</h2>
+<p class="note">
+  Cada linha é um botão de hoje; as colunas são o que ele <b>realmente</b> é. A coluna “paleta” tem
+  quatro valores para sete linhas: <b>a aba já agrupa, internamente, do jeito que esta proposta
+  agrupa na tela.</b>
+</p>
+
+<div class="omap m5">
+  <div class="h">Botão hoje</div><div class="h">Formato real</div><div class="h">Canvas</div>
+  <div class="h">Paleta persistida</div><div class="h">O problema do nome</div>
+
+  <div class="who">Diário</div><div>Dia</div><div><code>1920×1080</code></div>
+  <div class="hot">dv — 13 chaves</div><div class="q no">nenhum — este nome está certo</div>
+
+  <div class="who">Semanal</div><div>Semana</div><div><code>1920×1080</code></div>
+  <div class="hot">wk — 7 chaves</div><div class="q">rasteriza a <code>WeeklyCalendarExportView</code>, não a <code>Weekly</code></div>
+
+  <div class="who">Calendário</div><div>Mês</div><div><code>1920×1080</code></div>
+  <div class="hot">wk — as mesmas 7</div><div class="q">no preview ele se chama <b>“Exportar Mensal”</b> — dois nomes para um alvo</div>
+
+  <div class="who">Mobile 01</div><div>Dia · story</div><div><code>1080×altura</code></div>
+  <div class="hot">ea — 9 + fundo</div><div class="q bad">“Eagles” — nome de outra academia</div>
+
+  <div class="who">Mobile 02</div><div>Dia · story</div><div><code>1080×altura</code></div>
+  <div class="hot">mm — 9 + fundo</div><div class="q bad">“MegaMan” — idem</div>
+
+  <div class="who">Mobile Semanal 01</div><div>Semana · story</div><div><code>1080×~3000</code></div>
+  <div class="hot">ea — as mesmas</div><div class="q bad">no botão Baixar vira <code>Semanal 01</code> por <code>.slice(0,15)</code></div>
+
+  <div class="who">Mobile Semanal 02</div><div>Semana · story</div><div><code>1080×~3000</code></div>
+  <div class="hot">mm — as mesmas</div><div class="q bad">idem — por isso os dois imprimiam a mesma string</div>
+</div>
+
+<p class="note">
+  <b>A proposta:</b> o <b>formato</b> passa a ser escolhido (5 opções, nomeadas pelo que a imagem é),
+  o <b>skin</b> é um segundo eixo — visível só onde existe mais de um — e o <b>canvas</b> vira
+  explícito nos dois formatos verticais. O nome do skin continua editável pelo usuário:
+  <code>APP_CONFIG.mobileWeeklyLabels</code> permanece, só que agora nomeia <b>um skin</b> (uma
+  coisa) em vez de dois formatos diferentes — que era a razão de o <code>.slice(0,15)</code> colidir.
+</p>
+
+<div class="omap m4">
+  <div class="h">Formato</div><div class="h">Canvas</div><div class="h">Skin</div><div class="h">Destino que o usuário tem em mente</div>
+  <div class="who">Dia</div><div><code>1920×1080 · 16:9</code></div><div>Diário</div><div class="q">tela da recepção, grupo do WhatsApp</div>
+  <div class="who">Semana</div><div><code>1920×1080 · 16:9</code></div><div>Grade</div><div class="q">o quadro da semana</div>
+  <div class="who">Mês</div><div><code>1920×1080 · 16:9</code></div><div>Grade</div><div class="q">planejamento, mural</div>
+  <div class="who hot">Dia · story</div><div><code>1080×1920 · 9:16</code></div><div>Preta · Marinho</div><div class="q hot">Stories, Reels, TikTok</div>
+  <div class="who hot">Semana · story</div><div><code>1080×1350 · 4:5 ou livre</code></div><div>Preta · Marinho</div><div class="q hot">post de feed / carrossel</div>
+</div>
+<p class="note" style="margin-top:-4px">
+  <span class="ok">O pedido de Reels/TikTok entra aqui</span>, e é uma mudança pequena de código:
+  hoje <code>doMobileExport</code> usa <code>W=1080, H=el.scrollHeight</code> — altura variável, que
+  não é formato de story nenhum. O canvas <b>9:16 (1080×1920)</b> vira o default do
+  <b>Dia · story</b>; a altura livre continua disponível para a semana, que nunca vai caber em 9:16.
+  <span class="warn">Isso cria um estado novo e obrigatório:</span> conteúdo que <b>não cabe</b> no
+  canvas fixo — hoje o <code>html2canvas</code> simplesmente corta, em silêncio. Desenhado na seção 5.
+</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">2 · Desktop 1280×800 — o preview <i>é</i> a superfície</h2>
+<p class="note">
+  <b>A mudança estrutural.</b> Hoje o corpo da aba é uma grade de semana viva (que por dentro é uma
+  <code>WeeklyExportView</code>) e o preview é um <b>modal separado</b> de 569 linhas — com <b>os
+  seus próprios</b> seletores de mês, semana e dia, duplicando os de baixo. São dois lugares para
+  escolher a mesma quinta-feira. Aqui existe <b>um</b> seletor, e o painel central mostra
+  <b>exatamente o arquivo que vai baixar</b>, na proporção real. O modal morre inteiro.
+</p>
+
+<div class="frame">
+  <div class="chrome">
+    <span class="brand">CONE</span>
+    <span class="tab">Criador</span><span class="tab">Atletas</span><span class="tab">Exercícios</span>
+    <span class="tab">Afiliados</span><span class="tab">Resultados</span><span class="tab">Agenda</span>
+    <span class="tab on">Publicador</span>
+    <span class="sp">sincronizado 14:02</span>
+  </div>
+
+  <div class="hdr">
+    <div>
+      <h3>Publicador</h3>
+      <div class="sub">a semana que você montou vira imagem — ou vira tela</div>
+    </div>
+    <div class="acts">
+      <button class="btn">▷ Apresentar</button>
+      <button class="btn pri">↓ Baixar PNG</button>
+    </div>
+  </div>
+
+  <div class="when">
+    <div class="mo"><span class="arw">◀</span> Agosto 2026 <span class="arw">▶</span></div>
+    <span class="sep"></span>
+    <span class="wk">03–07</span><span class="wk on">10–14</span><span class="wk">17–21</span><span class="wk">24–28</span>
+    <span class="sep"></span>
+    <span class="dy">Dom</span><span class="dy has">Seg</span><span class="dy has">Ter</span>
+    <span class="dy on">Qua</span><span class="dy has">Qui</span><span class="dy has">Sex</span><span class="dy">Sáb</span>
+  </div>
+
+  <div class="body3">
+    <div class="col">
+      <p class="colh">Formato</p>
+
+      <div class="fmt"><div class="fn"><span class="ratio r169"></span> Dia</div>
+        <div class="fd">1920×1080 · 16:9</div><div class="fs">skin Diário</div></div>
+
+      <div class="fmt on"><div class="fn"><span class="ratio r169"></span> Semana</div>
+        <div class="fd">1920×1080 · 16:9</div><div class="fs">skin Grade</div></div>
+
+      <div class="fmt"><div class="fn"><span class="ratio r169"></span> Mês</div>
+        <div class="fd">1920×1080 · 16:9</div><div class="fs">skin Grade</div></div>
+
+      <div class="fmt"><div class="fn"><span class="ratio r916"></span> Dia · story</div>
+        <div class="fd">1080×1920 · 9:16</div>
+        <div class="skinrow">
+          <div class="skin on"><div class="sw" style="background:var(--ex-bg)"></div><div class="sn">Preta</div></div>
+          <div class="skin"><div class="sw" style="background:var(--ex-mm-bg)"></div><div class="sn">Marinho</div></div>
+        </div>
+      </div>
+
+      <div class="fmt"><div class="fn"><span class="ratio r45"></span> Semana · story</div>
+        <div class="fd">1080×1350 · 4:5</div>
+        <div class="skinrow">
+          <div class="skin on"><div class="sw" style="background:var(--ex-bg)"></div><div class="sn">Preta</div></div>
+          <div class="skin"><div class="sw" style="background:var(--ex-mm-bg)"></div><div class="sn">Marinho</div></div>
+        </div>
+      </div>
+
+      <p class="colh" style="margin-top:16px">Filtro</p>
+      <div class="crow"><span class="cl">Todos os atletas</span><span class="cv">142</span></div>
+    </div>
+
+    <div class="col">
+      <p class="colh">Preview <span>rolagem própria ↔</span></p>
+      <div class="pvwrap">
+        <div class="art" style="min-width:640px">
+          <div class="agym">CONE · BOX VILA</div>
+          <div class="adate">SEMANA 10–14 AGOSTO</div>
+          <div class="acols">
+            <div class="acol"><div class="ad">SEG 10</div>
+              <div class="ab">AQUECIMENTO</div><div class="ax">Remo <span class="ai">500 m</span></div>
+              <div class="ab">FORÇA</div><div class="ax">Back Squat 5×5 <span class="ai">75 %</span></div>
+              <div class="ab">WOD · AMRAP 12'</div><div class="ax">Burpee 10<br>Pull-up 8</div></div>
+            <div class="acol"><div class="ad">TER 11</div>
+              <div class="ab">SKILL</div><div class="ax">Handstand Walk <span class="ai">4×10 m</span></div>
+              <div class="ab">WOD · FOR TIME</div><div class="ax">Thruster 21-15-9 <span class="ai">43/30 kg</span><br>Pull-up 21-15-9</div>
+              <div class="an">meta: sub 9'</div></div>
+            <div class="acol"><div class="ad">QUA 12</div>
+              <div class="ab">LPO</div><div class="ax">Snatch 6×2 <span class="ai">70 %</span></div>
+              <div class="ab">CONDICIONAMENTO</div><div class="ax">Bike <span class="ai">20 cal</span> × 5</div></div>
+            <div class="acol"><div class="ad">QUI 13</div>
+              <div class="ab">WOD · EMOM 20'</div><div class="ax">1 Clean &amp; Jerk <span class="ai">80 %</span><br>12 Wall Ball <span class="ai">9/6 kg</span></div></div>
+            <div class="acol"><div class="ad">SEX 14</div>
+              <div class="ab">WOD · ESTAÇÕES</div><div class="ax">Row 3'<br>Box Jump 3'<br>Ski 3'</div>
+              <div class="arest">2 ciclos · 1' entre</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="pvmeta">
+        <span>1920×1080</span><span>·</span><span>PNG</span><span>·</span>
+        <span class="fname">cone-semanal-1008to1408.png</span>
+        <span class="push">escala 2× · ~1,4 MB</span>
+      </div>
+    </div>
+
+    <div class="col">
+      <p class="colh">Aparência <span>skin Grade</span></p>
+      <p class="grp">Fundo e estrutura</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-bg)"></span><span class="cl">Fundo</span><span class="cv">#0d0b09</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-div)"></span><span class="cl">Divisórias</span><span class="cv">#2a2318</span></div>
+      <p class="grp">Cabeçalho</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-hdr)"></span><span class="cl">Título da semana</span><span class="cv">#4ac8c0</span></div>
+      <div class="crow hov"><span class="chip" style="background:var(--ex-sub)"></span><span class="cl">Número do dia</span><span class="cv">#887060</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-name)"></span><span class="cl">Nome da sessão</span><span class="cv">#c8b090</span></div>
+      <p class="grp">Blocos e exercícios</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-hdr)"></span><span class="cl">Tipo de bloco</span><span class="cv">#4ac8c0</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-sub)"></span><span class="cl">Exercício</span><span class="cv">#887060</span></div>
+      <p class="grp">Escalas</p>
+      <div class="scl"><span class="stp">−</span><span class="sv">1.5×</span><span class="stp">+</span><span class="sn">fonte</span></div>
+      <div class="scl"><span class="stp">−</span><span class="sv">2×</span><span class="stp">+</span><span class="sn">export</span></div>
+      <div style="margin-top:12px;display:flex;gap:6px">
+        <button class="btn sm">Restaurar padrão</button>
+        <button class="btn sm gh">Salvar config</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="note" style="margin-top:12px">
+  <b>Quatro coisas concretas que essa composição resolve, e nenhuma delas é estilo:</b><br>
+  <b>1 ·</b> <span class="ok">Um seletor de quando</span>, não dois.<br>
+  <b>2 ·</b> <span class="ok">O preview tem rolagem horizontal própria</span>
+  (<code>overflow-x:auto</code> no <code>.pvwrap</code>) — o achado do benchmark de 2026-07-09.
+  <span class="warn">Correção ao plans/81:</span> o único <code>overflowX:'auto'</code> do arquivo,
+  em <code>:2206</code>, <b>não está dentro da fazenda off-screen</b> — ele é <i>irmão</i> dela e
+  embrulha a grade viva da tela. O que falta rolagem é o <b>wrapper do preview</b>
+  (<code>:1408</code>), que é <code>overflow:hidden</code>.<br>
+  <b>3 ·</b> <span class="ok">O painel de cores encosta ao lado do que ele edita.</span> Hoje é uma
+  janela arrastável com <code>mousedown</code>/<code>touchstart</code> escritos à mão dentro de um
+  callback de <code>ref</code> (<code>:1596-1645</code>, ~60 linhas de DOM cru) — e ela só precisa
+  arrastar porque <b>cobre o preview que está editando</b>. Encostada, o motivo some junto com o código.<br>
+  <b>4 ·</b> <span class="ok">O nome do arquivo aparece antes de baixar</span> — ele já é calculado
+  (<code>gymSlug</code> + data), só nunca foi mostrado.
+</p>
+
+<div class="banner" style="max-width:1180px">
+  <span class="bi">▲</span>
+  <div><b>Defeito vivo que este redesenho corrige de graça, e que nenhum doc registrava:</b>
+  o ternário de escala do preview (<code>:1425-1432</code>) só testa <code>mobileA</code> e
+  <code>mobileB</code>. Os dois <b>Mobile Semanal</b> têm conteúdo de <b>1080px</b>, são escalados
+  por <code>previewWrapW/1920</code> e recebem <code>width:'1920px'</code> — hoje os dois formatos
+  verticais de semana são pré-visualizados a <b>~56% do tamanho</b>, dentro de um wrapper que corta
+  o resto. Com o canvas derivado do <b>formato</b>, o ternário deixa de existir.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">3 · O mesmo painel, formato vertical — skin, canvas e o artefato real</h2>
+<p class="note">
+  Trocar de formato troca <b>três coisas de uma vez</b>: a proporção do preview, a linha de skins e a
+  linha de canvas. Nada abre modal, nada muda de lugar. O <b>Marinho</b> aqui é o
+  <code>mm*</code> de hoje (<code>#0a1a5c</code>) — <b>o mesmo dado, com um nome que descreve a
+  coisa</b> em vez de nomear a academia de onde ele veio.
+</p>
+
+<div class="body2 frame" style="max-width:1180px">
+  <div class="col">
+    <p class="colh">Formato</p>
+    <div class="fmt"><div class="fn"><span class="ratio r169"></span> Dia</div>
+      <div class="fd">1920×1080 · 16:9</div><div class="fs">skin Diário</div></div>
+    <div class="fmt"><div class="fn"><span class="ratio r169"></span> Semana</div>
+      <div class="fd">1920×1080 · 16:9</div><div class="fs">skin Grade</div></div>
+    <div class="fmt"><div class="fn"><span class="ratio r169"></span> Mês</div>
+      <div class="fd">1920×1080 · 16:9</div><div class="fs">skin Grade</div></div>
+    <div class="fmt on"><div class="fn"><span class="ratio r916"></span> Dia · story</div>
+      <div class="fd">1080×1920 · 9:16</div>
+      <div class="skinrow">
+        <div class="skin"><div class="sw" style="background:var(--ex-bg)"></div><div class="sn">Preta</div></div>
+        <div class="skin on"><div class="sw" style="background:var(--ex-mm-bg)"></div><div class="sn">Marinho</div></div>
+      </div>
+      <div class="canvasrow">
+        <span class="cvb on">9:16 · 1080×1920</span><span class="cvb">4:5 · 1080×1350</span><span class="cvb">livre</span>
+      </div>
+      <div style="font-size:9.5px;color:var(--dim);font-family:Georgia,serif;font-style:italic;margin-top:5px">
+        Stories · Reels · TikTok
+      </div>
+    </div>
+    <div class="fmt"><div class="fn"><span class="ratio r45"></span> Semana · story</div>
+      <div class="fd">1080×1350 · 4:5</div><div class="fs">skin Preta · Marinho</div></div>
+  </div>
+
+  <div class="col">
+    <p class="colh">Preview <span>9:16 · escala real</span></p>
+    <div class="pvwrap" style="display:flex;justify-content:center">
+      <div class="art mm" style="width:190px">
+        <div class="agym" style="text-align:center">CONE · BOX VILA</div>
+        <div class="adate" style="text-align:center;font-size:15px">QUA 12/08</div>
+        <div style="border-top:2px solid var(--ex-hdr);margin:10px 0 8px"></div>
+        <div class="ab">LPO</div>
+        <div class="ax">Snatch <span class="ai">6×2 · 70 %</span></div>
+        <div class="ax">Snatch Balance <span class="ai">4×3</span></div>
+        <div class="ab">CONDICIONAMENTO</div>
+        <div class="ax">Bike <span class="ai">20 cal</span></div>
+        <div class="ax">Row <span class="ai">250 m</span></div>
+        <div class="ax">Ski <span class="ai">15 cal</span></div>
+        <div class="an">5 rounds · 90" de descanso</div>
+        <div class="ab">ACESSÓRIOS</div>
+        <div class="ax">Hollow Hold <span class="ai">3×40"</span></div>
+        <div class="ax">Ring Row <span class="ai">3×12</span></div>
+        <div style="height:34px"></div>
+        <div style="text-align:center;font-size:8px;letter-spacing:.2em;color:var(--ex-sub)">@CONEBOX</div>
+      </div>
+    </div>
+    <div class="pvmeta">
+      <span>1080×1920</span><span>·</span><span>9:16</span><span>·</span>
+      <span class="fname">cone-story-qua-12082026.png</span>
+      <span class="push">escala 2× · ~2,1 MB</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">4 · O painel “Cores” — fica, e vira uma superfície desenhada</h2>
+<p class="note">
+  <b>O usuário pediu para manter</b> (“é bom ter quando o app crescer”), então a pergunta do brief
+  — <i>feature ou acidente?</i> — se resolve como <b>feature</b>. O que muda é a forma: hoje são
+  ~466 linhas de <code>&lt;input type="color"&gt;</code> empilhados numa janela arrastável, com um
+  <code>&lt;select&gt;</code> de 5 opções no topo que ninguém liga ao botão que gerou a imagem.
+  Aqui o painel <b>já está no skin do formato selecionado</b>, agrupado por papel, e cada troca
+  aparece no preview ao lado — que é o arquivo real.
+</p>
+
+<div class="grid3">
+  <div>
+    <div class="cap">A · skin Grade <i>— wk*, 7 chaves</i></div>
+    <div class="frame" style="padding:12px">
+      <p class="grp" style="margin-top:0">Fundo e estrutura</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-bg)"></span><span class="cl">Fundo</span><span class="cv">#0d0b09</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-div)"></span><span class="cl">Divisórias</span><span class="cv">#2a2318</span></div>
+      <p class="grp">Cabeçalho</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-hdr)"></span><span class="cl">Título</span><span class="cv">#4ac8c0</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-sub)"></span><span class="cl">Número do dia</span><span class="cv">#887060</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-name)"></span><span class="cl">Nome da sessão</span><span class="cv">#c8b090</span></div>
+      <p class="grp">Blocos</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-hdr)"></span><span class="cl">Tipo de bloco</span><span class="cv">#4ac8c0</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-sub)"></span><span class="cl">Exercício</span><span class="cv">#887060</span></div>
+    </div>
+  </div>
+  <div>
+    <div class="cap">B · skin Diário <i>— dv*, 13 chaves, o mais rico</i></div>
+    <div class="frame" style="padding:12px">
+      <p class="grp" style="margin-top:0">Fundo e estrutura</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-bg)"></span><span class="cl">Fundo</span><span class="cv">#0d0b09</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-div)"></span><span class="cl">Divisórias</span><span class="cv">#2a2318</span></div>
+      <p class="grp">Cabeçalho</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-name)"></span><span class="cl">Nome do box</span><span class="cv">#c8b090</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-hdr)"></span><span class="cl">Data</span><span class="cv">#4ac8c0</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-sub)"></span><span class="cl">Nome do treino</span><span class="cv">#887060</span></div>
+      <p class="grp">Blocos</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-hdr)"></span><span class="cl">Zona / tipo</span><span class="cv">#4ac8c0</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-hdr)"></span><span class="cl">Rótulo do bloco</span><span class="cv">#4ac8c0</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-int)"></span><span class="cl">Cap de tempo</span><span class="cv">#d8a840</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-int)"></span><span class="cl">Rounds</span><span class="cv">#d8a840</span></div>
+      <p class="grp">Exercícios</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-name)"></span><span class="cl">Nome</span><span class="cv">#c8b090</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-int)"></span><span class="cl">Intensidade</span><span class="cv">#d8a840</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-note)"></span><span class="cl">Observação</span><span class="cv">#554a3a</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-note)"></span><span class="cl">Notas do bloco</span><span class="cv">#554a3a</span></div>
+    </div>
+  </div>
+  <div>
+    <div class="cap">C · skin Marinho <i>— mm*, 9 + fundo</i></div>
+    <div class="frame" style="padding:12px">
+      <p class="grp" style="margin-top:0">Fundo e estrutura</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-mm-bg)"></span><span class="cl">Fundo</span><span class="cv">#0a1a5c</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-div)"></span><span class="cl">Divisórias</span><span class="cv">rgba(…,.1)</span></div>
+      <p class="grp">Cabeçalho</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-name)"></span><span class="cl">Nome do box</span><span class="cv">#c8b090</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-hdr)"></span><span class="cl">Data</span><span class="cv">#4ac8c0</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-sub)"></span><span class="cl">Subtítulo</span><span class="cv">#3a6a80</span></div>
+      <p class="grp">Blocos</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-hdr)"></span><span class="cl">Tipo de bloco</span><span class="cv">#4ac8c0</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-hdr)"></span><span class="cl">Fundo da faixa</span><span class="cv">#4ac8c0</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-bg)"></span><span class="cl">Texto da faixa</span><span class="cv">#0d0b09</span></div>
+      <p class="grp">Exercícios</p>
+      <div class="crow"><span class="chip" style="background:var(--ex-name)"></span><span class="cl">Nome</span><span class="cv">#c8b090</span></div>
+      <div class="crow"><span class="chip" style="background:var(--ex-int)"></span><span class="cl">Intensidade</span><span class="cv">#d8a840</span></div>
+      <div style="border-top:1px solid var(--divider);margin-top:10px;padding-top:8px;
+                  font-size:10px;color:var(--dim);font-family:Georgia,serif;line-height:1.5">
+        A chave <code style="font-family:var(--font-mono);font-size:9.5px">mmSubtitle</code> é a
+        única sem <code style="font-family:var(--font-mono);font-size:9.5px">migEa</code> — nasceu
+        depois da migração. Continua assim.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="banner" style="max-width:1180px;margin-top:14px">
+  <span class="bi">■</span>
+  <div><b>Nenhuma chave é órfã, e isso é uma restrição, não uma intenção.</b>
+  <code>settings.value.colors</code> tem dado real de usuário e <code>saveSettings</code> é
+  <b>sobrescrita cega</b>, não merge — foi exatamente assim que o #142 apagou <code>boxWarnings</code>
+  do blob. As ~40 chaves (<code>dv</code> 13 · <code>wk</code> 7 · <code>ea</code> 9+bg ·
+  <code>mm</code> 9+bg · <code>noteColor</code> · as 4 escalas) continuam sendo lidas com o mesmo
+  <code>migEa</code> e escritas com o mesmo <code>...loadSettings()</code> na frente. O redesenho
+  <b>reagrupa a tela, não o blob</b>.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">5 · Estados — vazio, exportando, erro, e o que hoje não tem estado nenhum</h2>
+<p class="note">
+  Hoje: <code>alert('Nada para exportar ainda.')</code>, <code>alert('Falha na exportação')</code>,
+  um <code>&lt;span&gt;Exportando...&lt;/span&gt;</code> solto no fim da barra, e — o pior —
+  <b>nenhum aviso quando o dia selecionado não tem sessão</b>: o preview renderiza um retângulo preto
+  e o download entrega um PNG vazio. Tudo isso vira estado da própria área de preview.
+</p>
+
+<div class="grid2">
+  <div>
+    <div class="cap">A · nenhuma sessão em lugar nenhum <i>— o vazio da aba</i></div>
+    <div class="state">
+      <span class="ic">▤</span>
+      <div class="t">Nenhuma sessão ainda</div>
+      <div class="d">O Publicador transforma o que você montou no Criador em imagem.<br>Comece pela semana.</div>
+      <div style="margin-top:12px"><button class="btn">Ir para o Criador</button></div>
+    </div>
+  </div>
+  <div>
+    <div class="cap">B · a semana tem sessões, <b>o dia escolhido não</b> <i>— hoje: PNG preto, sem aviso</i></div>
+    <div class="state">
+      <span class="ic">◫</span>
+      <div class="t">Quarta 12/08 não tem sessão</div>
+      <div class="d">Nada para exportar neste dia. <b>Seg, Ter, Qui e Sex</b> têm sessão nesta semana.</div>
+      <div style="margin-top:12px;display:flex;gap:6px;justify-content:center">
+        <button class="btn sm">Ver Terça</button><button class="btn sm">Ver Quinta</button>
+        <button class="btn sm gh">Exportar a semana</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid2" style="margin-top:16px">
+  <div>
+    <div class="cap">C · exportando <i>— o estado ocupado é do botão que você apertou</i></div>
+    <div class="frame" style="padding:12px">
+      <div style="display:flex;gap:7px;justify-content:flex-end;margin-bottom:10px">
+        <button class="btn dis">▷ Apresentar</button>
+        <button class="btn pri dis">◴ Gerando PNG…</button>
+      </div>
+      <div class="pvwrap" style="opacity:.5">
+        <div class="art" style="min-width:0">
+          <div class="agym">CONE · BOX VILA</div>
+          <div class="adate">SEMANA 10–14 AGOSTO</div>
+          <div style="height:52px"></div>
+        </div>
+      </div>
+      <div class="pvmeta"><span>1920×1080 · rasterizando em escala 2×…</span></div>
+    </div>
+  </div>
+  <div>
+    <div class="cap">D · falha do html2canvas <i>— hoje um alert() que some</i></div>
+    <div class="state err">
+      <span class="ic">✕</span>
+      <div class="t">Não foi possível gerar a imagem</div>
+      <div class="d">A rasterização falhou. Isso costuma ser um logo carregado de outro domínio.<br>
+        <b>Tente de novo</b> — se repetir, exporte sem o logo.</div>
+      <div style="margin-top:12px;display:flex;gap:6px;justify-content:center">
+        <button class="btn sm">Tentar de novo</button><button class="btn sm gh">Exportar sem logo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cap" style="max-width:1180px">E · o estado que o canvas fixo cria — e que hoje seria um corte silencioso</div>
+<div class="banner bad" style="max-width:1180px">
+  <span class="bi">▲</span>
+  <div><b>Este dia não cabe em 9:16.</b> São 5 blocos e 14 exercícios; em 1080×1920 os dois últimos
+  ficariam de fora. <b>O <code>html2canvas</code> cortaria sem avisar</b> — é o que ele faz hoje,
+  em silêncio, sempre que a altura fixa é menor que o conteúdo.
+  <div style="margin-top:8px;display:flex;gap:6px">
+    <button class="btn sm">Usar 4:5 (1080×1350)</button>
+    <button class="btn sm">Usar altura livre</button>
+    <button class="btn sm gh">Reduzir a fonte para caber</button>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">6 · Apresentar — e a pergunta do #113, que tem resposta de evidência</h2>
+<p class="note">
+  <b>Apresentar</b> é o segundo trabalho declarado da aba: o dia em tela cheia, para projetar na
+  parede. Ele hoje mostra um QR que aponta para
+  <code>…/CrossFit-Apps/log.html?date=…&amp;session=…</code>
+  (<code>_presenterLogUrl</code>, <code>Publicador.jsx:546</code>). <span class="warn">Esse QR
+  entrega um 404.</span> O <code>log.html</code> está fora do <code>input</code> do
+  <code>vite.public.config.js</code> desde sempre — o comentário na linha 11 diz “retired and
+  excluded”.
+</p>
+<div class="banner bad" style="max-width:1180px;margin-bottom:14px">
+  <span class="bi">▲</span>
+  <div><b>Mas o 404 não é o problema — e essa é a descoberta que decide o #113.</b>
+  O <code>log.html</code> lê e escreve na tabela <b>legada <code>results</code></b>
+  (<code>from('results').select…</code> / <code>.upsert(…)</code>, linhas 285 e 291) — nunca
+  <code>results_v2</code>, nunca a RPC <code>log_result</code>. E a migração
+  <code>0009_lock_unread_anon_tables.sql</code> (#150) <b>derrubou a policy de leitura anon dessa
+  tabela e revogou <code>INSERT, UPDATE, DELETE</code> do papel <code>anon</code></b>. Ou seja:
+  colocá-lo no build hoje publica uma página que <b>falha nas duas pontas</b> e que, se funcionasse,
+  escreveria no blob v1 que <b>nenhuma superfície do app lê mais</b>. Não é um passo de build — é
+  reescrever a página inteira contra a RPC, que é território do #102.</div>
+</div>
+
+<div class="grid2">
+  <div>
+    <div class="cap">Proposta · o QR aponta para uma página que existe e funciona</div>
+    <div class="pres">
+      <span class="close">✕ Fechar</span>
+      <div class="art" style="border:none;padding:0">
+        <div class="agym">CONE · BOX VILA</div>
+        <div class="adate" style="font-size:16px">QUARTA 12 DE AGOSTO</div>
+        <div style="display:flex;gap:14px;margin-top:12px;align-items:flex-start">
+          <div style="flex:1">
+            <div class="ab">LPO</div><div class="ax">Snatch <span class="ai">6×2 · 70 %</span></div>
+            <div class="ab">CONDICIONAMENTO</div>
+            <div class="ax">Bike <span class="ai">20 cal</span> · Row <span class="ai">250 m</span></div>
+            <div class="an">5 rounds · 90" de descanso</div>
+          </div>
+          <div style="text-align:center">
+            <div class="qr"></div>
+            <div style="font-size:7.5px;letter-spacing:.16em;color:var(--ex-sub);margin-top:6px">
+              VER O TREINO<br>NO CELULAR
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="font-size:11.5px;margin-top:9px">
+      <code>schedule.html?date=2026-08-12&amp;box=…</code> — página <b>2 das 10 já publicadas</b>,
+      anon-legível, mostrando <b>a mesma sessão que está na parede</b>. Zero páginas novas no build,
+      zero migração, e o QR passa a levar a algum lugar. O texto sob o QR deixa de prometer
+      “registrar resultado”, que é o que ele não pode cumprir.
+    </p>
+  </div>
+  <div>
+    <div class="cap">Alternativa · Apresentar sem QR nenhum</div>
+    <div class="pres">
+      <span class="close">✕ Fechar</span>
+      <div class="art" style="border:none;padding:0">
+        <div class="agym">CONE · BOX VILA</div>
+        <div class="adate" style="font-size:16px">QUARTA 12 DE AGOSTO</div>
+        <div style="margin-top:12px">
+          <div class="ab">LPO</div><div class="ax">Snatch <span class="ai">6×2 · 70 %</span></div>
+          <div class="ab">CONDICIONAMENTO</div>
+          <div class="ax">Bike <span class="ai">20 cal</span> · Row <span class="ai">250 m</span> · Ski <span class="ai">15 cal</span></div>
+          <div class="an">5 rounds · 90" de descanso</div>
+          <div class="ab">ACESSÓRIOS</div>
+          <div class="ax">Hollow Hold <span class="ai">3×40"</span> · Ring Row <span class="ai">3×12</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="font-size:11.5px;margin-top:9px">
+      O treino ocupa a largura toda. Honesto e menor — mas joga fora a única ponte que a aba tem
+      entre a parede e o celular de quem está olhando para ela. <b>É a opção certa se você não quer
+      que o QR leve a lugar nenhum de útil</b>; a recomendação está no gate, abaixo.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">7 · Mobile 390×844 — a mesma estrutura, empilhada</h2>
+<p class="note">
+  Os formatos <b>quebram em duas colunas</b> em vez de rolar de lado — a chamada já registrada no
+  Criador e no #57: uma fileira que rola lateralmente não dá pista nenhuma de que existe mais coisa
+  à direita, e aqui são só 5 itens. O preview vem embaixo, com a mesma rolagem horizontal própria, e
+  <b>Baixar</b> fica fixo no rodapé, que é a única ação que sempre importa.
+</p>
+
+<div class="phones">
+  <div>
+    <div class="cap">Escolha <i>· formato + skin</i></div>
+    <div class="phone">
+      <div class="chrome" style="gap:6px">
+        <span class="brand">CONE</span>
+        <span class="tab">Resultados</span><span class="tab">Agenda</span><span class="tab on">Publicador</span>
+      </div>
+      <div class="hdr" style="padding:11px 12px 9px">
+        <div><h3 style="font-size:12.5px">Publicador</h3>
+          <div class="sub" style="font-size:10px">a semana vira imagem</div></div>
+      </div>
+      <div class="when" style="padding:8px 12px;gap:6px">
+        <div class="mo" style="font-size:11px"><span class="arw">◀</span> Ago 2026 <span class="arw">▶</span></div>
+        <span class="wk on">10–14</span>
+      </div>
+      <div style="padding:10px 12px">
+        <p class="colh">Formato</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div class="fmt" style="margin:0"><div class="fn" style="font-size:11px"><span class="ratio r169"></span> Dia</div>
+            <div class="fd">1920×1080</div></div>
+          <div class="fmt on" style="margin:0"><div class="fn" style="font-size:11px"><span class="ratio r169"></span> Semana</div>
+            <div class="fd">1920×1080</div></div>
+          <div class="fmt" style="margin:0"><div class="fn" style="font-size:11px"><span class="ratio r169"></span> Mês</div>
+            <div class="fd">1920×1080</div></div>
+          <div class="fmt" style="margin:0"><div class="fn" style="font-size:11px"><span class="ratio r916"></span> Dia · story</div>
+            <div class="fd">1080×1920</div></div>
+          <div class="fmt" style="margin:0;grid-column:1/-1"><div class="fn" style="font-size:11px"><span class="ratio r45"></span> Semana · story</div>
+            <div class="fd">1080×1350 · 4:5</div></div>
+        </div>
+        <p class="colh" style="margin-top:14px">Preview <span>rola ↔</span></p>
+        <div class="pvwrap" style="padding:7px">
+          <div class="art" style="min-width:520px;padding:9px 10px">
+            <div class="agym" style="font-size:7px">CONE · BOX VILA</div>
+            <div class="adate" style="font-size:10px">SEMANA 10–14 AGOSTO</div>
+            <div class="acols" style="gap:5px;margin-top:7px">
+              <div class="acol"><div class="ad">SEG 10</div><div class="ab">FORÇA</div><div class="ax">Back Squat <span class="ai">5×5</span></div></div>
+              <div class="acol"><div class="ad">TER 11</div><div class="ab">WOD</div><div class="ax">Thruster <span class="ai">21-15-9</span></div></div>
+              <div class="acol"><div class="ad">QUA 12</div><div class="ab">LPO</div><div class="ax">Snatch <span class="ai">6×2</span></div></div>
+              <div class="acol"><div class="ad">QUI 13</div><div class="ab">EMOM</div><div class="ax">C&amp;J <span class="ai">80 %</span></div></div>
+              <div class="acol"><div class="ad">SEX 14</div><div class="ab">ESTAÇÕES</div><div class="ax">Row 3'</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="pvmeta" style="font-size:9px">
+          <span>1920×1080</span><span class="fname">cone-semanal-1008to1408.png</span>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--divider);padding:9px 12px;display:flex;gap:7px;background:var(--stone)">
+        <button class="btn sm">▷ Apresentar</button>
+        <button class="btn sm gh">✎ Aparência</button>
+        <button class="btn pri sm" style="margin-left:auto">↓ Baixar</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="cap">Aparência <i>· folha inferior, o mesmo painel</i></div>
+    <div class="phone">
+      <div class="chrome" style="gap:6px;opacity:.4">
+        <span class="brand">CONE</span><span class="tab on">Publicador</span>
+      </div>
+      <div style="padding:10px 12px;opacity:.3">
+        <div class="pvwrap" style="padding:7px"><div class="art" style="min-width:0;padding:9px 10px">
+          <div class="agym" style="font-size:7px">CONE · BOX VILA</div>
+          <div class="adate" style="font-size:10px">SEMANA 10–14 AGOSTO</div>
+          <div style="height:26px"></div></div></div>
+      </div>
+      <div style="border-top:1px solid var(--border);background:var(--stone);padding:10px 12px 14px;
+                  margin-top:-6px;position:relative">
+        <div style="width:34px;height:3px;background:var(--dim);margin:0 auto 10px;border-radius:2px"></div>
+        <p class="colh" style="margin-bottom:6px">Aparência <span>skin Grade</span></p>
+        <p class="grp" style="margin-top:6px">Fundo e estrutura</p>
+        <div class="crow"><span class="chip" style="background:var(--ex-bg)"></span><span class="cl">Fundo</span><span class="cv">#0d0b09</span></div>
+        <div class="crow"><span class="chip" style="background:var(--ex-div)"></span><span class="cl">Divisórias</span><span class="cv">#2a2318</span></div>
+        <p class="grp">Cabeçalho</p>
+        <div class="crow"><span class="chip" style="background:var(--ex-hdr)"></span><span class="cl">Título da semana</span><span class="cv">#4ac8c0</span></div>
+        <div class="crow"><span class="chip" style="background:var(--ex-sub)"></span><span class="cl">Número do dia</span><span class="cv">#887060</span></div>
+        <p class="grp">Escalas</p>
+        <div class="scl"><span class="stp">−</span><span class="sv">1.5×</span><span class="stp">+</span><span class="sn">fonte</span></div>
+        <div style="margin-top:12px;display:flex;gap:6px">
+          <button class="btn sm">Restaurar padrão</button>
+          <button class="btn pri sm" style="margin-left:auto">Salvar alterações</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">8 · A prancha de corte — o que morre, o que fica, e o que quase morreu por engano</h2>
+
+<div class="kills">
+  <div class="kill"><h4>Morre: o modal de preview</h4>
+    <p><code>:1014-1582</code>, ~569 linhas, com <b>seletores duplicados</b> de mês, semana e dia.
+    O preview passa a ser a coluna do meio. Some junto o ternário de escala com o bug dos dois
+    Mobile Semanal.</p></div>
+
+  <div class="kill"><h4>Morre: a janela arrastável de cores</h4>
+    <p><code>:1596-1645</code> — <code>mousedown</code>/<code>mousemove</code>/<code>touchstart</code>
+    escritos à mão dentro de um callback de <code>ref</code>, mais <code>hdr._drag</code> e
+    <code>el._touch</code> como flags em nós do DOM. O painel encosta; o motivo de arrastar some.</p></div>
+
+  <div class="kill"><h4>Morre: o alvo de render morto</h4>
+    <p><code>exportWeeklyRef</code> (<code>:28</code>) e <code>weeklyRef</code> (<code>:36</code>)
+    são <b>write-only</b> — nenhum dos dois é lido em lugar nenhum. A
+    <code>WeeklyExportView</code> da fazenda (<code>:2095</code>) <b>nunca é rasterizada</b>. A
+    fazenda monta 7 views para 6 alvos vivos.</p></div>
+
+  <div class="kill"><h4>Morre: <code>window.prompt</code> e os três <code>alert</code></h4>
+    <p><code>:2025</code> pede o nome do arquivo de config num prompt nativo — mesma família que o
+    C1 tirou de Configurações. Vai para um <code>ConfirmReview</code>. Os
+    <code>alert('Falha na exportação')</code> viram o estado D da seção 5.</p></div>
+
+  <div class="kill"><h4>Morre: o zoo de botões</h4>
+    <p><code>.b</code> (28) · <code>.bsec</code> (4) · <code>.bd</code> (2) · <code>.bsm</code> (23)
+    · <code>.pvt</code> (4) · <code>.pub-controls</code> · <code>.pub-view-tabs</code> ·
+    <code>.pub-pane</code> + os dois wrappers do <code>App.jsx</code> (<code>:269,287</code>).
+    <code>.bp</code> e <code>.bfull</code> já têm <b>zero</b> consumidores.</p></div>
+
+  <div class="kill keep"><h4>Fica: <code>.fg</code> e <code>.lbl</code> — e não são desta aba</h4>
+    <p>A correção de 2026-08-31 ao plans/81: <code>IntensityInput.jsx</code> e
+    <code>ExerciseRow.jsx</code> usam as duas. Apagá-las com o zoo <b>desestiliza o Criador</b>.
+    <b>Retag → Criador #58</b>, não remoção. É o motivo de o passo (d) começar por um grep.</p></div>
+
+  <div class="kill keep"><h4>Fica: as paletas de artefato, e a isenção vai escrita</h4>
+    <p><code>exportViews.jsx</code> (76 hex) e <code>mobileExportViews.jsx</code> (62 + 26 rgba)
+    <b>não são tokenizados</b> — um PNG não muda de cor com o tema. A isenção é gravada
+    <b>ao lado da paleta, dentro do arquivo</b>, do jeito que o <code>SCALE_COL</code> faz.</p></div>
+
+  <div class="kill warn"><h4>Fica montado: a fazenda off-screen</h4>
+    <p>O <code>html2canvas</code> precisa de um alvo <b>montado e mensurável</b>. O que muda é a
+    <b>quantidade</b>: só a view do formato selecionado fica montada, em vez de todas as seis — o
+    que também acaba com “cada tecla no painel de cores re-renderiza os seis exports”.</p></div>
+
+  <div class="kill warn"><h4>Decide-se aqui: o <code>#00b8d4</code> e o <code>--theme-accent</code></h4>
+    <p>29 usos em <code>Publicador.jsx</code>, 5 em <code>events.jsx</code>. Não é alias: o
+    <code>App.jsx:61</code> escreve <b>inline no <code>&lt;html&gt;</code></b> a partir de
+    <code>APP_CONFIG.themeAccent</code>, e inline ganha de toda classe de tema. <b>Classificação:</b>
+    no <b>chrome</b> vira <code>var(--accent)</code>; dentro dos <b>artefatos</b> continua literal
+    (é cor de imagem); e o ajuste persistido continua existindo — só que como
+    <b>cor de export</b>, no painel Aparência, que é onde ele sempre fez sentido.</p></div>
+
+  <div class="kill keep"><h4>Fica intacto: tudo que não é esta aba</h4>
+    <p>Nada da Agenda (entregue no C5·a), nada do <code>rateAsOf</code>/#154 nem do
+    <code>ReportModal</code> (C5·c), nenhum build do #102. As chamadas de cor do jsPDF em
+    <code>events.jsx</code> são <b>triplas RGB</b> — isenção de impressão, ficam literais.</p></div>
+</div>
+
+<p class="note" style="margin-top:16px">
+  <b>E o <code>index.css</code> fecha a conta.</b> Depois desta sessão não deve sobrar
+  <b>nenhuma</b> tag <code>TAB-OWNED</code> no arquivo: as do Publicador saem para o
+  <code>Publicador.module.css</code>, as do Criador (<code>.fg</code>/<code>.lbl</code>) são
+  <b>retagueadas</b>, e o cabeçalho de triagem do próprio arquivo é atualizado para dizer isso.
+  <span class="warn">O <code>index.css</code> não passa pelo <code>format:check</code></span>
+  (que cobre só <code>src/**/*.{js,jsx}</code>) e é compacto à mão de propósito — as tags por seletor
+  são o modelo de evidência. <b>Nunca rodar prettier nele.</b>
+</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2 class="sec">9 · Duas perguntas para o gate</h2>
+
+<div class="gate">
+  <h4>1 · #113 — o Apresentar sai com um destino de compartilhamento que funciona, ou sem o QR?</h4>
+  <p><span class="rec">Recomendo: com QR, apontando para <code>schedule.html?date=…&amp;box=…</code></span>
+  — e <b>não</b> ressuscitar o <code>log.html</code>. A evidência da seção 6 é o que decide:
+  o <code>log.html</code> escreve na tabela legada <code>results</code>, cujo
+  <code>INSERT/UPDATE/DELETE</code> anon foi <b>revogado</b> pela <code>0009</code> e cuja leitura
+  anon foi derrubada na mesma migração. Colocá-lo no <code>input</code> do Vite publicaria uma
+  página quebrada nas duas pontas — não é o “passo de build” que o #113 imaginava. Já o
+  <code>schedule.html</code> é página publicada, anon-legível, e mostra a mesma sessão que está na
+  parede: <b>custo zero, e o QR passa a levar a algum lugar.</b></p>
+  <p>Se você preferir <b>sem QR</b> (a alternativa da seção 6, à direita), o desenho aceita —
+  o treino ocupa a tela toda. <b>Nos dois casos o #113 fecha</b>, e o
+  <code>vite.public.config.js</code> continua com <b>10 páginas</b>. Uma página de registro que
+  realmente funcione é reescrita contra a RPC <code>log_result</code>, o que é o #102.</p>
+</div>
+
+<div class="gate">
+  <h4>2 · #170 — entra uma exportação de imagem do Leaderboard?</h4>
+  <p><span class="no">Recomendo: não — e fechar a linha com o motivo.</span> O caminho todo
+  (<code>LB_IMG</code> + <code>doExport</code> + o alvo de 1080px, ~200 linhas) é recuperável de
+  <code>4772250^</code> e a maquinaria do <code>html2canvas</code> já está nesta aba — o custo é
+  real, mas baixo. O argumento contra é o da sua própria resposta de uso: <b>nenhum dos sete alvos
+  existentes foi enviado a ninguém nos últimos meses.</b> Acrescentar um oitavo artefato a um
+  conjunto de sete que ninguém usa é somar superfície, não valor — e a sessão já está gastando o
+  orçamento dela em deixar os sete <i>utilizáveis</i>.</p>
+  <p><b>E o redesenho torna o “não” barato de reverter:</b> com formato virando uma entrada de lista,
+  “Ranking · 1920×1080 · skin Grade” passa a ser um item a mais no trilho da seção 2, não uma
+  cirurgia. <span class="rec">Se você disser sim</span>, ele entra como <b>sexto formato</b> e o
+  desenho não muda em mais nada.</p>
+</div>
+
+<p class="note" style="margin-top:18px">
+  <b>Depois do gate, a ordem de build é a do plans/81 e não muda:</b> (a) conversão para JSX como
+  commit <b>puramente mecânico</b> — <code>Publicador.jsx</code> + <code>exportViews.jsx</code> +
+  <code>mobileExportViews.jsx</code>, sem mudança de comportamento, para que o diff seguinte seja
+  legível; (b) decomposição em <code>publicador/publisher/</code>, <code>Publicador.jsx</code> abaixo
+  de 800 linhas; (c) <code>Publicador.module.css</code> + as deleções do <code>index.css</code> com a
+  classificação de três vias; (d) o zoo, <b>depois do grep</b>; (e) primitivas C0,
+  <code>ConfirmReview</code>, a fatia de a11y, a rolagem do preview; (f) o que este gate decidir.
+  <span class="ok">Nada disso começa antes da sua aprovação.</span>
+</p>
