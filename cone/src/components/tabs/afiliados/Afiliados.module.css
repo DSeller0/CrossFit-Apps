@@ -142,6 +142,19 @@
 .detailName{font-size:14px;font-weight:700;color:var(--cream);margin:0 0 4px}
 .detailSub{font-size:11px;color:var(--muted)}
 .detailSection{margin-top:var(--sp-4)}
+.sectionTitle{font-size:11px;font-weight:900;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin:0 0 var(--sp-2)}
+.hint{font-size:11px;color:var(--muted);line-height:1.5;margin:6px 0 0}
+
+/* Per-box theme row (#59 C5·b1 step e, moved from Configurações — #143's key,
+   settings.value.boxThemes[locationId], is unchanged). */
+.themeRow{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.themeRowLbl{font-size:12px;font-weight:600;color:var(--sub);flex-shrink:0}
+.themeSel{
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--cream);font-family:inherit;font-size:12px;padding:7px 9px;
+  cursor:pointer;outline:none;flex-shrink:0;max-width:60%;
+}
+.themeSel:focus-visible{border-color:var(--accent);outline:2px solid var(--accent);outline-offset:1px}
 
 .mobileWrap{padding:var(--sp-3);padding-bottom:70px;display:flex;flex-direction:column;gap:var(--sp-2)}
 .mobileHdr{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);margin:var(--sp-2) 0}

@@ -12,6 +12,7 @@ import AthleteAssignment from './AthleteAssignment.jsx'
 import DirectionPair from './DirectionPair.jsx'
 import AffiliateSessions from './AffiliateSessions.jsx'
 import ReceivableRail from './ReceivableRail.jsx'
+import AparenciaCard from './AparenciaCard.jsx'
 import { rateLabel, typeLabel, eventsForAffiliate } from './affiliateHelpers.js'
 import s from './Afiliados.module.css'
 
@@ -40,6 +41,7 @@ export default function AffiliatesPane({
   to,
   monthLabel = '',
   pixKey = '',
+  boxThemes = {},
   selectedId = null,
   expandedId = null,
   compact = false,
@@ -50,6 +52,7 @@ export default function AffiliatesPane({
   onEdit,
   onDelete,
   onToggleAthlete,
+  onSetTheme,
 }) {
   const sel = locs.find(l => l.id === selectedId) || null
 
@@ -102,6 +105,7 @@ export default function AffiliatesPane({
                     monthLabel={monthLabel}
                   />
                   <AthleteAssignment loc={l} athletes={athletes} onToggle={onToggleAthlete} />
+                  <AparenciaCard loc={l} theme={boxThemes[l.id]} onSetTheme={onSetTheme} />
                 </div>
               </AffiliateRow>
             ))}
@@ -195,6 +199,8 @@ export default function AffiliatesPane({
             <div className={s.detailSection}>
               <AthleteAssignment loc={sel} athletes={athletes} onToggle={onToggleAthlete} />
             </div>
+
+            <AparenciaCard loc={sel} theme={boxThemes[sel.id]} onSetTheme={onSetTheme} />
           </>
         )}
       </div>

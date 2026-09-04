@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { loadSettings, saveSettings, loadLocations } from '../../utils/storage'
+import { loadSettings, saveSettings } from '../../utils/storage'
 import { useSync } from '../../context/SyncContext'
 import { APP_CONFIG } from '../../utils/config'
 import { THEMES, applyTheme, getAppliedTheme } from '../../public/lib/theme.js'
@@ -33,12 +33,15 @@ export default function ConfigTab() {
   const [logo, setLogo] = useState(init.logo || '')
   const [flash, setFlash] = useState(false)
   const [theme, setTheme] = useState(getAppliedTheme)
-  // #143 — the gym-wide default and the per-box overrides. Both live on `settings`, NOT on
-  // the location row: `locations` is anon-locked (0006), so a public page could not read a
-  // theme stored there at all. Same reasoning useBoxWarnings.js records for #53.
+  // #143 — the gym-wide default. Lives on `settings`, NOT on the location row:
+  // `locations` is anon-locked (0006), so a public page could not read a theme
+  // stored there at all. Same reasoning useBoxWarnings.js records for #53.
+  // ⚠️ The PER-BOX overrides moved to Afiliados' Aparência card (#59 C5·b1 step e) —
+  // same `settings.value.boxThemes` key, written from that tab's own mutator. Do
+  // NOT reintroduce them here: this component doesn't hold `boxThemes` at all any
+  // more, so `save()` below can't accidentally write a stale copy over what
+  // Afiliados just saved.
   const [gymTheme, setGymTheme] = useState(init.theme || '')
-  const [boxThemes, setBoxThemes] = useState(init.boxThemes || {})
-  const [boxes] = useState(() => loadLocations().filter(l => l.type === 'box'))
 
   // ── Dados (#95/plans/69) — Salvar/Carregar/Limpar estado, relocated here from
   // the App.jsx chrome. sessions/setSessions/setEvents come straight from
@@ -97,21 +100,10 @@ export default function ConfigTab() {
       label: label.trim(),
       logo: logo.trim(),
       theme: gymTheme || undefined,
-      boxThemes,
     })
     setFlash(true)
     setTimeout(() => setFlash(false), 2000)
   }
-
-  const setBoxTheme = (id, val) =>
-    setBoxThemes(prev => {
-      const next = { ...prev }
-      // An empty value means "inherit the gym default" — store nothing rather than an
-      // empty string, so resolveTheme's isTheme() guard never has to special-case it.
-      if (val) next[id] = val
-      else delete next[id]
-      return next
-    })
 
   return (
     <div className={s.wrap}>
@@ -190,11 +182,11 @@ export default function ConfigTab() {
 
       <div className={s.section}>
         <div className={s.sectionTitle}>
-          <i className="ti ti-building-store" /> Tema por box
+          <i className="ti ti-building-store" /> Tema da academia
         </div>
         <p className={s.hint}>
-          O tema que os atletas veem nas páginas públicas. Quem já escolheu um tema no próprio
-          aparelho continua com o dele.
+          O tema que os atletas veem nas páginas públicas por padrão. Quem já escolheu um tema no
+          próprio aparelho continua com o dele.
         </p>
 
         <label className={s.themeRow}>
@@ -213,27 +205,13 @@ export default function ConfigTab() {
           </select>
         </label>
 
-        {boxes.length === 0 ? (
-          <p className={s.hint}>Nenhum box cadastrado ainda — crie um em Afiliados.</p>
-        ) : (
-          boxes.map(b => (
-            <label key={b.id} className={s.themeRow}>
-              <span className={s.themeRowLbl}>{b.name || 'Box sem nome'}</span>
-              <select
-                className={s.themeSel}
-                value={boxThemes[b.id] || ''}
-                onChange={e => setBoxTheme(b.id, e.target.value)}
-              >
-                <option value="">Usar o padrão da academia</option>
-                {THEMES.map(t => (
-                  <option key={t.id} value={t.id}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ))
-        )}
+        {/* The per-box overrides moved to each affiliate's own Aparência card
+            (#59 C5·b1 step e) — same settings.value.boxThemes key, one mutator,
+            written straight from Afiliados rather than bundled into Salvar here. */}
+        <p className={s.hint}>
+          O tema de um box específico agora se configura na ficha desse box, em Afiliados → Meus
+          afiliados.
+        </p>
       </div>
 
       <div className={s.saveRow}>

@@ -6,6 +6,8 @@ import {
   saveLocations,
   loadCoach,
   saveCoach,
+  loadSettings,
+  saveSettings,
   uid,
 } from '../../../utils/storage'
 import { useIsMobile } from '../../../hooks/useIsMobile'
@@ -42,6 +44,12 @@ const EMPTY_FORM = {
 export default function AfiliadosTab({ events = {} }) {
   const [locs, setLocs] = useState(loadLocations)
   const [coach, setCoach] = useState(loadCoach)
+  // The per-box theme picker (#59 C5·b1 step e), moved here from Configurações —
+  // same `settings.value.boxThemes` key (#143). Read once like `locs`/`coach`
+  // above; written straight from `setBoxTheme` below, never a `useEffect` on this
+  // state (CLAUDE.md's "a load/read path never writes" — the same shape `saveLoc`/
+  // `toggleAthlete` already use for `locations`).
+  const [boxThemes, setBoxThemes] = useState(() => loadSettings().boxThemes || {})
   const [pane, setPane] = useState('afiliados')
   const [selectedId, setSelectedId] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
@@ -181,6 +189,21 @@ export default function AfiliadosTab({ events = {} }) {
     saveLocations(next)
   }
 
+  // Writes `settings.value.boxThemes[locId]`, NOT `locations` — same reasoning
+  // Configurações' old version recorded: `locations` is anon-locked (0006), so a
+  // public page could never read a theme stored there. `...loadSettings()` spread
+  // is load-bearing (CLAUDE.md's blind-overwrite trap) — this must not clobber
+  // gymName/boxWarnings/theme/etc. An empty value means "inherit the gym default";
+  // store nothing rather than an empty string, so resolveTheme's isTheme() guard
+  // never has to special-case it.
+  const setBoxTheme = (locId, val) => {
+    const next = { ...boxThemes }
+    if (val) next[locId] = val
+    else delete next[locId]
+    setBoxThemes(next)
+    saveSettings({ ...loadSettings(), boxThemes: next })
+  }
+
   const copyLink = () => {
     navigator.clipboard
       ?.writeText(boxLink(qrLoc.id, window.location.origin))
@@ -237,6 +260,7 @@ export default function AfiliadosTab({ events = {} }) {
             to={to}
             monthLabel={monthLabel}
             pixKey={coach.pixKey}
+            boxThemes={boxThemes}
             compact={isMobile}
             selectedId={selectedId}
             expandedId={expandedId}
@@ -251,6 +275,7 @@ export default function AfiliadosTab({ events = {} }) {
             onEdit={startEdit}
             onDelete={loc => setConfirmDel(loc.id)}
             onToggleAthlete={toggleAthlete}
+            onSetTheme={setBoxTheme}
           />
         ) : pane === 'fechamento' ? (
           <FechamentoPane
