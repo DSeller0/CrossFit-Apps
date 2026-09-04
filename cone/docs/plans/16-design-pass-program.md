@@ -21,8 +21,8 @@ carried prerequisites that were long satisfied and an Agenda assignment that mov
 | C2 | Atletas + Afiliados | #56 | M→L | ✅ [plans/75](./75-design-c2-atletas-servicos.md), shipped 2026-08-28 (planned + gated 2026-08-13, wired + verified live 2026-08-28) | Apply standard; empty states; Serviços pane overflow; reserve #39 card slot. **Absorbed the Serviços → Afiliados restructure** ([plans/42](./42-afiliados-direction.md)). Grew a tail — see the note below the table (#160/#161/#162). |
 | C3 | Resultados (SPA) | #57 | ~~M~~ **L** | ✅ [plans/80](./80-design-c3-resultados.md), shipped 2026-08-30 | ⚠️ **LANE B — the only C-session that is** (see the correction under rule 1). Not a restyle: the user reports two of the three sub-tabs are unfound in live use, so **Leaderboard is deleted** (a second copy of `leaderboard.html`) and **Histórico is dissolved** into the Atletas ficha + a class read-back on the session. Rides #157 and #169 — **both closed with it.** ✅ **SHIPPED: the sub-tab bar is gone and Resultados is ONE surface** (a 260px week rail + THE CLASS), because the roster became the form container. Histórico's halves landed as the ficha's "Histórico de resultados" Card and as `ClassHeader`/`SessionKpis`. ✅ **[plans/44](./44-resultados-decomposition.md) shipped 2026-07-26** — `Resultados.jsx` 912 → a shell over `resultados/` (**49 raw lines** today; the "27" was a pre-reformat figure, re-measured 2026-08-29). |
 | C4 | Criador | #58 | L | ✅ [plans/37](./37-design-c4-criador.md) | #26 decomposition ([plans/35](./35-criador-decomposition.md)) + #92 text mode ([plans/36](./36-criador-text-mode.md)) ran first, as required. Standard + the 2026-07-21 layout brief. |
-| C5 | Publicador **+ Agenda** | #59 | L | 🟢 **planned 2026-08-30** — [plans/81](./81-design-c5-publicador-agenda.md), **four sessions**, all in Ready at once | ⚠️ **LANE B, both surfaces** (user-confirmed — see rule 1). ✅ #25 prerequisite satisfied ([plans/39](./39-publicador-decomposition.md), `e957b57`). **Re-measured: 7,674 raw lines across five files**, not the 408+2125 this row used to carry. Split: **Phase 0** (dead `MicButton` + 3 one-line bugs, no gate) → **C5·a Agenda** (closes #105) → **C5·b Publicador** (closes #113, #170, #15; deletes the `.b*` zoo) → **C5·c Relatório + #154**. ⚠️ **JULY→pt-BR is still live** (`toLocaleString('default')`, not an English literal) — user confirmed the fix; **"classify jsPDF hex as exempt" is a no-op** (jsPDF takes RGB triples, so none of the 409 hex literals is its). **#102 is not a gate** — C5·a reserves a slot. |
-| — | #43 themes | #43 | L | ⏳ open | Only after B/C: token-clean codebase, verified under 4 themes per page |
+| C5 | Publicador **+ Agenda** | #59 | L | ✅ **[plans/81](./81-design-c5-publicador-agenda.md) · [plans/82](./82-c5b1-publicador-shell-e-cores.md) · [plans/83](./83-c5b2-publicador-renderer.md)**, shipped 2026-09-04 (last piece: C5·b2/plans/83) | ⚠️ **LANE B, both surfaces** (user-confirmed — see rule 1). ✅ #25 prerequisite satisfied ([plans/39](./39-publicador-decomposition.md), `e957b57`). Split: **Phase 0** (dead `MicButton` + 3 one-line bugs) → **C5·a Agenda** (closed #105/#106) → **C5·b Publicador** (b1 shell+colour, b2 the parametric renderer — closed #113, #170, #15; deleted the `.b*` zoo; `index.css` ends with zero `TAB-OWNED → Publicador` tags). Both halves of this row's own scope — Publicador and Agenda — are done. ⚠️ **C5·c (Relatório + #154, [plans/81 §C5·c](./81-design-c5-publicador-agenda.md)) is NOT part of this row's scope** (the row title never named Relatório) and stays open, tracked on its own in BACKLOG.md — it does not block #43 or this row's ✅. |
+| — | #43 themes | #43 | L | 🔵 **resume point** | Only after B/C: token-clean codebase, verified under 4 themes per page. C5's Publicador+Agenda scope is done; #43 is the design-pass program's next and only remaining item (C5·c/#154 tracked separately, not a gate). |
 
 > 🔑 **C2 GREW A TAIL — three follow-on rows, added 2026-08-28.** C2 was planned and built to its
 > gate, at which point the user took the two design directions to a coach and settled on **mockup 51
@@ -77,7 +77,14 @@ any more; nothing has been picked from Ready yet.
 > C5·c Relatório — **all four in Ready at once, in order, ahead of every other board item** (user).
 > **When row 4 closes, this program has one item left: #43.**
 >
-> 🔑 **THE RESUME POINT IS NOW C5 (#59) — the LAST design-pass session.** C3 closed 2026-08-30.
+> ✅ **C5·b2 SHIPPED 2026-09-04 → [plans/83](./83-c5b2-publicador-renderer.md)** — the parametric
+> renderer (Layout · Blocos · Títulos · fit), closing this row's own scope (Publicador + Agenda are
+> both done: C5·a shipped 2026-08-30, C5·b1 shipped 2026-09-04, C5·b2 shipped 2026-09-04). **C5·c
+> (Relatório + #154) was never part of this row's title and continues as its own tracked item in
+> BACKLOG.md** — it does not gate the program. 🔑 **THE RESUME POINT IS NOW #43** — the design-pass
+> program's only remaining item.
+>
+> 🔑 ~~THE RESUME POINT IS NOW C5 (#59) — the LAST design-pass session.~~ C3 closed 2026-08-30.
 > ~~**The resume point is now C3 (#57) → C5 (#59).**~~ Both were unblocked: plans/44 left
 > `Resultados.jsx` a 27-line shell over `resultados/`, and plans/39 left C5 inheriting
 > `publicador/AgendaView.jsx` directly. ⚠️ **C3 has a prerequisite the board records but this

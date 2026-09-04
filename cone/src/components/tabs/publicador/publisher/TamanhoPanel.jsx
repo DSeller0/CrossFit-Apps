@@ -25,11 +25,12 @@ function Scale({ label, value, onStep, digits = 2 }) {
   )
 }
 
-// Tamanho — the third Aparência panel (#59 C5·b1 step d). Font + export scale, unchanged
-// from the old toolbar/settings drawer. The per-zone sliders are Dia-only (they always
-// were — the old preview modal showed them only while `previewTarget === 'daily'`) and
-// stay here rather than moving to a Layout panel that doesn't exist yet — plans/83 owns
-// the real zone-count/layout axis; this pass only relocates what already existed.
+// Tamanho — the third Aparência panel (#59 C5·b1 step d). Font (per-format since C5·b2/
+// plans/83 T9 — the container passes the current format's own fontScale/setter) + export
+// scale. The per-zone sliders are Dia-only (they always were — the old preview modal
+// showed them only while `previewTarget === 'daily'`) and stay here even though
+// LayoutPanel now owns zone COUNT/split (#59 C5·b2) — Tamanho is SIZE, Layout is
+// structure, a deliberate split rather than a leftover.
 export default function TamanhoPanel({
   fontScale,
   onFontScaleStep,

@@ -62,21 +62,34 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 >    [plans/82](./plans/82-c5b1-publicador-shell-e-cores.md) (b1, shipped) and
 >    [plans/83](./plans/83-c5b2-publicador-renderer.md) (b2, below) — the row this banner originally
 >    carried is superseded by those two.
-> 1. **#59 · C5·b2 — Publicador: the export renderer** · **L** · **Opus** (design, done) → **Sonnet**
->    (build) · [plans/83](./plans/83-c5b2-publicador-renderer.md). Layout · Blocos · Títulos · fit —
->    the artefacts become parametric. **Depends on b1** (the `--a-*` palette seam, the fixed-canvas
->    wrapper and the decomposed shell are its output) and must not start before b1 ships, which it now
->    has. Also fixes **B2** (Saturday/Sunday dropped from the Mês and Semana-calendar exports) and
->    resolves the `MobileEagles`/`MobileMegaMan` "Dia mobile" pair question b1 deliberately left open.
-> 2. **#59 · C5·c — Relatório + rate history** · **M** · **Sonnet** ·
->    [plans/81 §C5·c](./plans/81-design-c5-publicador-agenda.md). **Closes #154.** Runs **last** —
->    it consumes C5·a's shared filter, and #149's whole point is that #154 sits on top of tested
->    `billing.js`. ⚠️ #154's row names `Servicos.jsx`, which no longer exists (#161 absorbed it), and
->    `billing.js` now has **nine** importers while `calcTotal` has no date in its contract.
+> ✅ ~~1. #59 · C5·b2 — Publicador: the export renderer~~ **SHIPPED 2026-09-04** — see Done.
+>    [plans/83](./plans/83-c5b2-publicador-renderer.md). Layout (Dia zones + hidden-zone collapse ·
+>    Semana's 7-day Sunday-start picker · Mês's per-box session cells) · Blocos (5 card treatments +
+>    2 content toggles) · Títulos (per-format, was one shared `label`) · fit (per-format `fontScale`,
+>    manual bounded auto-shrink, a terminal floor state) — the artefacts are parametric now. Also
+>    fixed **B2** (Saturday/Sunday were dropped from the Mês and Semana-calendar exports) and kept
+>    `MobileEagles`/`MobileMegaMan` alive as a named "modelo" pair (Clássico/Impacto) on the Dia
+>    mobile format, per b1's deferred decision. `index.css` ends this row with **zero**
+>    `TAB-OWNED → Publicador` tags. ⚠️ **Two real bugs caught live, not by a test** (`fitCheck.js` has
+>    no jsdom layout): the fit check was comparing the wrong DOM node (a flex child with its own
+>    `overflow:hidden` doesn't grow its fixed-height ancestor's `scrollHeight`, so overflow was never
+>    detected at all until content was wildly overflowing) and a dedup optimisation was freezing
+>    `overflowInfo`'s object reference, silently stopping auto-shrink after one step. Both fixed
+>    before shipping — see plans/83's Done marker for detail.
+> 1. **#59 · C5·c — Relatório + rate history** · **M** · **Sonnet** ·
+>    [plans/81 §C5·c](./plans/81-design-c5-publicador-agenda.md). **Closes #154.** The only row left
+>    in this refill — it consumes C5·a's shared filter, and #149's whole point is that #154 sits on
+>    top of tested `billing.js`. ⚠️ #154's row names `Servicos.jsx`, which no longer exists (#161
+>    absorbed it), and `billing.js` now has **nine** importers while `calcTotal` has no date in its
+>    contract. ⚠️ **Not a gate on anything else** — plans/16's C5 row (Publicador + Agenda) already
+>    flipped to ✅ without waiting for this; #154 was never part of that row's own scope.
 >
-> **#59 closes with row 2**, plans/16's C5 row flips to ✅, and **#43** (four new themes) becomes the
-> program's only remaining item. **#171** (TV as a customisable display, filed by b1) is Icebox,
-> blocked on b2's descriptor model — not part of this closing sequence.
+> ✅ **plans/16's C5 row (Publicador + Agenda) flipped to ✅ 2026-09-04** — both halves of its own
+> scope shipped (C5·a Agenda, C5·b Publicador incl. b1+b2). **#43** (four new themes) is now the
+> design-pass program's resume point; **C5·c/#154 above continues independently** and does not gate
+> it. **#171** (TV as a customisable display, filed by b1) is Icebox and **no longer blocked** —
+> b2 shipped the descriptor model (`{skin, zones, days, cardStyle, content, titles, scale}`) it was
+> waiting on — but stays unranked until someone picks it.
 
 > 🟢 **REFILLED 2026-08-29 — one plan, five rows, from the full pass that ran the same day.**
 > The [2026-08-29 review](./reviews/2026-08-29.md) found seven rows in the surfaces #160/#161/#162
@@ -553,16 +566,17 @@ then the planning-session inputs, then everything else.
 
 ### Captured 2026-09-04 (planning session for plans/82/83)
 
-- **#171 TV as a customisable display** · unranked, **blocked on [plans/83](./plans/83-c5b2-publicador-renderer.md)
-  (#59 C5·b2) shipping first** · filed by [plans/82](./plans/82-c5b1-publicador-shell-e-cores.md) decision 13,
-  elaborated in plans/83's Notes. Once b2 ships, the Publicador export renderer stops hardcoding each
-  format's layout and becomes parametric — a WOD is a descriptor
-  (`{skin, zones, days, cardStyle, content, titles, scale}`), not markup. That descriptor model is the
-  premise: `src/public/tv/TV.jsx`'s wall display could adopt the same one instead of its own hand-rolled
-  layout, making the TV screen customisable the same way an export is. 🔴 **Must NOT inherit the
-  fixed-canvas/crop model** — TV is a wall display that reflows to whatever screen it's on; it never crops
-  to a fixed export canvas the way a PNG target does. Do not start before b2 ships — the descriptor shape
-  this row depends on doesn't exist yet.
+- **#171 TV as a customisable display** · unranked, **no longer blocked** — [plans/83](./plans/83-c5b2-publicador-renderer.md)
+  (#59 C5·b2) shipped 2026-09-04 · filed by [plans/82](./plans/82-c5b1-publicador-shell-e-cores.md) decision 13,
+  elaborated in plans/83's Notes. The Publicador export renderer no longer hardcodes each format's layout —
+  it reads a real descriptor now (`zoneCount`/`zoneSplit`/`visibleDays`/`blockTreatment`/`blockContent`/
+  `titles`/`fontScaleByFormat`, `layoutHelpers.js` + `blockTreatments.js` + `titleHelpers.js` +
+  `fitCheck.js`), matching the `{skin, zones, days, cardStyle, content, titles, scale}` shape this row
+  named. That descriptor model is the premise: `src/public/tv/TV.jsx`'s wall display could adopt the same
+  one instead of its own hand-rolled layout, making the TV screen customisable the same way an export is.
+  🔴 **Must NOT inherit the fixed-canvas/crop model** — TV is a wall display that reflows to whatever
+  screen it's on; it never crops to a fixed export canvas the way a PNG target does. Still unranked —
+  unblocked is not the same as picked; needs its own planning pass before it's Ready.
 
 ### From the 2026-08-29 full pass ([reviews/2026-08-29.md](./reviews/2026-08-29.md))
 
@@ -926,7 +940,7 @@ section lists what was checked and found **clean**, so it isn't re-raised next p
 | `--dim` | **2.27** | **2.49** | **1.75** | **3.60** | 🔴 still open — worst in the system |
 
 **#137 deliberately fixed only the three cells its plan owned** and left `--gold`/`--green`/`--muted`/`--dim` alone: those are palette-identity colors used app-wide, so moving them is a design decision this row has to take, not a scoped token repair. Non-text tokens for reference (1.4.11 wants 3:1 for control boundaries and **nothing here reaches it**, on any theme): `--border` 1.89 · 1.98 · 1.80 · 1.86, `--divider` 1.27 · 1.33 · 1.18 · 1.24 — #137 made the two differ (1.50:1 apart) but did not chase 3:1, which would put a card outline brighter than `--dim`. — *historical census follows, numbers superseded above:* the *mechanical per-file* portion (aria-labels, keyboard on the 60 click-divs, per-page headings) is **absorbed into the design-program sessions #50–#59** ([plans/16](./plans/16-design-pass-program.md) rule 2); what remains here is the site-wide work no single page session owns: heading/landmark architecture across all pages, aria-live/role="timer" for timer+TV countdown+leaderboard live regions, `--muted` contrast roles documentation (4.0:1 fails body text). Original census kept below for the per-page sessions to consume: ~32 icon-only buttons need aria-label; add aria-live to timer/leaderboard; `<main>` landmarks; document contrast roles (`--muted` 4.0:1 fails body text) · **+ TV rewrite (2026-07-04):** ClassPanel.jsx:62 bare `ti-trash` button (no aria-label), ClassPanel.jsx:115 clickable accordion `<div onClick>` (needs role/tabIndex/keyboard), countdown pill (aria-live/role="timer" — old `TV.jsx:240` ref stale, TV.jsx now 126 lines, gap still open), ClassPanel.jsx:131 roster list (aria-live/role="status") · **+ #37/#38 shared IntensityInput (2026-07-05, gap doubles across Criador+Exercícios):** `IntensityInput.jsx:56-59` "sugestão ✕" dismiss is a mouse-only `<span>` (no role/tabIndex/keyboard/aria-label), `IntensityInput.jsx:102` icon-only `ti-minus` remove-série (no accessible name), unit `<select>` unnamed (`Exercicios.jsx:391`, `IntensityInput.jsx:91/114`); low: Cargas-padrão inputs placeholder-only (`Exercicios.jsx:384/389/397`), IntensityInput fields use `<span class=lbl>` not `<label htmlFor>` (`:76/88-89/121`) · **⚠️ RESIZED 2026-07-05 (4th pass) — the gap is systemic, not a pocket:** full-`src/` grep found only **3** `role=`/`tabIndex` attributes and only **2** `aria-label` attributes in the entire codebase; **zero** `<main>` landmarks anywhere; only **1** heading tag total (`LoginScreen.jsx`'s `<h1>Cone</h1>`, the sole heading a screen-reader user ever encounters on this site). **60** click-only `<div>`/`<span onClick>` across 13 files (vs. the 2 line-items already listed above) — new concrete instances: `Schedule.jsx:366,410,444` (exercise-done checkboxes), `:995` (session-summary accordion), `:1231` (check-in row selector); `Atletas.jsx:351` (expand toggle), `:572` (athlete-row nav), `:754` (color-swatch/hidden-file-input proxy). Re-tagged M→L / Sonnet→Opus given the true scope (heading hierarchy + landmarks + keyboard support for 60 click-handlers is a site-wide pattern pass, not a checklist of ~32 buttons).
-- **#15 Design-token sweep — ABSORBED into design program (2026-07-09)** · — · each page's hex/radius slice ships inside its #50–#59 session ([plans/16](./plans/16-design-pass-program.md) rule 2); the two policy halves are **settled** and now live in CLAUDE.md: border-radius Option A (circles `50%` exempt, pills are rects; sweep the ~73 public rounded-rects per page) and font-weights (load Cinzel 500/800 on first touch; Amarante ships only 400 — Spirit Blossom bolds stay synthesized by design). Row kept only as the census pointer — **re-measured 2026-07-16 (full pass):** ~~93 hex in `src/public`~~ → **62 raw lines / ~39 real violations**, now concentrated almost entirely in #53's four pages (`tv/**` 17 — worst in public, `timer/**` 11, `index/**` 3, `recover/**` 1; plus `schedule/**` 3 scrims + `Nav` 1). **`leaderboard/**` is 0-of-any-kind** (the `#00b8d4` is gone), `me/**` and `shared/**` are comments only, `results/**` is 3 `rgba(0,0,0,…)` scrims — #50/#51/#52 each did their slice. Full-src **912** hex lines (was ~986): `Publicador.jsx` 305 (jsPDF-exempt), ~~`index.css` 284~~ → **237 after plans/40 (#99), file now 800 raw lines**, Criador 84, Servicos 64 (75 by 2026-07-18), Resultados 34, `config.js` 30, `tvController.module.css` 29 → **half the SPA debt is 2 files**; ⚠️ SPA lines were **not** classified into violation/data-color/comment, so any "~607 non-exempt" figure is an **upper bound** and `config.js`'s 30 are likely mostly exempt palettes. **Radius: public 38 raw / 17 circles / 19 real violations, zero `999px` pills left in public; full-src 311 raw / 43 circles / 268 non-circle — up from 230/27, so the SPA is still adding them.** **All 4 themes define exactly the same 29 tokens — zero per-theme gaps** (verified programmatically); the only 5 undefined tokens in the codebase sit in dead `App.css` (→ #73), and **`var(--card)` now has 0 usages** (CLAUDE.md rule updated). Per-file tables in the 2026-07-16 report. **2026-07-18 update: the *public* side is now essentially clean (public radius 0, FOUC 0/9, index/recover 0 hex, timer ~2) — the hex debt is SPA-concentrated and GROWING: `Criador.jsx` 84→102, `Servicos.jsx` 64→75; `index.css` 284 unchanged.** `Me.jsx:710` "Scale" pt-BR miss → #52. Close this row when the program ends; `--font-mono` decision → #54 (C0). (`Me.jsx:710` "Scale" pt-BR: **done in #52**, along with me.html's whole hex/radius slice.)
+- **#15 Design-token sweep — ABSORBED into design program (2026-07-09)** · — · each page's hex/radius slice ships inside its #50–#59 session ([plans/16](./plans/16-design-pass-program.md) rule 2); the two policy halves are **settled** and now live in CLAUDE.md: border-radius Option A (circles `50%` exempt, pills are rects; sweep the ~73 public rounded-rects per page) and font-weights (load Cinzel 500/800 on first touch; Amarante ships only 400 — Spirit Blossom bolds stay synthesized by design). Row kept only as the census pointer — **re-measured 2026-07-16 (full pass):** ~~93 hex in `src/public`~~ → **62 raw lines / ~39 real violations**, now concentrated almost entirely in #53's four pages (`tv/**` 17 — worst in public, `timer/**` 11, `index/**` 3, `recover/**` 1; plus `schedule/**` 3 scrims + `Nav` 1). **`leaderboard/**` is 0-of-any-kind** (the `#00b8d4` is gone), `me/**` and `shared/**` are comments only, `results/**` is 3 `rgba(0,0,0,…)` scrims — #50/#51/#52 each did their slice. Full-src **912** hex lines (was ~986): `Publicador.jsx` 305 (jsPDF-exempt), ~~`index.css` 284~~ → **237 after plans/40 (#99), file now 800 raw lines**, Criador 84, Servicos 64 (75 by 2026-07-18), Resultados 34, `config.js` 30, `tvController.module.css` 29 → **half the SPA debt is 2 files**; ⚠️ SPA lines were **not** classified into violation/data-color/comment, so any "~607 non-exempt" figure is an **upper bound** and `config.js`'s 30 are likely mostly exempt palettes. **Radius: public 38 raw / 17 circles / 19 real violations, zero `999px` pills left in public; full-src 311 raw / 43 circles / 268 non-circle — up from 230/27, so the SPA is still adding them.** **All 4 themes define exactly the same 29 tokens — zero per-theme gaps** (verified programmatically); the only 5 undefined tokens in the codebase sit in dead `App.css` (→ #73), and **`var(--card)` now has 0 usages** (CLAUDE.md rule updated). Per-file tables in the 2026-07-16 report. **2026-07-18 update: the *public* side is now essentially clean (public radius 0, FOUC 0/9, index/recover 0 hex, timer ~2) — the hex debt is SPA-concentrated and GROWING: `Criador.jsx` 84→102, `Servicos.jsx` 64→75; `index.css` 284 unchanged.** `Me.jsx:710` "Scale" pt-BR miss → #52. Close this row when the program ends; `--font-mono` decision → #54 (C0). (`Me.jsx:710` "Scale" pt-BR: **done in #52**, along with me.html's whole hex/radius slice.) ✅ **CLOSED 2026-09-04, per plans/83's (#59 C5·b2) own acceptance criterion** — Publicador was the last per-page slice this row was still tracking (`index.css`'s `dv-*`/`wk-*` sets, the last `TAB-OWNED` tokenisation debt, moved into `Publicador.module.css` with C5·b2). Every other page/tab already shipped its own slice inside its #50–#59 session; #43 (four new themes) is a separate net-new-theme item, not a sweep of existing debt, so it doesn't need this row open.
 - **#19 Body metrics persistence** · M · Sonnet · `body_metrics` Supabase table; me.html UI exists but save is a no-op
 - **#20 Result splits** · S · Sonnet · `splits: number[]` on result blocks; timer captures them but doesn't pass to submission
 - **#21 Leaderboard all-time PRs** · M · Sonnet · best performance per movement across all sessions
@@ -971,6 +985,57 @@ section lists what was checked and found **clean**, so it isn't re-raised next p
 - ✅ **#94 Audit prod: exercise names used in sessions but absent from the registry** · **S** · **DONE 2026-07-25 (58.5% → 11.9%)** → [`docs/reviews/94-session-registry-audit.md`](./reviews/94-session-registry-audit.md) (regenerate: `node scripts/audit-session-registry.mjs`). **775 name occurrences · 453 unresolved (58.5%) · 343 distinct misses**, bucketed: **130 likely-registerable movements** (the actionable list — Wall Ball ×9, Thruster, Lunge ×6, Squat Clean/Snatch, bare Pull-up, GHD, Devil's Press, Burpee Box Jump Over…), **179 prescription-in-the-name** ("800m Run", "15 GHD", "30 Wall Ball" — the movement is fine, a leading distance/count leaked in; `stripVolumeNoise` only strips a bare leading count, not "800m"/"200m Row" — extend it, don't register these), **26 compound/complex notation** (registry-unfixable by design), **8 structural noise** ("Rest"/"Then"/"Rounds"/"Bloco …" leaked into name fields — data hygiene, not a registry gap). **ROUND 1 SHIPPED 2026-07-25** (coach reviewed the report inline and signed off R1–R5): unresolved **58.5% → 43.4% from resolver changes alone**, and **→ 34.8%** once the registry additions land. Four generalizations in `registry.js` rather than a bigger alias table — extended `stripVolumeNoise` (distance/duration/rep-scheme/per-side/cal/zone/`heavy`), auto-indexed `Movement (SH)` shorthand entries, spaced spellings of every hyphenated entry, and a guarded plural fallback (see CLAUDE.md's `registry.js` bullet for the contract). Root cause of the "Corrida" miss was **not** a backwards alias but a **dangling pointer**: `'run'/'sprint'` both targeted a "Corrida" entry the registry has never had (the real one is `Run`) — two test fixtures had the same fiction baked in and were corrected to prod reality. `scripts/audit-session-registry.mjs` now reports **dangling aliases** against live prod every run, so the class can't recur silently. **Registry additions APPLIED to prod 2026-07-25** ([`docs/reviews/94-registry-additions.sql`](./reviews/94-registry-additions.sql), idempotent/alphabetical) — prod confirmed at Cardio 18 · Skill 27 · Força 24 · Acessórios 31, audit re-run reports **0 dangling aliases**, bucket 1 130 → 102 and bucket 2 179 → 106. **Round 1 closed at 34.8% unresolved (277/795).** **ROUND 2 (2026-07-25)** → [`docs/reviews/94-round2-decisions.md`](./reviews/94-round2-decisions.md). Code half shipped (slot letters `A- 3 Snatch Balance` · trailing tempo/pause notes · trailing parens · alternating suffix · misspellings · audit classifier now files structural labels as noise instead of "register me"), plus the coach's decision batches as aliases: **34.8% → 28.1%**. **Round-2 additions APPLIED to prod 2026-07-25** ([`94-round2-registry-additions.sql`](./reviews/94-round2-registry-additions.sql), 71 entries) — prod confirmed at Core 35 · LPO 34 · Força 33 · Acessórios 51 · Skill 41 · Cardio 19. **#94 CLOSED at 11.9% (95/795), 0 dangling aliases**, bucket 1 130 → 16 and bucket 2 179 → 19. That is effectively the floor: 51 of the 95 remaining are bucket 3 (compound notation) + bucket 4 (structural noise), unresolvable by design, and the rest are deliberately-skipped complex fragments and one-off singles. Going further means changing how compound lines are ENTERED (#92 already flags them `complex-detected`), not growing the registry. Related to #62.
 
 ## ✅ Done (recent)
+
+**2026-09-04 — #59 · C5·b2 — Publicador: the export renderer (Lane B)** ·
+[plans/83](./plans/83-c5b2-publicador-renderer.md) · `ed637ea` (pure helpers + ui/Toast) ·
+`85afedc` (T5/T6/T7/T9 wired into the views + container) · `2856182` (CSS migration) ·
+`f995b6f` (gallery + design cards) · `248b4d9` (two live-caught fit-check bugs + the
+`useFitAutoShrink` extraction). Closes **B2** (Saturday/Sunday were dropped from the Mês and
+Semana-calendar exports) and the Dia-mobile "modelo" question b1 deferred. Design (Opus) was
+done ahead of this session; this was build only.
+
+**The renderer stopped hardcoding and started reading a descriptor.** Four axes, one pass,
+because every view touches all four: **Layout** — Dia's zone count/split
+(`layoutHelpers.js`'s `distributeZones`, with the hidden-zone collapse rule stated in the
+Layout panel, never silent — the same failure mode as B1, in the same file), Semana's 7-day
+Sunday-start picker (`visibleWeekDates`, reusing `DAY_PT`), Mês's per-box session-name cells
+with a truncation rule (`monthCellSessions`, `sessionBoxIds` the only sanctioned read of a
+session's box tags). **Blocos** — 5 card treatments (Nu · Acento · Contorno · Faixa ·
+Etiqueta, `BlockHeader.jsx`, keyed off `--a-hdr` alone — family colouring stays dropped) plus
+2 content toggles, wired into Dia and Semana; Dia mobile/Semana mobile keep their own
+established look (kept as a named "modelo" pair, Clássico/Impacto, per the b1-inherited
+decision) but do respect the content toggles. **Títulos** — per-format `titles` (the old
+shared `label` migrates into `titles.semana` on first read) resolved against a computed
+default, so a Semana title no longer bleeds onto Dia's header; global Academia/Rodapé
+(Rodapé mobile-only). **Fit** — `fontScale` is per-format-kind now, not one shared number; a
+measurement effect reads the OFF-SCREEN farm node and a manual, bounded auto-shrink effect
+(never automatic) lands on a toast (new `ui/Toast`) or a terminal floor message; the overflow
+fact folds into the existing "Baixar imagem" `ConfirmReview` instead of a second dialog.
+
+**Two real bugs, both caught live against real prod-shaped data, neither by a test**
+(`fitCheck.js` has no jsdom layout to catch either). (1) The fit check compared the outer
+canvas root's `scrollHeight` against the target height — but Dia's `.dvWrap` is a flex column
+with an explicit height, and each zone column clips independently via its OWN
+`overflow:hidden`; a flex child never grows its own `scrollHeight` past a box an
+explicit-height ancestor already pinned, so the root read exactly 1080px regardless of how
+much a zone was actually cutting. Fixed by walking every `[data-fitblock]` element and asking
+whether ITS OWN nearest `overflow:hidden` ancestor is hiding it — correct no matter where the
+clip sits in the tree. (2) Once that surfaced a real warning, "Ajustar automaticamente"
+advanced exactly one step and stopped: the measurement effect deduped `setOverflowInfo` by
+returning the previous object when the summary looked unchanged (which it does step-to-step,
+since `cutBlocks`/`contentH` stay identical right up until the step that clears it) — freezing
+`overflowInfo`'s reference, which the auto-shrink effect only re-evaluates on change. Fixed by
+always setting a fresh object. Verified after the fix: a real dense Segunda WOD at 2.5×
+font warned "os 5 últimos blocos ficam cortados," auto-shrink stepped 2.5→1.1× over real
+increments and stopped cleanly once the warning cleared.
+
+`Publicador.jsx` grew past its 800-line ceiling (818) once T5–T9 landed; extracting the fit/
+auto-shrink state machine into `useFitAutoShrink.js` brought it to 752. `index.css` ends this
+row at **zero** `TAB-OWNED → Publicador` tags (the `dv-*`/`wk-*` sets moved into
+`Publicador.module.css`, camelCased; 9 rules with zero consumers left anywhere in `src/` were
+dropped rather than carried over dead) — only Criador's (#58) remain. Gallery: the
+`Publicador` group gained `pub-layout`/`pub-blocos`/`pub-titulos`/`pub-fit` sections plus a
+2-zone-collapse artefact case; synced to Claude Design.
 
 **2026-09-04 — #59 · C5·b1 — Publicador: the shell and the colour model (Lane B)** ·
 [plans/82](./plans/82-c5b1-publicador-shell-e-cores.md) · `e61634d` (JSX conversion) ·

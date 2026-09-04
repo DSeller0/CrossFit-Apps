@@ -2,11 +2,9 @@ import s from '../Publicador.module.css'
 
 // The 5 export targets (#59 C5·b1 step d, plans/82 decision 9 — "story" is not used,
 // and the two gym-named skins ("Eagles"/"MegaMan") disappear from the UI entirely).
-// ⚠️ `diaMobile` currently always renders MobileEaglesExportView. `MobileMegaManExportView`
-// is unchanged and still exported from mobileExportViews.jsx, but nothing in b1 reaches
-// it — plans/83's "Dia mobile pair" section is where a modelo picker (or a deletion)
-// puts it back within reach. Not a data loss: no capability that WRITES anything is
-// gone, only a second READ path, and only until b2.
+// `diaMobile` reaches BOTH MobileEaglesExportView and MobileMegaManExportView now — the
+// Layout panel's "modelo" choice (Clássico/Impacto, #59 C5·b2/plans/83) picks between them
+// in renderArtefact.jsx, keeping the pair alive as a named axis rather than a dead 2nd path.
 export const FORMATS = [
   {
     id: 'dia',
