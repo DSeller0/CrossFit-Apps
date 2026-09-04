@@ -299,7 +299,8 @@ through `ConfirmReview` with copy that states the server-sync + sessions-only sc
 construction (`min-height:48px`, no wrap), so every consumer (Criador's `cr.stickyHead`,
 Resultados'/Agenda's `.rp-sticktop`, the sync-conflict banner) reads the same token unconditionally.
 
-**Publicador (#25 · plans/39 → #59 · C5·b1 · plans/82 → C5·b2 · plans/83, shipped 2026-09-04)** —
+**Publicador (#25 · plans/39 → #59 · C5·b1 · plans/82 → C5·b2 · plans/83 → C5·c · plans/81 §C5·c,
+shipped 2026-09-04)** —
 `src/components/tabs/Publicador.jsx` is the `SchedulePublisher` container, **752 lines** (was
 2224 pre-redesign, 574 after b1, grew to 818 with C5·b2's T5–T9 axes then back down once
 `useFitAutoShrink.js` — the fit/auto-shrink state machine — was extracted), over
@@ -311,12 +312,14 @@ the 5 Blocos treatments, T5), `titleHelpers.js` (#59/C5·b2 — per-format compu
 auto-shrink state machine, T9), `exportViews.jsx` (`DailyExportView`/`WeeklyExportView`/
 `WeeklyCalendarExportView`/`CalendarExportView`), `mobileExportViews.jsx`
 (`MobileEaglesExportView`/`MobileMegaManExportView`/`MobileWeeklyExportView`), `events.jsx`
-(`EventFormInner` + `ReportModal`), `pixQr.js` (#162/plans/78
+(`EventFormInner` + `ReportModal` — see the Relatório/#154 paragraph below), `pixQr.js` (#162/plans/78
 — `qrToBase64` extracted from `ReportModal`'s own closure so `afiliados/InvoiceDetail.jsx` can render
 an identical Pix QR without a second hand-rolled copy), and **`AgendaView.jsx`** — rewritten by #59 ·
 C5·a, see its own section below. ✅ **The whole family is JSX now** (`createElement` count = 0,
-confirmed C5·b1's first step) — `Publicador.jsx`, `exportViews.jsx` and `mobileExportViews.jsx` were
-the last holdouts.
+repo-wide across `src/components/tabs/publicador/`) — `Publicador.jsx`/`exportViews.jsx`/
+`mobileExportViews.jsx` converted first (C5·b1); `events.jsx`'s `EventFormInner`/`ReportModal` (76
+calls, the family's actual last holdout — **not** caught by C5·b1's "whole family is JSX" claim,
+which predated checking this file) converted last, by C5·c.
 
 **The surface (#59 C5·b1, plans/82)** replaced a toggled preview panel + a 466-line settings drawer
 with: **one when-picker** (`publisher/WhenPicker.jsx` — month → week → day, always visible; the day
@@ -443,6 +446,41 @@ brought it back to 752. This pass closed **B2**, kept the Dia-mobile pair alive,
 backlog row **#171** (TV as a customisable display) — a WOD is a descriptor now
 (`{skin, zones, days, cardStyle, content, titles, scale}`), not markup — which must NOT inherit the
 fixed-canvas/crop model TV's wall display has no use for.
+
+**Publicador → Relatório + rate history (#59 · C5·c · plans/81 §C5·c, shipped 2026-09-04)** — the
+last of C5's four sessions, and the last `createElement` holdout in the publicador family.
+**Closes #154**, the versioned-rate-history half #104(c) deferred back on 2026-08-05: an event-level
+`rateSnapshot` (plans/71) freezes the rate at booking time but *categorically* cannot re-price an
+event booked **before** it shipped, so a coach changing a box's rate today used to silently re-price
+every un-snapshotted past event to today's number the next time a report touched it. `publicador/
+billing.js`'s `rateAsOf(loc, isoDate)` walks `loc.rateHistory` (`[{rate, rateUnit, currency, from},
+…]`, appended chronologically, never resorted) for the entry whose `from` is the latest date `<=
+isoDate`; `calcTotal`'s precedence gained a middle tier — `ev.rateSnapshot ?? rateAsOf(loc, ev.date)
+?? loc` — so an un-snapshotted event now prices at whatever was *actually* in effect on its own
+date, falling through to the location's current rate only when history doesn't reach that far back
+(a location that has never been edited since #154 shipped, or an event dated before any recorded
+version). `events.jsx`'s per-event "Valor" PDF cell resolves through the same function — one rate
+path, closing the two-rate-paths shape #104(b) was. `afiliados/Afiliados.jsx`'s `saveLoc` **appends
+a version** (`affiliateHelpers.js`'s `appendRateVersion`) instead of overwriting `rate` in place —
+only when rate/rateUnit/currency actually changed (renaming or recolouring a location mints no
+version), and it **backfills the OLD values at a `1970-01-01` epoch on a location's first versioned
+edit** — without that backfill, the very first rate change would still leave every past event
+uncovered by history and falling through to the *new* rate, reproducing the exact bug being fixed.
+`rateLabel` gained an optional `isoDate` param (`rateAsOf(loc, isoDate) ?? loc`); every existing
+caller (`AffiliateRow`, `DirectionPair`, `MeuPerfilPane`, `startEdit`) keeps calling it with none,
+reading the current head unchanged. All written straight from the `saveLoc` mutator, never a
+`useEffect` on `locs` (CLAUDE.md's own "a load/read path never writes" rule, applied to itself).
+
+`events.jsx`'s `EventFormInner` (the create/edit form both Agenda and this row's own booking flow
+use) and `ReportModal` — 76 `React.createElement` calls, none of it tokenized — convert to JSX.
+Both move onto `ui/Modal` (a real `role="dialog"`, a focus trap, Escape-to-close: none of which the
+old hand-rolled `position:fixed` overlays had); `EventFormInner`'s repeated label+input pattern
+collapses onto `ui/Input` (`as="select"`/`as="textarea"` cover the dropdowns/notes field, `hint`
+covers the "R$ 200/hora" rate readout under the Serviço select); `ReportModal`'s hardcoded hex and
+`var(--theme-accent)` move onto new `Publicador.module.css` tokens (`.optionsBox`/`.previewBox`/
+`.reportEmpty`/`.reportError` etc). `window.alert`/`window.prompt` are gone: a PDF generation
+failure renders as inline text instead of blocking, and copying a Pix code — success or failure —
+is a `ui/Toast` message instead of a blocking prompt asking the coach to select-and-copy by hand.
 
 **Agenda → the editor (#59 · C5·a · mockup 62 · plans/81, shipped 2026-08-30)** — `AgendaView.jsx`
 is now a ~330-line JSX container over `publicador/agenda/`, and the answer it is built on is a
@@ -886,7 +924,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 
 - Dev: `supabase start` (once per Docker session) then `npm run dev` inside `cone/` — talks to the local stack, never prod
 - Build: `npm run build` → `dist/`
-- Tests: `npm test` (**1052 tests across 31 files**, re-measured 2026-09-04 — #59/C5·b2/plans/83 added 22 in a new `publicador/layoutHelpers.test.js` (`distributeZones` incl. the hidden-zone collapse rule at 1/2/3 zonas, `zoneCollapseMessage`'s singular/plural + multi-zone join, `zoneColumnWidths`, `visibleWeekDates`'s day-picker filter, `monthCellSessions`'s per-box grouping + truncation) — the three pure helpers the plan's acceptance named explicitly; fit-checking (`fitCheck.js`) and title defaults (`titleHelpers.js`) are DOM/context-dependent and verified live instead, not unit tested. Earlier, #59/C5·b1/plans/82 added 16 in `publicador/exportPalette.test.js` (the 8-role table; `resolveExportThemeId`'s box-preset-then-coach-theme precedence; `resolveExportPalette`'s custom-override + literal-hex + unknown-id-fallthrough; the legacy-colour migration helpers). Earlier, #59/plans/81 C5·a added 78 in two new pure suites: `publicador/eventFilter.test.js` (48 — `matchesEvent`/`matchingAthleteIds` at both granularities, the personal-only athlete rule, `filterEvents`/`filterDay`, `activeCount`/`clearFilter`/`toggleInSet`, and both presets) and `publicador/agenda/agendaHelpers.test.js` (30 — `dayTitle`'s capitalisation, `monthStats`' padding-day exclusion, `seriesScopes`' three counts, and `SERIES_EDIT_FIELDS` never carrying `date`/`status`/`id`/`recurrenceGroup`). Earlier same-day, #59/plans/81 Phase 0 added 22 tests: 5 direct `monthGridCells` cases to `week.test.js` (a month starting Sunday, one starting Saturday, a 28-day February, a 6-row month, `inMonth` on padding days — it had 3 consumers and no direct test before this) and a **new** `publicador/exportHelpers.test.js` (17 tests: `buildProgressionLines`/`exLine`/`complexLine`/`buildMobileSession`/`getWeeksOfMonth`/`mfs`), unlocked by deleting the module-scope `window.SpeechRecognition` read that made the file unimportable under vitest's `environment:'node'`. Earlier same-day: #57/plans/80 added the #157 gate as a pure predicate (`isBlockResolved`/`saveGate`) plus `resultSummary`/`topScale`/`sessionProgress` and a session-scoped `calcSessionKPIs` to `resultadosHelpers.test.js`, the migrated `resultKpis`/`resultHistory` to `atletasHelpers.test.js` (⚠️ `calcKPIs`'s own suite was deleted with it — `freq` no longer exists to test), and `skipped` durability to `resultEntry.test.js`): wod, week, sessions, goals, registry, boxScope, exerciseGroups, resultEntry, theme (`public/lib/`) · entries (`public/`) · meHelpers (`public/me/`) · scheduleHelpers (`public/schedule/`) · pix, resultMappers, storage, config (`utils/`) · blockModel, textFormat (`criador/`) · exerciciosHelpers, resultadosHelpers, stateBackup, billing, atletasHelpers, affiliateHelpers, billingState, exportHelpers, exportPalette, **eventFilter**, **layoutHelpers** (`components/tabs/`) · **agendaHelpers** (`components/tabs/publicador/agenda/`) · useClassTracking (`hooks/`))
+- Tests: `npm test` (**1071 tests across 31 files**, re-measured 2026-09-04 — #59/C5·c/plans/81 added 19 to two EXISTING files, no new file: `publicador/billing.test.js` gained 11 (`rateAsOf`'s date-resolution table incl. the same-day-double-edit tiebreak and the before-every-version null case, plus 3 `calcTotal`-with-history precedence tests) and `afiliados/affiliateHelpers.test.js` gained 8 (`rateLabel`'s optional `isoDate` param, `appendRateVersion`'s epoch-backfill-on-first-edit + no-op-when-unchanged + append-without-rebackfilling cases). Earlier same day, #59/C5·b2/plans/83 added 22 in a new `publicador/layoutHelpers.test.js` (`distributeZones` incl. the hidden-zone collapse rule at 1/2/3 zonas, `zoneCollapseMessage`'s singular/plural + multi-zone join, `zoneColumnWidths`, `visibleWeekDates`'s day-picker filter, `monthCellSessions`'s per-box grouping + truncation) — the three pure helpers the plan's acceptance named explicitly; fit-checking (`fitCheck.js`) and title defaults (`titleHelpers.js`) are DOM/context-dependent and verified live instead, not unit tested. Earlier, #59/C5·b1/plans/82 added 16 in `publicador/exportPalette.test.js` (the 8-role table; `resolveExportThemeId`'s box-preset-then-coach-theme precedence; `resolveExportPalette`'s custom-override + literal-hex + unknown-id-fallthrough; the legacy-colour migration helpers). Earlier, #59/plans/81 C5·a added 78 in two new pure suites: `publicador/eventFilter.test.js` (48 — `matchesEvent`/`matchingAthleteIds` at both granularities, the personal-only athlete rule, `filterEvents`/`filterDay`, `activeCount`/`clearFilter`/`toggleInSet`, and both presets) and `publicador/agenda/agendaHelpers.test.js` (30 — `dayTitle`'s capitalisation, `monthStats`' padding-day exclusion, `seriesScopes`' three counts, and `SERIES_EDIT_FIELDS` never carrying `date`/`status`/`id`/`recurrenceGroup`). Earlier same-day, #59/plans/81 Phase 0 added 22 tests: 5 direct `monthGridCells` cases to `week.test.js` (a month starting Sunday, one starting Saturday, a 28-day February, a 6-row month, `inMonth` on padding days — it had 3 consumers and no direct test before this) and a **new** `publicador/exportHelpers.test.js` (17 tests: `buildProgressionLines`/`exLine`/`complexLine`/`buildMobileSession`/`getWeeksOfMonth`/`mfs`), unlocked by deleting the module-scope `window.SpeechRecognition` read that made the file unimportable under vitest's `environment:'node'`. Earlier same-day: #57/plans/80 added the #157 gate as a pure predicate (`isBlockResolved`/`saveGate`) plus `resultSummary`/`topScale`/`sessionProgress` and a session-scoped `calcSessionKPIs` to `resultadosHelpers.test.js`, the migrated `resultKpis`/`resultHistory` to `atletasHelpers.test.js` (⚠️ `calcKPIs`'s own suite was deleted with it — `freq` no longer exists to test), and `skipped` durability to `resultEntry.test.js`): wod, week, sessions, goals, registry, boxScope, exerciseGroups, resultEntry, theme (`public/lib/`) · entries (`public/`) · meHelpers (`public/me/`) · scheduleHelpers (`public/schedule/`) · pix, resultMappers, storage, config (`utils/`) · blockModel, textFormat (`criador/`) · exerciciosHelpers, resultadosHelpers, stateBackup, billing, atletasHelpers, affiliateHelpers, billingState, exportHelpers, exportPalette, **eventFilter**, **layoutHelpers** (`components/tabs/`) · **agendaHelpers** (`components/tabs/publicador/agenda/`) · useClassTracking (`hooks/`))
 - Lint: `npm run lint` (`eslint.config.js`) — gated in CI (below), **clean at `--max-warnings 0`** since #108/plans/51 took the react-hooks correctness cluster 84 → 0 (2026-07-27). The five rules (`set-state-in-effect`/`refs`/`immutability`/`purity`/`static-components`) are back on the plugin's default `error`; there is no floor left to ratchet, so **a new warning fails CI**. Every surviving instance carries an inline disable with a written reason at the site — see the `eslint-disable` policy below
 - CI: push to `main` → GitHub Actions → gh-pages deploy (cone/ subfolder); also runs `npm test` then `npm run lint` (plans/43, #32) — a lint regression fails the build same as a test failure
 

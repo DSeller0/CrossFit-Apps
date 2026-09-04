@@ -1,5 +1,10 @@
 # 81 — #59 · Design pass C5 — Publicador + Agenda
 
+> ✅ Done: #59 · #105 · #106 · #113 · #154 · #170 — 2026-08-30 → 2026-09-04 — see BACKLOG.md. All
+> four sessions shipped (Phase 0 → C5·a → C5·b, split into [plans/82](./82-c5b1-publicador-shell-e-cores.md)
+> + [plans/83](./83-c5b2-publicador-renderer.md) → C5·c); #171 was filed along the way and stays
+> Icebox, unblocked but unranked.
+>
 > C5 in the [design-pass program](./16-design-pass-program.md). **The last design-pass session.**
 >
 > ✅ **Lane B for both surfaces — user-confirmed 2026-08-30.** plans/16 rule 1's 2026-08-29

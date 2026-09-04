@@ -76,20 +76,21 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 >    detected at all until content was wildly overflowing) and a dedup optimisation was freezing
 >    `overflowInfo`'s object reference, silently stopping auto-shrink after one step. Both fixed
 >    before shipping — see plans/83's Done marker for detail.
-> 1. **#59 · C5·c — Relatório + rate history** · **M** · **Sonnet** ·
->    [plans/81 §C5·c](./plans/81-design-c5-publicador-agenda.md). **Closes #154.** The only row left
->    in this refill — it consumes C5·a's shared filter, and #149's whole point is that #154 sits on
->    top of tested `billing.js`. ⚠️ #154's row names `Servicos.jsx`, which no longer exists (#161
->    absorbed it), and `billing.js` now has **nine** importers while `calcTotal` has no date in its
->    contract. ⚠️ **Not a gate on anything else** — plans/16's C5 row (Publicador + Agenda) already
->    flipped to ✅ without waiting for this; #154 was never part of that row's own scope.
+> ✅ ~~1. #59 · C5·c — Relatório + rate history~~ **SHIPPED 2026-09-04** — see Done. **Closed #154.**
+>    ⚠️ #154's original row named `Servicos.jsx`, which no longer existed by the time this ran (#161
+>    had absorbed it) — `affiliateHelpers.js`/`afiliados/Afiliados.jsx` are where the versioning
+>    landed instead. **This was the fourth and last session of the refill.**
 >
 > ✅ **plans/16's C5 row (Publicador + Agenda) flipped to ✅ 2026-09-04** — both halves of its own
 > scope shipped (C5·a Agenda, C5·b Publicador incl. b1+b2). **#43** (four new themes) is now the
-> design-pass program's resume point; **C5·c/#154 above continues independently** and does not gate
-> it. **#171** (TV as a customisable display, filed by b1) is Icebox and **no longer blocked** —
-> b2 shipped the descriptor model (`{skin, zones, days, cardStyle, content, titles, scale}`) it was
-> waiting on — but stays unranked until someone picks it.
+> design-pass program's resume point. **#171** (TV as a customisable display, filed by b1) is
+> Icebox and **no longer blocked** — b2 shipped the descriptor model
+> (`{skin, zones, days, cardStyle, content, titles, scale}`) it was waiting on — but stays unranked
+> until someone picks it.
+>
+> 🔑 **This refill is fully spent — all four rows shipped 2026-08-30 → 2026-09-04.** Ready is empty;
+> refill via `/app-review` per WORKFLOW.md's review cadence, or pick `#43` directly (it's already
+> the named resume point above, just not yet run through a planning pass of its own).
 
 > 🟢 **REFILLED 2026-08-29 — one plan, five rows, from the full pass that ran the same day.**
 > The [2026-08-29 review](./reviews/2026-08-29.md) found seven rows in the surfaces #160/#161/#162
@@ -700,7 +701,7 @@ All are ranked into **Tier 4** above.*
 
 ### Captured 2026-08-05 (planning session for plans/69–71)
 
-- **#154 Rate history — re-pricing events that were already booked** · **M** · Sonnet · **the deferred half of #104(c), split out by user decision 2026-08-05. Belongs to #59's Agenda/Publicador design pass, not to its own session.** [plans/71](./plans/71-billing-extraction.md) ships an event-level `rateSnapshot` written at booking time, which stops the bleeding — but a snapshot **categorically cannot re-price events booked before it shipped**, so every pre-existing event keeps pricing at whatever the location's rate is *today*. Regenerating February's Relatório in July still prices February at July's rate for those. The fix that does reach them is a versioned `loc.rateHistory = [{rate, rateUnit, currency, from}, …]` resolved by the event's date — which reaches into `Servicos.jsx`'s `saveLoc` (append a version, don't overwrite `rate`), `startEdit` (read the head), `rateLabel` (resolve "current"), and gives every rate reader an as-of date. ⚠️ **Two constraints:** `Servicos.jsx` today contains **zero** billing arithmetic and writes straight from its mutators per CLAUDE.md's "a load/read path never writes" rule — adding date resolution must not reintroduce a `useEffect` on `locs`; and `currency` is a **free-text input** with no validation, so `'R$'` and `'R$ '` are distinct buckets in any grouping. 🔑 **Run it on top of plans/71's tested `billing.js`**, never before — that sequencing is the whole point of #149.
+- ✅ **[shipped 2026-09-04 · plans/81 §C5·c](./plans/81-design-c5-publicador-agenda.md)** (see Done) — **#154 Rate history — re-pricing events that were already booked** · **M** · Sonnet · **the deferred half of #104(c), split out by user decision 2026-08-05. Belonged to #59's Agenda/Publicador design pass, not to its own session.** [plans/71](./plans/71-billing-extraction.md) ships an event-level `rateSnapshot` written at booking time, which stops the bleeding — but a snapshot **categorically cannot re-price events booked before it shipped**, so every pre-existing event keeps pricing at whatever the location's rate is *today*. Regenerating February's Relatório in July still prices February at July's rate for those. The fix that does reach them is a versioned `loc.rateHistory = [{rate, rateUnit, currency, from}, …]` resolved by the event's date — which reaches into `Servicos.jsx`'s `saveLoc` (append a version, don't overwrite `rate`), `startEdit` (read the head), `rateLabel` (resolve "current"), and gives every rate reader an as-of date. ⚠️ **Two constraints:** `Servicos.jsx` today contains **zero** billing arithmetic and writes straight from its mutators per CLAUDE.md's "a load/read path never writes" rule — adding date resolution must not reintroduce a `useEffect` on `locs`; and `currency` is a **free-text input** with no validation, so `'R$'` and `'R$ '` are distinct buckets in any grouping. 🔑 **Run it on top of plans/71's tested `billing.js`**, never before — that sequencing is the whole point of #149.
 - **#153 Phone back button logic overhaul** · **M–L** · **Opus** · **user request, 2026-08-05.** ⚠️ **This is a decision before it is a build** — it collides head-on with a recorded "do not re-litigate" call (*"No React Router — URL params are sufficient at current scale"*), so the plan's first job is to establish whether that call still holds now that the app has ~10 pages, 9 SPA tabs and a dozen dismissible surfaces. Current state, measured 2026-08-05:
   - 🔴 **The SPA has ZERO history integration.** `App.jsx`'s `tab` is `useState` (seeded from `location.search` by a lazy initializer per plans/51), so the Android back gesture from **any** of the 9 tabs **exits the app entirely** — there is no way back to the tab you came from, and no `pushState`/`popstate` anywhere in `src/components/`.
   - **`me.html` is the only page with real history integration**, and it is the model: a `popstate` listener (`Me.jsx:131-132`), `pushState` on athlete select (`:186`) and on clearing (`:195`), `replaceState` to seed `?id=` without a spurious entry (`:167`).
@@ -985,6 +986,49 @@ section lists what was checked and found **clean**, so it isn't re-raised next p
 - ✅ **#94 Audit prod: exercise names used in sessions but absent from the registry** · **S** · **DONE 2026-07-25 (58.5% → 11.9%)** → [`docs/reviews/94-session-registry-audit.md`](./reviews/94-session-registry-audit.md) (regenerate: `node scripts/audit-session-registry.mjs`). **775 name occurrences · 453 unresolved (58.5%) · 343 distinct misses**, bucketed: **130 likely-registerable movements** (the actionable list — Wall Ball ×9, Thruster, Lunge ×6, Squat Clean/Snatch, bare Pull-up, GHD, Devil's Press, Burpee Box Jump Over…), **179 prescription-in-the-name** ("800m Run", "15 GHD", "30 Wall Ball" — the movement is fine, a leading distance/count leaked in; `stripVolumeNoise` only strips a bare leading count, not "800m"/"200m Row" — extend it, don't register these), **26 compound/complex notation** (registry-unfixable by design), **8 structural noise** ("Rest"/"Then"/"Rounds"/"Bloco …" leaked into name fields — data hygiene, not a registry gap). **ROUND 1 SHIPPED 2026-07-25** (coach reviewed the report inline and signed off R1–R5): unresolved **58.5% → 43.4% from resolver changes alone**, and **→ 34.8%** once the registry additions land. Four generalizations in `registry.js` rather than a bigger alias table — extended `stripVolumeNoise` (distance/duration/rep-scheme/per-side/cal/zone/`heavy`), auto-indexed `Movement (SH)` shorthand entries, spaced spellings of every hyphenated entry, and a guarded plural fallback (see CLAUDE.md's `registry.js` bullet for the contract). Root cause of the "Corrida" miss was **not** a backwards alias but a **dangling pointer**: `'run'/'sprint'` both targeted a "Corrida" entry the registry has never had (the real one is `Run`) — two test fixtures had the same fiction baked in and were corrected to prod reality. `scripts/audit-session-registry.mjs` now reports **dangling aliases** against live prod every run, so the class can't recur silently. **Registry additions APPLIED to prod 2026-07-25** ([`docs/reviews/94-registry-additions.sql`](./reviews/94-registry-additions.sql), idempotent/alphabetical) — prod confirmed at Cardio 18 · Skill 27 · Força 24 · Acessórios 31, audit re-run reports **0 dangling aliases**, bucket 1 130 → 102 and bucket 2 179 → 106. **Round 1 closed at 34.8% unresolved (277/795).** **ROUND 2 (2026-07-25)** → [`docs/reviews/94-round2-decisions.md`](./reviews/94-round2-decisions.md). Code half shipped (slot letters `A- 3 Snatch Balance` · trailing tempo/pause notes · trailing parens · alternating suffix · misspellings · audit classifier now files structural labels as noise instead of "register me"), plus the coach's decision batches as aliases: **34.8% → 28.1%**. **Round-2 additions APPLIED to prod 2026-07-25** ([`94-round2-registry-additions.sql`](./reviews/94-round2-registry-additions.sql), 71 entries) — prod confirmed at Core 35 · LPO 34 · Força 33 · Acessórios 51 · Skill 41 · Cardio 19. **#94 CLOSED at 11.9% (95/795), 0 dangling aliases**, bucket 1 130 → 16 and bucket 2 179 → 19. That is effectively the floor: 51 of the 95 remaining are bucket 3 (compound notation) + bucket 4 (structural noise), unresolvable by design, and the rest are deliberately-skipped complex fragments and one-off singles. Going further means changing how compound lines are ENTERED (#92 already flags them `complex-detected`), not growing the registry. Related to #62.
 
 ## ✅ Done (recent)
+
+**2026-09-04 — #59 · C5·c — Relatório + rate history (Lane B)** ·
+[plans/81 §C5·c](./plans/81-design-c5-publicador-agenda.md) · `1bc1066` (`rateAsOf` + `calcTotal`'s
+versioned-rate precedence) · `99af3a2` (`saveLoc` appends a rate version) · `e1197ad` (`events.jsx`'s
+last `createElement` holdout converts to JSX + C0 primitives). Closes **#154**. The last of the
+four C5 sessions.
+
+**#154's versioned rate history**, deferred since #104(c): `billing.js`'s `rateAsOf(loc, isoDate)`
+walks `loc.rateHistory` (`[{rate, rateUnit, currency, from}, …]`, appended chronologically) for
+the entry whose `from` is the latest date `<=isoDate`. `calcTotal`'s precedence gained a middle
+tier — `ev.rateSnapshot ?? rateAsOf(loc, ev.date) ?? loc` — so a rate change today can no longer
+retroactively re-price a past event that never got its own booking-time snapshot; it prices at
+whichever rate was actually in effect on the event's own date, falling back to the location's
+current rate only when history doesn't reach that far back. `events.jsx`'s per-event "Valor" PDF
+column resolves through the same function, closing the two-rate-paths failure mode #104(b) was.
+`afiliados/Afiliados.jsx`'s `saveLoc` appends a version (`affiliateHelpers.js`'s
+`appendRateVersion`) instead of overwriting `rate` in place — only when rate/rateUnit/currency
+actually changed, and backfilling the OLD values at a `1970-01-01` epoch on a location's first
+versioned edit, so the very first rate change is already correct rather than needing a second
+edit to "learn" the boundary. `rateLabel` gained an optional `isoDate` param; every existing
+caller (rows, `startEdit`, `DirectionPair`) keeps reading the current head. All from the mutator,
+never an effect on `locs` (CLAUDE.md's "a load/read path never writes").
+
+**`events.jsx`'s `EventFormInner`/`ReportModal` — the publicador family's last 76 `createElement`
+calls — convert to JSX**, closing the whole-program grep the plan names. Both move onto `ui/Modal`
+(gaining a real `role="dialog"`, a focus trap, and Escape-to-close — none of which the old
+hand-rolled `position:fixed` overlays had); `EventFormInner`'s repeated label+input pattern
+collapses onto `ui/Input` (`as="select"`/`as="textarea"` cover the dropdowns/notes, `hint` covers
+the "R$ 200/hora" rate readout); `ReportModal`'s hardcoded hex and `var(--theme-accent)` move onto
+new `Publicador.module.css` tokens. `window.alert`/`window.prompt` are gone — a PDF generation
+failure renders inline instead of blocking, and copying a Pix code (success or failure) is a
+`ui/Toast` instead of a blocking prompt asking the coach to select-and-copy it by hand.
+
+Live-verified at 1280×800 and 390×844 across all 4 themes: created and edited an event through
+the new Modal form (Escape correctly closes it, focus restores to the trigger); generated a
+Relatório PDF end to end (content matched the on-screen preview exactly — the #149 regression
+class); edited a location's rate and confirmed the resulting `rateHistory` shape in `localStorage`
+matches the unit-tested backfill exactly. Zero console errors throughout.
+
+**Program note:** #59's four sessions (Phase 0, C5·a, C5·b1+b2, C5·c) are all shipped. plans/16's
+C5 row and `#43`'s resume-point status were already set by C5·b2 (Publicador + Agenda was that
+row's own scope); this closes the one row C5·c added independently, and the Ready refill banner
+above is now fully spent — see WORKFLOW.md's review cadence for the next `/app-review`.
 
 **2026-09-04 — #59 · C5·b2 — Publicador: the export renderer (Lane B)** ·
 [plans/83](./plans/83-c5b2-publicador-renderer.md) · `ed637ea` (pure helpers + ui/Toast) ·
