@@ -28,14 +28,8 @@ import {
 } from './publicador/layoutHelpers'
 import { DEFAULT_BLOCK_TREATMENT, DEFAULT_BLOCK_CONTENT } from './publicador/blockTreatments'
 import { computedTitle } from './publicador/titleHelpers'
-import {
-  measureFit,
-  describeOverflow,
-  FONT_SCALE_FLOOR,
-  FONT_SCALE_CEIL,
-  AUTO_SHRINK_STEP,
-  AUTO_SHRINK_MAX_STEPS,
-} from './publicador/fitCheck'
+import { describeOverflow, FONT_SCALE_FLOOR, FONT_SCALE_CEIL } from './publicador/fitCheck'
+import { useFitAutoShrink } from './publicador/useFitAutoShrink'
 import Button from '../ui/Button'
 import Input from '../ui/Input'
 import EmptyState from '../ui/EmptyState'
@@ -139,14 +133,6 @@ function SchedulePublisher({ sessions, locations }) {
   const [footer, setFooter] = useState(_savedSettings.footer || '')
   const [mobileModel, setMobileModel] = useState(_savedSettings.mobileModel || 'classico')
   const [presenterOpen, setPresenterOpen] = useState(false)
-
-  // Fit (T9) — measured off the ExportFarm's own off-screen node (`previewRef`),
-  // never the transform:scale'd on-screen preview. `autoShrinking` drives a
-  // bounded measure→setState→effect→re-measure cycle scoped to THIS format's
-  // fontScale only (D1/D3) — see the two effects below.
-  const [overflowInfo, setOverflowInfo] = useState(null)
-  const [autoShrinking, setAutoShrinking] = useState(false)
-  const [shrinkToast, setShrinkToast] = useState('')
 
   // ── The colour model (#59 C5·b1 step c/d, plans/82) — device-local, never in
   // `settings`. `origin` is 'tema' (the coach's own resolveTheme) | a locationId
@@ -401,85 +387,33 @@ function SchedulePublisher({ sessions, locations }) {
     setTimeout(generateAndPrompt, 0)
   }
 
-  // ── Fit measurement (T9) — reads the off-screen farm node after the DOM has had a
-  // moment to settle from whatever just changed. A short timeout stands in for a
-  // layout-settle signal; comparing against the previous result before setState
-  // avoids re-render churn when nothing actually moved.
-  useEffect(() => {
-    const dims = FORMATS.find(f => f.id === format) || FORMATS[0]
-    const t = setTimeout(() => {
-      const fit = measureFit(previewRef.current, dims)
-      setOverflowInfo(prev =>
-        prev &&
-        fit &&
-        prev.overflowing === fit.overflowing &&
-        prev.cutBlocks === fit.cutBlocks &&
-        prev.contentH === fit.contentH
-          ? prev
-          : fit,
-      )
-    }, 30)
-    return () => clearTimeout(t)
-  }, [
-    format,
-    fontScaleByFormat,
-    zoneCount,
-    zoneSplit,
-    blockTreatment,
-    blockContent,
-    titles,
-    footer,
-    mobileModel,
-    visibleDays,
-    filteredSessions,
-    selectedDate,
-    gymName,
-    logoDataUrl,
-    logoScale,
-    currentWeekDates,
-    year,
-    month,
-    selectedWeekIdx,
-  ])
-
-  // ── Auto-shrink (D3) — MANUAL trigger only (`onAutoShrink` below sets
-  // `autoShrinking`), bounded, and touches ONLY the current format's fontScale
-  // (D1) — never another format's. Each step waits for the fit effect above to
-  // re-measure before deciding whether to take another step.
-  const shrinkStepsRef = useRef(0)
-  // A bounded state machine reacting to a DOM measurement taken by the OTHER effect,
-  // not a mirrored prop — each step below is gated on a fresh `overflowInfo`, never a
-  // synchronous while() (T9: the prototype's loop doesn't port to React as-is). It
-  // deliberately does NOT depend on `fontScaleByFormat`/`format`: advancing only on a
-  // fresh measurement, never on its own state write, is what stops it racing ahead of
-  // the DOM it exists to react to.
-  useEffect(() => {
-    if (!autoShrinking || !overflowInfo) return
-    if (!overflowInfo.overflowing) {
-      // The fit effect above just confirmed this format now fits — end the loop and
-      // announce the result (D3: auto-shrink must never be a silent mutation).
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAutoShrinking(false)
-      shrinkStepsRef.current = 0
-      const fmtLabel = (FORMATS.find(f => f.id === format) || {}).label || format
-      setShrinkToast(
-        `Fonte ajustada — ${(fontScaleByFormat[format] ?? DEFAULT_FONT_SCALE).toFixed(2)}× em ${fmtLabel}`,
-      )
-      return
-    }
-    const current = fontScaleByFormat[format] ?? DEFAULT_FONT_SCALE
-    if (current <= FONT_SCALE_FLOOR + 0.001 || shrinkStepsRef.current >= AUTO_SHRINK_MAX_STEPS) {
-      setAutoShrinking(false)
-      shrinkStepsRef.current = 0
-      return
-    }
-    shrinkStepsRef.current++
-    setFontScaleByFormat(m => ({
-      ...m,
-      [format]: Math.max(FONT_SCALE_FLOOR, +(current - AUTO_SHRINK_STEP).toFixed(2)),
-    }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [overflowInfo, autoShrinking])
+  const { overflowInfo, autoShrinking, triggerAutoShrink, shrinkToast, dismissToast } =
+    useFitAutoShrink({
+      previewRef,
+      format,
+      fontScaleByFormat,
+      setFontScaleByFormat,
+      watch: [
+        fontScaleByFormat,
+        zoneCount,
+        zoneSplit,
+        blockTreatment,
+        blockContent,
+        titles,
+        footer,
+        mobileModel,
+        visibleDays,
+        filteredSessions,
+        selectedDate,
+        gymName,
+        logoDataUrl,
+        logoScale,
+        currentWeekDates,
+        year,
+        month,
+        selectedWeekIdx,
+      ],
+    })
 
   if (!hasAny)
     return (
@@ -655,7 +589,7 @@ function SchedulePublisher({ sessions, locations }) {
               }
               overflowInfo={overflowInfo}
               autoShrinking={autoShrinking}
-              onAutoShrink={() => setAutoShrinking(true)}
+              onAutoShrink={triggerAutoShrink}
             />
           )}
         </div>
@@ -779,7 +713,7 @@ function SchedulePublisher({ sessions, locations }) {
         selectedWeekIdx={selectedWeekIdx}
       />
 
-      <Toast open={!!shrinkToast} message={shrinkToast} onDismiss={() => setShrinkToast('')} />
+      <Toast open={!!shrinkToast} message={shrinkToast} onDismiss={dismissToast} />
 
       <ConfirmReview
         open={!!downloadPrompt}

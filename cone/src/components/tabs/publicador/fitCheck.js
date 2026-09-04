@@ -22,23 +22,43 @@ export function targetHeight(dims) {
 
 // Blocks are tagged `data-fitblock` by every export view (a generic, view-agnostic
 // marker) so this stays one function instead of one per view.
+//
+// ⚠️ Fixed-canvas formats clip PER NESTED CONTAINER, not at the outer root: Dia's
+// `.dvWrap` is a flex column with an explicit height, and each zone column
+// (`.dvZone`/`.dvZoneBody`) has its OWN `overflow:hidden` — a flex child never
+// grows its own `scrollHeight` past a box an explicit-height ancestor already
+// pinned, so `root.scrollHeight` reads exactly `dims.h` even while a zone is
+// visibly cutting content (caught live, not in a unit test — this file has no
+// jsdom layout to catch it). The fix walks every `[data-fitblock]` element and
+// asks whether ITS OWN nearest `overflow:hidden` ancestor is actually hiding it,
+// which is correct regardless of how deep that ancestor sits in the tree.
 export function measureFit(farmEl, dims) {
   if (!farmEl) return null
   const root = farmEl.firstElementChild
   if (!root) return null
   const targetH = targetHeight(dims)
-  const contentH = root.scrollHeight
   const clips = !!dims.h
-  const overflowing = contentH > targetH + 1
-  let cutBlocks = 0
-  if (overflowing) {
-    const rootTop = root.getBoundingClientRect().top
-    root.querySelectorAll('[data-fitblock]').forEach(el => {
-      const top = el.getBoundingClientRect().top - rootTop
-      if (top + el.offsetHeight > targetH) cutBlocks++
-    })
+  const contentH = root.scrollHeight
+
+  if (!clips) {
+    return { overflowing: contentH > targetH + 1, contentH, targetH, clips, cutBlocks: 0 }
   }
-  return { overflowing, contentH, targetH, clips, cutBlocks }
+
+  let cutBlocks = 0
+  root.querySelectorAll('[data-fitblock]').forEach(el => {
+    let node = el.parentElement
+    while (node && node !== root.parentElement) {
+      const cs = getComputedStyle(node)
+      if (cs.overflowY === 'hidden' || cs.overflow === 'hidden') {
+        const bound = node.getBoundingClientRect()
+        const target = el.getBoundingClientRect()
+        if (target.bottom > bound.bottom + 1) cutBlocks++
+        break
+      }
+      node = node.parentElement
+    }
+  })
+  return { overflowing: cutBlocks > 0, contentH, targetH, clips, cutBlocks }
 }
 
 // The one-line fact for the size ConfirmReview (D2) — folds into b1's existing
