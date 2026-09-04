@@ -1,26 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
-import {
-  loadAthletes,
-  loadSettings,
-  saveSettings,
-  matchesAthlete,
-  toISO,
-} from '../../utils/storage'
+import { loadSettings, saveSettings, matchesAthlete, toISO } from '../../utils/storage'
 import { APP_CONFIG } from '../../utils/config'
-import PresenterView from '../PresenterView'
-import { MONTH_PT } from '../../public/lib/week.js'
 import { getWeeksOfMonth } from './publicador/exportHelpers'
-import {
-  DailyExportView,
-  WeeklyExportView,
-  WeeklyCalendarExportView,
-  CalendarExportView,
-} from './publicador/exportViews'
-import {
-  MobileEaglesExportView,
-  MobileMegaManExportView,
-  MobileWeeklyExportView,
-} from './publicador/mobileExportViews'
+import PresenterLauncher from './publicador/publisher/PresenterLauncher'
+import PublisherToolbar from './publicador/publisher/PublisherToolbar'
+import PreviewModal from './publicador/publisher/PreviewModal'
+import SettingsDrawer from './publicador/publisher/SettingsDrawer'
+import ExportFarm from './publicador/publisher/ExportFarm'
 
 // ── SchedulePublisher (default export) ───────────────────────────────────────
 function SchedulePublisher({ sessions }) {
@@ -461,7 +447,7 @@ function SchedulePublisher({ sessions }) {
       const padD = n => String(n).padStart(2, '0')
       const labels = APP_CONFIG.mobileWeeklyLabels || ['Mobile Semanal 01', 'Mobile Semanal 02']
       const lbl = (labels[variant === 'A' ? 0 : 1] || '')
-        .replace(/[^a-zA-Z0-9\u00C0-\u024F\-_]/g, '-')
+        .replace(/[^a-zA-Z0-9À-ɏ\-_]/g, '-')
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '')
         .slice(0, 40)
@@ -470,7 +456,7 @@ function SchedulePublisher({ sessions }) {
         (gymName || APP_CONFIG.gymName || '')
           .toLowerCase()
           .normalize('NFD')
-          .replace(/[\u0300-\u036F]/g, '')
+          .replace(/[̀-ͯ]/g, '')
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-|-$/g, '') || 'grade'
       const fname = `${gymSlugW}-${lbl}-${padD(mon.getDate())}${padD(mon.getMonth() + 1)}to${padD(fri.getDate())}${padD(fri.getMonth() + 1)}`
@@ -527,7 +513,7 @@ function SchedulePublisher({ sessions }) {
 
   const currentWeekDates = selectedWeek || defaultWeek
 
-  const dvColorsObj = {
+  const dvColors = {
     bg: dvBg,
     gymName: dvGymName,
     date: dvDate,
@@ -542,1573 +528,263 @@ function SchedulePublisher({ sessions }) {
     blockNotes: dvBlockNotes,
     divider: dvDivider,
   }
+  const wkColors = {
+    bg: wkBg,
+    header: wkHeader,
+    dateNum: wkDateNum,
+    mainTraining: wkMainTraining,
+    blockType: wkBlockType,
+    exName: wkExName,
+    divider: wkDivider,
+  }
+  const eaColors = {
+    gymName: eaGymName,
+    date: eaDate,
+    subtitle: eaSubtitle,
+    blockType: eaBlockType,
+    blockMeta: eaBlockMeta,
+    exName: eaExName,
+    intensity: eaIntensity,
+    blockHdr: eaBlockHdr,
+    divider: eaDivider,
+    note: noteColor,
+  }
+  const mmColors = {
+    gymName: mmGymName,
+    date: mmDate,
+    subtitle: mmSubtitle,
+    blockType: mmBlockType,
+    blockMetaBg: mmBlockMetaBg,
+    blockMetaText: mmBlockMetaText,
+    exName: mmExName,
+    intensity: mmIntensity,
+    blockHdr: mmBlockHdr,
+    divider: mmDivider,
+    note: noteColor,
+  }
   const _presenterDateKey = selectedDate || toISO(currentWeekDates[1])
   const _presenterSess = (filteredSessions[_presenterDateKey] || [])[0]
   const _presenterLogUrl = _presenterSess
     ? `https://dseller0.github.io/CrossFit-Apps/log.html?date=${_presenterDateKey}&session=${_presenterSess.id}`
     : ''
+
   return (
     <React.Fragment>
-      {presenterOpen && (
-        <PresenterView logUrl={_presenterLogUrl} onClose={() => setPresenterOpen(false)}>
-          <DailyExportView
-            sessions={filteredSessions}
-            label={label}
-            gymName={gymName}
-            fontScale={fontScale}
-            zoneScales={zoneScales}
-            blockTitleScales={blockTitleScales}
-            selectedDate={_presenterDateKey}
-            logoDataUrl={logoDataUrl}
-            logoScale={logoScale}
-            weekDates={currentWeekDates}
-            dvColors={dvColorsObj}
-          />
-        </PresenterView>
-      )}
+      <PresenterLauncher
+        open={presenterOpen}
+        logUrl={_presenterLogUrl}
+        onClose={() => setPresenterOpen(false)}
+        sessions={filteredSessions}
+        label={label}
+        gymName={gymName}
+        fontScale={fontScale}
+        zoneScales={zoneScales}
+        blockTitleScales={blockTitleScales}
+        selectedDate={_presenterDateKey}
+        logoDataUrl={logoDataUrl}
+        logoScale={logoScale}
+        weekDates={currentWeekDates}
+        dvColors={dvColors}
+      />
       <div>
-        <div className="pub-controls">
-          <input
-            type="file"
-            ref={logoInputRef}
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleLogoUpload}
-          />
-          <div className="fg" style={{ minWidth: '80px', alignItems: 'center' }}>
-            <span className="lbl">Logo</span>
-            <div
-              onClick={() => logoInputRef.current?.click()}
-              title="Clique para enviar o logo"
-              style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '6px',
-                border: logoDataUrl ? '2px solid #e87820' : '1.5px dashed #444',
-                background: '#111',
-                cursor: 'pointer',
-                overflow: 'hidden',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'border-color .15s',
-                flexShrink: 0,
-              }}
-            >
-              {logoDataUrl ? (
-                <img
-                  src={logoDataUrl}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '3px',
-                  }}
-                >
-                  <i
-                    className="ti ti-upload"
-                    style={{ fontSize: '18px', color: '#555' }}
-                    aria-hidden="true"
-                  />
-                  <span
-                    style={{
-                      fontSize: '9px',
-                      color: '#555',
-                      textTransform: 'uppercase',
-                      letterSpacing: '.05em',
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-            {logoDataUrl && (
-              <button
-                type="button"
-                className="b bd bsm"
-                style={{
-                  marginTop: '4px',
-                  padding: '2px 6px',
-                  fontSize: '10px',
-                  minHeight: '22px',
-                }}
-                onClick={() => setLogoDataUrl(null)}
-              >
-                <i className="ti ti-x" aria-hidden="true" />
-                {' Remover'}
-              </button>
-            )}
-          </div>
-          {logoDataUrl && (
-            <div className="fg" style={{ minWidth: '160px' }}>
-              <span className="lbl">{`Escala do logo — ${logoScale.toFixed(2)}×`}</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button
-                  type="button"
-                  className="b bsm"
-                  style={{ padding: '4px 8px', minHeight: '28px' }}
-                  onClick={() =>
-                    setLogoScale(s => Math.max(0.25, Math.round((s - 0.01) * 1000) / 1000))
-                  }
-                >
-                  −
-                </button>
-                <input
-                  type="range"
-                  min="0.25"
-                  max="4"
-                  step="0.01"
-                  value={logoScale}
-                  onChange={e => setLogoScale(parseFloat(e.target.value))}
-                  style={{ flex: 1, accentColor: '#e87820' }}
-                />
-                <button
-                  type="button"
-                  className="b bsm"
-                  style={{ padding: '4px 8px', minHeight: '28px' }}
-                  onClick={() =>
-                    setLogoScale(s => Math.min(4, Math.round((s + 0.01) * 1000) / 1000))
-                  }
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          )}
-          <div className="fg" style={{ flex: '1', minWidth: '140px' }}>
-            <span className="lbl">Nome da academia</span>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <input
-                placeholder="Cone"
-                value={gymName}
-                onChange={e => setGymName(e.target.value)}
-                style={{ flex: 1 }}
-              />
-              <select
-                value={filterAthlete?.id || ''}
-                onChange={e => {
-                  const aths = loadAthletes()
-                  const a = aths.find(x => x.id === e.target.value) || null
-                  setFilterAthlete(a)
-                  if (a) setGymName(a.name)
-                  else setGymName('')
-                }}
-                style={{
-                  width: '36px',
-                  fontFamily: 'inherit',
-                  fontSize: '13px',
-                  background: '#111',
-                  border: '1px solid #2e2e2e',
-                  borderRadius: '5px',
-                  color: '#888',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                  padding: '0 4px',
-                }}
-                title="Filtrar por atleta"
-              >
-                <option value="">👤</option>
-                {loadAthletes().map(a => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="fg" style={{ flex: '1', minWidth: '140px' }}>
-            <span className="lbl">Rótulo do período</span>
-            <input
-              placeholder="ex: Semana 4"
-              value={label}
-              onChange={e => setLabel(e.target.value)}
-            />
-          </div>
-          <div className="fg" style={{ minWidth: '180px' }}>
-            <span className="lbl">{`Escala da fonte — ${fontScale.toFixed(2)}×`}</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                type="button"
-                className="b bsm"
-                style={{ padding: '4px 8px', minHeight: '28px' }}
-                onClick={() =>
-                  setFontScale(f => Math.max(0.5, Math.round((f - 0.01) * 1000) / 1000))
-                }
-              >
-                −
-              </button>
-              <input
-                type="range"
-                min="0.5"
-                max="3"
-                step="0.01"
-                value={fontScale}
-                onChange={e => setFontScale(parseFloat(e.target.value))}
-                style={{ flex: 1, accentColor: '#e87820' }}
-              />
-              <button
-                type="button"
-                className="b bsm"
-                style={{ padding: '4px 8px', minHeight: '28px' }}
-                onClick={() => setFontScale(f => Math.min(3, Math.round((f + 0.01) * 1000) / 1000))}
-              >
-                +
-              </button>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-            <button
-              type="button"
-              className="b bsm"
-              onClick={() => {
-                const d = new Date(year, month - 1, 1)
-                setMonth(d.getMonth())
-                setYear(d.getFullYear())
-              }}
-            >
-              <i className="ti ti-chevron-left" aria-hidden="true" />
-            </button>
-            <span
-              style={{
-                fontSize: '13px',
-                color: '#ccc',
-                padding: '0 6px',
-                whiteSpace: 'nowrap',
-                lineHeight: '1',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              {`${MONTH_PT[month]} ${year}`}
-            </span>
-            <button
-              type="button"
-              className="b bsm"
-              onClick={() => {
-                const d = new Date(year, month + 1, 1)
-                setMonth(d.getMonth())
-                setYear(d.getFullYear())
-              }}
-            >
-              <i className="ti ti-chevron-right" aria-hidden="true" />
-            </button>
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              gap: '8px',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-            }}
-          >
-            <button
-              type="button"
-              className="b"
-              style={{
-                borderColor: 'var(--theme-accent)',
-                color: previewOpen ? 'var(--theme-accent-text)' : 'var(--theme-accent)',
-                background: previewOpen ? 'var(--theme-accent)' : 'transparent',
-              }}
-              onClick={() => setPreviewOpen(p => !p)}
-            >
-              <i className="ti ti-eye" aria-hidden="true" />
-              {previewOpen ? ' Fechar' : ' Pré-visualizar'}
-            </button>
-            <button
-              type="button"
-              className="b"
-              style={{
-                borderColor: '#9b59b6',
-                color: '#9b59b6',
-                background: 'transparent',
-              }}
-              onClick={() => setPresenterOpen(true)}
-              title="Modo TV — tela cheia com QR code para atletas"
-            >
-              <i className="ti ti-presentation" aria-hidden="true" />
-              {' Apresentar'}
-            </button>
-            <button
-              type="button"
-              className="b bsm"
-              title="Configurações"
-              onClick={() => setSettingsOpen(true)}
-            >
-              <i className="ti ti-settings" aria-hidden="true" />
-              {' Cores'}
-            </button>
-            <button
-              type="button"
-              className="b bsec"
-              style={{ fontSize: '12px' }}
-              onClick={() => {
-                setExportTarget('daily')
-                doExport('daily')
-              }}
-              disabled={exporting}
-            >
-              <i className="ti ti-download" aria-hidden="true" />
-              {' Diário'}
-            </button>
-            <button
-              type="button"
-              className="b bsec"
-              style={{ fontSize: '12px' }}
-              onClick={() => {
-                setExportTarget('semanal')
-                doExport('semanal')
-              }}
-              disabled={exporting}
-            >
-              <i className="ti ti-table-column" aria-hidden="true" />
-              {' Semanal'}
-            </button>
-            <button
-              type="button"
-              className="b bsec"
-              style={{ fontSize: '12px' }}
-              onClick={() => {
-                setExportTarget('calendar')
-                doExport('calendar')
-              }}
-              disabled={exporting}
-            >
-              <i className="ti ti-calendar-down" aria-hidden="true" />
-              {' Calendário'}
-            </button>
-            <button
-              type="button"
-              className="b bsm"
-              style={{
-                fontSize: '12px',
-                background: 'var(--theme-accent)',
-                color: 'var(--theme-accent-text)',
-                borderColor: 'var(--theme-accent)',
-                fontWeight: 700,
-              }}
-              onClick={() => doMobileExport('A')}
-              disabled={exporting}
-            >
-              <i className="ti ti-device-mobile" aria-hidden="true" />
-              {' Mobile 01'}
-            </button>
-            <button
-              type="button"
-              className="b bsm"
-              style={{
-                fontSize: '12px',
-                background: '#00b8d4',
-                color: '#000',
-                borderColor: '#00b8d4',
-                fontWeight: 700,
-              }}
-              onClick={() => doMobileExport('B')}
-              disabled={exporting}
-            >
-              <i className="ti ti-device-mobile" aria-hidden="true" />
-              {' Mobile 02'}
-            </button>
-            <button
-              type="button"
-              className="b bsm"
-              style={{
-                fontSize: '11px',
-                background: 'var(--theme-accent)',
-                color: 'var(--theme-accent-text)',
-                borderColor: 'var(--theme-accent)',
-                fontWeight: 700,
-              }}
-              onClick={() => doMobileWeeklyExport('A')}
-              disabled={exporting}
-            >
-              <i className="ti ti-layout-list" aria-hidden="true" />{' '}
-              {APP_CONFIG.mobileWeeklyLabels?.[0] || 'Mobile Semanal 01'}
-            </button>
-            <button
-              type="button"
-              className="b bsm"
-              style={{
-                fontSize: '11px',
-                background: '#00b8d4',
-                color: '#000',
-                borderColor: '#00b8d4',
-                fontWeight: 700,
-              }}
-              onClick={() => doMobileWeeklyExport('B')}
-              disabled={exporting}
-            >
-              <i className="ti ti-layout-list" aria-hidden="true" />{' '}
-              {APP_CONFIG.mobileWeeklyLabels?.[1] || 'Mobile Semanal 02'}
-            </button>
-            {exporting && <span style={{ fontSize: '11px', color: '#e87820' }}>Exportando...</span>}
-          </div>
-        </div>
-        {previewOpen && (
-          <div>
-            <div
-              style={{
-                display: 'flex',
-                gap: '6px',
-                marginBottom: '6px',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-              }}
-            >
-              <button
-                type="button"
-                className={`pvt ${previewTarget === 'semanal' ? 'on' : ''}`}
-                onClick={() => {
-                  setPreviewTarget('semanal')
-                  setSelectedDate(null)
-                }}
-              >
-                Semanal
-              </button>
-              {getWeeksOfMonth(year, month).map((week, wi) => {
-                const mon = week[1]
-                const fri = week[5]
-                const fmt = d =>
-                  d.toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                  })
-                const active = selectedWeekIdx === wi
-                return (
-                  <button
-                    key={wi}
-                    type="button"
-                    className="b bsm"
-                    style={{
-                      background: active ? 'var(--theme-accent)' : 'transparent',
-                      color: active ? 'var(--theme-accent-text)' : 'var(--theme-accent)',
-                      borderColor: 'var(--theme-accent)',
-                      fontSize: '11px',
-                      padding: '5px 10px',
-                    }}
-                    onClick={() => {
-                      setSelectedWeekIdx(wi)
-                      setSelectedWeek(week)
-                      setSelectedDate(null)
-                      setPreviewTarget('semanal')
-                    }}
-                  >
-                    {`${fmt(mon)}–${fmt(fri)}`}
-                  </button>
-                )
-              })}
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                gap: '6px',
-                marginBottom: '8px',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-              }}
-            >
-              <button
-                type="button"
-                className={`pvt ${previewTarget === 'daily' ? 'on' : ''}`}
-                onClick={() => setPreviewTarget('daily')}
-              >
-                Diário
-              </button>
-              {(() => {
-                const selWk = getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates
-                return selWk.slice(1).map(d => {
-                  const iso = toISO(d)
-                  const hasSession = !!filteredSessions[iso]?.length
-                  const active = selectedDate === iso
-                  return (
-                    <button
-                      key={iso}
-                      type="button"
-                      className="b bsm"
-                      style={{
-                        background: active ? 'var(--theme-accent)' : 'transparent',
-                        color: active
-                          ? 'var(--theme-accent-text)'
-                          : hasSession
-                            ? 'var(--theme-accent)'
-                            : '#444',
-                        borderColor: hasSession ? 'var(--theme-accent)' : '#333',
-                        fontSize: '11px',
-                        padding: '5px 10px',
-                      }}
-                      onClick={() => {
-                        setSelectedDate(iso)
-                        setSelectedWeek(selWk)
-                        setPreviewTarget('daily')
-                      }}
-                    >
-                      {d.toLocaleDateString('pt-BR', {
-                        weekday: 'short',
-                        day: '2-digit',
-                        month: '2-digit',
-                      })}
-                    </button>
-                  )
-                })
-              })()}
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                gap: '6px',
-                marginBottom: '8px',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-              }}
-            >
-              <button
-                type="button"
-                className={`pvt ${previewTarget === 'calendar' ? 'on' : ''}`}
-                onClick={() => setPreviewTarget('calendar')}
-              >
-                Exportar Mensal
-              </button>
-              <button
-                type="button"
-                className={`pvt ${previewTarget === 'mobileA' ? 'on' : ''}`}
-                style={
-                  previewTarget === 'mobileA'
-                    ? {
-                        background: 'var(--theme-accent)',
-                        borderColor: 'var(--theme-accent)',
-                        color: 'var(--theme-accent-text)',
-                      }
-                    : {
-                        color: 'var(--theme-accent)',
-                        borderColor: 'var(--theme-accent)',
-                      }
-                }
-                onClick={() => setPreviewTarget('mobileA')}
-              >
-                Mobile 01
-              </button>
-              <button
-                type="button"
-                className={`pvt ${previewTarget === 'mobileB' ? 'on' : ''}`}
-                style={
-                  previewTarget === 'mobileB'
-                    ? {
-                        background: '#00b8d4',
-                        borderColor: '#00b8d4',
-                        color: '#000',
-                      }
-                    : { color: '#00b8d4', borderColor: '#00b8d4' }
-                }
-                onClick={() => setPreviewTarget('mobileB')}
-              >
-                Mobile 02
-              </button>
-              <button
-                type="button"
-                className={`pvt ${previewTarget === 'mobileWeeklyA' ? 'on' : ''}`}
-                style={
-                  previewTarget === 'mobileWeeklyA'
-                    ? {
-                        background: 'var(--theme-accent)',
-                        borderColor: 'var(--theme-accent)',
-                        color: 'var(--theme-accent-text)',
-                      }
-                    : {
-                        color: 'var(--theme-accent)',
-                        borderColor: 'var(--theme-accent)',
-                      }
-                }
-                onClick={() => setPreviewTarget('mobileWeeklyA')}
-              >
-                {APP_CONFIG.mobileWeeklyLabels?.[0] || 'Mobile Semanal 01'}
-              </button>
-              <button
-                type="button"
-                className={`pvt ${previewTarget === 'mobileWeeklyB' ? 'on' : ''}`}
-                style={
-                  previewTarget === 'mobileWeeklyB'
-                    ? {
-                        background: '#00b8d4',
-                        borderColor: '#00b8d4',
-                        color: '#000',
-                      }
-                    : { color: '#00b8d4', borderColor: '#00b8d4' }
-                }
-                onClick={() => setPreviewTarget('mobileWeeklyB')}
-              >
-                {APP_CONFIG.mobileWeeklyLabels?.[1] || 'Mobile Semanal 02'}
-              </button>
-              <button
-                type="button"
-                className="b bsec bsm"
-                style={{ marginLeft: 'auto', fontSize: '12px' }}
-                onClick={() =>
-                  previewTarget === 'mobileA'
-                    ? doMobileExport('A')
-                    : previewTarget === 'mobileB'
-                      ? doMobileExport('B')
-                      : previewTarget === 'mobileWeeklyA'
-                        ? doMobileWeeklyExport('A')
-                        : previewTarget === 'mobileWeeklyB'
-                          ? doMobileWeeklyExport('B')
-                          : doExport(previewTarget)
-                }
-                disabled={exporting}
-              >
-                <i className="ti ti-download" aria-hidden="true" />
-                {` Baixar ${previewTarget === 'daily' ? 'Diário' : previewTarget === 'semanal' ? 'Semanal' : previewTarget === 'calendar' ? 'Calendário' : previewTarget === 'mobileA' ? 'Mobile 01' : previewTarget === 'mobileB' ? 'Mobile 02' : previewTarget === 'mobileWeeklyA' ? (APP_CONFIG.mobileWeeklyLabels?.[0] || 'Semanal 01').slice(0, 15) : (APP_CONFIG.mobileWeeklyLabels?.[1] || 'Semanal 02').slice(0, 15)}`}
-              </button>
-            </div>
-            {previewTarget === 'daily' && (
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '10px',
-                  marginBottom: '8px',
-                  flexWrap: 'wrap',
-                  background: '#161616',
-                  border: '1px solid #252525',
-                  borderRadius: '6px',
-                  padding: '10px 12px',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '10px',
-                    color: '#555',
-                    textTransform: 'uppercase',
-                    letterSpacing: '.07em',
-                    width: '100%',
-                    marginBottom: '2px',
-                  }}
-                >
-                  Tamanho da fonte — por zona
-                </span>
-                {[0, 1, 2].map(zi => (
-                  <div key={zi} className="fg" style={{ flex: 1, minWidth: '140px' }}>
-                    <span className="lbl" style={{ color: '#e87820' }}>
-                      {`Zona 0${zi + 1} — ${zoneScales[zi].toFixed(2)}×`}
-                    </span>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
-                    >
-                      <button
-                        type="button"
-                        className="b bsm"
-                        style={{ padding: '3px 7px', minHeight: '26px' }}
-                        onClick={() =>
-                          setZoneScales(s => {
-                            const n = [...s]
-                            n[zi] = Math.max(0.3, Math.round((n[zi] - 0.01) * 1000) / 1000)
-                            return n
-                          })
-                        }
-                      >
-                        −
-                      </button>
-                      <input
-                        type="range"
-                        min="0.3"
-                        max="3"
-                        step="0.01"
-                        value={zoneScales[zi]}
-                        onChange={e =>
-                          setZoneScales(s => {
-                            const n = [...s]
-                            n[zi] = parseFloat(e.target.value)
-                            return n
-                          })
-                        }
-                        style={{ flex: 1, accentColor: '#e87820' }}
-                      />
-                      <button
-                        type="button"
-                        className="b bsm"
-                        style={{ padding: '3px 7px', minHeight: '26px' }}
-                        onClick={() =>
-                          setZoneScales(s => {
-                            const n = [...s]
-                            n[zi] = Math.min(3, Math.round((n[zi] + 0.01) * 1000) / 1000)
-                            return n
-                          })
-                        }
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {previewTarget === 'daily' && (
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '10px',
-                  marginBottom: '8px',
-                  flexWrap: 'wrap',
-                  background: '#161616',
-                  border: '1px solid #252525',
-                  borderRadius: '6px',
-                  padding: '10px 12px',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '10px',
-                    color: '#555',
-                    textTransform: 'uppercase',
-                    letterSpacing: '.07em',
-                    width: '100%',
-                    marginBottom: '2px',
-                  }}
-                >
-                  Tamanho do título do bloco — por zona
-                </span>
-                {[0, 1, 2].map(zi => (
-                  <div key={zi} className="fg" style={{ flex: 1, minWidth: '140px' }}>
-                    <span className="lbl" style={{ color: '#f5c842' }}>
-                      {`Título Zona 0${zi + 1} — ${blockTitleScales[zi].toFixed(2)}×`}
-                    </span>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
-                    >
-                      <button
-                        type="button"
-                        className="b bsm"
-                        style={{ padding: '3px 7px', minHeight: '26px' }}
-                        onClick={() =>
-                          setBlockTitleScales(s => {
-                            const n = [...s]
-                            n[zi] = Math.max(0.3, Math.round((n[zi] - 0.01) * 1000) / 1000)
-                            return n
-                          })
-                        }
-                      >
-                        −
-                      </button>
-                      <input
-                        type="range"
-                        min="0.3"
-                        max="3"
-                        step="0.01"
-                        value={blockTitleScales[zi]}
-                        onChange={e =>
-                          setBlockTitleScales(s => {
-                            const n = [...s]
-                            n[zi] = parseFloat(e.target.value)
-                            return n
-                          })
-                        }
-                        style={{ flex: 1, accentColor: '#f5c842' }}
-                      />
-                      <button
-                        type="button"
-                        className="b bsm"
-                        style={{ padding: '3px 7px', minHeight: '26px' }}
-                        onClick={() =>
-                          setBlockTitleScales(s => {
-                            const n = [...s]
-                            n[zi] = Math.min(3, Math.round((n[zi] + 0.01) * 1000) / 1000)
-                            return n
-                          })
-                        }
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div
-              ref={previewWrapRef}
-              style={{
-                width: '100%',
-                marginBottom: '12px',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                background: '#000',
-                position: 'relative',
-              }}
-            >
-              <div
-                style={{
-                  transform: `scale(${previewTarget === 'mobileA' || previewTarget === 'mobileB' ? previewMobileScale : previewScale})`,
-                  transformOrigin: 'top left',
-                  width:
-                    previewTarget === 'mobileA' || previewTarget === 'mobileB'
-                      ? '1080px'
-                      : '1920px',
-                  pointerEvents: 'none',
-                }}
-              >
-                {previewTarget === 'daily' ? (
-                  <DailyExportView
-                    sessions={filteredSessions}
-                    label={label}
-                    gymName={gymName}
-                    fontScale={fontScale}
-                    zoneScales={zoneScales}
-                    blockTitleScales={blockTitleScales}
-                    selectedDate={selectedDate}
-                    logoDataUrl={logoDataUrl}
-                    logoScale={logoScale}
-                    weekDates={currentWeekDates}
-                    dvColors={{
-                      bg: dvBg,
-                      gymName: dvGymName,
-                      date: dvDate,
-                      mainTraining: dvMainTraining,
-                      zoneType: dvZoneType,
-                      blockLabel: dvBlockLabel,
-                      cap: dvCap,
-                      rounds: dvRounds,
-                      exName: dvExName,
-                      intensity: dvIntensity,
-                      note: dvNote,
-                      blockNotes: dvBlockNotes,
-                      divider: dvDivider,
-                    }}
-                  />
-                ) : previewTarget === 'semanal' ? (
-                  <WeeklyCalendarExportView
-                    sessions={filteredSessions}
-                    label={label}
-                    year={year}
-                    month={month}
-                    gymName={gymName}
-                    logoDataUrl={logoDataUrl}
-                    logoScale={logoScale}
-                    fontScale={fontScale}
-                    weekDates={getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates}
-                    wkColors={{
-                      bg: wkBg,
-                      header: wkHeader,
-                      dateNum: wkDateNum,
-                      mainTraining: wkMainTraining,
-                      blockType: wkBlockType,
-                      exName: wkExName,
-                      divider: wkDivider,
-                    }}
-                  />
-                ) : previewTarget === 'mobileWeeklyA' ? (
-                  <MobileWeeklyExportView
-                    sessions={filteredSessions}
-                    gymName={gymName}
-                    logoDataUrl={logoDataUrl}
-                    logoScale={logoScale}
-                    fontScale={fontScale}
-                    weekDates={getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates}
-                    variant="A"
-                  />
-                ) : previewTarget === 'mobileWeeklyB' ? (
-                  <MobileWeeklyExportView
-                    sessions={filteredSessions}
-                    gymName={gymName}
-                    logoDataUrl={logoDataUrl}
-                    logoScale={logoScale}
-                    fontScale={fontScale}
-                    weekDates={getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates}
-                    variant="B"
-                  />
-                ) : previewTarget === 'mobileA' ? (
-                  <MobileEaglesExportView
-                    sessions={filteredSessions}
-                    selectedDate={selectedDate}
-                    currentWeekDates={currentWeekDates}
-                    gymName={gymName}
-                    logoDataUrl={logoDataUrl}
-                    logoScale={logoScale}
-                    fontScale={fontScale}
-                    bgOverride={eaglesBg}
-                    colors={{
-                      gymName: eaGymName,
-                      date: eaDate,
-                      subtitle: eaSubtitle,
-                      blockType: eaBlockType,
-                      blockMeta: eaBlockMeta,
-                      exName: eaExName,
-                      intensity: eaIntensity,
-                      blockHdr: eaBlockHdr,
-                      divider: eaDivider,
-                      note: noteColor,
-                    }}
-                  />
-                ) : previewTarget === 'mobileB' ? (
-                  <MobileMegaManExportView
-                    sessions={filteredSessions}
-                    selectedDate={selectedDate}
-                    currentWeekDates={currentWeekDates}
-                    gymName={gymName}
-                    logoDataUrl={logoDataUrl}
-                    logoScale={logoScale}
-                    fontScale={fontScale}
-                    bgOverride={megaManBg}
-                    colors={{
-                      gymName: mmGymName,
-                      date: mmDate,
-                      subtitle: mmSubtitle,
-                      blockType: mmBlockType,
-                      blockMetaBg: mmBlockMetaBg,
-                      blockMetaText: mmBlockMetaText,
-                      exName: mmExName,
-                      intensity: mmIntensity,
-                      blockHdr: mmBlockHdr,
-                      divider: mmDivider,
-                      note: noteColor,
-                    }}
-                  />
-                ) : (
-                  <CalendarExportView
-                    sessions={filteredSessions}
-                    label={label}
-                    year={year}
-                    month={month}
-                    gymName={gymName}
-                    logoDataUrl={logoDataUrl}
-                    logoScale={logoScale}
-                    fontScale={fontScale}
-                    wkColors={{
-                      bg: wkBg,
-                      header: wkHeader,
-                      dateNum: wkDateNum,
-                      mainTraining: wkMainTraining,
-                      blockType: wkBlockType,
-                      exName: wkExName,
-                      divider: wkDivider,
-                    }}
-                  />
-                )}
-              </div>
-              <div
-                style={{
-                  height: `${previewTarget === 'mobileA' || previewTarget === 'mobileB' ? 'auto' : 1080}px`,
-                  ...(previewTarget === 'mobileA' || previewTarget === 'mobileB'
-                    ? {}
-                    : { marginTop: `-${1080 * previewScale}px` }),
-                  pointerEvents: 'none',
-                }}
-              />
-            </div>
-          </div>
-        )}
-        {settingsOpen && (
-          <React.Fragment>
-            <div className="settings-overlay" onClick={() => setSettingsOpen(false)} />
-            <div
-              className="settings-modal"
-              ref={el => {
-                if (!el) return
-                let dragging = false,
-                  ox = 0,
-                  oy = 0
-                const hdr = el.querySelector('.settings-drag-hdr')
-                if (!hdr || hdr._drag) return
-                hdr._drag = true
-                const down = e => {
-                  dragging = true
-                  const r = el.getBoundingClientRect()
-                  ox = e.clientX - r.left
-                  oy = e.clientY - r.top
-                  el.style.transform = 'none'
-                  document.addEventListener('mousemove', move)
-                  document.addEventListener('mouseup', up)
-                }
-                const move = e => {
-                  if (!dragging) return
-                  el.style.left = e.clientX - ox + 'px'
-                  el.style.top = e.clientY - oy + 'px'
-                }
-                const up = () => {
-                  dragging = false
-                  document.removeEventListener('mousemove', move)
-                  document.removeEventListener('mouseup', up)
-                }
-                hdr.addEventListener('mousedown', down)
-                if (!el._touch) {
-                  el._touch = true
-                  let ty = 0,
-                    swipeFromTop = false
-                  const pill = el.querySelector('.settings-sheet-pill')
-                  el.addEventListener(
-                    'touchstart',
-                    e => {
-                      ty = e.touches[0].clientY
-                      swipeFromTop = hdr.contains(e.target) || !!(pill && pill.contains(e.target))
-                    },
-                    { passive: true },
-                  )
-                  el.addEventListener(
-                    'touchend',
-                    e => {
-                      if (swipeFromTop && e.changedTouches[0].clientY - ty > 60)
-                        setSettingsOpen(false)
-                    },
-                    { passive: true },
-                  )
-                }
-              }}
-            >
-              <div className="settings-sheet-pill">
-                <div className="settings-sheet-pill-bar" />
-              </div>
-              <div className="settings-drag-hdr">
-                <i className="ti ti-grip-horizontal" style={{ color: '#555', fontSize: '16px' }} />
-                <span
-                  style={{
-                    fontSize: '13px',
-                    color: '#888',
-                    marginRight: '8px',
-                    flexShrink: 0,
-                  }}
-                >
-                  Configurações:
-                </span>
-                <select
-                  value={settingsView}
-                  onChange={e => setSettingsView(e.target.value)}
-                  style={{
-                    flex: 1,
-                    fontFamily: 'inherit',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    color: '#fff',
-                    background: '#2a2a2a',
-                    border: '1px solid #3a3a3a',
-                    borderRadius: '5px',
-                    padding: '4px 8px',
-                    outline: 'none',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <option value="daily">Diário</option>
-                  <option value="semanal">Semanal</option>
-                  <option value="calendar">Calendário</option>
-                  <option value="mobileEagles">Mobile 01</option>
-                  <option value="megaMan">Mobile 02</option>
-                </select>
-                <button
-                  type="button"
-                  className="b bd bsm"
-                  style={{
-                    marginLeft: '8px',
-                    padding: '3px 8px',
-                    minHeight: '24px',
-                    flexShrink: 0,
-                  }}
-                  onClick={() => setSettingsOpen(false)}
-                >
-                  <i className="ti ti-x" />
-                </button>
-              </div>
-              <div style={{ padding: '14px 16px' }}>
-                {(() => {
-                  const row = ([lbl, val, setter, id]) => (
-                    <div key={id} className="settings-row">
-                      <span className="settings-lbl">{lbl}</span>
-                      <div className="color-row">
-                        <div
-                          className="color-swatch"
-                          style={{ background: val }}
-                          onClick={() => document.getElementById('picker-' + id)?.click()}
-                        />
-                        <input
-                          type="color"
-                          id={'picker-' + id}
-                          value={val.startsWith('#') && val.length === 7 ? val : '#888888'}
-                          onChange={e => setter(e.target.value)}
-                        />
-                        <input
-                          type="text"
-                          className="color-input"
-                          value={val}
-                          onChange={e => {
-                            if (/^(#[0-9a-fA-F]{0,8}|rgba?.*)$/.test(e.target.value))
-                              setter(e.target.value)
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )
-                  const sections = {
-                    daily: [
-                      ['Fundo', dvBg, setDvBg, 'dv-bg'],
-                      ['Nome da academia', dvGymName, setDvGymName, 'dv-gn'],
-                      ['Data / dia', dvDate, setDvDate, 'dv-dt'],
-                      ['Treino principal', dvMainTraining, setDvMainTraining, 'dv-mt'],
-                      ['Tipo do bloco (zona)', dvZoneType, setDvZoneType, 'dv-zt'],
-                      ['Tipo do bloco (sub-bloco)', dvBlockLabel, setDvBlockLabel, 'dv-bl'],
-                      ['CAP / Rounds label', dvCap, setDvCap, 'dv-cp'],
-                      ['Rounds valor', dvRounds, setDvRounds, 'dv-rd'],
-                      ['Nome do exercício', dvExName, setDvExName, 'dv-en'],
-                      ['Intensidade / Carga', dvIntensity, setDvIntensity, 'dv-in'],
-                      ['Observação exercício', dvNote, setDvNote, 'dv-nt'],
-                      ['Notas do bloco', dvBlockNotes, setDvBlockNotes, 'dv-bn'],
-                      ['Divisor', dvDivider, setDvDivider, 'dv-dv'],
-                    ],
-                    semanal: [
-                      ['Fundo', wkBg, setWkBg, 'wk-bg'],
-                      ['Cabeçalho dias', wkHeader, setWkHeader, 'wk-hd'],
-                      ['Número da data', wkDateNum, setWkDateNum, 'wk-dn'],
-                      ['Treino principal', wkMainTraining, setWkMainTraining, 'wk-mt'],
-                      ['Tipo do bloco', wkBlockType, setWkBlockType, 'wk-bt'],
-                      ['Nome do exercício', wkExName, setWkExName, 'wk-en'],
-                      ['Divisor', wkDivider, setWkDivider, 'wk-dv'],
-                    ],
-                    calendar: [
-                      ['Fundo', wkBg, setWkBg, 'cal-bg'],
-                      ['Cabeçalho dias', wkHeader, setWkHeader, 'cal-hd'],
-                      ['Número da data', wkDateNum, setWkDateNum, 'cal-dn'],
-                      ['Treino principal', wkMainTraining, setWkMainTraining, 'cal-mt'],
-                      ['Tipo do bloco', wkBlockType, setWkBlockType, 'cal-bt'],
-                      ['Nome do exercício', wkExName, setWkExName, 'cal-en'],
-                      ['Divisor', wkDivider, setWkDivider, 'cal-dv'],
-                    ],
-                    mobileEagles: [
-                      ['Fundo', eaglesBg, setEaglesBg, 'ea-bg'],
-                      ['Nome da academia', eaGymName, setEaGymName, 'ea-gn'],
-                      ['Data / dia', eaDate, setEaDate, 'ea-dt'],
-                      ['Sub-título', eaSubtitle, setEaSubtitle, 'ea-st'],
-                      ['Tipo do bloco', eaBlockType, setEaBlockType, 'ea-bt'],
-                      ['Meta do bloco', eaBlockMeta, setEaBlockMeta, 'ea-bm'],
-                      ['Fundo do header', eaBlockHdr, setEaBlockHdr, 'ea-bh'],
-                      ['Nome do exercício', eaExName, setEaExName, 'ea-en'],
-                      ['Intensidade', eaIntensity, setEaIntensity, 'ea-in'],
-                      ['Divisor', eaDivider, setEaDivider, 'ea-dv'],
-                      ['Observação (ambos)', noteColor, setNoteColor, 'ea-nc'],
-                    ],
-                    megaMan: [
-                      ['Fundo', megaManBg, setMegaManBg, 'mm-bg'],
-                      ['Nome da academia', mmGymName, setMmGymName, 'mm-gn'],
-                      ['Data / dia', mmDate, setMmDate, 'mm-dt'],
-                      ['Sub-título', mmSubtitle, setMmSubtitle, 'mm-st'],
-                      ['Tipo do bloco', mmBlockType, setMmBlockType, 'mm-bt'],
-                      ['Meta bg', mmBlockMetaBg, setMmBlockMetaBg, 'mm-bmbg'],
-                      ['Meta texto', mmBlockMetaText, setMmBlockMetaText, 'mm-bmt'],
-                      ['Fundo do header', mmBlockHdr, setMmBlockHdr, 'mm-bh'],
-                      ['Nome do exercício', mmExName, setMmExName, 'mm-en'],
-                      ['Intensidade', mmIntensity, setMmIntensity, 'mm-in'],
-                      ['Divisor', mmDivider, setMmDivider, 'mm-dv'],
-                    ],
-                  }
-                  return (sections[settingsView] || []).map(row)
-                })()}
-              </div>
-              <div style={{ padding: '10px 16px', borderTop: '1px solid #252525' }}>
-                <div
-                  style={{
-                    fontSize: '11px',
-                    color: '#555',
-                    textTransform: 'uppercase',
-                    letterSpacing: '.07em',
-                    marginBottom: '8px',
-                  }}
-                >
-                  Resolução do export
-                </div>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  {[2, 3].map(s => (
-                    <button
-                      key={s}
-                      type="button"
-                      className="b bsm"
-                      style={{
-                        background: exportScale === s ? 'var(--theme-accent)' : 'transparent',
-                        color: exportScale === s ? 'var(--theme-accent-text)' : '#888',
-                        borderColor: exportScale === s ? 'var(--theme-accent)' : '#2e2e2e',
-                      }}
-                      onClick={() => setExportScale(s)}
-                    >
-                      {`${s}× ${s === 2 ? '(2160px)' : '(3240px)'}`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div
-                style={{
-                  padding: '8px 16px',
-                  borderTop: '1px solid #252525',
-                  display: 'flex',
-                  gap: '8px',
-                }}
-              >
-                <button
-                  type="button"
-                  className="b bsm"
-                  style={{ flex: 1 }}
-                  onClick={() => {
-                    const inp = document.createElement('input')
-                    inp.type = 'file'
-                    inp.accept = '.json'
-                    inp.onchange = e => {
-                      const file = e.target.files[0]
-                      if (!file) return
-                      const reader = new FileReader()
-                      reader.onload = ev => {
-                        try {
-                          const cfg = JSON.parse(ev.target.result)
-                          const set = (key, setter, val) => {
-                            if (val !== undefined) setter(val)
-                          }
-                          set('wkBg', setWkBg, cfg.wkBg)
-                          set('wkHeader', setWkHeader, cfg.wkHeader)
-                          set('wkDateNum', setWkDateNum, cfg.wkDateNum)
-                          set('wkMainTraining', setWkMainTraining, cfg.wkMainTraining)
-                          set('wkBlockType', setWkBlockType, cfg.wkBlockType)
-                          set('wkExName', setWkExName, cfg.wkExName)
-                          set('wkDivider', setWkDivider, cfg.wkDivider)
-                          set('dvBg', setDvBg, cfg.dvBg)
-                          set('dvGymName', setDvGymName, cfg.dvGymName)
-                          set('dvDate', setDvDate, cfg.dvDate)
-                          set('dvMainTraining', setDvMainTraining, cfg.dvMainTraining)
-                          set('dvZoneType', setDvZoneType, cfg.dvZoneType)
-                          set('dvBlockLabel', setDvBlockLabel, cfg.dvBlockLabel)
-                          set('dvCap', setDvCap, cfg.dvCap)
-                          set('dvRounds', setDvRounds, cfg.dvRounds)
-                          set('dvExName', setDvExName, cfg.dvExName)
-                          set('dvIntensity', setDvIntensity, cfg.dvIntensity)
-                          set('dvNote', setDvNote, cfg.dvNote)
-                          set('dvBlockNotes', setDvBlockNotes, cfg.dvBlockNotes)
-                          set('dvDivider', setDvDivider, cfg.dvDivider)
-                          set('eaGymName', setEaGymName, cfg.eaGymName)
-                          set('eaDate', setEaDate, cfg.eaDate)
-                          set('eaSubtitle', setEaSubtitle, cfg.eaSubtitle)
-                          set('eaBlockType', setEaBlockType, cfg.eaBlockType)
-                          set('eaBlockMeta', setEaBlockMeta, cfg.eaBlockMeta)
-                          set('eaExName', setEaExName, cfg.eaExName)
-                          set('eaIntensity', setEaIntensity, cfg.eaIntensity)
-                          set('eaBlockHdr', setEaBlockHdr, cfg.eaBlockHdr)
-                          set('eaDivider', setEaDivider, cfg.eaDivider)
-                          if (cfg.mobileEaglesBg) setEaglesBg(cfg.mobileEaglesBg)
-                          set('mmGymName', setMmGymName, cfg.mmGymName)
-                          set('mmDate', setMmDate, cfg.mmDate)
-                          set('mmSubtitle', setMmSubtitle, cfg.mmSubtitle)
-                          set('mmBlockType', setMmBlockType, cfg.mmBlockType)
-                          set('mmBlockMetaBg', setMmBlockMetaBg, cfg.mmBlockMetaBg)
-                          set('mmBlockMetaText', setMmBlockMetaText, cfg.mmBlockMetaText)
-                          set('mmExName', setMmExName, cfg.mmExName)
-                          set('mmIntensity', setMmIntensity, cfg.mmIntensity)
-                          set('mmBlockHdr', setMmBlockHdr, cfg.mmBlockHdr)
-                          set('mmDivider', setMmDivider, cfg.mmDivider)
-                          if (cfg.mobileMegaManBg) setMegaManBg(cfg.mobileMegaManBg)
-                          if (cfg.themeAccent) {
-                            APP_CONFIG.themeAccent = cfg.themeAccent
-                            document.documentElement.style.setProperty(
-                              '--theme-accent',
-                              cfg.themeAccent,
-                            )
-                          }
-                          if (cfg.themeAccentText) {
-                            APP_CONFIG.themeAccentText = cfg.themeAccentText
-                            document.documentElement.style.setProperty(
-                              '--theme-accent-text',
-                              cfg.themeAccentText,
-                            )
-                          }
-                          if (cfg.fontFamily) {
-                            APP_CONFIG.fontFamily = cfg.fontFamily
-                            document.documentElement.style.setProperty(
-                              '--export-font',
-                              cfg.fontFamily,
-                            )
-                            if (cfg.googleFontsUrl) {
-                              const gf = document.getElementById('gfonts')
-                              if (gf) gf.href = cfg.googleFontsUrl
-                            }
-                          }
-                          if (cfg.fontScale) setFontScale(cfg.fontScale)
-                          if (cfg.exportScale) setExportScale(cfg.exportScale)
-                          if (cfg.gymName) setGymName(cfg.gymName)
-                          alert('Config carregada! Verifique o preview e salve se estiver correto.')
-                        } catch (err) {
-                          alert('Erro ao ler o arquivo: ' + err.message)
-                        }
-                      }
-                      reader.readAsText(file)
-                    }
-                    inp.click()
-                  }}
-                >
-                  <i className="ti ti-upload" />
-                  {' Carregar config'}
-                </button>
-                <button
-                  type="button"
-                  className="b bsm"
-                  style={{ flex: 1 }}
-                  onClick={() => {
-                    const exportCfg = {
-                      appTitle: APP_CONFIG.appTitle,
-                      appDescription: APP_CONFIG.appDescription || '',
-                      scheduleTitle: APP_CONFIG.scheduleTitle || APP_CONFIG.appTitle,
-                      leaderboardTitle: APP_CONFIG.leaderboardTitle || APP_CONFIG.appTitle,
-                      logo: APP_CONFIG.logo || 'icon-192.png',
-                      fontFamily: APP_CONFIG.fontFamily || "'Arial Black',Arial,sans-serif",
-                      googleFontsUrl: APP_CONFIG.googleFontsUrl || '',
-                      themeAccent: APP_CONFIG.themeAccent,
-                      themeAccentText: APP_CONFIG.themeAccentText,
-                      gymName: gymName || APP_CONFIG.gymName,
-                      fontScale,
-                      logoScale: APP_CONFIG.logoScale || 1,
-                      zoneScales,
-                      blockTitleScales,
-                      mobileEaglesBg: eaglesBg,
-                      mobileMegaManBg: megaManBg,
-                      mobileExerciseNoteColor: noteColor,
-                      restDayLabel: APP_CONFIG.restDayLabel,
-                      mobileWeeklyLabels: APP_CONFIG.mobileWeeklyLabels,
-                      exportScale,
-                      blockColors: APP_CONFIG.blockColors || {},
-                      blockNames: APP_CONFIG.blockNames,
-                      athleteLevels: APP_CONFIG.athleteLevels,
-                      athleteGoals: APP_CONFIG.athleteGoals,
-                      wkBg,
-                      wkHeader,
-                      wkDateNum,
-                      wkMainTraining,
-                      wkBlockType,
-                      wkExName,
-                      wkDivider,
-                      dvBg,
-                      dvGymName,
-                      dvDate,
-                      dvMainTraining,
-                      dvZoneType,
-                      dvBlockLabel,
-                      dvCap,
-                      dvRounds,
-                      dvExName,
-                      dvIntensity,
-                      dvNote,
-                      dvBlockNotes,
-                      dvDivider,
-                      eaGymName,
-                      eaDate,
-                      eaSubtitle,
-                      eaBlockType,
-                      eaBlockMeta,
-                      eaExName,
-                      eaIntensity,
-                      eaBlockHdr,
-                      eaDivider,
-                      mmGymName,
-                      mmDate,
-                      mmSubtitle,
-                      mmBlockType,
-                      mmBlockMetaBg,
-                      mmBlockMetaText,
-                      mmExName,
-                      mmIntensity,
-                      mmBlockHdr,
-                      mmDivider,
-                    }
-                    const raw = window.prompt('Nome do arquivo (sem extensão):', 'config')
-                    if (raw === null) return
-                    const fname = raw.trim().replace(/[^a-zA-Z0-9_-]/g, '-') || 'config'
-                    const blob = new Blob([JSON.stringify(exportCfg, null, 2)], {
-                      type: 'application/json',
-                    })
-                    const a = document.createElement('a')
-                    a.download = fname + '.json'
-                    a.href = URL.createObjectURL(blob)
-                    a.click()
-                    URL.revokeObjectURL(a.href)
-                  }}
-                >
-                  <i className="ti ti-download" />
-                  {' Salvar config.json'}
-                </button>
-              </div>
-              <div
-                style={{
-                  padding: '4px 16px 10px',
-                  fontSize: '11px',
-                  color: '#444',
-                }}
-              >
-                Cores também configuráveis em config.json no GitHub.
-              </div>
-            </div>
-          </React.Fragment>
-        )}
-        <div
-          style={{
-            position: 'fixed',
-            left: '-9999px',
-            top: '-9999px',
-            pointerEvents: 'none',
-            zIndex: -1,
-            overflow: 'hidden',
+        <PublisherToolbar
+          logoInputRef={logoInputRef}
+          onLogoUpload={handleLogoUpload}
+          logoDataUrl={logoDataUrl}
+          setLogoDataUrl={setLogoDataUrl}
+          logoScale={logoScale}
+          setLogoScale={setLogoScale}
+          gymName={gymName}
+          setGymName={setGymName}
+          filterAthlete={filterAthlete}
+          setFilterAthlete={setFilterAthlete}
+          label={label}
+          setLabel={setLabel}
+          fontScale={fontScale}
+          setFontScale={setFontScale}
+          month={month}
+          setMonth={setMonth}
+          year={year}
+          setYear={setYear}
+          previewOpen={previewOpen}
+          setPreviewOpen={setPreviewOpen}
+          setPresenterOpen={setPresenterOpen}
+          setSettingsOpen={setSettingsOpen}
+          exporting={exporting}
+          setExportTarget={setExportTarget}
+          doExport={doExport}
+          doMobileExport={doMobileExport}
+          doMobileWeeklyExport={doMobileWeeklyExport}
+        />
+        <PreviewModal
+          open={previewOpen}
+          year={year}
+          month={month}
+          previewTarget={previewTarget}
+          setPreviewTarget={setPreviewTarget}
+          selectedWeekIdx={selectedWeekIdx}
+          setSelectedWeekIdx={setSelectedWeekIdx}
+          setSelectedWeek={setSelectedWeek}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          currentWeekDates={currentWeekDates}
+          filteredSessions={filteredSessions}
+          zoneScales={zoneScales}
+          setZoneScales={setZoneScales}
+          blockTitleScales={blockTitleScales}
+          setBlockTitleScales={setBlockTitleScales}
+          previewWrapRef={previewWrapRef}
+          previewScale={previewScale}
+          previewMobileScale={previewMobileScale}
+          label={label}
+          gymName={gymName}
+          fontScale={fontScale}
+          logoDataUrl={logoDataUrl}
+          logoScale={logoScale}
+          exporting={exporting}
+          doExport={doExport}
+          doMobileExport={doMobileExport}
+          doMobileWeeklyExport={doMobileWeeklyExport}
+          dvColors={dvColors}
+          wkColors={wkColors}
+          eaColors={eaColors}
+          mmColors={mmColors}
+          eaglesBg={eaglesBg}
+          megaManBg={megaManBg}
+        />
+        <SettingsDrawer
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          settingsView={settingsView}
+          setSettingsView={setSettingsView}
+          fields={{
+            dvBg,
+            setDvBg,
+            dvGymName,
+            setDvGymName,
+            dvDate,
+            setDvDate,
+            dvMainTraining,
+            setDvMainTraining,
+            dvZoneType,
+            setDvZoneType,
+            dvBlockLabel,
+            setDvBlockLabel,
+            dvCap,
+            setDvCap,
+            dvRounds,
+            setDvRounds,
+            dvExName,
+            setDvExName,
+            dvIntensity,
+            setDvIntensity,
+            dvNote,
+            setDvNote,
+            dvBlockNotes,
+            setDvBlockNotes,
+            dvDivider,
+            setDvDivider,
+            wkBg,
+            setWkBg,
+            wkHeader,
+            setWkHeader,
+            wkDateNum,
+            setWkDateNum,
+            wkMainTraining,
+            setWkMainTraining,
+            wkBlockType,
+            setWkBlockType,
+            wkExName,
+            setWkExName,
+            wkDivider,
+            setWkDivider,
+            eaGymName,
+            setEaGymName,
+            eaDate,
+            setEaDate,
+            eaSubtitle,
+            setEaSubtitle,
+            eaBlockType,
+            setEaBlockType,
+            eaBlockMeta,
+            setEaBlockMeta,
+            eaExName,
+            setEaExName,
+            eaIntensity,
+            setEaIntensity,
+            eaBlockHdr,
+            setEaBlockHdr,
+            eaDivider,
+            setEaDivider,
+            eaglesBg,
+            setEaglesBg,
+            noteColor,
+            setNoteColor,
+            mmGymName,
+            setMmGymName,
+            mmDate,
+            setMmDate,
+            mmSubtitle,
+            setMmSubtitle,
+            mmBlockType,
+            setMmBlockType,
+            mmBlockMetaBg,
+            setMmBlockMetaBg,
+            mmBlockMetaText,
+            setMmBlockMetaText,
+            mmExName,
+            setMmExName,
+            mmIntensity,
+            setMmIntensity,
+            mmBlockHdr,
+            setMmBlockHdr,
+            mmDivider,
+            setMmDivider,
+            megaManBg,
+            setMegaManBg,
           }}
-        >
-          <div ref={exportDailyRef}>
-            <DailyExportView
-              sessions={filteredSessions}
-              label={label}
-              gymName={gymName}
-              fontScale={fontScale}
-              zoneScales={zoneScales}
-              blockTitleScales={blockTitleScales}
-              selectedDate={selectedDate}
-              logoDataUrl={logoDataUrl}
-              logoScale={logoScale}
-              weekDates={currentWeekDates}
-              dvColors={{
-                bg: dvBg,
-                gymName: dvGymName,
-                date: dvDate,
-                mainTraining: dvMainTraining,
-                zoneType: dvZoneType,
-                blockLabel: dvBlockLabel,
-                cap: dvCap,
-                rounds: dvRounds,
-                exName: dvExName,
-                intensity: dvIntensity,
-                note: dvNote,
-                blockNotes: dvBlockNotes,
-                divider: dvDivider,
-              }}
-            />
-          </div>
-          <div ref={exportWeeklyRef}>
-            <WeeklyExportView
-              sessions={filteredSessions}
-              label={label}
-              year={year}
-              month={month}
-              onDayClick={() => {}}
-            />
-          </div>
-          <div ref={exportWeeklyCalRef}>
-            <WeeklyCalendarExportView
-              sessions={filteredSessions}
-              label={label}
-              year={year}
-              month={month}
-              gymName={gymName}
-              logoDataUrl={logoDataUrl}
-              logoScale={logoScale}
-              fontScale={fontScale}
-              weekDates={getWeeksOfMonth(year, month)[selectedWeekIdx] || currentWeekDates}
-              wkColors={{
-                bg: wkBg,
-                header: wkHeader,
-                dateNum: wkDateNum,
-                mainTraining: wkMainTraining,
-                blockType: wkBlockType,
-                exName: wkExName,
-                divider: wkDivider,
-              }}
-            />
-          </div>
-          <div ref={exportCalendarRef}>
-            <CalendarExportView
-              sessions={filteredSessions}
-              label={label}
-              year={year}
-              month={month}
-              gymName={gymName}
-              logoDataUrl={logoDataUrl}
-              logoScale={logoScale}
-              fontScale={fontScale}
-              wkColors={{
-                bg: wkBg,
-                header: wkHeader,
-                dateNum: wkDateNum,
-                mainTraining: wkMainTraining,
-                blockType: wkBlockType,
-                exName: wkExName,
-                divider: wkDivider,
-              }}
-            />
-          </div>
-          <div ref={exportMobileARef} style={{ width: '1080px' }}>
-            <MobileEaglesExportView
-              sessions={filteredSessions}
-              selectedDate={selectedDate}
-              currentWeekDates={currentWeekDates}
-              gymName={gymName}
-              logoDataUrl={logoDataUrl}
-              logoScale={logoScale}
-              fontScale={fontScale}
-              bgOverride={eaglesBg}
-              colors={{
-                gymName: eaGymName,
-                date: eaDate,
-                subtitle: eaSubtitle,
-                blockType: eaBlockType,
-                blockMeta: eaBlockMeta,
-                exName: eaExName,
-                intensity: eaIntensity,
-                blockHdr: eaBlockHdr,
-                divider: eaDivider,
-                note: noteColor,
-              }}
-            />
-          </div>
-          <div ref={exportMobileBRef} style={{ width: '1080px' }}>
-            <MobileMegaManExportView
-              sessions={filteredSessions}
-              selectedDate={selectedDate}
-              currentWeekDates={currentWeekDates}
-              gymName={gymName}
-              logoDataUrl={logoDataUrl}
-              logoScale={logoScale}
-              fontScale={fontScale}
-              bgOverride={megaManBg}
-              colors={{
-                gymName: mmGymName,
-                date: mmDate,
-                subtitle: mmSubtitle,
-                blockType: mmBlockType,
-                blockMetaBg: mmBlockMetaBg,
-                blockMetaText: mmBlockMetaText,
-                exName: mmExName,
-                intensity: mmIntensity,
-                blockHdr: mmBlockHdr,
-                divider: mmDivider,
-                note: noteColor,
-              }}
-            />
-          </div>
-        </div>
-        {!previewOpen && (
-          <div
-            style={{
-              overflowX: 'auto',
-              WebkitOverflowScrolling: 'touch',
-              borderRadius: '8px',
-            }}
-          >
-            <div ref={weeklyRef}>
-              <WeeklyExportView
-                sessions={filteredSessions}
-                label={label}
-                year={year}
-                month={month}
-                onDayClick={handleDayClick}
-              />
-            </div>
-          </div>
-        )}
+          exportScale={exportScale}
+          setExportScale={setExportScale}
+          gymName={gymName}
+          setGymName={setGymName}
+          fontScale={fontScale}
+          setFontScale={setFontScale}
+          zoneScales={zoneScales}
+          blockTitleScales={blockTitleScales}
+        />
+        <ExportFarm
+          filteredSessions={filteredSessions}
+          label={label}
+          gymName={gymName}
+          fontScale={fontScale}
+          zoneScales={zoneScales}
+          blockTitleScales={blockTitleScales}
+          selectedDate={selectedDate}
+          logoDataUrl={logoDataUrl}
+          logoScale={logoScale}
+          currentWeekDates={currentWeekDates}
+          year={year}
+          month={month}
+          selectedWeekIdx={selectedWeekIdx}
+          dvColors={dvColors}
+          wkColors={wkColors}
+          eaColors={eaColors}
+          mmColors={mmColors}
+          eaglesBg={eaglesBg}
+          megaManBg={megaManBg}
+          exportDailyRef={exportDailyRef}
+          exportWeeklyRef={exportWeeklyRef}
+          exportWeeklyCalRef={exportWeeklyCalRef}
+          exportCalendarRef={exportCalendarRef}
+          exportMobileARef={exportMobileARef}
+          exportMobileBRef={exportMobileBRef}
+          weeklyRef={weeklyRef}
+          previewOpen={previewOpen}
+          handleDayClick={handleDayClick}
+        />
       </div>
     </React.Fragment>
-  ) // closes inner div + Fragment
+  )
 }
 
 export default SchedulePublisher
