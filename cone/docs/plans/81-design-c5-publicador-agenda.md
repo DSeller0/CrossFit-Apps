@@ -391,14 +391,24 @@ Not designed here. This is the problem list each mockup is judged against.
 - Correct at **1280×800 and 390×844 under all 4 themes** — the frozen-palette bug is the point.
 
 **C5·b — Publicador**
+- ⚠️ **This whole subsection predates the C5·b split and decision 4's supersession — read plans/82
+  (b1, shipped) and plans/83 (b2) instead of grepping these bullets literally.** Recorded here only
+  so the pre-gate acceptance bar isn't lost; plans/82's own acceptance is what b1 actually shipped
+  against.
 - `publicador/Publicador.module.css` exists. `Publicador.jsx` is a container over
   `publicador/publisher/` and is under 800 lines.
-- **Zero** `.b` / `.bp` / `.bsec` / `.bd` / `.bsm` / `.bfull` / `.fg` / `.lbl` / `.pvt` /
-  `.pub-pane` usages repo-wide; those **16 rules deleted from `index.css`** (`:33-36`, `:43-44`,
-  `:54-63`) and both `App.jsx` wrappers (`:269,287`) removed. `index.css` ends the session with **no
-  `TAB-OWNED` tag left** — verify by grep, and update the file's own triage header.
-- The export-artifact palettes are **kept and documented in-file as exempt** (decision 4); the
-  screen chrome is tokenized. `#00b8d4` is classified deliberately, not swept.
+- ✅ **AMENDED 2026-09-04.** "Zero `.fg`/`.lbl` usages" was always wrong — they're Criador's (#58),
+  confirmed by C5·a's own exit grep (decision 6 above) before b1 even started; they're retagged, not
+  deleted. And "`index.css` ends the session with no `TAB-OWNED` tag left" is impossible on its own
+  terms once `.fg`/`.lbl` survive — the real bar plans/82 shipped against is **no
+  `TAB-OWNED → Publicador` tag left after b2** (b1 leaves `dv-*`/`wk-*` tagged for b2 on purpose). The
+  other 15 rules (`.b`/`.bp`/`.bsec`/`.bd`/`.bsm`/`.bfull`/`.pvt`/`.pub-pane`) plus both `App.jsx`
+  wrappers **did** reach zero repo-wide usages and were deleted, per plan.
+- ✅ **SUPERSEDED 2026-09-04 — the export-artifact palettes are NOT kept.** Measured at the C5·b
+  design gate: 29 of the 37 defaults were an exact `totk-dark` token, hand-copied — not a real
+  per-artefact theming feature. plans/82's colour model (8 roles, resolved through the same
+  `resolveTheme()` every public page uses) replaced the "exempt, keep as-is" decision below. The
+  screen-chrome-tokenized half of decision 4 still held.
 - The whole family is JSX; `createElement` count across `Publicador.jsx` +
   `src/components/tabs/publicador/` = **0**.
 - Apresentar ships with a working share target or without the affordance — **closes #113**.

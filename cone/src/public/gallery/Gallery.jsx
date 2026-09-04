@@ -7,6 +7,7 @@ import atletas from './groups/atletas.jsx'
 import afiliados from './groups/afiliados.jsx'
 import resultados from './groups/resultados.jsx'
 import agenda from './groups/agenda.jsx'
+import publicador from './groups/publicador.jsx'
 import shared from './groups/shared.jsx'
 import results from './groups/results.jsx'
 import leaderboard from './groups/leaderboard.jsx'
@@ -40,6 +41,7 @@ export const GROUPS = [
   afiliados,
   resultados,
   agenda,
+  publicador,
   shared,
   results,
   leaderboard,

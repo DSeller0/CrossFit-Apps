@@ -40,8 +40,11 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 > zero C0 primitives · zero `aria-label`/`role`/`tabIndex` across 81 `onClick` handlers.
 > **`Publicador.jsx` is provably the last consumer of the `.b*`/`.fg`/`.lbl` zoo** that C3 left
 > standing (28 usages; every other file repo-wide is zero) — C5·b deletes those 12 rules, the 4
-> `.pub-pane` rules and both `App.jsx` wrappers, leaving `index.css` with **no `TAB-OWNED` tag left
-> at all**.
+> `.pub-pane` rules and both `App.jsx` wrappers. ⚠️ **CORRECTED 2026-09-04 (C5·b1 design gate) — "no
+> `TAB-OWNED` tag left at all" is impossible and was superseded before it shipped.** `.fg`/`.lbl` are
+> Criador's (#58), not dead — they get **retagged**, not deleted; and `dv-*`/`wk-*` (the export-artefact
+> CSS) survive C5·b1 on purpose, tagged for C5·b2 (plans/83). The real bar, and the one C5·b1 shipped
+> against: **no `TAB-OWNED → Publicador` tag left after b2.** See plans/82.
 >
 > ✅ ~~1. #59 · C5 Phase 0 — dead code + three one-line correctness bugs~~ **SHIPPED 2026-08-30**
 >    — see Done.
@@ -52,21 +55,28 @@ Product docs (personas/tiers/feature catalog/mobile): [FEATURES.md](./FEATURES.m
 >    one cyan in all four themes and that is also where decision 4's unexplained `#00b8d4` comes
 >    from. C5·b must decide what that persisted setting is for; see plans/81's correction note.
 >    Two sessions remain, renumbered 1–2 below.
-> 1. **#59 · C5·b — Publicador** · **L** · **Opus** (design) → **Sonnet** (build) ·
->    [plans/81 §C5·b](./plans/81-design-c5-publicador-agenda.md). Mockup 63 → **approval gate**.
->    **Closes #113** (Apresentar's dead `log.html` share link — decided at the mockup, not deferred
->    again), **#170** (a one-line gate question, *not* a pre-emptive build) and **#15** (the program's
->    census row). ⚠️ The #59 row's *"classify jsPDF hex as exempt"* is a **no-op as written** — jsPDF
->    lives only in `events.jsx` and takes RGB integer triples, so **none** of the 409 hex literals is
->    jsPDF's; the real exemption is **"export artifact"** (see plans/81 decision 4).
+> ✅ ~~1. #59 · C5·b1 — Publicador: the shell and the colour model~~ **SHIPPED 2026-09-04** — see
+>    Done. **Closed #113** (Apresentar's QR now points at `schedule.html`, not the never-built
+>    `log.html`) and **#170** (answered "no"). ⚠️ **C5·b SPLIT IN TWO at its own design gate**: the
+>    colour-model redirection (drop the bespoke palettes, follow the theme) turned one pass into
+>    [plans/82](./plans/82-c5b1-publicador-shell-e-cores.md) (b1, shipped) and
+>    [plans/83](./plans/83-c5b2-publicador-renderer.md) (b2, below) — the row this banner originally
+>    carried is superseded by those two.
+> 1. **#59 · C5·b2 — Publicador: the export renderer** · **L** · **Opus** (design, done) → **Sonnet**
+>    (build) · [plans/83](./plans/83-c5b2-publicador-renderer.md). Layout · Blocos · Títulos · fit —
+>    the artefacts become parametric. **Depends on b1** (the `--a-*` palette seam, the fixed-canvas
+>    wrapper and the decomposed shell are its output) and must not start before b1 ships, which it now
+>    has. Also fixes **B2** (Saturday/Sunday dropped from the Mês and Semana-calendar exports) and
+>    resolves the `MobileEagles`/`MobileMegaMan` "Dia mobile" pair question b1 deliberately left open.
 > 2. **#59 · C5·c — Relatório + rate history** · **M** · **Sonnet** ·
 >    [plans/81 §C5·c](./plans/81-design-c5-publicador-agenda.md). **Closes #154.** Runs **last** —
 >    it consumes C5·a's shared filter, and #149's whole point is that #154 sits on top of tested
 >    `billing.js`. ⚠️ #154's row names `Servicos.jsx`, which no longer exists (#161 absorbed it), and
 >    `billing.js` now has **nine** importers while `calcTotal` has no date in its contract.
 >
-> **#59 closes with row 3**, plans/16's C5 row flips to ✅, and **#43** (four new themes) becomes the
-> program's only remaining item.
+> **#59 closes with row 2**, plans/16's C5 row flips to ✅, and **#43** (four new themes) becomes the
+> program's only remaining item. **#171** (TV as a customisable display, filed by b1) is Icebox,
+> blocked on b2's descriptor model — not part of this closing sequence.
 
 > 🟢 **REFILLED 2026-08-29 — one plan, five rows, from the full pass that ran the same day.**
 > The [2026-08-29 review](./reviews/2026-08-29.md) found seven rows in the surfaces #160/#161/#162
@@ -541,6 +551,19 @@ then the planning-session inputs, then everything else.
 
 ## 🧊 Icebox (captured + prioritized — no plan yet)
 
+### Captured 2026-09-04 (planning session for plans/82/83)
+
+- **#171 TV as a customisable display** · unranked, **blocked on [plans/83](./plans/83-c5b2-publicador-renderer.md)
+  (#59 C5·b2) shipping first** · filed by [plans/82](./plans/82-c5b1-publicador-shell-e-cores.md) decision 13,
+  elaborated in plans/83's Notes. Once b2 ships, the Publicador export renderer stops hardcoding each
+  format's layout and becomes parametric — a WOD is a descriptor
+  (`{skin, zones, days, cardStyle, content, titles, scale}`), not markup. That descriptor model is the
+  premise: `src/public/tv/TV.jsx`'s wall display could adopt the same one instead of its own hand-rolled
+  layout, making the TV screen customisable the same way an export is. 🔴 **Must NOT inherit the
+  fixed-canvas/crop model** — TV is a wall display that reflows to whatever screen it's on; it never crops
+  to a fixed export canvas the way a PNG target does. Do not start before b2 ships — the descriptor shape
+  this row depends on doesn't exist yet.
+
 ### From the 2026-08-29 full pass ([reviews/2026-08-29.md](./reviews/2026-08-29.md))
 
 *Ran because Ready emptied **and** three L items shipped (#56 · #160 · #162) — WORKFLOW's cadence
@@ -629,6 +652,9 @@ billing blob) is anon-locked by `0006`, `qrcode` is a genuinely separate 23.46 k
 
 ### Captured 2026-08-29 (planning session for plans/80)
 
+- ✅ **CLOSED 2026-09-04 · [plans/82](./plans/82-c5b1-publicador-shell-e-cores.md) — answered "no."** Asked
+  as the recorded gate question C5·b's mockup carried; the user's answer was no, don't build it — closed
+  with the reason rather than built pre-emptively, exactly as this row's own note asked for.
 - **#170 The leaderboard PNG export dies with the SPA Leaderboard sub-tab — and no public page can
   replace it** · **S** · Sonnet · **filed as the recorded consequence of a user decision, not as a
   disagreement with it.** The sub-tab is deleted by [plans/80](./plans/80-design-c3-resultados.md)
@@ -781,6 +807,13 @@ caught none of these**, which is what scoped the targeted review in Ready.*
 
 ### Found while executing plans/48 (2026-07-27)
 
+- ✅ **CLOSED 2026-09-04 · [plans/82](./plans/82-c5b1-publicador-shell-e-cores.md) (#59 C5·b1 step d).**
+  Decided at the mockup, not deferred again: Apresentar keeps its QR, now pointing at
+  `schedule.html?id=<sessionId>` — a page that's actually in `vite.public.config.js`'s build input and
+  deploys — instead of the never-built `log.html`. `log.html` itself stays unbuilt on purpose: it both
+  reads and writes the legacy `results` blob, whose anon read policy and INSERT/UPDATE/DELETE grants were
+  all revoked by migration `0009` (#150), so reviving it would mean un-revoking a closed security hole for
+  a feature that already has a working replacement.
 - **[Tier 4 · ranked 2026-08-04 — it had never been in any tier; it needs a decision before it can be planned]** — **#113 `log.html`'s presenter share link is dead on the deployed site** · **S** · Sonnet · **found while re-verifying plans/48's "never-built" deletion list** — `log.html` looked like the same kind of zero-consumer file as the 18 that got deleted, but `Publicador.jsx`'s `PresenterView` (`_presenterLogUrl`, line ~259) builds a live `https://dseller0.github.io/CrossFit-Apps/log.html?date=…&session=…` share URL for it. `log.html` is tracked but was never added to `vite.public.config.js`'s 9-page build input, and only `public-dist/`'s built pages actually deploy (`deploy.yml` copies that directory wholesale) — so the URL the coach shares from the presenter view 404s on the real site today. Pre-existing, not introduced by plans/48 (which pulled `log.html` out of its deletion list on this discovery rather than deleting it). Decide: add `log.html` to the build whitelist (if the feature is still wanted — a 2026-07-04 review once called `_presenterLogUrl` dead code, but a 2026-07-05 correction found it live-consumed, so intent is genuinely unclear), or remove the `PresenterView` feature that links to it.
 
 ### From the 2026-07-26 full pass ([reviews/2026-07-26.md](./reviews/2026-07-26.md))
@@ -938,6 +971,86 @@ section lists what was checked and found **clean**, so it isn't re-raised next p
 - ✅ **#94 Audit prod: exercise names used in sessions but absent from the registry** · **S** · **DONE 2026-07-25 (58.5% → 11.9%)** → [`docs/reviews/94-session-registry-audit.md`](./reviews/94-session-registry-audit.md) (regenerate: `node scripts/audit-session-registry.mjs`). **775 name occurrences · 453 unresolved (58.5%) · 343 distinct misses**, bucketed: **130 likely-registerable movements** (the actionable list — Wall Ball ×9, Thruster, Lunge ×6, Squat Clean/Snatch, bare Pull-up, GHD, Devil's Press, Burpee Box Jump Over…), **179 prescription-in-the-name** ("800m Run", "15 GHD", "30 Wall Ball" — the movement is fine, a leading distance/count leaked in; `stripVolumeNoise` only strips a bare leading count, not "800m"/"200m Row" — extend it, don't register these), **26 compound/complex notation** (registry-unfixable by design), **8 structural noise** ("Rest"/"Then"/"Rounds"/"Bloco …" leaked into name fields — data hygiene, not a registry gap). **ROUND 1 SHIPPED 2026-07-25** (coach reviewed the report inline and signed off R1–R5): unresolved **58.5% → 43.4% from resolver changes alone**, and **→ 34.8%** once the registry additions land. Four generalizations in `registry.js` rather than a bigger alias table — extended `stripVolumeNoise` (distance/duration/rep-scheme/per-side/cal/zone/`heavy`), auto-indexed `Movement (SH)` shorthand entries, spaced spellings of every hyphenated entry, and a guarded plural fallback (see CLAUDE.md's `registry.js` bullet for the contract). Root cause of the "Corrida" miss was **not** a backwards alias but a **dangling pointer**: `'run'/'sprint'` both targeted a "Corrida" entry the registry has never had (the real one is `Run`) — two test fixtures had the same fiction baked in and were corrected to prod reality. `scripts/audit-session-registry.mjs` now reports **dangling aliases** against live prod every run, so the class can't recur silently. **Registry additions APPLIED to prod 2026-07-25** ([`docs/reviews/94-registry-additions.sql`](./reviews/94-registry-additions.sql), idempotent/alphabetical) — prod confirmed at Cardio 18 · Skill 27 · Força 24 · Acessórios 31, audit re-run reports **0 dangling aliases**, bucket 1 130 → 102 and bucket 2 179 → 106. **Round 1 closed at 34.8% unresolved (277/795).** **ROUND 2 (2026-07-25)** → [`docs/reviews/94-round2-decisions.md`](./reviews/94-round2-decisions.md). Code half shipped (slot letters `A- 3 Snatch Balance` · trailing tempo/pause notes · trailing parens · alternating suffix · misspellings · audit classifier now files structural labels as noise instead of "register me"), plus the coach's decision batches as aliases: **34.8% → 28.1%**. **Round-2 additions APPLIED to prod 2026-07-25** ([`94-round2-registry-additions.sql`](./reviews/94-round2-registry-additions.sql), 71 entries) — prod confirmed at Core 35 · LPO 34 · Força 33 · Acessórios 51 · Skill 41 · Cardio 19. **#94 CLOSED at 11.9% (95/795), 0 dangling aliases**, bucket 1 130 → 16 and bucket 2 179 → 19. That is effectively the floor: 51 of the 95 remaining are bucket 3 (compound notation) + bucket 4 (structural noise), unresolvable by design, and the rest are deliberately-skipped complex fragments and one-off singles. Going further means changing how compound lines are ENTERED (#92 already flags them `complex-detected`), not growing the registry. Related to #62.
 
 ## ✅ Done (recent)
+
+**2026-09-04 — #59 · C5·b1 — Publicador: the shell and the colour model (Lane B)** ·
+[plans/82](./plans/82-c5b1-publicador-shell-e-cores.md) · `e61634d` (JSX conversion) ·
+`c7af8a2` (decompose) · `c56fba8` (colour model) · `f66c64d` (the surface) · `ac805ff`
+(Afiliados Aparência card) · `3bfe21b` (zoo deletion) · gallery + cards (this commit).
+Closes **#113**; **#170** answered "no." Design was pre-approved (mockup 64, the
+colour redirect) — this session was build only.
+
+**The colour model, measured before it was designed.** 29 of the 37 export colour
+defaults were an EXACT `totk-dark` token, hand-copied (`#4ac8c0`=`--accent` ×10,
+`#c8b090`=`--sub` ×7, `#d8a840`=`--gold` ×5…) — the 466-line, ~40-key colour drawer
+was ~94% a frozen palette wearing a settings-panel costume. `exportPalette.js`
+collapses it to 8 roles (`EXPORT_ROLES`) resolved through the SAME `resolveTheme()`
+every public page uses, plus a per-box preset (`settings.boxThemes`, shared with
+`?box=`) and a device-local "Personalizado" override — never `var(--…)`, always
+literal hex, because a rasterised PNG must not shift colour when the coach's own
+SPA theme changes underneath it. **Spiked before converting anything**: a standalone
+html2canvas + CSS-custom-property test confirmed `--a-hdr`/`--a-name` rasterise
+pixel-exact from literal-hex custom properties, which is what let every export view
+lose its colour PROPS entirely in favour of reading `--a-*` directly.
+
+**The surface replaces a toggle with a picker.** One when-picker (month → week →
+day, always visible — the day row greys out rather than disappearing outside the
+two day-shaped formats) plus a 5-format rail (Dia · Semana · Mês · Dia mobile ·
+Semana mobile — "story" dropped, the two gym-named skins gone from the UI) replace
+the old toolbar + a preview panel that duplicated its own month/week/day tabs. The
+preview is now always the true-ratio selected artefact, not something opened on
+top of a toolbar. `ExportFarm` mounts exactly the selected format instead of 6
+always-mounted views; the two write-only refs (`exportWeeklyRef`/`weeklyRef`) the
+farm never needed are gone with it, along with the on-screen grid they fed — the
+WhenPicker does that navigation job now. **Baixar PNG generates the real file
+first**, then a `ConfirmReview` shows the actual filename and measured byte size
+before the browser download fires — "the byte count matches the saved file" by
+construction, not an estimate. Found and fixed a real latent bug while unifying
+the three old export functions into one: `exportScale` never affected the three
+desktop formats' resolution (`html2canvas` was always called with `scale:1` there,
+despite a "Resolução do export" control implying otherwise) — it now applies to
+all five formats uniformly.
+
+**Two live bugs closed alongside the redesign, not deferred.** A block with no
+`zone` field (or the legacy English `'Zone 01'` default) silently vanished from
+every Diário export — `byZone` was seeded with the pt-BR `ZONES` list but a
+zone-less block auto-vivified an English key nothing ever rendered. Fixed via
+`normaliseZone`, the same helper `config.js` already exported. And Apresentar's
+QR now points at `schedule.html?id=<sessionId>` instead of the never-built
+`log.html` — closing #113 with a working share target rather than deferring the
+decision a third time.
+
+**One bug caught by the gate that exists for exactly this.** A rewritten
+`index.css` comment contained a literal `.settings-*/.color-*` substring, which
+CSS parses as `*/` — an accidental early comment close that silently turned the
+rest of the comment into invalid CSS and broke the production build
+(`lightningcss: "Unexpected token Delim('*')"`). `npm run lint` and `npm test`
+both stayed green through it; only `npm run build:all` caught it, which is the
+whole reason all four gates run before every commit in this kind of pass, not
+just the fast two.
+
+**The zoo's last consumer, confirmed rather than assumed.** Repo-wide grep before
+deleting: `.b`/`.bp`/`.bsec`/`.bd`/`.bsm`/`.bfull` (the button zoo + its
+`.pub-pane` recolouring), `.pvt`/`.pub-controls`/`.pub-view-tabs` (the old toolbar
+chrome) and the whole `.settings-*`/`.color-*` shell plus the global
+`input[type=color]` rule were all at zero non-comment usages once Publicador's
+SettingsDrawer was gone — Publicador really was their last consumer.
+`.fg`/`.lbl` stay, retagged `TAB-OWNED → Criador #58` (still real consumers:
+`ExerciseRow`/`IntensityInput`); `dv-*`/`wk-*` (the export-artefact CSS) stay
+tagged `TAB-OWNED → Publicador #59` on purpose — plans/83 (b2) owns them next, so
+the amended acceptance bar is "no `TAB-OWNED → Publicador` tag left **after b2**,"
+not "zero after b1."
+
+**Verified live, not just built.** Local Supabase stack + real prod-seeded data
+via Playwright: every format switch, the empty-week and no-session-that-day
+states, Personalizado editing with the discard-confirm on switching away, the
+one-time legacy-colour import banner actually firing on real seeded legacy
+colours, the download confirm showing a real measured byte count, and
+Apresentar's QR overlay — all with zero console errors. Confirmed the shared-key
+round trip end to end: changed Eagles' theme in its new Afiliados Aparência card,
+and Publicador's Origem picker picked up the identical palette — proving it reads
+the same `settings.boxThemes` key, not a Publicador-private copy. `npm run
+build:all` (10 public pages), `npm test` (1030/1030), `npm run lint
+--max-warnings 0` and `npm run format:check` all clean throughout.
 
 **2026-08-30 — #59 · C5·a — Agenda (Lane B)** · [plans/81 §C5·a](./plans/81-design-c5-publicador-agenda.md) · mockup `2e363c0` (approved by the user) → `62f6d8e` · `e77bb72` · `c402e12` · `214cdef` · gallery + cards `435fc39`. Closed **#105** and **#106**.
 
