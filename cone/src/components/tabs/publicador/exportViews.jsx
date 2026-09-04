@@ -22,6 +22,10 @@ import {
   DEFAULT_BLOCK_CONTENT,
 } from './blockTreatments'
 import BlockHeader from './BlockHeader'
+// Aliased `css` (not the usual `s`) — both views in this file use `s` as the local
+// session-object variable name (`resolveDaySession`'s `s`, `daySessions[0]`'s `s`),
+// which would shadow a module import named `s` throughout the file.
+import css from './Publicador.module.css'
 
 // Every export view in this file is an EXPORT ARTEFACT (plans/82's colour model): it takes
 // no colour prop and reads the 8 `--a-*` custom properties instead, set as literal hex on
@@ -62,8 +66,8 @@ export function DailyExportView({
   const fs = fontScale || 1
   if (!resolved)
     return (
-      <div className="dv-wrap" style={{ '--fs': fs, background: 'var(--a-bg)' }}>
-        <div className="dv-empty-zone">Sem sessões nesta semana</div>
+      <div className={css.dvWrap} style={{ '--fs': fs, background: 'var(--a-bg)' }}>
+        <div className={css.dvEmptyZone}>Sem sessões nesta semana</div>
       </div>
     )
   const { session: s, date: dateObj } = resolved
@@ -76,9 +80,9 @@ export function DailyExportView({
   const { columns } = distributeZones(s.blocks, zoneCount)
   const gridTemplateColumns = zoneColumnWidths(zoneCount, zoneSplit).join(' ')
   return (
-    <div className="dv-wrap" style={{ '--fs': fs }}>
-      <div className="dv-topbar" style={{ background: 'var(--a-bg)' }}>
-        <div className="dv-top-left">
+    <div className={css.dvWrap} style={{ '--fs': fs }}>
+      <div className={css.dvTopbar} style={{ background: 'var(--a-bg)' }}>
+        <div className={css.dvTopLeft}>
           {logoDataUrl && (
             <div
               style={{
@@ -101,16 +105,16 @@ export function DailyExportView({
               />
             </div>
           )}
-          <span className="dv-gym-name" style={{ color: 'var(--a-name)' }}>
+          <span className={css.dvGymName} style={{ color: 'var(--a-name)' }}>
             {gymName || 'Cone'}
           </span>
         </div>
-        <div className="dv-top-right">
-          <div className="dv-date-label" style={{ color: 'var(--a-hdr)' }}>
+        <div className={css.dvTopRight}>
+          <div className={css.dvDateLabel} style={{ color: 'var(--a-hdr)' }}>
             {weekday + ' · ' + dateNum}
           </div>
           {s.mainTraining && (
-            <div className="dv-main-training" style={{ color: 'var(--a-sub)' }}>
+            <div className={css.dvMainTraining} style={{ color: 'var(--a-sub)' }}>
               {s.mainTraining}
             </div>
           )}
@@ -129,21 +133,21 @@ export function DailyExportView({
           )}
         </div>
       </div>
-      <div className="dv-zones" style={{ gridTemplateColumns }}>
+      <div className={css.dvZones} style={{ gridTemplateColumns }}>
         {columns.map((col, zi) => {
           const zoneBlocks = col.blocks
           const primaryBlock = zoneBlocks[0] || null
           return (
             <div
               key={col.zone}
-              className="dv-zone"
+              className={css.dvZone}
               style={{
                 '--zfs': zoneScales?.[zi] || 1,
                 '--bts': blockTitleScales?.[zi] || 1,
                 borderRight: '2px solid var(--a-div)',
               }}
             >
-              <div className="dv-zone-header" style={{ borderBottom: '1px solid var(--a-div)' }}>
+              <div className={css.dvZoneHeader} style={{ borderBottom: '1px solid var(--a-div)' }}>
                 {primaryBlock ? (
                   <BlockHeader
                     treatment={blockTreatment}
@@ -168,7 +172,7 @@ export function DailyExportView({
                   />
                 ) : (
                   <div
-                    className="dv-zone-type"
+                    className={css.dvZoneType}
                     style={{
                       color: '#1a1a1a',
                       fontSize: 'calc(22px * var(--fs,1))',
@@ -179,14 +183,14 @@ export function DailyExportView({
                 )}
               </div>
               {zoneBlocks.length === 0 ? (
-                <div className="dv-empty-zone">—</div>
+                <div className={css.dvEmptyZone}>—</div>
               ) : (
-                <div className="dv-zone-body">
+                <div className={css.dvZoneBody}>
                   {zoneBlocks.map((bl, bli) => {
                     return (
                       <div
                         key={bl.id}
-                        className="dv-block-in-zone"
+                        className={css.dvBlockInZone}
                         data-fitblock
                         style={blockWrapperStyle(blockTreatment, 'var(--a-hdr)')}
                       >
@@ -219,16 +223,16 @@ export function DailyExportView({
                               return (
                                 <div
                                   key={ex.id}
-                                  className="dv-ex-item"
+                                  className={css.dvExItem}
                                   style={{ borderBottom: '1px solid var(--a-div)' }}
                                 >
-                                  <div className="dv-ex-name" style={{ color: 'var(--a-name)' }}>
+                                  <div className={css.dvExName} style={{ color: 'var(--a-name)' }}>
                                     {complexLine(ex)}
                                   </div>
                                   {movs.map((m, mi) => (
                                     <div
                                       key={mi}
-                                      className="dv-ex-note"
+                                      className={css.dvExNote}
                                       style={{ color: 'var(--a-note)' }}
                                     >
                                       {`· ${[m.reps, m.name].filter(Boolean).join(' ')}`}
@@ -237,7 +241,7 @@ export function DailyExportView({
                                   {ex.note ? (
                                     <div
                                       key="n"
-                                      className="dv-ex-note"
+                                      className={css.dvExNote}
                                       style={{ color: 'var(--a-note)' }}
                                     >
                                       {ex.note}
@@ -254,15 +258,18 @@ export function DailyExportView({
                                 return (
                                   <div
                                     key={ex.id}
-                                    className="dv-ex-item"
+                                    className={css.dvExItem}
                                     style={{ borderBottom: '1px solid var(--a-div)' }}
                                   >
-                                    <div className="dv-ex-name" style={{ color: 'var(--a-name)' }}>
+                                    <div
+                                      className={css.dvExName}
+                                      style={{ color: 'var(--a-name)' }}
+                                    >
                                       {line}
                                     </div>
                                     {ex.note && (
                                       <div
-                                        className="dv-ex-note"
+                                        className={css.dvExNote}
                                         style={{ color: 'var(--a-note)' }}
                                       >
                                         {ex.note}
@@ -274,20 +281,20 @@ export function DailyExportView({
                               return (
                                 <div
                                   key={ex.id}
-                                  className="dv-ex-item"
+                                  className={css.dvExItem}
                                   style={{ borderBottom: '1px solid var(--a-div)' }}
                                 >
                                   {progLines.map((pl, si) => (
                                     <div key={si}>
                                       <div
-                                        className="dv-ex-name"
+                                        className={css.dvExName}
                                         style={{ color: 'var(--a-name)' }}
                                       >
                                         {pl.nameLine}
                                       </div>
                                       {blockContent.intensity && pl.loadStr && (
                                         <div
-                                          className="dv-ex-vol"
+                                          className={css.dvExVol}
                                           style={{
                                             color: 'var(--a-int)',
                                             display: 'inline-block',
@@ -300,7 +307,10 @@ export function DailyExportView({
                                     </div>
                                   ))}
                                   {ex.note && (
-                                    <div className="dv-ex-note" style={{ color: 'var(--a-note)' }}>
+                                    <div
+                                      className={css.dvExNote}
+                                      style={{ color: 'var(--a-note)' }}
+                                    >
                                       {ex.note}
                                     </div>
                                   )}
@@ -310,14 +320,14 @@ export function DailyExportView({
                             return (
                               <div
                                 key={ex.id}
-                                className="dv-ex-item"
+                                className={css.dvExItem}
                                 style={{ borderBottom: '1px solid var(--a-div)' }}
                               >
-                                <div className="dv-ex-name" style={{ color: 'var(--a-name)' }}>
+                                <div className={css.dvExName} style={{ color: 'var(--a-name)' }}>
                                   {line}
                                 </div>
                                 {ex.note && (
-                                  <div className="dv-ex-note" style={{ color: 'var(--a-note)' }}>
+                                  <div className={css.dvExNote} style={{ color: 'var(--a-note)' }}>
                                     {ex.note}
                                   </div>
                                 )}
@@ -342,7 +352,7 @@ export function DailyExportView({
                             return (
                               loads.length > 0 && (
                                 <div
-                                  className="dv-block-notes"
+                                  className={css.dvBlockNotes}
                                   style={{
                                     borderTop: '1px solid var(--a-div)',
                                     marginTop: '6px',
@@ -359,7 +369,7 @@ export function DailyExportView({
                           })()}
                         {blockContent.notes && bl.notes && (
                           <div
-                            className="dv-block-notes"
+                            className={css.dvBlockNotes}
                             style={{
                               color: 'var(--a-note)',
                               borderTopColor: 'var(--a-div)',
@@ -387,27 +397,27 @@ export function WeeklyExportView({ sessions, label, year, month, onDayClick }) {
   const monthName = MONTH_PT[month] + ' ' + year
   const today = new Date()
   return (
-    <div className="weekly-wrap">
-      <div className="wk-header">
-        <div className="wk-title">
+    <div className={css.weeklyWrap}>
+      <div className={css.wkHeader}>
+        <div className={css.wkTitle}>
           {'Grade de Treinos · '}
           {monthName}
         </div>
-        {label && <div className="wk-sub">{label}</div>}
+        {label && <div className={css.wkSub}>{label}</div>}
       </div>
-      <div className="wk-col-head-row">
-        <div className="wk-col-head" style={{ color: '#333', textAlign: 'center' }}>
+      <div className={css.wkColHeadRow}>
+        <div className={css.wkColHead} style={{ color: '#333', textAlign: 'center' }}>
           WK
         </div>
         {DSHORT.map(d => (
-          <div key={d} className="wk-col-head">
+          <div key={d} className={css.wkColHead}>
             {d}
           </div>
         ))}
       </div>
       {weeks.map((week, wi) => (
-        <div key={wi} className="wk-week-row">
-          <div className="wk-week-num">{wi + 1}</div>
+        <div key={wi} className={css.wkWeekRow}>
+          <div className={css.wkWeekNum}>{wi + 1}</div>
           {week.map((date, di) => {
             const dateKey = toISO(date)
             const inMonth = date.getMonth() === month
@@ -417,18 +427,18 @@ export function WeeklyExportView({ sessions, label, year, month, onDayClick }) {
             return (
               <div
                 key={di}
-                className={`wk-day-cell ${!s ? 'empty' : ''}`}
+                className={`${css.wkDayCell} ${!s ? css.empty : ''}`}
                 onClick={s && onDayClick ? () => onDayClick(week, date) : undefined}
               >
-                <div className={`wk-day-num${isToday ? ' today' : ''}`}>
+                <div className={`${css.wkDayNum}${isToday ? ' ' + css.today : ''}`}>
                   {inMonth ? date.getDate() : ''}
                 </div>
                 {s && (
                   <div>
-                    <div className="wk-day-training" style={{ color: inMonth ? '#ddd' : '#444' }}>
+                    <div className={css.wkDayTraining} style={{ color: inMonth ? '#ddd' : '#444' }}>
                       {s.mainTraining || '—'}
                     </div>
-                    <div className="wk-day-blocks">
+                    <div className={css.wkDayBlocks}>
                       {(s.blocks || []).slice(0, 4).map(bl => (
                         <span
                           key={bl.id}

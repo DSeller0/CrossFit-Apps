@@ -458,3 +458,256 @@
   height: 100%;
   overflow: hidden;
 }
+
+/* ── Daily export artefact (Dia) — moved here from index.css's TAB-OWNED →
+   Publicador section (#59 C5·b2). Fixed black/white export theme by design, not
+   the 4 living app themes — literal hex is correct here, not a #15 violation.
+   9 rules with zero consumers (dv-zone-num/-subtitle/-meta, dv-block-type-label,
+   dv-block-cap, dv-rounds-label, dv-logo-placeholder, dv-preview-wrap/-inner —
+   the bespoke zone-header/block-label markup they served is now BlockHeader.jsx,
+   which is inline-styled) were dropped in the move, not carried over dead. ── */
+.dvWrap {
+  background: #000;
+  color: #fff;
+  width: 1920px;
+  height: 1080px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--export-font);
+}
+.dvTopbar {
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 36px;
+  border-bottom: 2px solid #1a1a1a;
+  flex-shrink: 0;
+}
+.dvTopLeft {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.dvGymName {
+  font-size: calc(28px * var(--fs, 1));
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.dvTopRight {
+  text-align: right;
+}
+.dvDateLabel {
+  font-size: calc(16px * var(--fs, 1));
+  color: #e87820;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.dvMainTraining {
+  font-size: calc(14px * var(--fs, 1));
+  color: #888;
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+.dvZones {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  flex: 1;
+  overflow: hidden;
+  border-top: 2px solid #1a1a1a;
+}
+.dvZone {
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid #1a1a1a;
+  padding: 22px 32px;
+  overflow: hidden;
+}
+.dvZone:last-child {
+  border-right: none;
+}
+.dvZoneHeader {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #1e1e1e;
+  flex-shrink: 0;
+}
+.dvZoneType {
+  font-size: calc(22px * var(--fs, 1));
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  color: #e87820;
+}
+.dvZoneBody {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.dvBlockInZone {
+  margin-bottom: 16px;
+}
+.dvExItem {
+  margin-bottom: 10px;
+}
+.dvExName {
+  font-size: calc(22px * var(--fs, 1) * var(--zfs, 1));
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.15;
+}
+.dvExVol {
+  font-size: calc(19px * var(--fs, 1) * var(--zfs, 1));
+  margin-top: 3px;
+  font-weight: 900;
+  color: #f5c842;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dvExNote {
+  font-size: calc(14px * var(--fs, 1) * var(--zfs, 1));
+  color: #888;
+  margin-top: 2px;
+  font-style: italic;
+  font-weight: 400;
+}
+.dvBlockNotes {
+  font-size: calc(14px * var(--fs, 1) * var(--zfs, 1));
+  color: #888;
+  margin-top: 8px;
+  line-height: 1.6;
+  font-weight: 400;
+  font-style: italic;
+  border-top: 1px solid #1a1a1a;
+  padding-top: 6px;
+}
+.dvEmptyZone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: calc(12px * var(--fs, 1) * var(--zfs, 1));
+  color: #1e1e1e;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ── Weekly export chrome — on-screen only, never rasterised (see exportViews.jsx's
+   file header — WeeklyExportView is never one of the 5 export targets). Same fixed
+   export theme as Dia above. Moved from index.css's TAB-OWNED → Publicador section. ── */
+.weeklyWrap {
+  background: #000;
+  color: #fff;
+  border-radius: 0;
+  width: 1920px;
+  overflow: hidden;
+}
+.wkHeader {
+  background: #0a0a0a;
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #1a1a1a;
+}
+.wkTitle {
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--export-font);
+}
+.wkSub {
+  font-size: 14px;
+  color: #e87820;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.wkWeekRow {
+  display: grid;
+  grid-template-columns: 56px repeat(7, 1fr);
+  border-bottom: 1px solid #1a1a1a;
+}
+.wkWeekNum {
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  color: #333;
+  border-right: 1px solid #1a1a1a;
+  padding: 8px 4px;
+  font-family: var(--export-font);
+}
+.wkDayCell {
+  border-right: 1px solid #1a1a1a;
+  padding: 18px 16px;
+  min-height: 180px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.wkDayCell:hover {
+  background: #0e0e0e;
+}
+.wkDayCell.empty {
+  cursor: default;
+}
+.wkDayCell.empty:hover {
+  background: transparent;
+}
+.wkDayNum {
+  font-size: 13px;
+  color: #444;
+  margin-bottom: 6px;
+  font-weight: 900;
+  font-family: var(--export-font);
+}
+.wkDayNum.today {
+  color: #e87820;
+}
+.wkDayTraining {
+  font-size: 14px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: var(--export-font);
+}
+.wkDayBlocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.wkColHeadRow {
+  display: grid;
+  grid-template-columns: 56px repeat(7, 1fr);
+  background: #0a0a0a;
+  border-bottom: 1px solid #222;
+}
+.wkColHead {
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 900;
+  color: #e87820;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-right: 1px solid #1a1a1a;
+  font-family: var(--export-font);
+}
