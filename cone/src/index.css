@@ -21,25 +21,13 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 :root{--spa-sticky-top:49px}
 .pane{padding:14px}
 
-/* ── Themed panes — Publicador/Agenda (#59) — TAB-OWNED. The .res-pane halves went
-   with #57/plans/80 (C3): Resultados is on ui/Button + its own module now, so App.jsx's
-   .res-pane wrapper existed only to accent-fill these three and was removed with them.
-   Pruned 2026-07-26 (#99): the .log-block-title/.pub-section-title, .kpi-val,
-   .athlete-chip.active, .rpe-hp-slider thumb, .sc-card.drag-over-session/
-   .blk-wrap.drag-over and bare `a` rules were dead (grepped zero consumers —
-   the current Resultados/Publicador markup never renders those classes) and
-   the .res-pane half of the input[type=range] rule was too (no range input
-   in Resultados; Publicador's export-scale sliders set accent-color inline). ── */
-.pub-pane .b.bp{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent)}
-.pub-pane .b.bsec{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
-.pub-pane .pvt.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
-.pub-pane input[type=range]{accent-color:var(--theme-accent)}
-
-/* ── form + buttons — TAB-OWNED (shared, pending C1–C5). Pre-C0 zoo: every
-   class below is still live (Atletas/Resultados/Publicador/Servicos have no
-   module.css yet), but Button/Input/Card (#54/C0) exist to replace it
-   page-by-page. Not tokenised — a tab's C1–C5 pass deletes its share of this
-   zoo outright, so tokenising it now is work thrown away. ── */
+/* ── form fields — TAB-OWNED → Criador #58. Was a wider pre-C0 zoo (Atletas,
+   Resultados, Publicador and Servicos all had their own C-pass adopt Button/Input/
+   Card since); the button half (.b/.bp/.bsec/.bd/.bsm/.bfull) and the
+   .pub-pane/.pvt rules that recoloured it for Publicador died with #59 C5·b1 —
+   Publicador was their last consumer (confirmed by repo-wide grep before deleting).
+   .fg/.lbl are what's left: Criador's ExerciseRow/IntensityInput still render
+   them and have no module.css of their own yet. ── */
 .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:3px;display:block}
 .fg{display:flex;flex-direction:column;gap:3px}
 .fg input,.fg select,.fg textarea{font-family:inherit;font-size:16px;border:1px solid var(--divider,#2a231c);border-radius:6px;padding:9px 11px;background:var(--bg,#0d0b09);color:var(--text,#f0e8d0);outline:none;width:100%;-webkit-appearance:none;appearance:none;transition:border-color .15s}
@@ -49,18 +37,6 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .fg select option{background:var(--stone,#161210);font-size:16px}
 .fg textarea{resize:vertical;min-height:50px;font-size:14px;line-height:1.5}
 .mb8{margin-bottom:8px}.mb10{margin-bottom:10px}
-
-/* buttons */
-.b{font-family:inherit;font-size:13px;padding:9px 14px;border-radius:6px;border:1px solid var(--divider,#2a231c);background:transparent;color:var(--sub,#c8b090);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:40px;transition:background .12s,color .12s;user-select:none}
-.b:active{opacity:.65}
-.bp{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
-.bp:hover{background:#e8e8e8}
-.bd{color:#d05050;border-color:#2e1a1a}
-.bd:hover{background:#1a0a0a}
-.bsm{padding:6px 9px;font-size:12px;min-height:32px}
-.bfull{width:100%}
-.bsec{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
-.bsec:hover{background:#c86010}
 
 /* block → moves to Criador's criador.module.css in #58 (BlockEditor.jsx) */
 .blk-wrap{border-radius:8px;overflow:hidden;border:1px solid var(--divider,#2a231c);margin-bottom:10px}
@@ -177,12 +153,6 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 /* pill colours — GOLD: Benchmark */
 .p-bm{background:#2c2000;color:#d8a840;border:1px solid #4a3800}
 
-/* ── publisher controls — TAB-OWNED → Publicador #59 (C5·b) ── */
-.pub-controls{background:var(--stone2);border:1px solid var(--divider);border-radius:10px;padding:14px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
-.pub-view-tabs{display:flex;gap:6px;margin-bottom:12px}
-.pvt{font-family:inherit;font-size:12px;padding:7px 14px;border-radius:5px;border:1px solid var(--divider);background:transparent;color:var(--sub);cursor:pointer;transition:all .12s}
-.pvt.on{background:var(--theme-accent);color:var(--theme-accent-text);border-color:var(--theme-accent);font-weight:600}
-
 /* ── daily view — Eagles TV style — TAB-OWNED → Publicador #59 (exportViews.jsx).
    Fixed black/white export theme by design, not the 4 living themes — its hex
    is a separate deliberate brand, not a GLOBAL tokenisation candidate. ── */
@@ -234,21 +204,25 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .wk-col-head-row{display:grid;grid-template-columns:56px repeat(7,1fr);background:#0a0a0a;border-bottom:1px solid #222}
 .wk-col-head{padding:10px 14px;font-size:12px;font-weight:900;color:#e87820;text-transform:uppercase;letter-spacing:.1em;border-right:1px solid #1a1a1a;font-family:var(--export-font)}
 
-.empty2{text-align:center;padding:3rem;color:var(--muted);font-size:13px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Grab-bag, all TAB-OWNED, no header comment of their own in the original —
-   drag-handle/ex-suggestion: the shared ExerciseCombobox (components/shared/,
-   promoted from Criador by #56/C2/plans/75 Part 0). collapse-btn/blk-collapsed/
-   collapse-all-row/-btn/blk-body-drag/blk-ex-chip(+name): Criador BlockEditor
-   (#58). settings- shell: shared modal, Publicador (#59) + Atletas. Pruned
-   2026-07-26 (#99): .blk-wrap.drag-over/.ex-card.drag-over/
-   .sc-card.drag-over-session were dead (no component ever adds a literal
-   "drag-over"/"drag-over-session" class to those elements — Criador's block
-   reorder uses an inline outline style instead, and the week-grid's own
-   drag-over toggle targets .wg-sc, which has no matching rule).
-   .settings-body/.settings-col-title/.settings-title were dead too (the 2-col
-   layout + section title styling that shell variant never got adopted). ── */
+/* Grab-bag, all TAB-OWNED → Criador #58, no header comment of their own in the
+   original — drag-handle/ex-suggestion: the shared ExerciseCombobox
+   (components/shared/, promoted from Criador by #56/C2/plans/75 Part 0).
+   collapse-btn/blk-collapsed/collapse-all-row/-btn/blk-body-drag/blk-ex-chip
+   (+name): Criador BlockEditor (#58). Pruned 2026-07-26 (#99):
+   .blk-wrap.drag-over/.ex-card.drag-over/.sc-card.drag-over-session were dead
+   (no component ever adds a literal "drag-over"/"drag-over-session" class to
+   those elements — Criador's block reorder uses an inline outline style
+   instead, and the week-grid's own drag-over toggle targets .wg-sc, which has
+   no matching rule). The whole settings- / color- shell (shared modal + colour
+   row, Publicador #59 + Atletas) plus the global input[type=color] rule it
+   needed were pruned 2026-09-04 (#59 C5·b1): Publicador's SettingsDrawer was
+   the last consumer of the shell itself, and ui/ColorField (#56/C2) replaced
+   color-row/color-swatch/color-input everywhere, including Atletas — the
+   global rule (which hid the native swatch under a proxy div) is gone too,
+   since ColorField's own swatch selector IS the native input now, not a proxy
+   hiding it. ── */
 .drag-handle{cursor:grab;color:var(--dim);padding:0 6px;display:flex;align-items:center;font-size:16px;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:color .12s}
 .drag-handle:hover{color:var(--muted)}
 .ex-suggestion:focus{background:var(--divider);outline:none;}
@@ -265,30 +239,6 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .blk-body-drag:active{cursor:grabbing;color:#4ac8c0}
 .blk-ex-chip{font-size:10px;color:var(--dim);background:var(--bg);border:1px solid var(--divider);border-radius:4px;padding:2px 7px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0}
 .blk-ex-chip-name{max-width:90px;overflow:hidden;text-overflow:ellipsis}
-.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;pointer-events:all}
-.settings-modal{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--stone2,#1e1a16);border:1px solid var(--divider,#2a231c);border-radius:12px;width:820px;max-width:96vw;max-height:88vh;overflow-y:auto;z-index:501;pointer-events:all;box-shadow:0 8px 40px rgba(0,0,0,.8)}
-.settings-drag-hdr{padding:12px 16px;background:var(--stone,#161210);border-bottom:1px solid var(--divider,#2a231c);border-radius:12px 12px 0 0;display:flex;align-items:center;gap:8px;cursor:grab;user-select:none}
-.settings-drag-hdr:active{cursor:grabbing}
-.settings-sheet-pill{display:none;justify-content:center;padding:10px 0 2px;background:var(--stone);border-radius:16px 16px 0 0}
-.settings-sheet-pill-bar{width:36px;height:4px;background:var(--dim);border-radius:2px}
-@keyframes sht-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
-@media(max-width:768px){
-  .settings-overlay{background:rgba(0,0,0,.72)}
-  .settings-modal{top:auto!important;bottom:0!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;max-height:90vh!important;transform:none!important;border-radius:16px 16px 0 0!important;animation:sht-up .25s ease}
-  .settings-drag-hdr{cursor:default;border-radius:0}
-  .settings-sheet-pill{display:flex}
-}
-.settings-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
-.settings-row:last-child{margin-bottom:0}
-.settings-lbl{font-size:11px;color:var(--sub);flex:1}
-.color-row{display:flex;align-items:center;gap:6px}
-.color-swatch{width:24px;height:24px;border-radius:4px;border:1px solid var(--dim);flex-shrink:0;cursor:pointer;transition:transform .1s}
-.color-swatch:hover{transform:scale(1.1)}
-.color-input{font-family:inherit;font-size:12px;border:1px solid var(--divider);border-radius:4px;padding:4px 7px;background:var(--stone);color:var(--cream);outline:none;width:86px}
-.color-input:focus{border-color:var(--dim)}
-input[type=color]{width:0;height:0;opacity:0;position:absolute;pointer-events:none}
-/* .settings-body/.settings-col-title/.settings-title pruned above with the rest
-   of the dead settings-shell variants (see the grab-bag comment). */
 
 /* prog-table — shared component (IntensityInput.jsx), TAB-OWNED → Criador #58 +
    Exercícios #55/#87, same as "intensity" above */
