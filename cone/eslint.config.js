@@ -34,10 +34,10 @@ export default defineConfig([
     },
   },
   {
-    // Each of these five pairs one component with one small, stable non-component
-    // export (a context hook or a shared constant) that has no other natural home.
-    // Splitting five two-line exports into five new files would cost more than the
-    // rule protects — allowlisted by exact export name so anything else added to
+    // Each of these six pairs one component with one or two small, stable non-component
+    // exports (a context hook, a shared constant, a predicate) that have no other
+    // natural home. Splitting a two-line export into its own file would cost more than
+    // the rule protects — allowlisted by exact export name so anything else added to
     // these files still gets caught.
     files: [
       'src/context/AuthContext.jsx',
@@ -45,13 +45,22 @@ export default defineConfig([
       'src/public/Nav.jsx',
       'src/public/index/rail.jsx',
       'src/public/shared/ScaleFilter.jsx',
+      'src/components/tabs/publicador/publisher/FormatRail.jsx',
     ],
     rules: {
       'react-refresh/only-export-components': [
         'error',
         {
           allowConstantExport: true,
-          allowExportNames: ['useAuth', 'useSync', 'isNavHidden', 'dayTitle', 'FILTER_SCALES'],
+          allowExportNames: [
+            'useAuth',
+            'useSync',
+            'isNavHidden',
+            'dayTitle',
+            'FILTER_SCALES',
+            'FORMATS',
+            'isDayFormat',
+          ],
         },
       ],
     },

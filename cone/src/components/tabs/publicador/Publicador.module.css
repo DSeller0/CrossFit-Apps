@@ -1,0 +1,441 @@
+/* Publicador — the shell (#59 C5·b1 step d). Format → preview → Aparência, all token-only. */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.hdr {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.hdrTitle {
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cream);
+}
+.hdrSub {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-style: italic;
+  margin-top: 2px;
+}
+.hdrActs {
+  margin-left: auto;
+  display: flex;
+  gap: var(--sp-2);
+}
+
+/* ── When picker ─────────────────────────────────────────────────────── */
+.when {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  flex-wrap: wrap;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-md);
+  background: var(--stone);
+}
+.mo {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 12px;
+  color: var(--cream);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.sep {
+  width: 1px;
+  height: 18px;
+  background: var(--divider);
+  flex-shrink: 0;
+}
+.wkRow,
+.dyRow {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.wkBtn,
+.dyBtn {
+  font-size: 10px;
+  padding: 4px 8px;
+  border: 1px solid var(--divider);
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  background: transparent;
+  cursor: pointer;
+}
+.wkBtn.on,
+.dyBtn.on {
+  border-color: var(--accent);
+  color: var(--accent-text);
+  background: var(--accent);
+  font-weight: 700;
+}
+.dyBtn.has {
+  color: var(--sub);
+  border-color: var(--divider);
+}
+.dyBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.hint {
+  font-size: 10px;
+  color: var(--dim);
+  font-family: var(--font-body);
+  font-style: italic;
+  margin-left: 4px;
+}
+
+/* ── 3-column body ────────────────────────────────────────────────────── */
+.body {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 260px;
+  gap: var(--sp-3);
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.col {
+  min-width: 0;
+}
+
+.colh {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+  margin: 0 0 var(--sp-2);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+.colh span {
+  color: var(--dim);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+/* ── Format rail ──────────────────────────────────────────────────────── */
+.fmt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-2);
+  font-family: var(--font);
+}
+.fmt:hover {
+  border-color: var(--dim);
+}
+.fmt.on {
+  border-color: var(--accent);
+  background: var(--stone2);
+}
+.fmtName {
+  font-size: 12px;
+  color: var(--cream);
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.fmt.on .fmtName {
+  color: var(--accent);
+}
+.fmtDim {
+  font-size: 9.5px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  margin-top: 3px;
+}
+.fmtDest {
+  font-size: 9.5px;
+  color: var(--dim);
+  font-family: var(--font-body);
+  font-style: italic;
+  margin-top: 3px;
+}
+.ratio {
+  border: 1px solid var(--dim);
+  flex-shrink: 0;
+  display: inline-block;
+}
+.fmt.on .ratio {
+  border-color: var(--accent);
+}
+.r169 {
+  width: 18px;
+  height: 10px;
+}
+.r19 {
+  width: 10px;
+  height: 18px;
+}
+
+/* ── Preview pane ─────────────────────────────────────────────────────── */
+.pvWrap {
+  border: 1px solid var(--divider);
+  background: var(--stone);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  padding: var(--sp-2);
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+.pvStage {
+  position: relative;
+  flex: 0 1 auto;
+  max-width: 100%;
+}
+.pvMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+  font-size: 10px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  flex-wrap: wrap;
+}
+.pvFname {
+  color: var(--sub);
+}
+.pvPush {
+  margin-left: auto;
+}
+.busy {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ── Aparência accordion ──────────────────────────────────────────────── */
+.apNav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  padding: 4px 5px;
+  margin-bottom: var(--sp-3);
+}
+.apLabel {
+  flex: 1;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cream);
+}
+.apDots {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  margin: -6px 0 var(--sp-3);
+}
+.apDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--dim);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.apDot.on {
+  background: var(--accent);
+}
+
+.grp {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: var(--sp-3) 0 5px;
+  font-weight: 700;
+}
+.grp:first-child {
+  margin-top: 0;
+}
+
+.originList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.originBtn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 6px 8px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--sub);
+  font-family: var(--font);
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
+}
+.originBtn:hover {
+  border-color: var(--dim);
+}
+.originBtn.on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--stone2);
+}
+.swatchDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--divider);
+  flex-shrink: 0;
+}
+
+.scl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--sub);
+  padding: 5px 6px;
+}
+.sclStep {
+  border: 1px solid var(--border);
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: var(--sub);
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font);
+}
+.sclStep:hover {
+  color: var(--cream);
+  border-color: var(--dim);
+}
+.sclVal {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--cream);
+  min-width: 40px;
+  text-align: center;
+}
+.sclName {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 9.5px;
+}
+
+.logoBox {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  border: 1.5px dashed var(--border);
+  background: var(--stone2);
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.logoBox.has {
+  border: 2px solid var(--accent);
+}
+.logoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.footRow {
+  margin-top: var(--sp-3);
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  border: 1px solid var(--gold);
+  background: var(--stone2);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: 11.5px;
+  color: var(--sub);
+  line-height: 1.55;
+  margin-bottom: var(--sp-3);
+  border-radius: var(--radius-sm);
+}
+.banner b {
+  color: var(--cream);
+}
+.bannerActs {
+  margin-top: var(--sp-2);
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.detGrp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}
+
+.empty2 {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--dim);
+}
+
+/* ── Export artefact palette — LITERAL by exemption (plans/82). The chrome above
+   this line is tokenised; nothing below reads a theme var. ── */
+.art {
+  font-family:
+    'Arial Black',
+    Arial,
+    sans-serif;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}

@@ -1,4 +1,4 @@
-import { GF } from '../../../utils/config'
+import { APP_CONFIG, GF } from '../../../utils/config'
 import { fmtIntensity, blkMeta } from '../../../public/lib/wod.js'
 import { DAY_PT, MONTH_PT } from '../../../public/lib/week.js'
 import { toISO } from '../../../utils/storage'
@@ -775,7 +775,7 @@ function MobileWeeklySingleDay({ date, sessions, f }) {
     day: '2-digit',
     month: '2-digit',
   })
-  const restLabel = 'Descanso'
+  const restLabel = APP_CONFIG.restDayLabel || 'Descanso'
   const pad = Math.round(18 * f)
   const fontFamily = GF()
   return (

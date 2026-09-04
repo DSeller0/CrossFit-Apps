@@ -1,7 +1,14 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { useAuth } from './context/AuthContext'
 import { useSync } from './context/SyncContext'
-import { loadLS, loadResults, loadAthletes, loadSettings, saveSettings } from './utils/storage'
+import {
+  loadLS,
+  loadResults,
+  loadAthletes,
+  loadLocations,
+  loadSettings,
+  saveSettings,
+} from './utils/storage'
 import { supabase } from './utils/supabase'
 import { APP_CONFIG, GF } from './utils/config'
 import LoginScreen from './components/LoginScreen'
@@ -48,6 +55,9 @@ export default function App() {
   const [creatorPreload, setCreatorPreload] = useState(deepLink.preload)
   const [resultsPreload, setResultsPreload] = useState(null)
   const [saved, setSaved] = useState(false)
+  // Publicador's Origem picker needs the box list (#59 C5·b1); loaded once here rather
+  // than inside the tab so a later consumer (plans/83's Mês grouping) can share it.
+  const [locations] = useState(loadLocations)
   const [blockNames, setBlockNames] = useState(APP_CONFIG.blockNames)
   // A run-once guard for the config fetch below, never read while rendering — so a ref,
   // not state. As state its setter fired inside the effect that reads it, which is both a
@@ -257,7 +267,8 @@ export default function App() {
           {tab === 'locations' && <AfiliadosTab events={events} />}
           {/* No .res-pane wrapper since #57/plans/80 — it existed only to accent-fill
               .b.bp/.b.bsec/.res-tab.on, all three of which are gone with the tab's C0
-              adoption. (.pub-pane below is still real: Publicador/Agenda #59 owns it.) */}
+              adoption. (.pub-pane below it was the same story — #59 C5·b1 removed it,
+              the last consumer, along with the .b/.bsec/.pvt rules it only ever scoped.) */}
           {tab === 'results' && (
             <ResultadosTab
               sessions={sessions}
@@ -266,28 +277,22 @@ export default function App() {
             />
           )}
           {tab === 'agenda' && (
-            <div className="pub-pane">
-              <AgendaView
-                sessions={sessions}
-                events={events}
-                setEvents={setEvents}
-                athletes={loadAthletes()}
-                onEditSession={s => {
-                  setCreatorPreload(s)
-                  setTab('creator')
-                }}
-                onLogResult={({ athleteId, date }) => {
-                  setResultsPreload({ athleteId, date })
-                  setTab('results')
-                }}
-              />
-            </div>
+            <AgendaView
+              sessions={sessions}
+              events={events}
+              setEvents={setEvents}
+              athletes={loadAthletes()}
+              onEditSession={s => {
+                setCreatorPreload(s)
+                setTab('creator')
+              }}
+              onLogResult={({ athleteId, date }) => {
+                setResultsPreload({ athleteId, date })
+                setTab('results')
+              }}
+            />
           )}
-          {tab === 'publisher' && (
-            <div className="pub-pane">
-              <PublicadorTab sessions={sessions} />
-            </div>
-          )}
+          {tab === 'publisher' && <PublicadorTab sessions={sessions} locations={locations} />}
           {tab === 'tv' && <TvControllerTab sessions={sessions} />}
           {tab === 'config' && <ConfigTab />}
         </Suspense>
