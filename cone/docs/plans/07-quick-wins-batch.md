@@ -1,6 +1,6 @@
 # 07 — Quick-wins batch (#33 · #11 · #13 · #9 · #12)
 
-> ✅ Done: e943716 · 2026-07-03 — see BACKLOG.md "Done (recent)" for the shipped summary. #33's rounding rule was corrected pre-implementation (round-down to half-hour, not nearest-hour — see plan history); code review (8-angle, medium effort) caught one real CLAUDE.md violation (countdown badge `border-radius` on a public page — fixed) and one real staleness bug (`classLabel` never refreshed across multiple classes — fixed).
+> ✅ Done: e943716 · 2026-07-03 — closed #33, #9, #11, #12, #13. See BACKLOG.md "Done (recent)" for the shipped summary. #33's rounding rule was corrected pre-implementation (round-down to half-hour, not nearest-hour — see plan history); code review (8-angle, medium effort) caught one real CLAUDE.md violation (countdown badge `border-radius` on a public page — fixed) and one real staleness bug (`classLabel` never refreshed across multiple classes — fixed).
 
 ## Context
 Five small, independent S items batched into one session for momentum after three infra/security-heavy sessions (#4, #7, #34). Each touches a different file, so they don't interfere. Four are pure code/behaviour; **#12 alone needs a mockup-first design card** (new visual element) — do that card at the top of the session and gate #12's code on approval, so the other four can ship regardless of design iteration.

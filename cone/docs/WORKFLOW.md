@@ -31,12 +31,33 @@ An item enters **Ready** only when its plan file exists. Keep **only 2-3 items i
 1. Start a session: **"Work item #N, plan at `docs/plans/NN-slug.md`."**
 2. Claude reads `CLAUDE.md` (auto) + that one plan + the relevant code.
 3. Execute → commit + push.
-4. Move the row to **Done** in `BACKLOG.md`.
+4. Replace the row with its one-line **Done** row in `BACKLOG.md` (see “Board row grammar”).
 5. Mark the plan file done: prepend `> ✅ Done: <commit> · <date> — see BACKLOG.md` under its title (see "Plan lifecycle" below). Then run **`node scripts/audit-backlog-markers.mjs`** (from `cone/`, #151/plans/70) — it cross-references every row's marker against its plan's Done marker and flags the four drift shapes steps 4–5 exist to prevent. Advisory only (not a CI gate): a clean table confirms 4–5 landed correctly; any hit is something to fix inline before ending the session, same as the check that follows it.
 
 One item per session for size **S/M**. Large items (e.g. SPA standardization) get a dedicated *planning* session first, then *execution* session(s).
 
 **Plan lifecycle.** Shipped plans stay in `plans/` with a `> ✅ Done: <commit>` marker under the title, rather than being moved or deleted — the plan's rationale lives next to its outcome, and the marker is the one-glance signal that separates live plans from history. So `plans/` without a Done marker = actionable (Ready or In Progress); with one = archived-in-place. The BACKLOG `Done (recent)` entry holds the shipped *summary*; the plan file holds the original *intent* — keep both. Revisit archiving into a `plans/done/` subdir only if the unmarked-vs-marked ratio ever makes the directory hard to scan.
+
+**Board row grammar.** Every row in `BACKLOG.md` is **one line**, in one of four shapes:
+
+```
+Ready        - 🟢 **[→ Ready · plans/NN](./plans/NN-slug.md)** — **#N Title** · size · model · why-now
+In Progress  - 🔵 **[→ In Progress · plans/NN](./plans/NN-slug.md)** — **#N Title** · size · model
+Icebox       - **#N Title** · size · model · one-sentence note            (lead ⏸ if blocked)
+Done         - ✅ **[plans/NN · `commit` · YYYY-MM-DD](./plans/NN-slug.md)** — **#N Title** · closed #N. · outcome
+```
+
+**≤400 characters per row** (a Ready row may reach 600 — it gets picked up cold). **No blockquote
+commentary in any column.** Detail belongs in `plans/NN`: `## Context` holds the intent, the
+`> ✅ Done:` marker holds the outcome. If a fact doesn’t fit the row, it goes in the marker, not
+on the board. Two shapes the parser depends on: a Done row’s leading bracket names the plan that
+**shipped** it (never a program or decision doc — `plans/16`, `22` and `42` legitimately have no
+marker), and a `closed #…` clause contains **no `.`** but its terminator.
+
+⚠️ `scripts/audit-backlog-markers.mjs` parses exactly these four shapes — a row written any other
+way is **invisible** to ritual step 5. That is not hypothetical: the board drifted into blockquote
+refill banners during 2026-08, and the audit printed “Zero drift found” for five weeks while the six
+most recent shipped plans carried no Done marker at all.
 
 New bug or feature → add a row to **Icebox**. Batch trivial ones; don't spin a session per typo.
 
@@ -86,7 +107,7 @@ The human review is a gate, not a formality. In **auto/non-interactive mode the 
 
 ### The component gallery
 
-`gallery.html` (repo root) + `cone/src/public/gallery/` mounts a `Gallery` component: a theme `<select>`, a stage-width toggle, and sections that import the **real** components (`ExerciseList`, `Nav` today) rendering each state from small hardcoded fixtures. **Dev-only:** it is deliberately *not* in `vite.public.config.js` `rollupOptions.input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built or deployed. It grows page-by-page: each design-program session that touches a page extracts that page's reusable pieces into components (this is #17) and adds their state entries. Full Storybook was deferred; the gallery is a strict subset of its groundwork.
+`gallery.html` (repo root) + `cone/src/public/gallery/` mounts a `Gallery` component: a theme `<select>`, a stage-width toggle, and sections that import the **real** components rendering each state from small hardcoded fixtures. **Dev-only:** it is deliberately *not* in `vite.public.config.js` `rollupOptions.input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built or deployed. It grows page-by-page: each design-program session that touches a page extracts that page's reusable pieces into components (this is #17) and adds their state entries. Full Storybook was deferred; the gallery is a strict subset of its groundwork.
 
 ### Claude Design (claude.ai/design)
 

@@ -1,6 +1,6 @@
 # 21 — Design pass B3: me.html + athletes.html (#52)
 
-> ✅ **Done: `c4c0955` + `5cc512b` + `558b1d3` · 2026-07-16 — see BACKLOG.md**
+> ✅ **Done: `c4c0955` + `5cc512b` + `558b1d3` · 2026-07-16 — closed #52, #68. See BACKLOG.md**
 >
 > The retirement, extraction, canonical adoption and fold-ins shipped in #52 (`c4c0955`) and the gallery gate paused the rest on 2026-07-12, awaiting the user's Claude Design pass on the me.html **layout**.
 >

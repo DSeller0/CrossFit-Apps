@@ -74,12 +74,17 @@ function parsePlans() {
       if (lines[i].trim() !== '') break
     }
     const hasDoneMarker = start !== -1
-    // Prefer the title's own numbers — plans/68's Done marker mentions "#147–#151" as review
-    // OUTPUT ("5 new rows"), not what the plan itself closed, and the title is what's
-    // reliable there. Only fall back to scanning the marker block's "Closed #…" clause when
-    // the title carries no number at all (plans/61: a prose title, numbers only in the marker).
-    let doneNums = titleNums
-    if (hasDoneMarker && !doneNums.length) {
+    // What the plan claims to have closed, from three sources UNIONED — a plan that shipped
+    // several items names them in different places depending on when it was written:
+    //   1. the title's own leading chain (`# 80 — #57 · Design pass C3 …`);
+    //   2. the marker's leading chain immediately after `Done:` (`> ✅ Done: #59 · #105 · #106 …`),
+    //      which is how the multi-session plans record their full set;
+    //   3. a `clos… #N …` clause anywhere in the marker block (plans/45's "Also fully closes #101").
+    // ⚠️ Source 2 is deliberately anchored to the START of the marker. plans/68's marker
+    // mentions "#147–#151" as review OUTPUT ("5 new rows"), not what it closed — that sits in
+    // prose further along and must not be swept in. Anchoring is what keeps it out.
+    let doneNums = [...titleNums]
+    if (hasDoneMarker) {
       let end = start
       while (
         end < lines.length &&
@@ -88,8 +93,13 @@ function parsePlans() {
       )
         end++
       const blockText = lines.slice(start, end).join(' ')
-      const cm = blockText.match(/\b[Cc]losed:?\s+([^.]*)\./)
-      if (cm) doneNums = allNums(cm[1])
+      const lead = blockText.match(/^>\s*\*{0,2}✅\*{0,2}\s*\*{0,2}Done:?\*{0,2}\s*(#\d[^—–-]*)/)
+      // allNums, not leadingChainNums: the capture is already anchored to the marker's
+      // start and bounded by the em dash, and this board separates a chain with ` · `,
+      // which CHAIN_RE (built for `+`/`,`) does not accept.
+      if (lead) doneNums = [...new Set([...doneNums, ...allNums(lead[1])])]
+      const cm = blockText.match(/\b[Cc]los\w*:?\s+((?:\*\*)?#\d+[^.]*)\./)
+      if (cm) doneNums = [...new Set([...doneNums, ...allNums(cm[1])])]
     }
     plans.set(nn, { file, hasDoneMarker, doneNums })
   }
@@ -100,21 +110,35 @@ function parsePlans() {
 // A row is a top-level `- ` bullet (plans/70's parsing note) — indented continuation lines
 // and numbered historical recaps ("13. ✅ …") are deliberately not rows.
 //
-// Only two sections carry LIVE rows that a marker check applies to: Ready and Icebox. The
-// "Housekeeping program (ranked …)" section is a frozen point-in-time ranking snapshot (its
-// own header says "treat every number as stale until re-run") whose item rows are never
-// updated after shipping by convention — live status lives in Ready/Icebox instead, and in
-// that section's own strikethrough banners. "Done (recent)"'s `- ` lines are prose bullets
-// *inside* an already-shipped narrative entry, not board items needing their own marker.
-// Scanning either section turns "this plan shipped a while ago" into noise.
-function liveSectionRanges(lines) {
+// Every `## ` column carries rows, and every row is ONE LINE in the documented grammar
+// (BACKLOG.md's header; WORKFLOW.md "Board row grammar"). Before 2026-09-05 the Done section
+// held multi-paragraph narrative entries whose `- ` lines were prose bullets *inside* an
+// already-shipped entry, so scanning it was pure noise and it was excluded.
+//
+// 🔴 That exclusion is exactly what went wrong. `plan-missing-done-marker` and
+// `partial-marker` are fed ONLY by ✅ rows carrying a leading `**[… plans/NN]` bracket, and
+// the board drifted into blockquote refill banners during 2026-08 — which are not `- ` rows.
+// So this audit printed "Zero drift found" for five weeks while plans/75, 76, 77, 78, 82 and
+// 83 (the six most recent shipped plans) carried no Done marker at all. The board stopped
+// using the format its own drift detector reads, and the detector went quiet rather than
+// complaining. Done is now the PRIMARY feed for both shapes.
+//
+// Two grammar invariants this depends on, both stated in WORKFLOW.md:
+//   · a Done row's leading bracket names the plan that SHIPPED it — never a program or
+//     decision doc (plans/16, 22 and 42 legitimately have no marker, and a Done row linking
+//     one would make plan-missing-done-marker fire forever);
+//   · a row's `closed #…` clause contains no `.` but its terminator (rowClosedClauseNums
+//     stops at the first period).
+// If a frozen point-in-time section is ever re-added, its `## ` heading must NOT match the
+// regex below — that is what the retired "Housekeeping program (ranked …)" section was.
+function boardSectionRanges(lines) {
   const starts = []
   lines.forEach((l, i) => {
     if (/^## /.test(l)) starts.push({ line: i, title: l })
   })
   const ranges = []
   for (let i = 0; i < starts.length; i++) {
-    if (!/Ready|Icebox/.test(starts[i].title)) continue
+    if (!/Ready|In Progress|Icebox|Done/.test(starts[i].title)) continue
     ranges.push([starts[i].line, starts[i + 1] ? starts[i + 1].line : lines.length])
   }
   return ranges
@@ -126,6 +150,10 @@ function rowLeadMarker(line) {
   // "🟢 **[→ folded into #55 · plans/38]**" (a row absorbed into a DIFFERENT item) uses the
   // same emoji for a completely different claim and must not read as a live Ready pointer.
   if (/^🟢\s*\*\*\[→ Ready · plans\/\d+\]/.test(rest)) return 'ready'
+  // 🔵 In Progress shares the 'ready' class deliberately: for drift purposes "this row claims
+  // to be a live pick while its plan already carries a Done marker" is one shape, so reusing
+  // the class covers In Progress with no new finding type and no new reporting code.
+  if (/^🔵\s*\*\*\[→ In Progress · plans\/\d+\]/.test(rest)) return 'ready'
   if (rest.startsWith('✅')) return 'shipped'
   if (rest.startsWith('**')) return 'bare'
   return 'other' // ⏸/🔴/⚠️-led rows: a real marker, just not one of the two this audit tracks
@@ -154,7 +182,7 @@ function rowClosedClauseNums(line) {
 // is a cross-reference, not this row's own shipping vehicle, and must not turn an unrelated
 // row into a "linking row" for that plan.
 function rowPlanLink(line) {
-  const m = line.match(/^-\s+(?:🟢|✅)?\s*\*\*\[([^\]]*)\]/)
+  const m = line.match(/^-\s+(?:🟢|🔵|✅|⏸)?\s*\*\*\[([^\]]*)\]/)
   if (!m) return null
   const pm = m[1].match(/plans\/(\d+)/)
   return pm ? Number(pm[1]) : null
@@ -162,11 +190,11 @@ function rowPlanLink(line) {
 
 function parseRows() {
   const lines = readFileSync(BACKLOG, 'utf8').split(/\r?\n/)
-  const ranges = liveSectionRanges(lines)
-  const inLiveSection = i => ranges.some(([start, end]) => i >= start && i < end)
+  const ranges = boardSectionRanges(lines)
+  const inBoardSection = i => ranges.some(([start, end]) => i >= start && i < end)
   const rows = []
   lines.forEach((line, i) => {
-    if (!/^-\s/.test(line) || !inLiveSection(i)) return
+    if (!/^-\s/.test(line) || !inBoardSection(i)) return
     rows.push({
       lineNo: i + 1,
       text: line,
@@ -219,7 +247,7 @@ for (const r of rows) {
     findings.push({
       shape: 'ready-but-shipped',
       line: r.lineNo,
-      detail: `row leads 🟢 Ready → plans/${r.planNN}, but ${plan.file} already has a Done marker`,
+      detail: `row leads 🟢/🔵 live → plans/${r.planNN}, but ${plan.file} already has a Done marker`,
     })
   }
 }

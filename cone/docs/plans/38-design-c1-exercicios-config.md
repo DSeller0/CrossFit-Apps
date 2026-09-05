@@ -1,6 +1,6 @@
 # 38 — #55 · Design pass C1 — Exercícios + Configurações (+ #87 registry & PR board)
 
-> ✅ Done: `cab19c8` → `63d8394` → `3bf5bae` → `3b6a826` → `118f786` · 2026-07-26 — see BACKLOG.md
+> ✅ Done: `cab19c8` → `63d8394` → `3bf5bae` → `3b6a826` → `118f786` · 2026-07-26 — closed #55, #87. See BACKLOG.md
 
 > **All phases shipped.** Phase A `cab19c8` (Exercícios + Configurações adopt C0 —
 > Button/Input/ConfirmReview, the frozen totk-dark palette gone, "Salvar config.json"

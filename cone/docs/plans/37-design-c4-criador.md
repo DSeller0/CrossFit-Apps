@@ -1,6 +1,6 @@
 # 37 — #58 · Design pass C4 — Criador (+ #10 goals, #90 box dots, #35/#14/#15 slices)
 
-> ✅ Done: `aea2e9d` (2026-07-22). Shipped as planned, with two recorded deviations:
+> ✅ Done: `aea2e9d` (2026-07-22) — closed #58, #10, #90. Shipped as planned, with two recorded deviations:
 > the athlete picker became **inline inside `SessionMetaModal`** rather than the
 > nested modal the mockup implied (one modal layer, not two), and a new session
 > opens with **no blocks** rather than a seeded one — the coach picks the first

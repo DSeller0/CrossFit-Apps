@@ -1,6 +1,6 @@
 # 83 — #59 · C5·b2 — Publicador: the export renderer
 
-> ✅ Done: `ed637ea` → `85afedc` → `2856182` → `f995b6f` → `248b4d9` · 2026-09-04 — see BACKLOG.md. Closed **B2** (Saturday/Sunday were silently dropped from the Mês and Semana-calendar exports) and the Dia-mobile “modelo” question b1 deferred. Design (Opus) ran ahead of this session; this was build only. Two fit-check bugs were caught live, not by a test — see the Notes.
+> ✅ Done: `ed637ea` → `85afedc` → `2856182` → `f995b6f` → `248b4d9` · 2026-09-04 — closed #15, #18. See BACKLOG.md. The design program’s two fold-ins (hex→vars, desktop scroll-in-panes) finished here and the last `TAB-OWNED → Publicador` tag went with them. Also fixed **B2** (Saturday/Sunday were silently dropped from the Mês and Semana-calendar exports) and the Dia-mobile “modelo” question b1 deferred. Design (Opus) ran ahead of this session; this was build only. Two fit-check bugs were caught live, not by a test — see the Notes.
 
 > Split out of [plans/81](./81-design-c5-publicador-agenda.md) § "C5·b — Publicador".
 > **Runs after [plans/82](./82-c5b1-publicador-shell-e-cores.md) and depends on it** — the `--a-*` palette
