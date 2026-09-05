@@ -11,12 +11,26 @@ Discovered during the 2026-07-09 benchmark walk: **Cone is already ~60% of a PWA
 - A complete **`manifest.json`** (repo root) is linked from every public page: `standalone` display, correct `/CrossFit-Apps/` scope + start_url, 192/512 maskable icons, theme colors, and app shortcuts (Leaderboard/Agenda/Meu perfil).
 - **`Index.jsx:195`** implements a custom in-theme install banner (`beforeinstallprompt` + `appinstalled`) — "Adicionar à tela inicial / Instalar".
 - Served over HTTPS on GitHub Pages ⇒ **installable on Android today** (Chrome WebAPK: home-screen icon, standalone window). On iOS, Add-to-Home-Screen works but is manual (Safari share menu; no banner support).
-- **Missing: a service worker.** Consequences: no offline shell, no precache (every visit re-downloads), no mitigation of the chunk-hash-404 problem, and Chrome's richer-install criteria degrade. Legacy `sw.js` code exists only in the retired `schedule_builder_*.html` files — nothing current registers one.
+- ✅ **A service worker SHIPPED (corrected 2026-09-05 — this line used to say the opposite).** `sw.js`
+  at the repo root is live at `CACHE_VERSION = 'cone-v8'`, precaching 9 HTML pages + `manifest.json`
+  with a stale-while-revalidate handler for everything else. `src/public/registerSW.js` registers it
+  from **six** public entry points (`index/Index.jsx:92`, `leaderboard/main.jsx:7`, `me/Me.jsx:107`,
+  `results/Results.jsx:124`, `schedule/Schedule.jsx:173`, `tema/Tema.jsx:36`). It was hand-rolled, not
+  `vite-plugin-pwa`. ⚠️ **`cache.addAll` rejects atomically**, so one 404 in `PRECACHE_URLS` stops the
+  worker installing for every user on every page — which is why the retired `athletes.html` stub is
+  still in the repo. `tv.html` is built but deliberately not precached.
 
 ## Paths, in ascending cost
 
-### 1. Finish the PWA (service worker) — S/M, the only near-term-worthy step
-`vite-plugin-pwa` (Workbox) in both configs; precache each build's assets; runtime-cache Supabase GETs (network-first). Benefits: installed-app feel, faster loads on gym Wi-Fi, and **substantially fixes chunk-hash 404s** (old clients keep a consistent precached bundle until the new SW activates atomically). Complications: two builds sharing one origin need either two SWs with disjoint scopes (`/CrossFit-Apps/` vs `/CrossFit-Apps/cone/`) or one SW built from the public config covering both — decide at implementation. **#29 (Vercel) first** makes this materially easier (cache-control headers, single deploy, clean base path).
+### 1. ~~Finish the PWA (service worker)~~ — ✅ **ESSENTIALLY DONE (2026-08-05)**
+The hand-rolled `sw.js` above covers the offline shell and precache this path was written to buy, so
+the near-term step is spent. What it did **not** buy: the SPA build's own assets are not precached
+(the worker registers at scope `/CrossFit-Apps/` and precaches public HTML only), and **chunk-hash
+404s are not fixed** — that still needs #29 or a Workbox build that precaches each build's
+fingerprinted assets. Two builds share one origin, so a full `vite-plugin-pwa` adoption still has to
+choose between two SWs with disjoint scopes (`/CrossFit-Apps/` vs `/CrossFit-Apps/cone/`) or one SW
+covering both. ⚠️ **On localhost that same scope makes the worker serve precached production assets
+over the SPA dev server, with no console error** — see CLAUDE.md's service-worker poisoning note.
 
 ### 2. Play Store via TWA (Bubblewrap) — S on top of path 1
 Wraps the (finished) PWA for the Play Store. Google Play developer account: **$25 one-time**. Needs Digital Asset Links (`assetlinks.json`) — trivial on Vercel, awkward-but-possible on GH Pages. Android only. Store presence without touching app code.
@@ -32,7 +46,7 @@ A full client rewrite to escape a WebView the product doesn't suffer from. Not j
 
 | Trigger fires | Do |
 |---|---|
-| Chunk-hash pain / general polish | #29 Vercel → path 1 (SW) |
-| "Put it on athletes' phones" (one box) | Path 1 only — the install banner already exists |
-| Play-Store credibility for pitching boxes | Path 1 → path 2 (TWA) |
+| Chunk-hash pain / general polish | #29 Vercel — path 1's SW shipped 2026-08-05 and does **not** cover it |
+| "Put it on athletes' phones" (one box) | Nothing to build — the install banner and the SW both exist |
+| Play-Store credibility for pitching boxes | Path 2 (TWA) — path 1 is no longer a prerequisite |
 | iOS App Store required (business) | Path 3, after #30/#31 + push story exists |

@@ -43,14 +43,19 @@ Living inventory of every user-facing capability: where it lives, who consumes i
 | Ficha "Histórico de resultados" — RPE médio + sparkline · Taxa RX · Evolução de carga · the logged-result list (migrated out of Resultados' retired Histórico sub-tab, #57) | Atletas | `results_v2` | Pro |
 | (#39 planned: per-athlete adaptations) | Atletas | `goals_data.adaptations` | Gate: Pro |
 | Exercise registry CRUD (**248** entries after #94's two rounds of prod additions — measured live 2026-07-26, see #96; the old "146" predated them: categories, video, defaults) | Exercícios | `exercise_registry` | core |
-| Coach profile + Pix payment config | Serviços | `coach_profile` | Gate: business |
-| Locations ("boxes") w/ hourly rates + per-local athletes | Serviços | `locations` | Gate: business |
+| Coach profile + Pix payment config | Afiliados · Meu perfil | `coach_profile` | Gate: business |
+| Locations ("boxes") w/ hourly rates + per-local athletes | Afiliados · Meus afiliados | `locations` | Gate: business |
+| **Versioned rate history** — a rate change appends a version instead of overwriting, so a past event keeps the price it was booked at (#154) | Afiliados | `locations[].rateHistory` | Gate: business |
+| **Two-direction pair** — what the box pays the coach vs. what the coach charges the athlete, same field, opposite arrows by `loc.type` (#161) | Afiliados · Meus afiliados | `locations` | Gate: business |
+| **Fechamento** — the invoice board (Sessões abertas → Rascunho → Enviada → Paga). A status **stamp**, not an invoice entity; `sent`/`paid` freeze their total (#162) | Afiliados · Fechamento | `coach_profile.value.billing` | **Gate: business — the most gateable surface in the app** |
+| **Minha semana** — the coach's own week as a time grid over `events`; no new data (#162) | Afiliados · Minha semana | `events` | Gate: business |
+| **A receber** — outstanding-by-affiliate rail; a `paid` period drops out, a `sent` one still counts (#163) | Afiliados · Meus afiliados | `events` + `billing` | Gate: business |
 | Log a whole class: pick the session, log each athlete in place, read the class back (RPE médio · Taxa RX · Flags · Distribuição). Per-block **"não fez"** (#157) keeps absence distinct from a zero score | Resultados | `results_v2` | core / class read-back = Pro |
 | Coach calendar: classes + personal sessions, completion stats, Relatório | Agenda | `events` blob | Gate: business |
 | Grade exports: Diário/Semanal/Calendário/Mobile ×2/Mobile Semanal ×2 + Apresentar (PDF/img) | Publicador | `sessions` + jsPDF | Gate: Pro |
 | Live class ops: start/end class, roster, live registration, guest results | Quadro ao Vivo | `class_executions`, `results_v2`, `tv_state` | Gate: Pro (TV system) |
 | TV slide control + timer push + group rotation | Quadro ao Vivo | `tv_state` | Gate: Pro (TV system) |
-| Gym identity (name/modalidade/logo) + theme selection (4 themes; #43 adds 4 more) | Configurações | `settings` | core / themes = Pro candidate |
+| Gym identity (name/modalidade/logo) + theme selection (4 themes; #43 adds 2 more themes = 4 more `html.theme-*` classes) | Configurações | `settings` | core / themes = Pro candidate |
 | State backup/restore (Salvar/Carregar/Limpar estado, Sincronizar) | Configurações → Dados | all blobs | core |
 
 ## Infrastructure capabilities (invisible but gateable)

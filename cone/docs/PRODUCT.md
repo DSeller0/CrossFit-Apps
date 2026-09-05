@@ -4,10 +4,10 @@ First-draft product doc: who Cone serves, what services it bundles, and a **non-
 
 ## Personas
 
-- **Coach (solo)** — today's only paying-equivalent user; owns everything: programs sessions (Criador), runs classes live (Quadro ao Vivo + TV), registers/reviews results, manages athletes/PRs/goals, exports grades (Publicador), tracks his coaching business (Serviços: locations + hourly rates + Pix; Agenda: class/personal calendar + completion + Relatório). Authenticated (OTP + allowlist).
+- **Coach (solo)** — today's only paying-equivalent user; owns everything: programs sessions (Criador), runs classes live (Quadro ao Vivo + TV), registers/reviews results, manages athletes/PRs/goals, exports grades (Publicador), tracks his coaching business (Afiliados: locations + hourly rates + Pix; Agenda: class/personal calendar + completion + Relatório). Authenticated (OTP + allowlist).
 - **Athlete** — a regular at the coach's classes. No login today (identity = coach-registered record + device-local selection; changes with #30/#31). Consumes schedule/today hub, self-logs results, tracks PRs/goals/profile, appears on leaderboards, checks in to classes.
 - **Guest / drop-in** — walks in, scans the TV QR, checks in by typed name, gets day-scoped results (`anon_results`) — deliberately not durable. Conversion path: coach registers them as an athlete.
-- **Box (owner/multi-coach)** — future. What changes vs. solo coach: multiple coach seats, athlete identity + booking (#40), per-box branding (Configurações identity + the #43 "Common" theme is the box-friendly neutral skin), possibly per-location separation (Serviços' `locations` already models this).
+- **Box (owner/multi-coach)** — future. What changes vs. solo coach: multiple coach seats, athlete identity + booking (#40), per-box branding (Configurações identity + the #43 "Common" theme is the box-friendly neutral skin), possibly per-location separation (Afiliados' `locations` already models this).
 
 ## Services (what the product bundles today)
 
@@ -27,7 +27,7 @@ Lever candidates, from the gating column in FEATURES.md:
 | TV live system (tv.html + Quadro ao Vivo + realtime) | — | ✔ | ✔ |
 | Exports (Publicador PDF/img suite) | limited | ✔ | ✔ |
 | Templates, RM/goals tooling, KPIs, adaptations (#39), body metrics (#19) | — | ✔ | ✔ |
-| Business tabs (Serviços/Agenda) | — | ✔ | ✔ |
+| Business tabs (Afiliados/Agenda) | — | ✔ | ✔ |
 | Coach seats | 1 | 1 | N |
 | Athlete identity + booking (#40) | — | — | ✔ |
 | Themes | 2 | all | all + branding |

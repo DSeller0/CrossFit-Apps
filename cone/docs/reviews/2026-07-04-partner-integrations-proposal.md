@@ -1,6 +1,6 @@
 # TotalPass + Wellhub integration — proposal (pending gym-owner discussion)
 
-> **Status: PROPOSAL — not adopted.** Nothing from this doc is on the backlog board. Before anything moves: (1) discuss with the gym owner, (2) answer the open-questions checklist below (starting with T0 — whether the box even has direct portal access). Placeholder items P0–P5 get real backlog numbers only if/when adopted into BACKLOG.md. Hard prerequisite for most of it: per-athlete identity (**#30/#31**) and the turma schedule (**#40**).
+> **Status: PROPOSAL — not adopted.** ⏸ **Still unadopted as of 2026-09-05** — deliberately untriaged, cited by no board row, and its open-questions checklist has never been answered. Keep it as the record of the analysis; it is not work in flight. Nothing from this doc is on the backlog board. Before anything moves: (1) discuss with the gym owner, (2) answer the open-questions checklist below (starting with T0 — whether the box even has direct portal access). Placeholder items P0–P5 get real backlog numbers only if/when adopted into BACKLOG.md. Hard prerequisite for most of it: per-athlete identity (**#30/#31**) and the turma schedule (**#40**).
 
 ## Context
 

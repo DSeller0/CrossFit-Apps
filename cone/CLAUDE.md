@@ -4,7 +4,9 @@
 CrossFit coaching management app. Vite + React 19 + Supabase.  
 **Repo:** https://github.com/DSeller0/CrossFit-Apps  
 **Deploy:** GitHub Pages at https://dseller0.github.io/CrossFit-Apps/ via GitHub Actions (push to `main`).  
-**Working dir:** `cone/` subfolder. Dev server: `npm run dev` inside `cone/`.
+**Working dir:** `cone/` subfolder. Dev server: `npm run dev` inside `cone/`.  
+**The board:** [docs/BACKLOG.md](./docs/BACKLOG.md) — open items are `## ▶ Now` + Icebox P1–P4.  
+**The process:** [docs/WORKFLOW.md](./docs/WORKFLOW.md) — session ritual, board row grammar, design lanes.
 
 ---
 
@@ -28,7 +30,7 @@ Each page is a self-contained HTML file. Most use a React component mounted at `
 
 **Page whitelist** — the HTML entry list lives in `cone/vite.public.config.js` (`rollupOptions.input`, **10** pages). Every new public HTML page must be added there or it isn't built and 404s live. (`deploy.yml` at the repo root copies `public-dist/` wholesale — no whitelist there anymore.) The HTML entry files and `themes.css` live at the **repo root** (`CrossFit-Apps/`), not inside `cone/` — the public Vite config sets `root: '..'`.
 
-**Never-built legacy HTML (plans/48, 2026-07-27)** — of 33 tracked root `.html` files, 18 (old design mockups, `athletes_v1/v2.html`, `me-a/b/c.html`, `designer.html`) were zero-consumer and deleted; the 4 `schedule_builder_*` variants moved to `legacy/` (kept for the `exerciseRows` reference above, not deployed). **`log.html` looks the same — untracked from `vite.public.config.js`'s input, never built — but is NOT dead:** `Publicador.jsx`'s `PresenterView` builds a live share URL (`_presenterLogUrl`) pointing at it. Since only `public-dist/`'s 9 built pages actually deploy, that URL 404s on the real site today — a pre-existing bug, not introduced here, filed as #113 and deliberately not fixed by this sweep (deletion-only).
+**Never-built legacy HTML (plans/48, 2026-07-27)** — of 33 tracked root `.html` files, 18 (old design mockups, `athletes_v1/v2.html`, `me-a/b/c.html`, `designer.html`) were zero-consumer and deleted; the 4 `schedule_builder_*` variants moved to `legacy/` (kept for the `exerciseRows` reference above, not deployed). **`log.html` looks the same — untracked from `vite.public.config.js`'s input, never built — but is NOT dead:** `Publicador.jsx`'s `PresenterView` builds a live share URL (`_presenterLogUrl`) pointing at it. Since only `public-dist/`'s **10** built pages actually deploy, that URL 404s on the real site today — a pre-existing bug, not introduced here, filed as #113 and not fixed by that sweep (deletion-only). ⚠️ **#113 is CLOSED now** — C5·b1 repointed the share URL at `schedule.html?id=<sessionId>`, which is built and deployed (`Publicador.jsx:431-435`; see the Publicador section). `log.html` itself is still unbuilt and still 404s, and retiring it is the open question — it is the sole consumer of the root `cone-client.js`/`cone-utils.js`.
 
 ### Criador layout (#58 / plans/37)
 
@@ -278,6 +280,8 @@ Entry: `src/App.jsx`. All tabs lazy-loaded with `React.lazy()`:
 Criador, Atletas, Exercícios, Afiliados, Resultados, Agenda, Publicador, Configurações, TvController.  
 Providers: `AuthContext` (session), `SyncContext` (sessions + events + Supabase sync).
 
+#### AppChrome
+
 **AppChrome (#95 · plans/69, 2026-08-06)** — `src/components/chrome/AppChrome.jsx` +
 `AppChrome.module.css` + `tabs.js` replaced `App.jsx`'s inline topbar/tab-bar/sidebar (two stacked
 layouts, up to 226px tall on mobile — `.topbar-right`'s `flex-wrap` broke six chrome controls into
@@ -299,6 +303,8 @@ through `ConfirmReview` with copy that states the server-sync + sessions-only sc
 construction (`min-height:48px`, no wrap), so every consumer (Criador's `cr.stickyHead`,
 Resultados'/Agenda's `.rp-sticktop`, the sync-conflict banner) reads the same token unconditionally.
 
+#### Publicador — the tab
+
 **Publicador (#25 · plans/39 → #59 · C5·b1 · plans/82 → C5·b2 · plans/83 → C5·c · plans/81 §C5·c,
 shipped 2026-09-04)** —
 `src/components/tabs/Publicador.jsx` is the `SchedulePublisher` container, **752 lines** (was
@@ -315,7 +321,7 @@ auto-shrink state machine, T9), `exportViews.jsx` (`DailyExportView`/`WeeklyExpo
 (`EventFormInner` + `ReportModal` — see the Relatório/#154 paragraph below), `pixQr.js` (#162/plans/78
 — `qrToBase64` extracted from `ReportModal`'s own closure so `afiliados/InvoiceDetail.jsx` can render
 an identical Pix QR without a second hand-rolled copy), and **`AgendaView.jsx`** — rewritten by #59 ·
-C5·a, see its own section below. ✅ **The whole family is JSX now** (`createElement` count = 0,
+C5·a, see its own section below. ✅ **`src/components/tabs/publicador/` is JSX** (`React.createElement` count = 0 in code — the 3 grep hits there are comments,
 repo-wide across `src/components/tabs/publicador/`) — `Publicador.jsx`/`exportViews.jsx`/
 `mobileExportViews.jsx` converted first (C5·b1); `events.jsx`'s `EventFormInner`/`ReportModal` (76
 calls, the family's actual last holdout — **not** caught by C5·b1's "whole family is JSX" claim,
@@ -372,6 +378,8 @@ with the pt-BR `ZONES` list); fixed via `normaliseZone` (`utils/config.js`), alr
 the never-built `log.html`, which stays unbuilt on purpose (it reads/writes the legacy `results` blob
 whose anon grants `0009` revoked). **#170** (a Leaderboard PNG export) was asked and answered "no."
 Format names + the `--a-*` contract, precedence and every acceptance bar: [plans/82](./docs/plans/82-c5b1-publicador-shell-e-cores.md).
+
+#### Publicador — the export renderer
 
 **Publicador → the export renderer (#59 · C5·b2 · plans/83, shipped 2026-09-04)** — b1 made the tab
 usable and recoloured the artefacts; b2 makes them **parametric**. Four axes, one pass (every view
@@ -447,8 +455,10 @@ backlog row **#171** (TV as a customisable display) — a WOD is a descriptor no
 (`{skin, zones, days, cardStyle, content, titles, scale}`), not markup — which must NOT inherit the
 fixed-canvas/crop model TV's wall display has no use for.
 
+#### Publicador — Relatório + rate history
+
 **Publicador → Relatório + rate history (#59 · C5·c · plans/81 §C5·c, shipped 2026-09-04)** — the
-last of C5's four sessions, and the last `createElement` holdout in the publicador family.
+last of C5's four sessions. ⚠️ **It was the last holdout *inside* `publicador/`, not in the family** — `src/components/PresenterView.jsx` (157 lines) is still **100% `React.createElement`** and is imported by `publicador/publisher/PresenterLauncher.jsx:1`. A directory-scoped grep misses it; it is unconverted, not absent.
 **Closes #154**, the versioned-rate-history half #104(c) deferred back on 2026-08-05: an event-level
 `rateSnapshot` (plans/71) freezes the rate at booking time but *categorically* cannot re-price an
 event booked **before** it shipped, so a coach changing a box's rate today used to silently re-price
@@ -505,8 +515,10 @@ key), so a Toast-only fallback would have thrown away exactly what the old `prom
 coach. Both Pix-copy edge cases were caught by code review before push, not live-verified against a
 real clipboard-permission-denied browser.
 
+#### Agenda — the editor
+
 **Agenda → the editor (#59 · C5·a · mockup 62 · plans/81, shipped 2026-08-30)** — `AgendaView.jsx`
-is now a ~330-line JSX container over `publicador/agenda/`, and the answer it is built on is a
+is now a **428-line** JSX container (re-measured 2026-09-05) over `publicador/agenda/`, and the answer it is built on is a
 structure decision, not a style one. #162 had moved three of this tab's jobs into Afiliados —
 `MinhaSemanaPane` (the week), `AffiliateSessions` (an affiliate's month), `Fechamento` (the
 invoice). All three are **read-projections by money and none of them writes**; Agenda is the only
@@ -538,8 +550,9 @@ read-only view here that one of those three already owns, and don't move a write
   `evStatus` moved to `eventFilter.js` **verbatim** and nothing assumes `status` is a manual toggle
   in its *shape*; labels are **"A lançar"/"Feita"** (what the coach did with the record, never what
   the athlete did). The stats strip counts "a lançar" and never anything resembling attendance.
-- **`Agenda.module.css` is token-only** — zero non-data hex, zero non-circle radius literals, zero
-  `var(--theme-accent)`. `index.css` went 625 → 554: the **7 `rp-*`**, the
+- **`Agenda.module.css` is token-only** — zero non-data hex, zero non-circle radius literals. ⚠️ **One
+  `var(--theme-accent)` survives** (re-measured 2026-09-05); the sweep missed it and it is still a bug
+  under #43, not a licence to add more. `index.css` went 625 → **556** (the "554" this line used to carry disagreed with the 556 recorded in the Design-system section for the same event; **454 today**): the **7 `rp-*`**, the
   `pub-mobile-*`/`pub-day-*`/`pub-chip-*` and `agenda-*`/`cell-card-*` sets all moved here. ⚠️
   `.rp-sticktop`'s successor `.hdrSticky` keeps `top: var(--spa-sticky-top)` — never 88px.
   `BLOCK_C` stays a **data-colour** map at module scope in `AgendaView.jsx` (per-*type* chip hues,
@@ -550,6 +563,8 @@ read-only view here that one of those three already owns, and don't move a write
 - **a11y contract:** zero click-`<div>`s (every interactive element is a real `<button>`, not
   `role`+`tabIndex`), every icon-only control has an `aria-label`, cells carry an `aria-label`
   naming the day + item count, `<h1>` for the surface and `<h2>` for the day. `window.confirm` = 0.
+
+#### Agenda — the event filter
 
 **One event filter (#105 · closed by C5·a)** — `publicador/eventFilter.js` is pure (no React, no
 client, no storage; 48 tests) and `agenda/EventFilter.jsx` is its client-free UI, with `axes` and
@@ -568,6 +583,8 @@ call site's own opening position (Agenda: no period axis, status `all`; Relatór
 `completed`). ⚠️ `period` keeps `yr`/`mo` **in range mode too** — ReportModal's Pix `txid` reads them
 unconditionally, and dropping them would put `undefined` in a payment identifier.
 
+#### Agenda — recurring series
+
 **Recurring series are operable (#106 · closed by C5·a)** — `recurrenceGroup` had been written by
 `events.jsx`'s expander since it shipped and **never read back**, so deleting a generated quarter was
 ~13 separate deletes. `agendaHelpers.js`'s `seriesEvents`/`seriesScopes` + `SERIES_EDIT_FIELDS` are
@@ -577,10 +594,13 @@ pure and unit-tested; the three scopes (só este / este e os seguintes / toda a 
 describes the past is a false claim — and `SERIES_EDIT_FIELDS` never propagates `date`, `status`,
 `id` or `recurrenceGroup`.
 
+#### --theme-accent (app-wide trap)
+
 🔴 **`--theme-accent` is a hardcoded cyan, not an alias — and this is app-wide, not Agenda's.**
-`src/index.css:15` declares `--theme-accent: var(--accent, #4ac8c0)`, but **`App.jsx:61` then sets it
+`src/index.css:3` declares `--theme-accent: var(--accent, #4ac8c0)`, but **`App.jsx:71` then sets it
 as an inline style on `<html>`** from `APP_CONFIG.themeAccent` (`utils/config.js:26`), whose default
-is **`#00b8d4`** — the cyan #51 removed from the leaderboard, present in no theme. An inline style on
+is **`#00b8d4`** — the cyan #51 removed from the leaderboard, present in no theme. It is written
+**twice**: at mount, and again at **`App.jsx:107-113`** from the fetched remote `cfg`. An inline style on
 the root element beats every `html.theme-*` class, so that fallback never resolves (measured live:
 under `theme-totk-light`, `--theme-accent` is `#00b8d4` while `--accent` is `#1c6860`). Every
 consumer therefore renders one cyan **in all four themes**. It is also where the `#00b8d4` literals
@@ -588,6 +608,8 @@ scattered through `Publicador.jsx`/`mobileExportViews.jsx` come from. C5·a took
 `EventFormInner` off it entirely; **anything gallery-rendered must use `var(--accent)` /
 `var(--accent-text)`**, and the remaining sites plus the question of what that persisted setting is
 *for* belong to #59 · C5·b.
+
+#### Atletas + Afiliados (C2)
 
 **Atletas + Afiliados (#56 · C2 · plans/75, shipped 2026-08-28)** — the old
 `Atletas.jsx` (1795 lines, 7 frozen totk-dark palette consts) and `Servicos.jsx` (1199
@@ -616,6 +638,8 @@ gallery — callers needing it in a client-free component (`atletas/PrModal.jsx`
 it as a wired node prop instead of importing it. `.ex-input`/`.ex-input:focus`/
 `.ex-input::placeholder` are deleted from `index.css` (zero consumers once Atletas
 adopted `ui/Input`); `.ex-suggestion` stays, since the moved combobox still uses it.
+
+#### Atletas — Fichas
 
 **Atletas → Fichas (#160 · mockup 51 · plans/76, shipped 2026-08-28)** — `Atletas.jsx`'s
 composition changed from a 220px alphabetical list + detail pane to a **grade** ordered by
@@ -647,6 +671,8 @@ existing `me.html` call sites — it's session-domain and now has two consumers.
 helpers (`nextSessionGroups`/`adherence`/`daysSinceNote`/`goalSignal`/`presenceGrid`/
 `sinceLastNote`, plus the shared `agoLabel`/`lastSessionSignal`) live in `atletasHelpers.js`,
 `todayKey`-injected like `sessionStrip`.
+
+#### Afiliados — painéis do coach
 
 **Afiliados → painéis do coach (#161 · mockup 60 · plans/77, shipped 2026-08-29)** —
 `Afiliados.jsx`'s composition changed from a horizontal `PaneTabs` strip + two panes to a
@@ -681,6 +707,8 @@ asserting an isolation guarantee that does not exist (plans/42's tenancy sequenc
 isolation dead last; the panel becomes buildable once #31 lands). **Zero change to the
 `locations[]` shape** — every existing reader (`Config.jsx`, `Criador.jsx`, `AgendaView.jsx`,
 `events.jsx`, `billing.js`, `stateBackup.js`) is unaffected.
+
+#### Afiliados — Fechamento + Minha semana
 
 **Fechamento + Minha semana (#162 · mockup 60 · plans/78, shipped 2026-08-29)** — the rail's
 last two "Painéis" rows. `Fechamento` (`FechamentoPane.jsx`) is the invoice board — **Sessões
@@ -727,6 +755,8 @@ exact invoice (`onSelectInvoice`, mirroring `onSelectAffiliate`). "Ver na fatura
 semana's event detail) is the same cross-pane link in the other direction — together they're why
 the two panels are worth more built than either alone.
 
+#### Resultados — one surface
+
 **Resultados → one surface (#57 · mockup 61 · plans/80, shipped 2026-08-30)** — the tab had three
 sub-tabs and **two of them went months without being opened even by their author**, so C3 ran as
 **Lane B** and the structure was the finding. **Leaderboard** was a second copy of `leaderboard.html`
@@ -761,13 +791,19 @@ behind the bar, so **`Resultados.jsx` renders ONE surface** — `resultados/Regi
 - ⚠️ **`index.css` kept the 7 `rp-*` rules AgendaView shares** (until C5·a moved them into `agenda/Agenda.module.css`) (`rp-sticktop` · `rp-month-nav` ·
   `rp-nav-btn` · `rp-month-label` · `rp-weeks` · `rp-week-btn` · `rp-mobile-back`), retagged
   **TAB-OWNED → Publicador/Agenda #59**. ~120 other lines went, and `App.jsx`'s `.res-pane` wrapper
-  went with the three rules it existed to feed. 🔴 **`.b*`/`.fg`/`.lbl`/`.pub-pane` STAY** —
-  `Publicador.jsx` builds them with `React.createElement`, where a `className="b ` grep misses them.
+  went with the three rules it existed to feed. ⚠️ **`.fg`/`.lbl` stay; `.b*`/`.pub-pane` are GONE** (re-measured 2026-09-05). The old rule here
+  said all four survive because `Publicador.jsx` builds them with `React.createElement`, where a
+  `className="b ` grep misses them — **both halves are now false.** C5·b1 converted that file to JSX
+  (0 `React.createElement` in it) and C5·b2 deleted the button zoo; `index.css:24-29` records the
+  deletion. Only `.fg` (`:32-38`) and `.lbl` (`:31`) remain, and they are **Criador's (#58)**, not
+  Publicador's.
 - ⚠️ **Three defects that only live verification caught**, all invisible to tests and to the mockup:
   the mobile sheet at `z-index:60` sat **under** AppChrome (100/200) and lost its own header — it is
   **1000**, matching the `ex-sheet` precedent it claims to follow; the week strip side-scrolled
   `Hoje` out of a 260px rail (now wraps, Criador's own recorded call); and the class progress
   `TallyBar` spanned the full pane at 78px/block, reading as a ruler.
+
+#### Atletas — Histórico de resultados
 
 **Atletas ficha → "Histórico de resultados" (#57)** — one new Card at **position 4**, right after
 *Presença · 4 semanas*, so the three attendance-shaped Cards read in sequence: what was **assigned**
@@ -883,7 +919,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 ```
 **Contrast is measured, not assumed** — the standing table is #14's row in BACKLOG.md; re-run it before touching any of these (#43 adds four more themes and inherits the method). #137/plans/65 fixed the three cells it owned: `--red`/`--err` (identical values, always moved together — text only, never a fill) went 3.23–3.69:1 → **4.58–5.40:1** on the two **dark** themes by an exact per-channel scalar, so the hue is untouched and the light themes are unchanged; sb-light's `--teal`/`--accent`/`--cyan` went `#1490a0` → `#0f727e`, clearing **both** `--accent-text`-on-`--teal` (3.80 → 5.63, the `.rpeBtn.on`/`Button` primary pairing plans/57 deferred here) and `--teal`-as-text-on-`--bg` (3.34 → 4.95) from one token. ⚠️ **`--gold` on light themes (3.79 totk-light / 4.49 sb-light), `--muted` on darks, `--dim` in all four, and `--green` on sb-light (2.93) still fail and are #14's, deliberately not touched here** — they are palette-identity colors used app-wide, not a scoped fix.
 - `var(--card)` is NOT defined — it resolves to transparent, so use `var(--stone)`/`var(--stone2)`. (Historical: the codebase is **clean** as of 2026-07-16 — 0 usages remain. Kept as a don't-reintroduce note, not a live defect.) All 4 themes define exactly the same **29** tokens, verified (one of them is `--font-mono`, added #53/4·C — a theme-invariant system-mono stack; TV numeric readouts + the index ranking use it). **There are no undefined-token references left in the repo** — #99/plans/40 deleted `src/App.css` (which nothing imported and which held all 5 of them) and dropped the unused `--lb-font`, taking each theme 30 → 29. **The `:root` fallback block *also* carries theme-invariant geometry (#54/C0): `--sp-1..--sp-5` (4/8/12/16/24) + `--radius-sm:4px`/`--radius-md:6px`. These live only in `:root` (not the per-theme blocks) on purpose — spacing/radius don't vary by palette, and keeping them out of the theme classes preserves the per-theme token count. Every page loads themes.css, so `src/public/shared` primitives inherit them.**
-- **`index.css` is triaged, and its comments are load-bearing (#99 · plans/40).** Every rule carries one of three ownership tags: **`GLOBAL`** (keep + tokenize — the only bucket worth tokenizing) · **`TAB-OWNED → <tab> #NN`** (24 of them — leave in place; the named design pass moves it to that tab's `.module.css` and deletes it here) · **`DEAD`** (deleted on a zero-consumer grep). **A C-session reads its own `TAB-OWNED` tags instead of re-deriving what belongs to it.** Evidence is per *selector*, never per section — the Criador block looks wholly dead but `blk-row` has 0 refs while `intensity` has 57. File was 800 raw lines / 237 hex after that pass; **#57/plans/80 took it to ~625**, and **#59/C5·a to 556**, by deleting the Resultados-owned buckets (`.res-tabs`/`.res-tab`, `.level-badge`+`.lv-*`, `.scale-badge`+`.sc-*`, BOTH `.kpi-*` definitions, `.presence-dot`/`.pd-*`, `.flag-icon`, `.sparkline`, `.history-row`, `.empty-state`, `.sc-card`/`.sc-hdr`/`.sc-title`, the `.res-pane` selectors, and ~67 of the 74 `rp-*` rules). ⚠️ The 7 `rp-*` rules AgendaView shared survived C3 and were retagged for #59 — a `TAB-OWNED` tag naming one tab is not proof of a single consumer, so grep before deleting. **C5·a then moved all 7 into `agenda/Agenda.module.css`** along with the `pub-*`/`agenda-*` sets. **#59/C5·b2 then moved the `dv-*`/`wk-*` sets into `Publicador.module.css`** (camelCased; 9 zero-consumer rules dropped in the move, not carried over dead — see the Publicador section above), taking the file to **454 raw lines** and **zero** `TAB-OWNED → Publicador` tags — **only Criador's (#58) remain**, the design program's one open per-tab CSS debt.
+- **`index.css` is triaged, and its comments are load-bearing (#99 · plans/40).** Every rule carries one of three ownership tags: **`GLOBAL`** (keep + tokenize — the only bucket worth tokenizing) · **`TAB-OWNED → <tab> #NN`** (**10** of them, re-counted 2026-09-05, every one Criador's #58 — leave in place; the named design pass moves it to that tab's `.module.css` and deletes it here) · **`DEAD`** (deleted on a zero-consumer grep). **A C-session reads its own `TAB-OWNED` tags instead of re-deriving what belongs to it.** Evidence is per *selector*, never per section — the Criador block looks wholly dead but `blk-row` has 0 refs while `intensity` has 57. File was 800 raw lines / 237 hex after that pass; **#57/plans/80 took it to ~625**, and **#59/C5·a to 556**, by deleting the Resultados-owned buckets (`.res-tabs`/`.res-tab`, `.level-badge`+`.lv-*`, `.scale-badge`+`.sc-*`, BOTH `.kpi-*` definitions, `.presence-dot`/`.pd-*`, `.flag-icon`, `.sparkline`, `.history-row`, `.empty-state`, `.sc-card`/`.sc-hdr`/`.sc-title`, the `.res-pane` selectors, and ~67 of the 74 `rp-*` rules). ⚠️ The 7 `rp-*` rules AgendaView shared survived C3 and were retagged for #59 — a `TAB-OWNED` tag naming one tab is not proof of a single consumer, so grep before deleting. **C5·a then moved all 7 into `agenda/Agenda.module.css`** along with the `pub-*`/`agenda-*` sets. **#59/C5·b2 then moved the `dv-*`/`wk-*` sets into `Publicador.module.css`** (camelCased; 9 zero-consumer rules dropped in the move, not carried over dead — see the Publicador section above), taking the file to **454 raw lines** and **zero** `TAB-OWNED → Publicador` tags — **only Criador's (#58) remain**, the design program's one open per-tab CSS debt.
 - **`var(--border)` = stronger (card outlines + form controls); `var(--divider)` = subtle (internal separators) — and since #137/plans/65 (2026-08-04) this is TRUE IN THE CODE.** The two were **byte-identical in all four themes**, so every call site that "chose" between them chose nothing; that was the direct cause of #134 (a `.notesToggle` at `--divider` measured identical to the `<input>` at `--border` beside it). `--border` is now derived **per palette** — two of the four themes are light, where "stronger" means *darker* — as the point on that palette's own `--div → --muted` ramp measuring **1.50:1 against `--divider`**, which lands it at **1.80–1.98:1 against `--bg`** in every theme (`--divider` is 1.18–1.33). ⚠️ **`--divider` itself did NOT move** — it is ~330 of the ~360 call sites, and moving it would restyle the whole app; `--div` remains its legacy alias, still equal to it. **Token count is unchanged at 29 per theme** (both already existed) — verified programmatically, as this file's other 29-token claims are. 🔴 **The corollary the change exposed: ~150 full-box borders across page-level CSS are on `--divider` and now render a step weaker than the ~28 on `--border`.** That is not automatically a bug — containers/inputs strong, inner chips/KPIs hairline reads coherently, and `AccordionCard`'s `.card`(divider)/`.expanded`(border) pair became *better*. plans/65 reclassified only the two **shared primitives** whose mismatch is visible side by side (`ui/Input` and `shared/MaskedTimeInput`, both form controls, both → `--border`; the latter renders in the same `.numRow` as `ScoreFields`' `.input`). Everything else is each page's own design-pass call — check the pair deliberately when you touch a page's CSS.
 - No **rounded rectangles** on public pages — but `border-radius: 50%` (true circles: timer ring, avatar badges, dots) is an exempt shape primitive; pills (`999px` ends) count as rounded rects and get squared. Minimal radius on SPA components → `--radius-sm`/`--radius-md` (#54/C0). (Settled 2026-07-09 — BACKLOG "Decisions recorded".)
 - **Any focusable form control on a public page is ≥16px** — iOS Safari auto-zooms a focused control under that size, and `user-scalable=no` does not suppress it. Rediscovered three times before finally being written down here instead of re-found a fourth: `ui/Input.module.css` (`font-size:16px` comment), `shared/MaskedTimeInput`, and `shared/ScoreFields`' `.input` (#155/plans/74 — which also un-inverted `schedule.html`'s `.lpSelect`/`.rmInput`, given 16px only at `≥768px` and 13px on the phone, backwards for a phone-only bug).
@@ -891,7 +927,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 - Font: `var(--font)` → Cinzel (TotK themes) or Amarante (Spirit Blossom themes). Loaded weights (`src/fonts.js`): Cinzel **400/500/600/700/800/900** (500 + 800 added in #52, the first session to touch a weight-800 use), Crimson Pro 400/600, Amarante 400 **only** — Amarante ships no bold upstream, so its synthesized bolds are by design.
 - All UI strings: pt-BR.
 - **Design process is component-driven, two lanes (WORKFLOW.md "Design work"):** the all-states source of truth is the **in-app component gallery** (`gallery.html`, dev-only), which renders the *real* components — Lane A (changing existing UI) is gallery-first, no static mockup; Lane B (net-new) does a Claude Design ideation mockup first, then the built component enters the gallery. The moment code exists, the gallery is the truth — never hand-maintain a mirror. Claude Design (`cone/design/` → "Cone Design System" project) is token canon + **generated component cards** + Lane-B ideation + a screenshot archive, not a mirror.
-- **Component gallery:** `gallery.html` (repo root) + `cone/src/public/gallery/` — theme switcher + width toggle rendering the real components in every state from mock fixtures. **Decomposed #74/plans/41 (2026-07-26, pure move — `Gallery.jsx` had grown to 1790 lines, the fastest-growing file in the repo, and every design pass edits it):** `Gallery.jsx` is now the ~95-line shell (theme `<select>`, width toggle, sidebar) that imports and composes `GROUPS` from `gallery/groups/*.jsx`; `gallery/fixtures.js` holds the pure-data mock fixtures shared across groups (exercise/session/result shapes); `gallery/harness.jsx` holds the 6 generic render shells (`Case`/`Section`/`FixedFrame`/`ModalBox`/`TallModalBox`/`ScrollFrame` — the last one added with `AppChrome`, #95/plans/69: same `transform:translateZ(0)` containment as `ModalBox`, but scrollable with tall filler so a `position:sticky` element can demonstrate actually sticking); each of the 11 groups (`spa.jsx`/`criador.jsx`/`atletas.jsx`/`afiliados.jsx`/`shared.jsx`/`results.jsx`/`leaderboard.jsx`/`me.jsx`/`schedule.jsx`/`index.jsx`/`tema.jsx`) owns its own items array plus any fixtures/stateful demo wrappers used only by that group (e.g. `MeSheetHarness`, `LbMobileDemo`, `StubTypePicker`) — co-located with their sole consumer rather than centralized, since every demo wrapper turned out to be single-group. `GROUPS` holds **103** items (re-measured 2026-09-04 via `GROUPS.reduce((s,g)=>s+g.items.length,0)`, the same authoritative count `design:cards` itself renders from — supersedes the previous "114" figure, which does not reconcile against a fresh per-group count and predates this measurement method; #59/C5·b2/plans/83 grew the **`Publicador`** group **8 → 12**, adding `pub-layout` (all 4 format branches, incl. a real 3-zone-collapse demo), `pub-blocos`, `pub-titulos` and `pub-fit` (`PreviewPane`'s two non-happy fit states — warn-with-escape and the terminal floor); #59/C5·b1/plans/82 before it had added those original 8: `FormatRail`/`WhenPicker`/`OrigemCores`/`LogoPanel`/`TamanhoPanel`/`AparenciaPanel`/`ExportStates`/the artefact itself rendered through `renderArtefact` in both totk-dark and totk-light to prove the palette is theme-driven and independent of the gallery's own theme switcher; #59/plans/81 C5·a before it added the 5-item **`Agenda`** group (`EventCard`/`EventFilter`/`CellDay`/`DayList`/`DayPane`); #57/plans/80 before that added the 9-item **`Resultados`** group; the previous "80" was never re-measured after #161/#162; #162 grew the `Afiliados` group 11 → 16 adding `InvoiceCard`/`InvoiceDetail`/`FechamentoPane`/`WeekEventGrid`/`MinhaSemanaPane` — #161 before it grew 7 → 11 adding the rail + the two-direction pair + the month's sessions + the receivable rail) across **SPA**/**Criador**/**Atletas**/**Afiliados**/**Resultados**/**Agenda**/**Publicador**/Shared/Results/Leaderboard/Me/Schedule/**Index**/Tema (the **SPA** group = the #54/C0 primitives `Button`/`Input`/`MaskedTimeInput`/`Card`/`ConfirmReview` plus **`AppChrome`** (#95/plans/69 — the SPA chrome bar + sidebar, 7 cases incl. sync states, the conflict banner and the sticky-scroll pin); the **Criador** group = #92's text mode (`SessionTextPane`/`BlockTextEditor`/`WeekSessionCard`/`WeekImportModal`) plus #58's `GoalInput`/`SessionMetaModal`; the **Atletas** group = #160's `AthleteGrid`/`AthleteCard`/`DayGroupHeader`/`Ficha`/`SinceLastOneOnOne`/`PresenceGrid`/`CoachNotePanel` plus C2's surviving `PrRow`/`GoalBar`/`GoalConfigPanel` + its 3 modals; the **Afiliados** group = `PaneTabs`/`AffiliateRail`/`AffiliatesPane`/`DirectionPair`/`AffiliateSessions`/`ReceivableRail` (#161) plus **`InvoiceCard`/`InvoiceDetail`/`FechamentoPane`/`WeekEventGrid`/`MinhaSemanaPane`** (#162) plus C2's surviving `AffiliateRow`/`AthleteAssignment`/`MeuPerfilPane` + its 2 modals; the **Resultados** group = #57's `WeekRail`/`SessionCard`/`ClassHeader`/`SessionKpis`/`AthleteRow`/`AthleteRoster`/`BlockLogCard`/`LogForm` plus the ficha's `ResultHistoryCard` — ⚠️ **`Resultados` is the SPA tab; the lowercase `results` group is public `results.html`'s pieces**, they are two different things; the **Agenda** group = #59/C5·a's `EventCard`/`EventFilter`/`CellDay`/`DayList`/`DayPane` — ⚠️ unlike the `results`/`schedule` cards these have **no blank icon gaps**, because they use `@tabler/icons-react` (inline SVG) rather than the `ti` webfont the design cards' CSP blocks; the **Publicador** group = #59/C5·b1's `FormatRail`/`WhenPicker`/`OrigemCores`/`LogoPanel`/`TamanhoPanel`/`AparenciaPanel`/`ExportStates` plus #59/C5·b2's `LayoutPanel`/`BlocosPanel`/`TitulosPanel` and `PreviewPane`'s fit/overflow states, plus artefact cases rendering `DailyExportView` via `renderArtefact` — the SAME session in both `totk-dark` and `totk-light` (the live proof `--a-*` is literal hex, independent of whatever theme the gallery or the coach's own SPA happens to be in) and a 3-zone session at 2 zonas · 30/70 (the T6 collapse rule, on-screen, not just in the panel copy); the Index group = the #53 landing-page pieces: `WeekGrid`/`DaySessionCard`/`DayRanking`/`BoxWarnings`, all from `src/public/index/rail.jsx` — `WeekGrid` carries a second case for its Criador day-strip use, `filter`+`showCount`), picked from a sidebar. (The SPA group's card generates as `design/components/spa.html` — `design:cards` derives the filename from `group.toLowerCase()`, so that group name is a single clean token, not "SPA / UI".) **Dev-only:** NOT in `vite.public.config.js` `input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built/deployed. Grows page-by-page as components are extracted (#17).
+- **Component gallery:** `gallery.html` (repo root) + `cone/src/public/gallery/` — theme switcher + width toggle rendering the real components in every state from mock fixtures. **Decomposed #74/plans/41 (2026-07-26, pure move — `Gallery.jsx` had grown to 1790 lines, the fastest-growing file in the repo, and every design pass edits it):** `Gallery.jsx` is now the **139-line** shell (theme `<select>`, width toggle, sidebar) that imports and composes `GROUPS` from `gallery/groups/*.jsx`; `gallery/fixtures.js` holds the pure-data mock fixtures shared across groups (exercise/session/result shapes); `gallery/harness.jsx` holds the 6 generic render shells (`Case`/`Section`/`FixedFrame`/`ModalBox`/`TallModalBox`/`ScrollFrame` — the last one added with `AppChrome`, #95/plans/69: same `transform:translateZ(0)` containment as `ModalBox`, but scrollable with tall filler so a `position:sticky` element can demonstrate actually sticking); each of the **14** groups (`spa.jsx`/`criador.jsx`/`atletas.jsx`/`afiliados.jsx`/`shared.jsx`/`results.jsx`/`leaderboard.jsx`/`me.jsx`/`schedule.jsx`/`index.jsx`/`tema.jsx`) owns its own items array plus any fixtures/stateful demo wrappers used only by that group (e.g. `MeSheetHarness`, `LbMobileDemo`, `StubTypePicker`) — co-located with their sole consumer rather than centralized, since every demo wrapper turned out to be single-group. `GROUPS` holds **103** items (re-measured 2026-09-04 via `GROUPS.reduce((s,g)=>s+g.items.length,0)`, the same authoritative count `design:cards` itself renders from — supersedes the previous "114" figure, which does not reconcile against a fresh per-group count and predates this measurement method; #59/C5·b2/plans/83 grew the **`Publicador`** group **8 → 12**, adding `pub-layout` (all 4 format branches, incl. a real 3-zone-collapse demo), `pub-blocos`, `pub-titulos` and `pub-fit` (`PreviewPane`'s two non-happy fit states — warn-with-escape and the terminal floor); #59/C5·b1/plans/82 before it had added those original 8: `FormatRail`/`WhenPicker`/`OrigemCores`/`LogoPanel`/`TamanhoPanel`/`AparenciaPanel`/`ExportStates`/the artefact itself rendered through `renderArtefact` in both totk-dark and totk-light to prove the palette is theme-driven and independent of the gallery's own theme switcher; #59/plans/81 C5·a before it added the 5-item **`Agenda`** group (`EventCard`/`EventFilter`/`CellDay`/`DayList`/`DayPane`); #57/plans/80 before that added the 9-item **`Resultados`** group; the previous "80" was never re-measured after #161/#162; #162 grew the `Afiliados` group 11 → 16 adding `InvoiceCard`/`InvoiceDetail`/`FechamentoPane`/`WeekEventGrid`/`MinhaSemanaPane` — #161 before it grew 7 → 11 adding the rail + the two-direction pair + the month's sessions + the receivable rail) across **SPA**/**Criador**/**Atletas**/**Afiliados**/**Resultados**/**Agenda**/**Publicador**/Shared/Results/Leaderboard/Me/Schedule/**Index**/Tema (the **SPA** group = the #54/C0 primitives `Button`/`Input`/`MaskedTimeInput`/`Card`/`ConfirmReview` plus **`AppChrome`** (#95/plans/69 — the SPA chrome bar + sidebar, 7 cases incl. sync states, the conflict banner and the sticky-scroll pin); the **Criador** group = #92's text mode (`SessionTextPane`/`BlockTextEditor`/`WeekSessionCard`/`WeekImportModal`) plus #58's `GoalInput`/`SessionMetaModal`; the **Atletas** group = #160's `AthleteGrid`/`AthleteCard`/`DayGroupHeader`/`Ficha`/`SinceLastOneOnOne`/`PresenceGrid`/`CoachNotePanel` plus C2's surviving `PrRow`/`GoalBar`/`GoalConfigPanel` + its 3 modals; the **Afiliados** group = `PaneTabs`/`AffiliateRail`/`AffiliatesPane`/`DirectionPair`/`AffiliateSessions`/`ReceivableRail` (#161) plus **`InvoiceCard`/`InvoiceDetail`/`FechamentoPane`/`WeekEventGrid`/`MinhaSemanaPane`** (#162) plus C2's surviving `AffiliateRow`/`AthleteAssignment`/`MeuPerfilPane` + its 2 modals; the **Resultados** group = #57's `WeekRail`/`SessionCard`/`ClassHeader`/`SessionKpis`/`AthleteRow`/`AthleteRoster`/`BlockLogCard`/`LogForm` plus the ficha's `ResultHistoryCard` — ⚠️ **`Resultados` is the SPA tab; the lowercase `results` group is public `results.html`'s pieces**, they are two different things; the **Agenda** group = #59/C5·a's `EventCard`/`EventFilter`/`CellDay`/`DayList`/`DayPane` — ⚠️ unlike the `results`/`schedule` cards these have **no blank icon gaps**, because they use `@tabler/icons-react` (inline SVG) rather than the `ti` webfont the design cards' CSP blocks; the **Publicador** group = #59/C5·b1's `FormatRail`/`WhenPicker`/`OrigemCores`/`LogoPanel`/`TamanhoPanel`/`AparenciaPanel`/`ExportStates` plus #59/C5·b2's `LayoutPanel`/`BlocosPanel`/`TitulosPanel` and `PreviewPane`'s fit/overflow states, plus artefact cases rendering `DailyExportView` via `renderArtefact` — the SAME session in both `totk-dark` and `totk-light` (the live proof `--a-*` is literal hex, independent of whatever theme the gallery or the coach's own SPA happens to be in) and a 3-zone session at 2 zonas · 30/70 (the T6 collapse rule, on-screen, not just in the panel copy); the Index group = the #53 landing-page pieces: `WeekGrid`/`DaySessionCard`/`DayRanking`/`BoxWarnings`, all from `src/public/index/rail.jsx` — `WeekGrid` carries a second case for its Criador day-strip use, `filter`+`showCount`), picked from a sidebar. (The SPA group's card generates as `design/components/spa.html` — `design:cards` derives the filename from `group.toLowerCase()`, so that group name is a single clean token, not "SPA / UI".) **Dev-only:** NOT in `vite.public.config.js` `input`, so `npm run dev:public` serves it at `/CrossFit-Apps/gallery.html` but it is never built/deployed. Grows page-by-page as components are extracted (#17).
 - **`npm run design:cards`** (`vite.design.config.js` + `scripts/build-design-cards.mjs`) SSRs the gallery's exported `GROUPS` into the self-contained Claude Design cards — real markup + real CSS + inlined themes/fonts + a 4-theme switcher — so Claude Design can read and compose from actual component markup. Cards are a **build artifact: never hand-edit one**, change the component and re-run (Lane A ends with regenerate + sync). Cards can't load the `ti` webfont or any external URL (CSP), so `results`/`schedule` cards show blank icon gaps — expected, noted on the card itself. `tokens/palette.html` is generated from `themes.css`, which is what finally killed its 13-vs-29 token drift. Details: `cone/design/README.md`.
 - Design-pass program (restructured #27/#28, sessions #49–#59): `docs/plans/16-design-pass-program.md`. Product docs: `docs/FEATURES.md` (feature catalog + gate candidates), `docs/PRODUCT.md` (personas/tiers), `docs/MOBILE.md` (Android/iOS assessment — do nothing until a trigger fires). Consolidated interactive view: `docs/site/cone-docs.html` (open via `file://` — repo-only, NOT in the deploy whitelist by design; interactive tier board + coach-services worksheet for the tier meeting, full screenshot baseline in `docs/site/img/`; snapshot of the .md docs, regenerate on request).
 
@@ -955,7 +991,7 @@ Always check these before reimplementing a formatting or date utility. `src/util
 
 **`react-refresh/only-export-components` policy (#32/plans/43, 2026-07-26):** two exemptions, both in `eslint.config.js`, not a blanket disable — a new file that trips this rule outside these two carve-outs is a real finding, not noise.
 - **`src/public/gallery/**` has the rule off entirely.** It's excluded from `vite.public.config.js`'s `input`, so it is never built or deployed — Fast Refresh correctness there protects nothing, and every gallery group file intentionally pairs its exported items with the fixtures/constants they render.
-- **Five production files keep the rule on, but with a per-file `allowExportNames` allowlist** (`AuthContext.jsx`→`useAuth`, `SyncContext.jsx`→`useSync`, `Nav.jsx`→`isNavHidden`, `rail.jsx`→`dayTitle`, `ScaleFilter.jsx`→`FILTER_SCALES`): each pairs one component with exactly one small, stable non-component export that has no other natural home — splitting five two-line exports into five new files costs more than the rule protects. Anything else added to these files still gets flagged.
+- **Six production files keep the rule on, but with a per-file `allowExportNames` allowlist** (`AuthContext.jsx`→`useAuth`, `SyncContext.jsx`→`useSync`, `Nav.jsx`→`isNavHidden`, `rail.jsx`→`dayTitle`, `ScaleFilter.jsx`→`FILTER_SCALES`, `publicador/publisher/FormatRail.jsx`→`FORMATS`+`isDayFormat`): each pairs one component with one or two small, stable non-component exports that has no other natural home — splitting five two-line exports into five new files costs more than the rule protects. Anything else added to these files still gets flagged.
 
 **React-hooks correctness policy (#108/plans/51, 2026-07-27) — the cluster is at ZERO, so a new warning fails CI.** Conventions established while clearing it; follow them instead of reaching for a disable:
 - **A ref passed as a prop MUST be named `*Ref`.** The rule identifies refs *by the name suffix* (its own hint says so), so an unsuffixed ref reads as a plain immutable prop and every `.current =` in a child trips `react-hooks/immutability`. That's why the drag refs are `dragBlkIdxRef`/`dragExIdxRef`/`dragIdxRef`. Same applies to a ref reached through an object (`rotation.rotationCountRef`) — destructure it to a suffixed binding first. **Writing a ref from an event handler is correct** and needs no disable once it's named right.
