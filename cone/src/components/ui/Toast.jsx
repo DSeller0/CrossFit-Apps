@@ -13,17 +13,23 @@ import s from './Toast.module.css'
 //   duration  ms before auto-dismiss (default 3200)
 export default function Toast({ open, message, onDismiss, duration = 3200 }) {
   // Latest onDismiss in a ref (same pattern as ConfirmReview's hRef) so the timer
-  // effect only depends on [open, duration] — a caller passing an inline arrow
-  // must not reset the countdown on every one of its own re-renders.
+  // effect only depends on [open, duration, message] — a caller passing an inline
+  // arrow must not reset the countdown on every one of its own re-renders.
   const onDismissRef = useRef(onDismiss)
   useEffect(() => {
     onDismissRef.current = onDismiss
   })
+  // `message` is in the deps ON PURPOSE (#59/C5·c) — a caller that re-triggers the
+  // SAME literal string while a toast is already open (ReportModal's Pix-copy
+  // success message is one fixed string across every location) would otherwise
+  // see `open` stay `true→true`, React bail out of the identical-string setState,
+  // and the second event silently inherit whatever time was left on the first
+  // one's timer instead of getting its own full `duration`.
   useEffect(() => {
     if (!open) return
     const t = setTimeout(() => onDismissRef.current?.(), duration)
     return () => clearTimeout(t)
-  }, [open, duration])
+  }, [open, duration, message])
 
   if (!open) return null
   return (

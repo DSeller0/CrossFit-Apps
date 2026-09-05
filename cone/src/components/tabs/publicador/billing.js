@@ -61,13 +61,21 @@ export function rateAsOf(loc, isoDate) {
   return match
 }
 
+// #104(c)/#154 — the ONE precedence chain: a booked event's own frozen rate wins
+// over everything; next, the location's rate AS OF the event's own date (so a rate
+// change today can't retroactively re-price a past event that never got a
+// snapshot); finally the location's current rate, for an event dated before any
+// recorded history. `calcTotal` and `events.jsx`'s per-event PDF "Valor" cell both
+// call this rather than re-deriving the `??` chain — the two independently
+// writing it out was exactly the "PDF disagrees with the total under it" shape
+// #104(b)/#149 already had to close once.
+export function effectiveRateSource(ev, loc) {
+  return ev.rateSnapshot ?? rateAsOf(loc, ev.date) ?? loc
+}
+
 export function calcTotal(evs, loc) {
   const perEvent = evs.map(ev => {
-    // #104(c)/#154 — a booked event's own frozen rate wins over everything; next,
-    // the location's rate AS OF the event's own date (so a rate change today can't
-    // retroactively re-price a past event that never got a snapshot); finally the
-    // location's current rate, for an event dated before any recorded history.
-    const src = ev.rateSnapshot ?? rateAsOf(loc, ev.date) ?? loc
+    const src = effectiveRateSource(ev, loc)
     if (!src || !src.rate) return null
     // #104(a) — fractional hours, not Math.floor: a 90-minute per_hour class billed as one
     // hour flat (fmtDur prints "1h30min" for the same event, so the PDF disagreed with

@@ -14,15 +14,22 @@ import s from './Modal.module.css'
 //
 // CLIENT-FREE (renders in the gallery).
 //
-//   open      render + trap when true
-//   title     dialog heading (also the accessible name)
-//   onClose   backdrop click · Escape · the header ✕
+//   open              render + trap when true
+//   title             dialog heading (also the accessible name)
+//   onClose           Escape · the header ✕ · backdrop click (unless closeOnBackdrop is false)
+//   closeOnBackdrop   default true. Set false for a form substantial enough that an accidental
+//                     backdrop click shouldn't silently discard it (#59/C5·c — EventFormInner/
+//                     ReportModal's old hand-rolled overlays had no backdrop handler at all;
+//                     Modal's unconditional one was a real, uncalled-out behavior change).
+//                     Escape and the header ✕ still close — those are deliberate actions, not
+//                     an accidental click reaching past the dialog.
 //   size      'sm' 340 · 'md' 420 · 'lg' 560 (max-width; always 92vw-capped)
 //   footer    optional node pinned under the body
 export default function Modal({
   open,
   title,
   onClose,
+  closeOnBackdrop = true,
   size = 'md',
   footer = null,
   className = '',
@@ -86,7 +93,7 @@ export default function Modal({
 
   if (!open) return null
   return (
-    <div className={s.overlay} onClick={onClose}>
+    <div className={s.overlay} onClick={closeOnBackdrop ? onClose : undefined}>
       <div
         ref={dialogRef}
         className={`${s.modal} ${s[size]} ${className}`.trim()}

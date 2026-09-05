@@ -102,6 +102,33 @@ describe('appendRateVersion', () => {
     ).toBe(undefined)
   })
 
+  it('does not mint a spurious version on a legacy location missing rateUnit/currency', () => {
+    // Pre-#154 data can have `rate` with no `rateUnit`/`currency` ever stored.
+    // `startEdit` always defaults the FORM to 'per_session'/'R$' — comparing that
+    // against the location's raw (undefined) fields must not read as "changed".
+    const legacy = { rate: 40 }
+    expect(
+      appendRateVersion(
+        legacy,
+        { rate: 40, rateUnit: 'per_session', currency: 'R$' },
+        '2026-08-06',
+      ),
+    ).toBe(undefined)
+  })
+
+  it('still detects a real change on a legacy location missing rateUnit/currency', () => {
+    const legacy = { rate: 40 }
+    const hist = appendRateVersion(
+      legacy,
+      { rate: 60, rateUnit: 'per_session', currency: 'R$' },
+      '2026-08-06',
+    )
+    expect(hist).toEqual([
+      { rate: 40, rateUnit: 'per_session', currency: 'R$', from: '1970-01-01' },
+      { rate: 60, rateUnit: 'per_session', currency: 'R$', from: '2026-08-06' },
+    ])
+  })
+
   it('appends on a rateUnit-only change even when the number stayed the same', () => {
     const hist = appendRateVersion(
       loc,

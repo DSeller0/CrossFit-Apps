@@ -4,7 +4,7 @@ import { buildPixPayload, pixClean } from '../../../utils/pix'
 import { MONTH_PT, toISO } from '../../../public/lib/week.js'
 import { uid } from '../../../public/lib/wod.js'
 import { sessName } from '../../../public/lib/sessions.js'
-import { fmtDateNum, fmtDur, calcTotal, sumByCurrency, rateAsOf } from './billing.js'
+import { fmtDateNum, fmtDur, calcTotal, sumByCurrency, effectiveRateSource } from './billing.js'
 import { qrToBase64 } from './pixQr.js'
 import EventFilter from './agenda/EventFilter.jsx'
 import { reportFilter, filterEvents, matchingAthleteIds } from './eventFilter.js'
@@ -94,6 +94,7 @@ export function EventFormInner({ showForm, sessions, athletes, initialData, onSa
       open
       title={`${showForm.eventId ? 'Editar' : 'Novo'} ${isPers ? 'Personal' : 'Aula'}`}
       onClose={onCancel}
+      closeOnBackdrop={false}
       size="sm"
       footer={
         <>
@@ -344,6 +345,7 @@ export function ReportModal({ events, sessions, onClose }) {
   // the coach to select-and-copy a code by hand.
   const [pdfError, setPdfError] = useState('')
   const [toastMsg, setToastMsg] = useState('')
+  const [pixFallback, setPixFallback] = useState('')
 
   function filteredEvents() {
     return filterEvents(events, filter)
@@ -514,6 +516,17 @@ export function ReportModal({ events, sessions, onClose }) {
           doc.setTextColor(30, 30, 30)
           doc.text(name + ' — ' + period, 14, y)
           y += 6
+          // #104(b)/#149/#154 — computed BEFORE the rows, and the per-event cells below
+          // gate on IT (whether a price actually resolves), never on the location's
+          // current `loc.rate`. Those two can now diverge: a location zeroed out today
+          // still has a real historical rate for a past event via `rateHistory`, and
+          // gating on today's (falsy) rate would silently drop the whole Valor column
+          // while this same `t` total — and the subtotal line right below the table —
+          // still show a real number. Same divergence bug this feature exists to close,
+          // just one level down.
+          const locForCalc = resolveLocForCalc(loc, athGroup2)
+          const t = calcTotal(levs, locForCalc)
+          const hasRate = showRate && t.currencies.length > 0
           const rows = levs.map(ev => {
             const daySess = sessions[ev.date] || []
             const linked = ev.sessionId ? daySess.find(sess => sess.id === ev.sessionId) : null
@@ -529,18 +542,15 @@ export function ReportModal({ events, sessions, onClose }) {
               ev.label || name,
             ]
             if (showDetails) row.push(blockLabels || '-')
-            // #104(c)/#154 — the event's own frozen rate, else the location's rate AS OF
-            // the event's own date; the group-level total below resolves the same way
-            // (calcTotal), so this per-event figure can no longer silently disagree with it.
-            if (showRate && loc?.rate) {
-              const src = ev.rateSnapshot ?? rateAsOf(loc, ev.date) ?? loc
-              row.push((src.currency || 'R$') + ' ' + src.rate)
+            if (hasRate) {
+              const src = effectiveRateSource(ev, locForCalc)
+              row.push(src?.rate ? (src.currency || 'R$') + ' ' + src.rate : '-')
             }
             return row
           })
           const head = [['Data', 'Hora', 'Duração', 'Sessão']]
           if (showDetails) head[0].push('Detalhes')
-          if (showRate && loc?.rate) head[0].push('Valor')
+          if (hasRate) head[0].push('Valor')
           autoTable(doc, {
             startY: y,
             head,
@@ -550,13 +560,12 @@ export function ReportModal({ events, sessions, onClose }) {
             margin: { left: 14, right: 14 },
           })
           y = doc.lastAutoTable.finalY + 4
-          const t = calcTotal(levs, resolveLocForCalc(loc, athGroup2))
           const totalMin = levs.reduce((s, ev) => s + (ev.durationMin || 60), 0)
           doc.setFontSize(9)
           doc.setFont('helvetica', 'italic')
           doc.setTextColor(100, 100, 100)
           let sub = `${levs.length} ${levs.length !== 1 ? 'sessões' : 'sessão'} · ${fmtDur(totalMin)}`
-          if (t.currencies.length && showRate) sub += ` · ${t.label}`
+          if (hasRate) sub += ` · ${t.label}`
           doc.text(sub, 14, y)
           y += 8
           // Pix needs one amount + one currency — a group whose booked events snapshotted
@@ -650,18 +659,26 @@ export function ReportModal({ events, sessions, onClose }) {
     setGenerating(false)
   }
 
+  // On failure, the old `prompt('Copie o código Pix:', payload)` at least handed the coach
+  // the real EMV payload to select and copy — a Toast message alone (what this briefly
+  // regressed to) would have thrown that fallback away, since the generated PDF never
+  // prints the payload as text (only a QR image + the bare Pix key). `pixFallback` keeps
+  // the payload on screen, dismissibly, instead of a blocking prompt().
   const copyPix = payload => {
     navigator.clipboard
       ?.writeText(payload)
-      .then(() => setToastMsg('Código Pix copiado!'))
-      .catch(() => setToastMsg('Não foi possível copiar — copie o código pelo PDF gerado.'))
+      .then(() => {
+        setPixFallback('')
+        setToastMsg('Código Pix copiado!')
+      })
+      .catch(() => setPixFallback(payload))
   }
 
   const evs = filteredEvents()
   const groups = groupByLocation(evs)
 
   return (
-    <Modal open title="Gerar Relatório" onClose={onClose} size="lg">
+    <Modal open title="Gerar Relatório" onClose={onClose} closeOnBackdrop={false} size="lg">
       {/* #105 — the ONE filter. Four hand-rolled sections (period · tipo · status ·
           afiliados · atletas, ~395 lines) collapse into the shared component in its
           column layout, which is a superset of what was here: `status` gains the
@@ -773,6 +790,29 @@ export function ReportModal({ events, sessions, onClose }) {
       )}
 
       {pdfError && <div className={css.reportError}>{pdfError}</div>}
+
+      {pixFallback && (
+        <div className={css.pixFallback}>
+          <span className={css.pixFallbackLabel}>
+            Não foi possível copiar automaticamente — selecione e copie:
+          </span>
+          <input
+            readOnly
+            value={pixFallback}
+            onFocus={e => e.target.select()}
+            className={css.pixFallbackInput}
+            aria-label="Código Pix para copiar manualmente"
+          />
+          <button
+            type="button"
+            className={css.pixFallbackClose}
+            onClick={() => setPixFallback('')}
+            aria-label="Fechar"
+          >
+            <i className="ti ti-x" />
+          </button>
+        </div>
+      )}
 
       <Button
         variant="primary"

@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { fmtDateNum, fmtDur, fmtMoney, calcTotal, sumByCurrency, rateAsOf } from './billing.js'
+import {
+  fmtDateNum,
+  fmtDur,
+  fmtMoney,
+  calcTotal,
+  sumByCurrency,
+  rateAsOf,
+  effectiveRateSource,
+} from './billing.js'
 
 // #149/#104(c) · plans/71 — calcTotal is the only money arithmetic in the app and had zero
 // tests before this row, including the two behavior changes plans/68 shipped unpinned on
@@ -145,6 +153,29 @@ describe('rateAsOf', () => {
       { rate: 45, rateUnit: 'per_session', currency: 'R$', from: '2026-08-01' },
     ]
     expect(rateAsOf({ rateHistory: sameDay }, '2026-08-01').rate).toBe(45)
+  })
+})
+
+describe('effectiveRateSource', () => {
+  it('is the exact function calcTotal uses internally — a caller can rely on it agreeing', () => {
+    const hist = [{ rate: 40, rateUnit: 'per_session', currency: 'R$', from: '1970-01-01' }]
+    const loc999 = { rate: 999, rateUnit: 'per_session', currency: 'R$', rateHistory: hist }
+    const e = ev(60, { date: '2026-01-01' })
+    expect(effectiveRateSource(e, loc999)).toEqual(hist[0])
+    expect(calcTotal([e], loc999).totals['R$']).toBe(40)
+  })
+
+  it("returns the location itself when nothing else resolves — the caller's own falsy-rate check must read THIS, not loc.rate", () => {
+    // The location's CURRENT rate is 0 (deactivated), but a real historical rate covers
+    // the event's date — effectiveRateSource must resolve to the historical entry, not
+    // fall through to the (falsy) current loc, so a per-event "do we have a price"
+    // check based on THIS return value doesn't disagree with calcTotal's own total.
+    const loc = {
+      rate: 0,
+      rateHistory: [{ rate: 200, rateUnit: 'per_hour', currency: 'R$', from: '2026-01-01' }],
+    }
+    const e = ev(60, { date: '2026-06-01' })
+    expect(effectiveRateSource(e, loc).rate).toBe(200)
   })
 })
 

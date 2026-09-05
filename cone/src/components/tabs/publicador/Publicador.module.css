@@ -666,6 +666,46 @@
   font-size: 12px;
 }
 
+/* The clipboard-write-failed fallback (#59/C5·c) — replaces the old
+   prompt('Copie o código Pix:', payload), which at least handed the coach the
+   real payload to select. A Toast alone can't: it auto-dismisses and isn't
+   selectable text. */
+.pixFallback {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 8px 10px;
+  margin-bottom: var(--sp-3);
+  border-radius: var(--radius-sm);
+  background: var(--stone);
+  border: 1px solid var(--divider);
+}
+.pixFallbackLabel {
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.pixFallbackInput {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--bg);
+  color: var(--sub);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+}
+.pixFallbackClose {
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  flex-shrink: 0;
+}
+
 /* ── Export artefact palette — LITERAL by exemption (plans/82). The chrome above
    this line is tokenised; nothing below reads a theme var. ── */
 .art {

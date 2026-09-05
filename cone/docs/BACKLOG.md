@@ -1025,6 +1025,44 @@ Relatório PDF end to end (content matched the on-screen preview exactly — the
 class); edited a location's rate and confirmed the resulting `rateHistory` shape in `localStorage`
 matches the unit-tested backfill exactly. Zero console errors throughout.
 
+🔴 **2026-09-05 code-review pass, before push — 5 real findings, all fixed, none requiring a
+design change.** Eight parallel review agents independently converged on the same core issues:
+1. **The two-rate-paths claim above was false when written.** `calcTotal` and `events.jsx`'s
+   per-event Valor cell each wrote out `ev.rateSnapshot ?? rateAsOf(loc, ev.date) ?? loc`
+   independently — exactly the shape #104(b)/#149 already had to close once. Extracted into
+   `billing.js`'s `effectiveRateSource(ev, loc)`, now the only place either reads it.
+2. **The per-event Valor column's gate (`showRate && loc?.rate`) tested the location's CURRENT
+   rate, not whether a price actually resolves** — a location zeroed out today still has a real
+   historical rate for a past event via `rateHistory`, so the gate would silently drop the whole
+   Valor column and header while the group total right below it (computed from the same events)
+   still showed a real number. Fixed by computing the group's `calcTotal` result BEFORE building
+   the PDF rows and gating both the header and every row on `t.currencies.length > 0`.
+3. **`appendRateVersion`'s "changed" check compared `loc`'s raw fields against the form's
+   always-defaulted ones** — a legacy location saved before `rateUnit`/`currency` existed reads as
+   "changed" on every edit, even a bare rename, minting a spurious version each time. Fixed by
+   normalizing `loc`'s side through the same defaults `startEdit` seeds the form with.
+4. **`ui/Modal`'s backdrop-click-to-close is new behavior neither old hand-rolled overlay had**
+   (their backdrops had no `onClick` at all) — a coach who taps outside `EventFormInner` while
+   filling in a recurring event, or outside `ReportModal` mid-filter, would lose the form with
+   zero confirmation. Fixed by adding `Modal`'s `closeOnBackdrop` prop (default `true`, so every
+   other consumer is unaffected) and passing `false` on both.
+5. **The Pix-copy failure path (`.catch()`) pointed the coach at the generated PDF for the code,
+   but the PDF never prints the payload as text** (only a QR image + the bare Pix key) — a real
+   functional regression from the old `prompt(...)` fallback, which at least showed the code.
+   Fixed with `pixFallback`, a dismissible readonly field holding the actual EMV payload.
+
+Also caught, unrelated to money: `ui/Toast`'s auto-dismiss timer only re-armed on `[open,
+duration]` — a caller re-triggering the SAME literal string while a toast was already showing (the
+Pix-copy success message is one fixed string across every location) left `open` unchanged, so
+React bailed on the identical-string update and the second event inherited whatever time was left
+on the first one's timer. Fixed by adding `message` to the effect's deps.
+
+4 new tests (`billing.test.js`'s `effectiveRateSource`, `affiliateHelpers.test.js`'s legacy-location
+cases) plus a live re-verification of the backdrop-click fix (both modals) and a full Relatório PDF
+regenerated end to end (Valor column intact) — all four gates green after. None of this changes what
+shipped in the paragraphs above; it's what the same session found wrong in its own work before
+pushing.
+
 **Program note:** #59's four sessions (Phase 0, C5·a, C5·b1+b2, C5·c) are all shipped. plans/16's
 C5 row and `#43`'s resume-point status were already set by C5·b2 (Publicador + Agenda was that
 row's own scope); this closes the one row C5·c added independently, and the Ready refill banner

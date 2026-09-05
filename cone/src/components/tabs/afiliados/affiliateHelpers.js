@@ -43,25 +43,24 @@ const RATE_HISTORY_EPOCH = '1970-01-01'
  * fallback would read the location's brand-new rate: the exact
  * retroactive-repricing bug #154 exists to close, on the very first edit.
  * Returns `loc.rateHistory` unchanged (possibly `undefined`) when nothing
- * about the rate changed.
+ * about the rate changed. ⚠️ Compares `loc`'s side through the SAME defaults
+ * `startEdit` seeds the form with (`rateUnit` → `'per_session'`, `currency` →
+ * `'R$'`) — a location saved before these fields existed has them `undefined`,
+ * and comparing that raw `undefined` against the form's always-defaulted
+ * `next.rateUnit`/`next.currency` read as "changed" on every edit, even a
+ * bare rename, minting a spurious version each time.
  */
 export function appendRateVersion(loc, next, today) {
+  const prevRate = loc.rate || 0
+  const prevUnit = loc.rateUnit || 'per_session'
+  const prevCurrency = loc.currency || 'R$'
   const changed =
-    next.rate !== (loc.rate || 0) ||
-    next.rateUnit !== loc.rateUnit ||
-    next.currency !== loc.currency
+    next.rate !== prevRate || next.rateUnit !== prevUnit || next.currency !== prevCurrency
   if (!changed) return loc.rateHistory
   const prior =
     loc.rateHistory && loc.rateHistory.length
       ? loc.rateHistory
-      : [
-          {
-            rate: loc.rate || 0,
-            rateUnit: loc.rateUnit || 'per_session',
-            currency: loc.currency || 'R$',
-            from: RATE_HISTORY_EPOCH,
-          },
-        ]
+      : [{ rate: prevRate, rateUnit: prevUnit, currency: prevCurrency, from: RATE_HISTORY_EPOCH }]
   return [...prior, { ...next, from: today }]
 }
 
