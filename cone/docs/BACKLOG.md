@@ -10,7 +10,7 @@ written before 2026-07-27 are **not comparable** to later ones and **cannot be s
 ([plans/49](./plans/49-prettier-format-baseline.md)) reformatted the repo at `printWidth: 100`, ×1.77
 overall but non-uniformly (Publicador ×3.34 · Atletas ×2.27 · Timer ×1.37). That trap cost two sessions.
 Docs: [FEATURES.md](./FEATURES.md) · [PRODUCT.md](./PRODUCT.md) · [MOBILE.md](./MOBILE.md) ·
-design program [plans/16](./plans/16-design-pass-program.md) · review reports [reviews/](./reviews/).
+design program [plans/16](./plans/16-design-pass-program.md) · review reports [reviews/](./reviews/) — latest [2026-09-05](./reviews/2026-09-05.md).
 
 ---
 
@@ -19,7 +19,7 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 - **Ready:** **#155** — blocked on the user, not on code: `plans/74` shipped the 16px floor 2026-08-07
   and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test.
 - **In Progress:** none.
-- **Next refill:** **#43** (four new theme classes) is the design program's named resume point and the
+- **Next refill:** **Icebox P1** was just refilled by the [2026-09-05 full pass](./reviews/2026-09-05.md) and holds three blockers. **#43** (four new theme classes) is the design program's named resume point and the
   last row in [plans/16](./plans/16-design-pass-program.md). Otherwise run `/app-review` per WORKFLOW.md's
   review cadence, or pick from **Icebox P1**.
 
@@ -42,25 +42,54 @@ qualifies, something demotes; without the cap the tier degrades to "everything i
 
 ### P1 — next up (found in live use, small and visible)
 
+*Refilled by the [2026-09-05 full pass](./reviews/2026-09-05.md). At the 8-row cap: three
+blockers and two silent data-loss bugs arrived at once, so **#159, #156, #148 and #141
+demoted to P2** — they are still real, just outranked. #164 stayed on its 🔴.*
+
+- 🔴 **#172 Estações blocks publish as an empty card in every Publicador export** · S · Sonnet · the family reads `bl.exercises` directly (`exportViews.jsx:218,341,694`, `mobileExportViews.jsx:75,612,881`); `wod.js:288 blockExercises()` flattens `stations` for that type and has **zero** hits in `publicador/`. Goes into the PNG. **Before #187.**
+- 🔴 **#173 A stale `skipped:true` silently deletes a submitted score** · S–M · Sonnet · `mergeBlockEntry` is a spread and 4 of 5 writers omit the key, so a "não fez" block the athlete later logs keeps it beside a real score and all four guards drop it. Root cause: `resultsHelpers.js:20-32 DEF_INP` is a 2nd key declaration missing `skipped` — fix that first.
+- 🔴 **#174 `Quadro ao Vivo` is illegible on both light themes** · S · Sonnet · `tv/tvController.module.css` paints theme foregrounds on hardcoded dark panels — `--cream` on `#111` is **1.04:1** (totk-light) / **1.00:1** (sb-light). 13 sites from `:6`. One click from a coach's normal state. **Carried by the TvController + Timer pass.**
+- 🔴 **#175 `--theme-accent`'s inline override breaks six consumers on light themes** · XS · Sonnet · `App.jsx:71-72`+`:107-113` write `#00b8d4` onto `<html>`, beating `index.css:3`'s alias — 1.95:1 as text, and `index.css:238` is the login page's only focus cue at 1.47:1. 🔑 **Deleting the two `setProperty` calls fixes all six.**
 - 🔴 **#164 Three of the Atletas grade's four signals are structurally dead on real data** · M · Opus · `matchesAthlete` needs `s.mainTraining` and all 55 sessions in the last 30 days of prod have none, so ADERÊNCIA is `—` on 100% of cards and Presença shows 28 blank cells; decide what "prescribed for this athlete" means before touching code — the one-liner silently redefines me.html's bars too.
+- **#176 `mapResultRow` is forked 4× and `createdAt` is lost on two public pages** · S · Sonnet · `blobTables.js:8` is canonical precisely so a column can't be forgotten in one copy; `Results.jsx:145` and `Schedule.jsx:339` are byte-identical forks **missing `createdAt`** (`TV.jsx:197`/`TvController.jsx:127` are a 2nd pair).
+- **#178 `Timer.jsx` persists tomorrow's date for any WOD finished after 21:00 local** · XS · Sonnet · `timer/Timer.jsx:350` uses `new Date().toISOString().slice(0,10)` for a **persisted** history field while already importing from `../lib/week.js`; `todayISO()` is canonical and this exact fork is a documented bug class (`agendaHelpers.js:74-78`). `recover/Recover.jsx:82` is the display-only twin.
+- **#179 Configurações → Carregar is a 9th sessions entry point with no `normalizeSessionIds`** · XS · Sonnet · `config/stateBackup.js:65-91` rebuilds every session but never touches the `id`, then `:109` `setSessions` → `SyncContext.jsx:68` upserts it. Restoring a pre-mid-June-2026 backup reintroduces **#110**. One call.
+
+### P2 — queued (design program + measured layout rows)
+
+- **#180 `index.html` counts skipped entries in its "N resultados" caption** · XS · Sonnet · `index/Index.jsx:170` takes `blockRes.length` from the **unfiltered** array while `:169` correctly filters for the podium — an athlete marked "não fez" is counted as a result on the landing page.
+- **#181 `Publicador.jsx` upserts the whole `settings` blob on every keystroke** · S · Sonnet · `:167-202`'s deps include `gymName`/`titles`/`footer`, wired per-keystroke. Mount-guarded (so #76/#109/#111 is closed) but **not debounced**, which is CLAUDE.md's rule for this shape; `afiliados/Afiliados.jsx:105-116` is the reference.
+- **#182 No global `:focus-visible`, and 12 selectors strip the outline with nothing behind it** · S–M · Sonnet · `tvController.module.css:8,12` (zero `:focus` rules in that file), `Schedule.module.css:49,162,272`, `Me.module.css:310-312`, `index.css:365,399,401`. Criador's `--dim` focus borders also miss 3:1 in 3 of 4 themes.
+- **#183 `WeeklyExportView` is dead code — 171 lines + 16 CSS rules** · XS · Sonnet · `exportViews.jsx:394-461` has **zero importers repo-wide** (C5·b1 deleted the on-screen grid it fed) and is the sole consumer of 12 classes at `Publicador.module.css:869-971`, which therefore read as live to a dead-CSS sweep. Pure deletion. CLAUDE.md's claim was corrected 2026-09-05.
+- **#184 54 dead CSS classes across 9 `.module.css` files + 11 zero-consumer selectors in `index.css`** · S · Sonnet · worst are completed migrations that left the old CSS: `tv/TV.module.css` **24/100** (pre-`ExerciseList` rows) and `timer/Timer.module.css` **13/107** (the `bm*` picker). The other 30 module files are 0 dead.
+- **#185 The public-page mount loader is duplicated across five pages** · S–M · Sonnet · identical `registerSW()`+`load()`+`pageshow` handler + retry ladder in Index/Leaderboard/Me/Results/Schedule. 🔑 **5 of the 7 bare eslint disables cluster here** — a `usePublicPageLoad({fetch})` hook collapses the policy and the disables together.
+- **#186 The dialog focus trap is implemented three times with a real selector divergence** · S · Sonnet · `ui/Modal.jsx:48-90`, `shared/ConfirmReview.jsx:63-110` (near byte-identical) and `me/Sheet.jsx:29-53`. The first two use `:disabled`; `Sheet.jsx:4-5` uses the **`[disabled]` attribute**, which misses a control disabled by an ancestor `<fieldset disabled>`.
+- **#187 One shared `ExportExerciseList` — the export exercise renderer is triplicated** · S–M · Sonnet · `mobileExportViews.jsx:75`/`:612` differ only in `letterSpacing` and one padding multiplier; `exportViews.jsx:218` is the same tree with CSS modules. A scale/spacing spec keeps the structural Eagles/MegaMan split. **After #172.**
+- **#188 `tv.html` shows the wrong theme permanently, not transiently** · XS · Sonnet · `TV.jsx` imports `theme.js` **not at all**, so a wall device that has never opened another Cone page has no `cone_theme`, boots to `totk-dark`, and nothing ever corrects it — `settings.boxThemes[box]` is never consulted. A box on a light theme gets a dark TV forever. `TV.jsx:19` already fetches settings.
+- **#189 `ExCard` is declared inside `ExerciciosTab`'s render body** · XS · Sonnet · `Exercicios.jsx:411`, rendered at `:497,529,543` — its function identity changes every render, so React unmounts and remounts **the whole card grid** on every keystroke in the search box. No hooks inside, so no state is lost; the DOM churn and focus loss are real. The only in-render component definition in `src/`.
+- **#190 `dbSaveResults` upserts `onConflict:'id'` against a `unique (athlete_id, session_id)` table** · S · Sonnet · `utils/supabase.js:64-69` vs `0001_init.sql:162`. When a public page created the row via `log_result` first, the batch violates the constraint and fails **the whole array**, logged only as a `console.warn`.
+- **#191 Decomposition: `Timer.jsx` → `Exercicios.jsx` → `Schedule.jsx` + `Results.jsx`** · L · Opus · the four largest shipped components, none with a plan; seams measured in the review. **Timer first** (four `status` early-returns are already screen boundaries, 14 `useRef`s form one engine), then Exercicios (**fixes #189 free**), then the pair.
+- **#192 A dedup + hygiene batch** · S · Sonnet · none blocks another: `blockModel.js:6`/`textFormat.js:445` identical factories · `agendaHelpers.js:74` forks `toISO` on a **false** premise (`week.js` has zero imports) · `DayPane.jsx:104`=`EventCard.jsx:115` · `Timer.jsx:23`'s 5th volume formatter · 4 small dups · 2 dead exports · `rail.jsx:204`'s `--pcol` · radius in 2 shared primitives.
+- **#193 5 gallery-rendered Publicador files import `toISO` from `utils/storage`** · XS · Sonnet · `WhenPicker.jsx:2`, `PreviewPane.jsx:2`, `exportHelpers.js:3`, `exportViews.jsx:4`, `mobileExportViews.jsx:4` — pulling the **SPA Supabase client** into the client-free gallery. Dev-only (no prod bundle has both). One word each.
 - **#159 A non-WOD block's round counter needs `bl.rounds`; an exercise's own `sets` is ignored** · S→M · Sonnet · user-reported, mechanism confirmed at `schedule/scheduleHelpers.js:11-13`.
 - **#156 Four more sub-16px focusable controls, deliberately left out of #155's scope** · XS · Sonnet · same iOS auto-zoom floor `plans/74` fixed for the reported flow; these four were measured and left.
 - **#148 The same benchmark taxonomy is colour-coded two different ways in two pickers** · XS · Sonnet · `criador/TypePicker.jsx:108,115,122` vs the other picker — one of the two is not the documented data-colour set.
 - **#141 One prod goal stores `min` as a JS number, not a string** · XS · Sonnet · needs a call on whether to repair the row, harden the readers, or both; surfaced by `audit-text-roundtrip.mjs`.
-
-### P2 — queued (design program + measured layout rows)
-
 - **#43 Two new themes — Halo Reach + "Common"** · L · Opus · **the design program’s last row** ([plans/16](./plans/16-design-pass-program.md)); Lane B, mockup-first mandatory. 4 new `html.theme-*` classes × 29 tokens + `--podium-1/2/3`. ⚠️ Inherits the unowned `--theme-accent` question and a shrunken `lb_colors` fold-in — the `App.jsx` plumbing is already gone.
 - **#96 Exercícios gives 39% of the desktop window to the emptiest pane** · M · Sonnet · Lane A, gallery-first — the tab shipped, so the real component is the truth; also the whole first phone screen is empty categories.
-- **#14 Accessibility pass — site-wide residue** · ? · Opus · per-page mechanical a11y rode each C-session; what is left is the landmark/heading architecture plus realtime/live-region a11y. Carries the standing contrast table — 4 cells still fail (`--gold` on both light themes, `--muted` on darks, `--dim` everywhere, `--green` on sb-light).
+- **#14 Accessibility pass — site-wide residue** · M · Opus · the landmark/heading architecture + realtime live-region a11y, after per-page mechanical a11y rode each C-session. 🔁 **Re-measured 2026-09-05:** no `<main>` on index/timer/tv/recover nor anywhere in the SPA; index and timer have **zero headings**; the SPA renders **2–3 `<h1>`**; **six** live regions lack `aria-live`.
 - **#171 TV as a customisable display** · ? · ? · unblocked by C5·b2's descriptor model (`{skin, zones, days, cardStyle, content, titles, scale}`) but unranked. 🔴 Must NOT inherit the fixed-canvas/crop model — TV reflows to its screen, it never crops to an export canvas.
 - **#93 Block `duration` is bare minutes — migrate to mm:ss** · M · Sonnet · split out of #58 deliberately; `toSecs('14')` reads 14 as *seconds*, so this is a data migration. **Plan it with #138.**
 - **#138 An exercise's volume metric should be `reps | distância | tempo`, not a unit-bearing string in `reps`** · S–M · ? · a hold is stored as `reps: '40"'`, a numeric-looking field carrying a unit. **Plan it with #93, not alone.**
-- **#23 Testing** · M · Sonnet · the gap is measured: 11 hooks and only 1 tested (`useGroupRotation.js`, 259 ln, drives the gym TV, untested); `benchmarks.js` is the only untested file in `public/lib/`; there is no `test:coverage` script, so none of it is visible to CI.
+- **#23 Testing** · M · Sonnet · 🔁 **re-measured 2026-09-05: 11 hooks, 1 tested.** `useGroupRotation.js` (259 ln) drives the gym wall TV during a live class — untested, 3 bare disables. `public/lib/benchmarks.js` (436 ln, 5 importers) is the only untested file there. **No `test:coverage` script**, so none of it reaches CI. Zero render tests is deliberate.
 - **#35 MM:SS masked time inputs — the rollout** · M · Sonnet · the component shipped in C0 (2026-07-19); the result-logging half was absorbed by #115/`plans/52`. Only the remaining call sites are left.
 
 ### P3 — needs a decision before it needs code
 
+- **#194 Revoke `anon`'s `INSERT`/`UPDATE`/`DELETE` grants** · XS · Sonnet · needs migration **`0011`** and a scope call. Table-level write grants survive on most tables (incl. anon **DELETE** on `results_v2`/`class_executions`, against #7/`0003`'s intent), inert **only** because RLS denies. RLS itself verified sound 2026-09-05.
+- **#195 `html2canvas@^1.4.1` was last published in 2022 and is the whole export raster path** · M · Opus · **a decision before a build.** It renders what C5 just rebuilt; `fitCheck.js:1` already notes it crops silently. Successors: `html-to-image`, `modern-screenshot` — swapping re-opens every fit/crop assumption in `useFitAutoShrink.js`.
+- **#196 A public page's first reads can 401 against an expired stored token, silently** · S · Sonnet · **needs a call on the fallback.** Reproduced 2026-09-05: two 401s, stale `localStorage` rendered with no indication, clean on reload. Public pages are anon-readable, but "fall back to anon" changes what a logged-in coach sees.
+- **#197 `SERIES_EDIT_FIELDS` is dead and CLAUDE.md claimed the feature ships** · XS · Sonnet · `agenda/agendaHelpers.js:143-155` is a unit-tested 10-field whitelist with **zero prod importers**; `DeleteEventConfirm.jsx:3` imports only `seriesScopes`/`dayTitleShort`, so #106's scope covers **delete only**. Decide whether series *edit* scope ships or the helper, its tests and the claim all go.
 - **#102 `events` and `class_executions` have no join key, so attendance is not a queryable fact** · M–L · Opus · the keystone: #107 is blocked on it, #40's booking half needs it, and it is one of the two honest answers to #164. Its migration is **`0010`** — `0008` is taken by #71.
 - **#153 Phone back button logic overhaul** · M–L · Opus · collides head-on with a recorded do-not-re-litigate call (*"No React Router — URL params are sufficient at current scale"*), so the decision comes before the build.
 - **#158 Variable-interval EMOM, and Estações stations carrying their own type, goal and score** · (a) M / (b) L · Opus · two halves filed together because (b) subsumes (a). **Do NOT batch them** — (a) ships now, (b) is blocked.

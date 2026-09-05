@@ -369,9 +369,11 @@ own section — writing the same `settings.value.boxThemes[locationId]` key #143
 `?box=` visitor's public-page theme, Afiliados' picker and Publicador's Origem are three readers/one
 writer of one setting, not three copies.
 
-⚠️ **`WeeklyExportView`, the always-visible week grid, is NOT an export artefact** — it's on-screen
-chrome (confirmed live: `doExport` never selects `exportWeeklyRef`), so it keeps literal chrome colours
-and does not read `--a-*`. Two live bugs closed in the same pass, not deferred: **B1** — a block with no
+⚠️ **`WeeklyExportView` is DEAD CODE (re-measured 2026-09-05) — zero importers repo-wide.** It used to
+be the always-visible on-screen week grid (never an export artefact: `doExport` never selected
+`exportWeeklyRef`), which is why it kept literal chrome colours and never read `--a-*`. C5·b1 deleted
+the grid it fed and left the component, plus the 12 classes / 16 rules at `Publicador.module.css:869-971`
+that only it references — so those read as live to a dead-CSS sweep. 171 lines of pure deletion. Two live bugs closed in the same pass, not deferred: **B1** — a block with no
 `zone` (or the legacy English `'Zone 01'` default) vanished from the Diário export (`byZone` was seeded
 with the pt-BR `ZONES` list); fixed via `normaliseZone` (`utils/config.js`), already used elsewhere.
 **#113** — Apresentar's QR now points at `schedule.html?id=<sessionId>` (built and deployed) instead of
