@@ -16,18 +16,21 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready:** **#155** — blocked on the user, not on code: `plans/74` shipped the 16px floor 2026-08-07
-  and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test.
+- **Ready (pick from the top):** **plans/84** blockers batch → **plans/85** repo sweep → **plans/86**
+  TvController + Timer → **plans/87** #43 themes. The order is a real gate: 84 and 86 are 87's premise.
 - **In Progress:** none.
-- **Next refill:** **Icebox P1** was just refilled by the [2026-09-05 full pass](./reviews/2026-09-05.md) and holds three blockers. **#43** (four new theme classes) is the design program's named resume point and the
-  last row in [plans/16](./plans/16-design-pass-program.md). Otherwise run `/app-review` per WORKFLOW.md's
-  review cadence, or pick from **Icebox P1**.
+- **Also open, blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is
+  held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code.
+- **Next refill:** Icebox **P1** (5 rows) then **P2**. Last pass: [2026-09-05](./reviews/2026-09-05.md).
 
 ---
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/74](./plans/74-ios-input-zoom.md)** — **#155 iOS Safari zooms the page when logging a result** · S · Sonnet · 🟡 **held, not codeable** — shipped `793ee45` 2026-08-07 (`ScoreFields`' `.input` was 13px against `MaskedTimeInput`'s 16px); **held open pending an on-device iPhone re-test** — nothing to code until that comes back.
+- 🟢 **[→ Ready · plans/84](./plans/84-blockers-batch.md)** — **#172 + #173 + #175 + #176 + #179 Blockers + correctness batch** · M · Sonnet · two of these publish or destroy real data: Estações blocks export as empty cards, and a stale `skipped:true` deletes a submitted score. Five S/XS rows, none blocking another (the plans/79 precedent). **Pick this first.**
+- 🟢 **[→ Ready · plans/85](./plans/85-repo-dead-weight-sweep.md)** — **Repo dead-weight sweep** · S · Sonnet · ~1.9 MB of tracked, unreferenced files plus two docs that actively mislead (`CONE_CONTEXT.md`, the stock-Vite `README.md`), and the `log.html` retirement. 🔴 Do not touch `athletes.html` — `cache.addAll` is atomic.
+- 🟢 **[→ Ready · plans/86](./plans/86-tv-timer-surface-pass.md)** — **#174 TvController + Timer surface pass** · M–L · Opus · the two surfaces C0–C5 never reached. Carries the #174 blocker (`Quadro ao Vivo` illegible on both light themes), the worst a11y ratios, 37 dead CSS classes and the app's last `confirm()`. **Lane A; the clock rewrite is #191's, not this.**
+- 🟢 **[→ Ready · plans/87](./plans/87-new-themes.md)** — **#43 Two new themes — Halo Reach + "Common"** · L · Opus · **the design program's last row.** Lane B, mockup-first, user approval before any code. ⚠️ **Runs after plans/84 (#175) and plans/86** — both are its premise; starting earlier ships four more broken themes.
 
 ## 🔵 In Progress
 
@@ -42,18 +45,13 @@ qualifies, something demotes; without the cap the tier degrades to "everything i
 
 ### P1 — next up (found in live use, small and visible)
 
-*Refilled by the [2026-09-05 full pass](./reviews/2026-09-05.md). At the 8-row cap: three
-blockers and two silent data-loss bugs arrived at once, so **#159, #156, #148 and #141
-demoted to P2** — they are still real, just outranked. #164 stayed on its 🔴.*
+*Refilled by the [2026-09-05 full pass](./reviews/2026-09-05.md), which hit the 8-row cap at once and
+demoted **#159, #156, #148 and #141** to P2 — still real, just outranked. Four of those P1 rows were then
+promoted into **plans/84** and **plans/86** the same day, so what is left here is the tail.*
 
-- 🔴 **#172 Estações blocks publish as an empty card in every Publicador export** · S · Sonnet · the family reads `bl.exercises` directly (`exportViews.jsx:218,341,694`, `mobileExportViews.jsx:75,612,881`); `wod.js:288 blockExercises()` flattens `stations` for that type and has **zero** hits in `publicador/`. Goes into the PNG. **Before #187.**
-- 🔴 **#173 A stale `skipped:true` silently deletes a submitted score** · S–M · Sonnet · `mergeBlockEntry` is a spread and 4 of 5 writers omit the key, so a "não fez" block the athlete later logs keeps it beside a real score and all four guards drop it. Root cause: `resultsHelpers.js:20-32 DEF_INP` is a 2nd key declaration missing `skipped` — fix that first.
-- 🔴 **#174 `Quadro ao Vivo` is illegible on both light themes** · S · Sonnet · `tv/tvController.module.css` paints theme foregrounds on hardcoded dark panels — `--cream` on `#111` is **1.04:1** (totk-light) / **1.00:1** (sb-light). 13 sites from `:6`. One click from a coach's normal state. **Carried by the TvController + Timer pass.**
-- 🔴 **#175 `--theme-accent`'s inline override breaks six consumers on light themes** · XS · Sonnet · `App.jsx:71-72`+`:107-113` write `#00b8d4` onto `<html>`, beating `index.css:3`'s alias — 1.95:1 as text, and `index.css:238` is the login page's only focus cue at 1.47:1. 🔑 **Deleting the two `setProperty` calls fixes all six.**
+- ⏸ **#155 iOS Safari zooms the page when logging a result** · S · Sonnet · blocked on the user: `plans/74` shipped the 16px floor (`793ee45`, 2026-08-07) and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code until that comes back.
 - 🔴 **#164 Three of the Atletas grade's four signals are structurally dead on real data** · M · Opus · `matchesAthlete` needs `s.mainTraining` and all 55 sessions in the last 30 days of prod have none, so ADERÊNCIA is `—` on 100% of cards and Presença shows 28 blank cells; decide what "prescribed for this athlete" means before touching code — the one-liner silently redefines me.html's bars too.
-- **#176 `mapResultRow` is forked 4× and `createdAt` is lost on two public pages** · S · Sonnet · `blobTables.js:8` is canonical precisely so a column can't be forgotten in one copy; `Results.jsx:145` and `Schedule.jsx:339` are byte-identical forks **missing `createdAt`** (`TV.jsx:197`/`TvController.jsx:127` are a 2nd pair).
 - **#178 `Timer.jsx` persists tomorrow's date for any WOD finished after 21:00 local** · XS · Sonnet · `timer/Timer.jsx:350` uses `new Date().toISOString().slice(0,10)` for a **persisted** history field while already importing from `../lib/week.js`; `todayISO()` is canonical and this exact fork is a documented bug class (`agendaHelpers.js:74-78`). `recover/Recover.jsx:82` is the display-only twin.
-- **#179 Configurações → Carregar is a 9th sessions entry point with no `normalizeSessionIds`** · XS · Sonnet · `config/stateBackup.js:65-91` rebuilds every session but never touches the `id`, then `:109` `setSessions` → `SyncContext.jsx:68` upserts it. Restoring a pre-mid-June-2026 backup reintroduces **#110**. One call.
 
 ### P2 — queued (design program + measured layout rows)
 
