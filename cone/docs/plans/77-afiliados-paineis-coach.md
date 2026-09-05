@@ -1,5 +1,7 @@
 # 77 — #161 · Afiliados → painéis do coach: Meus afiliados + Meu perfil (mockup 60)
 
+> ✅ Done: `270a8e6` · 2026-08-29 — see BACKLOG.md. Closed **#161**. Same-day-family follow-on to #56/C2 — planned, built, tested and verified live in one session. The horizontal `PaneTabs` strip became the vertical `AffiliateRail`; panes renamed “Meus afiliados” / “Meu perfil”.
+
 > Follows [plans/75](./75-design-c2-atletas-servicos.md) (C2/#56), which renames the tab and
 > ships the two panes this plan re-lays-out. Design record: **mockup 60 · Afiliados
 > completo**, approved 2026-08-28. Siblings: [76](./76-atletas-fichas.md) ·

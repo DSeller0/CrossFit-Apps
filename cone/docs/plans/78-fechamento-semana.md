@@ -1,5 +1,7 @@
 # 78 — #162 · Fechamento + Minha semana + o carimbo de estado da fatura (mockup 60)
 
+> ✅ Done: `ea66e78` · 2026-08-29 — see BACKLOG.md. Closed **#162**. Closes out the #56/C2 scope session’s three-row split (#160/#161/#162) — planned, built, tested and verified live in one session. Bought the invoice board with a status stamp, not an invoice entity.
+
 > Depends on [plans/77](./77-afiliados-paineis-coach.md) for the rail — these are its third
 > and fourth panels. Design record: **mockup 60 · Afiliados completo**, approved 2026-08-28.
 > Siblings: [76](./76-atletas-fichas.md) · [77](./77-afiliados-paineis-coach.md).

@@ -1,5 +1,7 @@
 # 82 — #59 · C5·b1 — Publicador: the shell and the colour model
 
+> ✅ Done: `e61634d` → `c7af8a2` → `c56fba8` → `f66c64d` → `ac805ff` → `3bfe21b` · 2026-09-04 — see BACKLOG.md. Closed **#113** (Apresentar’s QR now points at the built `schedule.html`, not the never-built `log.html`); **#170** answered “no”. Design was pre-approved (mockup 64, the colour redirect) — this session was build only. The ~40-key colour drawer was measured at ~94% a hand-copied `totk-dark` palette and replaced by the 8 `--a-*` roles.
+
 > Split out of [plans/81](./81-design-c5-publicador-agenda.md) § "C5·b — Publicador".
 > Design record: `cone/design/mockups/63-publicador-c5.html` (structure) and
 > **`64-publicador-WIP.html`** (the interactive draft — the approved target).

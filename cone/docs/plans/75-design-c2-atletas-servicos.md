@@ -1,5 +1,7 @@
 # 75 — #56 · Design pass C2 — Atletas + Serviços → Afiliados
 
+> ✅ Done: `87aeeb1` · 2026-08-28 — see BACKLOG.md. **All phases shipped** (Phase A the two tabs onto C0 primitives, Phase B me.html’s PR sub-cards). Planned + built to the approval gate 2026-08-13, wired and verified live 2026-08-28. Closed **#56** and **#87** (folded in whole). Spawned #160/#161/#162 from mockups 51 + 60.
+
 > C2 in the [design-pass program](./16-design-pass-program.md). **Lane A — gallery-first,
 > no static mockup** (plans/16 rule 1: the surfaces exist, so the real component is the
 > truth). Adopts the [C0 standard](./33-design-c0-spa-standard.md) on the two tabs and

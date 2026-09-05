@@ -1,5 +1,7 @@
 # 76 — #160 · Atletas → Fichas (mockup 51)
 
+> ✅ Done: `61380a2` · 2026-08-28 — see BACKLOG.md. Closed **#160**. Same-day follow-on to #56/C2 — planned, built, tested, verified live and shipped in one session. `Atletas.jsx` went from list+detail to the grade (ordered by next session) + the 1:1 ficha.
+
 > Follows [plans/75](./75-design-c2-atletas-servicos.md) (C2/#56), which must land first —
 > this plan is built on C0 primitives + `TallyBar` and would otherwise re-derive them.
 > Design record: **mockup 51 · Atletas Fichas**, approved 2026-08-28.
