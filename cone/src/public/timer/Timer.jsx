@@ -617,6 +617,47 @@ export default function Timer() {
   else if (bt === 'AMRAP' && disp <= 30) clockCls += ' ' + s.warn
   else if (isTimeBlock(bt) && cap && e >= cap * 0.85) clockCls += ' ' + s.warn
 
+  // ── Screen-reader announcement (#174/plans/86, review H5) ─────────────────
+  // 🔴 The clock itself must NEVER be a live region: it ticks every 250ms, so
+  // aria-live on it would produce continuous speech and make the page unusable.
+  // `role="timer"` (below, on the clock) is the correct semantic and is
+  // implicitly aria-live="off" — it names the element without announcing it.
+  //
+  // Announcements ride on this DERIVED string instead. It is computed in render
+  // rather than stored, which is the whole trick: the 250ms tick re-renders, the
+  // string comes out identical, React touches no text node, and the screen reader
+  // stays silent. It changes only on a real transition — start, pause, round
+  // advance, finish — which is exactly the set the review asked for.
+  function announceText() {
+    if (status === 'getready') return 'Preparando'
+    if (status === 'paused') return 'Timer pausado'
+    if (status === 'finished') {
+      const rd = splits.length ? `, ${splits.length} round${splits.length !== 1 ? 's' : ''}` : ''
+      return `Finalizado. Tempo ${fmt(finalSecs)}${rd}`
+    }
+    if (status !== 'running') return ''
+    // Per type, the unit that actually advances. Each of these changes only at a
+    // real boundary (a minute, a station, a lap), never per tick.
+    if (bt === 'EMOM') return `Minuto ${Math.floor(e / 60) + 1}`
+    if (bt === 'Estações') {
+      const { idx, round } = stInfoRaw(e, cfg)
+      return `Estação ${idx + 1} de ${exes.length}, round ${round + 1}`
+    }
+    if (splits.length > 0) return `Round ${splits.length + 1}`
+    return 'Timer em andamento'
+  }
+  // ⚠️ Rendered per screen rather than once around all of them: this component
+  // early-returns a different tree per status, so there is no single wrapper to
+  // hang it on without restructuring (that is #191's). start/pause/round all
+  // happen INSIDE the running screen, so the region is genuinely stable for the
+  // three transitions that repeat; finish crosses screens, where the visible
+  // "FINALIZADO" carries it anyway.
+  const announcer = (
+    <div className={s.srOnly} role="status" aria-live="polite">
+      {announceText()}
+    </div>
+  )
+
   // ── Sub-renders ──────────────────────────────────────────────────────────
   function renderRing(clockJsx) {
     return (
@@ -679,7 +720,12 @@ export default function Timer() {
     }
     return (
       <>
-        <div className={clockCls}>{fmt(disp)}</div>
+        {/* role="timer" is implicitly aria-live="off" — it names the element
+            without announcing it, which is the point: this text changes 4x a
+            second. The announcements come from `announcer` instead. */}
+        <div className={clockCls} role="timer" aria-label={`Tempo ${lbl}`}>
+          {fmt(disp)}
+        </div>
         <div className={s.clockLbl}>{lbl}</div>
         {roundJsx}
       </>
@@ -739,8 +785,14 @@ export default function Timer() {
         </div>
         <div className={s.getreadyBody}>
           <div className={s.getreadyLbl}>Preparar</div>
-          <div className={s.getreadyNum}>{getreadySecs}</div>
+          {/* Same rule as the main clock: role="timer", never a live region —
+              a 10-second countdown announced digit by digit is noise, and the
+              one thing worth saying ("Preparando") is in `announcer`. */}
+          <div className={s.getreadyNum} role="timer" aria-label="Contagem regressiva">
+            {getreadySecs}
+          </div>
         </div>
+        {announcer}
         <Nav active="timer" gymName={gymName} box={box} />
       </div>
     )
@@ -1054,6 +1106,7 @@ export default function Timer() {
             </button>
           )}
         </div>
+        {announcer}
         <Nav active="timer" gymName={gymName} box={box} />
         <ConfirmReview
           open={confirmingExit}
@@ -1147,6 +1200,7 @@ export default function Timer() {
           })}
         </div>
       </div>
+      {announcer}
       <Nav active="timer" gymName={gymName} box={box} />
     </div>
   )

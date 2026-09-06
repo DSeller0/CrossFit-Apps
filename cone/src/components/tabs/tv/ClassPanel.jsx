@@ -204,7 +204,13 @@ function ClassAccordion({
         </span>
       </div>
       {expanded && (
-        <div className={st.rosterList}>
+        /* aria-live on the LIST ITSELF, not on a wrapper that only appears once
+           there are rows (#174/plans/86, review H5) — the same rule
+           shared/RankList.jsx follows: the region has to already be in the DOM
+           when the content it announces arrives, or the first update is silent.
+           This roster is refreshed from class_executions every 20s while a class
+           runs, so rows appear under the coach without any interaction. */
+        <div className={st.rosterList} aria-live="polite">
           {ranked.map((m, i) => (
             <RosterRow
               key={m.key}
