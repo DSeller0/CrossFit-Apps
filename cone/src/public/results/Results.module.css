@@ -284,6 +284,10 @@
    in #115 — this page's copy was one of five. What remains is the form's own frame. */
 .form { display:flex; flex-direction:column; gap:10px; margin:6px 0 8px; padding:10px; background:var(--stone); border:1px solid var(--divider); }
 
+/* #174/plans/86 — replaces a blocking alert('Erro ao salvar…'). Same convention as
+   shared/ConfirmReview.module.css's .err (font-size 12px, var(--err), same margin role). */
+.formError { font-size:12px; color:var(--err); margin:-2px 0 0; }
+
 .formBtns { display:flex; gap:8px; }
 .btnSubmit { flex:1; padding:10px; background:var(--teal); color:var(--accent-text); border:none; font-family:var(--font); font-size:13px; font-weight:900; letter-spacing:.04em; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:opacity .15s; }
 .btnSubmit:hover:not(:disabled) { opacity:.85; }

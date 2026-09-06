@@ -17,6 +17,7 @@ export default function LogForm({
   onField,
   onSubmit,
   onCancel = null,
+  error = '',
 }) {
   const dis = isSubmitting || undefined
 
@@ -39,6 +40,12 @@ export default function LogForm({
   return (
     <div className={styles.form}>
       <ScoreFields block={bl} value={inp} onChange={onChange} disabled={dis} />
+
+      {error && (
+        <div className={styles.formError} role="alert">
+          {error}
+        </div>
+      )}
 
       <div className={styles.formBtns}>
         {onCancel && (

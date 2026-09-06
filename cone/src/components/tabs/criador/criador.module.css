@@ -59,6 +59,10 @@
    second card. The colour still says destructive. */
 .dangerGhost { color: var(--red) }
 
+/* #174/plans/86 — replaces a blocking alert() below the "Salvar como Benchmark"
+   button. Same convention as shared/ConfirmReview.module.css's .err. */
+.inlineError { font-size: 12px; color: var(--err); margin-top: 4px; text-align: center }
+
 /* ── Empty week ──────────────────────────────────────────────────────────── */
 .emptyWeek {
   text-align: center; color: var(--muted); font-size: 12.5px;

@@ -35,6 +35,9 @@ export function BlockEditor({
 }) {
   const [showTypePicker, setShowTypePicker] = useState(false)
   const [bmSaveFlash, setBmSaveFlash] = useState(false)
+  // #174/plans/86 — replaces a blocking window.alert(); same transient shape as
+  // bmSaveFlash right above it, just the other outcome.
+  const [bmNameError, setBmNameError] = useState(false)
   const [textMode, setTextMode] = useState(false)
   const [pendingDelEx, setPendingDelEx] = useState(null)
   // *Ref suffix for the same reason as Criador's dragBlkIdxRef — see the note there.
@@ -131,7 +134,8 @@ export function BlockEditor({
   const saveCustomBenchmark = () => {
     const name = block.label && block.label !== block.type ? block.label : null
     if (!name) {
-      window.alert('Dê um nome personalizado ao bloco antes de salvar como benchmark.')
+      setBmNameError(true)
+      setTimeout(() => setBmNameError(false), 3000)
       return
     }
     const bm = {
@@ -559,16 +563,23 @@ export function BlockEditor({
                 </div>
 
                 {block.type !== 'Estações' && (block.exercises || []).some(e => e.name?.trim()) && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    full
-                    className={cr.mt2}
-                    onClick={saveCustomBenchmark}
-                  >
-                    <i className={`ti ${bmSaveFlash ? 'ti-check' : 'ti-bookmark-plus'}`} />
-                    {bmSaveFlash ? 'Salvo!' : 'Salvar como Benchmark'}
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      full
+                      className={cr.mt2}
+                      onClick={saveCustomBenchmark}
+                    >
+                      <i className={`ti ${bmSaveFlash ? 'ti-check' : 'ti-bookmark-plus'}`} />
+                      {bmSaveFlash ? 'Salvo!' : 'Salvar como Benchmark'}
+                    </Button>
+                    {bmNameError && (
+                      <div className={cr.inlineError} role="alert">
+                        Dê um nome personalizado ao bloco antes de salvar como benchmark.
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )

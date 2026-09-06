@@ -32,6 +32,10 @@ export function useSessionEditor({ setSessions, defaultBoxIds, onOpened, onSaved
   const [isDirty, setIsDirty] = useState(false)
   const [changedBlockFields, setChangedBlockFields] = useState({})
   const [activeTemplateId, setActiveTemplateId] = useState(null)
+  // #174/plans/86 — replaces a blocking alert() in saveS. Named what is missing,
+  // same shape as #157's saveGate, rather than a popup the coach has to dismiss
+  // before they can even see which block is empty.
+  const [saveError, setSaveError] = useState('')
   // Text mode (#92) is EDITOR UI STATE, never persisted: detalhado→texto
   // serializes, texto→detalhado parses. The blocks stay canonical either way.
   const [sessionMode, setSessionMode] = useState('detalhado') // 'detalhado' | 'texto'
@@ -64,6 +68,7 @@ export function useSessionEditor({ setSessions, defaultBoxIds, onOpened, onSaved
     setIsDirty(false)
     setChangedBlockFields({})
     setActiveTemplateId(null)
+    setSaveError('')
     // The week grid stays as it is — opening a session used to auto-collapse it to
     // the strip, but the coach wants the week's contents in view while he edits.
     onOpened?.()
@@ -91,6 +96,7 @@ export function useSessionEditor({ setSessions, defaultBoxIds, onOpened, onSaved
     setChangedBlockFields({})
     setActiveTemplateId(null)
     setPendingClose(false)
+    setSaveError('')
   }
 
   // Closing throws the edit away. That was survivable while the button read
@@ -154,9 +160,12 @@ export function useSessionEditor({ setSessions, defaultBoxIds, onOpened, onSaved
         !(bl.exercises || []).some(e => (e.name || '').trim() || e.isComplex),
     )
     if (emptyBlocks.length > 0) {
-      alert('Há blocos sem exercícios preenchidos. Adicione ao menos um exercício antes de salvar.')
+      setSaveError(
+        'Há blocos sem exercícios preenchidos. Adicione ao menos um exercício antes de salvar.',
+      )
       return
     }
+    setSaveError('')
     const dateKey = form.date || todayISO()
     const savedId = editing?.id || form.id || uid()
     const session = {
@@ -227,5 +236,7 @@ export function useSessionEditor({ setSessions, defaultBoxIds, onOpened, onSaved
     openNewSession,
     commitMeta,
     saveS,
+    saveError,
+    setSaveError,
   }
 }

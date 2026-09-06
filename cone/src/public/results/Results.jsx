@@ -113,6 +113,10 @@ export default function Results() {
   const [successData, setSuccessData] = useState(null)
   const [submittingKey, setSubmittingKey] = useState(null)
   const [errMsg, setErrMsg] = useState('')
+  // #174/plans/86 — replaces a blocking alert('Erro ao salvar…') on log_result RPC
+  // failure. Keyed by inputKey so it clears itself the moment the coach retries a
+  // DIFFERENT block, rather than following them around the page.
+  const [submitError, setSubmitError] = useState(null)
   const didUrlScroll = useRef(false)
   const didAutoSelect = useRef(false)
   // #144 — the one pinned block (header + `.selBar` + `.weekNav`). Measured, not assumed:
@@ -296,21 +300,19 @@ export default function Results() {
       delete n[k]
       return n
     })
+    setSubmitError(prev => (prev?.key === k ? null : prev))
   }
   function isEditing(sid, bid) {
     return editing.has(inputKey(sid, bid))
   }
 
+  // #174/plans/86 — dropped the two alert() guards this used to open with. Both were
+  // unreachable: this is only ever called from LogForm's onSubmit, which is rendered
+  // ONLY inside `{selAth && …}` (below) and whose submit button is itself
+  // `disabled` until `inp.scale && inp.rpe` — there's no <form> here for Enter to
+  // bypass it either. Validating a state the caller already prevents was dead code,
+  // not a save gate (see #157/saveGate for what a real one looks like).
   function showConfirm(sid, bid, dk) {
-    if (!selAth) {
-      alert('Selecione um atleta no filtro para registrar resultado.')
-      return
-    }
-    const inp = getInp(sid, bid)
-    if (!inp.scale || !inp.rpe) {
-      alert('Selecione a escala e o RPE antes de registrar.')
-      return
-    }
     setConfirmPending({ sid, bid, dk })
   }
   function proceedSubmit() {
@@ -324,6 +326,7 @@ export default function Results() {
     const k = inputKey(sid, bid)
     if (submittingKey) return
     setSubmittingKey(k)
+    setSubmitError(null)
     const inp = getInp(sid, bid)
     const sess = (sessions[dk] || []).find(s => s.id === sid)
     const bl = (sess?.blocks || []).find(b => b.id === bid)
@@ -379,7 +382,10 @@ export default function Results() {
     })
     setSubmittingKey(null)
     if (e) {
-      alert('Erro ao salvar. Verifique sua conexão e tente novamente.')
+      setSubmitError({
+        key: k,
+        message: 'Erro ao salvar. Verifique sua conexão e tente novamente.',
+      })
       return
     }
     setResults(next)
@@ -518,6 +524,7 @@ export default function Results() {
             onField={(f, v) => setInp(sess.id, bl.id, { [f]: v })}
             onSubmit={() => showConfirm(sess.id, bl.id, dk)}
             onCancel={edit ? () => cancelEdit(sess.id, bl.id) : null}
+            error={submitError?.key === k ? submitError.message : ''}
           />
         )}
       </>

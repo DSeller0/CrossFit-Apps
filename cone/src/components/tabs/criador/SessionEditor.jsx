@@ -4,6 +4,7 @@ import { CriadorTypePicker } from './TypePicker'
 import { SessionTextPane } from './SessionTextPane'
 import Button from '../../ui/Button.jsx'
 import Card from '../../ui/Card.jsx'
+import Toast from '../../ui/Toast.jsx'
 import tm from './textMode.module.css'
 import cr from './criador.module.css'
 
@@ -28,7 +29,17 @@ export function SessionEditor({
   tvPreviewOpen,
   onToggleTvPreview,
 }) {
-  const { form, blocks, editing, isDirty, activeTemplateId, sessionMode, setSessionMode } = editor
+  const {
+    form,
+    blocks,
+    editing,
+    isDirty,
+    activeTemplateId,
+    sessionMode,
+    setSessionMode,
+    saveError,
+    setSaveError,
+  } = editor
   const names = blockNames || APP_CONFIG.blockNames
   const saveLabel = editing ? 'Salvar alterações' : 'Salvar sessão'
   const onTemplateBtn = activeTemplateId
@@ -40,6 +51,16 @@ export function SessionEditor({
 
   return (
     <Card>
+      {/* #174/plans/86 — replaces a blocking alert(). Toast, not an inline message
+          under one Salvar button: there are three (mobile header, desktop header,
+          and this footer, added because the header's is out of reach on a long
+          block list) and the coach could have clicked any of them. */}
+      <Toast
+        open={!!saveError}
+        message={saveError}
+        onDismiss={() => setSaveError('')}
+        duration={5000}
+      />
       {isMobile ? (
         /* Four explicit rows — the coach reads this on a 390px screen, not
                1280px, so grouping by row beats one long flex-wrap line: close,

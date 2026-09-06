@@ -8,6 +8,7 @@ import { fmtSecs, isTimeBlock, MODE_LBL, maskMMSS } from '../lib/wod.js'
 import { fmtDate } from '../lib/week.js'
 import { getBoxScope } from '../lib/boxScope.js'
 import { syncTheme } from '../lib/theme.js'
+import ConfirmReview from '../shared/ConfirmReview.jsx'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const K_CFG = 'timer_config',
@@ -106,6 +107,8 @@ export default function Timer() {
   const [, forceUpdate] = useState(0)
   const [getreadySecs, setGetreadySecs] = useState(10)
   const [showTypePicker, setShowTypePicker] = useState(false)
+  // #174/plans/86 — replaces a bare confirm('Pausar e sair?'); see goBack below.
+  const [confirmingExit, setConfirmingExit] = useState(false)
 
   const [form, setForm] = useState(() => ({
     type: initCfg.blockType || 'For Time',
@@ -453,10 +456,17 @@ export default function Timer() {
   }
   function goBack() {
     if (statusRef.current === 'running') {
-      if (!confirm('Pausar e sair?')) return
-      pauseTimer()
+      setConfirmingExit(true)
+      return
     }
     if (statusRef.current === 'getready') cancelGetReady()
+    window.history.back()
+  }
+  // The confirmed half of the branch above: pauses (never discards — doDiscard
+  // is the separate, unguarded action) then leaves.
+  function confirmExit() {
+    setConfirmingExit(false)
+    pauseTimer()
     window.history.back()
   }
 
@@ -1045,6 +1055,20 @@ export default function Timer() {
           )}
         </div>
         <Nav active="timer" gymName={gymName} box={box} />
+        <ConfirmReview
+          open={confirmingExit}
+          title="Sair do timer?"
+          editLabel="Cancelar"
+          confirmLabel="Pausar e sair"
+          onEdit={() => setConfirmingExit(false)}
+          onClose={() => setConfirmingExit(false)}
+          onConfirm={confirmExit}
+        >
+          <div style={{ fontSize: 13, color: 'var(--sub)', lineHeight: 1.5 }}>
+            O timer <strong style={{ color: 'var(--cream)' }}>pausa</strong> e você sai da tela. O
+            progresso não é descartado.
+          </div>
+        </ConfirmReview>
       </div>
     )
   }
