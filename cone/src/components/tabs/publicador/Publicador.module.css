@@ -447,7 +447,7 @@
   color: var(--dim);
 }
 
-/* ── EventFormInner (events.jsx) — the Agenda's create/edit form, over `ui/Modal`
+/* ── EventFormInner (events.jsx) — the Agenda's create/edit form, over `shared/Modal`
    (#59 C5·c). No outer margins on these — `Modal`'s `.body` is a flex column with
    its own `gap`, so stacking is free; adding margins here would double it. ── */
 .evfDate {
@@ -557,7 +557,7 @@
 
 /* ── Relatório (events.jsx's ReportModal — #59 C5·c). Was 640 lines of
    React.createElement over hardcoded hex + `var(--theme-accent)`; the shell is
-   now `ui/Modal`, these are just its body. ── */
+   now `shared/Modal`, these are just its body. ── */
 .optionsBox {
   margin-bottom: var(--sp-4);
   padding: 10px 12px;

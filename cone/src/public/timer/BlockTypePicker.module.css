@@ -1,44 +1,32 @@
-.backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  z-index: 80;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
+/* BlockTypePicker — CONTENT ONLY since #174/plans/86.
+   The shell (backdrop, panel, header, title, close ✕, the phone bottom-sheet vs
+   desktop centred-dialog split) is now shared/Modal's. What was here duplicated
+   all of it without the dialog semantics — no role, no Escape, no focus trap.
+   ⚠️ Don't reintroduce padding on .grid/.list: Modal's own .body already pads
+   (14px 16px) and lays its children out as a column with a --sp-3 gap. */
 
-.modal {
-  width: 100%;
-  max-width: 480px;
-  max-height: 84vh;
-  background: var(--stone);
-  border-top: 1px solid var(--divider);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+/* Level > 0 back control. It sits in the BODY, not the header, because Modal's
+   header is title + ✕ — the title carries the level instead. */
+.backBtn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--teal);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: .04em;
+  -webkit-tap-highlight-color: transparent;
 }
-
-/* ── Header ── */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--divider);
-  flex-shrink: 0;
-}
-.title  { font-size: 10px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; color: var(--sub); }
-.backBtn { background: none; border: none; color: var(--teal); font-family: var(--font); font-size: 11px; font-weight: 700; cursor: pointer; padding: 0; letter-spacing: .04em; -webkit-tap-highlight-color: transparent; }
-.closeBtn { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; line-height: 1; padding: 4px; -webkit-tap-highlight-color: transparent; }
+.backBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ── Type grid (level 0 + 1) ── */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  padding: 14px;
-  overflow-y: auto;
 }
 
 .card {
@@ -56,6 +44,7 @@
   transition: opacity .12s;
 }
 .card:active { opacity: .7; }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .cardName { font-size: 12px; font-weight: 900; letter-spacing: .06em; color: var(--cream); text-transform: uppercase; }
 .cardDesc { font-size: 9px; color: var(--muted); letter-spacing: .02em; line-height: 1.4; }
 
@@ -64,8 +53,6 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  padding: 14px;
-  overflow-y: auto;
 }
 
 .listItem {
@@ -83,12 +70,12 @@
   transition: opacity .12s;
 }
 .listItem:active { opacity: .7; }
+.listItem:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .listName { font-size: 13px; font-weight: 900; color: var(--cream); letter-spacing: .04em; text-transform: uppercase; }
 .listDesc { font-size: 10px; color: var(--muted); }
 
-/* ── Desktop: centered dialog ── */
+/* Three across once there is room — a column-width decision, independent of the
+   shell's own sheet/dialog breakpoint (600px, in Modal). */
 @media (min-width: 768px) {
-  .backdrop { align-items: center; left: 220px; }
-  .modal { border: 1px solid var(--divider); max-height: 72vh; }
   .grid { grid-template-columns: repeat(3, 1fr); }
 }

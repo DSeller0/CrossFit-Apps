@@ -1,12 +1,20 @@
 import { useEffect, useId, useRef } from 'react'
 import s from './Modal.module.css'
 
-// The one SPA modal shell (#56/C2, C0 family). ConfirmReview (public/shared) covers
+// The one modal shell (#56/C2, C0 family). ConfirmReview, its neighbour here, covers
 // the *confirm* case — a read-back plus Editar/Confirmar. This covers the other one:
 // a titled form dialog. Before C2 that was the global `.settings-overlay` +
 // `.settings-modal` + `.settings-drag-hdr` trio (backdrop .5, radius 12px, a "drag"
 // header that never dragged) in Atletas and Publicador, plus three fully inline
 // hand-rolled overlays in Serviços with their own backdrops (.75/.8) and radii.
+//
+// ⚠️ It lived in `src/components/ui/` until #174/plans/86, when `timer/BlockTypePicker`
+// — a PUBLIC page — needed a real dialog. It moved here rather than being imported
+// across that boundary: the dependency runs one way only (20+ files under
+// src/components/ import from public/shared; nothing built imports the other
+// direction), for the reason ConfirmReview's own header gives — a public page's
+// bundle must never reach into src/components/. It is still a C0 primitive; it just
+// has public consumers now, exactly like ConfirmReview and MaskedTimeInput.
 //
 // Same a11y contract as ConfirmReview so the two can't diverge: role="dialog" +
 // aria-modal, focus moves in on open and is trapped, Escape closes, focus is

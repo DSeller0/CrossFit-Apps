@@ -721,7 +721,7 @@ export default {
       render: () => (
         <Section
           title="Modais de Atletas"
-          sub="Casca única: ui/Modal.jsx (role=dialog, foco preso, Escape, foco restaurado) no lugar de .settings-overlay/.settings-modal/.settings-drag-hdr. ColorField substitui o proxy só-mouse com document.getElementById().click(). Campos de tempo usam o MaskedTimeInput (#35)."
+          sub="Casca única: shared/Modal.jsx (role=dialog, foco preso, Escape, foco restaurado) no lugar de .settings-overlay/.settings-modal/.settings-drag-hdr. ColorField substitui o proxy só-mouse com document.getElementById().click(). Campos de tempo usam o MaskedTimeInput (#35)."
         >
           <Case label="Perfil do atleta — Input + ColorField (interativo)">
             <ProfileModalDemo />

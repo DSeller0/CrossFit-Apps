@@ -322,7 +322,7 @@
 .msEditRow > :first-child{flex:1;min-width:0}
 .msEditPct{width:72px;flex-shrink:0}
 
-/* GoalConfigPanel's modal shell is the real ui/Modal.jsx, wired by the container —
+/* GoalConfigPanel's modal shell is the real shared/Modal.jsx, wired by the container —
    not a hand-rolled overlay (removed here, unused: #56/C2 replaces, never wraps). */
 
 .readback{

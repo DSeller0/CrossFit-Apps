@@ -8,7 +8,7 @@ import { fmtDateNum, fmtDur, calcTotal, sumByCurrency, effectiveRateSource } fro
 import { qrToBase64 } from './pixQr.js'
 import EventFilter from './agenda/EventFilter.jsx'
 import { reportFilter, filterEvents, matchingAthleteIds } from './eventFilter.js'
-import Modal from '../../ui/Modal.jsx'
+import Modal from '../../../public/shared/Modal.jsx'
 import Button from '../../ui/Button.jsx'
 import Input from '../../ui/Input.jsx'
 import Toast from '../../ui/Toast.jsx'

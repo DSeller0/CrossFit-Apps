@@ -1,5 +1,5 @@
 import { IconCheck, IconCopy } from '@tabler/icons-react'
-import Modal from '../../ui/Modal.jsx'
+import Modal from '../../../public/shared/Modal.jsx'
 import Button from '../../ui/Button.jsx'
 import s from './Afiliados.module.css'
 
