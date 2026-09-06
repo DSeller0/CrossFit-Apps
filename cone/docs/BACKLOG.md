@@ -16,8 +16,8 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready (pick from the top):** **plans/85** repo sweep → **plans/86** TvController + Timer →
-  **plans/87** #43 themes. plans/84 shipped 2026-09-06; 86 is 87's other premise.
+- **Ready (pick from the top):** **plans/86** TvController + Timer → **plans/87** #43 themes.
+  plans/84 and plans/85 shipped 2026-09-06; 86 is 87's other premise.
 - **In Progress:** none.
 - **Also open, blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is
   held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code.
@@ -27,7 +27,6 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/85](./plans/85-repo-dead-weight-sweep.md)** — **Repo dead-weight sweep** · S · Sonnet · ~1.9 MB of tracked, unreferenced files plus two docs that actively mislead (`CONE_CONTEXT.md`, the stock-Vite `README.md`), and the `log.html` retirement. 🔴 Do not touch `athletes.html` — `cache.addAll` is atomic.
 - 🟢 **[→ Ready · plans/86](./plans/86-tv-timer-surface-pass.md)** — **#174 TvController + Timer surface pass** · M–L · Opus · the two surfaces C0–C5 never reached. Carries the #174 blocker (`Quadro ao Vivo` illegible on both light themes), the worst a11y ratios, 37 dead CSS classes and the app's last `confirm()`. **Lane A; the clock rewrite is #191's, not this.**
 - 🟢 **[→ Ready · plans/87](./plans/87-new-themes.md)** — **#43 Two new themes — Halo Reach + "Common"** · L · Opus · **the design program's last row.** Lane B, mockup-first, user approval before any code. ⚠️ **Runs after plans/84 (#175) and plans/86** — both are its premise; starting earlier ships four more broken themes.
 
@@ -118,6 +117,7 @@ promoted into **plans/84** and **plans/86** the same day, so what is left here i
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/85 · `ae46683` · 2026-09-06](./plans/85-repo-dead-weight-sweep.md)** — **Repo dead-weight sweep (deletion only)** · `legacy/`, root `fonts/`, `state.json`, `CONE_CONTEXT.md`, `Hercules sample training/`, `log.html`+`cone-client.js`+`cone-utils.js` deleted; `cone/README.md` rewritten; `deploy.yml`'s `cp` line trimmed. Kept `cone/Coach training week example.txt` — the plan's evidence table called it unreferenced scratch, but `textFormat.test.js` reads it live as a fixture.
 - ✅ **[plans/84 · `efcbb50` · 2026-09-06](./plans/84-blockers-batch.md)** — **#172 + #173 + #175 + #176 + #179 Blockers + correctness batch** · closed #172, #173, #175, #176, #179. · Estações exports flattened via `blockExercises`; a second drifted `ATHLETE_KEY_DEFAULTS` copy stopped clearing stale `skipped`; `--theme-accent`'s inline override deleted; `mapResultRow` de-forked; `Carregar` normalizes session ids again. Also fixed a live `WhenPicker.jsx` arg-order bug (crashed the whole Publicador tab on any day click) found while verifying #172.
 - ✅ **[plans/81 · `1bc1066`+`99af3a2`+`e1197ad` · 2026-09-04](./plans/81-design-c5-publicador-agenda.md)** — **#59 · C5·c — Relatório + rate history (Lane B)** · closed #59, #154. · Versioned rate history — `rateAsOf(loc,iso)` + one `effectiveRateSource` chain, `saveLoc` appends instead of overwriting; `events.jsx` was the family’s last `createElement` holdout
 - ✅ **[plans/83 · `ed637ea`+`85afedc`+`2856182`+`f995b6f`+`248b4d9` · 2026-09-04](./plans/83-c5b2-publicador-renderer.md)** — **#59 · C5·b2 — Publicador: the export renderer (Lane B)** · closed #59. · The export renderer became parametric — Layout · Blocos · Títulos · fit; also fixed Sat/Sun silently dropped from the Mês and Semana exports

@@ -1,5 +1,10 @@
 # 85 — Repo dead-weight sweep
 
+> ✅ Done: `ae46683` · 2026-09-06 — see BACKLOG.md. One deviation from the evidence table below:
+> `cone/Coach training week example.txt` was NOT deleted — `textFormat.test.js` reads it via
+> `readFileSync` as a live fixture (3 tests), so it isn't the unreferenced scratch file the table
+> claimed. Everything else shipped as planned; `npm test`/`lint`/`format:check`/`build:all` all green.
+
 > Deletion-only. ~1.9 MB of tracked, unreferenced files, plus two documentation files that actively
 > mislead. Filed from the 2026-09-05 planning session; the dead-code half was measured then and
 > confirmed by the [2026-09-05 full pass](../reviews/2026-09-05.md).
