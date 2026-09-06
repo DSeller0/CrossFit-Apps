@@ -16,8 +16,8 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready (pick from the top):** **plans/84** blockers batch → **plans/85** repo sweep → **plans/86**
-  TvController + Timer → **plans/87** #43 themes. The order is a real gate: 84 and 86 are 87's premise.
+- **Ready (pick from the top):** **plans/85** repo sweep → **plans/86** TvController + Timer →
+  **plans/87** #43 themes. plans/84 shipped 2026-09-06; 86 is 87's other premise.
 - **In Progress:** none.
 - **Also open, blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is
   held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code.
@@ -27,7 +27,6 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/84](./plans/84-blockers-batch.md)** — **#172 + #173 + #175 + #176 + #179 Blockers + correctness batch** · M · Sonnet · two of these publish or destroy real data: Estações blocks export as empty cards, and a stale `skipped:true` deletes a submitted score. Five S/XS rows, none blocking another (the plans/79 precedent). **Pick this first.**
 - 🟢 **[→ Ready · plans/85](./plans/85-repo-dead-weight-sweep.md)** — **Repo dead-weight sweep** · S · Sonnet · ~1.9 MB of tracked, unreferenced files plus two docs that actively mislead (`CONE_CONTEXT.md`, the stock-Vite `README.md`), and the `log.html` retirement. 🔴 Do not touch `athletes.html` — `cache.addAll` is atomic.
 - 🟢 **[→ Ready · plans/86](./plans/86-tv-timer-surface-pass.md)** — **#174 TvController + Timer surface pass** · M–L · Opus · the two surfaces C0–C5 never reached. Carries the #174 blocker (`Quadro ao Vivo` illegible on both light themes), the worst a11y ratios, 37 dead CSS classes and the app's last `confirm()`. **Lane A; the clock rewrite is #191's, not this.**
 - 🟢 **[→ Ready · plans/87](./plans/87-new-themes.md)** — **#43 Two new themes — Halo Reach + "Common"** · L · Opus · **the design program's last row.** Lane B, mockup-first, user approval before any code. ⚠️ **Runs after plans/84 (#175) and plans/86** — both are its premise; starting earlier ships four more broken themes.
@@ -85,7 +84,7 @@ promoted into **plans/84** and **plans/86** the same day, so what is left here i
 ### P3 — needs a decision before it needs code
 
 - **#194 Revoke `anon`'s `INSERT`/`UPDATE`/`DELETE` grants** · XS · Sonnet · needs migration **`0011`** and a scope call. Table-level write grants survive on most tables (incl. anon **DELETE** on `results_v2`/`class_executions`, against #7/`0003`'s intent), inert **only** because RLS denies. RLS itself verified sound 2026-09-05.
-- **#195 `html2canvas@^1.4.1` was last published in 2022 and is the whole export raster path** · M · Opus · **a decision before a build.** It renders what C5 just rebuilt; `fitCheck.js:1` already notes it crops silently. Successors: `html-to-image`, `modern-screenshot` — swapping re-opens every fit/crop assumption in `useFitAutoShrink.js`.
+- 🔴 **#195 `html2canvas@^1.4.1` was last published in 2022 and is the whole export raster path** · M · Opus · **no longer just tech debt — reproduced live 2026-09-06: every Dia-mobile/Semana-mobile export currently fails outright** (`Error: Attempting to parse an unsupported color function "color"`, thrown on `mobileExportViews.jsx`'s unconditional `color-mix(...)` header-pill background, so it hits every session). Dia/Semana desktop still rasterize fine. `fitCheck.js:1` already notes silent cropping on top of this. Successors: `html-to-image`, `modern-screenshot` — swapping re-opens every fit/crop assumption in `useFitAutoShrink.js`.
 - **#196 A public page's first reads can 401 against an expired stored token, silently** · S · Sonnet · **needs a call on the fallback.** Reproduced 2026-09-05: two 401s, stale `localStorage` rendered with no indication, clean on reload. Public pages are anon-readable, but "fall back to anon" changes what a logged-in coach sees.
 - **#197 `SERIES_EDIT_FIELDS` is dead and CLAUDE.md claimed the feature ships** · XS · Sonnet · `agenda/agendaHelpers.js:143-155` is a unit-tested 10-field whitelist with **zero prod importers**; `DeleteEventConfirm.jsx:3` imports only `seriesScopes`/`dayTitleShort`, so #106's scope covers **delete only**. Decide whether series *edit* scope ships or the helper, its tests and the claim all go.
 - **#102 `events` and `class_executions` have no join key, so attendance is not a queryable fact** · M–L · Opus · the keystone: #107 is blocked on it, #40's booking half needs it, and it is one of the two honest answers to #164. Its migration is **`0010`** — `0008` is taken by #71.
@@ -119,6 +118,7 @@ promoted into **plans/84** and **plans/86** the same day, so what is left here i
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/84 · `efcbb50` · 2026-09-06](./plans/84-blockers-batch.md)** — **#172 + #173 + #175 + #176 + #179 Blockers + correctness batch** · closed #172, #173, #175, #176, #179. · Estações exports flattened via `blockExercises`; a second drifted `ATHLETE_KEY_DEFAULTS` copy stopped clearing stale `skipped`; `--theme-accent`'s inline override deleted; `mapResultRow` de-forked; `Carregar` normalizes session ids again. Also fixed a live `WhenPicker.jsx` arg-order bug (crashed the whole Publicador tab on any day click) found while verifying #172.
 - ✅ **[plans/81 · `1bc1066`+`99af3a2`+`e1197ad` · 2026-09-04](./plans/81-design-c5-publicador-agenda.md)** — **#59 · C5·c — Relatório + rate history (Lane B)** · closed #59, #154. · Versioned rate history — `rateAsOf(loc,iso)` + one `effectiveRateSource` chain, `saveLoc` appends instead of overwriting; `events.jsx` was the family’s last `createElement` holdout
 - ✅ **[plans/83 · `ed637ea`+`85afedc`+`2856182`+`f995b6f`+`248b4d9` · 2026-09-04](./plans/83-c5b2-publicador-renderer.md)** — **#59 · C5·b2 — Publicador: the export renderer (Lane B)** · closed #59. · The export renderer became parametric — Layout · Blocos · Títulos · fit; also fixed Sat/Sun silently dropped from the Mês and Semana exports
 - ✅ **[plans/82 · `e61634d`+`c7af8a2`+`c56fba8`+`f66c64d`+`ac805ff`+`3bfe21b` · 2026-09-04](./plans/82-c5b1-publicador-shell-e-cores.md)** — **#59 · C5·b1 — Publicador: the shell and the colour model (Lane B)** · closed #59, #113, #170. · One when-picker + 5-format rail + true-ratio preview; the ~40-key colour drawer (measured ~94% a copied `totk-dark` palette) became 8 `--a-*` roles

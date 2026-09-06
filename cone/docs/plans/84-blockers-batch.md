@@ -1,5 +1,13 @@
 # 84 — Blockers + correctness batch (#172 · #173 · #175 · #176 · #179)
 
+> ✅ Done: #172 · #173 · #175 · #176 · #179 — `efcbb50` · 2026-09-06 — see BACKLOG.md. Also fixed a
+> live `WhenPicker.jsx` argument-order bug (crashed the Publicador tab on any day click in the
+> Dia/Dia-mobile formats) found while verifying #172 against the local stack — not one of the five
+> planned rows, but blocking their verification. `Não foi possível gerar a imagem` on Dia-mobile/
+> Semana-mobile is a separate, pre-existing, unrelated html2canvas/`color-mix()` incompatibility,
+> left unfixed (out of scope, folded into #195) — #172 itself was verified via the live component
+> tree those two formats share with the rasterizer.
+
 > Five rows from the [2026-09-05 full pass](../reviews/2026-09-05.md), batched on the
 > [plans/79](./79-post-162-cleanup.md) precedent (five small rows ship safely together because none
 > blocks another). Every one is S or XS. **User decision 2026-09-05:** these jump the three planned

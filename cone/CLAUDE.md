@@ -552,9 +552,10 @@ read-only view here that one of those three already owns, and don't move a write
   `evStatus` moved to `eventFilter.js` **verbatim** and nothing assumes `status` is a manual toggle
   in its *shape*; labels are **"A lançar"/"Feita"** (what the coach did with the record, never what
   the athlete did). The stats strip counts "a lançar" and never anything resembling attendance.
-- **`Agenda.module.css` is token-only** — zero non-data hex, zero non-circle radius literals. ⚠️ **One
-  `var(--theme-accent)` survives** (re-measured 2026-09-05); the sweep missed it and it is still a bug
-  under #43, not a licence to add more. `index.css` went 625 → **556** (the "554" this line used to carry disagreed with the 556 recorded in the Design-system section for the same event; **454 today**): the **7 `rp-*`**, the
+- **`Agenda.module.css` is token-only** — zero non-data hex, zero non-circle radius literals, and
+  (re-verified 2026-09-06 while closing #175/plans/84) zero live `var(--theme-accent)` usage — the
+  file's only occurrence of the string is its own file-header comment banning the token; the
+  2026-09-05 review's "one survives" claim didn't reproduce. `index.css` went 625 → **556** (the "554" this line used to carry disagreed with the 556 recorded in the Design-system section for the same event; **454 today**): the **7 `rp-*`**, the
   `pub-mobile-*`/`pub-day-*`/`pub-chip-*` and `agenda-*`/`cell-card-*` sets all moved here. ⚠️
   `.rp-sticktop`'s successor `.hdrSticky` keeps `top: var(--spa-sticky-top)` — never 88px.
   `BLOCK_C` stays a **data-colour** map at module scope in `AgendaView.jsx` (per-*type* chip hues,
@@ -596,20 +597,25 @@ pure and unit-tested; the three scopes (só este / este e os seguintes / toda a 
 describes the past is a false claim — and `SERIES_EDIT_FIELDS` never propagates `date`, `status`,
 `id` or `recurrenceGroup`.
 
-#### --theme-accent (app-wide trap)
+#### --theme-accent (app-wide trap) — CLOSED #175 · plans/84 (2026-09-06)
 
-🔴 **`--theme-accent` is a hardcoded cyan, not an alias — and this is app-wide, not Agenda's.**
-`src/index.css:3` declares `--theme-accent: var(--accent, #4ac8c0)`, but **`App.jsx:71` then sets it
-as an inline style on `<html>`** from `APP_CONFIG.themeAccent` (`utils/config.js:26`), whose default
-is **`#00b8d4`** — the cyan #51 removed from the leaderboard, present in no theme. It is written
-**twice**: at mount, and again at **`App.jsx:107-113`** from the fetched remote `cfg`. An inline style on
-the root element beats every `html.theme-*` class, so that fallback never resolves (measured live:
-under `theme-totk-light`, `--theme-accent` is `#00b8d4` while `--accent` is `#1c6860`). Every
-consumer therefore renders one cyan **in all four themes**. It is also where the `#00b8d4` literals
-scattered through `Publicador.jsx`/`mobileExportViews.jsx` come from. C5·a took the Agenda files and
-`EventFormInner` off it entirely; **anything gallery-rendered must use `var(--accent)` /
-`var(--accent-text)`**, and the remaining sites plus the question of what that persisted setting is
-*for* belong to #59 · C5·b.
+✅ **Was a hardcoded cyan, not an alias — app-wide, not Agenda's; now fixed.** `src/index.css:3`
+declares `--theme-accent: var(--accent, #4ac8c0)`, but `App.jsx` used to overwrite it with an inline
+style on `<html>` from `APP_CONFIG.themeAccent` (default `#00b8d4`, the cyan #51 removed from the
+leaderboard, present in no theme) — written twice, at mount and again from the fetched remote `cfg`,
+and an inline style on the root element beats every `html.theme-*` class, so the alias never
+resolved (measured live pre-fix: under `theme-totk-light`, `--theme-accent` was `#00b8d4` while
+`--accent` was `#1c6860`). #175 deleted both `setProperty('--theme-accent', …)` call sites (and the
+now-consumerless `themeAccent`/`themeAccentText` keys from `utils/config.js`), letting the
+`index.css` alias resolve — re-measured post-fix: `--theme-accent` now equals `--accent` in every
+theme. Six live consumers were affected, all now correct with no code change of their own: `index.css`'s
+login-input focus ring, `.login-btn`, `.insert-blk-btn`'s hover state, and the `.blk-adv-check`
+checkbox `accent-color`, plus `criador/BlockEditor.jsx`'s drag-over outline. (The `#00b8d4` literals
+this section used to blame on Publicador predate C5·b1's `--a-*` colour-model rewrite — re-checked
+2026-09-06, zero hits left in `src/components/tabs/publicador/`.) **Anything gallery-rendered must
+use `var(--accent)` / `var(--accent-text)`**, never `--theme-accent` — the gallery doesn't load
+`index.css`'s `:root` block that defines the alias, so a `--theme-accent` reference there still
+renders unstyled regardless of this fix.
 
 #### Atletas + Afiliados (C2)
 
