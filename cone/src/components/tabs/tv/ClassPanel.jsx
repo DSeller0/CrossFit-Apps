@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { rankResults, perfStr, SCALES } from '../../../public/lib/wod.js'
 import { ScaleRow, TimeField } from '../../../public/shared/ScoreFields.jsx'
+import { onKey } from '../../../public/schedule/scheduleHelpers.js'
 import st from './tvController.module.css'
 
 function buildMembers(cls, athletes) {
@@ -78,8 +79,12 @@ function RosterRow({ m, rank, timerType, isActive, canRegister, liveReg }) {
         <button className={`${st.btn} ${st.rowBtn} ${st.reg}`} onClick={saveEdit}>
           Salvar
         </button>
-        <button className={`${st.btn} ${st.rowBtn} ${st.remove}`} onClick={remove}>
-          <i className="ti ti-trash" />
+        <button
+          className={`${st.btn} ${st.rowBtn} ${st.remove}`}
+          onClick={remove}
+          aria-label={`Remover registro de ${m.name}`}
+        >
+          <i className="ti ti-trash" aria-hidden="true" />
         </button>
         <button className={`${st.btn} ${st.rowBtn} ${st.edit}`} onClick={() => setEditing(false)}>
           Cancelar
@@ -156,7 +161,24 @@ function ClassAccordion({
 
   return (
     <div className={`${st.classCard} ${isActive ? st.active : ''} ${expanded ? st.expanded : ''}`}>
-      <div className={st.classHead} onClick={onToggle}>
+      {/* role="button" rather than a real <button> because this header CONTAINS one
+          (Encerrar, below) and a button may not nest. Same contract as the app's own
+          shared/AccordionCard, which exists for exactly this shape.
+          ⚠️ The target guard is load-bearing: keydown from the nested Encerrar button
+          bubbles here, so without it Enter on Encerrar would end the class AND toggle
+          the accordion. Encerrar's onClick already stopPropagation()s the click; this
+          is the keyboard half of the same problem. */}
+      <div
+        className={st.classHead}
+        role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
+        onClick={onToggle}
+        onKeyDown={e => {
+          if (e.target !== e.currentTarget) return
+          onKey(onToggle)(e)
+        }}
+      >
         <div className={st.classHeadInfo}>
           <div className={st.cName}>
             {isActive && <span className={st.liveDot} />}
@@ -177,7 +199,9 @@ function ClassAccordion({
             <i className="ti ti-square-off" /> Encerrar
           </button>
         )}
-        <span className={st.chev}>{expanded ? '▾' : '▸'}</span>
+        <span className={st.chev} aria-hidden="true">
+          {expanded ? '▾' : '▸'}
+        </span>
       </div>
       {expanded && (
         <div className={st.rosterList}>

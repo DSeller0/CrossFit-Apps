@@ -1,19 +1,53 @@
 /* Shared styles for TvController + its tv/ panels (ClassPanel, GroupsPanel).
    Imported by all three — CSS Modules hash identically per source file, so
-   one shared module is the DRY primitive set instead of duplicating per-panel. */
+   one shared module is the DRY primitive set instead of duplicating per-panel.
+
+   ── Tokens (#174 / plans/86, 2026-09-06) ────────────────────────────────────
+   This file used to hold 41 colour literals (37 hex + 4 rgba), and they were not
+   token debt — they were a broken tab. It painted themed foregrounds onto
+   hardcoded DARK backgrounds, so on either light theme the two converged:
+   `--cream` on `#111` measured 1.04:1 (totk-light) and 1.00:1 (sb-light),
+   i.e. literally invisible, one click away in the Configurações theme picker.
+
+   Three rules keep it fixed:
+   1. NEVER pair a themed `color` with a literal `background`. Fix the PAIR.
+   2. One tint recipe for every teal selection —
+      `color-mix(in srgb, var(--teal) 10%, var(--stone))`. Measured
+      teal-on-tint: 7.80 / 5.05 / 7.88 / 4.90 across the four themes.
+      Don't invent a second percentage; three diverging tints is how this
+      file got here.
+   3. Ink on a themed fill is `var(--accent-text)`, never a literal near-black:
+      it is #000/#09070f on the dark themes and #fff on the light ones, so it
+      tracks. On `--teal` 10.31/6.57/9.51/5.63; on `--gold` 9.59/4.64/5.57/5.11.
+
+   ⚠️ Gold selections carry NO background tint on purpose. `--gold` on `--stone`
+   is already 4.11:1 on totk-light — one of #14's palette-identity cells — and
+   any tint makes it worse, so the selected state is signalled by border +
+   `box-shadow` ring instead, at zero contrast cost.
+
+   ⚠️ Residual #14 cells, deliberately NOT fixed here (they are palette identity,
+   used app-wide, and plans/87 re-affirms they are #14's): `--dim` is below 3:1
+   in all four themes, `--muted` fails on the two darks, `--gold` fails on the
+   two lights. Every one of them is strictly BETTER than before this pass (they
+   were on a frozen dark surface); none is fully passing. */
 
 /* ── Primitives ── */
-.card      { background: #111; border: 1px solid var(--divider); border-radius: 6px; padding: 16px 18px; }
+.card      { background: var(--stone); border: 1px solid var(--divider); border-radius: 6px; padding: 16px 18px; }
 .cardTitle { font-size: 11px; font-weight: 900; color: var(--gold); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 14px; }
-.input     { font-size: 12px; padding: 5px 8px; background: #111; border: 1px solid var(--divider); color: var(--sub); border-radius: 4px; outline: none; width: 100%; font-family: inherit; }
+.input     { font-size: 12px; padding: 5px 8px; background: var(--stone); border: 1px solid var(--divider); color: var(--sub); border-radius: 4px; width: 100%; font-family: inherit; }
 .input[type="number"] { -moz-appearance: textfield; }
 .input[type="number"]::-webkit-outer-spin-button,
 .input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.roInput   { font-size: 12px; padding: 5px 8px; background: #0d1a10; border: 1px solid #1a3a20; color: var(--teal); border-radius: 4px; outline: none; width: 100%; font-family: inherit; cursor: default; }
+.roInput   { font-size: 12px; padding: 5px 8px; background: color-mix(in srgb, var(--teal) 10%, var(--stone)); border: 1px solid color-mix(in srgb, var(--teal) 30%, var(--divider)); color: var(--teal); border-radius: 4px; width: 100%; font-family: inherit; cursor: default; }
 .lbl       { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; display: block; margin-bottom: 4px; }
 .btn       { padding: 6px 12px; font-size: 12px; font-weight: 700; border: 1px solid var(--divider); border-radius: 4px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; background: transparent; color: var(--sub); }
 .btn:disabled { cursor: default; opacity: .55; }
 .pill      { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px solid var(--divider); color: var(--sub); background: var(--stone); }
+
+/* The destructive trio. These three were byte-identical (#c84038 as both
+   border-color and color over a transparent fill) and measured 3.97:1 at 11px —
+   below the text bar. One rule on var(--red): 5.12 / 5.35 / 4.83 / 5.96. */
+.endBtn, .rowBtn.remove, .dissolveBtn { background: transparent; border-color: var(--red); color: var(--red); }
 
 /* ── Page shell ── */
 .page { padding: 20px 24px; font-family: var(--font, inherit); }
@@ -22,27 +56,27 @@
 .hdrTitle   { font-size: 18px; font-weight: 900; color: var(--cream); letter-spacing: .12em; text-transform: uppercase; }
 .hdrTitle i { margin-right: 8px; color: var(--teal); }
 .hdrSub     { font-size: 11px; color: var(--dim); margin-top: 3px; }
-.hdrLive    { color: #48b860; }
+.hdrLive    { color: var(--green); }
 .hdrSaving  { color: var(--muted); margin-left: 10px; }
-.openBtn    { padding: 8px 18px; font-size: 13px; background: var(--teal); border-color: var(--teal); color: #0d0b09; }
+.openBtn    { padding: 8px 18px; font-size: 13px; background: var(--teal); border-color: var(--teal); color: var(--accent-text); }
 
 /* ── Sessão — full-width date picker ── */
 .sessaoCard  { margin-bottom: 20px; }
 .datePicker  { display: flex; align-items: stretch; gap: 8px; margin-bottom: 12px; }
 .dpArrow     { display: flex; align-items: center; justify-content: center; width: 26px; flex-shrink: 0; color: var(--muted); font-size: 16px; background: transparent; border: 1px solid var(--divider); border-radius: 4px; cursor: pointer; }
 .dpDays      { flex: 1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
-.dpDay       { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px 8px; border: 1px solid var(--divider); border-radius: 6px; background: var(--stone2); cursor: pointer; transition: border-color .15s; }
+.dpDay       { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px 8px; border: 1px solid var(--divider); border-radius: 6px; background: var(--stone2); cursor: pointer; transition: border-color .15s; font-family: inherit; }
 .dpDow       { font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--sub); }
 .dpNum       { font-size: 20px; font-weight: 900; color: var(--cream); }
 .dpDot       { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }
-.dpDay.sel        { border-color: var(--teal); background: rgba(74,200,192,.1); }
+.dpDay.sel        { border-color: var(--teal); background: color-mix(in srgb, var(--teal) 10%, var(--stone)); }
 .dpDay.sel .dpDow, .dpDay.sel .dpNum { color: var(--teal); }
 .dpDay.sel .dpDot { background: var(--teal); }
 .dpDay.today .dpNum { color: var(--gold); }
 
 .sessChips   { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
-.sessChip    { min-width: 160px; max-width: 220px; flex-shrink: 0; padding: 10px 14px; border: 1px solid var(--divider); border-radius: 6px; background: var(--stone); cursor: pointer; transition: border-color .15s; }
-.sessChip.sel { border-color: var(--teal); box-shadow: 0 0 0 1px var(--teal); background: #0d1a1a; }
+.sessChip    { min-width: 160px; max-width: 220px; flex-shrink: 0; padding: 10px 14px; border: 1px solid var(--divider); border-radius: 6px; background: var(--stone); cursor: pointer; transition: border-color .15s; font-family: inherit; text-align: left; }
+.sessChip.sel { border-color: var(--teal); box-shadow: 0 0 0 1px var(--teal); background: color-mix(in srgb, var(--teal) 10%, var(--stone)); }
 .sessChipTitle  { font-size: 12px; font-weight: 900; color: var(--cream); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sessChip.sel .sessChipTitle { color: var(--teal); }
 .sessChipBlocks { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -61,24 +95,25 @@
 
 /* ── Slide ── */
 .slideRow    { display: flex; gap: 8px; flex-wrap: wrap; }
-.slideBtn    { background: #1a1a1a; }
-.slideBtn.sel { background: var(--teal); border-color: var(--teal); color: #0d0b09; }
+.slideBtn    { background: var(--stone2); }
+.slideBtn.sel { background: var(--teal); border-color: var(--teal); color: var(--accent-text); }
 .qrRow       { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
 .qrLbl       { font-size: 11px; color: var(--dim); }
 .qrToggle    { padding: 3px 12px; font-size: 11px; font-weight: 700; border-radius: 4px; font-family: inherit; cursor: pointer; }
-.qrToggle.on  { border: 1px solid var(--teal); background: rgba(74,200,192,.1); color: var(--teal); }
-.qrToggle.off { border: 1px solid var(--muted); background: rgba(128,104,80,.12); color: var(--muted); }
+.qrToggle.on  { border: 1px solid var(--teal); background: color-mix(in srgb, var(--teal) 10%, var(--stone)); color: var(--teal); }
+.qrToggle.off { border: 1px solid var(--muted); background: color-mix(in srgb, var(--muted) 12%, var(--stone)); color: var(--muted); }
 
 /* ── Timer ── */
 .timerHint   { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
 .timerHintStrong { color: var(--sub); }
 .timerHintDim { color: var(--dim); }
 .blkChips    { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-.blkChip     { background: var(--stone); border: 1px solid var(--divider); border-radius: 4px; padding: 6px 12px; cursor: pointer; text-align: center; min-width: 80px; }
+.blkChip     { background: var(--stone); border: 1px solid var(--divider); border-radius: 4px; padding: 6px 12px; cursor: pointer; text-align: center; min-width: 80px; font-family: inherit; }
 .blkChip .blkChipName { font-size: 11px; font-weight: 900; color: var(--sub); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
 .blkChip .blkChipType { font-size: 9px; color: var(--dim); font-weight: 700; text-transform: uppercase; }
-.blkChipCustom { background: var(--stone); border: 1px solid var(--divider); border-radius: 4px; padding: 6px 12px; cursor: pointer; text-align: center; }
-.blkChipCustom.sel { background: #1a120a; border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.blkChipCustom { background: var(--stone); border: 1px solid var(--divider); border-radius: 4px; padding: 6px 12px; cursor: pointer; text-align: center; font-family: inherit; }
+/* No background tint — see the ⚠️ gold note in the file header. */
+.blkChipCustom.sel { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
 .blkChipCustom .blkChipName { font-size: 11px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
 .blkChipCustom.sel .blkChipName { color: var(--gold); }
 .timerGrid   { display: grid; gap: 10px; margin-bottom: 14px; }
@@ -86,39 +121,44 @@
 .timerGrid .lbl { min-height: 26px; display: flex; align-items: flex-end; }
 .timerGridBadge { color: var(--teal); font-size: 9px; }
 .timerBtns   { display: flex; gap: 8px; align-items: center; }
-.timerBtnPlay  { background: #48b860; border-color: #48b860; color: #0d0b09; }
-.timerBtnPause { background: var(--gold); border-color: var(--gold); color: #0d0b09; }
-.timerBtnStop  { background: transparent; border-color: #3a3a3a; color: var(--muted); }
-.timerAccum  { font-size: 12px; color: var(--sub); font-family: monospace; margin-left: 8px; }
+.timerBtnPlay  { background: var(--green); border-color: var(--green); color: var(--accent-text); }
+.timerBtnPause { background: var(--gold); border-color: var(--gold); color: var(--accent-text); }
+.timerBtnStop  { background: transparent; border-color: var(--border); color: var(--muted); }
+.timerAccum  { font-size: 12px; color: var(--sub); font-family: var(--font-mono); margin-left: 8px; }
 
 /* ── Preview ── */
 .previewLbl   { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
 .previewFrame { width: 100%; aspect-ratio: 16/9; position: relative; overflow: hidden; background: var(--bg); border: 1px solid var(--divider); border-radius: 6px; }
 .previewInner { width: 1920px; height: 1080px; transform-origin: top left; position: absolute; top: 0; left: 0; }
+/* Deliberately pure black, NOT var(--bg) — this simulates the switched-off wall
+   panel and must read as "screen off" on every theme, exactly as TV.module.css's
+   own .blank does. The label is a fixed mid-grey for the same reason: it has to
+   be legible on that black regardless of theme (#808080 on #000 = 5.32:1; the
+   #222 it replaces measured 1.32:1). */
 .previewBlank { width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; }
-.previewBlank span { font-size: 28px; color: #222; text-transform: uppercase; letter-spacing: .2em; }
+.previewBlank span { font-size: 28px; color: #808080; text-transform: uppercase; letter-spacing: .2em; }
 .previewFoot  { font-size: 10px; color: var(--dim); margin-top: 6px; text-align: center; }
 .previewFootStrong { color: var(--sub); }
 
 /* ── Aula (class form) ── */
 .classForm    { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
 .classFormField { flex: 1; min-width: 120px; }
-.classFormBtn { flex-shrink: 0; background: #48b860; border-color: #48b860; color: #0d0b09; }
-.classFormBtn:disabled { background: #1a1a1a; border-color: var(--divider); color: var(--dim); }
+.classFormBtn { flex-shrink: 0; background: var(--green); border-color: var(--green); color: var(--accent-text); }
+.classFormBtn:disabled { background: var(--stone2); border-color: var(--divider); color: var(--dim); }
 .classHint    { font-size: 11px; color: var(--dim); margin-top: 8px; }
 
 /* ── Class accordion + merged roster ── */
 .classList    { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
 .classCard    { border: 1px solid var(--divider); border-radius: 6px; background: var(--stone2); overflow: hidden; }
-.classCard.active { border-color: rgba(72,184,96,.4); }
+.classCard.active { border-color: color-mix(in srgb, var(--green) 40%, transparent); }
 .classHead    { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; cursor: pointer; }
 .classHeadInfo { flex: 1; min-width: 0; }
 .cName        { font-size: 12px; font-weight: 700; color: var(--cream); display: flex; align-items: center; gap: 6px; }
-.liveDot      { width: 7px; height: 7px; border-radius: 50%; background: #48b860; box-shadow: 0 0 6px #48b860; flex-shrink: 0; }
+.liveDot      { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); flex-shrink: 0; }
 .cMeta        { font-size: 10px; color: var(--muted); margin-top: 2px; }
 .chev         { color: var(--muted); font-size: 11px; flex-shrink: 0; }
 .classCard.expanded .chev { color: var(--teal); }
-.endBtn       { font-size: 11px; border-color: #c84038; color: #c84038; background: transparent; flex-shrink: 0; }
+.endBtn       { font-size: 11px; flex-shrink: 0; }
 
 .rosterList   { padding: 4px 10px 10px; border-top: 1px solid var(--divider); }
 .rosterRow    { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; padding: 6px 8px; background: var(--stone); border-radius: 4px; margin-top: 6px; font-size: 11px; }
@@ -129,18 +169,18 @@
 /* scalePills/scalePill moved to shared/ScoreFields.module.css in #115 — this roster row was
    writing non-canonical 'Rx'/'Sc'/'Adp' and its pill also carried a hardcoded #0d1a1a that
    froze totk-dark across all four themes. Both go away with the shared ScaleRow. */
-.perf         { flex-shrink: 0; width: 46px; text-align: right; color: var(--teal); font-family: monospace; font-weight: 700; }
+.perf         { flex-shrink: 0; width: 46px; text-align: right; color: var(--teal); font-family: var(--font-mono); font-weight: 700; }
 .perf.empty   { color: var(--dim); }
 .rowBtn       { flex-shrink: 0; white-space: nowrap; padding: 5px 12px; font-size: 12px; }
-.rowBtn.reg   { background: var(--teal); border-color: var(--teal); color: #0d0b09; }
+.rowBtn.reg   { background: var(--teal); border-color: var(--teal); color: var(--accent-text); }
 .rowBtn.edit  { background: transparent; border: 1px solid var(--dim); color: var(--muted); padding: 4px 10px; font-size: 11px; }
-.rowBtn.remove { background: transparent; border-color: #c84038; color: #c84038; padding: 4px 10px; font-size: 11px; }
-.editTimeInput { width: 66px; text-align: center; font-family: monospace; }
+.rowBtn.remove { padding: 4px 10px; font-size: 11px; }
+.editTimeInput { width: 66px; text-align: center; font-family: var(--font-mono); }
 
 /* ── Groups ── */
 .groupsIntro  { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
 .groupsCreateBtns { display: flex; gap: 8px; }
-.createBtn    { background: #1a1a1a; color: var(--sub); font-size: 13px; padding: 8px 18px; }
+.createBtn    { background: var(--stone2); color: var(--sub); font-size: 13px; padding: 8px 18px; }
 .groupCards   { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
 .groupCard    { border: 1px solid; border-left-width: 4px; border-radius: 4px; padding: 10px 12px; background: var(--stone2); }
 .groupHead    { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
@@ -151,21 +191,50 @@
 
 .assignSection { margin-bottom: 14px; }
 .sectionLbl    { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; }
-.assignRow     { display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid #1a1a1a; }
+.assignRow     { display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--divider); }
 .assignName    { flex: 1; font-size: 12px; color: var(--cream); }
-.assignBtn     { width: 34px; height: 28px; border: 2px solid var(--divider); background: transparent; color: var(--dim); border-radius: 3px; cursor: pointer; font-size: 10px; font-weight: 800; }
+.assignBtn     { width: 34px; height: 28px; border: 2px solid var(--divider); background: transparent; color: var(--dim); border-radius: 3px; cursor: pointer; font-size: 10px; font-weight: 800; font-family: inherit; }
 
 .rotationSection { border-top: 1px solid var(--divider); padding-top: 12px; margin-top: 4px; }
 .rotationChips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-.rotationChip  { font-size: 10px; padding: 4px 10px; background: #111; border-color: var(--divider); color: var(--dim); }
-.rotationChip.on { background: #0d1a10; border-color: var(--teal); color: var(--teal); }
+.rotationChip  { font-size: 10px; padding: 4px 10px; background: var(--stone2); border-color: var(--divider); color: var(--dim); }
+.rotationChip.on { background: color-mix(in srgb, var(--teal) 10%, var(--stone)); border-color: var(--teal); color: var(--teal); }
 .restRow       { display: flex; align-items: center; gap: 8px; }
 .restLbl       { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; flex-shrink: 0; }
 .restInput     { width: 64px; text-align: center; }
 .restUnit      { font-size: 10px; color: var(--dim); }
 
 .rotationCtrls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
-.advanceBtn    { background: var(--teal); border-color: var(--teal); color: #0d0b09; }
-.autoBtn       { border-color: var(--divider); background: #1a1a1a; color: var(--muted); }
-.autoBtn.on    { border-color: var(--gold); background: #1a120a; color: var(--gold); }
-.dissolveBtn   { background: transparent; border-color: #c84038; color: #c84038; }
+.advanceBtn    { background: var(--teal); border-color: var(--teal); color: var(--accent-text); }
+.autoBtn       { border-color: var(--divider); background: var(--stone2); color: var(--muted); }
+/* No background tint — see the ⚠️ gold note in the file header. */
+.autoBtn.on    { border-color: var(--gold); background: var(--stone); box-shadow: 0 0 0 1px var(--gold); color: var(--gold); }
+
+/* ── Inline-to-block (plans/86) ──────────────────────────────────────────────
+   These three were <div>s until this pass turned their parents into real
+   <button>s — a button may not contain a div — so they are <span>s now and
+   need the block display their existing layout (margin-bottom, ellipsis)
+   already assumed. */
+.sessChipTitle, .blkChipName, .blkChipType { display: block; }
+
+/* ── Focus (#182 / plans/86) ─────────────────────────────────────────────────
+   This file had ZERO :focus, :focus-visible, :hover and :active rules, and it
+   stripped the native outline on .input/.roInput with nothing behind it — so
+   nothing in the tab was keyboard-visible at all. One ring, the same one every
+   SPA primitive already uses (Button/Input/Modal/ConfirmReview): var(--accent)
+   measures 9.65 / 5.37 / 9.51 / 4.95 against --bg across the four themes,
+   clearing the 3:1 non-text bar in every one. Do not invent a second ring. */
+.btn:focus-visible,
+.dpArrow:focus-visible,
+.dpDay:focus-visible,
+.sessChip:focus-visible,
+.qrToggle:focus-visible,
+.blkChip:focus-visible,
+.blkChipCustom:focus-visible,
+.classHead:focus-visible,
+.assignBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Text fields take ui/Input's exact treatment (ring at 1px offset + a stronger
+   border), so a field focused here looks like a field focused anywhere else. */
+.input:focus-visible,
+.roInput:focus-visible { border-color: var(--sub); outline: 2px solid var(--accent); outline-offset: 1px; }

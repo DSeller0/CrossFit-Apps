@@ -60,8 +60,8 @@ function DatePicker({ selDate, sessions, onChange }) {
 
   return (
     <div className={st.datePicker}>
-      <button className={st.dpArrow} onClick={prevWeek}>
-        <i className="ti ti-chevron-left" />
+      <button className={st.dpArrow} onClick={prevWeek} aria-label="Semana anterior">
+        <i className="ti ti-chevron-left" aria-hidden="true" />
       </button>
       <div className={st.dpDays}>
         {days.map(({ iso, d }) => {
@@ -69,20 +69,22 @@ function DatePicker({ selDate, sessions, onChange }) {
             isToday = iso === today
           const hasSess = (sessions[iso] || []).length > 0
           return (
-            <div
+            <button
               key={iso}
+              type="button"
               onClick={() => onChange(iso)}
+              aria-pressed={isSel}
               className={`${st.dpDay} ${isSel ? st.sel : ''} ${isToday ? st.today : ''}`}
             >
               <span className={st.dpDow}>{DAY_PT_TITLE[d.getDay()]}</span>
               <span className={st.dpNum}>{d.getDate()}</span>
               {hasSess && <span className={st.dpDot} />}
-            </div>
+            </button>
           )
         })}
       </div>
-      <button className={st.dpArrow} onClick={nextWeek}>
-        <i className="ti ti-chevron-right" />
+      <button className={st.dpArrow} onClick={nextWeek} aria-label="Semana seguinte">
+        <i className="ti ti-chevron-right" aria-hidden="true" />
       </button>
     </div>
   )
@@ -326,13 +328,15 @@ export default function TvController({ sessions: propSessions }) {
                 bl => bl.exercises?.length || bl.stations?.length,
               )
               return (
-                <div
+                <button
                   key={sess.id}
+                  type="button"
                   onClick={() => selectSession(sess.id)}
+                  aria-pressed={sel}
                   className={`${st.sessChip} ${sel ? st.sel : ''}`}
                 >
-                  <div className={st.sessChipTitle}>{sessName(sess, selDate)}</div>
-                  <div className={st.sessChipBlocks}>
+                  <span className={st.sessChipTitle}>{sessName(sess, selDate)}</span>
+                  <span className={st.sessChipBlocks}>
                     {blocks.slice(0, 5).map(bl => {
                       const col = blkColor(bl)
                       return (
@@ -349,8 +353,8 @@ export default function TvController({ sessions: propSessions }) {
                         </span>
                       )
                     })}
-                  </div>
-                </div>
+                  </span>
+                </button>
               )
             })}
           </div>
@@ -459,19 +463,23 @@ export default function TvController({ sessions: propSessions }) {
                   <div style={{ marginBottom: 12 }}>
                     <label className={st.lbl}>Bloco WOD</label>
                     <div className={st.blkChips}>
-                      <div
+                      <button
+                        type="button"
                         onClick={() => timer.selectBlock(null, null)}
+                        aria-pressed={!timer.timerBlkId}
                         className={`${st.blkChipCustom} ${!timer.timerBlkId ? st.sel : ''}`}
                       >
-                        <div className={st.blkChipName}>Personalizado</div>
-                      </div>
+                        <span className={st.blkChipName}>Personalizado</span>
+                      </button>
                       {wodBlocks.map(bl => {
                         const col = blkColor(bl),
                           sel = timer.timerBlkId === bl.id
                         return (
-                          <div
+                          <button
                             key={bl.id}
+                            type="button"
                             onClick={() => timer.selectBlock(bl.id, bl)}
+                            aria-pressed={sel}
                             className={st.blkChip}
                             style={
                               sel
@@ -483,19 +491,19 @@ export default function TvController({ sessions: propSessions }) {
                                 : undefined
                             }
                           >
-                            <div
+                            <span
                               className={st.blkChipName}
                               style={sel ? { color: col } : undefined}
                             >
                               {blkLabel(bl)}
-                            </div>
-                            <div
+                            </span>
+                            <span
                               className={st.blkChipType}
                               style={sel ? { color: col + 'cc' } : undefined}
                             >
                               {bl.type || bl.label}
-                            </div>
-                          </div>
+                            </span>
+                          </button>
                         )
                       })}
                     </div>

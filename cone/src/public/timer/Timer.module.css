@@ -186,7 +186,12 @@
 
 /* ── Type picker button ── */
 .typeBtn { width: 100%; background: var(--stone2); border: 1px solid var(--div); color: var(--cream); font-family: var(--font); font-size: 13px; font-weight: 700; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color .15s; }
-.typeBtn:focus, .typeBtn:hover { border-color: var(--teal); outline: none; }
+/* :focus used to be folded into this :hover rule — which also set outline:none —
+   so a keyboard user got exactly the border a mouse-over gives and no ring at all,
+   i.e. focus was indistinguishable from hover. Split, on the canonical --accent
+   ring the SPA primitives use (#182 / plans/86). */
+.typeBtn:hover { border-color: var(--teal); }
+.typeBtn:focus-visible { border-color: var(--teal); outline: 2px solid var(--accent); outline-offset: 2px; }
 .typeBtnArrow { font-size: 20px; color: var(--muted); line-height: 1; }
 
 /* ── Benchmark prompt (when form.type=Benchmark but none selected) ── */
@@ -194,6 +199,8 @@
 .bmPromptHint { font-size: 11px; color: var(--muted); line-height: 1.5; }
 .bmPromptBtn { background: transparent; border: 1px solid var(--teal); color: var(--teal); font-family: var(--font); font-size: 11px; font-weight: 900; padding: 9px 18px; cursor: pointer; letter-spacing: .06em; -webkit-tap-highlight-color: transparent; transition: opacity .12s; }
 .bmPromptBtn:active { opacity: .7; }
+/* It had :active only — no focus state at all. Same ring as .typeBtn above. */
+.bmPromptBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ── Responsive: tablet/desktop ── */
 @media (min-width: 768px) {

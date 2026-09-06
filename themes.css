@@ -112,9 +112,17 @@ html.theme-spirit-blossom{
    passes at 4.64:1. The other three themes' teal already passed and are unchanged.
    (plans/57 measured this cell, recorded it in ScoreFields.module.css and deferred
    it to #137 precisely because --accent/--accent-text is wider than one component.) */
+/* --green: #28a064 measured 3.33:1 both ways in the pairing that matters — as
+   var(--accent-text) ink on a --green fill AND as --green text on --stone (2.93 on
+   --bg). Both are live in tv/tvController.module.css (.timerBtnPlay/.classFormBtn
+   and .hdrLive), which #174 was fixing, so this was the one cell a token
+   substitution could not reach. Darkened by an exact x0.75 on every channel, so
+   the hue is untouched â the same method plans/65 used on --red for the two dark
+   themes: now 5.46 vs #fff / 4.81 on --bg / 4.58 on --stone2. The other three
+   themes already passed (9.72 / 6.85 / 11.03) and are unchanged. */
 html.theme-spirit-blossom-light{
   --bg:#f4eefb;--stone:#ffffff;--stone2:#f0e8f8;--div:#e2d4f0;
-  --gold:#c83070;--gold2:#a02258;--teal:#0f727e;--green:#28a064;
+  --gold:#c83070;--gold2:#a02258;--teal:#0f727e;--green:#1e784b;
   --red:#c02040;--cream:#1a0828;--sub:#4a2460;--muted:#7840a0;--dim:#9070b0;
   --font:'Amarante',serif;--font-body:'Amarante',serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
   --divider:#e2d4f0;--border:#c4a8d8;--accent:#0f727e;--accent-text:#fff;
