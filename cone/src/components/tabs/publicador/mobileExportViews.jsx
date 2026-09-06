@@ -1,5 +1,5 @@
 import { APP_CONFIG, GF } from '../../../utils/config'
-import { fmtIntensity, blkMeta } from '../../../public/lib/wod.js'
+import { fmtIntensity, blkMeta, blockExercises } from '../../../public/lib/wod.js'
 import { DAY_PT, MONTH_PT } from '../../../public/lib/week.js'
 import { toISO } from '../../../utils/storage'
 import {
@@ -72,7 +72,7 @@ function MobileBlock({ bl, fs, blockContent = DEFAULT_BLOCK_CONTENT }) {
           padding: `${Math.round(4 * f)}px ${pad}px ${Math.round(14 * f)}px`,
         }}
       >
-        {(bl.exercises || [])
+        {blockExercises(bl, { keepNotes: true })
           .filter(e => e.name || e.isComplex)
           .map(ex => {
             if (ex.isComplex) {
@@ -609,7 +609,7 @@ function MegaManBlock({ bl, fs, blockContent = DEFAULT_BLOCK_CONTENT }) {
           padding: `${Math.round(8 * f)}px ${pad}px ${Math.round(14 * f)}px`,
         }}
       >
-        {(bl.exercises || [])
+        {blockExercises(bl, { keepNotes: true })
           .filter(e => e.name || e.isComplex)
           .map(ex => {
             if (ex.isComplex) {
@@ -878,7 +878,7 @@ function MobileWeeklySingleDay({ date, sessions, f, blockContent = DEFAULT_BLOCK
           {(s.blocks || []).map(bl => {
             const title = blockTitle(bl)
             const meta = blkMeta(bl)
-            const exNames = (bl.exercises || []).filter(e => e.name || e.isComplex)
+            const exNames = blockExercises(bl).filter(e => e.name || e.isComplex)
             return (
               <div key={bl.id} data-fitblock>
                 <div

@@ -68,8 +68,6 @@ export default function App() {
   // ── Apply CSS variables from APP_CONFIG on mount ──────────────────────────
   useEffect(() => {
     document.documentElement.style.setProperty('--export-font', GF())
-    document.documentElement.style.setProperty('--theme-accent', APP_CONFIG.themeAccent)
-    document.documentElement.style.setProperty('--theme-accent-text', APP_CONFIG.themeAccentText)
     document.title = APP_CONFIG.appTitle
   }, [])
 
@@ -103,14 +101,6 @@ export default function App() {
         if (cfg.appTitle) {
           APP_CONFIG.appTitle = cfg.appTitle
           document.title = cfg.appTitle
-        }
-        if (cfg.themeAccent) {
-          APP_CONFIG.themeAccent = cfg.themeAccent
-          document.documentElement.style.setProperty('--theme-accent', cfg.themeAccent)
-        }
-        if (cfg.themeAccentText) {
-          APP_CONFIG.themeAccentText = cfg.themeAccentText
-          document.documentElement.style.setProperty('--theme-accent-text', cfg.themeAccentText)
         }
         if (cfg.restDayLabel) APP_CONFIG.restDayLabel = cfg.restDayLabel
         if (cfg.mobileWeeklyLabels?.length) APP_CONFIG.mobileWeeklyLabels = cfg.mobileWeeklyLabels

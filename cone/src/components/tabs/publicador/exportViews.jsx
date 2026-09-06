@@ -1,5 +1,5 @@
 import { DSHORT, PLC, APP_CONFIG } from '../../../utils/config'
-import { fmtIntensity, blkMeta } from '../../../public/lib/wod.js'
+import { fmtIntensity, blkMeta, blockExercises } from '../../../public/lib/wod.js'
 import { MONTH_PT, DAY_PT } from '../../../public/lib/week.js'
 import { toISO } from '../../../utils/storage'
 import {
@@ -215,7 +215,7 @@ export function DailyExportView({
                             padding="0 0 10px"
                           />
                         )}
-                        {(bl.exercises || [])
+                        {blockExercises(bl, { keepNotes: true })
                           .filter(e => e.name || e.isComplex)
                           .map(ex => {
                             if (ex.isComplex) {
@@ -338,7 +338,7 @@ export function DailyExportView({
                           (() => {
                             const loads = [
                               ...new Set(
-                                (bl.exercises || [])
+                                blockExercises(bl)
                                   .filter(
                                     e =>
                                       e.name &&
@@ -691,7 +691,7 @@ export function WeeklyCalendarExportView({
                     }}
                   >
                     {(s.blocks || []).map(bl => {
-                      const exs = bl.exercises?.filter(e => e.name || e.isComplex) || []
+                      const exs = blockExercises(bl).filter(e => e.name || e.isComplex)
                       return (
                         <div
                           key={bl.id}

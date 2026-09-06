@@ -8,6 +8,7 @@ import {
   blkMeta,
 } from '../lib/wod.js'
 import { sessName } from '../lib/sessions.js'
+import { athleteKeyDefaults } from '../lib/resultEntry.js'
 
 // Shared by Results.jsx and its extracted results/ components (#51) — one
 // canonical copy so the extraction can't drift the same helper two ways
@@ -17,19 +18,11 @@ import { sessName } from '../lib/sessions.js'
 // never touched the form still recorded RX at RPE 7, so neither field carried
 // real information. The submit buttons (LogForm) stay disabled until both are
 // explicitly tapped.
-export const DEF_INP = () => ({
-  rpe: null,
-  scale: null,
-  perfTime: '',
-  perfRounds: '',
-  perfReps: '',
-  // #112 — the DNF/where-you-stopped checkpoint. Same null defaults as resultEntry.js's
-  // ATHLETE_KEY_DEFAULTS (this file predates that consolidation and keeps its own copy).
-  finished: null,
-  checkpoint: null,
-  // #116 — per-exercise adaptation notes. Same null default, same reasoning.
-  exerciseRows: null,
-})
+//
+// #173 — derives from resultEntry.js's ATHLETE_KEY_DEFAULTS rather than declaring its own
+// key list: this file used to keep a second, drifted copy missing `skipped`, so a re-log
+// never cleared a stale `skipped: true` and the score silently ranked as absent.
+export const DEF_INP = athleteKeyDefaults
 
 export function inputKey(sid, bid) {
   return `${sid}:${bid}`

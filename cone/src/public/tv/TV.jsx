@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { sb } from '../supabaseClient.js'
 import { WodSlide, TimerSlide, ResultsSlide, QrSlide } from './slides.jsx'
 import { normalizeSessionIds } from '../lib/sessions.js'
+import { mapResultRow } from '../lib/blobTables.js'
 import s from './TV.module.css'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -75,7 +76,7 @@ export default function TV() {
       .select('*')
       .eq('session_id', sessId)
       .then(({ data }) => {
-        if (data) setResults(data.map(mapRow))
+        if (data) setResults(data.map(mapResultRow))
       })
 
     resChanRef.current = sb
@@ -194,16 +195,7 @@ export default function TV() {
   )
 }
 
-function mapRow(r) {
-  return {
-    id: r.id,
-    date: r.date,
-    athleteId: r.athlete_id,
-    sessionId: r.session_id,
-    blocks: r.blocks,
-  }
-}
 function mergeRow(prev, row) {
-  const mapped = mapRow(row)
+  const mapped = mapResultRow(row)
   return [...prev.filter(x => x.id !== mapped.id), mapped]
 }

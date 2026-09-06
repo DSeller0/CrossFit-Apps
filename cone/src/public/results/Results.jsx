@@ -21,6 +21,7 @@ import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { syncTheme } from '../lib/theme.js'
 import { normalizeSessionIds } from '../lib/sessions.js'
 import { mergeBlockEntry } from '../lib/resultEntry.js'
+import { mapResultRow } from '../lib/blobTables.js'
 import RankList from '../shared/RankList.jsx'
 import ScaleFilter from '../shared/ScaleFilter.jsx'
 import ConfirmReview, { ReadBox, ReadRow } from '../shared/ConfirmReview.jsx'
@@ -142,18 +143,7 @@ export default function Results() {
       ])
       const sD = normalizeSessionIds(sR.data?.value || {}),
         aD = aR.data?.value || []
-      const rD = (rRaw.data || []).map(r => ({
-        id: r.id,
-        date: r.date,
-        athleteId: r.athlete_id,
-        sessionId: r.session_id,
-        presence: r.presence,
-        energyLevel: r.energy_level,
-        blocks: r.blocks,
-        coachNote: r.coach_note,
-        flagForReview: r.flag_for_review,
-        loggedByAthlete: r.logged_by_athlete,
-      }))
+      const rD = (rRaw.data || []).map(mapResultRow)
       const stD = stR.data?.value || {}
       // Per-box theme (#143) — the box default applies unless the visitor picked their own.
       syncTheme(stD, box)
@@ -351,6 +341,7 @@ export default function Results() {
       finished: inp.finished ?? null,
       checkpoint: inp.checkpoint ?? null,
       exerciseRows: inp.exerciseRows ?? null,
+      skipped: inp.skipped ?? null,
     }
     const existing = Array.isArray(results) ? results : []
     const prev = existing.find(r => r.sessionId === sid && r.athleteId === selAth)

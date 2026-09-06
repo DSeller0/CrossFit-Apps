@@ -11,6 +11,7 @@ import { prBest } from '../lib/goals.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { syncTheme } from '../lib/theme.js'
 import { mergeBlockEntry, clearAthleteKeys } from '../lib/resultEntry.js'
+import { mapResultRow } from '../lib/blobTables.js'
 import {
   isRoundBlock,
   progGroups,
@@ -336,18 +337,7 @@ export default function Schedule() {
       ])
       const sD = normalizeSessionIds(sR.data?.value || {}),
         aD = aR.data?.value || []
-      const rD = (rRaw.data || []).map(r => ({
-        id: r.id,
-        date: r.date,
-        athleteId: r.athlete_id,
-        sessionId: r.session_id,
-        presence: r.presence,
-        energyLevel: r.energy_level,
-        blocks: r.blocks,
-        coachNote: r.coach_note,
-        flagForReview: r.flag_for_review,
-        loggedByAthlete: r.logged_by_athlete,
-      }))
+      const rD = (rRaw.data || []).map(mapResultRow)
       const stD = stR.data?.value || {},
         gdD = gdR.data?.value || { athleteGoals: {}, prs: {} }
       const erD = erR.data?.value || {}
@@ -753,7 +743,10 @@ export default function Schedule() {
           ...logBlocks.map(lb =>
             mergeBlockEntry(
               (existing.blocks || []).find(b => b.blockId === lb.blockId),
-              lb,
+              // This pane has no "não fez" control — force-clear any stale `skipped:true`
+              // carried over from a prior desk/TV registration so a real submitted score
+              // here always ranks (#173; same fix as the other 3 writers missing this key).
+              { ...lb, skipped: null },
             ),
           ),
         ]
@@ -844,6 +837,8 @@ export default function Schedule() {
       finished: deskRegFinished,
       checkpoint: deskRegCheckpoint,
       exerciseRows: deskRegExerciseRows,
+      // No "não fez" control on this pane either — same force-clear as the self-log path (#173).
+      skipped: null,
     }
     const blockResult = mergeBlockEntry(deskRegPrev, blockPatch)
     const mergedBlocks = existing

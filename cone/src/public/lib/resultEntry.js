@@ -35,6 +35,15 @@ const ATHLETE_KEY_DEFAULTS = {
 
 export const ATHLETE_KEYS = Object.keys(ATHLETE_KEY_DEFAULTS)
 
+// A fresh copy of the defaults above — the one factory every "starting input" shape should
+// derive from, so a future field added to ATHLETE_KEY_DEFAULTS reaches every consumer instead
+// of requiring each to grow its own copy of this list by hand (#173: results/resultsHelpers.js's
+// DEF_INP used to be a second, drifted declaration missing `skipped`, so a re-logged score kept
+// a stale `skipped: true` and every reader correctly dropped it as absent).
+export function athleteKeyDefaults() {
+  return { ...ATHLETE_KEY_DEFAULTS }
+}
+
 // `{ ...prev, ...patch }` — unknown keys on `prev` (a field this version of the app doesn't
 // know about) survive untouched. Identity fields (`blockId`/`blockType`/`blockLabel`) come
 // from `patch` whenever `patch` sets them, so a renamed or retyped block re-labels correctly

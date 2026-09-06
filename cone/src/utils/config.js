@@ -23,8 +23,6 @@ export const APP_CONFIG = {
   googleFontsUrl:
     'https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Raleway:wght@400;600;700;900&display=swap',
   logo: 'icon-192.png',
-  themeAccent: '#00b8d4',
-  themeAccentText: '#000000',
   exportScale: 2,
   restDayLabel: 'Descanso',
   mobileWeeklyLabels: ['Mobile Semanal 01', 'Mobile Semanal 02'],

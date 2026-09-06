@@ -98,6 +98,14 @@ describe('parseStateFile', () => {
     expect(parsed.sessions['2026-08-05'][0].blocks[0].type).toBe('WOD')
   })
 
+  it('normalises a legacy numeric session id to a string (#179/#110)', () => {
+    const text = JSON.stringify({
+      '2026-08-05': [{ id: 1722882000000, blocks: [] }],
+    })
+    const parsed = parseStateFile(text)
+    expect(parsed.sessions['2026-08-05'][0].id).toBe('1722882000000')
+  })
+
   it('throws on a payload that is not a plain object', () => {
     expect(() => parseStateFile(JSON.stringify([1, 2, 3]))).toThrow()
   })

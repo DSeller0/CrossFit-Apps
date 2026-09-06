@@ -71,7 +71,7 @@ export default function WhenPicker({
               aria-checked={on}
               disabled={!dayFormat}
               className={`${s.dyBtn} ${has ? s.has : ''} ${on ? s.on : ''}`}
-              onClick={() => onSelectDate(iso, currentWeek)}
+              onClick={() => onSelectDate(currentWeek, d)}
             >
               {DAY_PT[d.getDay()]}
             </button>

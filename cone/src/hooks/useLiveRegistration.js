@@ -42,6 +42,9 @@ export function useLiveRegistration({
         blockLabel: block?.label || block?.type || 'For Time',
         perfTime,
         scale,
+        // TV's live registration has no "não fez" control — force-clear any stale
+        // `skipped:true` so a real registered score here always ranks (#173).
+        skipped: null,
       })
       const merged = existing
         ? [...(existing.blocks || []).filter(b => b.blockId !== blockId), newBlk]

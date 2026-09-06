@@ -279,19 +279,22 @@ export function groupProgressionSteps(ex) {
 
 // The exercises a REGISTER FORM shows for a block. Estações nests its exercises under
 // stations rather than bl.exercises, so any consumer reading bl.exercises directly renders
-// nothing for that type. Rest stations are dropped and notes stripped — the approved compact
-// register-form treatment shows the prescription only (mockups/20-result-card-exerciselist.html).
+// nothing for that type. Rest stations are dropped and, by default, notes stripped — the
+// approved compact register-form treatment shows the prescription only
+// (mockups/20-result-card-exerciselist.html). Pass `{ keepNotes: true }` for a consumer that
+// prints the per-exercise note itself (#172 — Publicador's Dia/Dia-mobile/Semana-mobile export
+// views, which render `ex.note` distinctly from the block-level `bl.notes`).
 //
 // ⚠️ shared/WodBlockCard.jsx has a SIMILAR-LOOKING but deliberately different flattener: it
 // KEEPS rest stations and tags each exercise with `_station` for display. Same shape, different
 // contract — do not collapse them (checked #115, plans/52).
-export function blockExercises(bl) {
+export function blockExercises(bl, { keepNotes = false } = {}) {
   if (!bl) return []
   const exs =
     bl.type === 'Estações'
       ? (bl.stations || []).filter(st => !st.isRest).flatMap(st => st.exercises || [])
       : bl.exercises || []
-  return exs.map(ex => ({ ...ex, note: undefined }))
+  return keepNotes ? exs : exs.map(ex => ({ ...ex, note: undefined }))
 }
 
 export function toSecs(t) {

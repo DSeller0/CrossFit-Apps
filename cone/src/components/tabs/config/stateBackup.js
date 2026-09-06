@@ -21,6 +21,7 @@ import {
   toISO,
 } from '../../../utils/storage'
 import { normaliseType, normaliseZone } from '../../../utils/config'
+import { normalizeSessionIds } from '../../../public/lib/sessions.js'
 
 // The version-2 export shape. `sessions` is passed in (the live in-memory value
 // from useSync()) rather than re-read from localStorage — every other table has
@@ -67,9 +68,9 @@ export function parseStateFile(text) {
   const incoming = parsed.version && parsed.sessions ? parsed.sessions : parsed
   if (typeof incoming !== 'object' || incoming === null || Array.isArray(incoming))
     throw new Error('Invalid format')
-  const sessions = {}
+  const rawSessions = {}
   Object.keys(incoming).forEach(dateKey => {
-    sessions[dateKey] = (incoming[dateKey] || []).map(session => ({
+    rawSessions[dateKey] = (incoming[dateKey] || []).map(session => ({
       ...session,
       blocks: (session.blocks || []).map(bl => ({
         ...bl,
@@ -78,6 +79,10 @@ export function parseStateFile(text) {
       })),
     }))
   })
+  // #179 — a session id restored bare (a legacy numeric id, pre-dating uid()'s switch to
+  // base36 strings) never `===` its own results_v2 rows again (#110). Idempotent, so this
+  // is safe on every re-import.
+  const sessions = normalizeSessionIds(rawSessions)
   return {
     sessions,
     exerciseRegistry: parsed.exerciseRegistry,
