@@ -1,16 +1,25 @@
-# React + Vite
+# Cone
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CrossFit coaching management app — Vite + React 19 + Supabase. Full documentation lives in
+[`CLAUDE.md`](../CLAUDE.md) at the repo root; this file is just the entry point.
 
-Currently, two official plugins are available:
+**Working dir:** this folder (`cone/`). Public entry HTML files and `themes.css` live at the repo
+root instead — see `CLAUDE.md` for why.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Setup
 
-## React Compiler
+```
+supabase start        # local Supabase stack (Docker required), once per session
+npm install
+npm run dev            # SPA dev server
+npm run dev:public     # public pages dev server (index/schedule/results/etc.)
+npm test                # unit tests
+npm run lint            # eslint
+npm run build:all       # SPA + public pages, into dist/ and public-dist/
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Where to look next
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- [`CLAUDE.md`](../CLAUDE.md) — architecture, Supabase schema, design system, conventions
+- [`docs/BACKLOG.md`](./docs/BACKLOG.md) — open work
+- [`docs/WORKFLOW.md`](./docs/WORKFLOW.md) — session ritual and process

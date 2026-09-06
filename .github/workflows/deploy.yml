@@ -48,8 +48,7 @@ jobs:
           # React app build
           cp -r cone/dist/. deploy/cone/
           # Static files not processed by Vite
-          # cone-client.js and cone-utils.js are classic scripts — Vite skips them
-          cp cone-client.js cone-utils.js config.json manifest.json sw.js deploy/
+          cp config.json manifest.json sw.js deploy/
           cp icon-192.png icon-512.png deploy/
           cp -f icon-192.jpeg icon-512.jpeg deploy/ 2>/dev/null || true
 
