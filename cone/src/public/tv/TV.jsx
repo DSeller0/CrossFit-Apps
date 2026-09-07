@@ -3,6 +3,7 @@ import { sb } from '../supabaseClient.js'
 import { WodSlide, TimerSlide, ResultsSlide, QrSlide } from './slides.jsx'
 import { normalizeSessionIds } from '../lib/sessions.js'
 import { mapResultRow } from '../lib/blobTables.js'
+import { syncTheme } from '../lib/theme.js'
 import s from './TV.module.css'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -44,6 +45,18 @@ export default function TV() {
       if (sessR.data?.value) setSessions(normalizeSessionIds(sessR.data.value))
       if (athR.data?.value) setAthletes(athR.data.value)
       if (stR.data?.value?.gymName) setGymName(stR.data.value.gymName)
+      // #188 — the wall used to boot totk-dark and stay there FOREVER. tv.html's
+      // pre-paint script reads `cone_theme`, but nothing on this page ever wrote
+      // it, so a wall device that only opens tv.html never left the fallback: a
+      // box on a light theme got a dark wall permanently.
+      //
+      // ⚠️ plans/67 recorded tv.html as "deliberately out of scope" for #143, and
+      // that still holds for the reason it gives — the gym wall has no `?box=`
+      // scope, so it is driven by TvController rather than a scoped link. That is
+      // an argument about BOX SCOPE, not about theming: `syncTheme(settings, null)`
+      // skips the box rule entirely (resolveTheme:101) and resolves to
+      // `settings.theme`, the coach's own gym theme. No box scope required.
+      syncTheme(stR.data?.value || {}, null)
     }
     init()
   }, [])

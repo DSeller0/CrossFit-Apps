@@ -5,7 +5,7 @@ import { sb } from '../supabaseClient.js'
 import BlockTypePicker from './BlockTypePicker.jsx'
 import { benchmarkToTimerExes } from '../lib/benchmarks.js'
 import { fmtSecs, isTimeBlock, MODE_LBL, maskMMSS } from '../lib/wod.js'
-import { fmtDate } from '../lib/week.js'
+import { fmtDate, todayISO } from '../lib/week.js'
 import { getBoxScope } from '../lib/boxScope.js'
 import { syncTheme } from '../lib/theme.js'
 import ConfirmReview from '../shared/ConfirmReview.jsx'
@@ -350,7 +350,11 @@ export default function Timer() {
       totalTime: fmt(fe),
       totalSecs: fe,
       splits: currentSplits,
-      date: new Date().toISOString().slice(0, 10),
+      // #178 — was `new Date().toISOString().slice(0,10)`, i.e. the UTC date, on a
+      // PERSISTED field. In UTC-3 every WOD finished after 21:00 local was filed
+      // under tomorrow. todayISO() (week.js) builds the key from local
+      // getFullYear/getMonth/getDate, which is what every other writer uses.
+      date: todayISO(),
       // doFinishRaw runs from the tick / the Finalizar button, never during render — the
       // rule flags any Date.now() reachable from a component-scoped function.
       // eslint-disable-next-line react-hooks/purity
