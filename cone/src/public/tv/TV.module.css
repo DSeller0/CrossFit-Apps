@@ -74,24 +74,7 @@
    target from across the room, not as another fact about the block. */
 .blockGoal { font-size: 17px; color: var(--teal); font-weight: 700; letter-spacing: .06em; }
 .blockCardBig .blockGoal { font-size: 25px; }
-.exList { display: flex; flex-direction: column; gap: 9px; }
-.exRow  { display: flex; align-items: center; gap: 12px; }
-.exDot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.exName {
-  font-size: 26px; font-weight: 800; color: var(--cream);
-  text-transform: uppercase; letter-spacing: .05em;
-}
-.exVol  { font-size: 22px; font-weight: 700; color: var(--sub); flex-shrink: 0; }
-.exIns    { font-size: 18px; font-weight: 700; color: var(--muted); flex-shrink: 0; margin-left: 4px; }
-.exNote   { font-size: 16px; color: var(--muted); padding-left: 20px; margin-top: 1px; font-style: italic; }
 .blockNote { font-size: 16px; color: var(--muted); font-style: italic; padding-top: 6px; border-top: 1px solid var(--divider); }
-
-/* ── Complex exercise sub-movements ── */
-.complexBlock { display: flex; flex-direction: column; gap: 4px; }
-.complexMvs   { padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
-.complexMvRow { display: flex; align-items: center; gap: 10px; }
-.complexMvReps { font-size: 18px; font-weight: 700; color: var(--sub); flex-shrink: 0; }
-.complexMvName { font-size: 20px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: .04em; }
 
 /* ── QR footer ── */
 .qrFooter {
@@ -170,23 +153,8 @@
   padding: 4px 0 4px 20px;
   display: flex; align-items: center; gap: 14px;
 }
-.timerExList { display: flex; flex-direction: column; gap: 18px; }
-.timerExRow  { display: flex; align-items: flex-start; gap: 18px; }
-.timerExDot  { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 10px; }
-.timerExBody { display: flex; flex-direction: column; gap: 4px; }
-.timerExName {
-  font-size: 42px; font-weight: 900; color: var(--cream);
-  text-transform: uppercase; letter-spacing: .05em;
-}
-.timerExVol { font-size: 30px; font-weight: 700; color: var(--sub); }
 .timerNoEx  { font-size: 22px; color: var(--dim); text-transform: uppercase; }
-.timerExIns    { font-size: 26px; font-weight: 700; color: var(--muted); }
-.timerExNote   { font-size: 22px; color: var(--muted); font-style: italic; }
 .timerBlockNote { font-size: 24px; color: var(--muted); font-style: italic; margin-top: 10px; }
-.timerComplexMvs   { padding-left: 42px; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
-.timerComplexMvRow { display: flex; align-items: center; gap: 14px; }
-.timerComplexMvReps { font-size: 26px; font-weight: 700; color: var(--sub); flex-shrink: 0; }
-.timerComplexMvName { font-size: 30px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: .04em; }
 
 /* ── Results Slide ── */
 .resultsSlide {
