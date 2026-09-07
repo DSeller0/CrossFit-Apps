@@ -15,6 +15,8 @@ import me from './groups/me.jsx'
 import schedule from './groups/schedule.jsx'
 import index from './groups/index.jsx'
 import tema from './groups/tema.jsx'
+import tv from './groups/tv.jsx'
+import timer from './groups/timer.jsx'
 import s from './Gallery.module.css'
 
 // ── Component gallery (dev-only) ───────────────────────────────────────────────
@@ -49,6 +51,8 @@ export const GROUPS = [
   schedule,
   index,
   tema,
+  tv,
+  timer,
 ]
 
 const ALL_ITEMS = GROUPS.flatMap(g => g.items)

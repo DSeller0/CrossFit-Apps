@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from '../../utils/supabase'
 import { loadLS, loadAthletes, toISO } from '../../utils/storage'
 import { blkLabel, blkColor, isWodBlock, fmtSecs, TIMER_TYPES } from '../../public/lib/wod.js'
-import { DAY_PT_TITLE } from '../../public/lib/week.js'
 import { sessName } from '../../public/lib/sessions.js'
 import { rowToResult } from '../../utils/resultMappers.js'
 import { WodSlide, TimerSlide, ResultsSlide, QrSlide } from '../../public/tv/slides.jsx'
@@ -13,6 +12,7 @@ import { useGroupRotation } from '../../hooks/useGroupRotation'
 import { useLiveRegistration } from '../../hooks/useLiveRegistration'
 import ClassPanel from './tv/ClassPanel'
 import GroupsPanel from './tv/GroupsPanel'
+import DatePicker from './tv/DatePicker.jsx'
 import st from './tv/tvController.module.css'
 
 const SLIDES = [
@@ -22,73 +22,6 @@ const SLIDES = [
   { id: 'results', icon: 'ti-trophy', lbl: 'Resultados' },
   { id: 'qr', icon: 'ti-qrcode', lbl: 'QR Code' },
 ]
-
-// ── Full-width date picker (Sunday-start) ────────────────────────────────────
-function DatePicker({ selDate, sessions, onChange }) {
-  function startOfWeek(iso) {
-    const d = new Date((iso || toISO(new Date())) + 'T12:00:00')
-    d.setDate(d.getDate() - d.getDay())
-    return toISO(d)
-  }
-  // weekStart is real local state — the ‹ › arrows below move it independently of selDate —
-  // that re-syncs whenever selDate jumps to another week. Adjusted during render rather
-  // than from an effect (react-hooks/set-state-in-effect), React's documented replacement.
-  const [weekStart, setWeekStart] = useState(() => startOfWeek(selDate))
-  const [prevSelDate, setPrevSelDate] = useState(selDate)
-  if (prevSelDate !== selDate) {
-    setPrevSelDate(selDate)
-    const ws = startOfWeek(selDate)
-    if (ws !== weekStart) setWeekStart(ws)
-  }
-
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(weekStart + 'T12:00:00')
-    d.setDate(d.getDate() + i)
-    return { iso: toISO(d), d }
-  })
-  const today = toISO(new Date())
-  function prevWeek() {
-    const d = new Date(weekStart + 'T12:00:00')
-    d.setDate(d.getDate() - 7)
-    setWeekStart(toISO(d))
-  }
-  function nextWeek() {
-    const d = new Date(weekStart + 'T12:00:00')
-    d.setDate(d.getDate() + 7)
-    setWeekStart(toISO(d))
-  }
-
-  return (
-    <div className={st.datePicker}>
-      <button className={st.dpArrow} onClick={prevWeek} aria-label="Semana anterior">
-        <i className="ti ti-chevron-left" aria-hidden="true" />
-      </button>
-      <div className={st.dpDays}>
-        {days.map(({ iso, d }) => {
-          const isSel = iso === selDate,
-            isToday = iso === today
-          const hasSess = (sessions[iso] || []).length > 0
-          return (
-            <button
-              key={iso}
-              type="button"
-              onClick={() => onChange(iso)}
-              aria-pressed={isSel}
-              className={`${st.dpDay} ${isSel ? st.sel : ''} ${isToday ? st.today : ''}`}
-            >
-              <span className={st.dpDow}>{DAY_PT_TITLE[d.getDay()]}</span>
-              <span className={st.dpNum}>{d.getDate()}</span>
-              {hasSess && <span className={st.dpDot} />}
-            </button>
-          )
-        })}
-      </div>
-      <button className={st.dpArrow} onClick={nextWeek} aria-label="Semana seguinte">
-        <i className="ti ti-chevron-right" aria-hidden="true" />
-      </button>
-    </div>
-  )
-}
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function TvController({ sessions: propSessions }) {
