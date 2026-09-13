@@ -53,12 +53,26 @@
 > real dialog: `role="dialog"` · `aria-modal="true"` · `aria-labelledby` → "Tipo de WOD" · focus moved
 > inside on open (Escape fires `onClose`, which the gallery fixture no-ops by design).
 >
-> 🔴 **STILL NOT DONE — the live walk.** Starting a class against the local stack and running a full
-> timer cycle (rotation + rest, register an athlete, edit a result, delete one, end the class) was not
-> performed; it needs `supabase start` and real class data. Two things therefore remain unverified:
-> **the containers themselves** (`TvController.jsx`, `Timer.jsx`, `TV.jsx` import a Supabase client and
-> cannot render in the gallery) and **the 390px half that lives in the container** — `.rightGrid`'s
-> 320px column, as opposed to `.dpDays`, which is now measured. Do this before the gym sees it.
+> **The live walk was not done, and per the user (2026-09-13) it is NOT urgent.** Starting a class
+> against the local stack and running a full timer cycle (rotation + rest, register an athlete, edit a
+> result, delete one, end the class) was not performed; it needs `supabase start` and real class data.
+> Unverified as a result: **the containers themselves** (`TvController.jsx`, `Timer.jsx`, `TV.jsx`
+> import a Supabase client and cannot render in the gallery) and **the 390px half that lives in the
+> container** — `.rightGrid`'s 320px column, as opposed to `.dpDays`, which is measured.
+> 🔑 **`Quadro ao Vivo` is still not used live** — the user's call: *"even if an issue does present
+> itself we can fix it later without any problems."* So this is a known gap to close opportunistically,
+> not a release blocker, and a later session should not treat it as one.
+>
+> ⚠️ **That fact also weakens this plan's own Lane argument, and the correction is worth more than the
+> plan was.** The Lane section below resolves to Lane A on the premise that *"TV and Timer are used at
+> the gym every day"*, and it explains away the C5 addendum — *a defect obvious on first use, left
+> unreported for weeks, is evidence about usage* — by arguing the illegibility hid on a theme the box
+> never selects. The simpler explanation was available and was not considered: **nobody was opening
+> the tab.** The addendum was pointing at exactly the right thing and got argued past. ⚠️ The premise
+> is **per-surface, not per-plan** — `timer.html` and the `tv.html` wall are genuinely in daily gym
+> use; it is the **`Quadro ao Vivo` controller tab** that isn't. Bundling three surfaces under one
+> usage claim is what let the weak half ride along on the strong half's evidence. **#171 and #191 both
+> target this directory — check the usage of each surface separately before assigning either a lane.**
 >
 > `npm test` 1076/31 · lint · `format:check` · `build:all` all green; `design:cards` 16 cards, zero
 > skips; `audit-backlog-markers` zero drift.
