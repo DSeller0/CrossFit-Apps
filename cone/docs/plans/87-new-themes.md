@@ -98,7 +98,7 @@ Three corrections to the original row, all measured 2026-09-05:
   `cone_theme_user` pick still wins — the whole point of #143's two-key model.
 - `npm test` · `npm run lint` · `npm run build:all` · `/verify` live · `/code-review` (L).
 
-## Measured at the Lane-B gate (2026-09-13) — awaiting approval
+## Measured at the Lane-B gate (2026-09-13) — ✅ APPROVED 2026-09-13
 
 Mockups committed and synced: `design/mockups/65-halo-reach-theme.html` ·
 `design/mockups/66-common-theme.html` (numbered **65/66**, skipping 64 on purpose — plans/82 cites a
@@ -181,23 +181,33 @@ confirms ("SKULLS", "Primary Skulls" are proportional). v3 uses the closest face
 OS — **Bahnschrift** (Windows 10+, a variable DIN) then **DIN Alternate** (macOS), falling back to
 `system-ui`. Still no font package, still no `src/fonts.js` change.
 
-*Common — the number problem the user spotted.* In the Quadro ao Vivo the clock, the KPIs and the
-rank times were not Arial, and that was real: every numeric readout in the app renders
-`var(--font-mono)`, which the four existing themes all set to the same system-mono stack. 🔴 **The
-obvious fix — pointing Common's `--font-mono` at Arial — is wrong and was rejected after checking
-the consumers.** `--font-mono` has **84** call sites, and one of them is
-`criador/textMode.module.css:19-23`, the **textarea where the week's WOD notation is typed**
-(`21-15-9`, `3x60kg / 2x70%`, `Meta: 11-12'`); a proportional face there degrades the one surface
-that most needs column alignment. (Arial's digits *are* uniform width — measured 24.47px for all ten
-at 44px — so alignment alone would have survived; the text pane is what kills it.) So Common keeps a
-**true monospace**, just a better-matched one: **Consolas** first, then `SF Mono`/`Menlo`/
-`DejaVu Sans Mono`. Consolas is flatter and far closer to Arial than Cascadia Code, whose curved
-terminals are what made the numbers read as a different font.
+*Common — the number problem the user spotted, and the decision not to fix it.* In the Quadro ao
+Vivo the clock, the KPIs and the rank times are not Arial, and that is real: every numeric readout
+in the app renders `var(--font-mono)`, which all themes set to the same system-mono stack. Two fixes
+were considered and **both rejected**:
 
-⚠️ **This makes `--font-mono` no longer theme-invariant.** CLAUDE.md describes it as "a
-theme-invariant system-mono stack"; that was true of the four existing themes but was never a
-requirement, and Common deliberately diverges. **Token count is unchanged at 29** — a value
-replaced, nothing added — and the note in CLAUDE.md should be reworded when this ships.
+1. 🔴 **Pointing Common's `--font-mono` at Arial** — wrong, and ruled out by checking consumers.
+   `--font-mono` has **84** call sites and one is `criador/textMode.module.css:19-23`, the
+   **textarea where the week's WOD notation is typed** (`21-15-9`, `3x60kg / 2x70%`); a proportional
+   face there degrades the surface that most needs column alignment. (Arial's digits *are* uniform
+   width — measured 24.47px for all ten at 44px — so alignment alone would have survived; the text
+   pane is what kills it.)
+2. **Giving Common its own Consolas-led mono** — built, measured, then **reverted by user decision**.
+   It would have made `--font-mono` the first theme-scoped font token. The consequence was scoped
+   before deciding and turned out small but real: the export raster path is **unaffected** (the
+   `dv*`/`wk*`/mobile export classes declare zero `--font-mono`; the three uses in
+   `Publicador.module.css` are tab chrome — `FormatRail`/`LayoutPanel`/`WhenPicker`), nothing asserts
+   cross-theme token equality, and Consolas is ~6% *narrower* than Cascadia (`07:24` at 44px: 120.96
+   vs 128.91) so it could not clip anything that already fits. What it did cost was a **latent**
+   clipping risk in the three fixed-px boxes that size themselves around monospace text
+   (`TV.module.css:216` `.restPerf` 90px · `tvController.module.css:172` `.perf` 46px · `:178`
+   `.editTimeInput` 66px — the same failure shape as `.ex-qty-reps`, where `21-15-9` clipped to
+   `21-15` silently), plus one extra verification axis forever.
+
+✅ **Decision: `--font-mono` stays THEME-INVARIANT across all six themes.** Common's numerals reading
+as Cascadia rather than Arial is the accepted trade. CLAUDE.md's existing wording is therefore still
+correct and needs no change. 🔴 **Those three fixed-px boxes remain the reason to keep the
+invariant** — if a future theme ever wants its own mono, that is the thing to fix first.
 
 **Class naming — APPROVED by the user (2026-09-13):** `halo-reach-dark` / `halo-reach-light` /
 `common-dark` / `common-light`, names kept in **English**.
@@ -214,9 +224,13 @@ unconditional `document.documentElement.classList.add('theme-' + t)` — **no wh
 on all 9 themed entry pages (`athletes.html` is the redirect stub and carries none). New ids
 therefore resolve with **zero per-page edit**; only `THEMES` in `theme.js` gates them.
 
-**Open decisions for the review** (both cards end on these): class naming
+**All gate decisions are closed:** class naming approved in **English**
 (`halo-reach-dark`/`-light`, `common-dark`/`-light` — explicit suffix on both, unlike
-`spirit-blossom`'s bare dark), the pt-BR selector labels, and the typography call above.
+`spirit-blossom`'s bare dark); palettes approved as measured; typography approved as
+Bahnschrift/DIN for Halo headings and Arial/Helvetica for Common, with `--font-mono` left
+theme-invariant. Selector labels follow the **existing English convention** in `THEMES`
+("TotK Dark", "Spirit Blossom Light") rather than pt-BR — the theme names are proper nouns and
+`theme.js` already spells all four that way, so this is not a new decision.
 
 ---
 
