@@ -8,7 +8,6 @@ import { fmtSecs, isTimeBlock, MODE_LBL, maskMMSS } from '../lib/wod.js'
 import { fmtDate, todayISO } from '../lib/week.js'
 import { getBoxScope } from '../lib/boxScope.js'
 import { syncTheme } from '../lib/theme.js'
-import ConfirmReview from '../shared/ConfirmReview.jsx'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const K_CFG = 'timer_config',
@@ -107,8 +106,6 @@ export default function Timer() {
   const [, forceUpdate] = useState(0)
   const [getreadySecs, setGetreadySecs] = useState(10)
   const [showTypePicker, setShowTypePicker] = useState(false)
-  // #174/plans/86 — replaces a bare confirm('Pausar e sair?'); see goBack below.
-  const [confirmingExit, setConfirmingExit] = useState(false)
 
   const [form, setForm] = useState(() => ({
     type: initCfg.blockType || 'For Time',
@@ -458,19 +455,17 @@ export default function Timer() {
     dropHist(0)
     window.history.back()
   }
+  // #174/plans/86 — this used to open `confirm('Pausar e sair?')` behind a
+  // `statusRef.current === 'running'` branch, and that branch was ALREADY dead when
+  // the plan proposed converting it to a ConfirmReview: goBack has exactly one call
+  // site, the FECHAR button on the `status === 'finished'` screen, where statusRef is
+  // 'finished' by construction. Every other screen owns its own exit (getready has
+  // its own back button → cancelGetReady; finished has DESCARTAR/FECHAR) and the
+  // RUNNING screen deliberately offers none — you press FIM to leave a live WOD.
+  // So the guard, and the dialog it was converted into, could never fire. Deleted
+  // rather than kept as unreachable UI; if a running-screen exit is ever added, the
+  // pause-then-leave guard comes back WITH it.
   function goBack() {
-    if (statusRef.current === 'running') {
-      setConfirmingExit(true)
-      return
-    }
-    if (statusRef.current === 'getready') cancelGetReady()
-    window.history.back()
-  }
-  // The confirmed half of the branch above: pauses (never discards — doDiscard
-  // is the separate, unguarded action) then leaves.
-  function confirmExit() {
-    setConfirmingExit(false)
-    pauseTimer()
     window.history.back()
   }
 
@@ -1112,20 +1107,6 @@ export default function Timer() {
         </div>
         {announcer}
         <Nav active="timer" gymName={gymName} box={box} />
-        <ConfirmReview
-          open={confirmingExit}
-          title="Sair do timer?"
-          editLabel="Cancelar"
-          confirmLabel="Pausar e sair"
-          onEdit={() => setConfirmingExit(false)}
-          onClose={() => setConfirmingExit(false)}
-          onConfirm={confirmExit}
-        >
-          <div style={{ fontSize: 13, color: 'var(--sub)', lineHeight: 1.5 }}>
-            O timer <strong style={{ color: 'var(--cream)' }}>pausa</strong> e você sai da tela. O
-            progresso não é descartado.
-          </div>
-        </ConfirmReview>
       </div>
     )
   }

@@ -260,6 +260,10 @@ export default function Results() {
     }
     setLbTarget(null)
     setEditing(new Set())
+    // submitError is keyed by inputKey (sessionId:blockId) only — it carries no
+    // athlete — so a failed save for athlete A would otherwise keep rendering
+    // "Erro ao salvar" under athlete B's untouched form for the same block.
+    setSubmitError(null)
   }
   function toggleSess(sid) {
     setExpanded(prev => {
