@@ -1,7 +1,20 @@
 #!/usr/bin/env node
 // Run from cone/: node scripts/backup-supabase.mjs
-// Dumps all 10 Supabase KV-blob tables to cone/backups/<timestamp>/
+// Dumps the 9 Supabase KV-blob tables to cone/backups/<timestamp>/
 // Backups are local-only (.gitignore prevents commit of personal data).
+// (`lb_colors` was the 10th until plans/87 dropped the table — #60/#43.)
+//
+// 🔴 THIS SCRIPT IS CURRENTLY BLIND TO 4 OF ITS 9 TABLES — backlog #199.
+// It authenticates with VITE_SUPABASE_ANON_KEY (below), and since #81/`0006` and
+// #150/`0009` revoked the anon "public read" on coach_profile, locations, events and
+// templates, the anon role cannot read them at all. RLS returns zero rows rather than an
+// error, so `.maybeSingle()` yields null, this script logs "EMPTY", continues, and exits 0.
+// Measured against prod 2026-09-13 — readable: sessions, athletes, settings,
+// exercise_registry, goals_data · silently empty: events, locations, coach_profile, templates.
+// That means the Pix key, the service rates, the whole agenda and every session template are
+// NOT in any backup taken since 2026-08. Fixing it needs a service-role key (which this repo
+// deliberately does not carry for prod) or an authenticated coach session — a real decision,
+// which is why it is filed rather than patched here.
 
 import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
@@ -34,7 +47,6 @@ const TABLES = [
   'settings',
   'exercise_registry',
   'goals_data',
-  'lb_colors',
   'templates',
 ]
 

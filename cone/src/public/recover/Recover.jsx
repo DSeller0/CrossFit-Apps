@@ -9,7 +9,6 @@ const KEYS = {
   eagles_locations_v1: 'Afiliados / locais',
   eagles_coach_v1: 'Perfil do professor',
   eagles_settings_v1: 'Configurações',
-  eagles_lb_colors_v1: 'Cores do leaderboard',
   eagles_block_registry_v1: 'Registro de exercícios',
   eagles_athlete_goals_v1: 'Metas e PRs',
 }

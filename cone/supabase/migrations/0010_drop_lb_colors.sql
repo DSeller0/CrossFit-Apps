@@ -1,0 +1,36 @@
+-- Drop `lb_colors` — closes the table half of backlog #60, folded into #43 ([plans/87]).
+--
+-- WHAT IT WAS. One of the original 11 single-row JSONB blobs (`0001_init.sql:97`). It held the
+-- leaderboard's SKIN from before the 4-theme system existed: a 21-key colour map (`bg`, `rowAlt`,
+-- `podium0..2`, `headerBorder`, `rank1..3`, `scaleBadge*`, `filterActive*`, …) that the coach
+-- edited through a 20-slot colour picker in the SPA's Resultados tab. Its defaults were built on
+-- `#00b8d4` — the same stray cyan #175/`plans/84` removed as `APP_CONFIG.themeAccent` — and the
+-- page force-wrote `--accent` onto <html> from it, which is why the leaderboard rendered cyan even
+-- in themed elements. Same bug class, same origin.
+--
+-- HOW IT DIED, in three prior steps, none of which touched the table itself:
+--   #51  / plans/20  retired the system: leaderboard.html renders from theme tokens, the picker
+--                    and its 20 useStates went. Deliberately left the table ("churning the sync
+--                    layer inside a design session isn't worth it").
+--   #60  / plans/48  deleted the whole client leg — APP_CONFIG.lbColors, App.jsx's sync plumbing,
+--                    the export leg (which never had a matching import leg).
+--   #150 / 0009      revoked the anon "public read": zero public-page `.from()` call sites.
+--
+-- 🔑 THE TABLE HAS NEVER HELD A ROW, and this is measured rather than assumed. The only backup on
+-- disk (`cone/backups/2026-06-24_13-17-42/manifest.json`) was taken while the table was still
+-- fully anon-readable — every other table that day recorded `"status": "ok"` with a real size —
+-- and it records `"lb_colors": { "status": "empty" }`, i.e. `.eq('id',1).maybeSingle()` found no
+-- row. The coach's customisation only ever lived in localStorage (`eagles_lb_colors_v1`), never on
+-- the server, which is consistent with plans/48's finding that `public/config.json` is literally
+-- `{}` so `cfg.lbColors` was never truthy. So this DROP destroys nothing.
+--
+-- ⚠️ NOT verifiable with the anon key any more — `0009` locked the read, so a REST GET returns
+-- `[]` whether the table is empty or merely denied. The 2026-06-24 backup predates that lock and
+-- is the evidence. Re-checking today would need the coach's authenticated session.
+--
+-- The table's policies ("public read" was already dropped by `0009`; "auth write" remains) and its
+-- grants are removed implicitly by DROP TABLE — no separate DROP POLICY / REVOKE needed. IF EXISTS
+-- because prod predates the CLI migration workflow and this must stay idempotent across both
+-- histories (the #34 lesson).
+
+DROP TABLE IF EXISTS public.lb_colors;

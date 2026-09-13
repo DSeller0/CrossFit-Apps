@@ -38,7 +38,6 @@ const BLOB_TABLES = [
   'settings',
   'exercise_registry',
   'goals_data',
-  'lb_colors',
   'templates',
 ]
 
