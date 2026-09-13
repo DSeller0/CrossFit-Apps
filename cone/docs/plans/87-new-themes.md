@@ -171,6 +171,37 @@ call, because the two families read alike at v1; they now differ on three axes a
 heading face, and highlight colour. Every contrast cell was re-measured after the revision and all
 four themes still pass (the table above is v2's numbers).
 
+**v3 typography (2026-09-13) — the font half, now sourced the same way the palette was.**
+
+*Halo Reach.* Its real UI face is **Conduit ITC** (Mark van Bronkhorst / ITC — the ODST- and
+Reach-era interface font); **Handel Gothic** is the older Halo CE wordmark lineage. Both are
+commercial licences, so neither can ship. The important consequence is that **v2's mono heading
+stack was simply wrong**: Conduit is a squarish *proportional* grotesque, which the menu screenshot
+confirms ("SKULLS", "Primary Skulls" are proportional). v3 uses the closest faces that ship with an
+OS — **Bahnschrift** (Windows 10+, a variable DIN) then **DIN Alternate** (macOS), falling back to
+`system-ui`. Still no font package, still no `src/fonts.js` change.
+
+*Common — the number problem the user spotted.* In the Quadro ao Vivo the clock, the KPIs and the
+rank times were not Arial, and that was real: every numeric readout in the app renders
+`var(--font-mono)`, which the four existing themes all set to the same system-mono stack. 🔴 **The
+obvious fix — pointing Common's `--font-mono` at Arial — is wrong and was rejected after checking
+the consumers.** `--font-mono` has **84** call sites, and one of them is
+`criador/textMode.module.css:19-23`, the **textarea where the week's WOD notation is typed**
+(`21-15-9`, `3x60kg / 2x70%`, `Meta: 11-12'`); a proportional face there degrades the one surface
+that most needs column alignment. (Arial's digits *are* uniform width — measured 24.47px for all ten
+at 44px — so alignment alone would have survived; the text pane is what kills it.) So Common keeps a
+**true monospace**, just a better-matched one: **Consolas** first, then `SF Mono`/`Menlo`/
+`DejaVu Sans Mono`. Consolas is flatter and far closer to Arial than Cascadia Code, whose curved
+terminals are what made the numbers read as a different font.
+
+⚠️ **This makes `--font-mono` no longer theme-invariant.** CLAUDE.md describes it as "a
+theme-invariant system-mono stack"; that was true of the four existing themes but was never a
+requirement, and Common deliberately diverges. **Token count is unchanged at 29** — a value
+replaced, nothing added — and the note in CLAUDE.md should be reworded when this ships.
+
+**Class naming — APPROVED by the user (2026-09-13):** `halo-reach-dark` / `halo-reach-light` /
+`common-dark` / `common-light`, names kept in **English**.
+
 **Typography — a proposal inside the gate, not a decided fact.** Both families use **system stacks
 only** (Halo Reach: system mono for `--font`, system sans for body/`--sc-font`; Common: system sans
 throughout). No `@fontsource` package, no new weights, no `src/fonts.js` change — which is what
