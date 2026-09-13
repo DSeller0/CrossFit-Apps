@@ -1,0 +1,410 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<title>Cone &mdash; 66 &middot; #43 Lane-B &mdash; tema Common</title>
+<style>
+.theme-common-dark{--bg:#0e1013;--stone:#15181c;--stone2:#1b1f24;--div:#23282e;--gold:#e3a93c;--gold2:#b8821c;--teal:#4d9fe8;--green:#3fbf74;--red:#f4564a;--cream:#eceef1;--sub:#b4bac2;--muted:#8b939d;--dim:#6a737e;--font:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--font-body:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;--divider:#23282e;--border:#3e444b;--accent:#4d9fe8;--accent-text:#07090b;--text:#eceef1;--cyan:#4d9fe8;--sc-font:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--bg2:#15181c;--bg3:#1b1f24;--err:#f4564a;--podium-1:#e3a93c;--podium-2:#c2c7cd;--podium-3:#c67f4a}
+.theme-common-light{--bg:#f1f2f4;--stone:#ffffff;--stone2:#e7e9ec;--div:#d5dade;--gold:#855e08;--gold2:#66480a;--teal:#1f68a6;--green:#1b7341;--red:#bb312b;--cream:#14171a;--sub:#454e56;--muted:#5e666e;--dim:#7a828b;--font:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--font-body:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;--divider:#d5dade;--border:#adb3b9;--accent:#1f68a6;--accent-text:#ffffff;--text:#14171a;--cyan:#1f68a6;--sc-font:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--bg2:#ffffff;--bg3:#e7e9ec;--err:#bb312b;--podium-1:#8a6010;--podium-2:#565e66;--podium-3:#8f5024}
+
+*{box-sizing:border-box}
+body{margin:0;background:#15161a;color:#e8e8ea;font:14px/1.5 system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px}
+h1{font-size:26px;margin:0 0 4px;font-weight:600}
+h2{font-size:17px;margin:36px 0 10px;padding-bottom:6px;border-bottom:1px solid #33343a;font-weight:600}
+.lede{color:#a9aab2;max-width:76ch;margin:0 0 8px}
+ul.lede{padding-left:20px}
+ul.lede li{margin:5px 0}
+code{font-family:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;font-size:.92em}
+.pill{display:inline-block;border:1px solid #44454c;padding:2px 8px;font-size:11px;color:#c9cad2;margin:0 6px 6px 0}
+
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:8px;margin:6px 0 14px}
+.swg h4{margin:14px 0 6px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#8b8c95;font-weight:600}
+.chip{border:1px solid #3a3b42}
+.chipC{height:46px}
+.chipT{padding:5px 7px;font-family:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;font-size:11px;line-height:1.4;background:#1d1e23}
+.chipT b{display:block;color:#e8e8ea;font-weight:600}
+.chipT span{display:block;color:#8b8c95}
+
+table.ct{border-collapse:collapse;width:100%;font-size:12.5px;margin:6px 0 10px}
+.ct th,.ct td{border:1px solid #34353c;padding:5px 9px;text-align:right}
+.ct thead th{background:#1d1e23;text-align:center;font-family:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;font-size:11px}
+.ct tbody th{text-align:left;font-weight:400;font-family:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;font-size:11.5px;color:#d3d4da}
+.ct .on{color:#80818a}
+.ct .bar{color:#8b8c95;text-align:center}
+.ct .pass{color:#7fd6a0}
+.ct .fail{color:#ff8a80;font-weight:700}
+.ct tr.split th,.ct tr.split td{border-top:2px solid #4a4b53}
+
+pre{background:#1b1c21;border:1px solid #34353c;padding:12px 14px;overflow:auto;font-family:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;font-size:11.5px;line-height:1.55;color:#d6d7dd}
+
+.stage{border:1px solid #3a3b42;margin:12px 0 22px}
+.stageHead{background:#1d1e23;padding:7px 12px;font-family:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;font-size:11.5px;color:#a9aab2;display:flex;align-items:center;gap:8px}
+.stageDot{width:9px;height:9px;border-radius:50%;background:#6b6c76}
+.app{background:var(--bg);color:var(--text);font-family:var(--sc-font);padding:0 0 16px}
+
+.chrome{display:flex;align-items:center;gap:14px;min-height:49px;padding:0 14px;background:var(--stone);border-bottom:1px solid var(--divider)}
+.brand{font-family:var(--font);font-weight:700;letter-spacing:.14em;color:var(--gold);font-size:15px}
+.tabs{display:flex;gap:14px;font-size:12.5px;color:var(--muted);flex:1;overflow:hidden}
+.tabs b{color:var(--accent);font-weight:600;border-bottom:2px solid var(--accent);padding-bottom:2px}
+.acct{display:flex;gap:10px;align-items:center;font-size:11.5px;white-space:nowrap}
+.sync{color:var(--green)}
+.mail{color:var(--dim)}
+
+.warn{margin:12px 14px;padding:8px 11px;background:var(--stone2);border-left:3px solid var(--gold);font-size:12.5px;color:var(--sub)}
+.warn strong{color:var(--text)}
+
+.cols{display:flex;gap:14px;padding:0 14px;align-items:flex-start}
+.colMain{flex:1.55;min-width:0}
+.colSide{flex:1;min-width:0}
+@media(max-width:720px){.cols{flex-direction:column}}
+
+.card{background:var(--stone);border:1px solid var(--border);padding:12px;margin-bottom:12px}
+.cardHd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+.cardHd h3{font-family:var(--font);font-size:14px;margin:0;color:var(--text);font-weight:600}
+.tag{font-size:10.5px;border:1px solid var(--border);padding:1px 7px;color:var(--sub)}
+.muted{color:var(--muted);font-size:12px}
+
+.blk{border-top:1px solid var(--divider);padding-top:9px}
+.blkHd{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.blkHd b{font-family:var(--font);font-size:13px;color:var(--gold)}
+.fam{width:4px;height:15px;display:inline-block;background:#d8a840}
+.badge{font-size:10px;border:1px solid var(--divider);padding:1px 6px;color:var(--muted)}
+.exl{list-style:none;margin:0;padding:0}
+.exl li{display:flex;gap:10px;padding:3px 0;border-bottom:1px solid var(--divider);font-size:12.5px}
+.exn{flex:1;color:var(--text)}
+.exv{color:var(--sub);font-family:var(--font-mono);font-size:12px}
+.exi{color:var(--muted);font-family:var(--font-mono);font-size:12px;min-width:64px;text-align:right}
+.meta{margin-top:7px;font-size:12px;color:var(--sub)}
+.meta .onote{color:var(--muted)}
+
+.tally{display:flex;gap:2px;margin-bottom:10px}
+.tally i{flex:1;height:11px;background:var(--stone2);border:1px solid var(--bg)}
+.tally i.on{background:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.kpis div{text-align:center}
+.kpis b{display:block;font-family:var(--font-mono);font-size:17px;color:var(--text)}
+.kpis span{font-size:10.5px;color:var(--muted)}
+.dist{display:flex;height:9px;gap:1px}
+
+.rank{list-style:none;margin:0;padding:0}
+.rank li{display:flex;align-items:center;gap:9px;padding:5px 7px;border-bottom:1px solid var(--divider);font-size:12.5px}
+.rank .pos{width:18px;font-family:var(--font-mono);color:var(--muted);text-align:right}
+.rank .nm{flex:1;color:var(--text)}
+.rank .sc{color:var(--sub);font-size:11px}
+.rank .pf{font-family:var(--font-mono);color:var(--sub)}
+.rank .p1{background:color-mix(in srgb,var(--podium-1) 13%,transparent)}
+.rank .p2{background:color-mix(in srgb,var(--podium-2) 13%,transparent)}
+.rank .p3{background:color-mix(in srgb,var(--podium-3) 13%,transparent)}
+.rank .p1 .pos{color:var(--podium-1)}
+.rank .p2 .pos{color:var(--podium-2)}
+.rank .p3 .pos{color:var(--podium-3)}
+
+.fl{display:block;font-size:11px;color:var(--muted);margin:7px 0 3px}
+.inp{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 9px;font:16px/1.2 var(--sc-font);border-radius:4px}
+.inp::placeholder{color:var(--dim)}
+.inp.foc{outline:2px solid var(--accent);outline-offset:2px}
+.focusDemo{margin-top:14px;display:flex;align-items:center;gap:9px}
+.focusDemo .inp{flex:1}
+.fhint{font-size:11px;color:var(--muted);white-space:nowrap}
+
+.btns{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.b{font:600 12.5px/1 var(--sc-font);padding:8px 12px;border:1px solid transparent;border-radius:4px}
+.bp{background:var(--accent);color:var(--accent-text)}
+.bs{background:transparent;border-color:var(--border);color:var(--text)}
+.bd{background:transparent;border-color:var(--red);color:var(--red)}
+.bg{background:transparent;color:var(--muted)}
+
+.tv .clock{font-family:var(--font-mono);font-size:44px;line-height:1;text-align:center;color:var(--text);padding:10px 0 12px}
+.live{font-size:10.5px;font-weight:700;background:var(--green);color:var(--accent-text);padding:2px 8px;letter-spacing:.08em}
+.tvrow{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-top:1px solid var(--divider)}
+.tvrow span{color:var(--muted)}
+.tvrow b{font-family:var(--font-mono);color:var(--text)}
+
+.err{color:var(--red);font-size:12.5px;margin:4px 0}
+.dimtxt{color:var(--dim);font-size:12.5px;margin:4px 0}
+.mutedtxt{color:var(--muted);font-size:12.5px;margin:4px 0}
+
+</style>
+<div class="wrap">
+<h1>66 &middot; #43 &mdash; tema <b>Common</b></h1>
+<p class="lede">O objetivo da linha #43: uma pele <strong>neutra, sem Zelda</strong>, para mostrar o Cone a um box que n&atilde;o &eacute; este. Cinzas de ard&oacute;sia sem vi&eacute;s de matiz, um azul de a&ccedil;&atilde;o e um &acirc;mbar restrito reservado a conquista (p&oacute;dio, recordes). Nenhuma fonte decorativa: pilha sans do sistema.</p>
+<p class="lede"><span class="pill">Lane B</span><span class="pill">aguardando aprova&ccedil;&atilde;o</span><span class="pill"><code>theme-common-dark</code> &middot; <code>theme-common-light</code></span><span class="pill">29 tokens em cada</span><span class="pill">tipografia: sans do sistema (t&iacute;tulos e corpo)</span></p>
+<p class="lede"><b>Nenhuma fonte nova.</b> As duas fam&iacute;lias novas usam s&oacute; pilhas do
+sistema, ent&atilde;o <code>src/fonts.js</code>, os pesos carregados e o build n&atilde;o mudam
+&mdash; o que mant&eacute;m literalmente verdadeira a aceita&ccedil;&atilde;o do plans/16
+(<em>&ldquo;#43 adiciona um tema tocando s&oacute; em themes.css + Configura&ccedil;&otilde;es&rdquo;</em>).</p>
+
+<h2>Paleta &mdash; common-dark (escuro)</h2>
+<div class="swg"><h4>Superfícies</h4><div class="sw"><div class="chip"><div class="chipC" style="background:#0e1013"></div><div class="chipT"><b>--bg</b><span>#0e1013</span></div></div><div class="chip"><div class="chipC" style="background:#15181c"></div><div class="chipT"><b>--stone</b><span>#15181c</span></div></div><div class="chip"><div class="chipC" style="background:#1b1f24"></div><div class="chipT"><b>--stone2</b><span>#1b1f24</span></div></div><div class="chip"><div class="chipC" style="background:#23282e"></div><div class="chipT"><b>--div</b><span>#23282e</span></div></div></div></div>
+<div class="swg"><h4>Texto</h4><div class="sw"><div class="chip"><div class="chipC" style="background:#eceef1"></div><div class="chipT"><b>--cream</b><span>#eceef1</span><span>16.39:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#b4bac2"></div><div class="chipT"><b>--sub</b><span>#b4bac2</span><span>9.75:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#8b939d"></div><div class="chipT"><b>--muted</b><span>#8b939d</span><span>6.13:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#6a737e"></div><div class="chipT"><b>--dim</b><span>#6a737e</span><span>3.96:1 sobre --bg</span></div></div></div></div>
+<div class="swg"><h4>Identidade e estado</h4><div class="sw"><div class="chip"><div class="chipC" style="background:#e3a93c"></div><div class="chipT"><b>--gold</b><span>#e3a93c</span><span>9.08:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#b8821c"></div><div class="chipT"><b>--gold2</b><span>#b8821c</span><span>5.67:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#4d9fe8"></div><div class="chipT"><b>--teal</b><span>#4d9fe8</span><span>6.75:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#3fbf74"></div><div class="chipT"><b>--green</b><span>#3fbf74</span><span>8.09:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#f4564a"></div><div class="chipT"><b>--red</b><span>#f4564a</span><span>5.69:1 sobre --bg</span></div></div></div></div>
+<div class="swg"><h4>Estrutura e acento</h4><div class="sw"><div class="chip"><div class="chipC" style="background:#23282e"></div><div class="chipT"><b>--divider</b><span>#23282e</span></div></div><div class="chip"><div class="chipC" style="background:#3e444b"></div><div class="chipT"><b>--border</b><span>#3e444b</span></div></div><div class="chip"><div class="chipC" style="background:#4d9fe8"></div><div class="chipT"><b>--accent</b><span>#4d9fe8</span><span>6.75:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#07090b"></div><div class="chipT"><b>--accent-text</b><span>#07090b</span><span>7.07:1 sobre --accent</span></div></div></div></div>
+<div class="swg"><h4>Pódio</h4><div class="sw"><div class="chip"><div class="chipC" style="background:#e3a93c"></div><div class="chipT"><b>--podium-1</b><span>#e3a93c</span><span>9.08:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#c2c7cd"></div><div class="chipT"><b>--podium-2</b><span>#c2c7cd</span><span>11.20:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#c67f4a"></div><div class="chipT"><b>--podium-3</b><span>#c67f4a</span><span>5.93:1 sobre --bg</span></div></div></div></div>
+
+<h2>Paleta &mdash; common-light (claro)</h2>
+<div class="swg"><h4>Superfícies</h4><div class="sw"><div class="chip"><div class="chipC" style="background:#f1f2f4"></div><div class="chipT"><b>--bg</b><span>#f1f2f4</span></div></div><div class="chip"><div class="chipC" style="background:#ffffff"></div><div class="chipT"><b>--stone</b><span>#ffffff</span></div></div><div class="chip"><div class="chipC" style="background:#e7e9ec"></div><div class="chipT"><b>--stone2</b><span>#e7e9ec</span></div></div><div class="chip"><div class="chipC" style="background:#d5dade"></div><div class="chipT"><b>--div</b><span>#d5dade</span></div></div></div></div>
+<div class="swg"><h4>Texto</h4><div class="sw"><div class="chip"><div class="chipC" style="background:#14171a"></div><div class="chipT"><b>--cream</b><span>#14171a</span><span>16.06:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#454e56"></div><div class="chipT"><b>--sub</b><span>#454e56</span><span>7.57:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#5e666e"></div><div class="chipT"><b>--muted</b><span>#5e666e</span><span>5.21:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#7a828b"></div><div class="chipT"><b>--dim</b><span>#7a828b</span><span>3.48:1 sobre --bg</span></div></div></div></div>
+<div class="swg"><h4>Identidade e estado</h4><div class="sw"><div class="chip"><div class="chipC" style="background:#855e08"></div><div class="chipT"><b>--gold</b><span>#855e08</span><span>5.20:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#66480a"></div><div class="chipT"><b>--gold2</b><span>#66480a</span><span>7.51:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#1f68a6"></div><div class="chipT"><b>--teal</b><span>#1f68a6</span><span>5.22:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#1b7341"></div><div class="chipT"><b>--green</b><span>#1b7341</span><span>5.24:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#bb312b"></div><div class="chipT"><b>--red</b><span>#bb312b</span><span>5.23:1 sobre --bg</span></div></div></div></div>
+<div class="swg"><h4>Estrutura e acento</h4><div class="sw"><div class="chip"><div class="chipC" style="background:#d5dade"></div><div class="chipT"><b>--divider</b><span>#d5dade</span></div></div><div class="chip"><div class="chipC" style="background:#adb3b9"></div><div class="chipT"><b>--border</b><span>#adb3b9</span></div></div><div class="chip"><div class="chipC" style="background:#1f68a6"></div><div class="chipT"><b>--accent</b><span>#1f68a6</span><span>5.22:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#ffffff"></div><div class="chipT"><b>--accent-text</b><span>#ffffff</span><span>5.85:1 sobre --accent</span></div></div></div></div>
+<div class="swg"><h4>Pódio</h4><div class="sw"><div class="chip"><div class="chipC" style="background:#8a6010"></div><div class="chipT"><b>--podium-1</b><span>#8a6010</span><span>4.98:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#565e66"></div><div class="chipT"><b>--podium-2</b><span>#565e66</span><span>5.88:1 sobre --bg</span></div></div><div class="chip"><div class="chipC" style="background:#8f5024"></div><div class="chipT"><b>--podium-3</b><span>#8f5024</span><span>5.61:1 sobre --bg</span></div></div></div></div>
+
+<h2>Contraste medido, n&atilde;o presumido</h2>
+<p class="lede">Os <b>9 pares</b> da tabela permanente do #14, mais tr&ecirc;s c&eacute;lulas que
+passos anteriores tornaram determinantes (abaixo da linha grossa): <code>--muted</code> e
+<code>--dim</code> sobre <code>--stone2</code> &mdash; a superf&iacute;cie de card onde o
+spirit-blossom cai para <b>2,96</b> &mdash; e <code>--accent-text</code> sobre
+<code>--green</code>, o par &ldquo;ao vivo&rdquo; que o plans/86 fixou. Barra: 4,5:1 para texto
+normal; 3:1 para <code>--dim</code>, cujo uso &eacute; n&atilde;o textual (bordas e foco).</p>
+<table class="ct">
+<thead><tr><th>par</th><th class="bar">mín.</th><th>common-dark</th><th>common-light</th></tr></thead>
+<tbody>
+<tr><th>cream <span class="on">sobre</span> bg</th><td class="bar">4.5</td><td class="pass">16.39</td><td class="pass">16.06</td></tr>
+<tr><th>sub <span class="on">sobre</span> bg</th><td class="bar">4.5</td><td class="pass">9.75</td><td class="pass">7.57</td></tr>
+<tr><th>muted <span class="on">sobre</span> bg</th><td class="bar">4.5</td><td class="pass">6.13</td><td class="pass">5.21</td></tr>
+<tr><th>dim <span class="on">sobre</span> bg</th><td class="bar">3.0</td><td class="pass">3.96</td><td class="pass">3.48</td></tr>
+<tr><th>gold <span class="on">sobre</span> bg</th><td class="bar">4.5</td><td class="pass">9.08</td><td class="pass">5.20</td></tr>
+<tr><th>teal <span class="on">sobre</span> bg</th><td class="bar">4.5</td><td class="pass">6.75</td><td class="pass">5.22</td></tr>
+<tr><th>green <span class="on">sobre</span> bg</th><td class="bar">4.5</td><td class="pass">8.09</td><td class="pass">5.24</td></tr>
+<tr><th>red <span class="on">sobre</span> bg</th><td class="bar">4.5</td><td class="pass">5.69</td><td class="pass">5.23</td></tr>
+<tr><th>accent-text <span class="on">sobre</span> accent</th><td class="bar">4.5</td><td class="pass">7.07</td><td class="pass">5.85</td></tr>
+<tr class="split"><th>muted <span class="on">sobre</span> stone2</th><td class="bar">4.5</td><td class="pass">5.33</td><td class="pass">4.79</td></tr>
+<tr><th>dim <span class="on">sobre</span> stone2</th><td class="bar">3.0</td><td class="pass">3.44</td><td class="pass">3.20</td></tr>
+<tr><th>accent-text <span class="on">sobre</span> green</th><td class="bar">4.5</td><td class="pass">8.47</td><td class="pass">5.87</td></tr>
+</tbody></table>
+<p class="lede"><b>Todas as c&eacute;lulas passam nos dois temas.</b> Para compara&ccedil;&atilde;o,
+nos quatro temas existentes <code>--dim</code> falha em <em>todos</em> (2,27 / 2,49 / 1,75 / 3,60)
+e <code>--gold</code> falha nos dois claros (3,79 / 4,49).</p>
+
+<h2><code>--border</code> &mdash; derivado, nunca copiado</h2>
+<p class="lede">Regra do plans/65: o ponto da rampa <code>--div &rarr; --muted</code> <em>da
+pr&oacute;pria paleta</em> que mede <b>1,50:1 contra <code>--divider</code></b>. No tema claro
+&ldquo;mais forte&rdquo; significa <em>mais escuro</em> &mdash; &eacute; por isso que a regra
+&eacute; uma rampa por paleta e n&atilde;o um delta global.</p>
+<pre>common-dark
+  --divider #23282e  &rarr;  --border #3e444b
+  1.51:1 vs --divider  &middot;  1.94:1 vs --bg
+
+common-light
+  --divider #d5dade  &rarr;  --border #adb3b9
+  1.50:1 vs --divider  &middot;  1.89:1 vs --bg</pre>
+<p class="lede">Os quatro temas existentes medem 1,80&ndash;1,98:1 contra <code>--bg</code>; estes
+dois ficam na mesma faixa, e as eleva&ccedil;&otilde;es de superf&iacute;cie
+(<code>--div</code>/<code>--bg</code> 1,26&ndash;1,29) tamb&eacute;m foram ajustadas para a faixa
+existente de 1,18&ndash;1,33.</p>
+
+<h2>Em contexto</h2>
+<p class="lede">Componentes reais do app desenhados <em>s&oacute;</em> com os tokens acima: chrome,
+avisos do box, bloco de WOD com <code>ExerciseList</code>, <code>TallyBar</code>, KPIs,
+distribui&ccedil;&atilde;o de escalas, ranking com p&oacute;dio, formul&aacute;rio com os quatro
+variantes de <code>Button</code>, o anel de foco can&ocirc;nico e um fragmento do
+<b>Quadro ao Vivo</b> (a superf&iacute;cie que o plans/86 acabou de consertar).</p>
+
+<section class="stage theme-common-dark">
+  <div class="stageHead"><span class="stageDot"></span>Escuro &middot; <code>html.theme-common-dark</code></div>
+  <div class="app">
+
+    <div class="chrome">
+      <div class="brand">CONE</div>
+      <nav class="tabs"><b>Criador</b><span>Atletas</span><span>Resultados</span><span>Agenda</span><span>Publicador</span></nav>
+      <div class="acct"><span class="sync">sincronizado</span><span class="mail">ze@box.com</span></div>
+    </div>
+
+    <div class="warn"><strong>Feriado 07/09</strong> &mdash; sem aula das 6h e das 7h.</div>
+
+    <div class="cols">
+      <div class="colMain">
+
+        <div class="card">
+          <div class="cardHd"><h3>Quinta, 12/09 &mdash; Metcon</h3><span class="tag">P&uacute;blico</span></div>
+          <div class="blk">
+            <div class="blkHd"><span class="fam"></span><b>AMRAP 12'</b><span class="badge">For Time</span></div>
+            <ul class="exl">
+              <li><span class="exn">Thruster</span><span class="exv">3 x 12</span><span class="exi">40/30 kg</span></li>
+              <li><span class="exn">Pull-up</span><span class="exv">3 x 9</span><span class="exi">&mdash;</span></li>
+              <li><span class="exn">Run</span><span class="exv">400 m</span><span class="exi">&mdash;</span></li>
+            </ul>
+            <div class="meta">Meta: 11&ndash;12' &middot; <span class="onote">Obs: escalar para banda se necess&aacute;rio.</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="cardHd"><h3>Turma das 18h</h3><span class="muted">8 de 11 lan&ccedil;ados</span></div>
+          <div class="tally"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></div>
+          <div class="kpis">
+            <div><b>7,4</b><span>RPE m&eacute;dio</span></div>
+            <div><b>62%</b><span>RX</span></div>
+            <div><b>3</b><span>a lan&ccedil;ar</span></div>
+            <div><b>1</b><span>sem feedback</span></div>
+          </div>
+          <div class="dist"><i style="flex:5;background:var(--accent)"></i><i style="flex:3;background:var(--gold)"></i><i style="flex:2;background:var(--muted)"></i></div>
+        </div>
+
+        <div class="card">
+          <div class="cardHd"><h3>Ranking</h3></div>
+          <ol class="rank">
+            <li class="p1"><span class="pos">1</span><span class="nm">Marina Alves</span><span class="sc">RX</span><span class="pf">8:42</span></li>
+            <li class="p2"><span class="pos">2</span><span class="nm">Jo&atilde;o Pedro</span><span class="sc">RX</span><span class="pf">9:05</span></li>
+            <li class="p3"><span class="pos">3</span><span class="nm">Carla Nunes</span><span class="sc">Inter</span><span class="pf">9:31</span></li>
+            <li><span class="pos">4</span><span class="nm">Rafael Lima</span><span class="sc">SC</span><span class="pf">10:18</span></li>
+          </ol>
+        </div>
+
+      </div>
+      <div class="colSide">
+
+        <div class="card">
+          <div class="cardHd"><h3>Formul&aacute;rio</h3></div>
+          <label class="fl">Nome da sess&atilde;o</label>
+          <input class="inp" value="Metcon &mdash; quinta" readonly>
+          <label class="fl">Observa&ccedil;&atilde;o</label>
+          <input class="inp" placeholder="opcional" readonly>
+          <div class="btns">
+            <button class="b bp">Salvar</button>
+            <button class="b bs">Cancelar</button>
+            <button class="b bd">Excluir</button>
+            <button class="b bg">Editar</button>
+          </div>
+          <div class="focusDemo"><input class="inp foc" value="foco vis&iacute;vel" readonly><span class="fhint">anel <code>--accent</code></span></div>
+        </div>
+
+        <div class="card tv">
+          <div class="cardHd"><h3>Quadro ao Vivo</h3><span class="live">AO VIVO</span></div>
+          <div class="clock">07:24</div>
+          <div class="tvrow"><span>Rodada</span><b>4 / 6</b></div>
+          <div class="tvrow"><span>Esta&ccedil;&atilde;o</span><b>Remo 500 m</b></div>
+          <div class="btns"><button class="b bp">Pausar</button><button class="b bd">FIM</button></div>
+        </div>
+
+        <div class="card">
+          <div class="cardHd"><h3>Estados</h3></div>
+          <p class="err">N&atilde;o foi poss&iacute;vel salvar. Verifique a conex&atilde;o.</p>
+          <p class="dimtxt">Sem registro nas &uacute;ltimas 4 semanas.</p>
+          <p class="mutedtxt">&Uacute;ltima sess&atilde;o h&aacute; 3 dias</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stage theme-common-light">
+  <div class="stageHead"><span class="stageDot"></span>Claro &middot; <code>html.theme-common-light</code></div>
+  <div class="app">
+
+    <div class="chrome">
+      <div class="brand">CONE</div>
+      <nav class="tabs"><b>Criador</b><span>Atletas</span><span>Resultados</span><span>Agenda</span><span>Publicador</span></nav>
+      <div class="acct"><span class="sync">sincronizado</span><span class="mail">ze@box.com</span></div>
+    </div>
+
+    <div class="warn"><strong>Feriado 07/09</strong> &mdash; sem aula das 6h e das 7h.</div>
+
+    <div class="cols">
+      <div class="colMain">
+
+        <div class="card">
+          <div class="cardHd"><h3>Quinta, 12/09 &mdash; Metcon</h3><span class="tag">P&uacute;blico</span></div>
+          <div class="blk">
+            <div class="blkHd"><span class="fam"></span><b>AMRAP 12'</b><span class="badge">For Time</span></div>
+            <ul class="exl">
+              <li><span class="exn">Thruster</span><span class="exv">3 x 12</span><span class="exi">40/30 kg</span></li>
+              <li><span class="exn">Pull-up</span><span class="exv">3 x 9</span><span class="exi">&mdash;</span></li>
+              <li><span class="exn">Run</span><span class="exv">400 m</span><span class="exi">&mdash;</span></li>
+            </ul>
+            <div class="meta">Meta: 11&ndash;12' &middot; <span class="onote">Obs: escalar para banda se necess&aacute;rio.</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="cardHd"><h3>Turma das 18h</h3><span class="muted">8 de 11 lan&ccedil;ados</span></div>
+          <div class="tally"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></div>
+          <div class="kpis">
+            <div><b>7,4</b><span>RPE m&eacute;dio</span></div>
+            <div><b>62%</b><span>RX</span></div>
+            <div><b>3</b><span>a lan&ccedil;ar</span></div>
+            <div><b>1</b><span>sem feedback</span></div>
+          </div>
+          <div class="dist"><i style="flex:5;background:var(--accent)"></i><i style="flex:3;background:var(--gold)"></i><i style="flex:2;background:var(--muted)"></i></div>
+        </div>
+
+        <div class="card">
+          <div class="cardHd"><h3>Ranking</h3></div>
+          <ol class="rank">
+            <li class="p1"><span class="pos">1</span><span class="nm">Marina Alves</span><span class="sc">RX</span><span class="pf">8:42</span></li>
+            <li class="p2"><span class="pos">2</span><span class="nm">Jo&atilde;o Pedro</span><span class="sc">RX</span><span class="pf">9:05</span></li>
+            <li class="p3"><span class="pos">3</span><span class="nm">Carla Nunes</span><span class="sc">Inter</span><span class="pf">9:31</span></li>
+            <li><span class="pos">4</span><span class="nm">Rafael Lima</span><span class="sc">SC</span><span class="pf">10:18</span></li>
+          </ol>
+        </div>
+
+      </div>
+      <div class="colSide">
+
+        <div class="card">
+          <div class="cardHd"><h3>Formul&aacute;rio</h3></div>
+          <label class="fl">Nome da sess&atilde;o</label>
+          <input class="inp" value="Metcon &mdash; quinta" readonly>
+          <label class="fl">Observa&ccedil;&atilde;o</label>
+          <input class="inp" placeholder="opcional" readonly>
+          <div class="btns">
+            <button class="b bp">Salvar</button>
+            <button class="b bs">Cancelar</button>
+            <button class="b bd">Excluir</button>
+            <button class="b bg">Editar</button>
+          </div>
+          <div class="focusDemo"><input class="inp foc" value="foco vis&iacute;vel" readonly><span class="fhint">anel <code>--accent</code></span></div>
+        </div>
+
+        <div class="card tv">
+          <div class="cardHd"><h3>Quadro ao Vivo</h3><span class="live">AO VIVO</span></div>
+          <div class="clock">07:24</div>
+          <div class="tvrow"><span>Rodada</span><b>4 / 6</b></div>
+          <div class="tvrow"><span>Esta&ccedil;&atilde;o</span><b>Remo 500 m</b></div>
+          <div class="btns"><button class="b bp">Pausar</button><button class="b bd">FIM</button></div>
+        </div>
+
+        <div class="card">
+          <div class="cardHd"><h3>Estados</h3></div>
+          <p class="err">N&atilde;o foi poss&iacute;vel salvar. Verifique a conex&atilde;o.</p>
+          <p class="dimtxt">Sem registro nas &uacute;ltimas 4 semanas.</p>
+          <p class="mutedtxt">&Uacute;ltima sess&atilde;o h&aacute; 3 dias</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<h2>Os blocos, como iriam para <code>themes.css</code></h2>
+<pre>html.theme-common-dark{
+  --bg:#0e1013;--stone:#15181c;--stone2:#1b1f24;--div:#23282e;
+  --gold:#e3a93c;--gold2:#b8821c;--teal:#4d9fe8;--green:#3fbf74;
+  --red:#f4564a;--cream:#eceef1;--sub:#b4bac2;--muted:#8b939d;--dim:#6a737e;
+  --font:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--font-body:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
+  --divider:#23282e;--border:#3e444b;--accent:#4d9fe8;--accent-text:#07090b;
+  --text:#eceef1;--cyan:#4d9fe8;--sc-font:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --bg2:#15181c;--bg3:#1b1f24;--err:#f4564a;
+  --podium-1:#e3a93c;--podium-2:#c2c7cd;--podium-3:#c67f4a;
+}
+
+html.theme-common-light{
+  --bg:#f1f2f4;--stone:#ffffff;--stone2:#e7e9ec;--div:#d5dade;
+  --gold:#855e08;--gold2:#66480a;--teal:#1f68a6;--green:#1b7341;
+  --red:#bb312b;--cream:#14171a;--sub:#454e56;--muted:#5e666e;--dim:#7a828b;
+  --font:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--font-body:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--font-mono:ui-monospace,'SF Mono','Cascadia Code','Segoe UI Mono',monospace;
+  --divider:#d5dade;--border:#adb3b9;--accent:#1f68a6;--accent-text:#ffffff;
+  --text:#14171a;--cyan:#1f68a6;--sc-font:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --bg2:#ffffff;--bg3:#e7e9ec;--err:#bb312b;
+  --podium-1:#8a6010;--podium-2:#565e66;--podium-3:#8f5024;
+}</pre>
+
+<h2>Decis&otilde;es em aberto para esta revis&atilde;o</h2>
+<ul class="lede">
+<li><b>Nomes das classes.</b> Proposta: <code>common-dark</code> / <code>common-light</code>
+&mdash; sufixo expl&iacute;cito nos dois, como o <code>totk-*</code> j&aacute; faz. O
+<code>spirit-blossom</code> deixa o escuro sem sufixo; n&atilde;o repetimos essa ambiguidade.</li>
+<li><b>R&oacute;tulos no seletor</b> (Configura&ccedil;&otilde;es e <code>tema.html</code>):
+&ldquo;Common Escuro&rdquo; / &ldquo;Common Claro&rdquo;.</li>
+<li><b>Tipografia por pilha do sistema</b> &mdash; confirmar que trocar Cinzel/Amarante por
+sans do sistema (t&iacute;tulos e corpo) neste tema &eacute; o desejado.</li>
+</ul>
+</div>
