@@ -1,5 +1,48 @@
 # 86 — TvController + Timer surface pass (#174 · carries #182's worst half)
 
+> ✅ Done: #174 · #178 · #188 — `2d75135`+`a2ced34`+`a2c9d17`+`ca61b95`+`ead88c2`+`8ff63e2`+`8781ec0`
+> +`1618fe6` · 2026-09-06 (code-review pass 2026-09-13) — see BACKLOG.md.
+>
+> **Two rows close only PARTLY, and the board rows were narrowed rather than deleted.** **#182** —
+> `tvController.module.css` is now 0 `outline:none` and every interactive class carries the canonical
+> ring, and `Timer.module.css:189` split `:focus` out of its `:hover`; the other **10** of that row's
+> 12 selectors (`Schedule.module.css`, `Me.module.css`, `index.css`) and the missing global
+> `:focus-visible` are untouched. **#184** — 37 of its 54 dead classes went (TV 24 + Timer 13); the
+> remaining 17 across 7 module files plus the 11 `index.css` selectors stay open.
+>
+> **One item did not survive contact: Approach 5's `confirm()` conversion.** The plan asserted
+> `Timer.jsx:456` "gates a destructive mid-class action". It does not, and never did — `goBack` has
+> exactly one call site, the FECHAR button on the `status === 'finished'` screen, where `statusRef`
+> is 'finished' by construction, so the `=== 'running'` branch was **already unreachable before the
+> conversion** (`git show a2ced34^`). Pass 4 faithfully converted a guard that had never once fired,
+> producing a `ConfirmReview` that could not open; `/code-review` caught it and the dead branch,
+> state, handler and dialog were deleted instead. The running screen's lack of an exit is deliberate,
+> not an oversight — every other screen owns its own exit (getready → its own back button; finished →
+> DESCARTAR/FECHAR) and a live WOD is left by pressing FIM. The acceptance that actually mattered,
+> `confirm(`/`alert(` repo-wide → 0, holds. Two more review findings fixed in the same pass:
+> `Results.jsx`'s `submitError` is keyed by `sessionId:blockId` with no athlete, so a failed save
+> followed the coach onto the next athlete's form until `changeAth` was made to clear it; and the new
+> `--green` comment in `themes.css` carried a double-encoded em dash that `design:cards` had inlined
+> verbatim into all 16 cards.
+>
+> **⚠️ #188 changes the gym wall and was NOT confirmed with the user before the commit landed** (the
+> plan's Approach 9 asked for that). It is unpushed as of this marker — `tv.html` now follows
+> `settings.theme`, so a box on a light theme gets a light wall the next time the display loads.
+>
+> **#171's boundary, settled as the plan required.** This pass owns the **controller**
+> (`tv/tvController.module.css`, `TvController.jsx`, `ClassPanel`/`GroupsPanel`/`DatePicker`) and
+> `timer/`. **#171 owns `public/tv/TV.jsx`'s wall layout** and inherits it clean: `TV.module.css` was
+> touched for dead-class deletion only and `TV.jsx` for #188's single `syncTheme` call, so no layout
+> decision was pre-empted. 🔴 **#171 must not inherit the fixed-canvas/crop model** C5·b2 built for
+> Publicador — a wall display crops nothing and has no page size to fit. The four wall slides are now
+> gallery-rendered at a pinned 1920×1080 / 0.32 scale, which is the surface #171 starts from.
+>
+> **Verification gap to close before the gym sees this:** the plan's 🔴 live walk (start a class, run
+> a full timer cycle with a rotation and a rest, register/edit/delete a result, end the class), the
+> keyboard-only walk and the 390px check were **not** performed — every pass verified by measurement,
+> greps, the gallery and the four CI gates instead. `npm test` 1076/31 · lint · `format:check` ·
+> `build:all` all green; `design:cards` 16 cards, zero skips.
+
 > The two surfaces the C0–C5 design program never reached. [plans/16](./16-design-pass-program.md)'s
 > table has **no C-session for `TvController`**, and B4 covered `tv.html`/`timer.html` before the C0
 > primitives existed. **Runs before [plans/87](./87-new-themes.md)** — user decision 2026-09-05.

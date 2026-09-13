@@ -129,6 +129,17 @@ the existing settings fetch in `Schedule.jsx` · `Results.jsx` · `Me.jsx` · `L
 **`tv.html` is deliberately out of scope** — the gym wall has no box scope, is driven by TvController
 rather than a `?box=` link, and its colour work is #97. Stated, not left ambiguous.
 
+> 🔴 **SUPERSEDED 2026-09-06 by [plans/86](./86-tv-timer-surface-pass.md) (#188) — `tv.html` now calls
+> `syncTheme` like every other public page, so it is **7** pages, not 6.** The paragraph above is sound
+> about **box scope** and wrong about **theming**, and the two got conflated: every reason it gives —
+> no `?box=` link, driven by TvController — is an argument that the wall has no *box* to resolve
+> against, not an argument that it should ignore the coach's theme. `syncTheme(settings, null)` needs
+> no box: it falls through to `resolveTheme({settings})`, the gym's own theme. The cost of the
+> conflation was that `tv.html` booted `totk-dark` and **stayed there forever** — its pre-paint script
+> reads `cone_theme`, nothing on that page ever wrote it, so a wall device that opens no other Cone
+> page never left the fallback. A box on a light theme got a dark wall permanently. ⚠️ **This changes
+> what the gym wall looks like**, which is why it is called out here and not just in the commit.
+
 **A first-ever scoped visit still flashes once** before the settings fetch lands, because the boot
 script is synchronous and the settings are not. That flash exists on `index.html` today; it
 self-corrects from the second load, since `cone_theme` now caches the resolved answer. Accepted.
