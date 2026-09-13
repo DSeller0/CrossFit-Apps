@@ -37,11 +37,31 @@
 > Publicador — a wall display crops nothing and has no page size to fit. The four wall slides are now
 > gallery-rendered at a pinned 1920×1080 / 0.32 scale, which is the surface #171 starts from.
 >
-> **Verification gap to close before the gym sees this:** the plan's 🔴 live walk (start a class, run
-> a full timer cycle with a rotation and a rest, register/edit/delete a result, end the class), the
-> keyboard-only walk and the 390px check were **not** performed — every pass verified by measurement,
-> greps, the gallery and the four CI gates instead. `npm test` 1076/31 · lint · `format:check` ·
-> `build:all` all green; `design:cards` 16 cards, zero skips.
+> **Verification — what was done, and the one 🔴 item that was NOT.** Passes 1–9 each verified by
+> measurement, greps and the four CI gates. The close-out pass then drove the **gallery in a real
+> browser** (Playwright, `npm run dev:public`) and confirmed, rather than assumed:
+> **focus ring** on `.dpDay` measured live in all four themes — `2px solid var(--accent) @ 2px`,
+> **9.65 / 5.37 / 9.51 / 4.95** against the page background, exactly the predicted figures, all clear
+> of 3:1. **Day cells are real `<button>`s** and the week arrows carry `aria-label` ("Semana
+> anterior"). ⚠️ One scare that was a *measurement artifact*, recorded so it isn't re-raised: reading
+> `getComputedStyle(dayButton).color` gives `rgb(0,0,0)` on the dark themes (1.2:1) because `.dpDay`
+> sets no `color` of its own and both text children set theirs — every child measures **8.03–15.87**.
+> **390px**: `.dpDays`' 7-column grid fits in **322 of 390px** with no horizontal overflow, 7 cells at
+> 39.1px. **Keyboard**: the `ClassPanel` accordion toggles on **Enter** *and* **Space**, keeps focus,
+> and `scrollY` stays 0 (so `preventDefault` holds); Space on the nested **Encerrar** button does NOT
+> toggle the accordion — the `e.target !== e.currentTarget` guard works. **`BlockTypePicker`** is a
+> real dialog: `role="dialog"` · `aria-modal="true"` · `aria-labelledby` → "Tipo de WOD" · focus moved
+> inside on open (Escape fires `onClose`, which the gallery fixture no-ops by design).
+>
+> 🔴 **STILL NOT DONE — the live walk.** Starting a class against the local stack and running a full
+> timer cycle (rotation + rest, register an athlete, edit a result, delete one, end the class) was not
+> performed; it needs `supabase start` and real class data. Two things therefore remain unverified:
+> **the containers themselves** (`TvController.jsx`, `Timer.jsx`, `TV.jsx` import a Supabase client and
+> cannot render in the gallery) and **the 390px half that lives in the container** — `.rightGrid`'s
+> 320px column, as opposed to `.dpDays`, which is now measured. Do this before the gym sees it.
+>
+> `npm test` 1076/31 · lint · `format:check` · `build:all` all green; `design:cards` 16 cards, zero
+> skips; `audit-backlog-markers` zero drift.
 
 > The two surfaces the C0–C5 design program never reached. [plans/16](./16-design-pass-program.md)'s
 > table has **no C-session for `TvController`**, and B4 covered `tv.html`/`timer.html` before the C0
