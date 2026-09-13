@@ -99,7 +99,7 @@ _43 cards on disk, regenerated 2026-09-13._
 | `mockups/61-resultados-c3.html` | mockups | hand-authored | 71 KB |
 | `mockups/62-agenda-c5.html` | mockups | hand-authored | 108 KB |
 | `mockups/63-publicador-c5.html` | mockups | hand-authored | 64 KB |
-| `mockups/65-halo-reach-theme.html` | mockups | hand-authored | 32 KB |
+| `mockups/65-halo-reach-theme.html` | mockups | hand-authored | 33 KB |
 | `mockups/66-common-theme.html` | mockups | hand-authored | 32 KB |
 <!-- CARD-INDEX:END -->
 

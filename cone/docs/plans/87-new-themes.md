@@ -118,13 +118,13 @@ which is what makes it trustworthy here):
 
 | theme | `--divider` | `--border` | vs divider | vs `--bg` |
 |---|---|---|---|---|
-| halo-reach-dark | `#1f2630` | `#39424e` | 1.50 | 1.91 |
-| halo-reach-light | `#c8d2db` | `#a0adb8` | 1.49 | 1.93 |
-| common-dark | `#23282e` | `#3e444b` | 1.51 | 1.94 |
-| common-light | `#d5dade` | `#adb3b9` | 1.50 | 1.89 |
+| halo-reach-dark | `#1d2b34` | `#3b464e` | 1.50 | 1.94 |
+| halo-reach-light | `#c6d0d7` | `#a0abb2` | 1.50 | 1.95 |
+| common-dark | `#27272b` | `#434347` | 1.51 | 1.93 |
+| common-light | `#d6d6d9` | `#afafb3` | 1.51 | 1.95 |
 
-Existing four measure 1.80–1.98 vs `--bg`; surface elevations (`--div`/`--bg` 1.26–1.29,
-`--stone`/`--bg` 1.07–1.12, `--stone2`/`--bg` 1.05–1.15) were tuned into the existing 1.18–1.33 /
+Existing four measure 1.80–1.98 vs `--bg`; surface elevations (`--div`/`--bg` 1.28–1.30,
+`--stone`/`--bg` 1.06–1.13, `--stone2`/`--bg` 1.05–1.16) were tuned into the existing 1.18–1.33 /
 1.05–1.14 bands rather than left wherever the first draft landed.
 
 **Contrast — #14's 9 standing pairs, plus 3 cells later passes made load-bearing.** Bar is 4.5:1,
@@ -132,18 +132,18 @@ except `--dim` at 3:1 (non-text use: borders and focus).
 
 | pair | halo-reach-dark | halo-reach-light | common-dark | common-light |
 |---|---|---|---|---|
-| `--cream`/`--bg` | 16.66 | 15.60 | 16.39 | 16.06 |
-| `--sub`/`--bg` | 10.22 | 7.33 | 9.75 | 7.57 |
-| `--muted`/`--bg` | 6.41 | 5.05 | 6.13 | 5.21 |
-| `--dim`/`--bg` | 4.32 | 3.36 | 3.96 | 3.48 |
-| `--gold`/`--bg` | 9.55 | 5.01 | 9.08 | 5.20 |
-| `--teal`/`--bg` | 8.77 | 5.05 | 6.75 | 5.22 |
-| `--green`/`--bg` | 8.66 | 5.01 | 8.09 | 5.24 |
-| `--red`/`--bg` | 5.93 | 5.03 | 5.69 | 5.23 |
-| `--accent-text`/`--accent` | 8.99 | 5.99 | 7.07 | 5.85 |
-| `--muted`/`--stone2` | 5.57 | 4.82 | 5.33 | 4.79 |
-| `--dim`/`--stone2` | 3.75 | 3.21 | 3.44 | 3.20 |
-| `--accent-text`/`--green` | 8.87 | 5.95 | 8.47 | 5.87 |
+| `--cream`/`--bg` | 15.53 | 14.91 | 16.10 | 16.15 |
+| `--sub`/`--bg` | 10.79 | 7.55 | 9.50 | 8.40 |
+| `--muted`/`--bg` | 6.04 | 5.20 | 5.75 | 5.68 |
+| `--dim`/`--bg` | 4.09 | 3.39 | 3.69 | 3.76 |
+| `--gold`/`--bg` | 7.57 | 5.55 | 8.91 | 5.21 |
+| `--teal`/`--bg` | 6.77 | 5.47 | 6.39 | 5.23 |
+| `--green`/`--bg` | 7.94 | 4.96 | 8.07 | 5.25 |
+| `--red`/`--bg` | 5.62 | 4.97 | 5.68 | 5.23 |
+| `--accent-text`/`--accent` | 7.11 | 6.57 | 6.77 | 5.85 |
+| `--muted`/`--stone2` | 5.22 | 4.96 | 5.09 | 5.19 |
+| `--dim`/`--stone2` | 3.53 | 3.23 | 3.27 | 3.44 |
+| `--accent-text`/`--green` | 8.34 | 5.95 | 8.55 | 5.87 |
 
 🔴 **Every cell passes in all four new themes — no exception had to be taken.** The acceptance
 allowed for declaring a palette that genuinely could not clear `--dim`; none of them needed it. For
@@ -152,6 +152,24 @@ fails on both existing light themes (3.79 / 4.49), and `--muted`/`--stone2` is 2
 spirit-blossom. The last three rows are the cells outside #14's original table that plans/65,
 plans/86 and the 2026-09-05 pass each turned into real bugs; they are measured here so the new
 themes cannot reintroduce one.
+
+**v2 revision (2026-09-13), after the user supplied two Halo references.** The
+c20.reclaimers.net link is modding documentation — it documents the *tag formats* where colours live
+in the shipped game (`chud_globals_definition`, `color_table`) but publishes no values, so it could
+not serve as a palette source; extracting them from the shipped game is also an IP question, and
+colour *references* are the safe footing. The halopedia **menu screenshots** category did serve:
+`HR_Menu_Iron_Skulls.png` was downloaded and **sampled pixel by pixel**, which overturned three
+things in the v1 draft — surfaces are a blue-**teal** slate (measured `#0f1c26` / `#0c1620` /
+`#101420`), the text is **neutral**, not cool-tinted (`#e8e8e8` / `#d2d4d5` / `#8a8a8a` — the
+background carries all the colour), and the highlight is a muted **bronze** (`#a7826a`), not bright
+amber. It also settled the accent question: the menu's own navigation diamond measures `#26577a`, a
+steel blue, so blue is the UI's own accent and the earlier "blue/purple is Covenant" worry came from
+*concept art*, not UI. Halopedia's concept-art category (industrial greys, military browns, Covenant
+blue/purple accents) describes the **environment** palette and is deliberately not what a UI skin
+follows. **Common was de-tinted to true neutral (R=G=B) and moved to Arial/Helvetica** at the user's
+call, because the two families read alike at v1; they now differ on three axes at once — hue cast,
+heading face, and highlight colour. Every contrast cell was re-measured after the revision and all
+four themes still pass (the table above is v2's numbers).
 
 **Typography — a proposal inside the gate, not a decided fact.** Both families use **system stacks
 only** (Halo Reach: system mono for `--font`, system sans for body/`--sc-font`; Common: system sans
