@@ -52,12 +52,16 @@ afterEach(() => {
 })
 
 describe('THEMES', () => {
-  it('is the canonical list of the 4 palettes in themes.css', () => {
+  it('is the canonical list of the 8 palettes in themes.css', () => {
     expect(THEMES.map(t => t.id)).toEqual([
       'totk-dark',
       'totk-light',
       'spirit-blossom',
       'spirit-blossom-light',
+      'halo-reach-dark',
+      'halo-reach-light',
+      'common-dark',
+      'common-light',
     ])
     expect(THEMES.every(t => typeof t.label === 'string' && t.label.length > 0)).toBe(true)
   })
@@ -67,6 +71,13 @@ describe('THEMES', () => {
     expect(isTheme('nope')).toBe(false)
     expect(isTheme(null)).toBe(false)
     expect(isTheme(undefined)).toBe(false)
+  })
+
+  it('recognises the two #43 themes, each dark + light', () => {
+    expect(isTheme('halo-reach-dark')).toBe(true)
+    expect(isTheme('halo-reach-light')).toBe(true)
+    expect(isTheme('common-dark')).toBe(true)
+    expect(isTheme('common-light')).toBe(true)
   })
 })
 
@@ -89,6 +100,12 @@ describe('resolveTheme precedence', () => {
     const settings = { theme: 'totk-light', boxThemes: { b1: 'spirit-blossom' } }
     expect(resolveTheme({ settings, box: 'b2' })).toBe('totk-light')
     expect(resolveTheme({ settings, box: null })).toBe('totk-light')
+  })
+
+  it('resolves a #43 theme through the same precedence chain as the original 4', () => {
+    const settings = { theme: 'common-light', boxThemes: { b1: 'halo-reach-dark' } }
+    expect(resolveTheme({ settings, box: 'b1' })).toBe('halo-reach-dark')
+    expect(resolveTheme({ settings, box: null })).toBe('common-light')
   })
 
   it('1 — the visitor pick beats both the box default and the gym default', () => {

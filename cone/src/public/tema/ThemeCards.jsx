@@ -17,6 +17,10 @@ const PREVIEW_CLASS = {
   'totk-light': 'pvTotkLight',
   'spirit-blossom': 'pvSbDark',
   'spirit-blossom-light': 'pvSbLight',
+  'halo-reach-dark': 'pvHaloDark',
+  'halo-reach-light': 'pvHaloLight',
+  'common-dark': 'pvCommonDark',
+  'common-light': 'pvCommonLight',
 }
 
 export default function ThemeCards({ value, onPick }) {

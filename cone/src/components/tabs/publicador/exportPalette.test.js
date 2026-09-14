@@ -45,9 +45,11 @@ describe('resolveExportPalette', () => {
     expect(palette['--a-note']).toBe('#554a3a')
   })
 
-  it('differs across all 4 themes — the theme test this pass inverts', () => {
+  it('differs across every theme — the theme test this pass inverts', () => {
     const seen = new Set(THEMES.map(t => JSON.stringify(resolveExportPalette({ themeId: t.id }))))
-    expect(seen.size).toBe(4)
+    // THEMES.length, not a literal count: #43/plans/87 took this 4 → 8 and a hardcoded
+    // expectation would have silently stopped proving what the title claims.
+    expect(seen.size).toBe(THEMES.length)
   })
 
   it('an unknown theme id falls through to DEFAULT_THEME rather than being applied', () => {

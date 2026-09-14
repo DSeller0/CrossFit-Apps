@@ -19,6 +19,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync } from 'fs'
 import { resolve, dirname, join } from 'path'
 import { fileURLToPath, pathToFileURL } from 'url'
+import { THEMES } from '../src/public/lib/theme.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const CONE = resolve(__dirname, '..')
@@ -49,6 +50,10 @@ const THEME_LABELS = {
   'totk-light': 'TotK Light',
   'spirit-blossom': 'Spirit Blossom',
   'spirit-blossom-light': 'Spirit Blossom Light',
+  'halo-reach-dark': 'Halo Reach Dark',
+  'halo-reach-light': 'Halo Reach Light',
+  'common-dark': 'Common Dark',
+  'common-light': 'Common Light',
 }
 
 const esc = str => String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -213,8 +218,15 @@ async function main() {
 
   const { GROUPS } = await import(pathToFileURL(resolve(BUILD, 'design-cards-entry.js')).href)
   const themes = parseThemes(readFileSync(resolve(REPO, 'themes.css'), 'utf8'))
-  if (themes.length !== 4)
-    throw new Error(`Expected 4 themes in themes.css, parsed ${themes.length}`)
+  // Cross-checked against theme.js's THEMES, not a literal count (#43/plans/87 bumped this
+  // 4 → 8 and a hardcoded number would only have deferred the next staleness to whoever adds
+  // theme #9). This still catches the failure the original guard existed for — a broken
+  // parseThemes regex silently returning 0 or a truncated list — and now ALSO catches the two
+  // files disagreeing about which themes exist, in either direction.
+  if (themes.length !== THEMES.length)
+    throw new Error(
+      `themes.css has ${themes.length} theme(s), theme.js's THEMES has ${THEMES.length} — they must match`,
+    )
 
   console.log('▸ Rendering cards…')
   const skipped = []

@@ -76,6 +76,14 @@
 .pvTotkLight { --pv-bg:#ede8dc; --pv-line:#b09878; --pv-gold:#9a6c14; --pv-text:#1c1508; --pv-accent:#1c6860; }
 .pvSbDark    { --pv-bg:#09070f; --pv-line:#4a3060; --pv-gold:#e05490; --pv-text:#ede4f8; --pv-accent:#38c4d0; }
 .pvSbLight   { --pv-bg:#f4eefb; --pv-line:#c4a8d8; --pv-gold:#c83070; --pv-text:#1a0828; --pv-accent:#0f727e; }
+/* #43/plans/87 — --pv-line taken straight from each theme's CURRENT --border (themes.css),
+   not from the four legacy rows above: those pre-date plans/65's per-palette --border
+   derivation and have drifted a few hex units from today's --border (e.g. pvTotkLight's
+   #b09878 vs the real #b4a490) — a pre-existing gap, out of #43's scope to correct. */
+.pvHaloDark    { --pv-bg:#0b131a; --pv-line:#3b464e; --pv-gold:#cf9a6e; --pv-text:#e9eaeb; --pv-accent:#5aa2d8; }
+.pvHaloLight   { --pv-bg:#e6ebee; --pv-line:#a0abb2; --pv-gold:#7d5330; --pv-text:#11181d; --pv-accent:#1d6389; }
+.pvCommonDark  { --pv-bg:#101012; --pv-line:#434347; --pv-gold:#e0a83e; --pv-text:#ececed; --pv-accent:#4a9ae6; }
+.pvCommonLight { --pv-bg:#f2f2f3; --pv-line:#afafb3; --pv-gold:#855e08; --pv-text:#161618; --pv-accent:#1f68a6; }
 
 /* ── Reset row ── */
 .resetRow {

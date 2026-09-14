@@ -77,6 +77,48 @@ const THEME_TOKENS = {
     '--muted': '#7840a0',
     '--accent-text': '#ffffff',
   },
+  // #43/plans/87 — added when the guard below caught the gap at import time, exactly as
+  // its own comment predicted.
+  'halo-reach-dark': {
+    '--bg': '#0b131a',
+    '--divider': '#1d2b34',
+    '--accent': '#5aa2d8',
+    '--sub': '#c2c5c7',
+    '--gold': '#cf9a6e',
+    '--dim': '#6b7783',
+    '--muted': '#8f9396',
+    '--accent-text': '#060c11',
+  },
+  'halo-reach-light': {
+    '--bg': '#e6ebee',
+    '--divider': '#c6d0d7',
+    '--accent': '#1d6389',
+    '--sub': '#3f4a53',
+    '--gold': '#7d5330',
+    '--dim': '#767f88',
+    '--muted': '#57626b',
+    '--accent-text': '#ffffff',
+  },
+  'common-dark': {
+    '--bg': '#101012',
+    '--divider': '#27272b',
+    '--accent': '#4a9ae6',
+    '--sub': '#b7b7ba',
+    '--gold': '#e0a83e',
+    '--dim': '#6d6d72',
+    '--muted': '#8d8d91',
+    '--accent-text': '#070708',
+  },
+  'common-light': {
+    '--bg': '#f2f2f3',
+    '--divider': '#d6d6d9',
+    '--accent': '#1f68a6',
+    '--sub': '#46464a',
+    '--gold': '#855e08',
+    '--dim': '#7b7b81',
+    '--muted': '#5f5f64',
+    '--accent-text': '#ffffff',
+  },
 }
 
 // Confirms THEME_TOKENS covers every theme.js knows about, at import time rather

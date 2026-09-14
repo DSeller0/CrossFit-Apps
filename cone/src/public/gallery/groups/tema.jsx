@@ -36,14 +36,14 @@ export default {
               <ThemeCardsDemo initial="spirit-blossom" />
             </div>
           </Case>
-          <Case label="⚠️ As 4 miniaturas usam hex fixo, não tokens">
+          <Case label="⚠️ As 8 miniaturas usam hex fixo, não tokens">
             <div style={{ maxWidth: 560 }}>
               <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 10, lineHeight: 1.5 }}>
                 themes.css escopa cada paleta em <code>html.theme-*</code>, então uma prévia dentro
-                da página não herda o tema que ela mostra — as quatro precisam aparecer ao mesmo
-                tempo numa página que é só uma delas. Mesma exceção já registrada para os swatches
-                de Config.module.css. Troque o tema no seletor acima: as miniaturas não mudam, o
-                resto da página sim.
+                da página não herda o tema que ela mostra — as oito precisam aparecer ao mesmo tempo
+                numa página que é só uma delas. Mesma exceção já registrada para os swatches de
+                Config.module.css. Troque o tema no seletor acima: as miniaturas não mudam, o resto
+                da página sim.
               </p>
               <ThemeCardsDemo initial="totk-light" />
             </div>

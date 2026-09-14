@@ -23,6 +23,10 @@ const SWATCH = {
   'totk-light': 'swatchTotkLight',
   'spirit-blossom': 'swatchSbDark',
   'spirit-blossom-light': 'swatchSbLight',
+  'halo-reach-dark': 'swatchHaloDark',
+  'halo-reach-light': 'swatchHaloLight',
+  'common-dark': 'swatchCommonDark',
+  'common-light': 'swatchCommonLight',
 }
 
 export default function ConfigTab() {

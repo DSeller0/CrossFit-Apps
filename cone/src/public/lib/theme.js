@@ -22,14 +22,19 @@ const KEY_USER = 'cone_theme_user'
 
 export const DEFAULT_THEME = 'totk-dark'
 
-// The 4 palettes, canonical. This list used to exist in three divergent shapes (Config.jsx
-// with a `swatch` field, gallery/fixtures.js as {v,label}, and the design mockups) — both
-// live consumers now re-import from here. Ids match themes.css's `html.theme-*` classes.
+// The 8 palettes, canonical (4 → 8 with #43/plans/87 — Halo Reach + Common, the design-pass
+// program's last row). This list used to exist in three divergent shapes (Config.jsx with a
+// `swatch` field, gallery/fixtures.js as {v,label}, and the design mockups) — both live
+// consumers now re-import from here. Ids match themes.css's `html.theme-*` classes.
 export const THEMES = [
   { id: 'totk-dark', label: 'TotK Dark' },
   { id: 'totk-light', label: 'TotK Light' },
   { id: 'spirit-blossom', label: 'Spirit Blossom Dark' },
   { id: 'spirit-blossom-light', label: 'Spirit Blossom Light' },
+  { id: 'halo-reach-dark', label: 'Halo Reach Dark' },
+  { id: 'halo-reach-light', label: 'Halo Reach Light' },
+  { id: 'common-dark', label: 'Common Dark' },
+  { id: 'common-light', label: 'Common Light' },
 ]
 
 export const isTheme = id => THEMES.some(t => t.id === id)
