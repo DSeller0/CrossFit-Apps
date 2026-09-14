@@ -1,6 +1,6 @@
 # 87 — #43 · Two new themes: Halo Reach + "Common"
 
-> ✅ Done: #43 · 2026-09-13 · `9004a12`+`43d448c`+`c17cac1`+`d99cc30`+`be66a5e`+`1094cb0`
+> ✅ Done: #43 · #60 · 2026-09-13 · `9004a12`+`43d448c`+`c17cac1`+`d99cc30`+`be66a5e`+`1094cb0`
 > — see BACKLOG.md. **The design-pass program's last row** ([plans/16](./16-design-pass-program.md))
 > — shipping this closes that umbrella doc, marked Done in the same pass.
 > **Lane B — mockup-first was mandatory** (plans/16 rule 1: C0 and #43 are the only Lane-B sessions
