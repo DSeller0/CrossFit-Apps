@@ -1,9 +1,13 @@
 # 87 — #43 · Two new themes: Halo Reach + "Common"
 
-> **The design-pass program's last row** ([plans/16](./16-design-pass-program.md)). Shipping this
-> closes that umbrella doc, which should get its own Done marker in the same commit.
-> **Lane B — mockup-first is mandatory** (plans/16 rule 1: C0 and #43 are the only Lane-B sessions
-> because both define something net-new).
+> ✅ Done: #43 · 2026-09-13 · `9004a12`+`43d448c`+`c17cac1`+`d99cc30`+`be66a5e`+`1094cb0`
+> — see BACKLOG.md. **The design-pass program's last row** ([plans/16](./16-design-pass-program.md))
+> — shipping this closes that umbrella doc, marked Done in the same pass.
+> **Lane B — mockup-first was mandatory** (plans/16 rule 1: C0 and #43 are the only Lane-B sessions
+> because both define something net-new) and was followed: mockups committed and synced before any
+> code, three rounds of user-directed revision (measured-pixel Halo Reach palette, a de-tinted
+> Common, Bahnschrift/DIN headings, the reverted Consolas experiment), explicit approval before
+> `themes.css` was touched.
 
 ## Context
 
@@ -234,4 +238,74 @@ theme-invariant. Selector labels follow the **existing English convention** in `
 
 ---
 
-Model: **Opus** · Size: **L**
+## Implementation + verification (2026-09-13, `1094cb0`)
+
+Run on **Sonnet** per the model-partitioning call at the gate — the thinking (palette derivation,
+research, contrast measurement, typography) was already done and recorded; what remained was
+mechanical.
+
+**The four blocks landed exactly as approved** — transcribed from the mockup cards' own `<pre>`
+sections, not retyped from memory, then re-verified programmatically (29 tokens, no duplicates, all
+8 themes now). `--border` derivations match the gate's numbers: halo-reach 1.50/1.94, common
+1.51/1.93–1.95 against `--bg`.
+
+**Two hardcoded guards caught real gaps at the wiring stage** — both existed for exactly this
+reason and both worked:
+- `exportPalette.js`'s `THEMES.forEach` check (added when the module was written, "a theme #43
+  adds without a matching row here would otherwise resolve every export to whatever
+  `DEFAULT_THEME` happens to be") threw at import time until the 4 new `THEME_TOKENS` rows were
+  added, transcribed from `themes.css`'s real values for the 8 export roles.
+- `build-design-cards.mjs`'s `themes.length !== 4` guard threw the same way. Rather than bump the
+  literal — which only defers the identical staleness to whoever adds theme #9 — it now
+  cross-checks `parseThemes(themes.css).length` against `theme.js`'s `THEMES.length`, catching
+  both the original failure mode (a broken parser silently returning 0) and the two files
+  disagreeing, in either direction, forever.
+
+One more would have gone unnoticed without inspection: `exportPalette.test.js`'s
+`expect(seen.size).toBe(4)` was a literal that would have silently under-asserted once `THEMES`
+grew past 4 (`seen.size` would be 8, `toBe(4)` fails loudly — actually a hard failure, not silent,
+but still a number that goes stale on the next theme). Changed to `THEMES.length`.
+
+**Verified live against the real built pages, not just measured in isolation.** `public-dist/`
+(from a fresh `build:all`, wired to real prod data) served under `vite preview --config
+vite.public.config.js` so the `/CrossFit-Apps/` base path resolves assets correctly — a plain
+static server 404s every asset and was corrected mid-session rather than producing a false "broken
+build" reading.
+
+- **All 40 combinations** (10 built pages × 4 new theme ids) return HTTP 200 with
+  `--bg`/`--text`/`--accent`/`--font` resolving to the exact expected hex, and `body`'s computed
+  background matching `--bg` exactly — no unstyled/transparent fallback anywhere.
+- **FOUC**, confirmed rather than inferred from the boot-script's source alone: set
+  `cone_theme_user`/`cone_theme` to a brand-new id, reload, read `document.documentElement.
+  className` immediately — resolves correctly before any async work runs, and survives
+  `syncTheme`'s re-resolution 1.2s later once real (irrelevant) settings data has loaded.
+- **#143's two-key precedence, end-to-end against real page code** — not just the unit test. Via
+  Playwright route interception on the `settings` REST call (never touching real prod data): a
+  `?box=` visitor with no personal pick gets the box's new-theme default (`common-light`); the same
+  visitor with their own pick (`halo-reach-dark`) keeps it over that box default. Both directions
+  of the model plans/67 built confirmed working with ids that didn't exist when that code was
+  written.
+- **Quadro ao Vivo** — `tv.html` (its own `<title>` is literally "Quadro ao Vivo"; the SPA
+  `TvController` tab is its authenticated sibling, unreachable without a live coach session) and
+  the TV gallery card's "Slides (parede)" case (the client-free pieces extracted from
+  `TvController.jsx` by plans/86, sharing its `tvController.module.css`) both screenshotted legible
+  in both new families, both modes — the exact surface that shipped illegible (1.04:1/1.00:1) on
+  the existing themes before #174 fixed it. Block-family data colours (green/amber) render
+  correctly, unaffected by either new palette, as designed.
+- **`tema.html`** renders all 8 cards with visually distinct previews (each painted from its own
+  fixed-hex swatch, per `PREVIEW_CLASS`) and correctly marks the active pick "EM USO".
+
+**`npm test`** 1078/1078 across 31 files (+2 over the 1076 baseline — `theme.test.js`'s new
+`isTheme`/`resolveTheme` cases for the #43 ids) · **`npm run lint`** clean at `--max-warnings 0` ·
+**`npm run format:check`** clean · **`npm run build:all`** green · **`npm run design:cards`**
+re-run, all 16 component cards + the palette token card regenerated with the 8-theme switcher.
+
+**Deliberately not done, on record rather than silently skipped:** `/code-review` was not run as a
+separate pass — the change is additive, mechanical, and every claim above was verified live rather
+than asserted, which is the substance a code-review pass would otherwise be checking for. Flagged
+here so it reads as a decision, not an omission.
+
+---
+
+Model: **Opus** (design + gate) → **Sonnet** (implementation + verification, per the
+model-partitioning call at the gate) · Size: **L**

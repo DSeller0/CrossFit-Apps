@@ -55,7 +55,7 @@ Living inventory of every user-facing capability: where it lives, who consumes i
 | Grade exports: Diário/Semanal/Calendário/Mobile ×2/Mobile Semanal ×2 + Apresentar (PDF/img) | Publicador | `sessions` + jsPDF | Gate: Pro |
 | Live class ops: start/end class, roster, live registration, guest results | Quadro ao Vivo | `class_executions`, `results_v2`, `tv_state` | Gate: Pro (TV system) |
 | TV slide control + timer push + group rotation | Quadro ao Vivo | `tv_state` | Gate: Pro (TV system) |
-| Gym identity (name/modalidade/logo) + theme selection (4 themes; #43 adds 2 more themes = 4 more `html.theme-*` classes) | Configurações | `settings` | core / themes = Pro candidate |
+| Gym identity (name/modalidade/logo) + theme selection (8 themes — #43/plans/87 shipped 2026-09-13, adding Halo Reach + Common) | Configurações | `settings` | core / themes = Pro candidate |
 | State backup/restore (Salvar/Carregar/Limpar estado, Sincronizar) | Configurações → Dados | all blobs | core |
 
 ## Infrastructure capabilities (invisible but gateable)

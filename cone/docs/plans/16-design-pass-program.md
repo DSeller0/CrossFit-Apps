@@ -1,5 +1,12 @@
 # 16 — Design-pass program (umbrella)
 
+> ✅ **PROGRAM CLOSED 2026-09-13 · [plans/87](./87-new-themes.md) · `9004a12`+`43d448c`+`c17cac1`+
+> `d99cc30`+`be66a5e`+`1094cb0` — see BACKLOG.md.** #43 was the last open row (table below); Halo
+> Reach + Common shipped as 4 new `html.theme-*` classes, Lane B, mockup-approved before any code.
+> Every session B1 through C6 plus #43 is now ✅ — the **12** rows in the table below (B1–B4, C0–C6,
+> #43; C5 and C2 each grew real sub-sessions of their own, tracked at their own rows, not recounted
+> here). The program ran **2026-07-09 → 2026-09-13**, just over two months.
+
 > **Program doc, not a single-session plan.** Sessions #49–#59 each get their own `plans/NN` when promoted to Ready (2–3 at a time, per WORKFLOW). Born from the 2026-07-09 planning session that restructured #27+#28; analysis in [reviews/2026-07-09-design-benchmark.md](../reviews/2026-07-09-design-benchmark.md).
 
 ## Context
@@ -23,7 +30,7 @@ carried prerequisites that were long satisfied and an Agenda assignment that mov
 | C4 | Criador | #58 | L | ✅ [plans/37](./37-design-c4-criador.md) | #26 decomposition ([plans/35](./35-criador-decomposition.md)) + #92 text mode ([plans/36](./36-criador-text-mode.md)) ran first, as required. Standard + the 2026-07-21 layout brief. |
 | C5 | Publicador **+ Agenda** | #59 | L | ✅ **[plans/81](./81-design-c5-publicador-agenda.md) · [plans/82](./82-c5b1-publicador-shell-e-cores.md) · [plans/83](./83-c5b2-publicador-renderer.md)**, shipped 2026-09-04 (last piece: C5·b2/plans/83) | ⚠️ **LANE B, both surfaces** (user-confirmed — see rule 1). ✅ #25 prerequisite satisfied ([plans/39](./39-publicador-decomposition.md), `e957b57`). Split: **Phase 0** (dead `MicButton` + 3 one-line bugs) → **C5·a Agenda** (closed #105/#106) → **C5·b Publicador** (b1 shell+colour, b2 the parametric renderer — closed #113, #170, #15; deleted the `.b*` zoo; `index.css` ends with zero `TAB-OWNED → Publicador` tags). Both halves of this row's own scope — Publicador and Agenda — are done. ⚠️ **C5·c (Relatório + #154, [plans/81 §C5·c](./81-design-c5-publicador-agenda.md)) was NOT part of this row's scope** (the row title never named Relatório) but shipped anyway, 2026-09-04, tracked on its own in BACKLOG.md — it never blocked #43 or this row's ✅, and plans/81 now carries its own top-level Done marker covering all four sessions. |
 | C6 | **TvController (SPA) + timer.html** | #174 | L | ✅ [plans/86](./86-tv-timer-surface-pass.md), shipped 2026-09-06 | ⚠️ **THIS ROW DID NOT EXIST UNTIL THE SESSION SHIPPED, AND THAT IS THE FINDING.** The program's table went C0→C5 with **no C-session for `TvController`** — the SPA tab that runs a live class — and B4 covered `tv.html`/`timer.html` in 2026-07 *before the C0 primitives existed*, so neither surface was ever measured against the standard. The cost was not cosmetic: `Quadro ao Vivo` was **illegible on both light themes** (`--cream` ink on a hardcoded `#111`, measured **1.04:1** / **1.00:1**) and the tab held the worst a11y ratio in the app (21 buttons · 0 `aria-label` · 5 click-`<div>`s, the whole date picker keyboard-unreachable). 🔑 **A surface absent from the program's own table is invisible to it** — when adding a program, enumerate the surfaces from the router/tab list, not from the sessions you already intend to run. **Lane A** (only its execution was wrong) — ⚠️ **but the usage half of that argument was WRONG for one of its three surfaces, confirmed by the user 2026-09-13: `Quadro ao Vivo` is still not used live.** The plan justified Lane A with *"TV and Timer are used at the gym every day"* and argued past the C5 addendum (*a defect obvious on first use, left unreported for weeks, is evidence about usage*) by saying the illegibility hid on a theme the box never selects. The simpler explanation — nobody opens the tab — was available and unexamined; **the addendum was right and got talked out of.** 🔑 **A usage premise is per-SURFACE, not per-plan**: `timer.html` and the `tv.html` wall really are in daily use, and bundling the unused controller tab with them let the weak half inherit the strong half's evidence. Check each surface's usage separately — #171 and #191 both target this directory. Rides #178, #182, #184, #188; the clock rewrite stays #191's. |
-| — | #43 themes | #43 | L | 🔵 **resume point** | Only after B/C: token-clean codebase, verified under 4 themes per page. C5 (all four sessions, incl. C5·c/#154) is fully done, and **C6 shipped 2026-09-06**. ⚠️ **This cell read "#43 is the program's only remaining item" from 2026-09-04, while `TvController` had never had a session at all** — the claim was true about the *table* and false about the *app*, which is exactly how C6 stayed invisible. It is accurate now. #43 inherits a codebase where all four themes are measured: sb-light's `--green` was the last failing cell and C6 fixed it. |
+| — | #43 themes | #43 | L | ✅ [plans/87](./87-new-themes.md), shipped 2026-09-13 | **The program's last row, closed.** Lane B (mockup-approved 2026-09-13): `design/mockups/65-halo-reach-theme.html`/`66-common-theme.html`. Halo Reach's palette came from pixels sampled off a real menu screenshot (halopedia), not memory — v1 guessed mono headings and a cool-tinted text colour, both wrong, corrected against the measurement; Common was de-tinted to true neutral after reading too close to Halo Reach. 4 new `html.theme-*` classes, 8 themes total, each exactly 29 tokens; `--border` derived per palette; every one of #14's 9 pairs plus 3 later-load-bearing cells passes in all four — no exception needed, unlike any of the original four. `lb_colors` table dropped in the same session (#60). Two hardcoded "4 themes" guards (`exportPalette.js`, `build-design-cards.mjs`) caught real wiring gaps exactly as built to; the second now cross-checks `theme.js`'s `THEMES.length` instead of a literal, so it can't go stale at theme #9. |
 
 > 🔑 **C2 GREW A TAIL — three follow-on rows, added 2026-08-28.** C2 was planned and built to its
 > gate, at which point the user took the two design directions to a coach and settled on **mockup 51
@@ -92,6 +99,9 @@ any more; nothing has been picked from Ready yet.
 > holdout — to JSX over `ui/Modal`/`Input`/`Button`/`Toast`. **All four C5 sessions are now shipped;
 > plans/81 carries its own top-level Done marker.** #43 remains the one item left in this program.
 >
+> ✅ **#43 SHIPPED 2026-09-13 → [plans/87](./87-new-themes.md).** The program's last item is closed;
+> see the Done marker at the top of this file.
+>
 > 🔑 ~~THE RESUME POINT IS NOW C5 (#59) — the LAST design-pass session.~~ C3 closed 2026-08-30.
 > ~~**The resume point is now C3 (#57) → C5 (#59).**~~ Both were unblocked: plans/44 left
 > `Resultados.jsx` a 27-line shell over `resultados/`, and plans/39 left C5 inheriting
@@ -142,6 +152,18 @@ any more; nothing has been picked from Ready yet.
    > ⚠️ **AMENDED 2026-09-06 — the live-region half is no longer wholly excluded.** [plans/86](./86-tv-timer-surface-pass.md) (C6) absorbed it for its own two surfaces: the timer announces **state transitions** via `role="timer"` (start / pause / round advance / finish) and the ClassPanel roster took `aria-live="polite"`. The exclusion was written to stop surface sessions being open-ended, and that still holds as the default — but a surface **whose entire content is a live region** cannot be design-passed without deciding its announcement contract, and deferring it would have shipped a timer that says nothing. 🔑 The line that makes this bounded rather than a re-opening: **announce transitions, never the tick.** A 250 ms clock inside `aria-live` is continuous speech; `role="timer"` is implicitly `aria-live="off"` and names the element without narrating it. Everything else in this residue — site-wide landmarks, headings, and live regions on surfaces that merely *contain* one — stays out of surface sessions.
 
 ## Acceptance (program-level)
-- Every surface shipped or explicitly deferred with a reason (the #27 bar).
+- Every surface shipped or explicitly deferred with a reason (the #27 bar). ✅ All 12 rows in the
+  table above are ✅.
 - `src/public` hardcoded hex ≈ 0 (minus exemptions); public rounded-rects = 0.
-- #43 can add a theme by touching only `themes.css` + Configurações.
+- ⚠️ **#43 can add a theme by touching only `themes.css` + Configurações — PARTIALLY TRUE, tested
+  against reality rather than assumed.** The theme *mechanism itself* needed exactly that (plus
+  `theme.js`'s `THEMES` array, which the bar implicitly required since Configurações reads from
+  it) — rendering, resolution, the FOUC boot script and `?box=` precedence all worked end-to-end
+  with just those three touched. But **two more files needed a matching update, and correctly
+  refused to work silently without one:** `exportPalette.js` maintains its own literal-hex
+  `THEME_TOKENS` table (deliberately not importing `themes.css`, since it must stay client-free)
+  and throws at import time if it's missing a row for a theme `theme.js` knows about;
+  `build-design-cards.mjs` asserts the two files agree on how many themes exist. Both are
+  independent "which themes exist" tables that exist for their own reasons — not gaps in the
+  bar's premise, but real additional touch points a future theme #9 should expect, not assume
+  away. Full account: [plans/87](./87-new-themes.md)'s Done marker.
