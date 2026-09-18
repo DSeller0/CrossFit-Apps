@@ -141,11 +141,30 @@ export function resolveExportThemeId({ settings = {}, box = null } = {}) {
   return resolveTheme({ settings })
 }
 
+// #195a/plans/88 — html2canvas@1.4.1 can't parse `color-mix()` and throws on every
+// mobile export, which used it (inline, in mobileExportViews.jsx) to tint a role at
+// partial opacity. `color-mix(in srgb, COLOR P%, transparent)` is just COLOR at P%
+// alpha, so a literal `rgba()` is the same pixel with no function the rasteriser
+// chokes on. Module-local: not a role (`EXPORT_ROLES` stays 8 — this is a function OF
+// a role, never a 9th one), exported only so the arithmetic itself is unit-testable.
+export function hexToRgba(hex, pct) {
+  const clean = hex.replace('#', '')
+  const full = clean.length === 3 ? clean.replace(/./g, c => c + c) : clean
+  const r = parseInt(full.slice(0, 2), 16)
+  const g = parseInt(full.slice(2, 4), 16)
+  const b = parseInt(full.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${pct / 100})`
+}
+
 // The literal 8-role palette for one resolved theme id, with `custom` (the device-
 // local "Personalizado" overrides, `cone_export_custom`) applied on top role by role.
 // An unknown/retired theme id falls through to DEFAULT_THEME rather than being
 // applied — the same rule resolveTheme itself documents, for the same reason: a
 // `theme-<garbage>` id must never silently paint an export in nothing.
+//
+// Also appends two DERIVED tints (`--a-hdr-tint`/`--a-int-edge`) the mobile exports
+// need — derived here, not stored as roles, so a customised `--a-hdr` moves its tint
+// with it instead of freezing at whatever it was when Personalizado was last saved.
 export function resolveExportPalette({ themeId, custom } = {}) {
   const id = isTheme(themeId) ? themeId : DEFAULT_THEME
   const tokens = THEME_TOKENS[id]
@@ -153,6 +172,8 @@ export function resolveExportPalette({ themeId, custom } = {}) {
   for (const { role, token } of EXPORT_ROLES) {
     palette[role] = (custom && custom[role]) || tokens[token]
   }
+  palette['--a-hdr-tint'] = hexToRgba(palette['--a-hdr'], 12)
+  palette['--a-int-edge'] = hexToRgba(palette['--a-int'], 25)
   return palette
 }
 

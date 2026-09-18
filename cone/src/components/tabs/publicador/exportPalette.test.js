@@ -6,6 +6,7 @@ import {
   resolveExportPalette,
   legacyColorsToCustom,
   hasNonDefaultLegacyColors,
+  hexToRgba,
 } from './exportPalette.js'
 
 describe('EXPORT_ROLES', () => {
@@ -30,9 +31,10 @@ describe('EXPORT_ROLES', () => {
 describe('resolveExportPalette', () => {
   it('returns literal hex for every role, never var(--…)', () => {
     const palette = resolveExportPalette({ themeId: 'totk-dark' })
-    expect(Object.keys(palette)).toHaveLength(8)
-    Object.values(palette).forEach(v => {
-      expect(v).toMatch(/^#[0-9a-fA-F]{6}$/)
+    // 8 roles + the 2 derived tints (#195a) — not var(--…) either, see below.
+    expect(Object.keys(palette)).toHaveLength(10)
+    EXPORT_ROLES.forEach(({ role }) => {
+      expect(palette[role]).toMatch(/^#[0-9a-fA-F]{6}$/)
     })
   })
 
@@ -65,6 +67,38 @@ describe('resolveExportPalette', () => {
     })
     expect(palette['--a-hdr']).toBe('#ff00ff')
     expect(palette['--a-bg']).toBe('#0d0b09') // untouched role still the theme's value
+  })
+})
+
+describe('hexToRgba (#195a — the color-mix() replacement html2canvas can parse)', () => {
+  it('converts a 6-digit hex + pct to the exact literal rgba() color-mix(in srgb, …, transparent) means', () => {
+    expect(hexToRgba('#4ac8c0', 12)).toBe('rgba(74, 200, 192, 0.12)')
+    expect(hexToRgba('#d8a840', 25)).toBe('rgba(216, 168, 64, 0.25)')
+  })
+
+  it('expands a 3-digit hex', () => {
+    expect(hexToRgba('#fff', 50)).toBe('rgba(255, 255, 255, 0.5)')
+  })
+})
+
+describe('resolveExportPalette — derived tints (#195a)', () => {
+  it('always carries the two derived keys alongside the 8 roles', () => {
+    const palette = resolveExportPalette({ themeId: 'totk-dark' })
+    expect(palette['--a-hdr-tint']).toBe(hexToRgba(palette['--a-hdr'], 12))
+    expect(palette['--a-int-edge']).toBe(hexToRgba(palette['--a-int'], 25))
+  })
+
+  it('a customised --a-hdr moves its tint with it, rather than freezing', () => {
+    const palette = resolveExportPalette({
+      themeId: 'totk-dark',
+      custom: { '--a-hdr': '#ff00ff' },
+    })
+    expect(palette['--a-hdr-tint']).toBe('rgba(255, 0, 255, 0.12)')
+  })
+
+  it('EXPORT_ROLES stays at 8 — the derived tints are not customisable roles', () => {
+    expect(EXPORT_ROLES).toHaveLength(8)
+    expect(EXPORT_ROLES.some(r => r.role.endsWith('-tint') || r.role.endsWith('-edge'))).toBe(false)
   })
 })
 

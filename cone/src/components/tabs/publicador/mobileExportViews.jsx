@@ -33,7 +33,7 @@ function MobileBlock({ bl, fs, blockContent = DEFAULT_BLOCK_CONTENT }) {
     <div style={{ borderBottom: '1px solid var(--a-div)' }} data-fitblock>
       <div
         style={{
-          background: 'color-mix(in srgb, var(--a-hdr) 12%, transparent)',
+          background: 'var(--a-hdr-tint)',
           padding: `${Math.round(10 * f)}px ${pad}px ${Math.round(6 * f)}px`,
           borderTop: '2px solid var(--a-hdr)',
         }}
@@ -185,7 +185,7 @@ function MobileBlock({ bl, fs, blockContent = DEFAULT_BLOCK_CONTENT }) {
                             fontWeight: 700,
                             color: 'var(--a-int)',
                             background: 'rgba(0,0,0,0.35)',
-                            border: '1px solid color-mix(in srgb, var(--a-int) 25%, transparent)',
+                            border: '1px solid var(--a-int-edge)',
                             borderRadius: '3px',
                             padding: `${Math.round(2 * f)}px ${Math.round(8 * f)}px`,
                             marginTop: mfs(3, f),
@@ -245,7 +245,7 @@ function MobileBlock({ bl, fs, blockContent = DEFAULT_BLOCK_CONTENT }) {
                       fontWeight: 700,
                       color: 'var(--a-int)',
                       background: 'rgba(0,0,0,0.35)',
-                      border: '1px solid color-mix(in srgb, var(--a-int) 25%, transparent)',
+                      border: '1px solid var(--a-int-edge)',
                       borderRadius: '3px',
                       padding: `${Math.round(2 * f)}px ${Math.round(8 * f)}px`,
                       marginTop: mfs(3, f),
@@ -565,7 +565,7 @@ function MegaManBlock({ bl, fs, blockContent = DEFAULT_BLOCK_CONTENT }) {
     <div style={{ borderBottom: '1px solid var(--a-div)' }} data-fitblock>
       <div
         style={{
-          background: 'color-mix(in srgb, var(--a-hdr) 12%, transparent)',
+          background: 'var(--a-hdr-tint)',
           padding: `${Math.round(10 * f)}px ${pad}px`,
           borderTop: `${Math.max(2, Math.round(3 * f))}px solid var(--a-hdr)`,
           display: 'flex',
@@ -722,7 +722,7 @@ function MegaManBlock({ bl, fs, blockContent = DEFAULT_BLOCK_CONTENT }) {
                             fontWeight: 700,
                             color: 'var(--a-int)',
                             background: 'rgba(0,0,0,0.35)',
-                            border: '1px solid color-mix(in srgb, var(--a-int) 25%, transparent)',
+                            border: '1px solid var(--a-int-edge)',
                             borderRadius: '3px',
                             padding: `${Math.round(2 * f)}px ${Math.round(8 * f)}px`,
                             marginTop: mfs(3, f),
@@ -782,7 +782,7 @@ function MegaManBlock({ bl, fs, blockContent = DEFAULT_BLOCK_CONTENT }) {
                       fontWeight: 700,
                       color: 'var(--a-int)',
                       background: 'rgba(0,0,0,0.35)',
-                      border: '1px solid color-mix(in srgb, var(--a-int) 25%, transparent)',
+                      border: '1px solid var(--a-int-edge)',
                       borderRadius: '3px',
                       padding: `${Math.round(2 * f)}px ${Math.round(8 * f)}px`,
                       marginTop: mfs(3, f),
@@ -883,7 +883,7 @@ function MobileWeeklySingleDay({ date, sessions, f, blockContent = DEFAULT_BLOCK
               <div key={bl.id} data-fitblock>
                 <div
                   style={{
-                    background: 'color-mix(in srgb, var(--a-hdr) 12%, transparent)',
+                    background: 'var(--a-hdr-tint)',
                     padding: `${Math.round(6 * f)}px ${pad}px`,
                     display: 'flex',
                     alignItems: 'center',
