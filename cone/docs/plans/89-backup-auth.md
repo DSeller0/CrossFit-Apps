@@ -1,5 +1,33 @@
 # 89 — `backup-supabase.mjs` reads 4 of its 9 tables as empty and exits 0 (#199)
 
+> ✅ Done: `99402c7` · 2026-09-18 — see BACKLOG.md
+>
+> **First complete backup since 2026-06-24: `backups/2026-09-18_16-05-25/`** — 9 of 9 `ok`,
+> `manifest.complete: true`, `auth: service-role`. Without the key the run exits 1 and names
+> `events, locations, coach_profile, templates` (the regression test, run first).
+>
+> **Two additions the plan didn't list.** (1) `assertServiceRole` rejects a `SUPABASE_SERVICE_ROLE_KEY`
+> whose JWT `role` isn't `service_role` (or isn't a recognisable key) — a wrongly pasted anon key would
+> otherwise put the run in service-role mode over tables that read back null, re-creating the exact
+> silent-empty this plan ends. (2) A no-key run still writes the tables it *can* read, but flags the
+> manifest `complete: false` and exits 1, rather than writing nothing.
+>
+> **Verification step 4's expectations were wrong about the data, not the script.** The plan expected
+> a Pix key in `coach_profile` and a `rateHistory` on `locations`. Prod has neither: `coach_profile` is
+> `{name, phone:'', contact:''}` — byte-for-byte the same shape as the June backup, last touched
+> 2026-07-27 — and all four locations carry `rate: 0` with no `rateHistory` (`locations` last written
+> 2026-08-31, four days *before* #154 shipped, so nothing has ever minted a version). So nothing was
+> lost to the blind backup on those two; the rates simply have never been entered in prod. Recovered
+> content: `events` 281 (65 days, 2026-06-01 → 2026-09-30; 13 carry a `rateSnapshot`; June's backup
+> had 102), `templates` 3, `sessions` 152 (June: 15), `athletes` 23 (June: 9) — every June session
+> and athlete id is still present.
+>
+> **Hand-off to #88:** `seed-dev.mjs` has the same anon-key blindness; the pattern here (merge
+> `.env.local` over the env file, pick the key by mode, classify `ok`/`empty`/`unreadable`, fail
+> non-zero) transfers directly. Left alone deliberately — it writes to the local stack and needs its
+> own verification. ⚠️ Not covered by this or any backup: **`results_v2`** (the normalized results
+> table, where athletes' logged results live) is not in `TABLES` — filed as **#201**.
+
 ## Context
 
 **There has been no complete backup of this app since 2026-06-24.**
