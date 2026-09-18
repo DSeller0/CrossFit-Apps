@@ -1,5 +1,43 @@
 # 91 — Untargeted sessions reach their audience (#164)
 
+> ✅ Done: `af88d4b` · 2026-09-18 — see BACKLOG.md · closes #164.
+>
+> **Real data (prod `results_v2` + the `2026-09-18_16-05-25` backup's sessions/athletes/locations,
+> today = 2026-09-18, scratchpad script, not committed).** Scopes: 12 `{Sem box}` · 9 `{Eagles}` ·
+> Arthur `{Eagles, Test Box 00, Sem box}` · Rodrigo M `{Test Box 00, Sem box, <a box id no location
+> carries>}` (a session tagged with a since-deleted box). **Grade: Hoje = 23 of 23** (every scope runs
+> today, as the plan predicted; before: 23 of 23 under *Sem sessão marcada*). **Adherence non-null:
+> 23 of 23** (before: 0 of 23), mostly `0%`: prescribed, nothing logged. Arthur's Presença:
+> 9 `presente` · 13 `sem registro` · 6 `none`. His "Desde o último 1:1" (anchor 31/08): 22 unlogged
+> prescribed sessions, 0 before.
+>
+> **Live-verified on the local stack** (reseeded from prod; the backup's `locations` upserted with the local
+> service-role key): the grade and the Eagles/no-box ADERÊNCIA (Paulo 15%↓, Stefaní 37%↑); Arthur's ficha;
+> me.html WOD bars with and without `?box=<eagles>` (Stefaní For Time 5/14); Publicador's filter (Esther,
+> Eagles only, gets only Eagles sessions; Stefaní gets only Sem box sessions). schedule.html (mobile day list)
+> and results.html (`?id=` lock) on the week of 13/07: the page text hashes to the same value with the old
+> forks stashed and with the new code, for an athlete on the named sessions and for one who isn't.
+>
+> **Code review (medium): one finding, deliberately kept.** An athlete in several scopes is prescribed
+> every scope's untargeted class. Someone who attends one class a day scores ~1/N adherence, and
+> "Desde o último 1:1" lists the other class as missed. That is rule 3 as settled with the user, so it
+> ships as written. On real data it affects 2 of 23 athletes, and it is filed as **#205**.
+>
+> **Newly visible, filed as #204:** me.html's Distribuição now renders `0/46`-style bars for everyone.
+> `results_v2` only ever logs WOD block types (prod: AMRAP/For Time/MetCon/Estações/EMOM/Benchmark), so
+> the executed side for Força/LPO/etc. is structurally 0. #164 didn't cause it. It was hidden while
+> planned was 0.
+>
+> **Deviations:** registered scopes count only `type === 'box'` locations. A personal location carries
+> `athleteIds` too, but can never tag a session, so counting it would cost a personal client their
+> Sem box default. The SessionMetaModal copy names the boxes ("Todos os atletas de Eagles e Garra", "…do Sem box") and
+> says "Ninguém enquanto oculta" for a hidden draft, which is rule 5. A gallery case covers the tagged
+> variant. Out of scope, as planned: `dupSession`'s `mainTraining: ''`, `executed` not checking
+> prescription (folded into #205), and name-keyed `mainTraining` breaking on a rename.
+> Also found: `seed-dev.mjs`'s `results_v2` upsert (`onConflict: 'id'`) fails on the
+> `(athlete_id, session_id)` key once local and prod ids diverge, which is #190's shape in the script.
+
+
 > Promoted from Icebox P1 on 2026-09-18, together with [plans/92](./92-publicador-settings-debounce.md)
 > and [plans/93](./93-focus-visible.md). A full `/app-review` pass runs once all three ship. The
 > consumer map below was re-measured against the tree and the `2026-09-18_16-05-25` backup that day.

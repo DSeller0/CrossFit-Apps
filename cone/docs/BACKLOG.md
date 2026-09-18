@@ -16,7 +16,7 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready (pick from the top):** plans/91 (#164) → plans/92 (#181) → plans/93 (#182) — promoted 2026-09-18, one session each.
+- **Ready (pick from the top):** plans/92 (#181) → plans/93 (#182) — promoted 2026-09-18, one session each. plans/91 (#164) shipped the same day.
 - **In Progress:** none.
 - **Also open, blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is
   held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code.
@@ -27,7 +27,6 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/91](./plans/91-untargeted-session-audience.md)** — **#164 Untargeted sessions reach their audience — revives 3 dead Atletas signals + me.html's bars** · M · Opus · 146 of 152 prod sessions carry no `mainTraining`, so `matchesAthlete` is always false. Rule settled 2026-09-18: an athlete's scopes = registered boxes ∪ scopes they've logged; a Sem box session reaches the no-box audience.
 - 🟢 **[→ Ready · plans/92](./plans/92-publicador-settings-debounce.md)** — **#181 Debounce Publicador's `settings` upsert, and flush on unmount** · S · Sonnet · one whole-blob upsert per keystroke; the Afiliados reference drops an edit made <500 ms before a tab switch (tabs unmount), so both get the flush.
 - 🟢 **[→ Ready · plans/93](./plans/93-focus-visible.md)** — **#182 A global `:focus-visible` ring + 10 outline-strippers + Criador's `--dim` focus borders** · S · Sonnet · keyboard focus vanishes on schedule/me/Criador controls; Criador's focus borders miss 3:1.
 
@@ -47,9 +46,10 @@ qualifies, something demotes; without the cap the tier degrades to "everything i
 *Refilled by the [2026-09-05 full pass](./reviews/2026-09-05.md), which hit the 8-row cap at once and
 demoted **#159, #156, #148 and #141** to P2 — still real, just outranked. Four of those P1 rows were then
 promoted into **plans/84** and **plans/86** the same day, and **#164** into **plans/91** on 2026-09-18,
-so only the blocked row is left here.*
+leaving only the blocked row until plans/91's close-out filed #204.*
 
 - ⏸ **#155 iOS Safari zooms the page when logging a result** · S · Sonnet · blocked on the user: `plans/74` shipped the 16px floor (`793ee45`, 2026-08-07) and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code until that comes back.
+- **#204 me.html's Distribuição reads 0/N for every athlete** · XS · Sonnet · `results_v2` logs only WOD block types, so `calcBlockStats`' executed side is structurally 0 for Força/LPO/Acessórios/Skill/Core/Cardio/Mobilidade. It was hidden until #164 made planned non-zero. Decide: hide the card until #64 logs strength blocks, or show planned only.
 
 ### P2 — queued (design program + measured layout rows)
 
@@ -75,6 +75,7 @@ so only the blocked row is left here.*
 
 ### P3 — needs a decision before it needs code
 
+- **#205 An athlete in several scopes is prescribed every scope's daily class** · S · Opus · #164's rule 3 (plans/91): Arthur and Rodrigo M (3 scopes each) score ~1/N adherence attending one class a day, and their 1:1 list shows the other class as missed. Needs a call first, e.g. on a day they attended one scope, prescribe only that one. Fold in `executed` not checking prescription.
 - **#201 `backup-supabase.mjs` doesn't back up `results_v2`, `class_executions` or `tv_state`** · S · Sonnet · found closing #199 (plans/89): `TABLES` is the 9 `id=1` KV blobs only, so athletes' logged results (the normalized table) are in no backup the repo takes. Needs a decision first — does the Supabase project have platform-level backups? If not, this is the largest unbacked-up dataset; the rows need paginated reads, not `.eq('id',1)`.
 - **#203 index.html: the session card and the ranking caption disagree on "N resultados"** · XS · Sonnet · decision first — `countFor` (`Index.jsx:155`) counts result **rows** per session, while #180 made the ranking caption count non-skipped **block entries**: an athlete present but marked "não fez" is in the card's 3, not the caption's 2. Probably right (a row is an athlete's session log) — then say so; otherwise align them.
 - **#194 Revoke `anon`'s `INSERT`/`UPDATE`/`DELETE` grants** · XS · Sonnet · needs a migration (**`0011`**, i.e. next free at ship time) and a scope call. Table-level write grants survive on most tables (incl. anon **DELETE** on `results_v2`/`class_executions`, against #7/`0003`'s intent), inert **only** because RLS denies. RLS itself verified sound 2026-09-05.
@@ -113,6 +114,7 @@ so only the blocked row is left here.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/91 · `af88d4b` · 2026-09-18](./plans/91-untargeted-session-audience.md)** — **#164 Untargeted sessions reach their audience** · closed #164. · An athlete's scopes = registered boxes ∪ scopes they've logged. Atletas' grade, ADERÊNCIA, Presença and 1:1 plus me.html's bars now work on real data: adherence non-null 0 → 23 of 23, all 23 under Hoje as predicted. Filed #204, #205.
 - ✅ **[plans/90 · `6dcc7da` · 2026-09-18](./plans/90-quick-wins-batch.md)** — **#183 + #180 + #189 + #193 + #200 Quick-wins batch** · closed #183, #180, #189, #193, #200. · `WeeklyExportView` + 12 CSS classes deleted; Index caption skips "não fez"; `ExCard` hoisted (search stops remounting the grid); 5 `toISO` imports off the SPA client; `design:cards` clock-free bar #202. #200's planned fix was wrong — see the marker. Filed #202, #203.
 - ✅ **[plans/89 · `99402c7` · 2026-09-18](./plans/89-backup-auth.md)** — **#199 `backup-supabase.mjs` reads 4 of 9 tables as empty and exits 0** · closed #199. · Reads with the service-role key from the untracked `cone/.env.local`; an unreadable table now names itself and exits non-zero (a wrong-role key is rejected too). First complete backup since 2026-06-24: `2026-09-18_16-05-25`, 9 of 9. Prod has no Pix key or `rateHistory` yet, so nothing was lost there. Filed #201.
 - ✅ **[plans/88 · `27e27e5` · 2026-09-18](./plans/88-mobile-export-colormix.md)** — **#195a Unbreak the mobile exports — `color-mix()` in the rasterised tree** · closed #195a. · The 7 `color-mix()` inline styles in `mobileExportViews.jsx` (html2canvas 1.4.1 can't parse the function) are now two derived literal-`rgba()` tints (`--a-hdr-tint`/`--a-int-edge`) computed in `resolveExportPalette` — `EXPORT_ROLES` stays at 8, a customised `--a-hdr` still carries its tint. Live-verified: Dia mobile + Semana mobile both threw 100% of the time before, both produce a real PNG now (default + a customised theme), desktop Dia/Semana/Mês unaffected.
