@@ -16,18 +16,20 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready (pick from the top):** none — plans/88 (#195a), plans/89 (#199) and plans/90 (#183 + #180 + #189 + #193 + #200) all shipped 2026-09-18.
+- **Ready (pick from the top):** plans/91 (#164) → plans/92 (#181) → plans/93 (#182) — promoted 2026-09-18, one session each.
 - **In Progress:** none.
 - **Also open, blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is
   held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code.
-- **Next refill:** Icebox **P1** — **#164** is next and its blocking decision is now recorded on the
-  row. Last pass: [2026-09-05](./reviews/2026-09-05.md).
+- **Next refill:** a full **`/app-review`** pass once plans/91–93 ship — Ready empties then. Last
+  pass: [2026-09-05](./reviews/2026-09-05.md).
 
 ---
 
 ## 🟢 Ready (planned — pick from the top)
 
-*(empty)*
+- 🟢 **[→ Ready · plans/91](./plans/91-untargeted-session-audience.md)** — **#164 Untargeted sessions reach their audience — revives 3 dead Atletas signals + me.html's bars** · M · Opus · 146 of 152 prod sessions carry no `mainTraining`, so `matchesAthlete` is always false. Rule settled 2026-09-18: an athlete's scopes = registered boxes ∪ scopes they've logged; a Sem box session reaches the no-box audience.
+- 🟢 **[→ Ready · plans/92](./plans/92-publicador-settings-debounce.md)** — **#181 Debounce Publicador's `settings` upsert, and flush on unmount** · S · Sonnet · one whole-blob upsert per keystroke; the Afiliados reference drops an edit made <500 ms before a tab switch (tabs unmount), so both get the flush.
+- 🟢 **[→ Ready · plans/93](./plans/93-focus-visible.md)** — **#182 A global `:focus-visible` ring + 10 outline-strippers + Criador's `--dim` focus borders** · S · Sonnet · keyboard focus vanishes on schedule/me/Criador controls; Criador's focus borders miss 3:1.
 
 ## 🔵 In Progress
 
@@ -44,15 +46,13 @@ qualifies, something demotes; without the cap the tier degrades to "everything i
 
 *Refilled by the [2026-09-05 full pass](./reviews/2026-09-05.md), which hit the 8-row cap at once and
 demoted **#159, #156, #148 and #141** to P2 — still real, just outranked. Four of those P1 rows were then
-promoted into **plans/84** and **plans/86** the same day, so what is left here is the tail.*
+promoted into **plans/84** and **plans/86** the same day, and **#164** into **plans/91** on 2026-09-18,
+so only the blocked row is left here.*
 
 - ⏸ **#155 iOS Safari zooms the page when logging a result** · S · Sonnet · blocked on the user: `plans/74` shipped the 16px floor (`793ee45`, 2026-08-07) and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code until that comes back.
-- 🔴 **#164 Three of the Atletas grade's four signals are structurally dead on real data** · M · Opus · `getTargets` returns `[]` without `s.mainTraining` (`lib/sessions.js:35-38`), so `matchesAthlete` is always false — ADERÊNCIA `—` on 100% of cards, Presença 28 blank cells, and `calcBlockStats` zeroes me.html's bars too. ✅ **Decided 2026-09-14: untargeted = everyone** (a session with no `mainTraining` is prescribed to every athlete in its box scope; one that has it keeps name matching) — change it in `sessions.js` so all consumers follow.
 
 ### P2 — queued (design program + measured layout rows)
 
-- **#181 `Publicador.jsx` upserts the whole `settings` blob on every keystroke** · S · Sonnet · `:167-202`'s deps include `gymName`/`titles`/`footer`, wired per-keystroke. Mount-guarded (so #76/#109/#111 is closed) but **not debounced**, which is CLAUDE.md's rule for this shape; `afiliados/Afiliados.jsx:105-116` is the reference.
-- **#182 No global `:focus-visible`, and 10 selectors still strip the outline with nothing behind it** · S · Sonnet · **narrowed by plans/86** — `tvController.module.css` is now 0 `outline:none` with the canonical ring on every interactive class. What is left: `Schedule.module.css:49,162,272`, `Me.module.css:310-312`, `index.css:365,399,401`, no global `:focus-visible`, and Criador's `--dim` focus borders missing 3:1 in 3 of 4 themes.
 - **#184 17 dead CSS classes across 7 `.module.css` files + 11 zero-consumer selectors in `index.css`** · XS · Sonnet · **narrowed by plans/86**, which deleted the two worst (`tv/TV.module.css` 24, the pre-`ExerciseList` rows; `timer/Timer.module.css` 13, the `bm*` picker) — 37 of the original 54. The tail is small and spread thin; the other 30 module files are 0 dead. ✅ **Unblocked:** #183 shipped ([plans/90](./plans/90-quick-wins-batch.md)) and took its 12 classes with it, so the count can be re-measured.
 - **#185 The public-page mount loader is duplicated across five pages** · S–M · Sonnet · identical `registerSW()`+`load()`+`pageshow` handler + retry ladder in Index/Leaderboard/Me/Results/Schedule. 🔑 **5 of the 7 bare eslint disables cluster here** — a `usePublicPageLoad({fetch})` hook collapses the policy and the disables together.
 - **#186 The dialog focus trap is implemented three times with a real selector divergence** · S · Sonnet · `public/shared/Modal.jsx:48-90`, `shared/ConfirmReview.jsx:63-110` (near byte-identical) and `me/Sheet.jsx:29-53`. The first two use `:disabled`; `Sheet.jsx:4-5` uses the **`[disabled]` attribute**, which misses a control disabled by an ancestor `<fieldset disabled>`.
