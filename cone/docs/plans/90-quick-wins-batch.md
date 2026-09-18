@@ -1,5 +1,32 @@
 # 90 — Quick-wins batch (#183 · #180 · #189 · #193 · #200)
 
+> ✅ Done: `6dcc7da` · 2026-09-18 — see BACKLOG.md · closes #183, #180, #189, #193, #200.
+>
+> **Deviation on #200 — Approach step 1 as written would have been wrong.** It says to swap
+> `Date.now() - 95000` for a fixed epoch minus 95 s. But `slides.jsx:38-41`'s `elapsedSecs` computes
+> `Date.now() - timer_started_at` itself, so *any* `timer_started_at` makes the ring read the wall clock;
+> a fixed epoch makes "elapsed" years, `isFinished` flips true, and the card changes from `01:35` to
+> `TIME!` while still passing "two runs, no diff". Shipped instead: the case is a **paused** state
+> (`timer_started_at: null`, `timer_paused_elapsed: 95`), which `TimerSlide` draws identically — the only
+> running-vs-paused difference is the live 250 ms tick, and SSR never runs effects. `tvTimerRunning` →
+> `tvTimerAt95s`; the case label no longer says "rodando".
+>
+> **The acceptance test was too weak, so it was strengthened.** "Twice in a row → no diff" also holds for
+> anything that drifts once a day. Regenerating with the system clock shifted +40 d 7 h changes exactly two
+> things: `README.md`'s `regenerated <date>` stamp (deliberate) and `afiliados.html`'s "enviada" date
+> (`afiliados.jsx:193`'s `Date.now()`, deliberate too — filed **#202**). `tv.html` is identical across the shift.
+>
+> **Also in the diff, not in the plan:** `DSHORT` (`utils/config.js`) deleted — `WeeklyExportView` was its
+> last importer; `exportHelpers.test.js` loses its `vi.mock` of `utils/storage` (importing without it is now
+> the guard); `publicador.html` moved by two `--a-*` props that #195a's commit never regenerated; the other
+> 14 changed cards are purely the 12 deleted classes leaving the inlined CSS bundle.
+>
+> **Verified live against HEAD, not just built:** #180 — with a session of two real results + one "não fez"
+> (intercepted network), HEAD's caption read `3 resultados`, now `2`. #189 — holding a card's DOM node across
+> three keystrokes: destroyed on HEAD, same node after. Publicador — all five formats render and produce a
+> real html2canvas PNG (965 KB · 1.4 MB · 543 KB · 913 KB · 2.5 MB), 0 page errors; gallery — all 12
+> Publicador items render. Filed **#203**: the session card's `countFor` still says `3` beside the ranking's `2`.
+
 > Five XS rows, batched on the [plans/79](./79-post-162-cleanup.md) / [plans/84](./84-blockers-batch.md)
 > precedent: small rows ship safely together when **none blocks another**. Every one was
 > re-verified against the current tree on 2026-09-14 before this plan was written — two of the five
