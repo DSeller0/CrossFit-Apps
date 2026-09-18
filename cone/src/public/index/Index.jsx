@@ -166,12 +166,16 @@ export default function Index() {
           .filter(b => b.blockId === wod.id)
           .map(b => ({ ...b, name: nameById[r.athleteId] || '—' })),
       )
-    const ranked = rankResults(blockRes, wod.type).slice(0, 3)
-    const n = blockRes.length
+    // rankResults is where `skipped` (#157, "não fez") is filtered, so the count comes from
+    // ITS output — taken before the slice. Counting `blockRes` read a skipped athlete as a result.
+    const ranked = rankResults(blockRes, wod.type)
+    const n = ranked.length
     return {
       wodLabel: blkLabel(wod),
       wodMeta: [blkMeta(wod), `${n} resultado${n !== 1 ? 's' : ''}`].filter(Boolean).join(' · '),
-      rows: ranked.map(r => ({ name: r.name, scale: r.scale, perf: perfStr(r, wod.type) })),
+      rows: ranked
+        .slice(0, 3)
+        .map(r => ({ name: r.name, scale: r.scale, perf: perfStr(r, wod.type) })),
       href,
     }
   }, [selSess, weekResults, athletes, box])

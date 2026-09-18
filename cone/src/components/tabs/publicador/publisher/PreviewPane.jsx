@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { toISO } from '../../../../utils/storage'
-import { MONTH_PT, DAY_PT } from '../../../../public/lib/week.js'
+import { MONTH_PT, DAY_PT, toISO } from '../../../../public/lib/week.js'
 import { getWeeksOfMonth } from '../exportHelpers'
 import { describeOverflow, FIT_FLOOR_MESSAGE, FONT_SCALE_FLOOR } from '../fitCheck'
 import { FORMATS, isDayFormat } from './FormatRail'

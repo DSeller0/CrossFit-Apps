@@ -1,6 +1,5 @@
 import { exVolStr, groupProgressionSteps } from '../../../public/lib/wod.js'
-import { monthGridCells } from '../../../public/lib/week.js'
-import { toISO } from '../../../utils/storage'
+import { monthGridCells, toISO } from '../../../public/lib/week.js'
 
 export function buildProgressionLines(ex) {
   const steps = ex.intensity?.steps || []

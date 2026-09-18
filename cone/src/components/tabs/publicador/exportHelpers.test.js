@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import {
   buildProgressionLines,
   exLine,
@@ -10,15 +10,11 @@ import {
 
 // #59 · plans/81 Phase 0 — this file only became importable under vitest once
 // exportHelpers.js's module-scope `window.SpeechRecognition` read (the dictation hook
-// deleted here as dead code) stopped forcing the whole module to need jsdom. It still
-// imports toISO from utils/storage, which also constructs the SPA Supabase client at
-// module scope — real env vars aren't present under vitest, so that throws. storage.js's
-// toISO is just a re-export of week.js's, which has no such dependency, so the mock
-// hands back the real implementation.
-vi.mock('../../../utils/storage', async () => {
-  const week = await import('../../../public/lib/week.js')
-  return { toISO: week.toISO }
-})
+// deleted here as dead code) stopped forcing the whole module to need jsdom.
+// It used to also need a `vi.mock` of utils/storage (#193): exportHelpers.js took toISO from
+// there, which constructs the SPA Supabase client at module scope and throws without env
+// vars. It imports it from public/lib/week.js now, so this file importing at all — with no
+// mock — is the guard that the client-free import stays that way.
 
 describe('buildProgressionLines', () => {
   test('returns null when the exercise has no intensity steps', () => {

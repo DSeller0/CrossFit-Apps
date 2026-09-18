@@ -207,14 +207,21 @@ const slideSessions = { [SEL_DATE]: [slideSess] }
 const slideAthletes = cpAthletes
 const tvBlank = { slide: 'blank', date_key: SEL_DATE, session_id: 's1', show_qr: true }
 const tvWod = { ...tvBlank, slide: 'wod' }
-const tvTimerRunning = {
+// A For Time block 1:35 into a 12:00 cap, expressed as PAUSED elapsed rather than a start
+// timestamp (#200). slides.jsx's `elapsedSecs` computes `Date.now() - timer_started_at`, so
+// ANY started_at — even a fixed one — makes the SSR'd ring read the wall clock: the card's
+// stroke-dashoffset changed on every `design:cards` run, and a fixed epoch would have been
+// worse (years of "elapsed" flips the slide to TIME!). `timer_paused_elapsed` is read as-is,
+// and TimerSlide draws paused and running identically — only the live 250ms tick differs,
+// and SSR never runs effects.
+const tvTimerAt95s = {
   ...tvBlank,
   slide: 'timer',
   timer_block_id: 'b1',
   timer_type: 'For Time',
   timer_cap_secs: 720,
-  timer_started_at: Date.now() - 95000,
-  timer_paused_elapsed: 0,
+  timer_started_at: null,
+  timer_paused_elapsed: 95,
 }
 const tvResults = { ...tvBlank, slide: 'results' }
 const tvQr = { ...tvBlank, slide: 'qr', class_id: 'c-active' }
@@ -314,10 +321,10 @@ export default {
               />
             </TvCanvas>
           </Case>
-          <Case label="Timer — rodando">
+          <Case label="Timer — For Time em 1:35 de 12:00 (relógio fixo, não corre)">
             <TvCanvas>
               <TimerSlide
-                tv={tvTimerRunning}
+                tv={tvTimerAt95s}
                 sessions={slideSessions}
                 classExecs={[]}
                 athletes={slideAthletes}

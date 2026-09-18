@@ -1,7 +1,6 @@
-import { DSHORT, PLC, APP_CONFIG } from '../../../utils/config'
+import { APP_CONFIG } from '../../../utils/config'
 import { fmtIntensity, blkMeta, blockExercises } from '../../../public/lib/wod.js'
-import { MONTH_PT, DAY_PT } from '../../../public/lib/week.js'
-import { toISO } from '../../../utils/storage'
+import { MONTH_PT, DAY_PT, toISO } from '../../../public/lib/week.js'
 import {
   getWeeksOfMonth,
   exLine,
@@ -35,10 +34,6 @@ import css from './Publicador.module.css'
 // Family block-colouring (ECOL) is DROPPED here (plans/82 measurement 2: it fails the 3:1
 // bar on both light themes) — every block-header accent is `--a-hdr` now, uniformly, via
 // the 5 Blocos treatments (plans/83 T5, BlockHeader.jsx).
-// `WeeklyExportView` below is the one exception: it's on-screen chrome (the always-visible
-// week grid, never one of the 5 rasterised export targets — confirmed live, `doExport`
-// never selects `exportWeeklyRef`), not an export artefact, so it keeps its own literal chrome
-// colours rather than adopting `--a-*`.
 //
 // Every rendered block is tagged `data-fitblock` (T9, plans/83) — the one generic marker
 // fitCheck.js's measureFit() queries to estimate how many blocks a fixed canvas cuts off.
@@ -387,75 +382,6 @@ export function DailyExportView({
           )
         })}
       </div>
-    </div>
-  )
-}
-
-// ── WeeklyExportView — on-screen chrome only (never rasterised, see file header) ─────
-export function WeeklyExportView({ sessions, label, year, month, onDayClick }) {
-  const weeks = getWeeksOfMonth(year, month)
-  const monthName = MONTH_PT[month] + ' ' + year
-  const today = new Date()
-  return (
-    <div className={css.weeklyWrap}>
-      <div className={css.wkHeader}>
-        <div className={css.wkTitle}>
-          {'Grade de Treinos · '}
-          {monthName}
-        </div>
-        {label && <div className={css.wkSub}>{label}</div>}
-      </div>
-      <div className={css.wkColHeadRow}>
-        <div className={css.wkColHead} style={{ color: '#333', textAlign: 'center' }}>
-          WK
-        </div>
-        {DSHORT.map(d => (
-          <div key={d} className={css.wkColHead}>
-            {d}
-          </div>
-        ))}
-      </div>
-      {weeks.map((week, wi) => (
-        <div key={wi} className={css.wkWeekRow}>
-          <div className={css.wkWeekNum}>{wi + 1}</div>
-          {week.map((date, di) => {
-            const dateKey = toISO(date)
-            const inMonth = date.getMonth() === month
-            const daySessions = sessions[dateKey] || []
-            const s = daySessions[0] || null
-            const isToday = date.toDateString() === today.toDateString()
-            return (
-              <div
-                key={di}
-                className={`${css.wkDayCell} ${!s ? css.empty : ''}`}
-                onClick={s && onDayClick ? () => onDayClick(week, date) : undefined}
-              >
-                <div className={`${css.wkDayNum}${isToday ? ' ' + css.today : ''}`}>
-                  {inMonth ? date.getDate() : ''}
-                </div>
-                {s && (
-                  <div>
-                    <div className={css.wkDayTraining} style={{ color: inMonth ? '#ddd' : '#444' }}>
-                      {s.mainTraining || '—'}
-                    </div>
-                    <div className={css.wkDayBlocks}>
-                      {(s.blocks || []).slice(0, 4).map(bl => (
-                        <span
-                          key={bl.id}
-                          className={`wg-pill ${PLC[bl.type] || 'p-st'}`}
-                          style={{ fontSize: '9px', padding: '1px 5px' }}
-                        >
-                          {bl.type}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      ))}
     </div>
   )
 }

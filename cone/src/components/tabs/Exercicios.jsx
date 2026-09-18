@@ -50,6 +50,41 @@ function CmplIcons({ c }) {
   )
 }
 
+// One card in the Pane-2 grid. MODULE scope on purpose (#189): declared inside
+// ExerciciosTab's body its identity changed every render, so React unmounted and remounted
+// the whole grid on every keystroke in the search box. What it used to close over arrives as
+// props — `activeKey` (normExName of the exercise open in Pane 3; null for none or a new one),
+// `blocksOf` (registry lookup) and `onOpen` (goToEx).
+function ExCard({ ex, catContext, activeKey, blocksOf, onOpen }) {
+  const name = getExName(ex)
+  const c = completeness(ex)
+  const active = activeKey === normExName(name)
+  const filled = [c.cargas, c.video !== 'none', c.desc, c.musc, c.det].filter(Boolean).length
+  const tags = blocksOf(name).filter(b => b !== catContext)
+  return (
+    <button
+      type="button"
+      className={`${s.exCard}${active ? ' ' + s.exCardActive : ''}`}
+      style={{ '--fc': famColorOf(catContext || blocksOf(name)[0]) }}
+      onClick={() => onOpen(ex)}
+      title={`${filled} de 5 campos preenchidos`}
+    >
+      <span className={s.exCardName}>{name}</span>
+      <CmplIcons c={c} />
+      {tags.length > 0 && (
+        <div className={s.chips}>
+          {tags.slice(0, 3).map(t => (
+            <span key={t} className={s.chip} style={{ '--cc': famColorOf(t) }}>
+              {t}
+            </span>
+          ))}
+          {tags.length > 3 && <span className={s.chipMore}>+{tags.length - 3}</span>}
+        </div>
+      )}
+    </button>
+  )
+}
+
 const extractYouTubeId = url => {
   if (!url) return null
   const m = url.match(
@@ -408,34 +443,11 @@ export default function ExerciciosTab() {
   )
 
   // ── Pane 2: exercise card grid ───────────────────────────────────────────────
-  const ExCard = ({ ex, catContext }) => {
-    const name = getExName(ex)
-    const c = completeness(ex)
-    const active = detail && !detail.isNew && normExName(detail.origName) === normExName(name)
-    const filled = [c.cargas, c.video !== 'none', c.desc, c.musc, c.det].filter(Boolean).length
-    const tags = blocksOf(name).filter(b => b !== catContext)
-    return (
-      <button
-        type="button"
-        className={`${s.exCard}${active ? ' ' + s.exCardActive : ''}`}
-        style={{ '--fc': famColorOf(catContext || blocksOf(name)[0]) }}
-        onClick={() => goToEx(ex)}
-        title={`${filled} de 5 campos preenchidos`}
-      >
-        <span className={s.exCardName}>{name}</span>
-        <CmplIcons c={c} />
-        {tags.length > 0 && (
-          <div className={s.chips}>
-            {tags.slice(0, 3).map(t => (
-              <span key={t} className={s.chip} style={{ '--cc': famColorOf(t) }}>
-                {t}
-              </span>
-            ))}
-            {tags.length > 3 && <span className={s.chipMore}>+{tags.length - 3}</span>}
-          </div>
-        )}
-      </button>
-    )
+  // The three things ExCard needs from this component, spread onto every card.
+  const cardCtx = {
+    activeKey: detail && !detail.isNew ? normExName(detail.origName) : null,
+    blocksOf,
+    onOpen: goToEx,
   }
 
   const renderPane2 = () => {
@@ -494,7 +506,12 @@ export default function ExerciciosTab() {
                   </div>
                   <div className={s.grid}>
                     {sec.exs.map(ex => (
-                      <ExCard key={sec.cat + ':' + getExName(ex)} ex={ex} catContext={sec.cat} />
+                      <ExCard
+                        key={sec.cat + ':' + getExName(ex)}
+                        ex={ex}
+                        catContext={sec.cat}
+                        {...cardCtx}
+                      />
                     ))}
                   </div>
                 </div>
@@ -526,7 +543,7 @@ export default function ExerciciosTab() {
             </div>
             <div className={s.grid}>
               {g.items.map(ex => (
-                <ExCard key={getExName(ex)} ex={ex} catContext={selBlock} />
+                <ExCard key={getExName(ex)} ex={ex} catContext={selBlock} {...cardCtx} />
               ))}
             </div>
           </div>
@@ -540,7 +557,7 @@ export default function ExerciciosTab() {
             )}
             <div className={s.grid}>
               {singles.map(ex => (
-                <ExCard key={getExName(ex)} ex={ex} catContext={selBlock} />
+                <ExCard key={getExName(ex)} ex={ex} catContext={selBlock} {...cardCtx} />
               ))}
             </div>
           </div>

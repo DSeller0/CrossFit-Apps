@@ -1,7 +1,6 @@
 import { APP_CONFIG, GF } from '../../../utils/config'
 import { fmtIntensity, blkMeta, blockExercises } from '../../../public/lib/wod.js'
-import { DAY_PT, MONTH_PT } from '../../../public/lib/week.js'
-import { toISO } from '../../../utils/storage'
+import { DAY_PT, MONTH_PT, toISO } from '../../../public/lib/week.js'
 import {
   mfs,
   exLine,

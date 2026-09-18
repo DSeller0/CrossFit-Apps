@@ -1,7 +1,5 @@
 import { ALL_CATEGORIES } from '../public/lib/exerciseGroups.js'
 
-export { DAY_PT as DSHORT } from '../public/lib/week.js'
-
 export const APP_CONFIG = {
   gymName: 'Cone',
   fontScale: 1.5,
