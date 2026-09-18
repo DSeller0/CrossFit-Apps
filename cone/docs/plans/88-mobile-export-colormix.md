@@ -1,5 +1,7 @@
 # 88 — Unbreak the mobile exports: `color-mix()` in the rasterised tree (#195a)
 
+> ✅ Done: `27e27e5` · 2026-09-18 — see BACKLOG.md
+
 > Split out of **#195** at planning on 2026-09-14. #195 filed one row for two different things: a
 > *currently broken feature* and a *stale dependency*. This plan is the first half only. The library
 > migration (`html2canvas` → `html-to-image`/`modern-screenshot`) stays in Icebox as **#195b**, M ·
