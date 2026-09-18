@@ -1,11 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   loadAthletes,
+  loadLocations,
+  loadResults,
   loadSettings,
   saveSettings,
   matchesAthlete,
   toISO,
 } from '../../utils/storage'
+import { athleteScopes } from '../../public/lib/sessions.js'
 import { APP_CONFIG } from '../../utils/config'
 import { getWeeksOfMonth, resolveDaySession, buildMobileSession } from './publicador/exportHelpers'
 import {
@@ -218,11 +221,25 @@ function SchedulePublisher({ sessions, locations }) {
   })
   const currentWeekDates = selectedWeek || defaultWeek
 
+  // #164/plans/91 — an untargeted session reaches the athlete only through a scope
+  // they share with it. Without the scopes, picking an athlete kept every box's
+  // untargeted class: the "Todos" export, retitled with the athlete's name.
+  const filterScopes = useMemo(
+    () =>
+      filterAthlete
+        ? athleteScopes(filterAthlete, {
+            locations: loadLocations(),
+            results: loadResults(),
+            sessions,
+          })
+        : null,
+    [filterAthlete, sessions],
+  )
   const filteredSessions = filterAthlete
     ? Object.fromEntries(
         Object.entries(sessions).map(([k, v]) => [
           k,
-          v.filter(s => matchesAthlete(s, filterAthlete.name)),
+          v.filter(s => matchesAthlete(s, filterAthlete.name, filterScopes)),
         ]),
       )
     : sessions

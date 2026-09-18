@@ -40,7 +40,12 @@ describe('getTargets / matchesAthlete', () => {
   it('matches by name', () => {
     expect(matchesAthlete({ mainTraining: ['Bruna'] }, 'Bruna')).toBe(true)
     expect(matchesAthlete({ mainTraining: ['Bruna'] }, 'Arthur')).toBe(false)
-    expect(matchesAthlete({}, 'Bruna')).toBe(false)
+  })
+  it('an untargeted public session reaches everyone in the (already scoped) list — #164', () => {
+    expect(matchesAthlete({}, 'Bruna')).toBe(true)
+  })
+  it('a missing session matches nobody', () => {
+    expect(matchesAthlete(null, 'Bruna')).toBe(false)
   })
 })
 

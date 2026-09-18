@@ -21,6 +21,7 @@ import {
   presenceGrid,
   sinceLastNote,
 } from './atletasHelpers.js'
+import { SEM_BOX } from '../../../public/lib/sessions.js'
 
 // atletasHelpers imports only public/lib/sessions.js (client-free), so unlike
 // stateBackup.test.js this needs no utils/supabase mock.
@@ -196,6 +197,19 @@ describe('sessionStrip', () => {
     expect(sessionStrip(sessions, '', '2026-08-04')).toEqual([])
     expect(sessionStrip(null, 'Ana', '2026-08-04')).toEqual([])
   })
+
+  it('#164 — an untargeted session reaches the athletes whose scopes it shares', () => {
+    const untargeted = {
+      '2026-08-03': [{ id: 'semBox' }, { id: 'eagles', locationIds: ['eg'] }],
+    }
+    const ids = scopes =>
+      sessionStrip(untargeted, 'Ana', '2026-08-04', scopes).map(x => x.session.id)
+    expect(ids(new Set([SEM_BOX]))).toEqual(['semBox'])
+    expect(ids(new Set(['eg']))).toEqual(['eagles'])
+    expect(ids(new Set([SEM_BOX, 'eg']))).toEqual(['semBox', 'eagles'])
+    // no scopes passed: the athlete has none, i.e. the no-box audience
+    expect(sessionStrip(untargeted, 'Ana', '2026-08-04').map(x => x.session.id)).toEqual(['semBox'])
+  })
 })
 
 // ── #160/plans/76 — the grade + ficha helpers ──────────────────────────────────
@@ -268,6 +282,24 @@ describe('nextSessionGroups', () => {
     const groups = nextSessionGroups(sessions, athletes.slice(0, 3), {}, todayKey)
     expect(groups.find(g => g.label === 'Sem sessão marcada')).toBeUndefined()
   })
+
+  it('#164 — an untargeted session groups each athlete by their own scopes', () => {
+    const untargeted = {
+      '2026-08-04': [{ id: 'eaglesToday', locationIds: ['eg'] }],
+      '2026-08-05': [{ id: 'semBoxTomorrow' }],
+    }
+    const scopesById = new Map([
+      ['a1', new Set(['eg'])], // Eagles member → today
+      ['a2', new Set([SEM_BOX])], // no-box → tomorrow
+      ['a3', new Set(['garra'])], // neither scope runs → no session
+    ])
+    const groups = nextSessionGroups(untargeted, athletes.slice(0, 3), {}, todayKey, scopesById)
+    expect(groups.map(g => [g.label, g.athletes.map(a => a.name)])).toEqual([
+      ['Hoje', ['Ana']],
+      ['Amanhã', ['Bruno']],
+      ['Sem sessão marcada', ['Carla']],
+    ])
+  })
 })
 
 describe('lastSessionSignal', () => {
@@ -339,6 +371,28 @@ describe('adherence', () => {
       },
     ]
     expect(adherence(upSessions, downResults, athlete, todayKey).trend).toBe('down')
+  })
+
+  it('#164 — scores untargeted sessions in the athlete scopes, tagged ones included', () => {
+    const sessions = {
+      '2026-08-01': [{ blocks: [{ type: 'For Time' }] }], // Sem box
+      '2026-08-02': [{ locationIds: ['eg'], blocks: [{ type: 'AMRAP' }] }], // Eagles
+    }
+    const results = [
+      {
+        athleteId: 'a1',
+        date: '2026-08-02',
+        presence: 'Presente',
+        blocks: [{ blockType: 'AMRAP' }],
+      },
+    ]
+    // An Eagles member used to read null: calcBlockStats ran with box = null (Sem box only)
+    expect(adherence(sessions, results, athlete, todayKey, new Set(['eg']))).toEqual({
+      pct: 100,
+      trend: 'flat',
+    })
+    expect(adherence(sessions, results, athlete, todayKey, new Set([SEM_BOX, 'eg'])).pct).toBe(50)
+    expect(adherence(sessions, results, athlete, todayKey, new Set(['garra']))).toBeNull()
   })
 })
 
@@ -443,6 +497,19 @@ describe('presenceGrid', () => {
     const weeks = presenceGrid({}, [], athlete, todayKey)
     expect(weeks.flat().every(c => c.state === 'none')).toBe(true)
   })
+
+  it('#164 — an untargeted session outside the athlete scopes is none, inside is unlogged', () => {
+    const untargeted = {
+      [yesterday]: [{ locationIds: ['eg'] }],
+      [addD(todayKey, -2)]: [{}], // Sem box
+      [addD(todayKey, -3)]: [{ public: false }], // a hidden draft reaches no one
+    }
+    const cells = presenceGrid(untargeted, [], athlete, todayKey, new Set([SEM_BOX])).flat()
+    const at = d => cells.find(c => c.date === d).state
+    expect(at(yesterday)).toBe('none')
+    expect(at(addD(todayKey, -2))).toBe('unlogged')
+    expect(at(addD(todayKey, -3))).toBe('none')
+  })
 })
 
 describe('sinceLastNote', () => {
@@ -492,6 +559,20 @@ describe('sinceLastNote', () => {
     const notes = [{ id: 'n1', date: '2026-08-03', text: 'x' }]
     const out = sinceLastNote(athlete, notes, prs, goals, sessions, results, todayKey)
     expect(out.items).toEqual([])
+  })
+
+  it('#164 — lists a missed untargeted session in the athlete scopes, not the other box', () => {
+    const notes = [{ id: 'n1', date: '2026-07-15', text: 'x' }]
+    const twoClasses = {
+      '2026-07-25': [{ id: 'semBox' }, { id: 'eagles', locationIds: ['eg'] }],
+    }
+    const logged = [{ athleteId: 'a1', date: '2026-07-25', sessionId: 'semBox' }]
+    const missed = scopes =>
+      sinceLastNote(athlete, notes, [], [], twoClasses, logged, todayKey, scopes)
+        .items.filter(i => i.kind === 'missed')
+        .map(i => i.session.id)
+    expect(missed(new Set([SEM_BOX]))).toEqual([]) // did the one class in their scope
+    expect(missed(new Set([SEM_BOX, 'eg']))).toEqual(['eagles'])
   })
 })
 

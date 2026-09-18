@@ -19,7 +19,7 @@ import {
 import { onKey } from '../schedule/scheduleHelpers.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { syncTheme } from '../lib/theme.js'
-import { normalizeSessionIds } from '../lib/sessions.js'
+import { normalizeSessionIds, matchesAthlete } from '../lib/sessions.js'
 import { mergeBlockEntry } from '../lib/resultEntry.js'
 import { mapResultRow } from '../lib/blobTables.js'
 import RankList from '../shared/RankList.jsx'
@@ -50,14 +50,7 @@ function sessionsForDay(sessions, dk, lockedAthName, box) {
     s => s.public !== false && inBoxScope(s, box) && s.blocks && s.blocks.length,
   )
   if (!lockedAthName) return all
-  return all.filter(s => {
-    const t = Array.isArray(s.mainTraining)
-      ? s.mainTraining
-      : s.mainTraining
-        ? [s.mainTraining]
-        : []
-    return t.length === 0 || t.includes(lockedAthName)
-  })
+  return all.filter(s => matchesAthlete(s, lockedAthName))
 }
 
 // Auto-select (#51): the desktop opened with two empty panes until you picked a

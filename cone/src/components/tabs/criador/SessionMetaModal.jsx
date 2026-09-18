@@ -14,6 +14,23 @@ import s from './criador.module.css'
 // knows whether the session is already saved and on which day.
 //
 // The athlete picker is inline, not a second modal on top of this one.
+
+// What "nobody picked" means (#164/plans/91): not "no athlete" but the session's whole
+// audience — the athletes of its boxes, or of Sem box when it has none — unless it is
+// hidden, since an untargeted hidden session is a draft prescribed to no one. Picking
+// names narrows it. Follows matchesAthlete (public/lib/sessions.js); change both together.
+function untargetedAudience(d, boxIds, boxLocs) {
+  if (d.public === false) return 'Ninguém enquanto oculta — clique para selecionar'
+  if (!boxIds.length) return 'Todos os atletas do Sem box — clique para restringir'
+  const names = boxIds.map(id => boxLocs.find(b => b.id === id)?.name)
+  const who = names.every(Boolean)
+    ? 'de ' + new Intl.ListFormat('pt-BR').format(names)
+    : boxIds.length > 1
+      ? 'dos boxes'
+      : 'do box'
+  return `Todos os atletas ${who} — clique para restringir`
+}
+
 export function SessionMetaModal({
   initial,
   athletes = [],
@@ -40,6 +57,7 @@ export function SessionMetaModal({
   const set = patch => setD(prev => ({ ...prev, ...patch }))
   const targets = Array.isArray(d.mainTraining) ? d.mainTraining : []
   const boxIds = d.locationIds || []
+  const audience = untargetedAudience(d, boxIds, boxLocs)
 
   const toggleAthlete = name =>
     set({
@@ -95,7 +113,7 @@ export function SessionMetaModal({
             >
               <i className="ti ti-users" aria-hidden="true" />
               {targets.length === 0
-                ? 'Nenhum atleta — clique para selecionar'
+                ? audience
                 : targets.map(n => (
                     <span key={n} className={s.athChip}>
                       {n}

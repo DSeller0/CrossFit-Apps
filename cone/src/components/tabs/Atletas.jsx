@@ -6,13 +6,14 @@ import {
   loadGoalsData,
   saveGoalsData,
   loadRegistry,
+  loadLocations,
   uid,
   todayISO,
 } from '../../utils/storage'
 import { APP_CONFIG } from '../../utils/config'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { isWodBlock } from '../../public/lib/wod.js'
-import { sessName } from '../../public/lib/sessions.js'
+import { sessName, athleteScopes, SEM_BOX } from '../../public/lib/sessions.js'
 import { buildRegistryIndex, resolveExercise } from '../../public/lib/registry.js'
 import ConfirmReview from '../../public/shared/ConfirmReview'
 import Button from '../ui/Button.jsx'
@@ -89,6 +90,19 @@ export default function AtletasTab({ sessions, results, events = {} }) {
   }
 
   const ath = athletes.find(a => a.id === selAthlete) || null
+
+  // Each athlete's scopes (#164/plans/91) — who an untargeted session is prescribed
+  // to. One memo feeds the grade AND the ficha, so the two can't disagree. It reads
+  // `loadLocations()` fresh rather than App's `locations` state, which is loaded once
+  // and goes stale the moment Afiliados edits a roster in the same session.
+  const scopesById = useMemo(() => {
+    const locations = loadLocations()
+    return new Map(athletes.map(a => [a.id, athleteScopes(a, { locations, results, sessions })]))
+  }, [athletes, results, sessions])
+  const athScopes = useMemo(
+    () => scopesById.get(selAthlete) || new Set([SEM_BOX]),
+    [scopesById, selAthlete],
+  )
   // Memoized: `(goalsData.x || {})[id] || []` mints a NEW empty array every render
   // when the athlete has no entry yet, which would make every downstream useMemo
   // keyed on these re-run every render regardless of its own real dependencies.
@@ -111,7 +125,7 @@ export default function AtletasTab({ sessions, results, events = {} }) {
   // logged Fran or a stations WOD shows a perf here, not just plain strength blocks.
   const sessionItems = useMemo(() => {
     if (!ath) return []
-    return sessionStrip(sessions, ath.name, todayKey).map(({ date, session }) => {
+    return sessionStrip(sessions, ath.name, todayKey, athScopes).map(({ date, session }) => {
       const myResult = athResults.find(r => r.date === date && r.sessionId === session.id)
       const wb = myResult
         ? (myResult.blocks || []).find(b => isWodBlock({ type: b.blockType, label: b.blockLabel }))
@@ -119,7 +133,7 @@ export default function AtletasTab({ sessions, results, events = {} }) {
       const perf = wb ? wb.perfTime || (wb.perfRounds ? wb.perfRounds + 'rds' : null) : null
       return { date, session, perf, logged: !!myResult }
     })
-  }, [ath, sessions, athResults, todayKey])
+  }, [ath, sessions, athResults, todayKey, athScopes])
 
   const prGroups = useMemo(() => groupPrsByCategory(athPrs, blockOrder), [athPrs, blockOrder])
   const prCategories = useMemo(
@@ -128,10 +142,10 @@ export default function AtletasTab({ sessions, results, events = {} }) {
   )
 
   // The grade's grouping (#160/plans/76) — every athlete under the earliest
-  // session (today or later) they're assigned to, or under "Sem sessão marcada".
+  // session (today or later) prescribed to them, or under "Sem sessão marcada".
   const groups = useMemo(
-    () => nextSessionGroups(sessions, athletes, events, todayKey),
-    [sessions, athletes, events, todayKey],
+    () => nextSessionGroups(sessions, athletes, events, todayKey, scopesById),
+    [sessions, athletes, events, todayKey, scopesById],
   )
 
   // One signals object per athlete — the grade's 4-signal card reads this map,
@@ -143,13 +157,13 @@ export default function AtletasTab({ sessions, results, events = {} }) {
       const aNotes = (goalsData.coachNotes || {})[a.id] || []
       map[a.id] = {
         lastSession: lastSessionSignal(results, a.id, todayKey),
-        adherence: adherence(sessions, results, a, todayKey),
+        adherence: adherence(sessions, results, a, todayKey, scopesById.get(a.id)),
         daysSinceFeedback: daysSinceNote(aNotes, todayKey),
         goal: goalSignal(aGoals, todayKey),
       }
     })
     return map
-  }, [athletes, goalsData, results, sessions, todayKey])
+  }, [athletes, goalsData, results, sessions, todayKey, scopesById])
 
   // Mobile collapses the date-based grade into a 3-bucket signal list — same
   // AthleteGrid, a differently-shaped `groups` (no date/time, so the header just
@@ -189,13 +203,15 @@ export default function AtletasTab({ sessions, results, events = {} }) {
   )
 
   const presenceWeeks = useMemo(
-    () => (ath ? presenceGrid(sessions, results, ath, todayKey) : []),
-    [ath, sessions, results, todayKey],
+    () => (ath ? presenceGrid(sessions, results, ath, todayKey, athScopes) : []),
+    [ath, sessions, results, todayKey, athScopes],
   )
   const sinceLast = useMemo(
     () =>
-      ath ? sinceLastNote(ath, athNotes, athPrs, athGoals, sessions, results, todayKey) : null,
-    [ath, athNotes, athPrs, athGoals, sessions, results, todayKey],
+      ath
+        ? sinceLastNote(ath, athNotes, athPrs, athGoals, sessions, results, todayKey, athScopes)
+        : null,
+    [ath, athNotes, athPrs, athGoals, sessions, results, todayKey, athScopes],
   )
 
   const goToAthlete = athId => {

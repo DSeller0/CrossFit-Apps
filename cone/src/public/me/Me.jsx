@@ -404,15 +404,9 @@ export default function Me() {
 
     // Executed vs planned, by block type.
     const monthStart = `${mPrefix}-01`
-    const wStats = calcBlockStats(
-      sessions,
-      present,
-      selAthlete.name,
-      WOD_TYPES,
-      monthStart,
-      td,
+    const wStats = calcBlockStats(sessions, present, selAthlete.name, WOD_TYPES, monthStart, td, {
       box,
-    )
+    })
     const wodRows = WOD_TYPES.filter(t => (wStats.planned[t] || 0) > 0).map(t => {
       const pl = wStats.planned[t],
         ex = Math.min(wStats.executed[t] || 0, pl)
@@ -421,15 +415,9 @@ export default function Me() {
 
     const d90 = new Date(now)
     d90.setDate(d90.getDate() - 90)
-    const dStats = calcBlockStats(
-      sessions,
-      present,
-      selAthlete.name,
-      DIST_TYPES,
-      toISO(d90),
-      td,
+    const dStats = calcBlockStats(sessions, present, selAthlete.name, DIST_TYPES, toISO(d90), td, {
       box,
-    )
+    })
     const distRows = DIST_TYPES.filter(t => (dStats.planned[t] || 0) > 0).map(t => {
       const pl = dStats.planned[t],
         ex = Math.min(dStats.executed[t] || 0, pl)

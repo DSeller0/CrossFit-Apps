@@ -6,7 +6,7 @@ import styles from './Schedule.module.css'
 import { MONTH_PT, DAY_PT, toISO, getWeek, dateToWeekOffset } from '../lib/week.js'
 import { uid, blkLabel, isWodBlock, blkColor } from '../lib/wod.js'
 import { buildRegistryIndex } from '../lib/registry.js'
-import { getTargets, sessName, normalizeSessionIds } from '../lib/sessions.js'
+import { matchesAthlete, sessName, normalizeSessionIds } from '../lib/sessions.js'
 import { prBest } from '../lib/goals.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { syncTheme } from '../lib/theme.js'
@@ -37,12 +37,7 @@ function filterDaySessions(daySessions, athId, aths, box) {
   const all = (daySessions || []).filter(s => s.public !== false && inBoxScope(s, box))
   if (!athId) return all.filter(s => s.blocks && s.blocks.length)
   const athName = aths.find(a => a.id === athId)?.name
-  return all
-    .filter(s => {
-      const t = getTargets(s)
-      return t.length === 0 || t.includes(athName)
-    })
-    .filter(s => s.blocks && s.blocks.length)
+  return all.filter(s => matchesAthlete(s, athName)).filter(s => s.blocks && s.blocks.length)
 }
 
 function autofillRm(sD, aths, athId, gdD) {

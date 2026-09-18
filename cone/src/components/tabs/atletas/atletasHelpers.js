@@ -1,4 +1,4 @@
-import { matchesAthlete, calcBlockStats } from '../../../public/lib/sessions.js'
+import { matchesAthlete, calcBlockStats, SEM_BOX } from '../../../public/lib/sessions.js'
 import { toISO, DAY_PT, DAY_PT_TITLE } from '../../../public/lib/week.js'
 import { WOD_TYPES } from '../../../public/lib/wod.js'
 import { buildEvents } from '../../../public/me/meHelpers.js'
@@ -8,6 +8,17 @@ import { buildEvents } from '../../../public/me/meHelpers.js'
 // resultadosHelpers / exerciciosHelpers / stateBackup / billing set.
 //
 // No React, no client: importable from the tab, its components AND the gallery.
+
+/**
+ * Who a session is prescribed to (#164/plans/91) turns on the athlete's SCOPES —
+ * `athleteScopes` in public/lib/sessions.js, built once per athlete by the container
+ * (it needs `locations`, which these helpers never read). An untargeted session
+ * reaches the athletes whose scopes intersect its own. A helper called without
+ * scopes treats the athlete as having none, which the rule says is the no-box
+ * audience — never "every scope", which would prescribe every box's class to
+ * everyone.
+ */
+const NO_SCOPES = new Set([SEM_BOX])
 
 /**
  * The default athlete identity colour. A DATA colour (it identifies a person, so it
@@ -114,7 +125,7 @@ export function groupPrsByCategory(prs, blockOrder) {
  * rather than read from the clock so this stays pure and testable (calling
  * `new Date()` in a render path is also a react-hooks/purity violation).
  */
-export function sessionStrip(sessions, athleteName, todayKey) {
+export function sessionStrip(sessions, athleteName, todayKey, scopes = NO_SCOPES) {
   if (!athleteName || !sessions) return []
   const future = new Date(todayKey + 'T12:00:00')
   future.setDate(future.getDate() + 30)
@@ -125,7 +136,7 @@ export function sessionStrip(sessions, athleteName, todayKey) {
     .sort()
     .forEach(date => {
       ;(sessions[date] || []).forEach(s => {
-        if (matchesAthlete(s, athleteName)) all.push({ date, session: s })
+        if (matchesAthlete(s, athleteName, scopes)) all.push({ date, session: s })
       })
     })
 
@@ -163,22 +174,24 @@ export function agoLabel(days) {
 
 /**
  * The grade's grouping: each athlete lands under the earliest session (today or
- * later) they're assigned to, or under "Sem sessão marcada" with none. A time is
+ * later) prescribed to them, or under "Sem sessão marcada" with none. A time is
  * appended only when an agenda event links the session (`events[date]` carries
  * `time`+`sessionId`; a plain session record has no time field of its own).
+ * `scopesById` is a Map of athlete id → that athlete's scope Set.
  * Returns [{ date, time, label, athletes[] }, …] plus a trailing no-session group.
  */
-export function nextSessionGroups(sessions, athletes, events, todayKey) {
+export function nextSessionGroups(sessions, athletes, events, todayKey, scopesById = new Map()) {
   const byDate = {}
   const noSession = []
 
+  const dates = Object.keys(sessions || {})
+    .filter(d => d >= todayKey)
+    .sort()
   ;(athletes || []).forEach(a => {
-    const dates = Object.keys(sessions || {})
-      .filter(d => d >= todayKey)
-      .sort()
+    const scopes = scopesById.get(a.id) || NO_SCOPES
     let hit = null
     for (const date of dates) {
-      const s = (sessions[date] || []).find(x => matchesAthlete(x, a.name))
+      const s = (sessions[date] || []).find(x => matchesAthlete(x, a.name, scopes))
       if (s) {
         hit = { date, session: s }
         break
@@ -236,7 +249,7 @@ export function lastSessionSignal(results, athleteId, todayKey) {
  * exist: an athlete who only logs when present would score 100% forever there.
  * `null` when nothing was ever prescribed in the current window (nothing to score).
  */
-export function adherence(sessions, results, athlete, todayKey) {
+export function adherence(sessions, results, athlete, todayKey, scopes = NO_SCOPES) {
   const present = (results || []).filter(
     r => String(r.athleteId) === String(athlete.id) && r.presence === 'Presente',
   )
@@ -248,6 +261,7 @@ export function adherence(sessions, results, athlete, todayKey) {
       WOD_TYPES,
       start,
       end,
+      { scopes },
     )
     const pl = WOD_TYPES.reduce((n, t) => n + (planned[t] || 0), 0)
     const ex = WOD_TYPES.reduce((n, t) => n + (executed[t] || 0), 0)
@@ -298,11 +312,11 @@ export const DOW_LETTERS = DAY_PT.map(d => d[0]) // D S T Q Q S S — Sunday-sta
 /**
  * 4 weeks × 7 days, Sunday-start, ending with the week containing `todayKey`.
  * A cell is 'presente' (a results_v2 row with presence==='Presente'), 'unlogged'
- * (the athlete was assigned that day and nothing was logged — an INFERENCE, not a
+ * (a session was prescribed that day and nothing was logged — an INFERENCE, not a
  * fact: no row is ever created for a no-show, #102 is what turns this into one) or
- * 'none' (no session assigned, or the date hasn't happened yet).
+ * 'none' (nothing prescribed, or the date hasn't happened yet).
  */
-export function presenceGrid(sessions, results, athlete, todayKey) {
+export function presenceGrid(sessions, results, athlete, todayKey, scopes = NO_SCOPES) {
   const today = new Date(todayKey + 'T12:00:00')
   const sun = new Date(today)
   sun.setDate(today.getDate() - today.getDay())
@@ -318,7 +332,7 @@ export function presenceGrid(sessions, results, athlete, todayKey) {
       const dateKey = toISO(date)
       days.push({
         date: dateKey,
-        state: presenceCellState(sessions, results, athlete, dateKey, todayKey),
+        state: presenceCellState(sessions, results, athlete, dateKey, todayKey, scopes),
       })
     }
     weeks.push(days)
@@ -326,9 +340,9 @@ export function presenceGrid(sessions, results, athlete, todayKey) {
   return weeks
 }
 
-function presenceCellState(sessions, results, athlete, dateKey, todayKey) {
+function presenceCellState(sessions, results, athlete, dateKey, todayKey, scopes) {
   if (dateKey > todayKey) return 'none'
-  const assigned = (sessions[dateKey] || []).some(s => matchesAthlete(s, athlete.name))
+  const assigned = (sessions[dateKey] || []).some(s => matchesAthlete(s, athlete.name, scopes))
   if (!assigned) return 'none'
   const logged = (results || []).some(
     r =>
@@ -340,11 +354,20 @@ function presenceCellState(sessions, results, athlete, dateKey, todayKey) {
 /**
  * "Desde o último 1:1": the newest coachNotes date anchors a list of what changed
  * since — PR improvements + milestones hit (both already computed by
- * me/meHelpers.js's buildEvents, filtered to after the anchor) plus sessions the
- * athlete was assigned to with no logged result. `null` anchor (no notes yet) means
+ * me/meHelpers.js's buildEvents, filtered to after the anchor) plus sessions
+ * prescribed to the athlete with no logged result. `null` anchor (no notes yet) means
  * there is nothing to anchor against, not an empty "nothing changed" list.
  */
-export function sinceLastNote(athlete, notes, prs, goals, sessions, results, todayKey) {
+export function sinceLastNote(
+  athlete,
+  notes,
+  prs,
+  goals,
+  sessions,
+  results,
+  todayKey,
+  scopes = NO_SCOPES,
+) {
   if (!notes?.length) return { anchorDate: null, items: [] }
   const anchor = notes.reduce((b, n) => (n.date > b.date ? n : b)).date
 
@@ -356,7 +379,7 @@ export function sinceLastNote(athlete, notes, prs, goals, sessions, results, tod
     .sort()
     .forEach(date => {
       ;(sessions[date] || []).forEach(session => {
-        if (!matchesAthlete(session, athlete.name)) return
+        if (!matchesAthlete(session, athlete.name, scopes)) return
         const logged = (results || []).some(
           r =>
             String(r.athleteId) === String(athlete.id) &&

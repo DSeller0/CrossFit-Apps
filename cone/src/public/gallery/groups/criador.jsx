@@ -424,6 +424,18 @@ export default {
               />
             </TallModalBox>
           </Case>
+          <Case label="Sem atletas, com box — o box inteiro recebe (#164)">
+            <TallModalBox>
+              <SessionMetaModal
+                initial={{ ...goalMetaDraft, mainTraining: [], locationIds: ['b1', 'b2'] }}
+                isEdit
+                athletes={goalAthletes}
+                boxLocs={txtBoxLocs}
+                onCancel={NOOP}
+                onConfirm={NOOP}
+              />
+            </TallModalBox>
+          </Case>
           <Case label="Editar dados — preenchida, sessão oculta">
             <TallModalBox>
               <SessionMetaModal

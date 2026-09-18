@@ -38,7 +38,7 @@ Living inventory of every user-facing capability: where it lives, who consumes i
 |---|---|---|---|
 | Session builder (12 block types, stations, complexes, intensity modes, ghost defaults #38) | Criador | `sessions`, `exercise_registry`, `templates` | core |
 | Templates save/apply | Criador | `templates` | Gate: Pro |
-| Publish/visibility (`session.public`), per-athlete sessions (`mainTraining`) | Criador | `sessions` | core / personal-training = Pro |
+| Publish/visibility (`session.public`), per-athlete sessions (`mainTraining`) — an untargeted session reaches its box audience (its box tags, or Sem box), a hidden untargeted one reaches no one (#164) | Criador | `sessions` | core / personal-training = Pro |
 | Athlete CRUD, levels, colors, PR/goal editing | Atletas | `athletes`, `goals_data` | core |
 | Ficha "Histórico de resultados" — RPE médio + sparkline · Taxa RX · Evolução de carga · the logged-result list (migrated out of Resultados' retired Histórico sub-tab, #57) | Atletas | `results_v2` | Pro |
 | (#39 planned: per-athlete adaptations) | Atletas | `goals_data.adaptations` | Gate: Pro |
