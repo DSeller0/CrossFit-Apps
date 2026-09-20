@@ -1,5 +1,65 @@
 # 93 — A global `:focus-visible` ring, the outline strippers, and Criador's focus borders (#182)
 
+> ✅ Done: `e13938d` · 2026-09-20 — see BACKLOG.md · closes #182. Filed #206.
+>
+> **Contrast, measured** (WCAG, the #14 method; `--accent` is the focus colour, `--dim` is the
+> before-state of H2). Every fill and every unfocused border the fixed controls sit on clears 3:1:
+>
+> | Theme | `--accent` vs `--bg` | `--stone` | `--stone2` | `--divider` (unfocused) | `--border` | `--dim` vs `--divider` (before) |
+> |---|---|---|---|---|---|---|
+> | totk-dark | 9.65 | 9.14 | 8.49 | 7.61 | 5.10 | 1.79 |
+> | totk-light | 5.37 | 5.82 | 5.08 | 4.05 | 2.71 | 1.88 |
+> | spirit-blossom | 9.51 | 9.10 | 8.63 | 8.05 | 5.30 | **1.48** |
+> | spirit-blossom-light | 4.95 | 5.63 | 4.72 | 4.00 | 2.67 | 2.91 |
+> | halo-reach-dark | 6.77 | 6.30 | 5.85 | 5.25 | 3.50 | 3.17 |
+> | halo-reach-light | 5.47 | 6.16 | 5.21 | 4.19 | 2.80 | 2.60 |
+> | common-dark | 6.39 | 6.01 | 5.65 | 5.00 | 3.31 | 2.89 |
+> | common-light | 5.23 | 5.85 | 4.78 | 4.03 | 2.68 | 2.90 |
+>
+> Minimum across the 8: **4.72** on any fill, **4.00** on `--divider`. The `--dim` column reproduces
+> the review's H2 numbers for the original four (1.79 / 1.88 / 1.48 / 2.91) and shows it fails 3:1 in
+> **6 of 8** themes. **The `--border` column fails in all four light themes (2.67–2.80).** It is not
+> load-bearing here (every control fixed uses `--divider` as its unfocused border), so per this plan's
+> own rule it is a **finding for #14**, not a per-theme token: a future control whose unfocused
+> border is `--border` needs a different indicator than a border swap.
+>
+> **Where the plan's premises were wrong, found while doing it:**
+> - **Gallery `.select` was not a bare stripper**: `Gallery.module.css:26` already had
+>   `.select:focus { border-color: var(--teal) }`. The `:focus-visible` outline was added anyway, as written.
+> - **`.blk-meta-field input` and `.blk-notes-quick` are dead CSS.** Zero consumers in `src/`
+>   (`BlockEditor.jsx` renders only `.blk-meta-row`; `criador.module.css:205` says the field moved).
+>   Two of H2's five rules were therefore edited in place, as the plan says, but **cannot be verified
+>   live**. They belong to #184's zero-consumer sweep; not deleted here.
+> - **An unlisted stripper defeated the combobox fix.** Combobox items carry `ex-suggestion` *and*
+>   `comboItem`; `index.css:177`'s `.ex-suggestion:focus { outline:none }` is the same specificity as
+>   the module's `:focus-visible`, so whichever stylesheet loaded later won. The `outline:none` is
+>   removed from `index.css` (the plan's Files list didn't name it). Both items share one fill; the ring
+>   is the only thing that tells keyboard focus from mouse hover.
+> - **The palette card did move.** The plan said `parseThemes` leaves it unaffected; `tokens/palette.html`
+>   also inlines the new rule (+12 lines). Exactly 18 generated files moved: the 16 component cards, that
+>   palette card, and `README.md` (date and size stamps). Each card gained the rule; `afiliados.html`
+>   gained 2 lines more, which are #202's deliberate `Date.now()` "enviada" date (13/09 → 15/09).
+>
+> **Verified live** (local stack, keyboard-driven, totk-dark + totk-light, computed styles read back
+> and each ring screenshotted; the shared Playwright profile was held by another Claude session, so an
+> isolated Chrome with a throwaway profile was used instead):
+> - `schedule.html` desktop: search wrapper `2px solid` accent, inset; `.rmUnitSel` border swap. Mobile: `.athleteSel`.
+> - `me.html` log sheet: `.lsDate` outline, `.lsGoalInp` bottom border only (zoomed to confirm teal, not a screenshot artifact), `.lsNote`.
+> - Criador desktop: `.blk-name-input`, `.ex-qty-input`, `.ex-unit-sel`, `.ex-complex-name`; Estações `.st-name-input` (outline
+>   **not clipped** by `.st-block`'s `overflow:hidden`) and `.st-dur-input`; 390px sheet `.sheet-qty-input`
+>   (in light it is `rgb(28,104,96)` now, where the frozen `#4ac8c0` was a pale cyan). Gallery `select`.
+> - **Combobox:** keyboard-focused item `2px solid` accent, inset; mouse-hovered item same fill, no ring.
+> - **A mouse click draws no ring** on schedule / me / gallery / the SPA (`:focus` true, `:focus-visible` false,
+>   `outline-style: none`); keyboard focus on the same SPA button does. Nothing forces `:focus` onto a button
+>   (the only plain-`:focus` rules in `src/` are on inputs). The only `tabIndex={-1}` sites are `Modal` and
+>   `ConfirmReview`'s dialog boxes; `ConfirmReview` is `outline:none`, `Modal`'s ring predates this plan.
+> - `transition: all` controls sample `3px` for ~120 ms after focus, then settle to `2px`; cosmetic.
+>
+> **Filed:** #206, a **pre-existing** bug the combobox check exposed. `ExerciseCombobox`'s item `onKeyDown`
+> moves focus but never `preventDefault()`s ArrowUp/ArrowDown, so the dropdown *also* scrolls natively:
+> 4 ArrowDowns → `scrollTop` 160 (4 × 40px) while focus moved 3 items, leaving the focused item 66px
+> above the list. With the default suppressed in the test page only, `scrollTop` stayed 40.
+
 > Promoted from Icebox P2 on 2026-09-18 with [plans/91](./91-untargeted-session-audience.md) and
 > [plans/92](./92-publicador-settings-debounce.md). A full `/app-review` pass runs once all three
 > ship. Every selector below was re-verified against the tree that day. The line numbers are

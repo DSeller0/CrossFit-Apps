@@ -16,18 +16,18 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready (pick from the top):** plans/93 (#182) — promoted 2026-09-18, one session. plans/91 (#164) shipped the same day; plans/92 (#181) on 2026-09-20.
+- **Ready (pick from the top):** none. plans/91 (#164) shipped 2026-09-18; plans/92 (#181) and plans/93 (#182) on 2026-09-20.
 - **In Progress:** none.
 - **Also open, blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is
   held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code.
-- **Next refill:** a full **`/app-review`** pass once plans/91–93 ship — Ready empties then. Last
+- **Next refill:** a full **`/app-review`** pass — plans/91–93 have shipped and Ready is empty. Last
   pass: [2026-09-05](./reviews/2026-09-05.md).
 
 ---
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/93](./plans/93-focus-visible.md)** — **#182 A global `:focus-visible` ring + 10 outline-strippers + Criador's `--dim` focus borders** · S · Sonnet · keyboard focus vanishes on schedule/me/Criador controls; Criador's focus borders miss 3:1.
+*(empty)*
 
 ## 🔵 In Progress
 
@@ -71,6 +71,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#23 Testing** · M · Sonnet · 🔁 **re-measured 2026-09-05: 11 hooks, 1 tested.** `useGroupRotation.js` (259 ln) drives the gym wall TV during a live class — untested, 3 bare disables. `public/lib/benchmarks.js` (436 ln, 5 importers) is the only untested file there. **No `test:coverage` script**, so none of it reaches CI. Zero render tests is deliberate.
 - **#35 MM:SS masked time inputs — the rollout** · M · Sonnet · the component shipped in C0 (2026-07-19); the result-logging half was absorbed by #115/`plans/52`. Only the remaining call sites are left.
 - **#202 `design:cards` still moves one line a day: `afiliados.html`'s "enviada" date** · XS · Sonnet · `gallery/groups/afiliados.jsx:193` builds `STAMP_SENT` from `Date.now()` on purpose (a fixed date would eventually cross `InvoiceCard`'s 30-day overdue line). The only clock read left in the cards, found closing #200 by regenerating with the clock +40d. Fix: an injectable `now` on `InvoiceCard`'s `isOverdue`.
+- **#206 ExerciseCombobox arrow keys move focus but never `preventDefault()`, so the dropdown also scrolls natively** · XS · Sonnet · `shared/ExerciseCombobox.jsx:138-149`. Measured in plans/93: 4 ArrowDowns → `scrollTop` 160 (4 × 40px) while focus moved 3 items, so the focused item ends 66px above the list; suppressed, it stays 40. Add `e.preventDefault()` to both keys.
 
 ### P3 — needs a decision before it needs code
 
@@ -113,6 +114,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/93 · `e13938d` · 2026-09-20](./plans/93-focus-visible.md)** — **#182 A global `:focus-visible` ring + 10 outline-strippers + Criador's `--dim` focus borders** · closed #182. · One global ring in `themes.css` (≥ 4.72:1 on every fill, all 8 themes); each stripper brings its own replacement; Criador's `--dim` borders (fail 3:1 in 6 of 8 themes) → `--accent`. Filed #206.
 - ✅ **[plans/92 · `0cca9e6` · 2026-09-20](./plans/92-publicador-settings-debounce.md)** — **#181 Debounce Publicador's `settings` upsert, and flush on unmount** · closed #181. · 20 keystrokes → 1 upsert (was 20). Publicador and Afiliados both flush on unmount, so a <500 ms tab switch keeps the edit. The plan's "skip-flag path needs no change" was wrong — see the marker.
 - ✅ **[plans/91 · `af88d4b` · 2026-09-18](./plans/91-untargeted-session-audience.md)** — **#164 Untargeted sessions reach their audience** · closed #164. · An athlete's scopes = registered boxes ∪ scopes they've logged. Atletas' grade, ADERÊNCIA, Presença and 1:1 plus me.html's bars now work on real data: adherence non-null 0 → 23 of 23, all 23 under Hoje as predicted. Filed #204, #205.
 - ✅ **[plans/90 · `6dcc7da` · 2026-09-18](./plans/90-quick-wins-batch.md)** — **#183 + #180 + #189 + #193 + #200 Quick-wins batch** · closed #183, #180, #189, #193, #200. · `WeeklyExportView` + 12 CSS classes deleted; Index caption skips "não fez"; `ExCard` hoisted (search stops remounting the grid); 5 `toISO` imports off the SPA client; `design:cards` clock-free bar #202. #200's planned fix was wrong — see the marker. Filed #202, #203.
