@@ -174,7 +174,7 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
    hiding it. ── */
 .drag-handle{cursor:grab;color:var(--dim);padding:0 6px;display:flex;align-items:center;font-size:16px;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:color .12s}
 .drag-handle:hover{color:var(--muted)}
-.ex-suggestion:focus{background:var(--divider);outline:none;}
+.ex-suggestion:focus{background:var(--divider);}
 .ex-suggestion:hover{background:var(--divider);}
 .collapse-btn{font-family:inherit;font-size:13px;background:transparent;border:none;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .12s;flex-shrink:0;line-height:1;display:flex;align-items:center}
 .collapse-btn:hover{color:var(--cream)}
@@ -319,7 +319,7 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .blk-type-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:7px 12px;border-radius:6px;border-width:1.5px;border-style:solid;background:transparent;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity .12s}
 .blk-type-btn:hover{opacity:.75}
 .blk-name-input{flex:1;min-width:120px;background:var(--stone);border:1px solid var(--divider);border-radius:7px;color:var(--cream);font-family:inherit;font-size:14px;padding:8px 11px;outline:none;transition:border-color .15s}
-.blk-name-input:focus{border-color:var(--dim)}
+.blk-name-input:focus{border-color:var(--accent)}
 .blk-name-input::placeholder{color:var(--dim)}
 
 /* Adaptive meta fields (duration, rounds, time cap) */
@@ -327,7 +327,7 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .blk-meta-field{display:flex;flex-direction:column;gap:4px;min-width:100px}
 .blk-meta-field>span{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .blk-meta-field input{background:var(--stone);border:1px solid var(--divider);border-radius:7px;color:var(--cream);font-family:inherit;font-size:18px;padding:9px 12px;outline:none;width:100%;text-align:center;transition:border-color .15s;-webkit-appearance:none}
-.blk-meta-field input:focus{border-color:var(--dim)}
+.blk-meta-field input:focus{border-color:var(--accent)}
 .blk-meta-field input::placeholder{color:var(--divider)}
 
 /* Exercise list inside block */
@@ -336,7 +336,7 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 
 /* Advanced section toggle */
 .blk-notes-quick{width:100%;background:var(--stone);border:1px solid var(--divider);border-radius:5px;color:var(--sub);font-family:inherit;font-size:12px;padding:7px 10px;outline:none;resize:vertical;min-height:32px;box-sizing:border-box;transition:border-color .15s,color .15s}
-.blk-notes-quick:focus{border-color:var(--dim);color:var(--cream)}
+.blk-notes-quick:focus{border-color:var(--accent);color:var(--cream)}
 .blk-notes-quick:not(:placeholder-shown){color:var(--sub)}
 .blk-adv-toggle{display:flex;align-items:center;gap:7px;background:transparent;border:none;border-top:1px solid var(--divider);padding:10px 0 2px;color:var(--dim);font-family:inherit;font-size:11px;cursor:pointer;width:100%;transition:color .12s;-webkit-tap-highlight-color:transparent}
 .blk-adv-toggle:hover{color:var(--muted)}
@@ -356,13 +356,14 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .ex-drag:active{cursor:grabbing;color:var(--gold)}
 .ex-qty{display:flex;align-items:center;gap:3px;flex-shrink:0}
 .ex-qty-input{width:40px;background:var(--bg);border:1px solid var(--divider);border-radius:5px;color:var(--cream);font-family:inherit;font-size:13px;padding:5px 4px;outline:none;text-align:center;transition:border-color .15s;-webkit-appearance:none}
-.ex-qty-input:focus{border-color:var(--dim)}
+.ex-qty-input:focus{border-color:var(--accent)}
 /* Séries is one or two digits; Reps is a rep SCHEME — "21-15-9", "10-9-8-7",
    "15,12,9" in escada mode. At 40px those clip to "21-15" with no sign that
    anything is missing, on a row that has ~800px of unused width beside it. */
 .ex-qty-reps{width:88px}
 .ex-qty-sep{font-size:12px;color:var(--dim);flex-shrink:0;padding:0 1px}
 .ex-unit-sel{background:var(--bg);border:1px solid var(--divider);border-radius:5px;color:var(--cream);font-family:inherit;font-size:12px;padding:5px 4px;outline:none;-webkit-appearance:none;appearance:none;flex-shrink:0}
+.ex-unit-sel:focus{border-color:var(--accent)}
 .ex-dist-toggle{background:transparent;border:1px solid var(--divider);border-radius:5px;color:var(--dim);cursor:pointer;padding:5px 6px;font-size:12px;flex-shrink:0;transition:all .12s;line-height:1}
 .ex-dist-toggle.on{color:#40b878;border-color:#1a4a2a;background:rgba(64,184,120,.1)}
 .ex-load-badge{font-size:10px;font-weight:700;padding:2px 5px;border-radius:3px;background:#1c1a10;color:#c8a030;border:1px solid #3a3010;flex-shrink:0;white-space:nowrap;letter-spacing:.02em}
@@ -378,7 +379,7 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 
 /* ── Complex sets ────────────────────────────────────────────────────────── */
 .ex-complex-name{flex:1;min-width:0;background:var(--stone);border:1px solid var(--divider);border-radius:6px;color:var(--cream);font-family:inherit;font-size:14px;padding:6px 10px;outline:none;transition:border-color .15s}
-.ex-complex-name:focus{border-color:var(--dim)}
+.ex-complex-name:focus{border-color:var(--accent)}
 .ex-complex-name::placeholder{color:var(--divider)}
 .ex-complex-badge{display:flex;align-items:center;gap:4px;flex-shrink:0;white-space:nowrap}
 .ex-complex-notation{font-size:12px;font-weight:700;color:#9070d8;letter-spacing:.02em}
@@ -397,8 +398,10 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .st-header{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--bg);border-bottom:1px solid var(--divider)}
 .st-rest .st-header{background:var(--bg);border-bottom-color:var(--divider)}
 .st-name-input{flex:1;background:transparent;border:none;color:var(--cream);font-family:inherit;font-size:13px;font-weight:600;outline:none;min-width:0;padding:2px 0}
+.st-name-input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .st-rest .st-name-input{color:var(--muted)}
 .st-dur-input{width:58px;background:var(--stone);border:1px solid var(--divider);border-radius:4px;color:#c8a030;font-family:inherit;font-size:12px;font-weight:700;padding:4px 6px;outline:none;text-align:center;-webkit-appearance:none}
+.st-dur-input:focus{border-color:var(--accent)}
 .st-rest .st-dur-input{color:var(--dim)}
 .st-exercises{padding:8px 8px 4px}
 .st-repeat-row{display:flex;align-items:center;gap:10px;padding:8px 0 10px;margin-bottom:8px;border-bottom:1px solid var(--divider)}
@@ -419,7 +422,7 @@ html,body{background:var(--bg,#0d0b09);min-height:100vh;font-family:var(--font,'
 .sheet-qty-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--divider)}
 .sheet-qty-field{display:flex;flex-direction:column;align-items:center;gap:5px}
 .sheet-qty-input{background:var(--bg);border:1px solid var(--divider);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:20px;font-weight:700;text-align:center;width:76px;font-family:inherit;outline:none;-webkit-appearance:none;transition:border-color .15s}
-.sheet-qty-input:focus{border-color:#4ac8c0}
+.sheet-qty-input:focus{border-color:var(--accent)}
 /* Same split as .ex-qty-reps, and tighter here — 76px at 20px font is barely four
    characters, so the sheet clipped rep schemes harder than the desktop row did. */
 .sheet-qty-reps{width:130px}

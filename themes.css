@@ -216,3 +216,15 @@ html.theme-common-light{
 ::-webkit-scrollbar-thumb:hover{background:var(--teal)}
 ::-webkit-scrollbar-corner{background:var(--bg)}
 *{scrollbar-width:thin;scrollbar-color:var(--dim) var(--stone);-webkit-tap-highlight-color:transparent}
+
+/* ── Focus ring (all themes · #182 / plans/93) ──
+   The floor for any control with no focus rule of its own: without it the browser draws its
+   own ring, which differs per browser and ignores the theme. --accent measures >= 4.72:1 on
+   --bg/--stone/--stone2 in all 8 themes (WCAG 1.4.11 asks 3:1).
+   ⚠️ It does NOT fix a stripper. This rule is (0,1,0) and this file loads BEFORE every module
+   and index.css, so a component's own `outline:none` still wins — by source order at equal
+   specificity, by specificity above it. Every `outline:none` must therefore bring its own
+   replacement (a :focus border swap, or its own :focus-visible ring); this is only what the
+   controls that never asked for one fall back to.
+   :focus-visible, never :focus — a mouse click on a button must not draw it. */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}

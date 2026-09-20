@@ -47,6 +47,7 @@
 /* ── Bars ── */
 .selBar { background:var(--bg); border-bottom:1px solid var(--divider); padding:10px 20px; }
 .athleteSel { font-size:12px; background:var(--stone); border:1px solid var(--divider); color:var(--text); padding:6px 10px; outline:none; cursor:pointer; width:100%; max-width:320px; font-family:inherit; }
+.athleteSel:focus { border-color:var(--accent); }
 .weekNav { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; background:var(--bg); border-bottom:1px solid var(--border); }
 .weekLabel { font-size:13px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:.06em; }
 .navBtn { background:transparent; border:1px solid var(--divider); color:var(--muted); font-size:16px; width:32px; height:32px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s; }
@@ -160,6 +161,7 @@
 .rmInput { font-size:16px; padding:5px 8px; border:1px solid var(--gold2); background:var(--stone2); color:var(--cream); width:76px; outline:none; font-family:inherit; }
 .rmInput:focus { border-color:var(--gold); }
 .rmUnitSel { font-size:11px; padding:5px 6px; border:1px solid var(--divider); background:var(--stone2); color:var(--sub); outline:none; cursor:pointer; font-family:inherit; }
+.rmUnitSel:focus { border-color:var(--accent); }
 .rmConfirmBtn { font-size:12px; font-weight:900; padding:5px 10px; border:1px solid var(--teal); background:transparent; color:var(--teal); cursor:pointer; font-family:inherit; }
 .rmConfirmBtn:hover,.rmConfirmBtn:active { background:var(--teal); color:var(--accent-text); }
 .rmVolRow { display:flex; flex-direction:column; align-items:flex-start; gap:5px; margin-top:6px; }
@@ -268,6 +270,9 @@
 .deskAthPane { width:160px; flex-shrink:0; border-right:1px solid var(--divider); display:flex; flex-direction:column; overflow:hidden; background:var(--stone); }
 .deskPaneHdr { padding:7px 10px 5px; font-size:9px; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); border-bottom:1px solid var(--divider); flex-shrink:0; }
 .deskAthSearchWrap { display:flex; align-items:center; gap:5px; padding:5px 8px; border-bottom:1px solid var(--divider); flex-shrink:0; }
+/* The input inside is borderless and has no box of its own to colour — the ring goes on the row.
+   Inset (-2px) because .deskAthPane clips with overflow:hidden. */
+.deskAthSearchWrap:focus-within { outline:2px solid var(--accent); outline-offset:-2px; }
 .deskAthSearchIc { font-size:13px; color:var(--dim); flex-shrink:0; }
 .deskAthSearchInput { flex:1; min-width:0; background:none; border:none; color:var(--sub); font-family:inherit; font-size:12px; outline:none; padding:0; }
 .deskAthSearchInput::placeholder { color:var(--dim); }
