@@ -16,7 +16,7 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready (pick from the top):** plans/92 (#181) → plans/93 (#182) — promoted 2026-09-18, one session each. plans/91 (#164) shipped the same day.
+- **Ready (pick from the top):** plans/93 (#182) — promoted 2026-09-18, one session. plans/91 (#164) shipped the same day; plans/92 (#181) on 2026-09-20.
 - **In Progress:** none.
 - **Also open, blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is
   held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code.
@@ -27,7 +27,6 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/92](./plans/92-publicador-settings-debounce.md)** — **#181 Debounce Publicador's `settings` upsert, and flush on unmount** · S · Sonnet · one whole-blob upsert per keystroke; the Afiliados reference drops an edit made <500 ms before a tab switch (tabs unmount), so both get the flush.
 - 🟢 **[→ Ready · plans/93](./plans/93-focus-visible.md)** — **#182 A global `:focus-visible` ring + 10 outline-strippers + Criador's `--dim` focus borders** · S · Sonnet · keyboard focus vanishes on schedule/me/Criador controls; Criador's focus borders miss 3:1.
 
 ## 🔵 In Progress
@@ -114,6 +113,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/92 · `0cca9e6` · 2026-09-20](./plans/92-publicador-settings-debounce.md)** — **#181 Debounce Publicador's `settings` upsert, and flush on unmount** · closed #181. · 20 keystrokes → 1 upsert (was 20). Publicador and Afiliados both flush on unmount, so a <500 ms tab switch keeps the edit. The plan's "skip-flag path needs no change" was wrong — see the marker.
 - ✅ **[plans/91 · `af88d4b` · 2026-09-18](./plans/91-untargeted-session-audience.md)** — **#164 Untargeted sessions reach their audience** · closed #164. · An athlete's scopes = registered boxes ∪ scopes they've logged. Atletas' grade, ADERÊNCIA, Presença and 1:1 plus me.html's bars now work on real data: adherence non-null 0 → 23 of 23, all 23 under Hoje as predicted. Filed #204, #205.
 - ✅ **[plans/90 · `6dcc7da` · 2026-09-18](./plans/90-quick-wins-batch.md)** — **#183 + #180 + #189 + #193 + #200 Quick-wins batch** · closed #183, #180, #189, #193, #200. · `WeeklyExportView` + 12 CSS classes deleted; Index caption skips "não fez"; `ExCard` hoisted (search stops remounting the grid); 5 `toISO` imports off the SPA client; `design:cards` clock-free bar #202. #200's planned fix was wrong — see the marker. Filed #202, #203.
 - ✅ **[plans/89 · `99402c7` · 2026-09-18](./plans/89-backup-auth.md)** — **#199 `backup-supabase.mjs` reads 4 of 9 tables as empty and exits 0** · closed #199. · Reads with the service-role key from the untracked `cone/.env.local`; an unreadable table now names itself and exits non-zero (a wrong-role key is rejected too). First complete backup since 2026-06-24: `2026-09-18_16-05-25`, 9 of 9. Prod has no Pix key or `rateHistory` yet, so nothing was lost there. Filed #201.

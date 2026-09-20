@@ -1,5 +1,24 @@
 # 92 — Debounce Publicador's `settings` upsert, and flush on unmount (#181)
 
+> ✅ Done: `0cca9e6` · 2026-09-20 — see BACKLOG.md · closes #181.
+>
+> **Verified live** (local stack, Playwright request counts, no edits left in the seed): opening
+> Publicador → 0 `settings` writes; 20 keystrokes in Rodapé → 1 write, ~465 ms after the last key;
+> typing then switching tab 32 ms later → 1 write (the unmount flush) and `cone_settings_v1` plus the
+> reopened field hold the edit; timer flush then unmount → still 1; the write body carries
+> `boxThemes`/`dvBg` (spread at write time). Same for Afiliados → Meu perfil → Chave Pix against
+> `coach_profile` (0 / 1 / 1). **Negative control:** with the unmount flush disabled, the same fast
+> switch wrote nothing and left `cone_settings_v1` unchanged. A click-driven field (Blocos treatment)
+> still persists across a reload.
+>
+> **Where the plan was wrong.** It said `skipCoachEffectRef`'s path "leaves no pending payload and
+> needs no change". True with nothing typed, false with a Pix keystroke followed by an invoice advance
+> inside 500 ms: the skip run's cleanup cancels the *timer* but not the queued *payload*, so the
+> unmount flush wrote the pre-advance `coach` over the stamp `advanceInvoice` had just saved.
+> Reproduced with Playwright's fake clock (a second write with no `2026-09` stamp; `cone_coach_v1`
+> lost the draft), fixed by nulling `pendingCoachRef` in the skip branch, re-run clean. Also: the
+> localStorage key is `cone_settings_v1`, not `cone_settings` as the Acceptance section writes it.
+>
 > Promoted from Icebox P2 on 2026-09-18 with [plans/91](./91-untargeted-session-audience.md) and
 > [plans/93](./93-focus-visible.md). A full `/app-review` pass runs once all three ship.
 
