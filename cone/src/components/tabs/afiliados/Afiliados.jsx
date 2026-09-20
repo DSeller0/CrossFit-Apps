@@ -34,6 +34,17 @@ const EMPTY_FORM = {
   coachName: '',
 }
 
+const COACH_DEBOUNCE_MS = 500
+
+// Writes whatever the coach effect left in `pendingRef`, then empties it, so the
+// timer and the unmount flush can both call this and exactly one of them saves.
+function flushCoach(pendingRef) {
+  const pending = pendingRef.current
+  if (!pending) return
+  pendingRef.current = null
+  saveCoach(pending)
+}
+
 // Container for the Afiliados tab (#56/C2 · plans/75; rail + 3-column "Meus
 // afiliados" #161/plans/77, mockup 60) — was ServicosTab. Owns all storage
 // reads/writes and QR generation; every rendered component is client-free.
@@ -100,8 +111,16 @@ export default function AfiliadosTab({ events = {} }) {
   // same effect watches, so without the flag it would schedule a second, redundant
   // save of the identical data 500ms later. Same pull-suppression shape
   // `SyncContext.jsx` uses for its own two auto-save effects.
+  //
+  // #181/plans/92 — the pending payload is also flushed on unmount. `App.jsx` renders
+  // tabs as `{tab === 'x' && <Tab/>}`, so switching tabs unmounts this one, and a
+  // debounce whose cleanup only `clearTimeout`s drops the last edit (a Pix key typed
+  // <500 ms before the click was never written). NOT a shared hook with Publicador's
+  // settings effect on purpose: two call sites, and this one carries the skip flag and
+  // writes `coach` whole, where that one spreads `loadSettings()` at write time.
   const coachMounted = useRef(false)
   const skipCoachEffectRef = useRef(false)
+  const pendingCoachRef = useRef(null)
   useEffect(() => {
     if (!coachMounted.current) {
       coachMounted.current = true
@@ -109,11 +128,21 @@ export default function AfiliadosTab({ events = {} }) {
     }
     if (skipCoachEffectRef.current) {
       skipCoachEffectRef.current = false
+      // `advanceInvoice` just saved `coach` whole — including any keystroke still
+      // waiting on the timer this run's cleanup already cancelled. Drop that pending
+      // payload too: it predates the billing stamp, so the unmount flush would
+      // overwrite the stamp with the old one.
+      pendingCoachRef.current = null
       return
     }
-    const t = setTimeout(() => saveCoach(coach), 500)
+    pendingCoachRef.current = coach
+    const t = setTimeout(() => flushCoach(pendingCoachRef), COACH_DEBOUNCE_MS)
     return () => clearTimeout(t)
   }, [coach])
+
+  // Unmount flush — see the comment above for why it exists. No-op when nothing is
+  // pending, so opening the tab and leaving it still writes nothing (#109).
+  useEffect(() => () => flushCoach(pendingCoachRef), [])
 
   // `qr` is reset in the `onQr` handler below, not here — setState synchronously in
   // an effect body (rather than inside the async .then) trips react-hooks/set-state-

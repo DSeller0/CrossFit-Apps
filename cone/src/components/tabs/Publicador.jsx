@@ -92,6 +92,20 @@ function migrateTitles(saved, legacyLabel) {
   return base
 }
 
+const SETTINGS_DEBOUNCE_MS = 500
+
+// Writes whatever the settings effect left in `pendingRef`, then empties it — so the
+// timer and the unmount flush can both call this and exactly one of them saves.
+// `...loadSettings()` is spread HERE, at write time, not when the payload was queued:
+// a key another writer added in the meantime (boxWarnings, boxThemes, theme — #142)
+// must survive.
+function flushSettings(pendingRef) {
+  const pending = pendingRef.current
+  if (!pending) return
+  pendingRef.current = null
+  saveSettings({ ...loadSettings(), ...pending })
+}
+
 function fmtBytes(n) {
   if (!n) return ''
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`
@@ -166,14 +180,19 @@ function SchedulePublisher({ sessions, locations }) {
   // mount-firing first run so merely opening the tab doesn't re-upsert the blob.
   // ⚠️ Colour fields are NOT listed here any more — they live in localStorage
   // (exportSource.js), not `settings` (plans/82's colour model).
+  //
+  // #181/plans/92 — debounced, because `gymName`/`titles`/`footer` are wired per
+  // keystroke and each change used to be one whole-blob upsert. The payload waits in
+  // `pendingSettingsRef` and is written by whichever comes first: the 500 ms timer or
+  // the unmount flush below. See that effect for why the second one exists.
   const settingsMounted = useRef(false)
+  const pendingSettingsRef = useRef(null)
   useEffect(() => {
     if (!settingsMounted.current) {
       settingsMounted.current = true
       return
     }
-    saveSettings({
-      ...loadSettings(),
+    pendingSettingsRef.current = {
       fontScale: fontScaleByFormat,
       zoneScales,
       blockTitleScales,
@@ -187,7 +206,9 @@ function SchedulePublisher({ sessions, locations }) {
       mobileModel,
       gymName,
       exportScale,
-    })
+    }
+    const t = setTimeout(() => flushSettings(pendingSettingsRef), SETTINGS_DEBOUNCE_MS)
+    return () => clearTimeout(t)
   }, [
     fontScaleByFormat,
     zoneScales,
@@ -203,6 +224,13 @@ function SchedulePublisher({ sessions, locations }) {
     gymName,
     exportScale,
   ])
+
+  // The only thing standing between a fast tab switch and a lost edit: `App.jsx`
+  // renders tabs as `{tab === 'x' && <Tab/>}`, so leaving this tab UNMOUNTS it, and the
+  // effect above cancels its own timer on the way out. Without this flush, a Títulos
+  // edit made <500 ms before the click is never written. No-op when nothing is
+  // pending (the timer already flushed, or the tab was opened and left untouched, #109).
+  useEffect(() => () => flushSettings(pendingSettingsRef), [])
 
   const handleLogoUpload = e => {
     const file = e.target.files?.[0]
