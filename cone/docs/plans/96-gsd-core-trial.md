@@ -146,6 +146,15 @@ with a `restore-surface.js` beside them to put them back. The cache itself is no
   would stage `~/.claude/skills/gsd-*/` is wrong** — it re-homes the cache instead. Cleanup's
   `rm -rf ~/.claude/skills/gsd-*` is therefore a no-op, harmless, and stays only as a guard.
 
+⚠️ **Do not verify the trim by counting the `/gsd-core:` menu — the double registration makes it
+lie.** After `profile standard` the menu still offers **46** entries, not 23: the same 23
+capabilities appear once as commands (`surface`, `plan-phase`, …) and once as skills (`gsd-surface`,
+`gsd-plan-phase`, …). Seeing "more than 23" is the expected, correct state and does **not** mean the
+trim failed or was reverted. Confirmed 2026-09-21 after `onboard` + `map-codebase`: cache still 23
+commands + 23 skills, 49 still parked in `gsd-surface-disabled`, `commands/gsd` mtime still 13:40 —
+neither command touched the surface. **The valid check is that a disabled stem is ABSENT:**
+`/gsd-core:ship` matches nothing (`find` over `commands/` + `skills/` for `*ship*` returns empty).
+
 ⚠️ **`standard` disables `ship`, which step 4's loop calls for.** The 23 survivors are:
 `code-review config discuss-phase execute-phase help import ingest-docs manager map-codebase
 new-project onboard pause-work phase plan-phase progress quick resume-work review settings surface
