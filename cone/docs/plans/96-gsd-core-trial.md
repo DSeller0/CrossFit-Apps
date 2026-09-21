@@ -299,6 +299,48 @@ the map and the three restatement files.
   gates (research, UI, parallel-wave planning) go unexercised by #207, not one. That strengthens the
   case for the separate `plan-phase`-only run below.
 
+### Step 4 · PHASE 1 PLANNED — 2 plans, and the structural finding that matters most
+
+`plan-phase 1` produced **2 plans in 2 waves** (commits `5f49bae`, `44a87cd`): wave 1 moves the
+Apresentar URL to `date+session` via a new pure `buildSessionShareUrl` and validates `?id=` through a
+new pure `findAthleteById` before any write (SHARE-01/02/03, GUARD-01/02/03); wave 2 corrects the
+records carrying the false `?id=` premise (DOCS-01/02). Coverage 8/8, post-planning gap analysis
+clean, both verify probes clean — 22 commands, all targets resolve, all carry a `fails_when`.
+Plan-checker passed with **zero issues on the first iteration, no revision loop**.
+
+⚠️ **"2 waves" is NOT the parallel decomposition rubric row 4 asks about — it is the opposite.**
+Waves are *sequential* stages; parallelism is two or more plans **inside one wave**. Here each wave
+holds exactly one plan, and wave 2 (docs) is gated behind wave 1 (code) so the docs describe shipped
+reality. That is correct sequencing and **zero evidence of parallel decomposition**. Row 4 remains
+unanswered and still needs the separate `plan-phase`-only run on #191 or #102.
+
+#### 🔴 gsd's artifacts do not participate in Cone's own consistency gate
+
+**The most important adoption finding so far, and gsd raised it itself.** `docs/WORKFLOW.md:163`
+requires a `## Must-haves` block in `cone/docs/plans/NN-*.md` (#223, required from `plans/94` on) —
+and cites **this exact #207 failure** as the reason it exists. gsd writes `.planning/phases/`
+instead, so **`scripts/audit-backlog-markers.mjs` never sees its plans**: the script scans
+`docs/plans/` only, which is why it reports "177 board rows · 95 plan files" and errors outright when
+run from the wrong cwd. Adopting gsd therefore means either duplicating every plan into `docs/plans/`
+or losing the gate that #223 was built to provide. That artifact belongs to the `ship` half this
+trial does not reach, but it is a real structural difference, not a formatting preference.
+
+#### ✅ The planner found a third copy of the false claim — nobody else did
+
+`cone/docs/arch/publicador.md:83` carried a **third** statement that #113's fix works
+("Apresentar's QR now points at `schedule.html?id=<sessionId>`"). DOCS-01 named only
+`Publicador.jsx`; DOCS-02 named only `cone/CLAUDE.md`; **this plan's own earlier sweep missed it
+too.** The planner pulled it into scope unprompted under `CLAUDE.md`'s "Docs are part of Done" rule,
+flagged it in plan 02's assumptions table rather than smuggling it, and the checker rated it
+policy-compliant. **Corrected on `main` 2026-09-21** alongside the `CLAUDE.md` fix, same reasoning:
+the worktree's copy dies at Cleanup.
+
+⚠️ **The pattern-mapper was skipped — a real cost of the skip-research path.** §7.8 skips it when
+neither `CONTEXT.md` nor `RESEARCH.md` exists, and both were declined on this plan's advice. It
+would have had `REQUIREMENTS.md`'s file list to work from. gsd flagged this correctly as a workflow
+consequence, **not** a config problem. Small, but it belongs in the cost column: the advice to skip
+two gates silently removed a third.
+
 ### 🔴 Step 4 · ROADMAP — 1 phase, and rubric row 4 is **unanswerable from this trial**
 
 The roadmapper produced **one phase**, 8/8 requirements mapped, 5 success criteria, no ship phase.

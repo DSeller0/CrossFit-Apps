@@ -80,9 +80,13 @@ them. plans/90 removed component and CSS in one commit (leaving the CSS is what 
 `utils/config.js`'s `DSHORT` alias went with its last importer. C5·b1's pass also closed two live bugs, not deferred: **B1** — a block with no
 `zone` (or the legacy English `'Zone 01'` default) vanished from the Diário export (`byZone` was seeded
 with the pt-BR `ZONES` list); fixed via `normaliseZone` (`utils/config.js`), already used elsewhere.
-**#113** — Apresentar's QR now points at `schedule.html?id=<sessionId>` (built and deployed) instead of
+**#113** — Apresentar's QR was repointed at `schedule.html?id=<sessionId>` (built and deployed) instead of
 the never-built `log.html`, which stays unbuilt on purpose (it reads/writes the legacy `results` blob
-whose anon grants `0009` revoked). **#170** (a Leaderboard PNG export) was asked and answered "no."
+whose anon grants `0009` revoked). ⚠️ **That fix does not work — #113 is superseded by #207.**
+`Schedule.jsx:393` opens a session only on `date` **and** `session` together, so `?id=` never reaches
+one; it falls through to the athlete-lock branch and writes the **session** id into
+`localStorage.cone_athlete_filter` unvalidated. The working convention is `?date=…&session=…`. See
+`cone/CLAUDE.md`'s "Never-built legacy HTML" note for the full chain. **#170** (a Leaderboard PNG export) was asked and answered "no."
 Format names + the `--a-*` contract, precedence and every acceptance bar: [plans/82](../plans/82-c5b1-publicador-shell-e-cores.md).
 
 🔑 **The client-free boundary inside `publicador/` (#193 · plans/90).** The five gallery-rendered files —
