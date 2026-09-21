@@ -254,6 +254,35 @@ and a code fix cannot recall them.** Those visitors keep arriving *after* the fi
 *new* poison, which is why `GUARD-02` is load-bearing rather than defensive tidying. Both facts are
 true and they are about different populations; gsd's is the one that decides the scope.
 
+### 🔴 Step 4 · ROADMAP — 1 phase, and rubric row 4 is **unanswerable from this trial**
+
+The roadmapper produced **one phase**, 8/8 requirements mapped, 5 success criteria, no ship phase.
+That is the correct output — and it means the trial as scoped **cannot answer rubric row 4**
+("do Cone's rows decompose into parallel non-overlapping plans?"). #207 was chosen *because* it is
+small and crisp; a small crisp row yields one wave **by construction**, so a 1-phase roadmap is
+evidence about #207, not about the planner. 🔑 **Do not write "no, it produced 1 wave" in the
+report** — that would be measuring the row, not the machinery.
+
+**To actually answer row 4, run `plan-phase` alone on a row that genuinely could decompose** — #191
+(decomposition) or #102 (the `events`/`class_executions` join key) — and stop before execute. That
+costs one command and no code, and it is the only part of the rubric that speaks to the ~17-week
+throughput question the whole trial exists for. Everything measured so far is diagnosis quality,
+which is interesting but does not turn that number.
+
+⚠️ **`.planning/config.json` is written without reference to the active surface.** Line 28 sets
+`"ui_phase": true`, but `/gsd-core:ui-phase` and `/gsd-core:ui-review` are **both parked in
+`gsd-surface-disabled`** by the `standard` profile. `new-project` wrote a config enabling a phase
+whose command does not exist in the running surface, and nothing reconciles the two. The roadmapper's
+offered option "re-add `**UI hint**: yes` so downstream offers `/gsd:ui-phase`" would therefore
+produce a suggestion that **matches nothing**. Its own instinct to omit the hint was right for a
+better reason than it gave: not just that no interface is being designed, but that the command is
+not installed.
+
+✅ Worth crediting: **criterion 3 is deliberately worded to be unfakeable** — "a stale printed QR
+carrying `?id=<sessionId>` fails visibly **and writes nothing**", so it cannot pass on "the session
+doesn't open" alone. That is the half a URL-only fix would silently skip, and writing the criterion
+to exclude it is exactly what a verify gate is for.
+
 ⚠️ **`DOCS-02` is a real error in `CLAUDE.md`, and the trial cannot fix it.** The core file asserted
 "**#113 is CLOSED** — C5·b1 repointed the share URL at `schedule.html?id=<sessionId>`, which is built
 and deployed", citing a stale `Publicador.jsx:431-435`. That claim is false and had been sitting in
@@ -363,7 +392,7 @@ different findings.
 | Did Verify catch something a normal session would have shipped? | a named finding, or an explicit "no" |
 | Cost of one row end to end | tokens + wall-clock vs. a typical `plans/NN` session, **plus** the always-on figures |
 | Did `.planning/` duplicate `BACKLOG.md` / `plans/`? | which files now hold the same fact twice |
-| Do Cone's rows decompose into parallel non-overlapping plans? | did the planner produce >1 wave, and was the split real? |
+| Do Cone's rows decompose into parallel non-overlapping plans? | did the planner produce >1 wave, and was the split real? ⚠️ **#207 cannot answer this** — it is a single-wave row by construction (see step 4 · ROADMAP). Needs a `plan-phase`-only run on #191 or #102. |
 | Did the generated codebase map add anything the hand-written notes lack? | a list, or "nothing" |
 
 ## Cleanup
