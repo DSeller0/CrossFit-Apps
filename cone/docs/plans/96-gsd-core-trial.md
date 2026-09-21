@@ -51,21 +51,70 @@ subcommands do the same job from any terminal.
 - It is **more than the entire `CLAUDE.md` core** (~6 500 after #224). Installed as-is, gsd-core
   would undo 1.6× of what plans/95 just saved, on every session, forever.
 - It is far above gsd-core's own documented **~1 200 description tokens** for a full install,
-  because the plugin ships each capability **twice** — as a command `/gsd:add-tests` (72 files
+  because the plugin ships each capability **twice** — as a command `/gsd-core:add-tests` (72 files
   under `commands/gsd/`, each carrying `name: gsd:<cmd>`) *and* as a skill `gsd-add-tests` (72
   dirs under `skills/`) — so 72 commands surface as 144 skills.
 
-**Trim it before judging the loop, or the trial measures the wrong thing:** `/gsd:surface profile
-standard` (or `/gsd:surface list` first) cuts the surface to the core loop plus the everyday
-management commands. Re-run `claude plugin details gsd-core` afterwards and record both numbers —
-before and after — in the report. This is itself a rubric answer.
+**Trim it before judging the loop, or the trial measures the wrong thing:** `/gsd-core:surface
+profile standard` (or `/gsd-core:surface list` first) cuts the surface to the core loop plus the
+everyday management commands. Re-run `claude plugin details gsd-core` afterwards and record both
+numbers — before and after — in the report. This is itself a rubric answer.
+
+### Step 2 · `/gsd-core:surface list` — run 2026-09-21 13:06, output recorded
+
+**It ran clean. No error, no stack trace** — the freshly compiled Windows engine was the plausible
+failure point and it was not one. `ensure-runtime-build.cjs` fired on first use as predicted
+(`bin/lib/` 10 → ~200 `.cjs`, `surface.cjs` 41 KB, built 13:06), and the run minted
+`~/.claude/gsd-core/` — 5 symlinks (`bin` `contexts` `references` `templates` `workflows`) into the
+plugin cache, 614 files behind them. `rm -rf` unlinks without touching the targets, so the Cleanup
+step already covers it. Nothing else moved: no `.gsd-surface.json`, no `.gsd-profile`, and
+`~/.claude/skills/` is still `app-review` + `synced`. `list` is read-only, as documented.
+
+🔑 **The invocation is `/gsd-core:<cmd>` — namespaced by PLUGIN name, not by the command's own
+frontmatter.** Every file under `commands/gsd/` carries `name: gsd:surface`, and that `gsd:` prefix
+is *not* what the harness registers; `/gsd:surface` and `/gsd-surface` both match nothing. This is
+what the "commands not found" session was hitting. Corrected in step 1 below.
+
+**The two token figures do not measure the same thing, and the gap is the finding:**
+
+| Source | Reports | Counts |
+|---|---|---|
+| `/gsd-core:surface list` | **72 skills, ~1363 tok** (vs its own ~500 budget cap, 2.7×) | the 72 command **stems** and their descriptions |
+| `claude plugin details gsd-core` | **~10 700 tok always-on** · 144 skills · 64 agents · 7 hooks | both halves of the double registration **+ the 64 agents** |
+
+🔴 **~7.8× apart.** The 64 agents are absent from `surface`'s model entirely, and the double
+registration is counted once by `surface` and twice by the harness. So `profile standard` trimming
+`1363 → n` says **nothing** about where 10 700 lands — only the second `claude plugin details`
+reading settles it. That is exactly what the must-have was for; do not substitute surface's own
+number for it. (Re-measured after the `list` run: still ~10 700 / 144 / 64 / 7. Unchanged, as
+read-only implies.)
+
+⚠️ **Header count 72, enumerated rows 67 — 5 unaccounted.** The missing stems are
+`mempalace-recall` `mvp-phase` `phase` `pr-branch` `profile-user`. All five exist under
+`commands/gsd/`, all five are in `CLUSTERS.utility` in `src/clusters.cts`, and all five are
+`utility`-only (no second cluster), so they should have printed. They are also **consecutive in
+alphabetical order**, landing exactly at a line wrap between `mempalace-capture` and `progress` in
+the utility block. Either `list` drops a run of entries at a wrap, or the transcription lost a line
+— **the output was read from a screenshot, so this is not settled.** Re-run redirected to a file
+before treating it as a bug. Worth settling: if `list` under-reports, the surface it shows is not
+the surface you get.
+
+Cluster sizes as printed (de-duplicated — an overlapping stem prints under its first cluster only,
+which is why `utility` shows 21 rows against 32 members in `clusters.cts`): core_loop 8 ·
+audit_review 11 · milestone 4 · research_ideate 6 · workspace_state 7 · docs 2 · ui 2 · ai_eval 1 ·
+ns_meta 5 · utility 21. Disabled: none.
+
+**No install-profile marker exists** — `~/.claude/.gsd-surface.json` and `~/.claude/.gsd-profile`
+are both absent, so `readActiveProfile` returns null and the resolver falls through to the whole
+manifest. The full surface is the *absence* of a choice, not a chosen profile.
 
 ## Must-haves
 
-- A fresh session started **in the worktree's `cone/`** lists the `/gsd:*` commands — if it does not,
-  the plugin did not load and nothing else in this plan is valid.  [`/help` or tab-complete]
-- `claude plugin details gsd-core` recorded **twice**: at the installed surface and after
-  `/gsd:surface profile standard`.
+- A fresh session started **in the worktree's `cone/`** lists the `/gsd-core:*` commands — if it does
+  not, the plugin did not load and nothing else in this plan is valid.  [`/help` or tab-complete]
+- `claude plugin details gsd-core` recorded **twice**: at the installed surface ✅ (~10 700 / 144 /
+  64 / 7, re-confirmed 2026-09-21 after the `list` run) and after `/gsd-core:surface profile
+  standard`.
 - **#207 is actually fixed and driven in the worktree** — a visitor with no stored
   `cone_athlete_filter` opens the Apresentar QR and lands on that session. A trial that produces
   artifacts but no working fix answers nothing.
@@ -81,17 +130,22 @@ before and after — in the report. This is itself a rubric answer.
    worktree is ever recreated. (`.env.development` **is** present — it is committed. `.env.local`
    is not, and is not needed for this row.)
 1. Open a terminal in `C:\Users\ze_do\repos\CrossFit-Apps-gsd-trial\cone` and run `claude`.
-   🔑 **The commands are namespaced `gsd:`, not `gsd-`** — `/gsd:surface`, `/gsd:onboard`,
-   `/gsd:map-codebase`, `/gsd:new-project`. `gsd-surface` is the *skill* half of the double
-   registration above, not what you type. A `/gsd-...` that matches nothing looks identical to
-   the plugin not being loaded — run `claude plugin list` before assuming either.
-2. `/gsd:surface list`, then `/gsd:surface profile standard`. **Restart the session** — surface
-   changes only take effect next session. Record the new always-on figure.
-3. `/gsd:onboard` → it will ask for `/gsd:map-codebase`. Run it. 🔴 **Keep the 7 generated files in
+   🔑 **The commands are namespaced by PLUGIN name: `/gsd-core:<cmd>`** — `/gsd-core:surface`,
+   `/gsd-core:onboard`, `/gsd-core:map-codebase`, `/gsd-core:new-project`. ⚠️ **Not `/gsd:…`**,
+   even though every file under `commands/gsd/` declares `name: gsd:<cmd>` in its frontmatter —
+   the harness ignores that prefix and uses `plugin.json`'s `"name": "gsd-core"`. `gsd-surface` is
+   the *skill* half of the double registration above, not what you type either. Confirmed by a
+   live run 2026-09-21; an earlier session lost time to `/gsd-surface` and `/gsd:surface` both
+   matching nothing, which looks identical to the plugin not being loaded — run `claude plugin
+   list` before assuming either.
+2. `/gsd-core:surface list` ✅ **done 2026-09-21, recorded above**, then `/gsd-core:surface profile
+   standard`. **Restart the session** — surface changes only take effect next session. Record the
+   new always-on figure from `claude plugin details`, not from surface's own count (see above).
+3. `/gsd-core:onboard` → it will ask for `/gsd-core:map-codebase`. Run it. 🔴 **Keep the 7 generated files in
    the worktree — never merge them.** Then diff them against `cone/CLAUDE.md` + `docs/arch/*.md`:
    does a generated map surface anything the hand-written notes lack? That answer feeds rubric row 5
    and is worth having whichever way the trial goes.
-4. `/gsd:new-project` scoped to one row, then the full loop on **#207** — discuss → plan → execute →
+4. `/gsd-core:new-project` scoped to one row, then the full loop on **#207** — discuss → plan → execute →
    verify → ship. #207 is the blocker `Publicador.jsx:480` sends a session id to
    `schedule.html?id=`, which `Schedule.jsx:155` reads as an *athlete* id, persisting a bad
    `localStorage.cone_athlete_filter`. Chosen because it is small, has a crisp demonstrable outcome,
@@ -110,7 +164,7 @@ before and after — in the report. This is itself a rubric answer.
 
 ## Cleanup
 
-### Baseline — `~/.claude` before the trial (recorded 2026-09-21, pre-`/gsd:`)
+### Baseline — `~/.claude` before the trial (recorded 2026-09-21, pre-`/gsd-core:`)
 
 | | |
 |---|---|
@@ -119,12 +173,12 @@ before and after — in the report. This is itself a rubric answer.
 | `~/.claude/.gsd*` | none |
 
 ⚠️ **The worktree isolates the *repo*, not the CLI's home directory** — so "nothing global"
-was already false before a single `/gsd:` command ran: `claude plugin marketplace add` wrote
+was already false before a single `/gsd-core:` command ran: `claude plugin marketplace add` wrote
 `extraKnownMarketplaces.gsd-core` into `~/.claude/settings.json`, and the 1.14.0 payload sits in
 `~/.claude/plugins/cache/gsd-core/`. Both are reversible (step 2 below); the point is that the
 blast radius is the home dir, and it has to be checked rather than assumed.
 
-🔴 **`/gsd:surface` is the one to watch.** Its own spec writes `~/.claude/.gsd-surface.json`
+🔴 **`/gsd-core:surface` is the one to watch.** Its own spec writes `~/.claude/.gsd-surface.json`
 (sibling to `~/.claude/.gsd-profile`) and re-stages skill dirs at `~/.claude/skills/gsd-*/` —
 all home-dir paths, outside the worktree, and **none of them `plugin uninstall`'s job**. It also
 compiles its engine on first run (`src/surface.cts` → `bin/lib/surface.cjs`, via
