@@ -115,6 +115,34 @@ ns_meta 5 · utility 21. Disabled: none.
 are both absent, so `readActiveProfile` returns null and the resolver falls through to the whole
 manifest. The full surface is the *absence* of a choice, not a chosen profile.
 
+### 🔴 Step 3 · the worktree-root trap — `main` was one command away from being written to
+
+**gsd-core resolves a linked worktree's project root with `git rev-parse --git-common-dir`, which
+remaps to the MAIN checkout.** For `...-gsd-trial`, that resolves to
+`C:/Users/ze_do/repos/CrossFit-Apps` on branch `main` — so `/gsd-core:onboard` and everything after
+it would have written `.planning/` **into the main working tree**, breaking the "main is untouched"
+must-have without touching the worktree at all. The worktree isolates the *checkout*; it does not
+isolate gsd's idea of where the project is.
+
+**The guard is already in place** (commit `56ad15c` on `gsd-trial`, 2026-09-21 13:54): a committed
+`.planning/.gitkeep` in the worktree root. `resolveWorktreeContext`
+(`gsd-core/bin/lib/worktree-safety.cjs`) checks for a **local `.planning/` first** and returns that
+directory when one exists — "local `.planning` takes precedence over linked-worktree remapping".
+⚠️ **The directory's mere existence is the isolation.** Do not delete `.planning/` or its
+`.gitkeep` while the trial runs, and if the worktree is ever recreated, create `.planning/` *before*
+the first `/gsd-core:` command, not after. Verified 2026-09-21: `main` has no `.planning/` and
+`git status` there is clean.
+
+### ⚠️ Step 3 · `map-codebase` produced no artifacts — unresolved
+
+As of 2026-09-21 ~13:55, after `/gsd-core:onboard` + `/gsd-core:map-codebase`, the worktree's
+`.planning/` holds **only** the `.gitkeep` pin. `git status` in the worktree is empty — no untracked
+files, no generated map, nothing under any other `.planning/` in the tree. The plan's step 3 expects
+**7 generated files**; there are zero. This is not yet diagnosed — the run may have errored, been
+interrupted, or written somewhere unexamined. **Rubric row 5 ("did the generated map add anything
+the hand-written notes lack?") cannot be answered until this is resolved**, and "the mapper produced
+nothing on a 1113-test React codebase" is itself a reportable answer if it reproduces.
+
 ### Step 2b · `/gsd-core:surface profile standard` — run 2026-09-21 13:40, both numbers now recorded
 
 | | Skills | Agents | Hooks | **Always-on** |
