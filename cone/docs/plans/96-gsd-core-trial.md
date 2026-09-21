@@ -64,6 +64,10 @@ before and after — in the report. This is itself a rubric answer.
 
 ## Approach
 
+0. ⚠️ **The worktree needs its own `node_modules`** — a git worktree shares history, not
+   installed packages. `npm install` was run there on 2026-09-21, so it is ready; re-run it if the
+   worktree is ever recreated. (`.env.development` **is** present — it is committed. `.env.local`
+   is not, and is not needed for this row.)
 1. Open a terminal in `C:\Users\ze_do\repos\CrossFit-Apps-gsd-trial\cone` and run `claude`.
 2. `/gsd-surface list`, then `/gsd-surface profile standard`. **Restart the session** — surface
    changes only take effect next session. Record the new always-on figure.
