@@ -95,9 +95,16 @@ read-only implies.)
 `utility`-only (no second cluster), so they should have printed. They are also **consecutive in
 alphabetical order**, landing exactly at a line wrap between `mempalace-capture` and `progress` in
 the utility block. Either `list` drops a run of entries at a wrap, or the transcription lost a line
-— **the output was read from a screenshot, so this is not settled.** Re-run redirected to a file
-before treating it as a bug. Worth settling: if `list` under-reports, the surface it shows is not
-the surface you get.
+— **the output was read from a screenshot, so this is not settled.** Worth settling: if `list`
+under-reports, the surface it shows is not the surface you get.
+
+⚠️ **Driving the engine standalone to settle it does not work — tried 2026-09-21, don't retry.**
+`bin/lib/surface.cjs` is a module, not a CLI (`node bin/lib/surface.cjs list` prints nothing), and
+its export `listSurface(runtimeConfigDir, manifest, clusterMap, registry)` returns
+`enabled: 0, disabled: 0, tokenCost: 0` when called with just `~/.claude` — the **manifest is
+supplied by the slash command**, not discovered from the config dir. To capture raw output, re-run
+`/gsd-core:surface list` in the worktree session and have that session `Write` the result to a
+file; a screenshot is what created this ambiguity in the first place.
 
 Cluster sizes as printed (de-duplicated — an overlapping stem prints under its first cluster only,
 which is why `utility` shows 21 rows against 32 members in `clusters.cts`): core_loop 8 ·
