@@ -10,22 +10,27 @@ written before 2026-07-27 are **not comparable** to later ones and **cannot be s
 ([plans/49](./plans/49-prettier-format-baseline.md)) reformatted the repo at `printWidth: 100`, ×1.77
 overall but non-uniformly (Publicador ×3.34 · Atletas ×2.27 · Timer ×1.37). That trap cost two sessions.
 Docs: [FEATURES.md](./FEATURES.md) · [PRODUCT.md](./PRODUCT.md) · [MOBILE.md](./MOBILE.md) ·
-design program [plans/16](./plans/16-design-pass-program.md) · review reports [reviews/](./reviews/) — latest [2026-09-05](./reviews/2026-09-05.md).
+design program [plans/16](./plans/16-design-pass-program.md) · review reports [reviews/](./reviews/) — latest [2026-09-20](./reviews/2026-09-20.md).
 
 ---
 
 ## ▶ Now
 
-- **Ready (pick from the top):** none. plans/91 (#164) shipped 2026-09-18; plans/92 (#181) and plans/93 (#182) on 2026-09-20.
-- **In Progress:** none.
-- **Also open, blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is
-  held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code.
-- **Just refilled:** the [2026-09-20 full pass](./reviews/2026-09-20.md) (all 9 dimensions incl. a
-  live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
-  Its companion [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) +
-  [SQL](./reviews/2026-09-20-registry-additions.sql) is **waiting on the user** (20 naming calls +
-  approve the drafted pt-BR text before it reaches prod).
+- **Ready:** none
+- **In Progress:** none
 - **Start here:** **#207** — #113 shipped a fix that doesn't work and corrupts `cone_athlete_filter`.
+- **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
+  `> 🟡 Shipped:` pending an on-device iPhone re-test; nothing to code. · **#211** — the
+  [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) needs 20 naming calls and
+  approval of the drafted pt-BR text before its
+  [SQL](./reviews/2026-09-20-registry-additions.sql) reaches prod.
+- **Last refill:** the [2026-09-20 full pass](./reviews/2026-09-20.md) (all 9 dimensions incl. a
+  live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
+
+⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
+plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
+them against the two columns below and cannot tell a claim from a reminiscence inside one bullet.
+Every other bullet here is free-form.
 
 ---
 
@@ -90,6 +95,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#218 Every public page ships Supabase Realtime it never uses** · M · Opus · the 203 kB / 52 kB gz shared chunk is `@supabase/supabase-js` (confirmed by grepping the built asset for `GoTrueClient`/`RealtimeClient`); with React that is a ~112 kB gz floor on `tema.html` and `recover.html` too. Needs a call on a lighter read path (PostgREST fetch) before it is worth building.
 - **#219 `App.jsx:162-179` is dead code that arms a load-path write if anyone fills a stub** · XS · Sonnet · `saveSettings(merged)` at `:174` sits outside the `colourChanged` test and `:170` forces `gymName`. Inert **only** because the SPA's `./config.json` resolves to `cone/public/config.json`, the `{}` stub `9ca4348` added. Delete it, or gate the write.
 - **#220 `build-design-cards.mjs:48-57` keeps a 9th literal theme enumeration** · XS · Sonnet · `THEME_LABELS` hand-lists all 8 ids while the guard at `:221` only checks count == `THEMES.length`, so theme #9 passes the guard and renders its raw class name as the switcher label. `THEMES[].label` already exists.
+- **#224 `CLAUDE.md` is 159 KB / ~40k tokens and auto-loads on every session** · M–L · Opus · 20% of a 200k context gone before the first prompt. **Hand-cut, never regenerated** — it is an earned trap list, not a map a tool rebuilds — into a lean core + on-demand `docs/arch/*.md`; target ~8–10k. The index is the risk control: each pointer names its file's traps.
 
 ### P3 — needs a decision before it needs code
 
@@ -109,6 +115,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#88 Reconcile prod vs. dev database** · S–M · Sonnet · **re-measured 2026-09-20: FOUR tables, not two.** `seed-dev.mjs` prints EMPTY for `locations`, `coach_profile`, **`events` and `templates`** (`0006` locked two, `0009` the others) — indistinguishable from prod having none. It also seeds **0** result rows when #190 fires. Fix is plans/89's service-role read.
 - **#221 `useLiveRegistration.js:52-59` upserts `results_v2` with no error check at all** · XS · Sonnet · decision first: the return value isn't destructured, so a constraint violation (#190's, reachable because `:29` also filters on `date`) vanishes with **zero** signal. Decide how a failed live registration surfaces on the TV controller.
 - **#222 Four test athletes live in prod** · XS · Sonnet · `Atleta00`–`Atleta03` render in me.html's public picker alongside real members. Decide: delete, or mark them non-public — the athlete blob has no flag for it today.
+- **#225 Trial gsd-core's phase loop in isolation, then decide** · M · Opus · [gsd-core](https://github.com/open-gsd/gsd-core) — install as a plugin at `--profile=standard`, run **#207** through discuss→plan→execute→verify→ship in a worktree, answer a 5-question rubric in a dated report, uninstall. Cone has ~70% of it already; the question is whether parallel waves beat one-row-per-session.
 
 ### P4 — parked (features, infra, large structural)
 

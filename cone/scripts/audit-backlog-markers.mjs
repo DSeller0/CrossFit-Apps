@@ -5,9 +5,11 @@
 //
 // Cross-references three sources per #N: a board row's own leading marker (🟢 Ready / ✅
 // shipped / bare), the plan file's `> ✅ Done:` marker (present? which #Ns does it name?),
-// and any other board row that already calls the same #N shipped. Reports four shapes,
-// matching the drift found and hand-corrected in reviews/2026-08-05-full-pass.md:
+// and any other board row that already calls the same #N shipped. Reports six shapes — the
+// first four match the drift found and hand-corrected in reviews/2026-08-05-full-pass.md:
 //   ready-but-shipped · bare-but-shipped · plan-missing-done-marker · partial-marker
+// plus two added by #223 (2026-09-20), which close the two gaps the 2026-09-20 review found:
+//   must-haves-unverified · now-section-drift
 //
 // Deliberately permissive — this board is prose, not data. A false negative (missed drift)
 // is fine; a false positive would train the next session to ignore the table. See plans/70
@@ -16,6 +18,12 @@ import { readFileSync, readdirSync } from 'node:fs'
 
 const PLANS_DIR = 'docs/plans'
 const BACKLOG = 'docs/BACKLOG.md'
+
+// #223 · the must-haves gate applies to plans written from here on, NOT retroactively.
+// 93 was the highest plan when the gate shipped, so 94 is the first plan expected to carry
+// `## Must-haves`. Raising this number silently disarms the gate — don't, unless the
+// convention itself is being retired.
+const MUST_HAVES_FROM = 94
 
 // ── number extraction ───────────────────────────────────────────────────────────
 // `#126–#131` (en dash, the range form the board uses) expands to every number in
@@ -84,6 +92,7 @@ function parsePlans() {
     // mentions "#147–#151" as review OUTPUT ("5 new rows"), not what it closed — that sits in
     // prose further along and must not be swept in. Anchoring is what keeps it out.
     let doneNums = [...titleNums]
+    let markerText = ''
     if (hasDoneMarker) {
       let end = start
       while (
@@ -93,6 +102,7 @@ function parsePlans() {
       )
         end++
       const blockText = lines.slice(start, end).join(' ')
+      markerText = blockText
       const lead = blockText.match(/^>\s*\*{0,2}✅\*{0,2}\s*\*{0,2}Done:?\*{0,2}\s*(#\d[^—–-]*)/)
       // allNums, not leadingChainNums: the capture is already anchored to the marker's
       // start and bounded by the em dash, and this board separates a chain with ` · `,
@@ -101,7 +111,13 @@ function parsePlans() {
       const cm = blockText.match(/\b[Cc]los\w*:?\s+((?:\*\*)?#\d+[^.]*)\./)
       if (cm) doneNums = [...new Set([...doneNums, ...allNums(cm[1])])]
     }
-    plans.set(nn, { file, hasDoneMarker, doneNums })
+    // #223 · the must-haves gate. `hasMustHaves` is the plan declaring what it must be able
+    // to demonstrate; `markerEvidences` is the Done marker recording that each one WAS driven.
+    // Both are matched permissively (case, hyphen, `##`/`###`) — the point is to catch a plan
+    // that skipped the step entirely, not to police spelling.
+    const hasMustHaves = lines.some(l => /^#{2,3}\s*Must[- ]?haves?\b/i.test(l))
+    const markerEvidences = /Must[- ]?haves?/i.test(markerText)
+    plans.set(nn, { file, hasDoneMarker, doneNums, hasMustHaves, markerEvidences })
   }
   return plans
 }
@@ -139,7 +155,14 @@ function boardSectionRanges(lines) {
   const ranges = []
   for (let i = 0; i < starts.length; i++) {
     if (!/Ready|In Progress|Icebox|Done/.test(starts[i].title)) continue
-    ranges.push([starts[i].line, starts[i + 1] ? starts[i + 1].line : lines.length])
+    // Third element added by #223 so a row can name the column it sits in — the ▶ Now
+    // cross-check needs 🟢 Ready and 🔵 In Progress told apart, which rowLeadMarker
+    // deliberately does not do (it folds both into one 'ready' class).
+    ranges.push([
+      starts[i].line,
+      starts[i + 1] ? starts[i + 1].line : lines.length,
+      starts[i].title,
+    ])
   }
   return ranges
 }
@@ -188,16 +211,30 @@ function rowPlanLink(line) {
   return pm ? Number(pm[1]) : null
 }
 
+// 'Ready' is tested before 'In Progress' only because neither heading contains the other's
+// words; `## 🟢 Ready (planned — pick from the top)` and `## 🔵 In Progress` are disjoint.
+function sectionName(title) {
+  if (/In Progress/.test(title)) return 'in-progress'
+  if (/Ready/.test(title)) return 'ready'
+  if (/Icebox/.test(title)) return 'icebox'
+  return 'done'
+}
+
 function parseRows() {
   const lines = readFileSync(BACKLOG, 'utf8').split(/\r?\n/)
   const ranges = boardSectionRanges(lines)
-  const inBoardSection = i => ranges.some(([start, end]) => i >= start && i < end)
+  const sectionOf = i => {
+    const hit = ranges.find(([start, end]) => i >= start && i < end)
+    return hit ? sectionName(hit[2]) : null
+  }
   const rows = []
   lines.forEach((line, i) => {
-    if (!/^-\s/.test(line) || !inBoardSection(i)) return
+    const section = sectionOf(i)
+    if (!/^-\s/.test(line) || !section) return
     rows.push({
       lineNo: i + 1,
       text: line,
+      section,
       lead: rowLeadMarker(line),
       titleNums: rowTitleNums(line),
       closedNums: rowClosedClauseNums(line),
@@ -205,6 +242,42 @@ function parseRows() {
     })
   })
   return rows
+}
+
+// ── ▶ Now ────────────────────────────────────────────────────────────────────────
+// #223. The ▶ Now block is the board's position tracker and was pure prose, which is why
+// it could disagree with the columns below it indefinitely and nothing noticed. Two of its
+// bullets now carry a FIXED grammar (WORKFLOW.md "▶ Now grammar"):
+//
+//   - **Ready:** none          |  - **Ready:** #207 · #211
+//   - **In Progress:** none    |  - **In Progress:** #207
+//
+// Those two bullets carry a claim and NOTHING ELSE — no dates, no plan links, no history.
+// That restriction is the whole point: the previous wording was "none. plans/91 (#164)
+// shipped 2026-09-18; plans/92 (#181) …", where every #N is historical commentary, and no
+// parser can tell a claim from a reminiscence inside one bullet. Every other bullet in the
+// block stays free-form and is not read here.
+function parseNow() {
+  const lines = readFileSync(BACKLOG, 'utf8').split(/\r?\n/)
+  const start = lines.findIndex(l => /^##\s.*▶\s*Now/.test(l))
+  if (start === -1) return null
+  let end = lines.length
+  for (let i = start + 1; i < lines.length; i++) {
+    if (/^##\s/.test(lines[i])) {
+      end = i
+      break
+    }
+  }
+  const claim = label => {
+    const re = new RegExp(`^-\\s+\\*\\*${label}:?\\*\\*`)
+    for (let i = start; i < end; i++) {
+      if (!re.test(lines[i])) continue
+      const rest = lines[i].replace(/^-\s+\*\*[^*]*\*\*:?\s*/, '').trim()
+      return { lineNo: i + 1, rest, isNone: /^none\b/i.test(rest), nums: allNums(rest) }
+    }
+    return null
+  }
+  return { ready: claim('Ready'), inProgress: claim('In Progress') }
 }
 
 // ── cross-reference ─────────────────────────────────────────────────────────────
@@ -299,12 +372,78 @@ for (const [nn, p] of plans) {
   }
 }
 
+// must-haves-unverified (#223). The 2026-09-20 review found #113 closed with a fix that did
+// not work — the ritual's `/run` step is advice, so it gets skipped, and nothing downstream
+// could tell. A plan from MUST_HAVES_FROM on declares what it must be able to demonstrate,
+// and its Done marker records that each one was actually driven. Only plans that already
+// claim to be shipped are checked: a live plan has not reached the gate yet.
+for (const [nn, p] of plans) {
+  if (nn < MUST_HAVES_FROM || !p.hasDoneMarker) continue
+  if (!p.hasMustHaves) {
+    findings.push({
+      shape: 'must-haves-unverified',
+      line: null,
+      detail: `${p.file} carries a Done marker but has no \`## Must-haves\` section (expected from plans/${MUST_HAVES_FROM} on)`,
+    })
+  } else if (!p.markerEvidences) {
+    findings.push({
+      shape: 'must-haves-unverified',
+      line: null,
+      detail: `${p.file} declares must-haves, but its Done marker records no evidence they were driven`,
+    })
+  }
+}
+
+// now-section-drift (#223). ▶ Now is the board's position tracker; until now nothing
+// compared it to the columns underneath it, which is the same silence that let the board
+// run five weeks on a format its own detector could not read.
+const now = parseNow()
+for (const [label, claim, section] of [
+  ['Ready', now?.ready, 'ready'],
+  ['In Progress', now?.inProgress, 'in-progress'],
+]) {
+  if (!now) break
+  if (!claim) {
+    findings.push({
+      shape: 'now-section-drift',
+      line: null,
+      detail: `▶ Now has no \`- **${label}:**\` bullet — the grammar requires both`,
+    })
+    continue
+  }
+  if (claim.isNone && claim.nums.length) {
+    findings.push({
+      shape: 'now-section-drift',
+      line: claim.lineNo,
+      detail: `▶ Now's **${label}:** says "none" and then names #${claim.nums.join(', #')} — a claim bullet carries one or the other, never prose`,
+    })
+    continue
+  }
+  const column = new Set()
+  for (const r of rows) if (r.section === section) r.titleNums.forEach(n => column.add(n))
+  const claimed = new Set(claim.isNone ? [] : claim.nums)
+  const missing = [...column].filter(n => !claimed.has(n))
+  const extra = [...claimed].filter(n => !column.has(n))
+  if (missing.length || extra.length) {
+    const parts = []
+    if (missing.length) parts.push(`the column has #${missing.join(', #')} which ▶ Now omits`)
+    if (extra.length) parts.push(`▶ Now names #${extra.join(', #')} which is not in the column`)
+    findings.push({
+      shape: 'now-section-drift',
+      line: claim.lineNo,
+      detail: `▶ Now's **${label}:** disagrees with the ${label} column — ${parts.join('; ')}`,
+    })
+  }
+}
+
 // ── report ───────────────────────────────────────────────────────────────────────
 const SHAPES = [
   'ready-but-shipped',
   'bare-but-shipped',
   'plan-missing-done-marker',
   'partial-marker',
+  'must-haves-unverified',
+  'now-section-drift',
 ]
 console.log(`\n# Backlog marker audit — ${rows.length} board rows · ${plans.size} plan files\n`)
 if (!findings.length) {
