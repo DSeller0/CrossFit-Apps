@@ -1,5 +1,40 @@
 # 94 — #223 · A verify gate that is checkable + ▶ Now grammar
 
+> ✅ Done: `87de081` · 2026-09-20 — see BACKLOG.md · closes #223. Filed #224, #225.
+>
+> **Must-haves: 6/6 driven.** Against a throwaway `docs/plans/94-GATE-TEST-DELETE-ME.md` fixture,
+> mutated through four states, and against the real board:
+>
+> | # | Must-have | What happened |
+> |---|---|---|
+> | 1 | fires on a `94+` plan with a Done marker and no `## Must-haves` | `must-haves-unverified (1)` |
+> | 2 | fires when must-haves exist but the marker never reports driving them | fired, naming the file |
+> | 3 | silent once the marker carries evidence | `0 total finding(s)` |
+> | 4 | silent on a live plan (no Done marker) | `0 total finding(s)` — the gate is for shipped plans |
+> | 5 | `now-section-drift` on a claimed `#N` absent from the column | *"▶ Now names #207, #211 which is not in the column"* |
+> | 6 | …and on `none` beside a `#N` in one bullet | *"says \"none\" and then names #182"* — the board's own pre-#223 wording |
+>
+> Real board after the rewrite: **zero drift**, 176 rows / 93 plan files. `npm run format:check`
+> clean, `npm run lint` clean, `npm test` 1113 passed (31 files).
+>
+> 🔴 **Driving must-have 3 caught a bug in the gate itself, in this very marker.** The
+> evidence scan reused the existing marker walk, which stops at the first EMPTY `>` line — the
+> anchoring `doneNums` depends on to keep plans/68's review output out of its closure set. A real
+> marker puts its prose and tables *below* that separator, so the scan never saw them and this
+> plan reported itself unverified. The two walks are now separate and commented at the site; the
+> `doneNums` one is untouched. Re-driven after the fix on a fixture whose evidence sits below a
+> separator: fires without it, silent with it. Reasoning about the gate would not have found this.
+>
+> 🔑 **Two things worth carrying forward.** `MUST_HAVES_FROM = 94` is the whole backfill
+> policy — raising it silently disarms the gate. And the ▶ Now restriction (`none` **or** `#N`s,
+> never prose) is the mechanism, not fussiness: the bullet this replaced read *"none. plans/91
+> (#164) shipped 2026-09-18…"*, where every `#N` is a reminiscence, and no parser can tell that from
+> a claim inside one bullet.
+>
+> ⚠️ **`/verify` no longer exists.** WORKFLOW.md had named it since the ritual was written; the
+> current skill surface offers `/run`. A ritual step pointing at a command that silently does
+> nothing is a plausible part of why step 4 kept being skipped.
+
 ## Context
 
 The 2026-09-20 review's blocker (#207) is a process failure, not a coding one: **#113 shipped a fix

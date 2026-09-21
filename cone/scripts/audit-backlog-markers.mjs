@@ -102,7 +102,14 @@ function parsePlans() {
       )
         end++
       const blockText = lines.slice(start, end).join(' ')
-      markerText = blockText
+      // ⚠️ `end` above stops at the first EMPTY `>` line, and `doneNums` depends on that —
+      // the anchoring that keeps plans/68's "#147–#151" review output out of its closure set.
+      // The must-haves evidence scan needs the OPPOSITE: the whole leading blockquote,
+      // because a real marker puts its prose and tables below a `>` separator. Caught by
+      // driving this gate against its own plan (plans/94), which reported itself unverified.
+      let full = start
+      while (full < lines.length && /^>/.test(lines[full])) full++
+      markerText = lines.slice(start, full).join(' ')
       const lead = blockText.match(/^>\s*\*{0,2}✅\*{0,2}\s*\*{0,2}Done:?\*{0,2}\s*(#\d[^—–-]*)/)
       // allNums, not leadingChainNums: the capture is already anchored to the marker's
       // start and bounded by the em dash, and this board separates a chain with ` · `,
