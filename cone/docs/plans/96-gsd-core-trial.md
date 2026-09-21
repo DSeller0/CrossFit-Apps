@@ -174,6 +174,28 @@ cross-check on `CLAUDE.md`.
 claim "nothing new" across the whole map rather than across `CONCERNS.md`, they need the same
 treatment — spot-check each against `docs/arch/` before generalising.
 
+### ✅ Step 4 · `new-project` opened QUESTIONING — and asked the right question (2026-09-21 14:22)
+
+**The first thing in this trial to go in gsd's favour, and it is worth saying plainly.** Before
+writing a single file, `/gsd-core:new-project` grounded itself in the repo and said: Cone is not a
+blank slate, `BACKLOG.md` is the board, `WORKFLOW.md` is the ritual, `plans/NN-*.md` are the plans,
+`docs/reviews/` holds the reports — *"your board even tracks this trial as #225"* — and therefore
+`REQUIREMENTS.md` + `ROADMAP.md` **will overlap with what `BACKLOG.md` already holds**, so the
+answer determines "whether GSD becomes a *second* board competing with your first, or something
+scoped narrowly enough to coexist."
+
+🔑 **That is rubric row 3 ("did `.planning/` duplicate `BACKLOG.md`/`plans/`?") being raised by the
+tool itself, unprompted, before any duplication happened.** The mapper re-narrated the docs and got
+them wrong (row 5 above); the planner *read the same docs and drew the correct strategic conclusion
+from them*. Those are different capabilities and the report must not average them into one verdict.
+It also refused a menu — "tell me what you're actually after, in your own words, not one of the
+above" — which is the opposite of the confident-wrong failure mode `CONCERNS.md` showed.
+
+⚠️ **The answer given must therefore be narrow on purpose**, or the trial creates the second board
+gsd just warned about. Scope it to **#207 only**, state that `BACKLOG.md` stays the master board and
+that no `ROADMAP.md` modelling the whole product is wanted, and end the loop at `verify-work`
+(`ship` is disabled at `standard`, see above).
+
 ### Step 2b · `/gsd-core:surface profile standard` — run 2026-09-21 13:40, both numbers now recorded
 
 | | Skills | Agents | Hooks | **Always-on** |

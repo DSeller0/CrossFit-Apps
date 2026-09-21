@@ -36,7 +36,7 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/96](./plans/96-gsd-core-trial.md)** — **#225 Trial gsd-core's phase loop in isolation, then decide** · M · Opus · worktree + plugin already installed (local scope, gitignored). Run #207 through discuss→plan→execute→verify→ship, answer the 5-question rubric, uninstall. ⚠️ **Measured before starting: ~10 700 tokens always-on** — more than the whole `CLAUDE.md` core after #224. Trim with `/gsd-surface profile standard` first, or the trial measures the wrong thing.
+- 🟢 **[→ Ready · plans/96](./plans/96-gsd-core-trial.md)** — **#225 Trial gsd-core's phase loop in isolation, then decide** · M · Opus · worktree + plugin already installed (local scope, gitignored). Run #207 through discuss→plan→execute→verify, answer the 5-question rubric, uninstall. ⚠️ **Commands are `/gsd-core:<cmd>`**, not `/gsd:` or `/gsd-` — both match nothing. ⚠️ **Measured: ~10 700 tokens always-on, and `/gsd-core:surface profile standard` only gets it to ~7 008** — the 64 agents are a floor surface cannot touch, so even trimmed it costs more than the whole `CLAUDE.md` core after #224. `standard` also disables `ship`, hence the loop ending at verify.
 
 ## 🔵 In Progress
 
