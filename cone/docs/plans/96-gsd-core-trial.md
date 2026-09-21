@@ -29,6 +29,16 @@ worktree and the plugin go and the report stays.
 | Plugin | `claude plugin install gsd-core --scope local -y`, run **inside the worktree** ✅ |
 | Isolation | recorded in the worktree's `.claude/settings.local.json`, which is **globally gitignored**; `git status` there is clean. Nothing global, nothing committed. |
 
+⚠️ **A local-scope install is keyed to the exact directory `claude` was launched from, not to
+the repo.** The install ran at the worktree **root**, so `installed_plugins.json` recorded
+`projectPath: ...\CrossFit-Apps-gsd-trial` and the `enabledPlugins` key landed in that root's
+`.claude/settings.local.json`. Launching from `...-gsd-trial\cone` — which step 1 below tells
+you to do — reads a *different* settings file, so the plugin was **disabled** there, with no error
+and no `gsd` commands. `claude plugin list` is the oracle: it printed `✘ disabled` in `cone\` and
+`✔ enabled` one level up. Fixed 2026-09-21 by adding the same `enabledPlugins` key to
+`...-gsd-trial\cone\.claude\settings.local.json` (also gitignored — both trees still clean). If
+the worktree is ever recreated, run the install **from `cone\`**, not from the root.
+
 ⚠️ **`/plugin` does not exist in the VSCode extension** — that is an environment limitation, not
 session state, so opening a new session there will not produce it. The `claude plugin …` **CLI**
 subcommands do the same job from any terminal.
@@ -41,20 +51,21 @@ subcommands do the same job from any terminal.
 - It is **more than the entire `CLAUDE.md` core** (~6 500 after #224). Installed as-is, gsd-core
   would undo 1.6× of what plans/95 just saved, on every session, forever.
 - It is far above gsd-core's own documented **~1 200 description tokens** for a full install,
-  because the plugin registers every command **twice** — `add-tests` *and* `gsd-add-tests` — so 72
-  commands surface as 144 skills.
+  because the plugin ships each capability **twice** — as a command `/gsd:add-tests` (72 files
+  under `commands/gsd/`, each carrying `name: gsd:<cmd>`) *and* as a skill `gsd-add-tests` (72
+  dirs under `skills/`) — so 72 commands surface as 144 skills.
 
-**Trim it before judging the loop, or the trial measures the wrong thing:** `/gsd-surface profile
-standard` (or `/gsd-surface list` first) cuts the surface to the core loop plus the everyday
+**Trim it before judging the loop, or the trial measures the wrong thing:** `/gsd:surface profile
+standard` (or `/gsd:surface list` first) cuts the surface to the core loop plus the everyday
 management commands. Re-run `claude plugin details gsd-core` afterwards and record both numbers —
 before and after — in the report. This is itself a rubric answer.
 
 ## Must-haves
 
-- A fresh session started **in the worktree's `cone/`** lists the `gsd-*` commands — if it does not,
+- A fresh session started **in the worktree's `cone/`** lists the `/gsd:*` commands — if it does not,
   the plugin did not load and nothing else in this plan is valid.  [`/help` or tab-complete]
 - `claude plugin details gsd-core` recorded **twice**: at the installed surface and after
-  `/gsd-surface profile standard`.
+  `/gsd:surface profile standard`.
 - **#207 is actually fixed and driven in the worktree** — a visitor with no stored
   `cone_athlete_filter` opens the Apresentar QR and lands on that session. A trial that produces
   artifacts but no working fix answers nothing.
@@ -69,13 +80,17 @@ before and after — in the report. This is itself a rubric answer.
    worktree is ever recreated. (`.env.development` **is** present — it is committed. `.env.local`
    is not, and is not needed for this row.)
 1. Open a terminal in `C:\Users\ze_do\repos\CrossFit-Apps-gsd-trial\cone` and run `claude`.
-2. `/gsd-surface list`, then `/gsd-surface profile standard`. **Restart the session** — surface
+   🔑 **The commands are namespaced `gsd:`, not `gsd-`** — `/gsd:surface`, `/gsd:onboard`,
+   `/gsd:map-codebase`, `/gsd:new-project`. `gsd-surface` is the *skill* half of the double
+   registration above, not what you type. A `/gsd-...` that matches nothing looks identical to
+   the plugin not being loaded — run `claude plugin list` before assuming either.
+2. `/gsd:surface list`, then `/gsd:surface profile standard`. **Restart the session** — surface
    changes only take effect next session. Record the new always-on figure.
-3. `/gsd-onboard` → it will ask for `/gsd-map-codebase`. Run it. 🔴 **Keep the 7 generated files in
+3. `/gsd:onboard` → it will ask for `/gsd:map-codebase`. Run it. 🔴 **Keep the 7 generated files in
    the worktree — never merge them.** Then diff them against `cone/CLAUDE.md` + `docs/arch/*.md`:
    does a generated map surface anything the hand-written notes lack? That answer feeds rubric row 5
    and is worth having whichever way the trial goes.
-4. `/gsd-new-project` scoped to one row, then the full loop on **#207** — discuss → plan → execute →
+4. `/gsd:new-project` scoped to one row, then the full loop on **#207** — discuss → plan → execute →
    verify → ship. #207 is the blocker `Publicador.jsx:480` sends a session id to
    `schedule.html?id=`, which `Schedule.jsx:155` reads as an *athlete* id, persisting a bad
    `localStorage.cone_athlete_filter`. Chosen because it is small, has a crisp demonstrable outcome,
