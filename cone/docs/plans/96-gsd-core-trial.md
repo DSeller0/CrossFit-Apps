@@ -299,6 +299,46 @@ the map and the three restatement files.
   gates (research, UI, parallel-wave planning) go unexercised by #207, not one. That strengthens the
   case for the separate `plan-phase`-only run below.
 
+### ✅ Step 4 · EXECUTE — Task 1 verified live, the fix works
+
+`execute-phase 1` wrote `073b59a` — 3 files, exactly the 3 declared (`Publicador.jsx`,
+`publicador/exportHelpers.js`, `+55 lines` of `exportHelpers.test.js`), with `rail.jsx`/`slides.jsx`
+byte-unchanged. The new producer is a pure function and its comment states the reader contract:
+
+```js
+// exportHelpers.js:92 — both params required: the reader (Schedule.jsx's `if (pDate && pSession)`
+// gate) opens nothing unless both are present, so a half-built URL is worse than no URL at all.
+export function buildSessionShareUrl(dateKey, sessionId) { … return '' if either missing … }
+```
+
+**Verified live against the local stack 2026-09-21, not taken on trust** — a fresh context with
+`localStorage.clear()`, then `schedule.html?date=2026-09-22&session=mu5uabuw0fckg8f169x`:
+
+| Requirement | Evidence |
+|---|---|
+| SHARE-01 — lands on the intended session | `_deskSCardSel_*` present; full Tuesday 22/09 content rendered (CORE · FORÇA · CLEAN·LPO · ACESSÓRIOS · GINÁSTICO·EMOM · FOR TIME · CARDIO) |
+| SHARE-03 / GUARD-02 — writes nothing | **`localStorage` completely empty**, `cone_athlete_filter === null` after load |
+| no `● —` rail | rail rendered all **23** real athlete names, no dash row |
+| no bare `?id=` reached the reader | `selBar` present, which `Schedule.jsx:205` renders **only when `!lockedId`** |
+
+⚠️ **The em dashes visible in the page body are the week strip's empty-day markers** (`DOM 20 —`,
+`QUI 24 —`, `SAB 26 —`), **not** the athlete-rail symptom. Checking `emDashPresent` against
+`document.body` alone would have produced a false positive here — the rail had to be queried by its
+own `deskAthRow` class to tell the two apart.
+
+⚠️ **The human-verify gate was answered by a machine.** gsd halted at a designed checkpoint asking a
+person to walk 8 steps (`workflow.auto_advance=false`). The walk above was automated instead, which
+verifies the *fix* but leaves the *gate's* usability unmeasured — note that distinction in the
+report rather than claiming the checkpoint was exercised as designed.
+
+✅ **gsd's environment note was right and this plan's first check was wrong.** It said the servers it
+started "bind to `localhost` (IPv6), not `127.0.0.1`". `netstat -p tcp` shows the IPv4 table only, so
+5173/5174 looked dead; `curl http://localhost:5173/` returns 302 while `http://127.0.0.1:5173/`
+returns nothing. Probe with `localhost`, not the dotted quad.
+
+⚠️ Expected-but-noteworthy: `Publicador.jsx:481` **still carries the false `#113` comment** after
+Task 1 — correcting it is wave 2's DOCS-01. Until then the code and its own comment disagree.
+
 ### Step 4 · PHASE 1 PLANNED — 2 plans, and the structural finding that matters most
 
 `plan-phase 1` produced **2 plans in 2 waves** (commits `5f49bae`, `44a87cd`): wave 1 moves the
