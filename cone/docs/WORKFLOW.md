@@ -6,7 +6,8 @@ How work on Cone is organized. The goal: each session tackles **one** backlog it
 
 | What | Where | Loaded |
 |---|---|---|
-| Architecture north star | `cone/CLAUDE.md` | auto, every session |
+| Architecture north star (the core) | `cone/CLAUDE.md` | auto, every session |
+| Per-area architecture + traps | `cone/docs/arch/*.md` | **on demand** |
 | Durable prefs / decisions | `~/.claude/.../memory/` | auto, every session |
 | The board | `cone/docs/BACKLOG.md` | **on demand** |
 | Per-item plans | `cone/docs/plans/NN-slug.md` | **on demand** |
@@ -29,7 +30,9 @@ An item enters **Ready** only when its plan file exists. Keep **only 2-3 items i
 ## The session ritual
 
 1. Start a session: **"Work item #N, plan at `docs/plans/NN-slug.md`."**
-2. Claude reads `CLAUDE.md` (auto) + that one plan + the relevant code.
+2. Claude reads `CLAUDE.md` (auto) + that one plan + the relevant code, and opens the
+   `docs/arch/*.md` file its index points at for the area being touched (#224/plans/95 — the core
+   is ~6.5k tokens, the detail is not gone, it just loads when needed).
 3. Execute.
 4. **Drive the plan's `## Must-haves`** — every one, on the real surface, before committing. Not "the tests pass": open the page, do the thing, look at it. Note what you saw; it goes into the Done marker in step 6.
 5. Commit + push, then replace the row with its one-line **Done** row in `BACKLOG.md` (see “Board row grammar”).
@@ -83,7 +86,7 @@ New bug or feature → add a row to **Icebox**. Batch trivial ones; don't spin a
 - `/code-review` before pushing M/L items.
 - `/security-review` for anything touching RLS, auth, or user-input rendering.
 
-**Docs are part of Done.** Shipping an item includes correcting any `CLAUDE.md` note or `BACKLOG.md` row the change invalidated. Stale docs cost every future session.
+**Docs are part of Done.** Shipping an item includes correcting any `CLAUDE.md` / `docs/arch/*.md` note or `BACKLOG.md` row the change invalidated. Stale docs cost every future session.
 
 ⚠️ **This rule and ritual steps 5–6 were skipped three sessions running** (plans/39, 40, 41 — 2026-07-26). The board then claimed three shipped items were still Ready, In Progress pointed at a closed plan, and no Done entries existed. Cleaning that up cost a whole session. Steps 5–6 are ~5 minutes at the end of the session that has the context; they are not optional.
 

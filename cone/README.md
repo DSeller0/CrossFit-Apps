@@ -1,10 +1,11 @@
 # Cone
 
 CrossFit coaching management app — Vite + React 19 + Supabase. Full documentation lives in
-[`CLAUDE.md`](../CLAUDE.md) at the repo root; this file is just the entry point.
+[`CLAUDE.md`](./CLAUDE.md) in this folder — a lean always-loaded core, with the per-area
+detail in [`docs/arch/`](./docs/arch/). This file is just the entry point.
 
 **Working dir:** this folder (`cone/`). Public entry HTML files and `themes.css` live at the repo
-root instead — see `CLAUDE.md` for why.
+root instead — see [`CLAUDE.md`](./CLAUDE.md) for why.
 
 ## Setup
 
@@ -20,6 +21,8 @@ npm run build:all       # SPA + public pages, into dist/ and public-dist/
 
 ## Where to look next
 
-- [`CLAUDE.md`](../CLAUDE.md) — architecture, Supabase schema, design system, conventions
+- [`CLAUDE.md`](./CLAUDE.md) — the core: structure, the two Supabase clients, data colours, build + deploy
+- [`docs/arch/`](./docs/arch/) — per-area detail, loaded on demand (Criador, Publicador, Agenda/Resultados,
+  Atletas/Afiliados, TV, shared utils, design system, Supabase, lint policy)
 - [`docs/BACKLOG.md`](./docs/BACKLOG.md) — open work
 - [`docs/WORKFLOW.md`](./docs/WORKFLOW.md) — session ritual and process
