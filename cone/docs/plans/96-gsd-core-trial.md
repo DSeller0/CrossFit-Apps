@@ -232,6 +232,36 @@ visitor's valid filter**. It has to run inside `load()` after `aD` resolves. Als
 scope call: the poison is **self-healing** — `:535` overwrites the key as soon as the visitor picks
 an athlete from the rail — so nobody is permanently stuck.
 
+### ✅ Step 4 · REQUIREMENTS — two more verified findings, and one argument that beat mine
+
+`DEFINING REQUIREMENTS` produced 8 v1 requirements (SHARE-01/02/03, GUARD-01/02/03, DOCS-01/02) with
+`HYG-01` (the `load()`-scoped storage repair) and `CONV-01` (unifying the two deep-link conventions)
+deferred to v2. **Both of its new findings verified against source and hold:**
+
+- **`lockedId` is not dead once the URL is fixed.** Fixing `Publicador.jsx:480` leaves `?id=`
+  producer-less in-tree, but `lockedId` drives **six live kiosk render sites** — `:917` (locked
+  athlete name), `:941` and `:1072` (`!lockedId &&` guards), `:1276`/`:1280` (the locked athlete
+  row), `:1440` (`Nav`'s `lockedId` prop). A later plan reading "no producer → dead code" would
+  delete all six. `GUARD-03` exists to pin it as *preserved*, which is a real regression guard, not
+  scope creep.
+- **`:1280` is the `● —` symptom, exactly.** `<span className={deskAthDot deskAthDotFilled} />`
+  renders the dot, `athletes.find(…)?.name || '—'` renders the dash. Symptom traced to source line.
+
+🔑 **Its stale-QR argument is better than the one this plan recorded.** Step 4 above noted the poison
+"self-heals" at `:535` once a visitor picks an athlete — true, but that is about *already-poisoned*
+visitors. gsd made the sharper point: **QR codes already printed and shared carry the bad `?id=` URL,
+and a code fix cannot recall them.** Those visitors keep arriving *after* the fix ships, creating
+*new* poison, which is why `GUARD-02` is load-bearing rather than defensive tidying. Both facts are
+true and they are about different populations; gsd's is the one that decides the scope.
+
+⚠️ **`DOCS-02` is a real error in `CLAUDE.md`, and the trial cannot fix it.** The core file asserted
+"**#113 is CLOSED** — C5·b1 repointed the share URL at `schedule.html?id=<sessionId>`, which is built
+and deployed", citing a stale `Publicador.jsx:431-435`. That claim is false and had been sitting in
+the always-loaded core. **Corrected directly on `main` 2026-09-21**, because the worktree's copy of
+the fix is deleted with the branch at Cleanup. `DOCS-01` (the false rationale comment at
+`Publicador.jsx:476-478`, which states the broken behaviour as the design) is left to the trial —
+it is a code change and fixing it here would contaminate the measurement.
+
 ### Step 2b · `/gsd-core:surface profile standard` — run 2026-09-21 13:40, both numbers now recorded
 
 | | Skills | Agents | Hooks | **Always-on** |
