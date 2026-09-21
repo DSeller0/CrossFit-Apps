@@ -1,5 +1,39 @@
 # 95 — #224 · Split `CLAUDE.md` into a lean core + on-demand `docs/arch/`
 
+> ✅ Done: `2a9ced2` · 2026-09-20 — see BACKLOG.md · closes #224.
+>
+> **Auto-loaded per session: ~39 080 → ~6 503 tokens (83% smaller).** Nine files under
+> `docs/arch/`; the total across all ten files is ~41 900, slightly more than before — the point
+> was never to write less, it was to stop loading all of it on every item.
+>
+> **Must-haves: 6/6 driven**, by script over old-vs-new rather than by eye:
+>
+> | # | Must-have | Result |
+> |---|---|---|
+> | 1 | every heading + every content line still present | **28/28 headings, 997/997 lines** — 0 missing, 0 duplicated |
+> | 2 | core ≤ 10 000 tokens | **6 503** (was 39 080) |
+> | 3 | the two-clients rule and the data-colour exemption still in the core, in full | both verbatim, `## Supabase clients` and `## Data colours` |
+> | 4 | every index pointer names a trap its file really holds | **12 of 12** spot-checked by `grep -F`, all found |
+> | 5 | audit + gates unchanged | zero drift · format:check clean · lint clean · 1113 tests |
+> | 6 | no link left pointing at something that moved | **52 relative links resolve**; 3 repointed, 1 dangling prose reference fixed |
+>
+> 🔑 **The index is the whole risk control, and it is written to a rule:** each line names the
+> **traps** its file holds, not its subject — *"`WeekGrid` returns a fragment, not a wrapper div"*,
+> *"`push()` is patch-only"*, *"`var(--card)` is not defined"*. A pointer that only said "Criador
+> stuff" would leave a session to discover the trap by hitting it.
+>
+> ⚠️ **Two paragraphs are the only ones summarised anywhere**: the 880-token load-path case
+> history and the 805-token RLS narrative. Both are stated in full force in the core, held verbatim
+> in `docs/arch/supabase.md`, and say so at the site with a 📖 link. Nothing else was condensed.
+>
+> 🔴 **Found while moving, pre-existing:** `cone/README.md` linked `../CLAUDE.md` — the repo
+> root — twice, and said the file lives there. It has always lived in `cone/`. Both links were dead
+> before this row touched anything.
+>
+> **What this does NOT do:** it does not make the notes any more current. The 2026-09-20 review found
+> several stale claims inside this file; they moved stale. What it changes is that each file is now
+> small enough to actually proof-read when its area is touched (WORKFLOW.md, "Docs are part of Done").
+
 ## Context
 
 `cone/CLAUDE.md` is **159 KB / ~39 000 tokens** and is injected into the system prompt of **every

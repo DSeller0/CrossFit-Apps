@@ -23,7 +23,9 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
   `> 🟡 Shipped:` pending an on-device iPhone re-test; nothing to code. · **#211** — the
   [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) needs 20 naming calls and
   approval of the drafted pt-BR text before its
-  [SQL](./reviews/2026-09-20-registry-additions.sql) reaches prod.
+  [SQL](./reviews/2026-09-20-registry-additions.sql) reaches prod. · **#225** — the gsd-core
+  trial needs you to install the plugin (`/plugin marketplace add open-gsd/gsd-core`) and start a
+  fresh session; plugin commands only load at session start, so it cannot begin from inside one.
 - **Last refill:** the [2026-09-20 full pass](./reviews/2026-09-20.md) (all 9 dimensions incl. a
   live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
 
@@ -95,7 +97,6 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#218 Every public page ships Supabase Realtime it never uses** · M · Opus · the 203 kB / 52 kB gz shared chunk is `@supabase/supabase-js` (confirmed by grepping the built asset for `GoTrueClient`/`RealtimeClient`); with React that is a ~112 kB gz floor on `tema.html` and `recover.html` too. Needs a call on a lighter read path (PostgREST fetch) before it is worth building.
 - **#219 `App.jsx:162-179` is dead code that arms a load-path write if anyone fills a stub** · XS · Sonnet · `saveSettings(merged)` at `:174` sits outside the `colourChanged` test and `:170` forces `gymName`. Inert **only** because the SPA's `./config.json` resolves to `cone/public/config.json`, the `{}` stub `9ca4348` added. Delete it, or gate the write.
 - **#220 `build-design-cards.mjs:48-57` keeps a 9th literal theme enumeration** · XS · Sonnet · `THEME_LABELS` hand-lists all 8 ids while the guard at `:221` only checks count == `THEMES.length`, so theme #9 passes the guard and renders its raw class name as the switcher label. `THEMES[].label` already exists.
-- **#224 `CLAUDE.md` is 159 KB / ~40k tokens and auto-loads on every session** · M–L · Opus · 20% of a 200k context gone before the first prompt. **Hand-cut, never regenerated** — it is an earned trap list, not a map a tool rebuilds — into a lean core + on-demand `docs/arch/*.md`; target ~8–10k. The index is the risk control: each pointer names its file's traps.
 
 ### P3 — needs a decision before it needs code
 
@@ -141,6 +142,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/95 · `2a9ced2` · 2026-09-20](./plans/95-claude-md-split.md)** — **#224 Split `CLAUDE.md` into a lean core + on-demand `docs/arch/`** · closed #224. · Auto-loaded per session **~39 080 → ~6 503 tokens (83%)**. A cut, not a regeneration: 28/28 headings and 997/997 lines still present. The index names each file's traps.
 - ✅ **[plans/94 · `87de081` · 2026-09-20](./plans/94-verify-gate-and-now-grammar.md)** — **#223 A verify gate that is checkable + ▶ Now grammar** · closed #223. · Plans from 94 on declare `## Must-haves` and record driving them in the Done marker; ▶ Now's claim bullets are parsed against the 🟢/🔵 columns. Driving it caught a bug in the gate itself. Filed #224, #225.
 - ✅ **[plans/93 · `e13938d` · 2026-09-20](./plans/93-focus-visible.md)** — **#182 A global `:focus-visible` ring + 10 outline-strippers + Criador's `--dim` focus borders** · closed #182. · One global ring in `themes.css` (≥ 4.72:1 on every fill, all 8 themes); each stripper brings its own replacement; Criador's `--dim` borders (fail 3:1 in 6 of 8 themes) → `--accent`. Filed #206.
 - ✅ **[plans/92 · `0cca9e6` · 2026-09-20](./plans/92-publicador-settings-debounce.md)** — **#181 Debounce Publicador's `settings` upsert, and flush on unmount** · closed #181. · 20 keystrokes → 1 upsert (was 20). Publicador and Afiliados both flush on unmount, so a <500 ms tab switch keeps the edit. The plan's "skip-flag path needs no change" was wrong — see the marker.
