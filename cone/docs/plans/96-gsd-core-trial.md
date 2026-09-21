@@ -133,15 +133,46 @@ directory when one exists — "local `.planning` takes precedence over linked-wo
 the first `/gsd-core:` command, not after. Verified 2026-09-21: `main` has no `.planning/` and
 `git status` there is clean.
 
-### ⚠️ Step 3 · `map-codebase` produced no artifacts — unresolved
+### Step 3 · `map-codebase` — ran 2026-09-21 14:15, 7 files, 2 534 lines
 
-As of 2026-09-21 ~13:55, after `/gsd-core:onboard` + `/gsd-core:map-codebase`, the worktree's
-`.planning/` holds **only** the `.gitkeep` pin. `git status` in the worktree is empty — no untracked
-files, no generated map, nothing under any other `.planning/` in the tree. The plan's step 3 expects
-**7 generated files**; there are zero. This is not yet diagnosed — the run may have errored, been
-interrupted, or written somewhere unexamined. **Rubric row 5 ("did the generated map add anything
-the hand-written notes lack?") cannot be answered until this is resolved**, and "the mapper produced
-nothing on a 1113-test React codebase" is itself a reportable answer if it reproduces.
+✅ Produced exactly the 7 files the plan predicted, committed as `86a41d9` on `gsd-trial`:
+`ARCHITECTURE.md` (338) · `CONCERNS.md` (614) · `CONVENTIONS.md` (336) · `INTEGRATIONS.md` (205) ·
+`STACK.md` (192) · `STRUCTURE.md` (447) · `TESTING.md` (402) — ~130 KB total. `main` verified clean.
+(An earlier empty `.planning/` was simply the command not having been run yet, not a failure.)
+
+#### 🔴 Rubric row 5 — did the generated map add anything the hand-written notes lack? **No. It subtracted.**
+
+Audited in depth: `CONCERNS.md`, the one file whose job is net-new findings. Its section list is
+**derived from `BACKLOG.md` and `CLAUDE.md`, not from the code** — "Tracked Issues (from Backlog)"
+is literally the board, and every "Known Gotcha" (chunk-hash 404s, load-paths-that-write #76/#109/
+#111, service-worker cache poisoning, `push()` patch-only) is already in `CLAUDE.md`, usually with
+more precision. Nothing in it was a fact the hand-written notes lacked.
+
+⚠️ **Where it did synthesize, it introduced errors.** Its `### RLS Posture — Five Tables Locked,
+12 More at Risk` is wrong three ways in one section:
+
+| gsd claims | Actual | How it went wrong |
+|---|---|---|
+| "12 more at risk", "(12 tables)" | **8** | Lifted the `12` from **#194**, which measures anon's **write grants** ("12 of 15 tables"), and relabelled it as **read** exposure. Different question. |
+| lists 8 tables under a "(12 tables)" label | — | Self-inconsistent **within the same bullet**. |
+| `allowed_emails` is "still open to anon read" | **not readable** | `0001_init.sql` gives it **no policy at all**; RLS-on-with-zero-policies denies by default. gsd's *own next paragraph* says it is "inert only because RLS has zero policies" — it contradicts itself in the same section. |
+| omits `settings` | **is** anon-readable | `0001_init.sql:127` — `create policy "public read" on settings for select using (true)`, never dropped by `0006`/`0009`. |
+
+The true list is `sessions` `athletes` `settings` `exercise_registry` `goals_data` `results_v2`
+`tv_state` `class_executions` — 8. gsd got the count of enumerated rows right by accident, having
+made one false positive and one false negative that cancel. **On the single security claim in the
+file, it swapped the one table that matters.**
+
+🔑 **The lesson for the decision, not just for this file:** the mapper's output is confident,
+well-structured prose that reads like a verified audit and is in fact a **re-narration of the docs
+it was pointed at, with synthesis errors introduced at the joins**. For a codebase whose notes are
+already earned ones, that is negative value — it would take a reader who already knew the answer to
+catch the `allowed_emails`/`settings` swap. ⚠️ **Do not merge any of it**, and do not use it as a
+cross-check on `CLAUDE.md`.
+
+⚠️ **Outstanding:** the other 6 files were surveyed at heading level only. If the report wants to
+claim "nothing new" across the whole map rather than across `CONCERNS.md`, they need the same
+treatment — spot-check each against `docs/arch/` before generalising.
 
 ### Step 2b · `/gsd-core:surface profile standard` — run 2026-09-21 13:40, both numbers now recorded
 
