@@ -314,14 +314,40 @@ costs one command and no code, and it is the only part of the rubric that speaks
 throughput question the whole trial exists for. Everything measured so far is diagnosis quality,
 which is interesting but does not turn that number.
 
-⚠️ **`.planning/config.json` is written without reference to the active surface.** Line 28 sets
-`"ui_phase": true`, but `/gsd-core:ui-phase` and `/gsd-core:ui-review` are **both parked in
-`gsd-surface-disabled`** by the `standard` profile. `new-project` wrote a config enabling a phase
-whose command does not exist in the running surface, and nothing reconciles the two. The roadmapper's
-offered option "re-add `**UI hint**: yes` so downstream offers `/gsd:ui-phase`" would therefore
-produce a suggestion that **matches nothing**. Its own instinct to omit the hint was right for a
-better reason than it gave: not just that no interface is being designed, but that the command is
-not installed.
+⚠️ **`surface` and `new-project` do not know about each other.** `new-project` wrote
+`.planning/config.json` with no reference to the active surface profile. Four of its `workflow`
+gates are `true` while their commands sit parked in `gsd-surface-disabled`:
+
+| config key | command | at `standard` |
+|---|---|---|
+| `ui_phase: true` | `/gsd-core:ui-phase` | ** disabled ** |
+| `ai_integration_phase: true` | `/gsd-core:ai-integration-phase` | ** disabled ** |
+| `security_enforcement: true` | `/gsd-core:secure-phase` | ** disabled ** |
+| `research: true` | `/gsd-core:explore` | ** disabled ** |
+| `code_review: true` | `/gsd-core:code-review` | enabled |
+| `verifier: true` | `/gsd-core:verify-work` | enabled |
+
+🔑 **Be precise about the damage: it depends on how each gate is implemented.** Gates that run as
+**agents** survive the trim — the 64 agents are untouched by `surface` — which is why `research:
+true` still spawned a researcher, and why `ui-plan-gate` still evaluated (`frontend: false`) without
+`/gsd-core:ui-phase` existing. Gates that would hand the user a **command** are the broken ones, and
+that already produced a concrete symptom: the roadmapper's offered "re-add `**UI hint**: yes` so
+downstream offers `/gsd:ui-phase`" would emit a suggestion matching nothing. Its instinct to omit the
+hint was right for a better reason than it gave. `config.json` also sets `claude_md_path:
+"./.claude/CLAUDE.md"` — a file gsd deliberately chose **not** to create.
+
+⚠️ **The plan-checker runs on the cheapest model.** `adaptive` resolved this run as researcher →
+Sonnet, pattern-mapper → Sonnet, planner → **Opus**, plan-checker → **Haiku**. The gate whose job is
+catching the planner's mistakes is the weakest model in the chain. Given that gsd's demonstrated
+failure mode in this trial is **confident, well-structured, and wrong at the joins** — `CONCERNS.md`'s
+RLS section, the incomplete call-site table — a Haiku checker is precisely where not to economise.
+Worth naming in the report whatever the verdict.
+
+✅ **Good judgement to credit:** the Walking Skeleton gate's mechanical trigger fired (MVP mode +
+phase 01 + zero prior summaries) and gsd **overrode it**, because the gate is documented "new
+projects only" and this is a brownfield fix on a shipped app with `.planning/codebase/` already
+present. It scaffolded nothing. That is the same read-the-intent-not-the-trigger judgement the
+mapper failed to apply to its own sources.
 
 ✅ Worth crediting: **criterion 3 is deliberately worded to be unfakeable** — "a stale printed QR
 carrying `?id=<sessionId>` fails visibly **and writes nothing**", so it cannot pass on "the session
