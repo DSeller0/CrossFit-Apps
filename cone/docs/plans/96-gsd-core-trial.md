@@ -115,13 +115,54 @@ ns_meta 5 · utility 21. Disabled: none.
 are both absent, so `readActiveProfile` returns null and the resolver falls through to the whole
 manifest. The full surface is the *absence* of a choice, not a chosen profile.
 
+### Step 2b · `/gsd-core:surface profile standard` — run 2026-09-21 13:40, both numbers now recorded
+
+| | Skills | Agents | Hooks | **Always-on** |
+|---|---|---|---|---|
+| Installed surface | 144 | 64 | 7 | **~10 700 tok** |
+| After `profile standard` | **46** | 64 | 7 | **~7 008 tok** |
+| Δ | −98 (−68%) | — | — | **−3 692 (−34%)** |
+
+🔴 **Skill count fell 68%, cost fell 34% — because the 64 agents are the floor and `surface`
+cannot touch them.** 46 skills ≈ 1 900 tok, so the agents are ≈ 5 100 of the remaining 7 008.
+This is the confirmation of the gap flagged above: surface's own accounting models command stems
+only, and no profile it offers reaches the agent payload. **Even fully trimmed, gsd-core costs
+~7 000 tokens on every session — still more than Cone's entire `CLAUDE.md` core (~6 500 after
+#224).** That is a rubric answer on its own: the always-on cost is not a tuning problem.
+
+⚠️ **The mechanism is a file move, not a flag.** `profile standard` **physically moved 49 of the
+72 commands and their 49 skill dirs out of the plugin cache** into a new global directory,
+`~/.claude/gsd-surface-disabled/1.14.0/{commands,skills}` — 470 KB of **real files, not symlinks**,
+with a `restore-surface.js` beside them to put them back. The cache itself is now 23 commands +
+23 skills (23 × 2 = the 46 the harness reports). Consequences:
+
+- **`~/.claude/gsd-surface-disabled/` is a second global directory the Cleanup step did not know
+  about.** Added below. `plugin uninstall` does not take it — it is outside the cache by design.
+- **Order matters if the plugin is ever kept:** uninstalling while 49 commands are parked there
+  orphans them. Run `/gsd-core:surface reset` (or `restore-surface.js`) *before* uninstall if the
+  plugin is staying. For this trial it does not matter — Cleanup deletes both trees.
+- The predicted markers still never appeared: no `.gsd-surface.json`, no `.gsd-profile`, and
+  `~/.claude/skills/` is *still* only `app-review` + `synced`. **The plan's prediction that surface
+  would stage `~/.claude/skills/gsd-*/` is wrong** — it re-homes the cache instead. Cleanup's
+  `rm -rf ~/.claude/skills/gsd-*` is therefore a no-op, harmless, and stays only as a guard.
+
+⚠️ **`standard` disables `ship`, which step 4's loop calls for.** The 23 survivors are:
+`code-review config discuss-phase execute-phase help import ingest-docs manager map-codebase
+new-project onboard pause-work phase plan-phase progress quick resume-work review settings surface
+update verify-work workspace`. Discuss → plan → execute → verify all survive; **ship does not**, nor
+do `audit-fix` `validate-phase` `add-tests` `secure-phase`. Step 4 must either end the loop at
+`verify-work`, use the surviving `phase`, or re-enable the cluster — decide deliberately and say
+which in the report, because "we skipped ship" and "ship isn't in the profile we measured" are
+different findings.
+
 ## Must-haves
 
 - A fresh session started **in the worktree's `cone/`** lists the `/gsd-core:*` commands — if it does
   not, the plugin did not load and nothing else in this plan is valid.  [`/help` or tab-complete]
-- `claude plugin details gsd-core` recorded **twice**: at the installed surface ✅ (~10 700 / 144 /
-  64 / 7, re-confirmed 2026-09-21 after the `list` run) and after `/gsd-core:surface profile
-  standard`.
+- ✅ **DONE 2026-09-21.** `claude plugin details gsd-core` recorded **twice**: installed surface
+  **~10 700** (144 skills / 64 agents / 7 hooks) → after `/gsd-core:surface profile standard`
+  **~7 008** (46 / 64 / 7). Both in step 2b above. ⚠️ It only resolves **from the worktree** — a
+  local-scope install answers `Plugin "gsd-core" not found` anywhere else.
 - **#207 is actually fixed and driven in the worktree** — a visitor with no stored
   `cone_athlete_filter` opens the Apresentar QR and lands on that session. A trial that produces
   artifacts but no working fix answers nothing.
@@ -185,13 +226,22 @@ was already false before a single `/gsd-core:` command ran: `claude plugin marke
 `~/.claude/plugins/cache/gsd-core/`. Both are reversible (step 2 below); the point is that the
 blast radius is the home dir, and it has to be checked rather than assumed.
 
-🔴 **`/gsd-core:surface` is the one to watch.** Its own spec writes `~/.claude/.gsd-surface.json`
-(sibling to `~/.claude/.gsd-profile`) and re-stages skill dirs at `~/.claude/skills/gsd-*/` —
-all home-dir paths, outside the worktree, and **none of them `plugin uninstall`'s job**. It also
-compiles its engine on first run (`src/surface.cts` → `bin/lib/surface.cjs`, via
-`ensure-runtime-build.cjs`), which may mint `~/.claude/gsd-core/`. **Run `ls -A ~/.claude`
-immediately after step 2** and add anything new to step 3 — that diff is also rubric evidence,
-since a framework that plants global state is a different adoption cost than one that does not.
+🔴 **`/gsd-core:surface` is the one to watch — and what it actually did is NOT what its spec says.**
+Measured 2026-09-21 (steps 2 and 2b above), it minted **two** new global directories, and neither is
+`plugin uninstall`'s job:
+
+| Path | What it is | Made by |
+|---|---|---|
+| `~/.claude/gsd-core/` | 5 **symlinks** (`bin` `contexts` `references` `templates` `workflows`) into the plugin cache, 614 files behind them | `ensure-runtime-build.cjs` on first `surface` run (13:06) |
+| `~/.claude/gsd-surface-disabled/1.14.0/` | **470 KB of real files** — the 49 commands + 49 skills `profile standard` moved out of the cache, plus `restore-surface.js` | `surface profile standard` (13:40) |
+
+⚠️ The spec's predicted writes — `~/.claude/.gsd-surface.json`, `~/.claude/.gsd-profile`, and
+staged `~/.claude/skills/gsd-*/` — **never happened**. All three are still absent after both runs;
+`~/.claude/skills/` is untouched at `app-review` + `synced`. The surface state lives in *which files
+are where*, not in a marker file. Don't trust the spec's paths; `ls -A ~/.claude` is the oracle, and
+it is worth re-running after every new `gsd` command, not just after step 2 — this diff is rubric
+evidence, since a framework that plants global state is a different adoption cost than one that
+does not.
 
 ### The steps
 
@@ -206,10 +256,17 @@ claude plugin marketplace remove gsd-core
 
 # 3. what the plugin leaves behind - not covered by uninstall
 ls -d ~/.claude/skills/gsd-*          # LOOK at the glob before the rm below
-rm -f  ~/.claude/.gsd-surface.json ~/.claude/.gsd-profile
-rm -rf ~/.claude/skills/gsd-*
-rm -rf ~/.claude/gsd-core
+rm -f  ~/.claude/.gsd-surface.json ~/.claude/.gsd-profile   # never appeared; guard only
+rm -rf ~/.claude/skills/gsd-*                               # never appeared; guard only
+rm -rf ~/.claude/gsd-core                                   # 5 symlinks - CONFIRMED present
+rm -rf ~/.claude/gsd-surface-disabled                       # 470 KB real files - CONFIRMED present
 ```
+
+⚠️ **`~/.claude/gsd-surface-disabled/` holds the only copy of the 49 commands `profile standard`
+moved out of the cache.** Deleting it is correct for this trial — the payload is re-downloadable
+and the plugin is going anyway. But if the plugin is ever *kept*, run `/gsd-core:surface reset`
+(or its `restore-surface.js`) **before** `plugin uninstall`, or those 49 are orphaned outside a
+cache that no longer exists.
 
 🔴 **`app-review` lives in `~/.claude/skills/` too.** It is yours, it is not gsd's, and nothing in
 this plan may touch it. The `ls -d` line above exists so the glob is read before it is run.
@@ -219,6 +276,7 @@ this plan may touch it. The `ls -d` line above exists so the glob is read before
 ```
 ls -A ~/.claude | tr '\n' ' '                                  # matches the baseline row
 ls -A ~/.claude/skills                                         # app-review, synced. nothing else
+ls -d ~/.claude/gsd-* 2>/dev/null                              # nothing - both dirs gone
 grep -c gsd ~/.claude/settings.json                            # 0
 ls ~/.claude/plugins/cache                                     # no gsd-core
 cat ~/.claude/plugins/installed_plugins.json                   # no gsd-core entry
@@ -227,7 +285,8 @@ git -C C:/Users/ze_do/repos/CrossFit-Apps worktree list        # main only
 ```
 
 If the trial **does** convince, do not adopt wholesale — file a follow-up row naming *which* pieces
-are worth taking, measured against the ~10 700-token always-on cost.
+are worth taking, measured against the **~7 008-token trimmed floor** (not the ~10 700 installed
+figure — `standard` is the cheapest surface gsd offers, and it is still above `CLAUDE.md`'s ~6 500).
 
 ## Verification
 
