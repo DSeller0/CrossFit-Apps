@@ -254,6 +254,51 @@ and a code fix cannot recall them.** Those visitors keep arriving *after* the fi
 *new* poison, which is why `GUARD-02` is load-bearing rather than defensive tidying. Both facts are
 true and they are about different populations; gsd's is the one that decides the scope.
 
+### 🔴 Step 4 · PROJECT INITIALIZED — rubric rows 2 and 3 answered, before one line of code
+
+**Measured at `PROJECT INITIALIZED`, 2026-09-21 14:49 — nothing has been built yet.** Six commits on
+`gsd-trial` (`56ad15c` → `4f03665`), worktree clean, `main` verified untouched.
+
+#### Row 2 — cost
+
+| | |
+|---|---|
+| Subagent tokens | **316 780** across **5 spawns** — 258 844 for the four mappers (one-time, reusable *only if gsd is adopted*), 57 936 for the roadmapper |
+| Subagent wall time | **~14 min** |
+| Orchestrator context | on top of the above, not counted in it |
+| Production code written | **zero** |
+
+⚠️ **Read the "one-time, reusable" framing carefully.** The 258 844 amortises across future rows
+**only if gsd stays**. For this trial — a decision row — it is a sunk cost against a single XS bug
+fix, and it bought a map that [row 5](#) found to be a re-narration with errors.
+
+#### Row 3 — did `.planning/` duplicate `BACKLOG.md` / `plans/`? **Yes, at roughly 40:1.**
+
+| Artifact | Lines | Duplicates |
+|---|---|---|
+| `codebase/` (7 files) | **2 534** | `CLAUDE.md` + `docs/arch/*.md` = **1 237 lines**. → **2.05× the length of the notes it re-narrates**, and per row 5 less accurate. |
+| `PROJECT.md` | 131 | the #207 board row |
+| `REQUIREMENTS.md` | 103 | the #207 board row |
+| `ROADMAP.md` | 34 | the #207 board row |
+| `STATE.md` | 82 | nothing — pure gsd machinery, **fair** |
+| `config.json` | 68 | nothing — machinery, **fair** |
+| **Total** | **2 952** + PROJECT = **3 083** | |
+
+🔑 **`BACKLOG.md` holds #207 in 69 words.** `PROJECT.md` + `REQUIREMENTS.md` + `ROADMAP.md` restate
+that same row in **268 lines**. The machinery files (`STATE.md`, `config.json`) are gsd's own
+bookkeeping and duplicate nothing — that part is honest. The duplication is real and concentrated in
+the map and the three restatement files.
+
+#### Two things gsd did well here, recorded so the verdict stays fair
+
+- **It detected that `main` moved under it** (commit `805612f`, written from this session) while
+  confirming nothing had leaked, named the commit, and **explicitly declined to touch it** — "it's
+  your parallel work and I haven't touched it." Correct boundary behaviour, unprompted.
+- **It reached the row-4 conclusion independently and extended it:** this slice "deliberately has no
+  research phase and no UI phase — two of GSD's gates will produce nothing to score." So **three**
+  gates (research, UI, parallel-wave planning) go unexercised by #207, not one. That strengthens the
+  case for the separate `plan-phase`-only run below.
+
 ### 🔴 Step 4 · ROADMAP — 1 phase, and rubric row 4 is **unanswerable from this trial**
 
 The roadmapper produced **one phase**, 8/8 requirements mapped, 5 success criteria, no ship phase.
