@@ -196,6 +196,42 @@ gsd just warned about. Scope it to **#207 only**, state that `BACKLOG.md` stays 
 that no `ROADMAP.md` modelling the whole product is wanted, and end the loop at `verify-work`
 (`ship` is disabled at `standard`, see above).
 
+### ✅ Step 4 · DISCUSS found something the board row didn't — verified 2026-09-21
+
+**This is the trial's first real technical win, and it is a rubric answer.** The discuss phase
+re-derived #207 from the code and produced a sharper mechanism than `BACKLOG.md` carried.
+Independently verified against the source, **all three of its core claims hold**:
+
+- `Publicador.jsx:480` is the **only** site emitting `?id=`. The others build `?date=…&session=…`
+  (`index/rail.jsx:99`, `tv/slides.jsx:78`, `tv/slides.jsx:610`).
+- `Schedule.jsx:393` consumes it as **`if (pDate && pSession)` — it needs BOTH**. So `?id=` never
+  had *any* path to opening a session; it could only ever reach the athlete-lock branch.
+- That branch is `:155` `lockedId = sp.get('id')` → `:373` `curAth = lockedId || …` → `:376-378`
+  `setSelAth(lockedId)` + `localStorage.setItem('cone_athlete_filter', lockedId)`, then `:893`
+  `athletes.find(…) || null` returns null for a session id — which is the `● —` rail.
+
+🔑 **The sharpening the board row lacked:** the row framed this as "`:155` reads it as an athlete id",
+which reads like a naming collision. The real defect is an **asymmetry inside one function** — the
+`?athlete=` branch at `:382-385` validates with `aD.find(…)` **before** writing to localStorage; the
+`?id=` branch at `:376-378` writes **unvalidated**. Same function, twenty lines apart, two different
+standards. That is why a wrong-param link could corrupt storage at all, and it is a better
+description of the bug class than the row had.
+
+⚠️ **It missed a fifth call site.** Its table says "three others already use the established pair";
+there are **four** others, and `public/timer/Timer.jsx:472-481`'s `buildScheduleUrl` uses a
+*different* convention — `date` + `openLog` + `blockId` + `athlete` + `prefill`. So "the established
+pair" is really **two** conventions: `date&session` (open a session) and `date&openLog&…` (open a
+log entry). Not fatal to the fix, but the generalisation is wrong and would mislead anyone who took
+the table as complete. **Same failure shape as `CONCERNS.md`: the specific findings are sound, the
+summarising claim over-reaches.**
+
+⚠️ **Trap in its own option 3** (a one-time cleanup dropping any `cone_athlete_filter` that matches
+no known athlete): `:84` seeds `selAth` from localStorage **at mount**, before the async `load()`
+populates `aD`. A cleanup run at mount therefore sees an empty athlete list and would **wipe every
+visitor's valid filter**. It has to run inside `load()` after `aD` resolves. Also relevant to the
+scope call: the poison is **self-healing** — `:535` overwrites the key as soon as the visitor picks
+an athlete from the rail — so nobody is permanently stuck.
+
 ### Step 2b · `/gsd-core:surface profile standard` — run 2026-09-21 13:40, both numbers now recorded
 
 | | Skills | Agents | Hooks | **Always-on** |
