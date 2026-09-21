@@ -16,16 +16,14 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready:** none
+- **Ready:** #225
 - **In Progress:** none
 - **Start here:** **#207** — #113 shipped a fix that doesn't work and corrupts `cone_athlete_filter`.
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
   `> 🟡 Shipped:` pending an on-device iPhone re-test; nothing to code. · **#211** — the
   [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) needs 20 naming calls and
   approval of the drafted pt-BR text before its
-  [SQL](./reviews/2026-09-20-registry-additions.sql) reaches prod. · **#225** — the gsd-core
-  trial needs you to install the plugin (`/plugin marketplace add open-gsd/gsd-core`) and start a
-  fresh session; plugin commands only load at session start, so it cannot begin from inside one.
+  [SQL](./reviews/2026-09-20-registry-additions.sql) reaches prod.
 - **Last refill:** the [2026-09-20 full pass](./reviews/2026-09-20.md) (all 9 dimensions incl. a
   live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
 
@@ -38,7 +36,7 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-*(empty)*
+- 🟢 **[→ Ready · plans/96](./plans/96-gsd-core-trial.md)** — **#225 Trial gsd-core's phase loop in isolation, then decide** · M · Opus · worktree + plugin already installed (local scope, gitignored). Run #207 through discuss→plan→execute→verify→ship, answer the 5-question rubric, uninstall. ⚠️ **Measured before starting: ~10 700 tokens always-on** — more than the whole `CLAUDE.md` core after #224. Trim with `/gsd-surface profile standard` first, or the trial measures the wrong thing.
 
 ## 🔵 In Progress
 
@@ -116,7 +114,6 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#88 Reconcile prod vs. dev database** · S–M · Sonnet · **re-measured 2026-09-20: FOUR tables, not two.** `seed-dev.mjs` prints EMPTY for `locations`, `coach_profile`, **`events` and `templates`** (`0006` locked two, `0009` the others) — indistinguishable from prod having none. It also seeds **0** result rows when #190 fires. Fix is plans/89's service-role read.
 - **#221 `useLiveRegistration.js:52-59` upserts `results_v2` with no error check at all** · XS · Sonnet · decision first: the return value isn't destructured, so a constraint violation (#190's, reachable because `:29` also filters on `date`) vanishes with **zero** signal. Decide how a failed live registration surfaces on the TV controller.
 - **#222 Four test athletes live in prod** · XS · Sonnet · `Atleta00`–`Atleta03` render in me.html's public picker alongside real members. Decide: delete, or mark them non-public — the athlete blob has no flag for it today.
-- **#225 Trial gsd-core's phase loop in isolation, then decide** · M · Opus · [gsd-core](https://github.com/open-gsd/gsd-core) — install as a plugin at `--profile=standard`, run **#207** through discuss→plan→execute→verify→ship in a worktree, answer a 5-question rubric in a dated report, uninstall. Cone has ~70% of it already; the question is whether parallel waves beat one-row-per-session.
 
 ### P4 — parked (features, infra, large structural)
 
