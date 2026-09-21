@@ -27,7 +27,7 @@ worktree and the plugin go and the report stays.
 | Worktree | `C:\Users\ze_do\repos\CrossFit-Apps-gsd-trial`, branch **`gsd-trial`** off `cee12ca` |
 | Marketplace | `claude plugin marketplace add open-gsd/gsd-core` ✅ |
 | Plugin | `claude plugin install gsd-core --scope local -y`, run **inside the worktree** ✅ |
-| Isolation | recorded in the worktree's `.claude/settings.local.json`, which is **globally gitignored**; `git status` there is clean. Nothing global, nothing committed. |
+| Isolation | recorded in the worktree's `.claude/settings.local.json`, which is **globally gitignored**; `git status` there is clean. Nothing committed — but **not** nothing global, see Cleanup. |
 
 ⚠️ **A local-scope install is keyed to the exact directory `claude` was launched from, not to
 the repo.** The install ran at the worktree **root**, so `installed_plugins.json` recorded
@@ -71,7 +71,8 @@ before and after — in the report. This is itself a rubric answer.
   artifacts but no working fix answers nothing.
 - The report answers **all five** rubric rows below, including any that read "no".
 - `main` is untouched: `git -C ../CrossFit-Apps status` clean, no `.planning/` anywhere in it.
-- Cleanup ran, or the report states plainly why it did not.
+- Cleanup ran **and was verified** against the `~/.claude` baseline in Cleanup below, or the
+  report states plainly why it did not.
 
 ## Approach
 
@@ -109,10 +110,59 @@ before and after — in the report. This is itself a rubric answer.
 
 ## Cleanup
 
+### Baseline — `~/.claude` before the trial (recorded 2026-09-21, pre-`/gsd:`)
+
+| | |
+|---|---|
+| `~/.claude` | `.credentials.json` `.last-cleanup` `.last-update-result.json` `backups` `cache` `file-history` `history.jsonl` `ide` `plans` `plugins` `projects` `session-env` `sessions` `settings.json` `shell-snapshots` `skills` `telemetry` |
+| `~/.claude/skills` | `app-review` · `synced` — **and nothing else** |
+| `~/.claude/.gsd*` | none |
+
+⚠️ **The worktree isolates the *repo*, not the CLI's home directory** — so "nothing global"
+was already false before a single `/gsd:` command ran: `claude plugin marketplace add` wrote
+`extraKnownMarketplaces.gsd-core` into `~/.claude/settings.json`, and the 1.14.0 payload sits in
+`~/.claude/plugins/cache/gsd-core/`. Both are reversible (step 2 below); the point is that the
+blast radius is the home dir, and it has to be checked rather than assumed.
+
+🔴 **`/gsd:surface` is the one to watch.** Its own spec writes `~/.claude/.gsd-surface.json`
+(sibling to `~/.claude/.gsd-profile`) and re-stages skill dirs at `~/.claude/skills/gsd-*/` —
+all home-dir paths, outside the worktree, and **none of them `plugin uninstall`'s job**. It also
+compiles its engine on first run (`src/surface.cts` → `bin/lib/surface.cjs`, via
+`ensure-runtime-build.cjs`), which may mint `~/.claude/gsd-core/`. **Run `ls -A ~/.claude`
+immediately after step 2** and add anything new to step 3 — that diff is also rubric evidence,
+since a framework that plants global state is a different adoption cost than one that does not.
+
+### The steps
+
 ```
+# 1. the repo
 git -C C:/Users/ze_do/repos/CrossFit-Apps worktree remove ../CrossFit-Apps-gsd-trial --force
 git -C C:/Users/ze_do/repos/CrossFit-Apps branch -D gsd-trial
-claude plugin uninstall gsd-core            # and: claude plugin marketplace remove gsd-core
+
+# 2. plugin + marketplace (takes the cache and the settings.json entry with them)
+claude plugin uninstall gsd-core
+claude plugin marketplace remove gsd-core
+
+# 3. what the plugin leaves behind - not covered by uninstall
+ls -d ~/.claude/skills/gsd-*          # LOOK at the glob before the rm below
+rm -f  ~/.claude/.gsd-surface.json ~/.claude/.gsd-profile
+rm -rf ~/.claude/skills/gsd-*
+rm -rf ~/.claude/gsd-core
+```
+
+🔴 **`app-review` lives in `~/.claude/skills/` too.** It is yours, it is not gsd's, and nothing in
+this plan may touch it. The `ls -d` line above exists so the glob is read before it is run.
+
+### Verify the cleanup — don't assume it
+
+```
+ls -A ~/.claude | tr '\n' ' '                                  # matches the baseline row
+ls -A ~/.claude/skills                                         # app-review, synced. nothing else
+grep -c gsd ~/.claude/settings.json                            # 0
+ls ~/.claude/plugins/cache                                     # no gsd-core
+cat ~/.claude/plugins/installed_plugins.json                   # no gsd-core entry
+git -C C:/Users/ze_do/repos/CrossFit-Apps status --porcelain   # empty
+git -C C:/Users/ze_do/repos/CrossFit-Apps worktree list        # main only
 ```
 
 If the trial **does** convince, do not adopt wholesale — file a follow-up row naming *which* pieces
