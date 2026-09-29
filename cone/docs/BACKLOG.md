@@ -16,11 +16,10 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready:** #207
+- **Ready:** none
 - **In Progress:** none
-- **Start here:** **#207** — #113 shipped a fix that doesn't work and corrupts `cone_athlete_filter`;
-  [plans/97](./plans/97-share-link-athlete-guard.md) ports the #225 trial's reviewed fix and closes
-  the same write in `Results.jsx`.
+- **Start here:** Ready is empty. Plan the next row from Icebox P1 — **#155** and **#211** wait on
+  the user (below).
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
   `> 🟡 Shipped:` pending an on-device iPhone re-test; nothing to code. · **#211** — the
   [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) needs 20 naming calls and
@@ -38,7 +37,7 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/97](./plans/97-share-link-athlete-guard.md)** — **#207 #113's fix doesn't work and corrupts the visitor's stored athlete filter** · S · Sonnet · Start-here blocker. Ports the #225 trial's reviewed fix (`buildSessionShareUrl` + `findAthleteById`, 24 tests, applies cleanly to `main`) and closes the identical unvalidated write at `Results.jsx:151-154` that the trial's code review found.
+*(empty)*
 
 ## 🔵 In Progress
 
@@ -141,6 +140,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/97 · `15d12e2` · 2026-09-29](./plans/97-share-link-athlete-guard.md)** — **#207 The Apresentar share link opens its session; no `?id=` can corrupt the athlete filter** · closed #207. · The QR now encodes `?date=…&session=…`; every `?id=` reader on schedule + results validates through `findAthleteById` (+24 tests). Printed QRs keep the old URL — the guard makes them harmless.
 - ✅ **[plans/96 · `d5be099` · 2026-09-29](./plans/96-gsd-core-trial.md)** — **#225 Trial gsd-core's phase loop in isolation, then decide** · closed #225. · **Not adopted**: ~10 700 tok always-on with no supported trim, plans outside the #223 gate, ~40:1 board duplication. Its code review caught #207's write in `Results.jsx` too (→ plans/97). Kept two WORKFLOW rules; filed #226.
 - ✅ **[plans/95 · `2a9ced2` · 2026-09-20](./plans/95-claude-md-split.md)** — **#224 Split `CLAUDE.md` into a lean core + on-demand `docs/arch/`** · closed #224. · Auto-loaded per session **~39 080 → ~6 503 tokens (83%)**. A cut, not a regeneration: 28/28 headings and 997/997 lines still present. The index names each file's traps.
 - ✅ **[plans/94 · `87de081` · 2026-09-20](./plans/94-verify-gate-and-now-grammar.md)** — **#223 A verify gate that is checkable + ▶ Now grammar** · closed #223. · Plans from 94 on declare `## Must-haves` and record driving them in the Done marker; ▶ Now's claim bullets are parsed against the 🟢/🔵 columns. Driving it caught a bug in the gate itself. Filed #224, #225.

@@ -1,5 +1,11 @@
 # 97 — #207 · The Apresentar share link opens its session, and no `?id=` can corrupt the athlete filter
 
+> ✅ Done: `15d12e2` · 2026-09-29 — see BACKLOG.md · closes #207.
+>
+> **Must-haves: 6/6 driven** on the local stack (SPA `:5173`, public `:5174`, real ids), then re-driven as a PASS/FAIL table on the final files — 11/11. (1) the Apresentar QR encoder was handed `https://dseller0.github.io/CrossFit-Apps/schedule.html?date=2026-09-21&session=mu5uabuwl28kx7ve9b` — both params, no bare `id=`. (2) That URL on `schedule.html` selected Segunda-feira and rendered that session's blocks (Snatch · LPO exists only in that session); `cone_athlete_filter` absent, localStorage empty. (3) Stale `?id=<sessionId>`, fresh storage: 23-row Atletas list, no `● —`, selector bar visible at 390px, nothing written. (4) Same URL with a valid filter pre-set: value byte-identical afterwards. (5) `?id=<athleteId>`: selector bar gone, one row "Stefaní", Nav's three tab links carry `?id=`. (6) (3)–(5) on `results.html`: 24-row rail, no locked badge / `athLocked` = "Stefaní". **The check can fail:** the same drive against the pre-fix `Schedule.jsx`/`Results.jsx` wrote the session id into `cone_athlete_filter` and rendered `—` on both pages.
+>
+> **Sibling sweep:** nothing unlisted. The literal `setItem('cone_athlete_filter'` grep cannot see `Me.jsx` (constant `ATHLETE_KEY`) — recorded in step 3 and in WORKFLOW.md. **Port note:** `git apply` under `core.autocrlf=true` leaves the touched files CRLF and fails `format:check` — run `prettier --write` on them. `gsd-trial` (tip `cb65820`, local-only) deleted last — its code is on `main` byte-for-byte; its 20 `.planning/` files were the only content not.
+
 ## Context
 
 #113's fix never worked (#207). `Publicador.jsx:480` sends a **session** id as `schedule.html?id=`;
