@@ -55,10 +55,11 @@ subcommands do the same job from any terminal.
   under `commands/gsd/`, each carrying `name: gsd:<cmd>`) *and* as a skill `gsd-add-tests` (72
   dirs under `skills/`) — so 72 commands surface as 144 skills.
 
-**Trim it before judging the loop, or the trial measures the wrong thing:** `/gsd-core:surface
-profile standard` (or `/gsd-core:surface list` first) cuts the surface to the core loop plus the
-everyday management commands. Re-run `claude plugin details gsd-core` afterwards and record both
-numbers — before and after — in the report. This is itself a rubric answer.
+**Trim it before judging the loop, or the trial measures the wrong thing** — down to the core loop
+plus the everyday management commands — and record `claude plugin details gsd-core` before and
+after, since that pair is itself a rubric answer. 🔴 **In this install gsd's own trimming tool
+cannot do it** (step 2b): `/gsd-core:surface` has no plugin awareness, so the trim was applied by
+hand, and no supported path to a smaller surface exists.
 
 ### Step 2 · `/gsd-core:surface list` — run 2026-09-21 13:06, output recorded
 
@@ -83,9 +84,9 @@ what the "commands not found" session was hitting. Corrected in step 1 below.
 | `claude plugin details gsd-core` | **~10 700 tok always-on** · 144 skills · 64 agents · 7 hooks | both halves of the double registration **+ the 64 agents** |
 
 🔴 **~7.8× apart.** The 64 agents are absent from `surface`'s model entirely, and the double
-registration is counted once by `surface` and twice by the harness. So `profile standard` trimming
-`1363 → n` says **nothing** about where 10 700 lands — only the second `claude plugin details`
-reading settles it. That is exactly what the must-have was for; do not substitute surface's own
+registration is counted once by `surface` and twice by the harness. So even a working `profile
+standard` moving `1363 → n` would say **nothing** about where 10 700 lands — only the second
+`claude plugin details` reading settles it. That is exactly what the must-have was for; do not substitute surface's own
 number for it. (Re-measured after the `list` run: still ~10 700 / 144 / 64 / 7. Unchanged, as
 read-only implies.)
 
@@ -101,10 +102,11 @@ under-reports, the surface it shows is not the surface you get.
 ⚠️ **Driving the engine standalone to settle it does not work — tried 2026-09-21, don't retry.**
 `bin/lib/surface.cjs` is a module, not a CLI (`node bin/lib/surface.cjs list` prints nothing), and
 its export `listSurface(runtimeConfigDir, manifest, clusterMap, registry)` returns
-`enabled: 0, disabled: 0, tokenCost: 0` when called with just `~/.claude` — the **manifest is
-supplied by the slash command**, not discovered from the config dir. To capture raw output, re-run
-`/gsd-core:surface list` in the worktree session and have that session `Write` the result to a
-file; a screenshot is what created this ambiguity in the first place.
+`enabled: 0, disabled: 0, tokenCost: 0` when called with just `~/.claude` — there is **no manifest
+to discover**: no `gsd-file-manifest.json` exists anywhere under `~/.claude`, because the engine
+assumes gsd's npm-global install layout and has no plugin awareness (step 2b). To capture raw
+output, re-run `/gsd-core:surface list` in the worktree session and have that session `Write` the
+result to a file; a screenshot is what created this ambiguity in the first place.
 
 Cluster sizes as printed (de-duplicated — an overlapping stem prints under its first cluster only,
 which is why `utility` shows 21 rows against 32 members in `clusters.cts`): core_loop 8 ·
@@ -124,14 +126,23 @@ it would have written `.planning/` **into the main working tree**, breaking the 
 must-have without touching the worktree at all. The worktree isolates the *checkout*; it does not
 isolate gsd's idea of where the project is.
 
-**The guard is already in place** (commit `56ad15c` on `gsd-trial`, 2026-09-21 13:54): a committed
+**The guard** (commit `56ad15c` on `gsd-trial`, 2026-09-21 13:54) is a committed
 `.planning/.gitkeep` in the worktree root. `resolveWorktreeContext`
-(`gsd-core/bin/lib/worktree-safety.cjs`) checks for a **local `.planning/` first** and returns that
-directory when one exists — "local `.planning` takes precedence over linked-worktree remapping".
-⚠️ **The directory's mere existence is the isolation.** Do not delete `.planning/` or its
-`.gitkeep` while the trial runs, and if the worktree is ever recreated, create `.planning/` *before*
-the first `/gsd-core:` command, not after. Verified 2026-09-21: `main` has no `.planning/` and
-`git status` there is clean.
+(`gsd-core/bin/lib/worktree-safety.cjs:169`) checks for a **local `.planning/` first** and returns
+that directory when one exists — "local `.planning` takes precedence over linked-worktree
+remapping".
+
+🔴 **Corrected 2026-09-29 — the pin is cwd-relative, so the directory's existence is only half the
+isolation.** The check is `existsSync(path.join(cwd, '.planning'))`: the **current** directory, no
+walk-up. Invoked from the worktree **root** it resolves correctly; invoked from `cone/` — where
+step 1 launches `claude` — it finds no `.planning/`, falls through to `resolveWorktreeLinkage`, and
+resolves `project_root` to **the main checkout**. Nothing leaked only because the gsd session `cd`s
+to the worktree root before every `gsd-tools` call. The pin's own `.gitkeep` note overclaims ("this
+directory's mere existence is what keeps artifacts on the branch"), and the durable fix — a second
+`cone/.planning/` — was never applied. **After every gsd command,
+`ls /c/Users/ze_do/repos/CrossFit-Apps/.planning` must stay empty** (verified empty 2026-09-29). Do
+not delete `.planning/` while the trial runs; if the worktree is ever recreated, create it — and
+`cone/.planning/` — *before* the first `/gsd-core:` command.
 
 ### Step 3 · `map-codebase` — ran 2026-09-21 14:15, 7 files, 2 534 lines
 
@@ -339,6 +350,81 @@ returns nothing. Probe with `localhost`, not the dotted quad.
 ⚠️ Expected-but-noteworthy: `Publicador.jsx:481` **still carries the false `#113` comment** after
 Task 1 — correcting it is wave 2's DOCS-01. Until then the code and its own comment disagree.
 
+### 🔴 Step 4 · VERIFY — rubric row 1 is **yes**, and it caught what this plan missed
+
+`execute-phase 1` finished both waves (`073b59a` `8ebf0e3` code · `dd1944d` `f0d6099` docs), then
+code review (`8d10070`, `01-REVIEW.md`) and verification (`cb65820`, `01-VERIFICATION.md`) ran.
+**Score: 5/11 must-haves verified · 5 behaviourally-unverified (the plan's own backstop tier) ·
+1 failed.** The phase is left unchecked and In Progress.
+
+**The failure is real, verified independently, and nothing upstream of these two gates saw it.**
+`cone_athlete_filter` is one localStorage key shared **on purpose** by `schedule.html`,
+`results.html` and `me.html` (`Me.jsx:41`'s own comment). The phase hardened `Schedule.jsx` only.
+`Results.jsx` still carries the **byte-identical pre-fix pattern**:
+
+- `:90`: `lockedId` from raw `?id=`, no setter, never re-validated
+- `:92-97`: `selAth` seeded from raw `?id=` at mount
+- `:151-154`: inside `load()`, *after* `aD` is loaded,
+  `localStorage.setItem('cone_athlete_filter', lockedId)` with no roster check
+- `Nav.jsx:84` carries `?id=` onto every lockable tab, so the entry point is any
+  `results.html?id=<anything>`, not only a hand-typed URL
+
+Code review found it first as **CR-01** (`code-review` survived the trim). The verifier then failed
+**GUARD-02** ("an unrecognized `?id=` leaves `cone_athlete_filter` unchanged"), because that
+requirement, unlike GUARD-01/03, never named `Schedule.jsx`. `Results.jsx` appeared in no plan, no
+trust-boundary table and no deferred-items entry — an undocumented blind spot, not a recorded cut.
+
+🔑 **Rubric row 1, "did Verify catch something a normal session would have shipped?": yes, and not
+hypothetically.** The board row, this plan, `REQUIREMENTS.md`, the planner *and this plan's own
+supervising session* all missed it. The 2026-09-21 verification above traced `?id=` through
+`Schedule.jsx` alone and never asked which other pages write the same key, so a normal session
+did ship this analysis. **This is the strongest finding in gsd's favour in the whole trial.** The
+report should lead with it, not bury it under the cost rows.
+
+✅ **Verifier conduct worth crediting:** it read every file from disk and re-ran two named tests
+against the shipped modules rather than trusting the executors' SUMMARYs. It also **reverted all 8
+requirement IDs out of `Complete`**, which the plans had marked *before verification ran*. That is
+the gate working, and it also shows the executors self-certify.
+
+⚠️ **WR-01 is legitimate: a "Docs are part of Done" miss by the trial's own executor.** The phase
+added exactly 24 tests to two existing files (11 `buildSessionShareUrl` cases in
+`exportHelpers.test.js`, 13 `findAthleteById` cases in `scheduleHelpers.test.js`), taking the suite
+to 1137. Plan 02 then edited `cone/CLAUDE.md` for DOCS-02 without refreshing the test count in the
+same file. `main` still runs 1113/31, matching its own `CLAUDE.md`; the drift exists only on
+`gsd-trial`.
+
+⚠️ Verifier glitch, format only: it reported `gsd-tools` absent from its sandbox and fell back to a
+`manual:`-labelled digest. The binary resolves fine; the verdict is unaffected.
+
+#### Row 2 — cost, continued (orchestrator turn times as gsd printed them)
+
+| Turn | Printed time |
+|---|---|
+| QUESTIONING | 58 s |
+| `new-project` → PROJECT INITIALIZED (requirements + roadmap) | 21 m 10 s |
+| `plan-phase 1` | 7 m 05 s |
+| `execute-phase 1` → Task 1 checkpoint | 21 m 21 s |
+| rest of execute + code review + verify | **1 h 19 m 25 s** |
+| **Captured total** | **≈ 2 h 10 m** — `onboard`/`map-codebase` not captured |
+
+That is for an S-sized bug fix. Subagent token totals after PROJECT INITIALIZED were never printed;
+collect them from the session before writing the report, along with a typical `plans/NN` session
+to compare against.
+
+**Still open:**
+
+- **D6/D7/D8, the three live human checks, were never driven:** a stale `?id=<sessionId>` opens no
+  session, applies no lock and leaves the key unchanged · a valid `?id=<athleteId>` still locks and
+  `Nav` carries it · a pre-set valid filter survives a stale link. As of 2026-09-29 all three
+  servers are down (5173, 5174, Supabase 54331), so driving them means `supabase start` plus both
+  dev servers first.
+- **gsd's two ways forward:** close the gap (`/gsd-core:plan-phase 01 --gaps`: import the tested
+  `findAthleteById` into `Results.jsx`, give `lockedId` a setter, reconcile `:92-97`), or re-scope
+  GUARD-02 to `Schedule.jsx` explicitly. This one-phase roadmap has no later phase to defer to.
+- The 8 commits on `gsd-trial` are local only, and gsd asked whether to push them.
+- `BACKLOG.md` #207 now names `Results.jsx:151-154` as well, so the hole survives whatever happens
+  to this branch.
+
 ### Step 4 · PHASE 1 PLANNED — 2 plans, and the structural finding that matters most
 
 `plan-phase 1` produced **2 plans in 2 waves** (commits `5f49bae`, `44a87cd`): wave 1 moves the
@@ -396,11 +482,11 @@ costs one command and no code, and it is the only part of the rubric that speaks
 throughput question the whole trial exists for. Everything measured so far is diagnosis quality,
 which is interesting but does not turn that number.
 
-⚠️ **`surface` and `new-project` do not know about each other.** `new-project` wrote
-`.planning/config.json` with no reference to the active surface profile. Four of its `workflow`
-gates are `true` while their commands sit parked in `gsd-surface-disabled`:
+⚠️ **Nothing checks `.planning/config.json` against what is actually installed.** `new-project`
+wrote the config after the hand trim (step 2b), and four of its `workflow` gates are `true` while
+their commands sit parked in `gsd-surface-disabled`:
 
-| config key | command | at `standard` |
+| config key | command | after the hand trim |
 |---|---|---|
 | `ui_phase: true` | `/gsd-core:ui-phase` | ** disabled ** |
 | `ai_integration_phase: true` | `/gsd-core:ai-integration-phase` | ** disabled ** |
@@ -410,7 +496,7 @@ gates are `true` while their commands sit parked in `gsd-surface-disabled`:
 | `verifier: true` | `/gsd-core:verify-work` | enabled |
 
 🔑 **Be precise about the damage: it depends on how each gate is implemented.** Gates that run as
-**agents** survive the trim — the 64 agents are untouched by `surface` — which is why `research:
+**agents** survive the trim — the 64 agents are untouched by it — which is why `research:
 true` still spawned a researcher, and why `ui-plan-gate` still evaluated (`frontend: false`) without
 `/gsd-core:ui-phase` existing. Gates that would hand the user a **command** are the broken ones, and
 that already produced a concrete symptom: the roadmapper's offered "re-add `**UI hint**: yes` so
@@ -444,63 +530,76 @@ the fix is deleted with the branch at Cleanup. `DOCS-01` (the false rationale co
 `Publicador.jsx:476-478`, which states the broken behaviour as the design) is left to the trial —
 it is a code change and fixing it here would contaminate the measurement.
 
-### Step 2b · `/gsd-core:surface profile standard` — run 2026-09-21 13:40, both numbers now recorded
+### Step 2b · the trim to `standard` — applied BY HAND 2026-09-21 13:40, both numbers recorded
+
+🔴 **Corrected 2026-09-29.** This section originally said `/gsd-core:surface profile standard` ran
+and moved the files. **It did not.** A separate Claude session moved them by hand, because
+**`/gsd-core:surface` cannot work in a plugin install.** That session's memory note
+(`project-gsd-plugin-surface`) records why, and each point was re-verified 2026-09-29:
+
+- **The engine has no plugin awareness.** It assumes gsd's npm-global layout: `applySurface`
+  stages skill dirs into `~/.claude/skills/gsd-*/`, which the plugin never reads. No
+  `gsd-file-manifest.json` exists anywhere under `~/.claude`, and `readSurface` and
+  `readActiveProfile` both return `null`. Applying a profile would build a second, parallel install
+  that does not control what the plugin surfaces.
+- **Claude Code has no per-skill disable.** `enabledPlugins` is a boolean per plugin.
+- **So the trim was a hand move** of 49 capabilities out of **both** trees (`commands/gsd/` and
+  `skills/`), leaving the 23 that gsd's own `resolveProfile({modes:['standard']})` returns. That is
+  why `gsd-surface-disabled/` holds a bespoke `restore-surface.js` with hard-coded paths into this
+  machine's home directory.
 
 | | Skills | Agents | Hooks | **Always-on** |
 |---|---|---|---|---|
 | Installed surface | 144 | 64 | 7 | **~10 700 tok** |
-| After `profile standard` | **46** | 64 | 7 | **~7 008 tok** |
+| After the hand trim to `standard` | **46** | 64 | 7 | **~7 008 tok** |
 | Δ | −98 (−68%) | — | — | **−3 692 (−34%)** |
 
-🔴 **Skill count fell 68%, cost fell 34% — because the 64 agents are the floor and `surface`
-cannot touch them.** 46 skills ≈ 1 900 tok, so the agents are ≈ 5 100 of the remaining 7 008.
-This is the confirmation of the gap flagged above: surface's own accounting models command stems
-only, and no profile it offers reaches the agent payload. **Even fully trimmed, gsd-core costs
-~7 000 tokens on every session — still more than Cone's entire `CLAUDE.md` core (~6 500 after
-#224).** That is a rubric answer on its own: the always-on cost is not a tuning problem.
+🔴 **The corrected cost verdict is harsher, not softer: ~10 700 is the only figure a supported
+install can reach.** ~7 008 exists only as an unsupported edit to a version-pinned cache path
+(`…/plugins/cache/gsd-core/gsd-core/1.14.0/`). Nothing that inspects the install can see it, and any
+update past 1.14.0 silently undoes it by arriving as a fresh, untrimmed cache dir. Even granting the
+hand trim, skills fell 68% while cost fell only 34%, because the **64 agents are a floor no trim
+reaches**: ≈ 5 100 of the remaining 7 008. Either way, gsd-core costs more on every session than
+Cone's entire `CLAUDE.md` core (~6 500 after #224). The always-on cost is not a tuning problem.
 
-⚠️ **The mechanism is a file move, not a flag.** `profile standard` **physically moved 49 of the
-72 commands and their 49 skill dirs out of the plugin cache** into a new global directory,
-`~/.claude/gsd-surface-disabled/1.14.0/{commands,skills}` — 470 KB of **real files, not symlinks**,
-with a `restore-surface.js` beside them to put them back. The cache itself is now 23 commands +
-23 skills (23 × 2 = the 46 the harness reports). Consequences:
+⚠️ **The undo path is broken.** `restore-surface.js` opens with `# Restore the full GSD surface…`.
+A `#` line is not a comment in Node, and `node --check` rejects the file with `SyntaxError: Invalid
+or unexpected token` (checked 2026-09-29). Nothing in this trial needs the script, since Cleanup
+deletes the cache and the quarantine wholesale. But if the plugin is ever *kept*, change that `#`
+to `//` before relying on it.
 
-- **`~/.claude/gsd-surface-disabled/` is a second global directory the Cleanup step did not know
-  about.** Added below. `plugin uninstall` does not take it — it is outside the cache by design.
-- **Order matters if the plugin is ever kept:** uninstalling while 49 commands are parked there
-  orphans them. Run `/gsd-core:surface reset` (or `restore-surface.js`) *before* uninstall if the
-  plugin is staying. For this trial it does not matter — Cleanup deletes both trees.
-- The predicted markers still never appeared: no `.gsd-surface.json`, no `.gsd-profile`, and
-  `~/.claude/skills/` is *still* only `app-review` + `synced`. **The plan's prediction that surface
-  would stage `~/.claude/skills/gsd-*/` is wrong** — it re-homes the cache instead. Cleanup's
-  `rm -rf ~/.claude/skills/gsd-*` is therefore a no-op, harmless, and stays only as a guard.
+- **`~/.claude/gsd-surface-disabled/` is a second global directory** outside the cache, so
+  `plugin uninstall` does not take it. It is in Cleanup below.
+- **The markers the surface spec predicts never appeared** — no `.gsd-surface.json`, no
+  `.gsd-profile`, no staged `~/.claude/skills/gsd-*/` (still only `app-review` + `synced`) —
+  because no profile was ever applied through the tool. That is consistent with the spec, not
+  evidence against it. Cleanup's `rm` lines for them are guards.
 
 ⚠️ **Do not verify the trim by counting the `/gsd-core:` menu — the double registration makes it
-lie.** After `profile standard` the menu still offers **46** entries, not 23: the same 23
-capabilities appear once as commands (`surface`, `plan-phase`, …) and once as skills (`gsd-surface`,
-`gsd-plan-phase`, …). Seeing "more than 23" is the expected, correct state and does **not** mean the
-trim failed or was reverted. Confirmed 2026-09-21 after `onboard` + `map-codebase`: cache still 23
-commands + 23 skills, 49 still parked in `gsd-surface-disabled`, `commands/gsd` mtime still 13:40 —
-neither command touched the surface. **The valid check is that a disabled stem is ABSENT:**
-`/gsd-core:ship` matches nothing (`find` over `commands/` + `skills/` for `*ship*` returns empty).
+lie.** After the trim the menu still offers **46** entries, not 23: the same 23 capabilities appear
+once as commands (`surface`, `plan-phase`, …) and once as skills (`gsd-surface`, `gsd-plan-phase`,
+…). Seeing "more than 23" is the expected state. Confirmed 2026-09-21 after `onboard` +
+`map-codebase`: the cache still held 23 + 23, the 49 were still parked, and the `commands/gsd` mtime
+was still 13:40. **The valid check is that a disabled stem is ABSENT:** `/gsd-core:ship` matches
+nothing.
 
 ⚠️ **`standard` disables `ship`, which step 4's loop calls for.** The 23 survivors are:
 `code-review config discuss-phase execute-phase help import ingest-docs manager map-codebase
 new-project onboard pause-work phase plan-phase progress quick resume-work review settings surface
 update verify-work workspace`. Discuss → plan → execute → verify all survive; **ship does not**, nor
-do `audit-fix` `validate-phase` `add-tests` `secure-phase`. Step 4 must either end the loop at
-`verify-work`, use the surviving `phase`, or re-enable the cluster — decide deliberately and say
-which in the report, because "we skipped ship" and "ship isn't in the profile we measured" are
-different findings.
+do `audit-fix` `validate-phase` `add-tests` `secure-phase`. The loop therefore ends at
+`verify-work`, and the report should say "ship wasn't in the surface we measured", not "we skipped
+ship".
 
 ## Must-haves
 
 - A fresh session started **in the worktree's `cone/`** lists the `/gsd-core:*` commands — if it does
   not, the plugin did not load and nothing else in this plan is valid.  [`/help` or tab-complete]
 - ✅ **DONE 2026-09-21.** `claude plugin details gsd-core` recorded **twice**: installed surface
-  **~10 700** (144 skills / 64 agents / 7 hooks) → after `/gsd-core:surface profile standard`
-  **~7 008** (46 / 64 / 7). Both in step 2b above. ⚠️ It only resolves **from the worktree** — a
-  local-scope install answers `Plugin "gsd-core" not found` anywhere else.
+  **~10 700** (144 skills / 64 agents / 7 hooks) → after the **hand** trim to `standard` **~7 008**
+  (46 / 64 / 7). Both are in step 2b above, which also records why gsd's own tool could not do the
+  trim. ⚠️ It only resolves **from the worktree**; a local-scope install answers
+  `Plugin "gsd-core" not found` anywhere else.
 - **#207 is actually fixed and driven in the worktree** — a visitor with no stored
   `cone_athlete_filter` opens the Apresentar QR and lands on that session. A trial that produces
   artifacts but no working fix answers nothing.
@@ -523,10 +622,14 @@ different findings.
    the *skill* half of the double registration above, not what you type either. Confirmed by a
    live run 2026-09-21; an earlier session lost time to `/gsd-surface` and `/gsd:surface` both
    matching nothing, which looks identical to the plugin not being loaded — run `claude plugin
-   list` before assuming either.
-2. `/gsd-core:surface list` ✅ **done 2026-09-21, recorded above**, then `/gsd-core:surface profile
-   standard`. **Restart the session** — surface changes only take effect next session. Record the
-   new always-on figure from `claude plugin details`, not from surface's own count (see above).
+   list` before assuming either. ⚠️ Launching `claude` from `cone/` is right for the plugin, but
+   **every `gsd-tools` call must run from the worktree root**, because the `.planning/` pin is
+   cwd-relative (step 3).
+2. `/gsd-core:surface list` ✅ **done 2026-09-21, recorded above.** ⚠️ **Do not run
+   `/gsd-core:surface profile …` in this install** — it has no plugin awareness and would build a
+   parallel install (step 2b). The trim to `standard` was done by hand instead ✅. Restart the
+   session afterwards and record the new always-on figure from `claude plugin details`, not from
+   surface's own count.
 3. `/gsd-core:onboard` → it will ask for `/gsd-core:map-codebase`. Run it. 🔴 **Keep the 7 generated files in
    the worktree — never merge them.** Then diff them against `cone/CLAUDE.md` + `docs/arch/*.md`:
    does a generated map surface anything the hand-written notes lack? That answer feeds rubric row 5
@@ -542,11 +645,11 @@ different findings.
 
 | Question | What counts as evidence |
 |---|---|
-| Did Verify catch something a normal session would have shipped? | a named finding, or an explicit "no" |
-| Cost of one row end to end | tokens + wall-clock vs. a typical `plans/NN` session, **plus** the always-on figures |
-| Did `.planning/` duplicate `BACKLOG.md` / `plans/`? | which files now hold the same fact twice |
+| Did Verify catch something a normal session would have shipped? | a named finding, or an explicit "no". ✅ **Yes**: CR-01 → GUARD-02 failed, because `Results.jsx:151-154` still writes raw `?id=` to the shared key. This plan's own supervising session missed it (step 4 · VERIFY). |
+| Cost of one row end to end | tokens + wall-clock vs. a typical `plans/NN` session, **plus** the always-on figures. ⏳ **Partial**: ≈ 2 h 10 m of printed orchestrator turns to reach verify, 316 780 subagent tokens before any code, always-on ~10 700 supported / ~7 008 hand-trimmed (steps 2b, 4). Post-init token totals and the `plans/NN` baseline still to collect. |
+| Did `.planning/` duplicate `BACKLOG.md` / `plans/`? | which files now hold the same fact twice. ✅ **Yes, ~40:1**: 268 lines restate a 69-word row, and the map is 2.05× the notes it re-narrates (step 4 · PROJECT INITIALIZED). |
 | Do Cone's rows decompose into parallel non-overlapping plans? | did the planner produce >1 wave, and was the split real? ⚠️ **#207 cannot answer this** — it is a single-wave row by construction (see step 4 · ROADMAP). Needs a `plan-phase`-only run on #191 or #102. |
-| Did the generated codebase map add anything the hand-written notes lack? | a list, or "nothing" |
+| Did the generated codebase map add anything the hand-written notes lack? | a list, or "nothing". ✅ **Nothing; it subtracted**: `CONCERNS.md`'s one security claim swapped `settings` for `allowed_emails` (step 3 · map-codebase). The other 6 files were only surveyed at heading level. |
 
 ## Cleanup
 
@@ -564,20 +667,17 @@ was already false before a single `/gsd-core:` command ran: `claude plugin marke
 `~/.claude/plugins/cache/gsd-core/`. Both are reversible (step 2 below); the point is that the
 blast radius is the home dir, and it has to be checked rather than assumed.
 
-🔴 **`/gsd-core:surface` is the one to watch — and what it actually did is NOT what its spec says.**
-Measured 2026-09-21 (steps 2 and 2b above), it minted **two** new global directories, and neither is
-`plugin uninstall`'s job:
+🔴 **Two new global directories appeared, and neither is `plugin uninstall`'s job** (measured
+2026-09-21; attribution corrected 2026-09-29):
 
 | Path | What it is | Made by |
 |---|---|---|
-| `~/.claude/gsd-core/` | 5 **symlinks** (`bin` `contexts` `references` `templates` `workflows`) into the plugin cache, 614 files behind them | `ensure-runtime-build.cjs` on first `surface` run (13:06) |
-| `~/.claude/gsd-surface-disabled/1.14.0/` | **470 KB of real files** — the 49 commands + 49 skills `profile standard` moved out of the cache, plus `restore-surface.js` | `surface profile standard` (13:40) |
+| `~/.claude/gsd-core/` | 5 **symlinks** (`bin` `contexts` `references` `templates` `workflows`) into the plugin cache, 614 files behind them | `ensure-runtime-build.cjs` on the first `/gsd-core:surface list` (13:06) |
+| `~/.claude/gsd-surface-disabled/1.14.0/` | **470 KB of real files**: the 49 commands + 49 skill dirs moved out of the cache, plus a bespoke `restore-surface.js` | the **hand trim** by a separate session (13:40) — not gsd, see step 2b |
 
-⚠️ The spec's predicted writes — `~/.claude/.gsd-surface.json`, `~/.claude/.gsd-profile`, and
-staged `~/.claude/skills/gsd-*/` — **never happened**. All three are still absent after both runs;
-`~/.claude/skills/` is untouched at `app-review` + `synced`. The surface state lives in *which files
-are where*, not in a marker file. Don't trust the spec's paths; `ls -A ~/.claude` is the oracle, and
-it is worth re-running after every new `gsd` command, not just after step 2 — this diff is rubric
+⚠️ The surface spec's predicted writes (`~/.claude/.gsd-surface.json`, `~/.claude/.gsd-profile`,
+staged `~/.claude/skills/gsd-*/`) never appeared, because no profile was applied through the tool.
+`ls -A ~/.claude` is the oracle; re-run it after every new `gsd` command. That diff is rubric
 evidence, since a framework that plants global state is a different adoption cost than one that
 does not.
 
@@ -600,11 +700,12 @@ rm -rf ~/.claude/gsd-core                                   # 5 symlinks - CONFI
 rm -rf ~/.claude/gsd-surface-disabled                       # 470 KB real files - CONFIRMED present
 ```
 
-⚠️ **`~/.claude/gsd-surface-disabled/` holds the only copy of the 49 commands `profile standard`
-moved out of the cache.** Deleting it is correct for this trial — the payload is re-downloadable
-and the plugin is going anyway. But if the plugin is ever *kept*, run `/gsd-core:surface reset`
-(or its `restore-surface.js`) **before** `plugin uninstall`, or those 49 are orphaned outside a
-cache that no longer exists.
+⚠️ **`~/.claude/gsd-surface-disabled/` holds the only copy of the 49 capabilities the hand trim
+moved out of the cache.** Deleting it is correct for this trial, since the payload is
+re-downloadable and the plugin is going anyway. If the plugin is ever *kept*, restore **before**
+`plugin uninstall` or those 49 are orphaned — and neither obvious restore works as-is:
+`/gsd-core:surface reset` has no plugin awareness, and `restore-surface.js` fails `node --check` on
+its `#` first line (change it to `//`).
 
 🔴 **`app-review` lives in `~/.claude/skills/` too.** It is yours, it is not gsd's, and nothing in
 this plan may touch it. The `ls -d` line above exists so the glob is read before it is run.
@@ -623,8 +724,9 @@ git -C C:/Users/ze_do/repos/CrossFit-Apps worktree list        # main only
 ```
 
 If the trial **does** convince, do not adopt wholesale — file a follow-up row naming *which* pieces
-are worth taking, measured against the **~7 008-token trimmed floor** (not the ~10 700 installed
-figure — `standard` is the cheapest surface gsd offers, and it is still above `CLAUDE.md`'s ~6 500).
+are worth taking, measured against **~10 700 tokens always-on**, the only figure a supported plugin
+install can reach. The ~7 008 trimmed figure needs an unsupported hand-edit of a version-pinned
+cache that any update silently reverts (step 2b), and even it is above `CLAUDE.md`'s ~6 500.
 
 ## Verification
 
