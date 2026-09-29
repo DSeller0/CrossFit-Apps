@@ -86,4 +86,14 @@ export function buildMobileSession(sessions, selectedDate, currentWeekDates) {
   return null
 }
 
+// #207 — the Apresentar share URL producer. Both params are required: the reader
+// (Schedule.jsx's `if (pDate && pSession)` gate) opens nothing unless both are present, so a
+// half-built URL is worse than no URL at all — return '' rather than emit one.
+export function buildSessionShareUrl(dateKey, sessionId) {
+  const dk = String(dateKey ?? '')
+  const sid = String(sessionId ?? '')
+  if (!dk || !sid) return ''
+  return `https://dseller0.github.io/CrossFit-Apps/schedule.html?date=${dk}&session=${encodeURIComponent(sid)}`
+}
+
 export const mfs = (px, fs) => `${Math.round(px * fs)}px`

@@ -10,7 +10,12 @@ import {
 } from '../../utils/storage'
 import { athleteScopes } from '../../public/lib/sessions.js'
 import { APP_CONFIG } from '../../utils/config'
-import { getWeeksOfMonth, resolveDaySession, buildMobileSession } from './publicador/exportHelpers'
+import {
+  getWeeksOfMonth,
+  resolveDaySession,
+  buildMobileSession,
+  buildSessionShareUrl,
+} from './publicador/exportHelpers'
 import {
   resolveExportThemeId,
   resolveExportPalette,
@@ -473,12 +478,11 @@ function SchedulePublisher({ sessions, locations }) {
   const dayFmt = isDayFormat(format)
   const _presenterDateKey = selectedDate || toISO(currentWeekDates[1])
   const _presenterSess = (filteredSessions[_presenterDateKey] || [])[0]
-  // #113: the share target is schedule.html?id=<sessionId>, a page that's actually
-  // built and deployed — log.html (the old target) isn't in vite.public.config.js's
-  // input and 404s in production. `?id=` locks the public schedule to this one session.
-  const _presenterLogUrl = _presenterSess
-    ? `https://dseller0.github.io/CrossFit-Apps/schedule.html?id=${_presenterSess.id}`
-    : ''
+  // #113/#207: the share target is schedule.html — built and deployed, unlike log.html
+  // (the old target, never in vite.public.config.js's input, 404d in production).
+  // #113's `?id=`-only form never opened a session — the reader needs BOTH `date` and
+  // `session`, built by buildSessionShareUrl (publicador/exportHelpers.js), not inline here.
+  const _presenterLogUrl = buildSessionShareUrl(_presenterDateKey, _presenterSess?.id)
 
   const canExport = filteredSessions[_presenterDateKey]?.length || !dayFmt
 

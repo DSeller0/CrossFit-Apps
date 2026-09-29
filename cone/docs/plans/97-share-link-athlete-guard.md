@@ -94,7 +94,11 @@ false-positives.
    | `Nav.jsx:84` carries `?id=` across tabs | safe once every reader validates |
 
    Re-run `grep -rn "setItem('cone_athlete_filter'" src/public` and `grep -rn "get('id')"
-   src/public` before committing; any site not in this table is a finding.
+   src/public` before committing; any site not in this table is a finding. ⚠️ The literal grep
+   cannot see `Me.jsx`, which keys the same storage through a constant — also run `grep -rn
+   ATHLETE_KEY src/public/me` and `grep -rn "setItem(" src/public | grep -v "setItem('"`.
+   (Run 2026-09-29: nothing unlisted — `Me.jsx:185` `selectAthlete(ath)` takes a matched roster
+   object, `:194` only removes.)
 
 4. **Docs are part of Done:**
    - `cone/CLAUDE.md` "Tests:" — the new total, with a clause: `#207/plans/97 added 24:

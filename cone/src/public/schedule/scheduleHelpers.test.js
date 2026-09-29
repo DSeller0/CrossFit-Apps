@@ -1,5 +1,10 @@
 import { describe, test, expect } from 'vitest'
-import { GUEST_CAP, findNameCollision, suggestGuestName } from './scheduleHelpers.js'
+import {
+  GUEST_CAP,
+  findNameCollision,
+  suggestGuestName,
+  findAthleteById,
+} from './scheduleHelpers.js'
 
 // #71 — the guest check-in name helpers. The whole point of this pair is that they never
 // dedupe: findNameCollision only REPORTS, and suggestGuestName only PROPOSES. Two real
@@ -94,5 +99,71 @@ describe('GUEST_CAP', () => {
   // Guards the client/server pair: migration 0008 hardcodes 20 in SQL and cannot import this.
   test('is 20, matching migration 0008', () => {
     expect(GUEST_CAP).toBe(20)
+  })
+})
+
+// #207 — the one validator both Schedule.jsx's `?id=` and `?athlete=` branches resolve
+// through. Empty/adjacency/ordering mirror the GUARD-01 must_haves truths in the plan.
+describe('findAthleteById', () => {
+  test('returns null for an empty roster', () => {
+    expect(findAthleteById([], 'a')).toBe(null)
+  })
+
+  test('returns null for a null roster', () => {
+    expect(findAthleteById(null, 'a')).toBe(null)
+  })
+
+  test('returns null for an undefined roster', () => {
+    expect(findAthleteById(undefined, 'a')).toBe(null)
+  })
+
+  test('returns null for an empty string id', () => {
+    expect(findAthleteById([{ id: 'a' }], '')).toBe(null)
+  })
+
+  test('returns null for a null id', () => {
+    expect(findAthleteById([{ id: 'a' }], null)).toBe(null)
+  })
+
+  test('returns null for an undefined id', () => {
+    expect(findAthleteById([{ id: 'a' }], undefined)).toBe(null)
+  })
+
+  test('matches a numeric roster id via a string id', () => {
+    expect(findAthleteById([{ id: 7, name: 'X' }], '7')).toEqual({ id: 7, name: 'X' })
+  })
+
+  test('matches a numeric roster id via a numeric id', () => {
+    expect(findAthleteById([{ id: 7, name: 'X' }], 7)).toEqual({ id: 7, name: 'X' })
+  })
+
+  test('does not match a leading-zero variant', () => {
+    expect(findAthleteById([{ id: 7 }], '07')).toBe(null)
+  })
+
+  test('does not match a leading-space variant', () => {
+    expect(findAthleteById([{ id: 7 }], ' 7')).toBe(null)
+  })
+
+  test('does not match a trailing-space variant', () => {
+    expect(findAthleteById([{ id: 7 }], '7 ')).toBe(null)
+  })
+
+  test('two entries sharing an id: the first in array order wins, every time', () => {
+    const roster = [
+      { id: 'a', name: 'first' },
+      { id: 'a', name: 'second' },
+    ]
+    expect(findAthleteById(roster, 'a').name).toBe('first')
+  })
+
+  test('never mutates or reorders the roster array', () => {
+    const roster = [
+      { id: 'a', name: 'first' },
+      { id: 'b', name: 'second' },
+    ]
+    const before = JSON.stringify(roster)
+    findAthleteById(roster, 'b')
+    expect(JSON.stringify(roster)).toBe(before)
   })
 })

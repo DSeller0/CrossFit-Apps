@@ -20,6 +20,7 @@ import {
   GUEST_CAP,
   findNameCollision,
   suggestGuestName,
+  findAthleteById,
 } from './scheduleHelpers.js'
 import DemoPanel from './DemoPanel.jsx'
 import LogPane from './LogPane.jsx'
@@ -152,7 +153,9 @@ export default function Schedule() {
   // its height varies with `lockedId`, which decides whether `.selBar` renders at all.
   const stickyHeadRef = useRef(null)
 
-  const [lockedId] = useState(() => new URLSearchParams(location.search).get('id') || '')
+  const [lockedId, setLockedId] = useState(
+    () => new URLSearchParams(location.search).get('id') || '',
+  )
   const [box] = useState(() => getBoxScope())
 
   // Fetched data that the render tree reads (demo videos, RM autofill), so it is state,
@@ -370,14 +373,22 @@ export default function Schedule() {
         pPrefillRounds = sp.get('prefillRounds')
       const pSession = sp.get('session')
 
-      const curAth = lockedId || localStorage.getItem('cone_athlete_filter') || ''
+      // #207 — resolve the query-param athlete lock against the freshly loaded roster before
+      // trusting it for anything. `findAthleteById` is the one validator both this branch and
+      // the `?athlete=` branch below go through. An id the roster doesn't recognise must not
+      // open a false lock, must not write to localStorage, and must narrow `lockedId` itself
+      // so all six kiosk render sites stop locking too (GUARD-01/GUARD-02/GUARD-03).
+      const lockedAth = findAthleteById(aD, lockedId)
+      if (lockedId && !lockedAth) setLockedId('')
+      const curAth = lockedAth?.id || localStorage.getItem('cone_athlete_filter') || ''
       let athId = curAth
       if (pDate) setWeekOffset(dateToWeekOffset(pDate))
-      if (lockedId) {
-        setSelAth(lockedId)
-        localStorage.setItem('cone_athlete_filter', lockedId)
+      if (lockedAth) {
+        athId = lockedAth.id
+        setSelAth(lockedAth.id)
+        localStorage.setItem('cone_athlete_filter', lockedAth.id)
       } else if (pAthlete) {
-        const a = aD.find(x => String(x.id) === String(pAthlete))
+        const a = findAthleteById(aD, pAthlete)
         if (a) {
           athId = a.id
           setSelAth(a.id)

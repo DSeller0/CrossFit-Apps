@@ -16,7 +16,7 @@ import {
   perfStr,
   goalOutcome,
 } from '../lib/wod.js'
-import { onKey } from '../schedule/scheduleHelpers.js'
+import { onKey, findAthleteById } from '../schedule/scheduleHelpers.js'
 import { getBoxScope, inBoxScope } from '../lib/boxScope.js'
 import { syncTheme } from '../lib/theme.js'
 import { normalizeSessionIds, matchesAthlete } from '../lib/sessions.js'
@@ -87,14 +87,13 @@ export default function Results() {
   const [results, setResults] = useState([])
   const [gymName, setGymName] = useState('Cone')
   const [weekOffset, setWeekOffset] = useState(0)
-  const [lockedId] = useState(() => new URLSearchParams(location.search).get('id') || '')
-  const [box] = useState(() => getBoxScope())
-  const [selAth, setSelAth] = useState(
-    () =>
-      new URLSearchParams(location.search).get('id') ||
-      localStorage.getItem('cone_athlete_filter') ||
-      '',
+  const [lockedId, setLockedId] = useState(
+    () => new URLSearchParams(location.search).get('id') || '',
   )
+  const [box] = useState(() => getBoxScope())
+  // Seeded from storage only — never from the raw `?id=` (#207). A URL id is trusted only after
+  // load() has resolved it against the roster, as Schedule.jsx does.
+  const [selAth, setSelAth] = useState(() => localStorage.getItem('cone_athlete_filter') || '')
   const [expanded, setExpanded] = useState(new Set())
   const [logInputs, setLogInputs] = useState({})
   const [editing, setEditing] = useState(new Set()) // keys being re-logged
@@ -148,10 +147,17 @@ export default function Results() {
       setAthletes(aD)
       setResults(rD)
       setGymName(stD.gymName || 'Cone')
-      if (lockedId) {
-        setSelAth(lockedId)
+      // #207 (CR-01) — resolve the `?id=` lock against the roster just loaded before trusting it,
+      // exactly as Schedule.jsx does. An id the roster doesn't recognise (a printed QR still
+      // carrying a session id) must not select, must not write the shared cone_athlete_filter
+      // key, and must narrow `lockedId` itself so `lockedAthName`, both lock guards and Nav
+      // stop locking too.
+      const lockedAth = findAthleteById(aD, lockedId)
+      if (lockedId && !lockedAth) setLockedId('')
+      if (lockedAth) {
+        setSelAth(lockedAth.id)
         try {
-          localStorage.setItem('cone_athlete_filter', lockedId)
+          localStorage.setItem('cone_athlete_filter', lockedAth.id)
         } catch {
           /* ignore */
         }

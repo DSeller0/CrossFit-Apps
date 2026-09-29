@@ -104,3 +104,15 @@ export function onKey(fn) {
     }
   }
 }
+
+// ── Athlete lookup (#207) ─────────────────────────────────────────────────────
+// The one validator both Schedule.jsx's `?id=` and `?athlete=` query parameters resolve
+// through, so a URL carrying either can never open a false lock or write a value the roster
+// doesn't recognise into cone_athlete_filter. Faithful extraction of the equality the
+// `?athlete=` branch already used — no trim/lowercase/normalise, on purpose: widening the
+// match here would silently accept more URLs than today. Never mutates or reorders `athletes`.
+export function findAthleteById(athletes, rawId) {
+  const key = String(rawId ?? '')
+  if (!key) return null
+  return (athletes || []).find(a => String(a.id) === key) || null
+}

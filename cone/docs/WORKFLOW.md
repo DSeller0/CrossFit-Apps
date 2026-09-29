@@ -185,8 +185,10 @@ fix that still corrupts storage; *"a stale link opens no lock **and** writes not
 a wrong URL convention, a copied helper — grep for every other instance and list each in the plan
 as fixed or explicitly deferred. #207's first fix hardened `Schedule.jsx` and missed the
 byte-identical write at `Results.jsx:151-154`; a code review found it by grepping for
-`setItem('cone_athlete_filter'` ([#225](./reviews/2026-09-29-gsd-trial.md)). A sibling nobody
-listed is a finding, not a cut.
+`setItem('cone_athlete_filter'` ([#225](./reviews/2026-09-29-gsd-trial.md)). A literal grep has a
+blind spot — `Me.jsx` reaches the same key through a constant (`ATHLETE_KEY`) — so also grep the
+constant and every `setItem(` whose key is not a string literal. A sibling nobody listed is a
+finding, not a cut.
 
 ⚠️ **Where this rule comes from.** The 2026-09-20 review found #113 closed with a fix that sends a
 session id to an athlete-id parameter — shipped, marked Done, and never once opened in a browser

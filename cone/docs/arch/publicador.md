@@ -82,11 +82,13 @@ them. plans/90 removed component and CSS in one commit (leaving the CSS is what 
 with the pt-BR `ZONES` list); fixed via `normaliseZone` (`utils/config.js`), already used elsewhere.
 **#113** — Apresentar's QR was repointed at `schedule.html?id=<sessionId>` (built and deployed) instead of
 the never-built `log.html`, which stays unbuilt on purpose (it reads/writes the legacy `results` blob
-whose anon grants `0009` revoked). ⚠️ **That fix does not work — #113 is superseded by #207.**
-`Schedule.jsx:393` opens a session only on `date` **and** `session` together, so `?id=` never reaches
-one; it falls through to the athlete-lock branch and writes the **session** id into
-`localStorage.cone_athlete_filter` unvalidated. The working convention is `?date=…&session=…`. See
-`cone/CLAUDE.md`'s "Never-built legacy HTML" note for the full chain. **#170** (a Leaderboard PNG export) was asked and answered "no."
+whose anon grants `0009` revoked). ⚠️ **That fix did not work — #207/plans/97 corrected it (2026-09-29).** `Schedule.jsx` opens a
+session only on `date` **and** `session` together, so `?id=` never reached one; it fell through to
+the athlete-lock branch and wrote the **session** id into `localStorage.cone_athlete_filter`
+unvalidated. Now `buildSessionShareUrl` (`publicador/exportHelpers.js`) builds
+`?date=…&session=…`, and every `?id=` reader resolves through `findAthleteById`
+(`schedule/scheduleHelpers.js`) — `Results.jsx` too. Printed QRs still carry the old URL; the reader
+guard is what makes them harmless. See `cone/CLAUDE.md`'s "Never-built legacy HTML" note for the full chain. **#170** (a Leaderboard PNG export) was asked and answered "no."
 Format names + the `--a-*` contract, precedence and every acceptance bar: [plans/82](../plans/82-c5b1-publicador-shell-e-cores.md).
 
 🔑 **The client-free boundary inside `publicador/` (#193 · plans/90).** The five gallery-rendered files —

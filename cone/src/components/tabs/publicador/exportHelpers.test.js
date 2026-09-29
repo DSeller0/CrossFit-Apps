@@ -6,6 +6,7 @@ import {
   buildMobileSession,
   getWeeksOfMonth,
   mfs,
+  buildSessionShareUrl,
 } from './exportHelpers.js'
 
 // #59 · plans/81 Phase 0 — this file only became importable under vitest once
@@ -152,5 +153,59 @@ describe('mfs', () => {
 
   test('rounds instead of truncating', () => {
     expect(mfs(10, 1.26)).toBe('13px')
+  })
+})
+
+describe('buildSessionShareUrl', () => {
+  test('returns the absolute schedule.html URL with date then session when both are present', () => {
+    expect(buildSessionShareUrl('2026-09-21', 'abc123')).toBe(
+      'https://dseller0.github.io/CrossFit-Apps/schedule.html?date=2026-09-21&session=abc123',
+    )
+  })
+
+  test('returns an empty string when dateKey is an empty string', () => {
+    expect(buildSessionShareUrl('', 'abc123')).toBe('')
+  })
+
+  test('returns an empty string when dateKey is null', () => {
+    expect(buildSessionShareUrl(null, 'abc123')).toBe('')
+  })
+
+  test('returns an empty string when dateKey is undefined', () => {
+    expect(buildSessionShareUrl(undefined, 'abc123')).toBe('')
+  })
+
+  test('returns an empty string when sessionId is an empty string', () => {
+    expect(buildSessionShareUrl('2026-09-21', '')).toBe('')
+  })
+
+  test('returns an empty string when sessionId is null', () => {
+    expect(buildSessionShareUrl('2026-09-21', null)).toBe('')
+  })
+
+  test('returns an empty string when sessionId is undefined', () => {
+    expect(buildSessionShareUrl('2026-09-21', undefined)).toBe('')
+  })
+
+  test('returns an empty string when both arguments are omitted', () => {
+    expect(buildSessionShareUrl()).toBe('')
+  })
+
+  test('percent-encodes a session id containing &, = and a space', () => {
+    const url = buildSessionShareUrl('2026-09-21', 'a&b=c d')
+    expect(url).toContain('session=a%26b%3Dc%20d')
+  })
+
+  test('leaves exactly one literal & in the URL — the parameter separator', () => {
+    const url = buildSessionShareUrl('2026-09-21', 'a&b=c d')
+    expect(url.split('&').length - 1).toBe(1)
+  })
+
+  test('emits date before session and never an id= or athlete= parameter', () => {
+    const url = buildSessionShareUrl('2026-09-21', 'abc123')
+    expect(url.indexOf('?date=')).toBeGreaterThan(-1)
+    expect(url.indexOf('?date=')).toBeLessThan(url.indexOf('&session='))
+    expect(url).not.toMatch(/\?id=/)
+    expect(url).not.toMatch(/athlete=/)
   })
 })
