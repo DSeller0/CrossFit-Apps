@@ -16,9 +16,11 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready:** #225
+- **Ready:** #225 · #207
 - **In Progress:** none
-- **Start here:** **#207** — #113 shipped a fix that doesn't work and corrupts `cone_athlete_filter`.
+- **Start here:** **#207** — #113 shipped a fix that doesn't work and corrupts `cone_athlete_filter`;
+  [plans/97](./plans/97-share-link-athlete-guard.md) ports the #225 trial's reviewed fix and closes
+  the same write in `Results.jsx`.
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
   `> 🟡 Shipped:` pending an on-device iPhone re-test; nothing to code. · **#211** — the
   [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) needs 20 naming calls and
@@ -37,6 +39,7 @@ Every other bullet here is free-form.
 ## 🟢 Ready (planned — pick from the top)
 
 - 🟢 **[→ Ready · plans/96](./plans/96-gsd-core-trial.md)** — **#225 Trial gsd-core's phase loop in isolation, then decide** · M · Opus · worktree + plugin installed (local scope, gitignored). Run #207 through discuss→plan→execute→verify, answer the 5-question rubric, uninstall. Commands are `/gsd-core:<cmd>`. ⚠️ **~10 700 tokens always-on, and no supported trim exists** — `/gsd-core:surface` can't work in a plugin install; a hand trim reaches ~7 008, still above the whole `CLAUDE.md` core.
+- 🟢 **[→ Ready · plans/97](./plans/97-share-link-athlete-guard.md)** — **#207 #113's fix doesn't work and corrupts the visitor's stored athlete filter** · S · Sonnet · Start-here blocker. Ports the #225 trial's reviewed fix (`buildSessionShareUrl` + `findAthleteById`, 24 tests, applies cleanly to `main`) and closes the identical unvalidated write at `Results.jsx:151-154` that the trial's code review found.
 
 ## 🔵 In Progress
 
@@ -58,7 +61,6 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 - ⏸ **#155 iOS Safari zooms the page when logging a result** · S · Sonnet · blocked on the user: `plans/74` shipped the 16px floor (`793ee45`, 2026-08-07) and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code until that comes back.
 - **#204 me.html's Distribuição reads 0/N for every athlete** · XS · Sonnet · `results_v2` logs only WOD block types, so `calcBlockStats`' executed side is structurally 0 for Força/LPO/Acessórios/Skill/Core/Cardio/Mobilidade. It was hidden until #164 made planned non-zero. Decide: hide the card until #64 logs strength blocks, or show planned only.
-- **#207 #113's fix doesn't work and corrupts the visitor's stored athlete filter** · S · Sonnet · `Publicador.jsx:480` sends a session id to `schedule.html?id=`; `Schedule.jsx:376-378` writes it to `cone_athlete_filter` unvalidated, so the session never opens and the rail shows `● —`. ⚠️ `Results.jsx:151-154` has the same unvalidated write — fix both. Reopens #113.
 - **#208 Off-screen panels stay in the tab order on every public page** · XS · Sonnet · `Nav.module.css:3` `.ovSheet` and `Results.module.css:181` `.lbPane` hide by `transform` alone. Verified live: the 3 overflow tiles are `visibility:visible` and take focus. The fix idiom is already in both files (`display:none` / `visibility:hidden`).
 - **#209 `ExRow.jsx:219` hardcodes `% RM` and fabricates a load from it** · XS · Sonnet · `:65` in the same file derives the real unit; `:220` then treats kg figures as percentages of the athlete's RM. 6 of 683 prod progression steps carry kg/lb. The other two render paths are correct. Recorded by the 09-05 pass, never filed.
 - **#210 A rest-day article was pasted into the Criador and became 50 exercises** · S · Sonnet · session `mt7kwk74qic61a0mx9s` (2026-08-27): 49 prose lines are `exercises` with empty reps/sets across four Mobilidade blocks, `block.notes` empty on all four. Renders to athletes as a WOD with 50 movements. Decide: repair the row, and whether the paste path should have caught it.
@@ -95,6 +97,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#218 Every public page ships Supabase Realtime it never uses** · M · Opus · the 203 kB / 52 kB gz shared chunk is `@supabase/supabase-js` (confirmed by grepping the built asset for `GoTrueClient`/`RealtimeClient`); with React that is a ~112 kB gz floor on `tema.html` and `recover.html` too. Needs a call on a lighter read path (PostgREST fetch) before it is worth building.
 - **#219 `App.jsx:162-179` is dead code that arms a load-path write if anyone fills a stub** · XS · Sonnet · `saveSettings(merged)` at `:174` sits outside the `colourChanged` test and `:170` forces `gymName`. Inert **only** because the SPA's `./config.json` resolves to `cone/public/config.json`, the `{}` stub `9ca4348` added. Delete it, or gate the write.
 - **#220 `build-design-cards.mjs:48-57` keeps a 9th literal theme enumeration** · XS · Sonnet · `THEME_LABELS` hand-lists all 8 ids while the guard at `:221` only checks count == `THEMES.length`, so theme #9 passes the guard and renders its raw class name as the switcher label. `THEMES[].label` already exists.
+- **#226 The board audit never checks row length — 13 rows are over the cap** · XS · Sonnet · `audit-backlog-markers.mjs` parses the four row shapes but not their length (≤400, Ready ≤600), so overruns pass silently: one row is 2 724 chars, and #225 reached 667 unnoticed. Add the check, then trim the 13.
 
 ### P3 — needs a decision before it needs code
 

@@ -66,9 +66,11 @@ hand, and no supported path to a smaller surface exists.
 **It ran clean. No error, no stack trace** — the freshly compiled Windows engine was the plausible
 failure point and it was not one. `ensure-runtime-build.cjs` fired on first use as predicted
 (`bin/lib/` 10 → ~200 `.cjs`, `surface.cjs` 41 KB, built 13:06), and the run minted
-`~/.claude/gsd-core/` — 5 symlinks (`bin` `contexts` `references` `templates` `workflows`) into the
-plugin cache, 614 files behind them. `rm -rf` unlinks without touching the targets, so the Cleanup
-step already covers it. Nothing else moved: no `.gsd-surface.json`, no `.gsd-profile`, and
+`~/.claude/gsd-core/` — 5 links (`bin` `contexts` `references` `templates` `workflows`) into the
+plugin cache, 614 files behind them. ⚠️ They are **NTFS junctions**, not symlinks (`dir /al` shows
+`<JUNCTION>`; Git Bash's `ls -la` displays them like symlinks) — remove them with `rmdir`, which does
+not follow a junction, rather than assuming `rm -rf` won't (corrected 2026-09-29; see Cleanup).
+Nothing else moved: no `.gsd-surface.json`, no `.gsd-profile`, and
 `~/.claude/skills/` is still `app-review` + `synced`. `list` is read-only, as documented.
 
 🔑 **The invocation is `/gsd-core:<cmd>` — namespaced by PLUGIN name, not by the command's own
@@ -672,7 +674,7 @@ blast radius is the home dir, and it has to be checked rather than assumed.
 
 | Path | What it is | Made by |
 |---|---|---|
-| `~/.claude/gsd-core/` | 5 **symlinks** (`bin` `contexts` `references` `templates` `workflows`) into the plugin cache, 614 files behind them | `ensure-runtime-build.cjs` on the first `/gsd-core:surface list` (13:06) |
+| `~/.claude/gsd-core/` | 5 **NTFS junctions** (`bin` `contexts` `references` `templates` `workflows`) into the plugin cache, 614 files behind them | `ensure-runtime-build.cjs` on the first `/gsd-core:surface list` (13:06) |
 | `~/.claude/gsd-surface-disabled/1.14.0/` | **470 KB of real files**: the 49 commands + 49 skill dirs moved out of the cache, plus a bespoke `restore-surface.js` | the **hand trim** by a separate session (13:40) — not gsd, see step 2b |
 
 ⚠️ The surface spec's predicted writes (`~/.claude/.gsd-surface.json`, `~/.claude/.gsd-profile`,
@@ -681,24 +683,33 @@ staged `~/.claude/skills/gsd-*/`) never appeared, because no profile was applied
 evidence, since a framework that plants global state is a different adoption cost than one that
 does not.
 
-### The steps
+### The steps — as actually run 2026-09-29
+
+🔴 **The procedure first written here had three bugs**, each caught before it could bite: it removed
+the worktree **before** uninstalling (a local-scope plugin only resolves from its own `projectPath`,
+so the uninstall would have found nothing); it called `claude plugin uninstall` bare, which
+**defaults to `--scope user`**; and it uninstalled **once**, while `installed_plugins.json` held
+**two** local installs (the worktree root and its `cone/`) — one uninstall removed exactly one
+record. It also called `~/.claude/gsd-core`'s entries "symlinks": they are **NTFS junctions**, so
+they were removed with `rmdir`, which never follows one, rather than `rm -rf`.
 
 ```
-# 1. the repo
+# 1. uninstall while both projectPaths still exist - local scope - from EACH
+cd C:/Users/ze_do/repos/CrossFit-Apps-gsd-trial      && ~/.local/bin/claude.exe plugin uninstall gsd-core --scope local
+cd C:/Users/ze_do/repos/CrossFit-Apps-gsd-trial/cone && ~/.local/bin/claude.exe plugin uninstall gsd-core --scope local
+# 2. marketplace (no --scope = every scope): clears settings.json, known_marketplaces, the clone
+~/.local/bin/claude.exe plugin marketplace remove gsd-core
+# 3. worktree - branch gsd-trial KEPT for plans/97's port, deleted as that plan's last step
 git -C C:/Users/ze_do/repos/CrossFit-Apps worktree remove ../CrossFit-Apps-gsd-trial --force
-git -C C:/Users/ze_do/repos/CrossFit-Apps branch -D gsd-trial
-
-# 2. plugin + marketplace (takes the cache and the settings.json entry with them)
-claude plugin uninstall gsd-core
-claude plugin marketplace remove gsd-core
-
-# 3. what the plugin leaves behind - not covered by uninstall
-ls -d ~/.claude/skills/gsd-*          # LOOK at the glob before the rm below
-rm -f  ~/.claude/.gsd-surface.json ~/.claude/.gsd-profile   # never appeared; guard only
-rm -rf ~/.claude/skills/gsd-*                               # never appeared; guard only
-rm -rf ~/.claude/gsd-core                                   # 5 symlinks - CONFIRMED present
-rm -rf ~/.claude/gsd-surface-disabled                       # 470 KB real files - CONFIRMED present
+# 4. residue neither command owns - look first, and remove junctions without following them
+cmd /c rmdir "C:\Users\ze_do\.claude\gsd-core\<each of the 5>"   # then rmdir the empty parent
+rm -rf ~/.claude/gsd-surface-disabled                            # 470 KB, the hand trim's quarantine
+rm -rf ~/.claude/plugins/cache/gsd-core                          # 481 MB - survived BOTH uninstalls and marketplace remove
 ```
+
+⚠️ `--force` was needed: gsd left **uncommitted runtime state** after its own commits — a flag in
+`.planning/config.json`, untracked `.planning/state.json` + `milestone.lock`, and a `.gsd/`
+sentinel. Inspected first; none held anything worth keeping (no token metrics).
 
 ⚠️ **`~/.claude/gsd-surface-disabled/` holds the only copy of the 49 capabilities the hand trim
 moved out of the cache.** Deleting it is correct for this trial, since the payload is
@@ -708,20 +719,23 @@ re-downloadable and the plugin is going anyway. If the plugin is ever *kept*, re
 its `#` first line (change it to `//`).
 
 🔴 **`app-review` lives in `~/.claude/skills/` too.** It is yours, it is not gsd's, and nothing in
-this plan may touch it. The `ls -d` line above exists so the glob is read before it is run.
+this plan touched it (verified below).
 
-### Verify the cleanup — don't assume it
+### Verify the cleanup — ✅ all clean 2026-09-29
 
 ```
-ls -A ~/.claude | tr '\n' ' '                                  # matches the baseline row
-ls -A ~/.claude/skills                                         # app-review, synced. nothing else
-ls -d ~/.claude/gsd-* 2>/dev/null                              # nothing - both dirs gone
-grep -c gsd ~/.claude/settings.json                            # 0
-ls ~/.claude/plugins/cache                                     # no gsd-core
-cat ~/.claude/plugins/installed_plugins.json                   # no gsd-core entry
-git -C C:/Users/ze_do/repos/CrossFit-Apps status --porcelain   # empty
+ls -A ~/.claude | grep -i gsd                                  # nothing
+ls -A ~/.claude/skills                                         # app-review synced
+ls ~/.claude/plugins/{cache,marketplaces,data} | grep -i gsd   # nothing
+grep -c gsd ~/.claude/settings.json ~/.claude/plugins/known_marketplaces.json ~/.claude/plugins/installed_plugins.json   # 0 0 0
 git -C C:/Users/ze_do/repos/CrossFit-Apps worktree list        # main only
+git -C C:/Users/ze_do/repos/CrossFit-Apps branch --list gsd-trial   # present, on purpose (plans/97)
+ls C:/Users/ze_do/repos/CrossFit-Apps/.planning                # absent
 ```
+
+⚠️ **Don't diff the whole `~/.claude` listing against the baseline** — two entries appeared that are
+Claude Code's own, not gsd's: `paste-cache/` (from pasting this trial's terminal output) and
+`state/` (no gsd reference in either). Compare gsd paths, as above.
 
 If the trial **does** convince, do not adopt wholesale — file a follow-up row naming *which* pieces
 are worth taking, measured against **~10 700 tokens always-on**, the only figure a supported plugin

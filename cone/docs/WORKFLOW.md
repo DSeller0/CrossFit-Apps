@@ -99,6 +99,10 @@ The backlog gets *refilled* by running **`/app-review`** (portable skill in `~/.
 - **Full pass:** when Ready empties, after any L item ships, or ~quarterly.
 - **Targeted pass:** one dimension anytime it feels off.
 
+**Code review, every three implemented plans.** The batch backstop for **S** items: the ritual's
+`/code-review` line above covers M/L items only, so an S fix otherwise reaches `main` unreviewed.
+(#207 is S; the [#225 trial](./reviews/2026-09-29-gsd-trial.md) showed what a review catches there.)
+
 This closes the loop: plan → execute → **review** → replan.
 
 ## Design work — component-driven, two lanes (mandatory)
@@ -172,6 +176,17 @@ you will personally watch happen.
 ```
 
 Bad, because nothing can fail it: *"the QR works"* · *"no regressions"* · *"tests pass"*.
+
+**Write each so its easy half cannot pass alone.** *"A stale link opens no session"* passes on a
+fix that still corrupts storage; *"a stale link opens no lock **and** writes nothing to
+`cone_athlete_filter`"* does not. Name the side effect the bug had, not just the symptom you saw.
+
+**Sweep for siblings before planning the fix.** When the bug is a *pattern* — an unvalidated write,
+a wrong URL convention, a copied helper — grep for every other instance and list each in the plan
+as fixed or explicitly deferred. #207's first fix hardened `Schedule.jsx` and missed the
+byte-identical write at `Results.jsx:151-154`; a code review found it by grepping for
+`setItem('cone_athlete_filter'` ([#225](./reviews/2026-09-29-gsd-trial.md)). A sibling nobody
+listed is a finding, not a cut.
 
 ⚠️ **Where this rule comes from.** The 2026-09-20 review found #113 closed with a fix that sends a
 session id to an athlete-id parameter — shipped, marked Done, and never once opened in a browser
