@@ -1,5 +1,19 @@
 # 96 — #225 · Trial gsd-core's phase loop in isolation, then decide
 
+> ✅ Done: `d5be099` · 2026-09-29 — see BACKLOG.md · closes #225. Filed #226.
+>
+> **Not adopted — stopped at verify by decision.** Report:
+> [2026-09-29-gsd-trial](../reviews/2026-09-29-gsd-trial.md). gsd suits a repo without a structured
+> process; Cone's already covers what it adds, and gsd runs beside it rather than inside it.
+>
+> **Must-haves: 4/6 driven.** (1) `/gsd-core:*` listed in a fresh `cone/` session ✅ · (2) `plugin
+> details` recorded twice, ~10 700 → ~7 008 (hand trim) ✅ · (3) **half** — the new share URL was
+> driven live; the reader guard is only unit-tested and reviewed (D6–D8 never driven), and CR-01
+> found `Results.jsx` unguarded — both carried to [plans/97](./97-share-link-athlete-guard.md) ·
+> (4) **four of five** rubric rows answered; row 4 left unanswered by decision · (5) `main` has no
+> `.planning/`, status clean ✅ (the docs it did gain are listed in the report) · (6) cleanup ran and
+> verified clean ✅ — branch `gsd-trial` kept on purpose until plans/97 ports it.
+
 ## Context
 
 [open-gsd/gsd-core](https://github.com/open-gsd/gsd-core) is a spec-driven development framework for

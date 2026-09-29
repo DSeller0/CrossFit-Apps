@@ -16,7 +16,7 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready:** #225 · #207
+- **Ready:** #207
 - **In Progress:** none
 - **Start here:** **#207** — #113 shipped a fix that doesn't work and corrupts `cone_athlete_filter`;
   [plans/97](./plans/97-share-link-athlete-guard.md) ports the #225 trial's reviewed fix and closes
@@ -38,7 +38,6 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/96](./plans/96-gsd-core-trial.md)** — **#225 Trial gsd-core's phase loop in isolation, then decide** · M · Opus · worktree + plugin installed (local scope, gitignored). Run #207 through discuss→plan→execute→verify, answer the 5-question rubric, uninstall. Commands are `/gsd-core:<cmd>`. ⚠️ **~10 700 tokens always-on, and no supported trim exists** — `/gsd-core:surface` can't work in a plugin install; a hand trim reaches ~7 008, still above the whole `CLAUDE.md` core.
 - 🟢 **[→ Ready · plans/97](./plans/97-share-link-athlete-guard.md)** — **#207 #113's fix doesn't work and corrupts the visitor's stored athlete filter** · S · Sonnet · Start-here blocker. Ports the #225 trial's reviewed fix (`buildSessionShareUrl` + `findAthleteById`, 24 tests, applies cleanly to `main`) and closes the identical unvalidated write at `Results.jsx:151-154` that the trial's code review found.
 
 ## 🔵 In Progress
@@ -142,6 +141,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/96 · `d5be099` · 2026-09-29](./plans/96-gsd-core-trial.md)** — **#225 Trial gsd-core's phase loop in isolation, then decide** · closed #225. · **Not adopted**: ~10 700 tok always-on with no supported trim, plans outside the #223 gate, ~40:1 board duplication. Its code review caught #207's write in `Results.jsx` too (→ plans/97). Kept two WORKFLOW rules; filed #226.
 - ✅ **[plans/95 · `2a9ced2` · 2026-09-20](./plans/95-claude-md-split.md)** — **#224 Split `CLAUDE.md` into a lean core + on-demand `docs/arch/`** · closed #224. · Auto-loaded per session **~39 080 → ~6 503 tokens (83%)**. A cut, not a regeneration: 28/28 headings and 997/997 lines still present. The index names each file's traps.
 - ✅ **[plans/94 · `87de081` · 2026-09-20](./plans/94-verify-gate-and-now-grammar.md)** — **#223 A verify gate that is checkable + ▶ Now grammar** · closed #223. · Plans from 94 on declare `## Must-haves` and record driving them in the Done marker; ▶ Now's claim bullets are parsed against the 🟢/🔵 columns. Driving it caught a bug in the gate itself. Filed #224, #225.
 - ✅ **[plans/93 · `e13938d` · 2026-09-20](./plans/93-focus-visible.md)** — **#182 A global `:focus-visible` ring + 10 outline-strippers + Criador's `--dim` focus borders** · closed #182. · One global ring in `themes.css` (≥ 4.72:1 on every fill, all 8 themes); each stripper brings its own replacement; Criador's `--dim` borders (fail 3:1 in 6 of 8 themes) → `--accent`. Filed #206.
