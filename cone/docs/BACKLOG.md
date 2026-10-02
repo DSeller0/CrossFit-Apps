@@ -10,23 +10,29 @@ written before 2026-07-27 are **not comparable** to later ones and **cannot be s
 ([plans/49](./plans/49-prettier-format-baseline.md)) reformatted the repo at `printWidth: 100`, ×1.77
 overall but non-uniformly (Publicador ×3.34 · Atletas ×2.27 · Timer ×1.37). That trap cost two sessions.
 Docs: [FEATURES.md](./FEATURES.md) · [PRODUCT.md](./PRODUCT.md) · [MOBILE.md](./MOBILE.md) ·
+[DEVICE-TESTS.md](./DEVICE-TESTS.md) (pending iPhone checks) ·
 design program [plans/16](./plans/16-design-pass-program.md) · review reports [reviews/](./reviews/) — latest [2026-09-20](./reviews/2026-09-20.md).
 
 ---
 
 ## ▶ Now
 
-- **Ready:** none
+- **Ready:** #227 · #231 · #228
 - **In Progress:** none
-- **Start here:** Ready is empty. Plan the next row from Icebox P1 — **#155** and **#211** wait on
-  the user (below).
+- **Start here:** plans/98 Phase 0 on Sonnet — reproduce #227 + #231 locally and hand the user the
+  Android script; no fix until the phone run is back. Then #228 (plans/99), which stops at an
+  approval gate once its editor fields render.
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
-  `> 🟡 Shipped:` pending an on-device iPhone re-test; nothing to code. · **#211** — the
+  `> 🟡 Shipped:` pending an iPhone re-test, now listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md) (no
+  iPhone at hand); nothing to code. · **#211** — the
   [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) needs 20 naming calls and
-  approval of the drafted pt-BR text before its
-  [SQL](./reviews/2026-09-20-registry-additions.sql) reaches prod.
+  approval of the drafted text before its [SQL](./reviews/2026-09-20-registry-additions.sql) reaches
+  prod; a Markdown decision checklist for the user comes next. · **plans/98 Phase 1** waits on the
+  Android run.
 - **Last refill:** the [2026-09-20 full pass](./reviews/2026-09-20.md) (all 9 dimensions incl. a
   live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
+  2026-10-02: #227–#231 filed from user reports and the
+  [block-structures evidence](./reviews/2026-10-02-block-structures.md); #158 narrowed to its (b) half.
 
 ⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
 plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
@@ -37,7 +43,8 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-*(empty)*
+- 🟢 **[→ Ready · plans/98](./plans/98-phone-rendering-verify.md)** — **#227 + #231 Two phone rendering bugs: the logging dialog loses "Confirmar"; long exercise rows overlap** · S–M · Sonnet · user-reported 2026-10-02. Suspects: `ConfirmReview.module.css` has no max-height inside a fixed overlay that can't scroll; `ExRow.jsx`'s nowrap pills spill over a squeezed name. Verify first — local repro + an Android script — then fix.
+- 🟢 **[→ Ready · plans/99](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off: a time-per-round field on every block type** · M · Sonnet · 38 prod blocks keep an interval only as text, 16 a "40'' on 20'' off", and 12 Estações exist only for the clock. Absorbs #158(a): EMOM's 60 s is hardcoded in the timer. Stops at an approval gate once the editor fields render.
 
 ## 🔵 In Progress
 
@@ -57,7 +64,7 @@ demoted **#159, #156, #148 and #141** to P2 — still real, just outranked. Four
 promoted into **plans/84** and **plans/86** the same day, and **#164** into **plans/91** on 2026-09-18,
 leaving only the blocked row until plans/91's close-out filed #204.*
 
-- ⏸ **#155 iOS Safari zooms the page when logging a result** · S · Sonnet · blocked on the user: `plans/74` shipped the 16px floor (`793ee45`, 2026-08-07) and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test. Nothing to code until that comes back.
+- ⏸ **#155 iOS Safari zooms the page when logging a result** · S · Sonnet · blocked on the user: `plans/74` shipped the 16px floor (`793ee45`, 2026-08-07) and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test — steps in [DEVICE-TESTS.md](./DEVICE-TESTS.md). Nothing to code until it runs.
 - **#204 me.html's Distribuição reads 0/N for every athlete** · XS · Sonnet · `results_v2` logs only WOD block types, so `calcBlockStats`' executed side is structurally 0 for Força/LPO/Acessórios/Skill/Core/Cardio/Mobilidade. It was hidden until #164 made planned non-zero. Decide: hide the card until #64 logs strength blocks, or show planned only.
 - **#208 Off-screen panels stay in the tab order on every public page** · XS · Sonnet · `Nav.module.css:3` `.ovSheet` and `Results.module.css:181` `.lbPane` hide by `transform` alone. Verified live: the 3 overflow tiles are `visibility:visible` and take focus. The fix idiom is already in both files (`display:none` / `visibility:hidden`).
 - **#209 `ExRow.jsx:219` hardcodes `% RM` and fabricates a load from it** · XS · Sonnet · `:65` in the same file derives the real unit; `:220` then treats kg figures as percentages of the athlete's RM. 6 of 683 prod progression steps carry kg/lb. The other two render paths are correct. Recorded by the 09-05 pass, never filed.
@@ -96,6 +103,8 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#219 `App.jsx:162-179` is dead code that arms a load-path write if anyone fills a stub** · XS · Sonnet · `saveSettings(merged)` at `:174` sits outside the `colourChanged` test and `:170` forces `gymName`. Inert **only** because the SPA's `./config.json` resolves to `cone/public/config.json`, the `{}` stub `9ca4348` added. Delete it, or gate the write.
 - **#220 `build-design-cards.mjs:48-57` keeps a 9th literal theme enumeration** · XS · Sonnet · `THEME_LABELS` hand-lists all 8 ids while the guard at `:221` only checks count == `THEMES.length`, so theme #9 passes the guard and renders its raw class name as the switcher label. `THEMES[].label` already exists.
 - **#226 The board audit never checks row length — 13 rows are over the cap** · XS · Sonnet · `audit-backlog-markers.mjs` parses the four row shapes but not their length (≤400, Ready ≤600), so overruns pass silently: one row is 2 724 chars, and #225 reached 667 unnoticed. Add the check, then trim the 13.
+- **#229 Round-groups inside a block — buy-in / N rounds / buy-out, one score** · L · Opus→Sonnet · 21 prod blocks type `3 Rounds`, `Buy in`, `Then` as exercise rows: athletes see them as movements, and #112's DNF total counts `3 Rounds` as 3 reps. Claude Design mockup of the inputs and the athlete view first. [Evidence](./reviews/2026-10-02-block-structures.md).
+- **#230 Estações timer + cap math** · S–M · Sonnet · the timer gives every station the FIRST station's duration and never sees `restBetweenCycles` (`Schedule.jsx:601`) — wrong for 2026-09-12's 9'/8'/7' windows. `stationsCapMins` and `stationsCapStr` disagree on a trailing rest; `cloneBlocks` never re-ids stations.
 
 ### P3 — needs a decision before it needs code
 
@@ -109,7 +118,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#198 Publicador: let the coach pick WHICH session to export, defaulting its colour to that session's own box theme** · S–M · Sonnet · `exportHelpers.js`'s `resolveDaySession` silently takes a day's **first** session (`sessions[0]`) — no picker exists for a day with more than one. `exportPalette.js`'s `resolveExportThemeId({settings,box})` already resolves a box's theme; the missing piece is deriving `box` from the **selected session's own** `locationIds`/`sessionBoxIds` instead of the separate manual Origem pick (`exportSource.js`), which can silently drift from what's on screen. Decide what wins when a session carries multiple box tags before building it.
 - **#102 `events` and `class_executions` have no join key, so attendance is not a queryable fact** · M–L · Opus · the keystone: #107 is blocked on it, #40's booking half needs it, and it is one of the two honest answers to #164. Its migration is **`0012`** (next free at ship time — it claimed `0010` until 2026-09-13, when [plans/87](./plans/87-new-themes.md) took that number for the `lb_colors` drop and #194 already held `0011`; highest on disk is `0009`).
 - **#153 Phone back button logic overhaul** · M–L · Opus · collides head-on with a recorded do-not-re-litigate call (*"No React Router — URL params are sufficient at current scale"*), so the decision comes before the build.
-- **#158 Variable-interval EMOM, and Estações stations carrying their own type, goal and score** · (a) M / (b) L · Opus · two halves filed together because (b) subsumes (a). **Do NOT batch them** — (a) ships now, (b) is blocked.
+- **#158 Estações groups with their own type, goal and score** · L · Opus · (a) absorbed by #228. 9 prod Estações are multi-part with a clock and a score per part (HYROX tests, `Set 01–05 - AMRAP`), the type living in the station name. Unblocked: #157's per-block shape shipped (plans/80). Results key on `blockId`, so per-part scoring needs a key below it.
 - **#152 Lock mobile orientation to portrait, and decide whether zoom should be blocked** · S (spike, then a decision) · Sonnet · user-requested exploration, not a decided change; the output is a recommendation plus whatever part of it is worth doing.
 - **#66 `energy_level` — capture it for real or remove the feature** · S · Sonnet · ⚠️ premise corrected: `resultados/RegistroView.jsx` has a live coach-facing "Energia pré-treino" chip row that reads, highlights and writes it, so dropping the column is a feature removal needing a product call, not a dead-code deletion.
 - **#88 Reconcile prod vs. dev database** · S–M · Sonnet · **re-measured 2026-09-20: FOUR tables, not two.** `seed-dev.mjs` prints EMPTY for `locations`, `coach_profile`, **`events` and `templates`** (`0006` locked two, `0009` the others) — indistinguishable from prod having none. It also seeds **0** result rows when #190 fires. Fix is plans/89's service-role read.
