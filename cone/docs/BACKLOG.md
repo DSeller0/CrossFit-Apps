@@ -19,9 +19,9 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 - **Ready:** #227 · #231 · #228
 - **In Progress:** none
-- **Start here:** plans/98 Phase 0 on Sonnet — reproduce #227 + #231 locally and hand the user the
-  Android script; no fix until the phone run is back. Then #228 (plans/99), which stops at an
-  approval gate once its editor fields render.
+- **Start here:** #228 (plans/99), which stops at an approval gate once its editor fields render.
+  plans/98's Phase 0 is done (2026-10-02): both bugs reproduced and located locally, the Android
+  script handed over — its Phase 1, the fixes, waits on the user's phone run.
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
   `> 🟡 Shipped:` pending an iPhone re-test, now listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md) (no
   iPhone at hand); nothing to code. · **#211** — the
@@ -43,7 +43,7 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/98](./plans/98-phone-rendering-verify.md)** — **#227 + #231 Two phone rendering bugs: the logging dialog loses "Confirmar"; long exercise rows overlap** · S–M · Sonnet · user-reported 2026-10-02. Suspects: `ConfirmReview.module.css` has no max-height inside a fixed overlay that can't scroll; `ExRow.jsx`'s nowrap pills spill over a squeezed name. Verify first — local repro + an Android script — then fix.
+- 🟢 **[→ Ready · plans/98](./plans/98-phone-rendering-verify.md)** — **#227 + #231 Two phone rendering bugs: the logging dialog loses "Confirmar"; long exercise rows overlap** · S–M · Sonnet · user-reported 2026-10-02. Phase 0 done: both reproduced and located locally (the review dialog is 1.7–2.3× a phone screen; `ExRow`'s load cluster takes 66–82% of its row). Phase 1, the fixes, waits on the user's Android run.
 - 🟢 **[→ Ready · plans/99](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off: a time-per-round field on every block type** · M · Sonnet · 38 prod blocks keep an interval only as text, 16 a "40'' on 20'' off", and 12 Estações exist only for the clock. Absorbs #158(a): EMOM's 60 s is hardcoded in the timer. Stops at an approval gate once the editor fields render.
 
 ## 🔵 In Progress

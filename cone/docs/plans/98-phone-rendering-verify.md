@@ -3,6 +3,11 @@
 *Planned 2026-10-02 (Opus). Two execution sessions, both **Sonnet**: **Phase 0** (local repro +
 the Android script) now; **Phase 1** (the fixes) only after the user's phone run comes back.*
 
+*Phase 0 ran 2026-10-02 (Sonnet): both bugs reproduce locally in a phone-sized viewport and are
+located. Results, the steps the run proved wrong (corrected in place) and the verified Android script
+are under "Phase 0 — result" and "Phase 0b". **Phase 1 waits on the user's phone run.** This plan
+carries no `> ✅ Done:` marker until Phase 1 ships.*
+
 ## Context
 
 Both user-reported 2026-10-02, both seen on a phone, neither reproduced yet:
@@ -43,57 +48,72 @@ complex (`:109-148`) paths share the outer row. Second renderer: `shared/Exercis
 
 | Site | Shape | Disposition |
 |---|---|---|
-| `results/Results.module.css:206` `.successModal` | centred, fixed, no max-height/overflow | measured in Phase 0, fixed with #227 if it clips |
-| `schedule/Schedule.module.css:352` `.ckSheet` | bottom sheet, no max-height | fixed with #227 (short content, low risk) |
-| `schedule/Schedule.module.css:200` `.logPane` | fixed, `overflow-y:auto` | **control** — already scrolls; measure its own `Registrar` |
-| `resultados/Resultados.module.css:594-606` (SPA sheet) | sticky save row | **control** — the pattern to copy if the LogPane is at fault |
-| `ConfirmReview` call sites (~20, SPA included) | shared shell | one shell fix covers them all |
+| `results/Results.module.css:206` `.successModal` | centred, fixed, no max-height/overflow | **measured:** 775px with 8 long notes; loses `Fechar` at ≤700px high (a backdrop tap still closes it). Fix with #227 |
+| `schedule/Schedule.module.css:352` `.ckSheet` | bottom sheet, no max-height | **bounded** (`.ckList` max 160px → ≈410px): clips only in landscape. Give it a max-height with #227; not driven |
+| `schedule/Schedule.module.css:200` `.logPane` | fixed, `overflow-y:auto` | **control, measured:** scrolls (2045px in 800), `Registrar` reachable at all 4 viewports — unchanged. The dialog is the fault |
+| `resultados/Resultados.module.css:594-606` (SPA sheet) | sticky save row | not needed — the LogPane is not at fault |
+| `ConfirmReview` call sites (20 in 14 files, +5 gallery fixtures) | shared shell | one shell fix covers them all; regression-check the SPA ones at 360 |
 
 ## Acceptance
 
 Both bugs are reproduced and located before any fix: a surface × viewport table backed by
 screenshots, from the local repro **and** from the user's Android phone. Then, after Phase 1, the
 test WOD logs end to end at 360px with `Confirmar` reachable, and no exercise row on schedule.html,
-index.html or results.html has overlapping text or overflows its card.
+index.html, the LogPane's list or the review dialog's list has overlapping text or overflows its
+card (results.html's `WodSummary` was already clean in Phase 0 — re-check it, don't touch it).
 
 ## Must-haves
 
-Phase 1's gate, driven on the local stack with the test WOD, then confirmed on the user's phone:
+Phase 1's gate, driven on the local stack with the test WOD, then confirmed on the user's phone.
+Each one fails before the fix — Phase 0's pre-fix number is in brackets — and the appendix harness
+is the instrument:
 
 - At **360×800** the test WOD's `Revisar registro` shows `Confirmar` inside the viewport without
-  scrolling the page **and** its body scrolls on its own.                         [schedule.html]
-- While that dialog is open, scrolling inside it does **not** move the page behind it. [schedule.html]
-- No exercise row in blocks D–E has intersecting text boxes **and** none overflows its card, at
-  360px, on all three surfaces.                  [schedule.html · index.html · results.html]
-- results.html's success modal reaches `Fechar` after logging block E as `Adaptado` with a note
-  on every exercise.                                                              [results.html]
+  scrolling the page **and** its body scrolls on its own.
+  [schedule.html · pre-fix: dialog 1524px, `Confirmar` at y 1105]
+- A touch swipe inside that open dialog — through the end of its body and past it — leaves
+  `window.scrollY` unchanged.                            [schedule.html · pre-fix: 1000 → 1536]
+- No exercise row of the test WOD (blocks A–E) has intersecting text boxes **and** none overflows
+  its row or card, at 360px, on all four surfaces.
+  [schedule.html 7 rows · index.html 4 · LogPane list 1 · review-dialog list 4, pre-fix]
+- At **360×667**, after logging block A as `Adaptado` with a ~90-character note on all 8
+  exercises, results.html's confirm dialog shows `Confirmar` and its success modal shows `Fechar`.
+  [results.html · pre-fix: 772px and 775px in a 667px screen]
 - The user's Android phone reports both fixed, from the same test session.          [device]
 
 ## Files
 
-- Phase 0: none (docs only — this plan, `docs/DEVICE-TESTS.md` if the steps change).
+- Phase 0: docs only — this plan, `docs/DEVICE-TESTS.md`, the board's `▶ Now` block and this row.
 - Phase 1, expected: `public/shared/ConfirmReview.module.css` · `public/results/Results.module.css`
   · `public/schedule/Schedule.module.css` · `public/schedule/ExRow.jsx` ·
-  `public/shared/ExerciseList.module.css` · possibly `public/results/WodSummary.jsx` · gallery
-  fixtures in `public/gallery/groups/{spa,schedule,shared}.jsx` · regenerated `cone/design/` cards.
+  `public/shared/ExerciseList.module.css` · gallery fixtures in
+  `public/gallery/groups/{spa,schedule,shared}.jsx` · regenerated `cone/design/` cards.
+  **Not** `results/WodSummary.jsx` — Phase 0 measured it clean (it renders no loads).
 
 ## Approach
 
-### Phase 0 — local repro (Sonnet, this plan's first session)
+### Phase 0 — local repro (Sonnet, this plan's first session — **done 2026-10-02**; steps corrected where the run proved them wrong)
 
-1. `supabase start` if down · inside `cone/`, `npm run dev` (SPA) and `npm run dev:public`; read
-   each port from its log. Browse `localhost`, never `127.0.0.1` (the servers bind IPv6).
-2. Pick a **free day next week** (weeks start on Sunday) — one "›" tap on every public page,
-   because `index.html` reads no date parameter. In the **local** SPA Criador (the Playwright
-   profile is signed in): that day → `+ sessão` → `¶ Texto` → paste the test WOD → check the preview
-   parsed the gender pairs, the progression lists and the complex → `Aplicar` → gear: name
-   `TESTE MOBILE — apagar`, Para quem **Atleta00** (any athlete if the local roster lacks it),
-   Público, Sem box → `Salvar`. Local DB only; this validates the steps the user repeats in prod.
+1. `supabase start` if down · inside `cone/`, **`npm run dev` (SPA) first**, then
+   `npm run dev:public`. The Playwright profile is signed in on `localhost:5173` and localStorage
+   is per-port, so the SPA has to be the server that gets 5173 (public takes 5174) — the other
+   order shows the login screen. Read each port from its log; browse `localhost`, never
+   `127.0.0.1` (the servers bind IPv6).
+2. Pick a **free day in the current week** (weeks start on Sunday). `index.html` shows only the
+   current week — no "›", no date parameter — so a session in another week can never appear there.
+   In the **local** SPA Criador (run it at 360px so it also validates the steps the user repeats in
+   prod): that day's `+ sessão` → the **"Nova sessão" form comes first** (no gear step): name
+   `TESTE MOBILE — apagar`, Para quem **Atleta00**, Público, Sem box → `Criar sessão` → `¶ Texto` →
+   paste the test WOD → check the preview ends "5 blocos · 28 exercícios" (gender pairs, the
+   progression list and the complex all parsed) → `Aplicar` → `Salvar sessão`. Local DB only.
 3. Viewports: **360×800** and **412×915** (Android), plus **375×667** and **390×844** recorded for
-   `DEVICE-TESTS.md`.
-4. **#231** on schedule.html (`?box=all&date=<day>`, athlete Atleta00, session open), the
-   index.html day panel (`?box=all`, "›", the day), results.html's WodSummary (`?box=all`, "›", the
-   session) and the LogPane's lists. With `browser_evaluate`, for every exercise row: collect the
+   `DEVICE-TESTS.md`. Emulate with the Playwright viewport + CDP scrollbars-hidden + touch only — see
+   the appendix for why `Emulation.setDeviceMetricsOverride` is a trap.
+4. **#231** on schedule.html (`?box=all&date=<day>`, athlete Atleta00, `Detalhes` open), the
+   index.html day panel (`?box=all`, tap the day, **then tap every block header** — an
+   `ExerciseList` row only exists once its block is open), results.html's WodSummary (`?box=all`; the
+   session card is open by default when it is the latest past day) and the LogPane's lists. With
+   `browser_evaluate`, for every exercise row: collect the
    rects of its leaf text boxes (pills, name, buttons), test each pair for intersection (1px
    tolerance), and test `scrollWidth > clientWidth` on the row and its card. Select rows by their
    CSS-module class token (`detailEx`, ExerciseList's `row`, WodSummary's row class) — not a
@@ -104,12 +124,16 @@ Phase 1's gate, driven on the local stack with the test WOD, then confirmed on t
    `Registrar`, and results.html's confirm and success modals (block E, Escala `Adaptado`, a note on
    every exercise).
 6. Lengthen the test WOD until the dialog is ≥1.3× a 915px viewport and #231 hits at 412px, so
-   both reproduce on any phone.
+   both reproduce on any phone. **Not needed:** the unmodified WOD gives 1.67× at 412×915, and
+   #231 hits at 412px (4 rows on schedule.html).
 7. **Report, no fix:** one table per bug — surface × viewport → reproduced? — with the screenshots.
    Hand the user the Android script below (with the real date filled in) and update
    `DEVICE-TESTS.md` if any step changed.
 
-**Test WOD** (blocks A–C load the dialog; D–E carry long names + loads; step 6 may lengthen it):
+**Test WOD** (blocks A–C load the dialog; D–E carry long names + loads; parses to 5 blocks · 28
+exercises. Força D is not a WOD block, so the LogPane and the review dialog carry A, B, C, E — 24
+rows). ⚠️ Block E's ladder is on its **second** line on purpose: as the first line under a header,
+`21-15-9 Thruster …` is read as the structure line and the Thruster falls to a note:
 
 ```
 For Time – Teste A – TC 20'
@@ -146,46 +170,129 @@ Complexo A: 1 Hang Clean + 1 Push Jerk 50/60/70%
 6 Romanian Deadlift 65/70/75/80/85%
 
 For Time – Teste E – TC 12'
-21-15-9 Thruster 43/30kg – 35/25kg
 5 Dual Kettlebell Front Rack Walking Lunges 32/24kg – 24/16kg
+21-15-9 Thruster 43/30kg – 35/25kg
 50m Dual KB Farmer's Carry 32/24kg
 ```
 
-### Phase 0b — the Android script (handed to the user at the end of Phase 0)
+### Phase 0 — result (2026-10-02)
 
-English, with the app's pt-BR labels quoted exactly.
+Both bugs reproduce on the local stack in a phone-sized viewport and are located. Setup: Playwright
+at 360×800 · 412×915 · 375×667 · 390×844, scrollbars hidden (Android Chrome draws overlay scrollbars;
+a classic one costs 10–15px of width) and touch on. The test session is on **Sunday 27/9/2026** —
+Atleta00, Sem box, public — and stays in the local DB for Phase 1 (id `murlzzjojfvl6c1bjum`, no
+results logged against it; delete it when Phase 1 closes). Screenshots:
+`cone/.playwright-mcp/p0-*.png` (gitignored — they stay on this machine). The instrument is the
+appendix harness: text-box intersection at 1px tolerance, `scrollWidth > clientWidth`, text past the
+card edge.
 
-1. **Create the test session.** Cone → Criador → the free day next week → `+ sessão` → `¶ Texto`
-   → paste the test WOD → `Aplicar` → gear: name `TESTE MOBILE — apagar`, Para quem **Atleta00**,
-   Público, **Sem box** → `Salvar`.
-2. **Open it in Chrome on the phone:**
-   `https://dseller0.github.io/CrossFit-Apps/schedule.html?box=all` → "›" to next week → athlete
-   selector **Atleta00** → open the session.
-3. **#231 — overlap.** Screenshot every row in blocks D and E where text touches or overlaps.
-   Then `index.html?box=all` → "›" → the day, and `results.html?box=all` → "›" → the session;
-   screenshot the same rows there.
-4. **#227 — the dialog.** Back on schedule.html: `Registrar resultado` → every block: Escala `RX`,
-   RPE `5` → `Registrar`. Could you reach `Registrar`? On **Revisar registro**: is `Confirmar`
-   visible? After scrolling *inside* the dialog? Does the page behind move instead? Screenshot
-   each. Then tap **Editar** — never `Confirmar` (if tapped by accident: delete Atleta00's row in
-   Resultados).
-5. **Tell me:** phone model, Android and Chrome versions, and Chrome → Settings → Accessibility →
-   *Text scaling* %. If Cone is installed as a home-screen app, repeat steps 2–4 there.
-6. **Clean up in the same sitting** — athletes can see next week: delete the session in Criador;
-   if the phone normally opens a box link, open it again (`?box=all` cleared the stored box).
+**What the plan had wrong** — all corrected in the steps above: `index.html` has no "›" and shows
+only the current week; `+ sessão` opens the "Nova sessão" form before anything else (no gear step);
+a first-line ladder turns the Thruster into a note; Força D never reaches the dialog; the SPA has
+to be started before the public server; no lengthening of the WOD was needed.
+
+**#231 — overlapping / overflowing exercise rows**
+
+| Surface (component) | 360×800 | 412×915 | 375×667 | 390×844 |
+|---|---|---|---|---|
+| schedule.html — session detail (`ExRow`, 28 rows) | **7 rows overlap**, worst 71px | **4**, 19px | **6**, 56px | **4**, 41px |
+| index.html — day panel (`ExerciseList tiny`, 28 rows) | no overlap · **4 rows overflow their box**, one load **8.5px past the card** | clean | 3 overflow | 1 overflow |
+| schedule.html — LogPane list (`tiny`, 24 rows) | 1 row overflows (card E 297 → 308px) | clean | clean | clean |
+| review-dialog list (`tiny` in the fixed 300px `.modal`, 24 rows) | **4 rows overflow, 3 leave the card** — 54px past it, off the screen | same, on screen | same | same |
+| results.html — `WodSummary` compact (24 rows) | clean | clean | clean | clean |
+| results.html — "O que foi adaptado?" rows (block E, 3 rows) | clean | – | – | – |
+| leaderboard card | not reachable with this WOD until a result is logged (Phase 1 does that); its 10 seeded rows are clean at 360 and 412 | | | |
+
+Located: **`ExRow`** — in a 271px row the load pill + Demo cluster is 179–222px wide and
+`flex-shrink:0`, leaving the name's column 3–86px. The name div has `min-width:auto`, so it cannot
+shrink below its longest word (56–83px) and overruns the column by 20–102px — into the cluster. The
+control, `Double Under` (cluster = Demo only, 57px), overruns by 0. The trigger is therefore any
+**gender load** (`M: 24 kg | F: 16 kg`), not a long name: `Kettlebell Swing` and `Deadlift` collide
+at 360px. **`ExerciseList tiny`** (index, LogPane, dialog) — `.body` is a no-wrap flex row without
+`min-width:0` and `.ins` never shrinks, so a long load pushes sideways instead of overlapping; the
+dialog is worst because `.modal` is a fixed 300px column at every phone width. **`WodSummary`**
+renders names and volumes only — no loads, nothing to collide with.
+
+**#227 — the review dialog**
+
+| Surface | 360×800 | 412×915 | 375×667 | 390×844 |
+|---|---|---|---|---|
+| LogPane → `Revisar registro` (A, B, C, E) — dialog height | **1524px = 1.91×** the screen | **1.67×** | **2.28×** | **1.81×** |
+| … `Confirmar` | y 1105–1145 — **off-screen** | 1163–1203, off | 1039–1079, off | 1127–1167, off |
+| … touch swipe inside the dialog | the **page behind** scrolls (1000 → 1536); dialog and `Confirmar` don't move | → 1634 | → 1438 | → 1572 |
+| LogPane `Registrar` (control) | reachable — the pane scrolls (2045px), y 739–784 | 854–899 | 606–651 | 783–828 |
+| results.html confirm — block E, Adaptado, 3 notes | 422px = 0.53× · `Confirmar` visible | | | |
+| results.html success modal — same | 457px = 0.57× · `Fechar` visible | | | |
+| results.html — block A, Adaptado, 8 notes of ~90 chars | confirm **772px = 0.97×**, success **775px** | | | |
+
+The 775px success modal (no max-height) loses `Fechar` once the viewport is ≤700px high — 800 ✓ ·
+740 ✓ · 700 ✗ · 667 ✗ · 600 ✗ — which is any phone with the address bar showing; a backdrop tap still
+closes it. The plan's own scenario (block E, 3 short notes) fits everywhere, so its Must-have was
+replaced by the block-A one, which fails pre-fix.
+
+Located: `.overlay` is `position:fixed` with `overflow:visible`; `.modal` has `max-height:none` and
+no scrolling body, and `align-items:center` cuts a too-tall body equally top and bottom. `Confirmar`
+is the last child, so it is the first thing lost, and with no scroll container anywhere a swipe
+chains to the document and moves the page behind. The height doesn't depend on the viewport width
+(fixed 300px column), so it fails at every phone width tested.
+
+**What this changes for Phase 1.** #227's expected shape stands (bounded `.modal`, scrolling `.body`
+with `overscroll-behavior:contain`, pinned `.btns`); `.successModal` takes the same; `.ckSheet` gets
+its max-height for landscape only. #231 needs **two** fixes, not one: `ExRow` (load cluster to its
+own line — it is 66–82% of the row — and a name that can wrap) **and** `ExerciseList tiny`
+(`.body{min-width:0}`, `.ins` allowed to shrink/wrap; `grid` keeps its own rules). The gallery's
+fixtures need the case none of them showed: a gender load beside a long name.
+
+### Phase 0b — the Android script (handed to the user 2026-10-02; the creation steps were driven at 360×800 on the local stack)
+
+English, with the app's pt-BR labels quoted exactly. About 15 minutes, in Chrome; if Cone is also
+installed as a home-screen app, repeat steps 2–4 there.
+
+1. **Create the test session** — Cone → Criador, on the phone. In the week list tap **`+ sessão`** on
+   the **`DOM`** (Sunday) row of the *current* week: no class that day, and it is already past, so
+   nobody looks at it. In "Nova sessão": name `TESTE MOBILE — apagar` (a plain hyphen is fine),
+   "Para quem" → tick **Atleta00**, Visibilidade **Público**, Box **Sem box** → `Criar sessão`. Then
+   tap **`¶ Texto`** beside "Blocos", paste the test WOD above, check the preview ends
+   "5 blocos · 28 exercícios" → `Aplicar` → `Salvar sessão`.
+2. **Open it, one page at a time.** Every link ends `?box=all` — a "Sem box" session only shows in
+   the general view:
+   - `https://dseller0.github.io/CrossFit-Apps/schedule.html?box=all` → athlete selector
+     **Atleta00** → the **DOM** card → `Detalhes`.
+   - `https://dseller0.github.io/CrossFit-Apps/index.html?box=all` → tap **DOM** in the week strip →
+     tap each of the five blocks to open it.
+   - `https://dseller0.github.io/CrossFit-Apps/results.html?box=all` → the **DOM** card (open it if
+     it is collapsed).
+3. **#231 — overlap.** schedule.html: scroll blocks B, C, D and E and screenshot every row where
+   text sits on top of other text. index.html: screenshot every open block where a load
+   (`M: … kg | F: … kg`) touches or crosses the card's right edge. results.html: just say whether
+   any row looks wrong.
+4. **#227 — the dialog.** schedule.html → bottom of the session → **`Registrar resultado`**. In
+   **every** block tap `RX` and RPE `5`. Scroll *inside* the panel down to `Registrar` — **could you
+   reach it?** Tap it. On **Revisar registro**: **(a)** is `Confirmar` on screen? **(b)** swipe up
+   inside the dialog — does the dialog move, or the page behind it? Screenshot (a) and (b). Then tap
+   **`Editar`** — never `Confirmar` (by accident: Cone → Resultados → delete Atleta00's row).
+5. **Tell me:** phone model · Android version · Chrome version (⋮ → Settings → About Chrome) ·
+   Chrome → Settings → Accessibility → *Text scaling* % · browser or home-screen app · whether the
+   address bar was showing.
+6. **Clean up in the same sitting.** Criador → tap the `DOM` row → the trash icon (`Remover`) →
+   `Remover`. Until you do, anyone who opens index.html or results.html and taps Sunday sees the
+   session. If your phone normally opens a box link, open it once more — `?box=all` cleared the
+   stored box.
 
 ### Phase 1 — the fixes (Sonnet, after the phone run)
 
-Choose from the evidence — these are the expected shapes, not commitments:
+Phase 0's evidence supports these shapes; the phone run can still redirect them:
 
-- **#227**, if the suspect holds: `ConfirmReview` adopts `Modal`'s idiom — `.modal{max-height:
+- **#227** — the suspect held: `ConfirmReview` adopts `Modal`'s idiom — `.modal{max-height:
   calc(100dvh - 40px)}` with a `vh` fallback, a flex column, `.body{overflow-y:auto; min-height:0;
   overscroll-behavior:contain}`, title and `.btns` `flex-shrink:0`. The same for `.successModal`;
-  `.ckSheet` gets a max-height. If the phone instead points at the **LogPane** itself, pin
-  `lpSubmit` as a sticky footer with `env(safe-area-inset-bottom)` (the SPA sheet's pattern).
-- **#231**, per surface the phone confirms: in `ExRow`, let the load cluster drop to its own line
-  instead of squeezing the name — the complex path already does this with `rmVolRow` — give the
-  name `overflow-wrap:anywhere`, and let pills wrap; in `ExerciseList`, `.body{min-width:0}`.
+  `.ckSheet` gets a max-height. Phase 0 found the LogPane itself fine (it scrolls, `Registrar` is
+  reachable); only if the phone disagrees, pin `lpSubmit` as a sticky footer with
+  `env(safe-area-inset-bottom)` (the SPA sheet's pattern).
+- **#231** — two fixes: in `ExRow`, let the load cluster drop to its own line instead of squeezing
+  the name — the complex path already does this with `rmVolRow` — give the name
+  `overflow-wrap:anywhere`, and let pills wrap; in `ExerciseList`, `.body{min-width:0}` **and** let
+  `.ins` shrink and wrap (it is `flex-shrink:0`, so `min-width:0` alone moves nothing).
   ⚠️ Respect the recorded `grid` decision (`ExerciseList.module.css:54-67`): `tiny` was kept apart
   from `grid` on purpose (LogPane and the leaderboard card are not 200px columns).
 - **Lane A:** the gallery's `ConfirmReview` (`gallery/groups/spa.jsx:325-383`), `BlockDetail` and
@@ -194,10 +301,200 @@ Choose from the evidence — these are the expected shapes, not commitments:
 
 ## Verification
 
-Phase 0: the two tables with screenshots, and the script handed over — no code changed.
-Phase 1: the must-haves above, driven, with the pre-fix file proving each check can fail (memory:
-live-verify recipe — the stash-free swap). `npm test` · `npm run lint` · `npm run format:check` ·
+Phase 0: the two tables with screenshots, and the script handed over — no code changed. ✔ done.
+Phase 1: the must-haves above, driven with the appendix harness, with the pre-fix file proving each
+check can fail (memory: live-verify recipe — the stash-free swap); re-run the harness on all five
+surfaces, not only the ones that failed. `npm test` · `npm run lint` · `npm run format:check` ·
 `npm run build:all` · `node scripts/audit-backlog-markers.mjs` clean. Update `DEVICE-TESTS.md` with
 what is still pending on iPhone.
 
 Model: Sonnet · Size: S–M
+
+---
+
+## Appendix — the measurement harness
+
+Kept because Phase 1's must-haves are only worth anything if the *same* instrument shows them
+failing on the pre-fix file. Save the code below to a file, register it once per browser context with
+`await page.context().addInitScript({ path })`, and it is on `window.__h` after every navigation.
+Read-only — it never changes the page.
+
+**Phone emulation that worked:** `page.setViewportSize({ width, height })` + CDP
+`Emulation.setScrollbarsHidden {hidden:true}` + `Emulation.setTouchEmulationEnabled
+{enabled:true, maxTouchPoints:5}`. A swipe is `Input.dispatchTouchEvent` `touchStart` → ~25
+`touchMove` → `touchEnd`; `Input.synthesizeScrollGesture` did nothing without touch emulation.
+⚠️ Do **not** use `Emulation.setDeviceMetricsOverride`: Playwright's own element and clip
+screenshots re-apply the page's stored viewport, so crops silently come out at the wrong width (a
+"412px" run produced 298px crops byte-identical to the 360px ones). Check each crop's PNG width.
+
+**Calls** — a surface passes when `hit`, `overflowRows`, `escapeRows` and `cardsOverflowing` are all
+0 (`list[i].overlaps` names the colliding boxes):
+
+| Surface | `window.__h.measureRows(cfg)` |
+|---|---|
+| schedule.html session detail (after `Detalhes`) | `{ rowTok: 'detailEx', cardTok: 'detailBlock' }` |
+| index.html day panel (after tapping every `_blkHdr_`) | `{ rowSel: '[class*="_exBlock_"], [class*="_complexBlock_"]', cardSel: '[class*="_sessCard_"]' }` |
+| LogPane list | `{ scope: '[class*="_logPane_"]', rowSel: <as above>, cardTok: 'lpBlock' }` |
+| review-dialog list | `{ scope: '[role=dialog]', rowSel: <as above>, cardTok: 'readbox' }` |
+| results.html `WodSummary` | `{ rowTok: 'wodSumEx', cardSel: '[class*="_wodSection_"]' }` |
+
+`window.__h.dialogInfo('[role=dialog]')` returns the dialog's rect, the overlay/dialog/body
+`overflow-y`, `max-height`, `pageScrollY` and each button's rect — `Confirmar` passes when
+`t >= 0 && b <= innerHeight`. The LogPane flow: `Detalhes` → `Registrar resultado` → in each
+`_lpBlock_` click `RX` and `5` → `_lpSubmit_`.
+
+**Gotchas.** Row selectors are exact CSS-module tokens (`_detailEx_<hash>_<line>`): `[class*=detailEx]`
+also matches `detailExName`; `_exBlock_` misses `_complexBlock_` only because of the leading
+underscore. Rows that share a card count its overflow once (`cardsOverflowing`), never per row. Text
+boxes come from `Range.getClientRects()` on each text node, so a wrapped name is compared line by
+line; a ≤2px vertical touch between adjacent lines is line-box noise — the real hits are tens of px
+wide (worst 71px).
+
+```js
+// plans/98 Phase 0 measurement harness. Installed with page.addInitScript({ path }) so it is
+// present after every navigation. Read-only: it never mutates the page.
+;(() => {
+  if (window.__h && window.__h.v >= 2) return
+
+  // CSS-module class token: `_detailEx_10yne_253` -> base `detailEx`. An exact-token test, so
+  // `detailEx` does NOT match `_detailExName_…` (a substring match would).
+  const hasTok = (el, base) => {
+    for (const t of el.classList) {
+      if (t === base) return true
+      if (t.startsWith('_' + base + '_') && /^[A-Za-z0-9-]+_\d+$/.test(t.slice(base.length + 2)))
+        return true
+    }
+    return false
+  }
+  const byTok = (root, base) => [...root.querySelectorAll('[class]')].filter(e => hasTok(e, base))
+  const closestTok = (el, base) => {
+    for (let p = el.parentElement; p; p = p.parentElement) if (hasTok(p, base)) return p
+    return null
+  }
+  const R = r => ({ l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height })
+  const round = n => Math.round(n * 10) / 10
+
+  function leafRects(row) {
+    const out = []
+    let nid = 0
+    const walker = document.createTreeWalker(row, NodeFilter.SHOW_TEXT)
+    let n
+    while ((n = walker.nextNode())) {
+      if (!n.textContent.trim()) continue
+      const el = n.parentElement
+      const cs = getComputedStyle(el)
+      if (cs.visibility === 'hidden' || cs.display === 'none') continue
+      const range = document.createRange()
+      range.selectNodeContents(n)
+      const id = nid++
+      for (const r of range.getClientRects()) {
+        if (r.width < 0.5 || r.height < 0.5) continue
+        out.push({ kind: 'text', id, owner: el, label: n.textContent.trim().slice(0, 30), ...R(r) })
+      }
+    }
+    // chips: an element that paints its own box (pill / button) and holds text directly
+    for (const el of row.querySelectorAll('*')) {
+      const cs = getComputedStyle(el)
+      const paints =
+        (cs.backgroundColor && cs.backgroundColor !== 'rgba(0, 0, 0, 0)') ||
+        parseFloat(cs.borderTopWidth) > 0
+      const hasDirectText = [...el.childNodes].some(c => c.nodeType === 3 && c.textContent.trim())
+      if (paints && hasDirectText && el !== row) {
+        const r = el.getBoundingClientRect()
+        if (r.width > 0 && r.height > 0)
+          out.push({ kind: 'chip', id: 'c' + nid++, owner: el, label: '[' + el.textContent.trim().slice(0, 24) + ']', ...R(r) })
+      }
+    }
+    return out
+  }
+
+  function pairHits(rects) {
+    const hits = []
+    for (let i = 0; i < rects.length; i++) {
+      for (let j = i + 1; j < rects.length; j++) {
+        const a = rects[i],
+          b = rects[j]
+        if (a.kind === 'text' && b.kind === 'text' && a.id === b.id) continue
+        // a chip and the text that lives inside it are the same ink
+        if (a.kind === 'chip' && b.kind === 'text' && a.owner.contains(b.owner)) continue
+        if (b.kind === 'chip' && a.kind === 'text' && b.owner.contains(a.owner)) continue
+        if (a.kind === 'chip' && b.kind === 'chip' && (a.owner.contains(b.owner) || b.owner.contains(a.owner))) continue
+        const w = Math.min(a.r, b.r) - Math.max(a.l, b.l)
+        const h = Math.min(a.b, b.b) - Math.max(a.t, b.t)
+        if (w > 1 && h > 1) hits.push({ a: a.label, b: b.label, kinds: a.kind + '/' + b.kind, w: round(w), h: round(h) })
+      }
+    }
+    return hits
+  }
+
+  // cfg: { rowTok | rowSel, cardTok | cardSel, scope?: selector }
+  function measureRows(cfg) {
+    const scope = cfg.scope ? document.querySelector(cfg.scope) : document
+    if (!scope) return { error: 'scope not found: ' + cfg.scope }
+    const rows = cfg.rowTok ? byTok(scope, cfg.rowTok) : [...scope.querySelectorAll(cfg.rowSel)]
+    const res = { viewport: { w: innerWidth, h: innerHeight }, rows: rows.length, hit: 0, overflowRows: 0, escapeRows: 0, cards: [], list: [] }
+    const seenCards = new Map()
+    rows.forEach((row, idx) => {
+      const card = cfg.cardTok ? closestTok(row, cfg.cardTok) : cfg.cardSel ? row.closest(cfg.cardSel) : null
+      const cardR = card ? card.getBoundingClientRect() : null
+      if (card && !seenCards.has(card)) {
+        const info = { w: Math.round(cardR.width), sw: card.scrollWidth, cw: card.clientWidth, overflow: card.scrollWidth - card.clientWidth > 1 }
+        seenCards.set(card, info)
+        res.cards.push(info)
+      }
+      const rects = leafRects(row)
+      const overlaps = pairHits(rects)
+      const rowOverflow = row.scrollWidth - row.clientWidth > 1
+      const escapes = cardR
+        ? rects.filter(r => r.kind === 'text' && (r.r > cardR.right + 1 || r.l < cardR.left - 1)).map(r => r.label + ' r=' + round(r.r) + ' (card r=' + round(cardR.right) + ')')
+        : []
+      const text = row.innerText.replace(/\s+/g, ' ').trim().slice(0, 70)
+      const bad = overlaps.length > 0 || rowOverflow || escapes.length > 0
+      if (overlaps.length) res.hit++
+      if (rowOverflow) res.overflowRows++
+      if (escapes.length) res.escapeRows++
+      res.list.push({ idx, text, bad, overlaps, rowOverflow, escapes, w: round(row.getBoundingClientRect().width) })
+    })
+    res.cardsOverflowing = res.cards.filter(c => c.overflow).length
+    const doc = document.documentElement
+    res.page = { scrollW: doc.scrollWidth, clientW: doc.clientWidth, overflowX: doc.scrollWidth > doc.clientWidth + 1 }
+    return res
+  }
+
+  // The open ConfirmReview-like dialog: geometry of dialog, overlay, body and the action buttons.
+  function dialogInfo(sel) {
+    const dlg = document.querySelector(sel || '[role=dialog]')
+    if (!dlg) return { error: 'no dialog' }
+    const ov = dlg.parentElement
+    const btns = [...dlg.querySelectorAll('button')].map(b => ({ text: b.textContent.trim(), ...Object.fromEntries(Object.entries(R(b.getBoundingClientRect())).map(([k, v]) => [k, round(v)])) }))
+    const csO = getComputedStyle(ov),
+      csD = getComputedStyle(dlg)
+    const vv = window.visualViewport
+    const body = [...dlg.children].find(c => c.scrollHeight > 0 && getComputedStyle(c).display === 'flex')
+    return {
+      innerHeight,
+      innerWidth,
+      visualViewportH: vv ? round(vv.height) : null,
+      dialog: Object.fromEntries(Object.entries(R(dlg.getBoundingClientRect())).map(([k, v]) => [k, round(v)])),
+      dialogScrollH: dlg.scrollHeight,
+      dialogClientH: dlg.clientHeight,
+      dialogOverflowY: csD.overflowY,
+      dialogMaxH: csD.maxHeight,
+      overlayPos: csO.position,
+      overlayOverflowY: csO.overflowY,
+      overlayScrollH: ov.scrollHeight,
+      overlayClientH: ov.clientHeight,
+      bodyOverflowY: body ? getComputedStyle(body).overflowY : null,
+      bodyScrollH: body ? body.scrollHeight : null,
+      bodyClientH: body ? body.clientHeight : null,
+      pageScrollY: Math.round(scrollY),
+      docScrollH: document.documentElement.scrollHeight,
+      bodyOverflow: getComputedStyle(document.body).overflow,
+      htmlOverflow: getComputedStyle(document.documentElement).overflow,
+      btns,
+    }
+  }
+
+  window.__h = { v: 2, measureRows, dialogInfo, byTok, hasTok, closestTok }
+})()
+```

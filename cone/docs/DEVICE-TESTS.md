@@ -34,12 +34,18 @@ add it to that row rather than a new one.
 ### #227 + #231 · The logging dialog, and overlapping exercise rows ([plans/98](./plans/98-phone-rendering-verify.md))
 
 Run plans/98's **Phase 0b** script in Safari, with the same test session (recreate it if it was
-already deleted). On top of what that script asks, watch for what only iOS does:
+already deleted — it lives on this week's Sunday, because index.html shows only the current week).
+In step 5 report iPhone model · iOS version · Safari or home-screen app · whether Safari's bottom
+bar was showing, instead of Chrome's items. On top of what that script asks, watch for what only
+iOS does:
 
 - **The toolbars.** Does Safari's bottom bar cover `Registrar` or `Confirmar`? Does the dialog fit
   between the top and bottom bars once the Phase 1 fix (if shipped) uses `dvh`?
 - **Font widths.** iOS draws text in a different system font, so rows may overlap at different
   names than on Android — screenshot every row in blocks D and E, not just the ones Android flagged.
+- **A baseline to compare with** (local Chromium, 360px, before any fix): schedule.html has 7
+  overlapping rows — B `Kettlebell Swing`, C `Deadlift`, D both lunges, E the lunges, `Thruster`
+  and `Farmer's Carry` — and the review dialog is 1524px tall with `Confirmar` off the screen.
 
 Say whether plans/98's Phase 1 fix had shipped on the day you ran it. Result → plans/98's marker.
 
@@ -52,5 +58,6 @@ becomes its own row (a sound or screen-flash cue).
 
 ## Android — pending
 
-- **plans/98 Phase 0b** — the Android script is handed over at the end of plans/98's Phase 0; its
-  result decides Phase 1.
+- **plans/98 Phase 0b** — the Android script was handed over 2026-10-02 (its creation steps were
+  driven at 360×800 on the local stack); the user's result, the five items in its step 5, decides
+  Phase 1. The local repro already reproduces both bugs, so the phone run confirms where, not whether.
