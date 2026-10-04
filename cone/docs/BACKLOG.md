@@ -17,22 +17,23 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready:** #227 · #231 · #228
+- **Ready:** #228
 - **In Progress:** none
 - **Start here:** #228 (plans/99), which stops at an approval gate once its editor fields render.
-  plans/98's Phase 0 is done (2026-10-02): both bugs reproduced and located locally, the Android
-  script handed over — its Phase 1, the fixes, waits on the user's phone run.
+  plans/98 shipped 2026-10-04 (`9acfdfa`) — only its S22 re-check is left, listed in
+  [DEVICE-TESTS.md](./DEVICE-TESTS.md).
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
   `> 🟡 Shipped:` pending an iPhone re-test, now listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md) (no
   iPhone at hand); nothing to code. · **#211** — the
   [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) needs 20 naming calls and
   approval of the drafted text before its [SQL](./reviews/2026-09-20-registry-additions.sql) reaches
-  prod; a Markdown decision checklist for the user comes next. · **plans/98 Phase 1** waits on the
-  Android run.
+  prod; a Markdown decision checklist for the user comes next. · **#227 · #231** — plans/98 shipped
+  and is held at `> 🟡 Shipped:` until the S22 re-check passes; nothing to code.
 - **Last refill:** the [2026-09-20 full pass](./reviews/2026-09-20.md) (all 9 dimensions incl. a
   live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
   2026-10-02: #227–#231 filed from user reports and the
   [block-structures evidence](./reviews/2026-10-02-block-structures.md); #158 narrowed to its (b) half.
+  2026-10-04: #209 closed by plans/98; #232 filed from its screenshots.
 
 ⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
 plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
@@ -43,7 +44,6 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/98](./plans/98-phone-rendering-verify.md)** — **#227 + #231 Two phone rendering bugs: the logging dialog loses "Confirmar"; long exercise rows overlap** · S–M · Sonnet · user-reported 2026-10-02. Phase 0 done: both reproduced and located locally (the review dialog is 1.7–2.3× a phone screen; `ExRow`'s load cluster takes 66–82% of its row). Phase 1, the fixes, waits on the user's Android run.
 - 🟢 **[→ Ready · plans/99](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off: a time-per-round field on every block type** · M · Sonnet · 38 prod blocks keep an interval only as text, 16 a "40'' on 20'' off", and 12 Estações exist only for the clock. Absorbs #158(a): EMOM's 60 s is hardcoded in the timer. Stops at an approval gate once the editor fields render.
 
 ## 🔵 In Progress
@@ -65,9 +65,9 @@ promoted into **plans/84** and **plans/86** the same day, and **#164** into **pl
 leaving only the blocked row until plans/91's close-out filed #204.*
 
 - ⏸ **#155 iOS Safari zooms the page when logging a result** · S · Sonnet · blocked on the user: `plans/74` shipped the 16px floor (`793ee45`, 2026-08-07) and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test — steps in [DEVICE-TESTS.md](./DEVICE-TESTS.md). Nothing to code until it runs.
+- ⏸ **[plans/98 · `9acfdfa` · 🟡 S22 re-check pending](./plans/98-phone-rendering-verify.md)** — **#227 + #231 The logging dialog loses "Confirmar"; long exercise rows overlap** · S · Sonnet · blocked on the user: both fixed and driven on Chromium; the plan stays `> 🟡 Shipped:` until the S22 re-check passes — steps in [DEVICE-TESTS.md](./DEVICE-TESTS.md). Nothing to code.
 - **#204 me.html's Distribuição reads 0/N for every athlete** · XS · Sonnet · `results_v2` logs only WOD block types, so `calcBlockStats`' executed side is structurally 0 for Força/LPO/Acessórios/Skill/Core/Cardio/Mobilidade. It was hidden until #164 made planned non-zero. Decide: hide the card until #64 logs strength blocks, or show planned only.
 - **#208 Off-screen panels stay in the tab order on every public page** · XS · Sonnet · `Nav.module.css:3` `.ovSheet` and `Results.module.css:181` `.lbPane` hide by `transform` alone. Verified live: the 3 overflow tiles are `visibility:visible` and take focus. The fix idiom is already in both files (`display:none` / `visibility:hidden`).
-- **#209 `ExRow.jsx:219` hardcodes `% RM` and fabricates a load from it** · XS · Sonnet · `:65` in the same file derives the real unit; `:220` then treats kg figures as percentages of the athlete's RM. 6 of 683 prod progression steps carry kg/lb. The other two render paths are correct. Recorded by the 09-05 pass, never filed.
 - **#210 A rest-day article was pasted into the Criador and became 50 exercises** · S · Sonnet · session `mt7kwk74qic61a0mx9s` (2026-08-27): 49 prose lines are `exercises` with empty reps/sets across four Mobilidade blocks, `block.notes` empty on all four. Renders to athletes as a WOD with 50 movements. Decide: repair the row, and whether the paste path should have caught it.
 - **#211 Registry: 29 new entries + 115 aliases + 4 resolver rules** · M · Sonnet · [audit](./reviews/2026-09-20-exercises.md) + [SQL](./reviews/2026-09-20-registry-additions.sql). Measured to take unresolved prescriptions 20.3% → 10.9%. ⏸ **20 naming calls + the drafted pt-BR text need the user first.** Aliases/rules are a code change, not the SQL.
 - **#190 `dbSaveResults` upserts `onConflict:'id'` against a `unique (athlete_id, session_id)` table** · S · Sonnet · **promoted from P2 2026-09-20 — no longer latent.** `utils/supabase.js:67` AND `scripts/seed-dev.mjs:82`. Reproduced live: seed-dev failed the whole batch and seeded **0** result rows; after a `delete from results_v2` it seeded 87. Only trace is a `console.warn`.
@@ -105,6 +105,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#226 The board audit never checks row length — 13 rows are over the cap** · XS · Sonnet · `audit-backlog-markers.mjs` parses the four row shapes but not their length (≤400, Ready ≤600), so overruns pass silently: one row is 2 724 chars, and #225 reached 667 unnoticed. Add the check, then trim the 13.
 - **#229 Round-groups inside a block — buy-in / N rounds / buy-out, one score** · L · Opus→Sonnet · 21 prod blocks type `3 Rounds`, `Buy in`, `Then` as exercise rows: athletes see them as movements, and #112's DNF total counts `3 Rounds` as 3 reps. Claude Design mockup of the inputs and the athlete view first. [Evidence](./reviews/2026-10-02-block-structures.md).
 - **#230 Estações timer + cap math** · S–M · Sonnet · the timer gives every station the FIRST station's duration and never sees `restBetweenCycles` (`Schedule.jsx:601`) — wrong for 2026-09-12's 9'/8'/7' windows. `stationsCapMins` and `stationsCapStr` disagree on a trailing rest; `cloneBlocks` never re-ids stations.
+- **#232 `ReadRow` has no gap between its label and its value** · XS · Sonnet · `ConfirmReview.module.css:96` `.row` is `justify-content:space-between` with no `gap`, so a short exercise name beside a long note reads "RunSubstituí pela versão…" in the review dialog and the LogPane's read boxes. Add a gap and let the value wrap. Found in plans/98's screenshots.
 
 ### P3 — needs a decision before it needs code
 
@@ -149,6 +150,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/98 · `9acfdfa` · 2026-10-04](./plans/98-phone-rendering-verify.md)** — **#209 A kg progression stops reading as % RM** · closed #209. · `progressionGroupUnit()` in `wod.js` is the one derivation (+9 tests); `ExRow` and the exports call it, so `60/70/80 kg` has no RM line and no invented load. Also fixed #227 and #231 (held at 🟡 for the S22). Filed #232.
 - ✅ **[plans/97 · `15d12e2` · 2026-09-29](./plans/97-share-link-athlete-guard.md)** — **#207 The Apresentar share link opens its session; no `?id=` can corrupt the athlete filter** · closed #207. · The QR now encodes `?date=…&session=…`; every `?id=` reader on schedule + results validates through `findAthleteById` (+24 tests). Printed QRs keep the old URL — the guard makes them harmless.
 - ✅ **[plans/96 · `d5be099` · 2026-09-29](./plans/96-gsd-core-trial.md)** — **#225 Trial gsd-core's phase loop in isolation, then decide** · closed #225. · **Not adopted**: ~10 700 tok always-on with no supported trim, plans outside the #223 gate, ~40:1 board duplication. Its code review caught #207's write in `Results.jsx` too (→ plans/97). Kept two WORKFLOW rules; filed #226.
 - ✅ **[plans/95 · `2a9ced2` · 2026-09-20](./plans/95-claude-md-split.md)** — **#224 Split `CLAUDE.md` into a lean core + on-demand `docs/arch/`** · closed #224. · Auto-loaded per session **~39 080 → ~6 503 tokens (83%)**. A cut, not a regeneration: 28/28 headings and 997/997 lines still present. The index names each file's traps.

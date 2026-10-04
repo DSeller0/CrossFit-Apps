@@ -1,5 +1,29 @@
 # 98 — #227 + #231 · Two phone rendering bugs: verify on device, then fix
 
+> 🟡 Shipped: `9acfdfa` · 2026-10-04 — see BACKLOG.md · closes #209. #227 and #231 are fixed and
+> driven on Chromium, and **stay open until the S22 re-check passes** (steps in
+> [DEVICE-TESTS.md](../DEVICE-TESTS.md)); the marker is flipped then.
+>
+> **Must-haves: 5/6 driven** on the local stack (SPA `:5173`, public `:5174`, the 30-exercise test
+> WOD on today's session), 4 font families × 360×800 / 384×854 / 412×915, on the final files.
+> (1) `Revisar registro` is 0.95× the screen (760px of 800; 814 of 854) with `Confirmar` at y 723–763
+> (777–817), and its body scrolls on its own — 1395px of content in 640. (2) A swipe through and past
+> the end of the body leaves `scrollY` where it was (2431 → 2431 at 360×800; 2313 → 2313 at 384×854)
+> with the body scrolled to its end. (3) 0 overlapping and 0 overflowing rows, in all 12 cells, on
+> schedule.html (30 rows), index.html (30), the LogPane list (24) and the review dialog's list (24).
+> (4) All 15 rows that carry a load show it under the name, `Demo` stays on the name's line on all
+> 30 rows, the 3 `% RM` rows carry `RM` on its own line first under the name, and typing 100 into
+> each makes the chip `RM · 100 kg` with `75 kg` · `65/70/75/80/85 kg` · `50/60/70 kg` under the
+> load; the kg Deadlift reads `60/70/80 kg` with only `Demo`. (5) results.html at 360×667, block A
+> logged `Adaptado` with a 90-character note on all 8 exercises: confirm 627px with `Confirmar` at
+> 590–630, success modal 635px with `Fechar` at 594–630. **(6) the S22 is the one not driven** — it
+> runs after this deploy. **The checks can fail:** with the pre-fix files swapped back in, the same
+> driver reproduced the baseline (TotK Dark 360×800: 7 · 4 · 1 · 4 rows, dialog 1524px, `Confirmar`
+> at y 1105, the swipe moving the page 2277 → 2630), and the RM-line checks flagged all three RM rows
+> against the layout they replaced.
+>
+> **Filed:** #232 (`ReadRow` has no gap between its label and its value).
+
 *Planned 2026-10-02 (Opus). Two execution sessions, both **Sonnet**: **Phase 0** (local repro +
 the Android script) now; **Phase 1** (the fixes) only after the user's phone run comes back.*
 
