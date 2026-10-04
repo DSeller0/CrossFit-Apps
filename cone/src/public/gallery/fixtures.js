@@ -111,6 +111,50 @@ export const exLong = {
   intensity: { mode: 'pct', pct: 60 },
 }
 export const exNoteOnly = { id: 'e9', name: 'Alongamento', note: '2 min cada lado' }
+// plans/98 (#231 · #209) — the three shapes that overlapped, overflowed or misreported on a phone.
+// A gender load beside a long name: in ExRow the load pill + Demo took 66–82% of a 271px row.
+export const exLongGender = {
+  id: 'e11',
+  name: 'Dual Kettlebell Front Rack Walking Lunges',
+  reps: '5',
+  intensity: {
+    mode: 'gender',
+    Masculino_RX: '32',
+    Masculino_Inter: '24',
+    Feminino_RX: '24',
+    Feminino_Inter: '16',
+    Masculino_unit: 'kg',
+    Feminino_unit: 'kg',
+  },
+}
+// A ladder (reps '21,15,9' reads 21-15-9) with a gender load: a wide volume AND a wide load.
+export const exLadderGender = {
+  id: 'e12',
+  name: 'Thruster',
+  reps: '21,15,9',
+  intensity: {
+    mode: 'gender',
+    Masculino_RX: '43',
+    Masculino_Inter: '35',
+    Feminino_RX: '30',
+    Feminino_Inter: '25',
+    Masculino_unit: 'kg',
+    Feminino_unit: 'kg',
+  },
+}
+// #209 — a progression in kg: it read "60/70/80% RM" with an RM chip and an invented load.
+export const exProgKg = {
+  id: 'e13',
+  name: 'Deadlift',
+  intensity: {
+    mode: 'progression',
+    steps: [
+      { reps: '3', load: '60', unit: 'kg' },
+      { reps: '3', load: '70', unit: 'kg' },
+      { reps: '3', load: '80', unit: 'kg' },
+    ],
+  },
+}
 
 export const FULL_LIST = [
   exStandard,

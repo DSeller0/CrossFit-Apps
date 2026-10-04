@@ -34,7 +34,8 @@
    mockups/20-result-card-exerciselist.html. compact's sizes (name 26px/
    vol 22px/ins 18px) are TV-wall-display scale; this matches the 10-14px
    type scale of the rest of that form instead.
-   `grid` shares every one of these values — see its own block below. ── */
+   `grid` shares every one of these values, and — since #231 — the by-line layout
+   below too. ── */
 .tiny, .grid { gap: 6px; }
 .tiny .row,  .grid .row  { gap: 8px; }
 .tiny .dot,  .grid .dot  { width: 6px; height: 6px; }
@@ -51,26 +52,34 @@
 .tiny .mvReps, .grid .mvReps { font-size: 11px; }
 .tiny .mvName, .grid .mvName { font-size: 13px; }
 
-/* ── grid: tiny, re-tuned for the Criador week column (#58 follow-up) ──────────
-   Same scale as tiny everywhere except two things a 200px column forces:
-   the name drops to 12px so it stops being the one oversized word on the card,
-   and the intensity takes its own line instead of trailing the name — inline it
-   ran past the column's right edge and clipped ("63/70/75/80/85 %", "M: 22.5 kg
-   | F: 15"). vol stays on the name line: it reads as part of the prescription,
-   and dropping it too would make every exercise three lines tall.
-   NOT folded into `tiny` — that one is shared with results.html's LogPane and
-   WodBlockCard, which are not in a 200px column.
-   The body stops being a flex row here and becomes a text block: `flex-wrap` put
-   the vol on its OWN line whenever the name was too long to sit beside it
-   ("4×(2+1+1)" / "CLEAN PULL + POWER CLEAN + PUSH JERK"), which is the opposite
-   of keeping them together. Inline vol + inline name flow as one run and wrap
-   like a sentence; only `ins` is forced to break. ── */
+/* ── tiny + grid: BY LINE (#231 · plans/98) ────────────────────────────────────
+   One rule for both: the volume and the name flow as ONE wrapping run and the
+   load takes its own line under them — "M: 32/24 kg | F: 24/16 kg" never sits
+   beside a long name. vol stays on the name line: it reads as part of the
+   prescription, and dropping it too would make every exercise three lines tall.
+   The body is a text block, not a flex row: `flex-wrap` put the vol on its OWN
+   line whenever the name was too long to sit beside it ("4×(2+1+1)" / "CLEAN
+   PULL + POWER CLEAN + PUSH JERK"), the opposite of keeping them together.
+   Inline vol + inline name wrap like a sentence; only `ins` is forced to break,
+   and `min-width:0` + `overflow-wrap` let a long word wrap instead of widening
+   the row.
+   History: `grid` got this first, for the Criador's 200px week column (#58
+   follow-up — a load trailing the name ran past the column's right edge and
+   clipped: "63/70/75/80/85 %", "M: 22.5 kg | F: 15"). `tiny` was kept a no-wrap
+   flex row on purpose — LogPane and the leaderboard card are not 200px columns —
+   and then overflowed sideways on a phone: rows past their box in the index day
+   panel (one load 8.5px past the card) and in the review dialog's fixed 300px
+   column (3 of them off the card), measured in plans/98. Hence one rule.
+   `grid` keeps only its own 12px name, the one thing a 200px column still
+   forces. `compact`/`large` (the TV wall) are untouched. ── */
+.tiny .row,  .grid .row  { align-items: flex-start; }
+.tiny .body, .grid .body { display: block; min-width: 0; }
+.tiny .vol,  .grid .vol  { display: inline; margin-right: 5px; }
+.tiny .name, .grid .name { overflow-wrap: anywhere; }
+.tiny .ins,  .grid .ins  { display: block; margin-top: 1px; }
+.tiny .dot { margin-top: 7px; }  /* the dot sits on the first line's middle: a 15px name… */
+.grid .dot { margin-top: 5px; }  /* …and a 12px one */
 .grid .name { font-size: 12px; }
-.grid .row  { align-items: flex-start; }
-.grid .dot  { margin-top: 5px; }
-.grid .body { display: block; }
-.grid .vol  { display: inline; margin-right: 5px; }
-.grid .ins  { display: block; margin-top: 1px; }
 
 /* ── Complex sub-movements — compact ── */
 .mvs  { display: flex; flex-direction: column; gap: 4px; padding-left: 20px; }

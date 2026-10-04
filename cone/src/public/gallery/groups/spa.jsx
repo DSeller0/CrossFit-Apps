@@ -5,8 +5,19 @@ import Card from '../../../components/ui/Card.jsx'
 import AppChrome from '../../../components/chrome/AppChrome.jsx'
 import MaskedTimeInput from '../../shared/MaskedTimeInput.jsx'
 import ConfirmReview, { ReadBox, ReadRow } from '../../shared/ConfirmReview.jsx'
-import { Case, Section, ModalBox, FixedFrame, ScrollFrame } from '../harness.jsx'
-import { NOOP } from '../fixtures.js'
+import { ExerciseList } from '../../shared/ExerciseList.jsx'
+import { Case, Section, ModalBox, TallModalBox, FixedFrame, ScrollFrame } from '../harness.jsx'
+import {
+  NOOP,
+  AMBER,
+  exStandard,
+  exProg,
+  exComplex,
+  exLong,
+  exLongGender,
+  exLadderGender,
+  exProgKg,
+} from '../fixtures.js'
 import s from '../Gallery.module.css'
 
 // Inline SVG icons (no ti webfont) so the Button cases render in the generated card too.
@@ -83,6 +94,20 @@ const crBody = (
     <ReadRow label="Tempo" value="11:42" mono />
   </ReadBox>
 )
+// LogPane's review: one ReadBox per WOD block, each with that block's full list — 1.5–1.9× a phone
+// screen (#227, plans/98). The shell has to keep the title and the buttons in view and scroll only this.
+const crLongBody = [
+  ['Teste A · For Time', [exStandard, exLong, exLongGender]],
+  ['Teste B · AMRAP', [exProg, exComplex, exProgKg]],
+  ['Teste C · For Time', [exLadderGender, exLongGender, exStandard]],
+  ['Teste E · For Time', [exLongGender, exLadderGender]],
+].map(([title, exs]) => (
+  <ReadBox key={title} title={title}>
+    <ExerciseList exercises={exs} color={AMBER} size="tiny" />
+    <ReadRow label="Escala" value="RX" />
+    <ReadRow label="RPE" value="5 / 10" />
+  </ReadBox>
+))
 // Same shape as MaskedTimeDemo above — the one interactive case (#1) owns its
 // own tab state so clicking a nav button actually switches the active tab.
 const CHROME_FIXTURE = { userEmail: 'coach@cone.com.br', gymName: 'Cone' }
@@ -337,6 +362,13 @@ export default {
                 {crBody}
               </ConfirmReview>
             </ModalBox>
+          </Case>
+          <Case label="Corpo longo (LogPane, 4 blocos) — título e botões fixos; só o corpo rola (#227)">
+            <TallModalBox>
+              <ConfirmReview open onEdit={NOOP} onConfirm={NOOP} onClose={NOOP}>
+                {crLongBody}
+              </ConfirmReview>
+            </TallModalBox>
           </Case>
           <Case label="Enviando (ambos desabilitados)">
             <ModalBox>

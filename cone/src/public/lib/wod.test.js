@@ -10,6 +10,7 @@ import {
   perfStr,
   repsBefore,
   groupProgressionSteps,
+  progressionGroupUnit,
   goalStr,
   goalOutcome,
   isTimeBlock,
@@ -232,6 +233,55 @@ describe('groupProgressionSteps', () => {
   test('step with no load → group has empty loads array', () => {
     const ex = { intensity: { steps: [{ reps: '2' }] } }
     expect(groupProgressionSteps(ex)).toEqual([{ reps: '2', loads: [] }])
+  })
+})
+
+// #209 — the unit a progression's loads are in. groupProgressionSteps doesn't carry it (its tests
+// above pin `{reps, loads}`), and the schedule row and the export lines both need to agree that a
+// "60/70/80 kg" progression is not a "% RM" one.
+describe('progressionGroupUnit', () => {
+  const steps = (...ss) => ({ intensity: { steps: ss } })
+  test('one unit across the group → that unit', () => {
+    const ex = steps(
+      { reps: '3', load: '60', unit: 'kg' },
+      { reps: '3', load: '70', unit: 'kg' },
+      { reps: '3', load: '80', unit: 'kg' },
+    )
+    expect(progressionGroupUnit(ex, '3')).toBe('kg')
+  })
+  test('`%`, `% do RM` and `% RM` are one unit, spelled `% RM`', () => {
+    for (const unit of ['%', '% do RM', '% RM'])
+      expect(progressionGroupUnit(steps({ reps: '5', load: '70', unit }), '5')).toBe('% RM')
+  })
+  test('no unit recorded → `% RM`, the default a progression always had', () => {
+    expect(progressionGroupUnit(steps({ reps: '5', load: '70' }), '5')).toBe('% RM')
+  })
+  test('kg and % mixed inside one group → `% RM`', () => {
+    const ex = steps({ reps: '3', load: '60', unit: 'kg' }, { reps: '3', load: '70', unit: '%' })
+    expect(progressionGroupUnit(ex, '3')).toBe('% RM')
+  })
+  test('each rep group reads its own unit', () => {
+    const ex = steps({ reps: '5', load: '60', unit: 'kg' }, { reps: '3', load: '80', unit: '%' })
+    expect(progressionGroupUnit(ex, '5')).toBe('kg')
+    expect(progressionGroupUnit(ex, '3')).toBe('% RM')
+  })
+  test('a step with no load does not vote', () => {
+    const ex = steps({ reps: '3', load: '60', unit: 'kg' }, { reps: '3', unit: '%' })
+    expect(progressionGroupUnit(ex, '3')).toBe('kg')
+  })
+  test('groups by the same key as groupProgressionSteps — a step with no reps takes ex.reps', () => {
+    const ex = { reps: '3', intensity: { steps: [{ load: '60', unit: 'kg' }] } }
+    expect(progressionGroupUnit(ex, groupProgressionSteps(ex)[0].reps)).toBe('kg')
+  })
+  test('`reps` omitted → every loaded step (the complex path shows one merged line)', () => {
+    const kg = steps({ reps: '5', load: '60', unit: 'kg' }, { reps: '3', load: '80', unit: 'kg' })
+    const mixed = steps({ reps: '5', load: '60', unit: 'kg' }, { reps: '3', load: '80', unit: '%' })
+    expect(progressionGroupUnit(kg)).toBe('kg')
+    expect(progressionGroupUnit(mixed)).toBe('% RM')
+  })
+  test('no steps → `% RM`', () => {
+    expect(progressionGroupUnit({}, '')).toBe('% RM')
+    expect(progressionGroupUnit({ intensity: {} })).toBe('% RM')
   })
 })
 

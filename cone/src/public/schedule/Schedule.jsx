@@ -15,6 +15,7 @@ import { mapResultRow } from '../lib/blobTables.js'
 import {
   isRoundBlock,
   progGroups,
+  usesRm,
   parseDurMins,
   onKey,
   GUEST_CAP,
@@ -41,6 +42,8 @@ function filterDaySessions(daySessions, athId, aths, box) {
   return all.filter(s => matchesAthlete(s, athName)).filter(s => s.blocks && s.blocks.length)
 }
 
+// Pre-fills the RM of every row that has an RM chip (a % progression, or a plain `75%` — usesRm),
+// from the athlete's best logged load PR for that exercise. A kg progression has no chip (#209).
 function autofillRm(sD, aths, athId, gdD) {
   if (!athId) return {}
   const ath = aths.find(a => a.id === athId)
@@ -51,7 +54,7 @@ function autofillRm(sD, aths, athId, gdD) {
     ;(daySess || []).forEach(sess => {
       ;(sess.blocks || []).forEach(bl => {
         ;(bl.exercises || [])
-          .filter(e => e.name && e.intensity?.mode === 'progression')
+          .filter(e => e.name && usesRm(e))
           .forEach(ex => {
             const pr = prs.find(
               p =>

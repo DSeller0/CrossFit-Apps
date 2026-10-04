@@ -4,6 +4,8 @@ import {
   findNameCollision,
   suggestGuestName,
   findAthleteById,
+  usesRm,
+  calcFromRm,
 } from './scheduleHelpers.js'
 
 // #71 — the guest check-in name helpers. The whole point of this pair is that they never
@@ -165,5 +167,84 @@ describe('findAthleteById', () => {
     const before = JSON.stringify(roster)
     findAthleteById(roster, 'b')
     expect(JSON.stringify(roster)).toBe(before)
+  })
+})
+
+// #231 / #209 — "does this row get an RM chip?" and "what does a % of the RM weigh?". One rule,
+// shared by ExRow (the chip, the computed load) and Schedule.jsx's autofillRm (the pre-fill).
+describe('usesRm', () => {
+  const prog = (...steps) => ({ intensity: { mode: 'progression', steps } })
+
+  test('a plain %RM load uses an RM — only with a number in it', () => {
+    expect(usesRm({ intensity: { mode: 'pct', pct: '75' } })).toBe(true)
+    expect(usesRm({ intensity: { mode: 'pct', pct: '' } })).toBe(false)
+    expect(usesRm({ intensity: { mode: 'pct' } })).toBe(false)
+  })
+  test('gender loads, legacy cardio and no intensity have nothing to compute from an RM', () => {
+    expect(usesRm({ intensity: { mode: 'gender', Masculino_RX: '32' } })).toBe(false)
+    expect(usesRm({ intensity: { mode: 'cardio', cardioVal: '500' } })).toBe(false)
+    expect(usesRm({})).toBe(false)
+    expect(usesRm(undefined)).toBe(false)
+  })
+  test('a % progression uses an RM, whichever way its unit is spelled', () => {
+    for (const unit of ['% do RM', '%', '% RM', undefined])
+      expect(usesRm(prog({ reps: '5', load: '70', unit }))).toBe(true)
+  })
+  test('a kg progression does not (#209)', () => {
+    expect(
+      usesRm(
+        prog(
+          { reps: '3', load: '60', unit: 'kg' },
+          { reps: '3', load: '70', unit: 'kg' },
+          { reps: '3', load: '80', unit: 'kg' },
+        ),
+      ),
+    ).toBe(false)
+  })
+  test('a progression with no load at all does not', () => {
+    expect(usesRm(prog({ reps: '5' }, { reps: '3' }))).toBe(false)
+    expect(usesRm(prog())).toBe(false)
+  })
+  test('one % group among kg ones is enough', () => {
+    expect(
+      usesRm(prog({ reps: '5', load: '60', unit: 'kg' }, { reps: '3', load: '80', unit: '%' })),
+    ).toBe(true)
+  })
+  test('a complex follows the same rule as a plain exercise', () => {
+    expect(
+      usesRm({
+        isComplex: true,
+        intensity: { mode: 'progression', steps: [{ load: '50', unit: '% do RM' }] },
+      }),
+    ).toBe(true)
+    expect(
+      usesRm({
+        isComplex: true,
+        intensity: { mode: 'progression', steps: [{ load: '50', unit: 'kg' }] },
+      }),
+    ).toBe(false)
+  })
+})
+
+describe('calcFromRm', () => {
+  const rm = (n, unit) => ({ rm: n, unit })
+
+  test('one %: 75% of a 100 kg RM', () => {
+    expect(calcFromRm(rm(100, 'kg'), [75])).toBe('75 kg')
+  })
+  test('a ladder reads slash-joined, in the athlete’s own unit', () => {
+    expect(calcFromRm(rm(100, 'kg'), [60, 70, 80])).toBe('60/70/80 kg')
+    expect(calcFromRm(rm(225, 'lbs'), [50, 100])).toBe('113/225 lbs')
+  })
+  test('rounds UP, so the bar is never under-loaded: 75% of 85 kg is 64 kg, not 63.75', () => {
+    expect(calcFromRm(rm(85, 'kg'), [75])).toBe('64 kg')
+  })
+  test('no unit recorded → kg', () => {
+    expect(calcFromRm({ rm: 100 }, [50])).toBe('50 kg')
+  })
+  test('no RM yet, or nothing to compute → empty (the pill is simply not drawn)', () => {
+    expect(calcFromRm(undefined, [75])).toBe('')
+    expect(calcFromRm(rm(0, 'kg'), [75])).toBe('')
+    expect(calcFromRm(rm(100, 'kg'), [])).toBe('')
   })
 })

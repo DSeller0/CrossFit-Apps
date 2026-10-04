@@ -1,4 +1,4 @@
-import { groupProgressionSteps, isWodBlock } from '../lib/wod.js'
+import { groupProgressionSteps, progressionGroupUnit, isWodBlock } from '../lib/wod.js'
 import { normExName } from '../lib/registry.js'
 
 // Shared by Schedule.jsx and its extracted schedule/ components (#17) — one
@@ -19,6 +19,28 @@ export function isRoundBlock(bl) {
 export function progGroups(ex) {
   const g = groupProgressionSteps(ex)
   return g.length ? g : [{ reps: '', loads: [] }]
+}
+
+// Is this exercise's load prescribed as a percentage of the athlete's RM? The one rule behind
+// "this row gets an RM chip" (ExRow) and "pre-fill its RM from the athlete's PRs"
+// (Schedule.jsx autofillRm) — so a row that has nothing to compute from an RM never offers one:
+// a plain `75%`, or a progression with at least one loaded `% RM` group. A kg progression
+// (`60/70/80 kg`), a gender load and a loadless progression all say no (#209 · #231).
+export function usesRm(ex) {
+  const ins = ex?.intensity
+  if (ins?.mode === 'pct') return !isNaN(parseFloat(ins.pct))
+  if (ins?.mode === 'progression')
+    return groupProgressionSteps(ex).some(
+      g => g.loads.length > 0 && progressionGroupUnit(ex, g.reps) === '% RM',
+    )
+  return false
+}
+
+// The kg an athlete lifts for a list of %-of-RM steps, in their own RM unit: ceil, so 75% of 85 kg
+// reads 64 kg and never under-loads the bar. '' when there is no RM or nothing to compute.
+export function calcFromRm(exRm, pcts) {
+  if (!exRm?.rm || !pcts.length) return ''
+  return pcts.map(p => Math.ceil((exRm.rm * p) / 100)).join('/') + ' ' + (exRm.unit || 'kg')
 }
 
 export function parseDurMins(d) {

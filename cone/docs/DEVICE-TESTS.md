@@ -33,21 +33,31 @@ add it to that row rather than a new one.
 
 ### #227 + #231 · The logging dialog, and overlapping exercise rows ([plans/98](./plans/98-phone-rendering-verify.md))
 
-Run plans/98's **Phase 0b** script in Safari, with the same test session (recreate it if it was
-already deleted — it lives on this week's Sunday, because index.html shows only the current week).
-In step 5 report iPhone model · iOS version · Safari or home-screen app · whether Safari's bottom
-bar was showing, instead of Chrome's items. On top of what that script asks, watch for what only
-iOS does:
+plans/98's Phase 1 fixed both on Chromium (2026-10-04): the review dialog is bounded — title and
+buttons pinned, only its body scrolls — and exercise rows read by line. Run plans/98's **Phase 0b**
+script in Safari, with the same test session (recreate it if it was already deleted — it lives on
+this week's Sunday, because index.html shows only the current week) and the **current** test WOD,
+whose block D now ends with `5x5 Back Squat 75%` and `Deadlift 3x60kg / 3x70kg / 3x80kg`. In step 5
+report iPhone model · iOS version · Safari or home-screen app · whether Safari's bottom bar was
+showing, instead of Chrome's items. On top of what that script asks, watch for what only iOS does:
 
-- **The toolbars.** Does Safari's bottom bar cover `Registrar` or `Confirmar`? Does the dialog fit
-  between the top and bottom bars once the Phase 1 fix (if shipped) uses `dvh`?
-- **Font widths.** iOS draws text in a different system font, so rows may overlap at different
-  names than on Android — screenshot every row in blocks D and E, not just the ones Android flagged.
-- **A baseline to compare with** (local Chromium, 360px, before any fix): schedule.html has 7
-  overlapping rows — B `Kettlebell Swing`, C `Deadlift`, D both lunges, E the lunges, `Thruster`
-  and `Farmer's Carry` — and the review dialog is 1524px tall with `Confirmar` off the screen.
+- **The toolbars.** The dialog is bounded by its fixed overlay (`max-height:100%`), not `dvh` —
+  does it fit between Safari's top and bottom bars? Is `Confirmar` on screen with the bottom bar
+  showing, and does the dialog keep its margin from both bars?
+- **Does the page behind still move?** Swipe up on the dialog's body past its end, and on the dark
+  backdrop: the page must stay put (`touch-action` + `overscroll-behavior`). iOS before 16 ignores
+  `overscroll-behavior`, so an old iPhone may still chain the scroll at the body's end — say the iOS
+  version.
+- **Font widths.** iOS draws text in a different system font. Rows are by line now, so nothing
+  should overlap at any width — but screenshot every row in blocks D and E anyway.
+- **Back Squat and Deadlift.** Back Squat has an `RM` chip on its own line under the name, with
+  `Demo` beside the name; tap it and enter 100 kg — the chip reads `RM · 100 kg` and `75 kg` appears
+  under `75% RM`. The kg Deadlift reads `60/70/80 kg` with no RM line.
+- **A baseline to compare with** (local Chromium, 360×800): before the fix schedule.html had 7
+  overlapping rows and the review dialog was 1524px tall with `Confirmar` off the screen; after it,
+  0 and 760px (0.95× the screen) with `Confirmar` at y 723–763.
 
-Say whether plans/98's Phase 1 fix had shipped on the day you ran it. Result → plans/98's marker.
+Say whether plans/98's fix had shipped on the day you ran it. Result → plans/98's marker.
 
 ### Timer cues on iPhone — an observation, not an item yet
 
@@ -58,6 +68,26 @@ becomes its own row (a sound or screen-flash cue).
 
 ## Android — pending
 
-- **plans/98 Phase 0b** — the Android script was handed over 2026-10-02 (its creation steps were
-  driven at 360×800 on the local stack); the user's result, the five items in its step 5, decides
-  Phase 1. The local repro already reproduces both bugs, so the phone run confirms where, not whether.
+### #227 + #231 · The S22 re-check after plans/98's Phase 1 (≈5 minutes)
+
+Phase 0b ran on the S22 on 2026-10-02 (#227 confirmed; #231 not seen in Halo Reach). Phase 1 shipped
+2026-10-04; this closes both rows. After the deploy, close every Cone tab and reopen it — the service
+worker can serve the old build for one load, so open each page twice.
+
+1. **The test session.** If the old one is still there, add the two new lines to block D (`5x5 Back
+   Squat 75%` and `Deadlift 3x60kg / 3x70kg / 3x80kg`); otherwise recreate it from plans/98's Test
+   WOD (Criador → this week's `DOM` → `+ sessão` → `¶ Texto` → paste → check "5 blocos · 30
+   exercícios" → `Aplicar` → `Salvar sessão`).
+2. **Rows, in your own theme.** `schedule.html?box=all` → Atleta00 → the `DOM` card → `Detalhes`.
+   Blocks D and E: is every load **under** its exercise's name, with `Demo` beside it? Back Squat has
+   `RM` on its own line under the name; tap it, enter 100 → does the chip read `RM · 100 kg`, with
+   `75 kg` under `75% RM`? Deadlift reads `60/70/80 kg` with **no** `RM`.
+3. **Rows, in the default theme.** `tema.html` → **TotK Dark** → repeat step 2 (this is the wide face
+   where the overlap was measured). Then put your own theme back.
+4. **The dialog.** `Registrar resultado` → `RX` and RPE `5` in every block → `Registrar`. On
+   **Revisar registro**: is `Confirmar` on screen without scrolling the page? Swipe up inside the
+   dialog, past the end of its list — does only the list move? Swipe on the dark backdrop — does the
+   page stay put? Then `Editar` — never `Confirmar` by accident.
+5. **Tell me:** both fixed? In both themes? A screenshot of anything that still looks wrong.
+6. **Clean up:** Criador → `DOM` → `Remover`. Result → plans/98's marker, which turns `> 🟡 Shipped:`
+   into `> ✅ Done:` and closes #227 and #231.

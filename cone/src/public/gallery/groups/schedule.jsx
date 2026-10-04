@@ -12,6 +12,10 @@ import {
   exStandard,
   exProg,
   exComplex,
+  exLong,
+  exLongGender,
+  exLadderGender,
+  exProgKg,
   schedBlPlain,
   schedBlRound,
   demoMapFull,
@@ -34,6 +38,33 @@ import {
   deskRegBlAmrap,
   checkinAthletes,
 } from '../fixtures.js'
+
+// plans/98 — the row at the width that broke it: 271px is what a 360px phone leaves a row in the
+// session detail (check column + card padding already taken). Every no-op prop is fixed here, so
+// a case only states what varies.
+function PhoneRow({ ex, rm, rmEdit = null, width = 271 }) {
+  return (
+    <div style={{ width, maxWidth: '100%' }}>
+      <ExRow
+        ex={ex}
+        bl={schedBlPlain}
+        isWod={false}
+        isRd={false}
+        checked={new Set()}
+        roundState={{}}
+        rmValues={rm || {}}
+        rmEditKey={rmEdit}
+        demoMap={{}}
+        onCheck={NOOP}
+        onAdvance={NOOP}
+        onReset={NOOP}
+        onRmToggle={NOOP}
+        onRmConfirm={NOOP}
+        onDemo={NOOP}
+      />
+    </div>
+  )
+}
 
 export default {
   group: 'Schedule',
@@ -103,7 +134,7 @@ export default {
       render: () => (
         <Section
           title="ExRow"
-          sub="src/public/schedule/ExRow.jsx — linha de exercício interativa (checkbox/contador, chip de RM, Demo)"
+          sub="src/public/schedule/ExRow.jsx — linha de exercício interativa (checkbox/contador, Demo; RM, carga e carga calculada, cada um na sua linha)"
         >
           <Case label="Padrão · pct">
             <ExRow
@@ -141,6 +172,45 @@ export default {
               onRmToggle={NOOP}
               onRmConfirm={NOOP}
               onDemo={NOOP}
+            />
+          </Case>
+          {/* plans/98 (#231 · #209) — by line: the name line carries volume + name + [Demo]; under it,
+              one line each, [RM] (only where the load is a % of the RM), the load, and the load worked
+              out from the RM. 271px = a 360px phone's row. */}
+          <Case label="Padrão · pct, sem RM definido (271px · o RM na própria linha)">
+            <PhoneRow ex={exStandard} />
+          </Case>
+          <Case label="Padrão · pct, RM definido · carga calculada (271px)">
+            <PhoneRow
+              ex={exStandard}
+              rm={{ [exStandard.id]: { rm: 100, unit: 'kg', source: 'manual' } }}
+            />
+          </Case>
+          <Case label="Padrão · pct, editando o RM (271px)">
+            <PhoneRow ex={exStandard} rmEdit={exStandard.id} />
+          </Case>
+          <Case label="Nome longo · pct (271px · o nome quebra ao lado do Demo)">
+            <PhoneRow ex={exLong} />
+          </Case>
+          <Case label="Nome longo · pct, RM definido (271px · o caso mais alto: nome em linhas, RM, carga, carga calculada)">
+            <PhoneRow ex={exLong} rm={{ [exLong.id]: { rm: 100, unit: 'kg', source: 'manual' } }} />
+          </Case>
+          <Case label="Complexo · % RM, RM definido (271px · o RM vem depois dos movimentos)">
+            <PhoneRow
+              ex={exComplex}
+              rm={{ [exComplex.id]: { rm: 100, unit: 'kg', source: 'manual' } }}
+            />
+          </Case>
+          <Case label="Nome longo + carga M/F (a carga desce para a linha de baixo, 271px)">
+            <PhoneRow ex={exLongGender} />
+          </Case>
+          <Case label="Escada 21-15-9 + carga M/F (271px)">
+            <PhoneRow ex={exLadderGender} />
+          </Case>
+          <Case label="Progressão em kg (#209 — sem RM, sem % RM, sem carga inventada, 271px)">
+            <PhoneRow
+              ex={exProgKg}
+              rm={{ [exProgKg.id]: { rm: 100, unit: 'kg', source: 'manual' } }}
             />
           </Case>
           <Case label="Progressão (sem RM definido)">

@@ -5,8 +5,12 @@ the Android script) now; **Phase 1** (the fixes) only after the user's phone run
 
 *Phase 0 ran 2026-10-02 (Sonnet): both bugs reproduce locally in a phone-sized viewport and are
 located. Results, the steps the run proved wrong (corrected in place) and the verified Android script
-are under "Phase 0 — result" and "Phase 0b". **Phase 1 waits on the user's phone run.** This plan
-carries no `> ✅ Done:` marker until Phase 1 ships.*
+are under "Phase 0 — result" and "Phase 0b".*
+
+*The user's S22 run (2026-10-02) confirmed #227 and did not show #231, and redirected the fix to
+by-line rows; #209 joined (see "Phase 0b — result"). **Phase 1 ran 2026-10-04 (Sonnet)** and is under
+"Phase 1 — result". This plan carries no `> ✅ Done:` marker until the S22 re-check in
+[DEVICE-TESTS.md](../DEVICE-TESTS.md) passes — its marker is `> 🟡 Shipped:` until then.*
 
 ## Context
 
@@ -64,22 +68,31 @@ card (results.html's `WodSummary` was already clean in Phase 0 — re-check it, 
 
 ## Must-haves
 
-Phase 1's gate, driven on the local stack with the test WOD, then confirmed on the user's phone.
-Each one fails before the fix — Phase 0's pre-fix number is in brackets — and the appendix harness
-is the instrument:
+Phase 1's gate, driven on the local stack with the test WOD (results.html's block A for the
+short-phone one), then confirmed on the user's phone. Each one fails before the fix — the pre-fix
+number is in brackets — and the appendix harness is the instrument. *Rewritten after the phone run
+(2026-10-02): the S22's 384px width joins the viewports, #231 becomes by-line rows, #209 joins.*
 
-- At **360×800** the test WOD's `Revisar registro` shows `Confirmar` inside the viewport without
-  scrolling the page **and** its body scrolls on its own.
+- At **360×800** and **384×854** the test WOD's `Revisar registro` shows `Confirmar` inside the
+  viewport without scrolling the page **and** its body scrolls on its own.
   [schedule.html · pre-fix: dialog 1524px, `Confirmar` at y 1105]
 - A touch swipe inside that open dialog — through the end of its body and past it — leaves
   `window.scrollY` unchanged.                            [schedule.html · pre-fix: 1000 → 1536]
-- No exercise row of the test WOD (blocks A–E) has intersecting text boxes **and** none overflows
-  its row or card, at 360px, on all four surfaces.
-  [schedule.html 7 rows · index.html 4 · LogPane list 1 · review-dialog list 4, pre-fix]
+- In **TotK Dark** at 360px no exercise row of the test WOD has intersecting text boxes **and**
+  none overflows its row or card, on schedule.html, index.html, the LogPane's list and the review
+  dialog's list.                                   [pre-fix: 7 · 4 · 1 · 4 rows, re-measured]
+- On schedule.html, in all four font families (TotK Dark · Spirit Blossom · Halo Reach Dark ·
+  Common Dark), every row with a load shows it **under** the name, with `Demo` still on the name's
+  line; a row that carries an `RM` chip (the Back Squat, the % progression, the % complex) has it
+  **on its own line, first under the name** (or after a complex row's movements), above the load —
+  and once RM = 100 kg the chip reads `RM · 100 kg` and `75 kg` appears under `75% RM`; the Deadlift
+  row reads `60/70/80 kg` with no RM line and no computed load.  [pre-fix: load beside the name · no
+  RM chip · `60/70/80% RM` + an invented load. *The RM line was the user's call at the Lane A gate;
+  before it the chip sat beside `Demo`.*]
 - At **360×667**, after logging block A as `Adaptado` with a ~90-character note on all 8
   exercises, results.html's confirm dialog shows `Confirmar` and its success modal shows `Fechar`.
   [results.html · pre-fix: 772px and 775px in a 667px screen]
-- The user's Android phone reports both fixed, from the same test session.          [device]
+- The user's Android phone reports both fixed, in TotK Dark as well as in Halo Reach.  [device]
 
 ## Files
 
@@ -104,7 +117,7 @@ is the instrument:
    In the **local** SPA Criador (run it at 360px so it also validates the steps the user repeats in
    prod): that day's `+ sessão` → the **"Nova sessão" form comes first** (no gear step): name
    `TESTE MOBILE — apagar`, Para quem **Atleta00**, Público, Sem box → `Criar sessão` → `¶ Texto` →
-   paste the test WOD → check the preview ends "5 blocos · 28 exercícios" (gender pairs, the
+   paste the test WOD → check the preview ends "5 blocos · 30 exercícios" (gender pairs, the
    progression list and the complex all parsed) → `Aplicar` → `Salvar sessão`. Local DB only.
 3. Viewports: **360×800** and **412×915** (Android), plus **375×667** and **390×844** recorded for
    `DEVICE-TESTS.md`. Emulate with the Playwright viewport + CDP scrollbars-hidden + touch only — see
@@ -130,10 +143,13 @@ is the instrument:
    Hand the user the Android script below (with the real date filled in) and update
    `DEVICE-TESTS.md` if any step changed.
 
-**Test WOD** (blocks A–C load the dialog; D–E carry long names + loads; parses to 5 blocks · 28
+**Test WOD** (blocks A–C load the dialog; D–E carry long names + loads; parses to 5 blocks · 30
 exercises. Força D is not a WOD block, so the LogPane and the review dialog carry A, B, C, E — 24
 rows). ⚠️ Block E's ladder is on its **second** line on purpose: as the first line under a header,
-`21-15-9 Thruster …` is read as the structure line and the Thruster falls to a note:
+`21-15-9 Thruster …` is read as the structure line and the Thruster falls to a note. Phase 1 added
+the last two lines of block D (`5x5 Back Squat 75%` → a plain %RM row; `Deadlift 3x60kg / 3x70kg /
+3x80kg` → a kg progression, #209) — Phase 0's tables below were measured on the 28-exercise version
+without them:
 
 ```
 For Time – Teste A – TC 20'
@@ -168,6 +184,8 @@ Complexo A: 1 Hang Clean + 1 Push Jerk 50/60/70%
 5 Dual Kettlebell Front Rack Walking Lunges 32/24kg – 24/16kg
 8 Single Arm Dumbbell Overhead Walking Lunge 22.5/15kg – 15/10kg
 6 Romanian Deadlift 65/70/75/80/85%
+5x5 Back Squat 75%
+Deadlift 3x60kg / 3x70kg / 3x80kg
 
 For Time – Teste E – TC 12'
 5 Dual Kettlebell Front Rack Walking Lunges 32/24kg – 24/16kg
@@ -253,7 +271,7 @@ installed as a home-screen app, repeat steps 2–4 there.
    nobody looks at it. In "Nova sessão": name `TESTE MOBILE — apagar` (a plain hyphen is fine),
    "Para quem" → tick **Atleta00**, Visibilidade **Público**, Box **Sem box** → `Criar sessão`. Then
    tap **`¶ Texto`** beside "Blocos", paste the test WOD above, check the preview ends
-   "5 blocos · 28 exercícios" → `Aplicar` → `Salvar sessão`.
+   "5 blocos · 30 exercícios" → `Aplicar` → `Salvar sessão`.
 2. **Open it, one page at a time.** Every link ends `?box=all` — a "Sem box" session only shows in
    the general view:
    - `https://dseller0.github.io/CrossFit-Apps/schedule.html?box=all` → athlete selector
@@ -279,9 +297,37 @@ installed as a home-screen app, repeat steps 2–4 there.
    session. If your phone normally opens a box link, open it once more — `?box=all` cleared the
    stored box.
 
+### Phase 0b — result: the user's Galaxy S22 Ultra (2026-10-02)
+
+Samsung Galaxy S22 Ultra (SM-S908E) · Android 16 · Chrome 154.0.8037.92 · text scaling 100% ·
+a Chrome tab · about 384 CSS px wide at the default display size (not measured). The user's three
+screenshots are in the conversation only — nothing from the phone is in the repo.
+
+- **#227 — confirmed on the device.** `Registrar` is reachable (the LogPane scrolls), but on
+  `Revisar registro` the dialog is cut off, `Confirmar` is never on screen, and a swipe moves **only
+  the page behind it**: the local repro, point for point.
+- **#231 — not seen on the phone, with this WOD.** The phone runs the user's own theme, **Halo
+  Reach** (body font `system-ui` — Roboto on Android), while Phase 0 measured in the default
+  **TotK** (`theme.js` `DEFAULT_THEME = 'totk-dark'`; in the local snapshot of prod `settings.theme`
+  is unset and the Eagles box default is `totk-light`), whose font is **Cinzel**, a wide one. First
+  guess: the bug lives in the wide faces. **Phase 1's per-font baseline refuted that** (table in
+  "Phase 1 — result"): all four families collide at 360–412px locally, Halo Reach included — but
+  there `system-ui` resolves to Windows' Segoe UI, wider than Roboto, which cannot be measured on
+  this machine. So the S22's clean run is consistent with Roboto being narrower, not proof that the
+  bug needs a wide face; by-line rows remove the dependence on font width either way.
+- **The user's direction:** render the rows **by line** — the name line carries the volume, the name,
+  `RM` and `DEMO`; the loads sit on the line below. `RM` shows only where it applies to the
+  exercise. "Some blocks already work like that" is right: `ExRow`'s progression and complex paths
+  already put the load in a `.rmVolRow` under the name; the plain path and `ExerciseList`'s `tiny`
+  size are the odd ones out.
+- **Decisions (2026-10-02, with the user):** plain `% RM` rows (`Back Squat 75%`) gain the `RM` chip
+  and a computed load; **every** `ExerciseList tiny` list goes by-line, not only the dialog's;
+  #209 (a kg progression shown as `60/70/80% RM` with an invented load) is fixed in the same pass.
+
 ### Phase 1 — the fixes (Sonnet, after the phone run)
 
-Phase 0's evidence supports these shapes; the phone run can still redirect them:
+Phase 0's evidence supports these shapes; the phone run can still redirect them (**it did — see
+"Phase 0b — result" above: #231 becomes by-line rows, and #209 joins**):
 
 - **#227** — the suspect held: `ConfirmReview` adopts `Modal`'s idiom — `.modal{max-height:
   calc(100dvh - 40px)}` with a `vh` fallback, a flex column, `.body{overflow-y:auto; min-height:0;
@@ -298,6 +344,116 @@ Phase 0's evidence supports these shapes; the phone run can still redirect them:
 - **Lane A:** the gallery's `ConfirmReview` (`gallery/groups/spa.jsx:325-383`), `BlockDetail` and
   `ExerciseList` entries gain long-content fixtures; review at 390/1280 in the themes; then
   `npm run design:cards`.
+
+### Phase 1 — result (2026-10-04)
+
+**What changed**
+
+- **#227 — the dialogs are bounded.** `ConfirmReview.module.css`: `.modal` is a flex column with
+  `max-height:100%` of the padded fixed overlay (not `dvh`: it follows Chrome Android's moving
+  address bar and also bounds the gallery's transformed `ModalBox`); title, error and buttons are
+  `flex-shrink:0`; `.body` is the one scroller (`overflow-y:auto`, `min-height:0`,
+  `overscroll-behavior:contain`, `touch-action:pan-y pinch-zoom`); the overlay is
+  `touch-action:pinch-zoom`, so a swipe on the backdrop, title or buttons can't pan the page behind.
+  One shell, so all 20 call sites. `Results.module.css` `.successModal` takes the same shape
+  (`Fechar` pinned, `.successDetail` scrolls); `.ckSheet` gets a `max-height` and scrolls.
+- **#231 — rows read by line.** `ExRow`: the name line (`ExHead` — volume pill + name on the left,
+  `[Demo]` on the right; it wraps, as a safety net) and, under it, `LoadLines` — **one line each, in
+  this order: `RM` (only where the load is a % of the RM; `RM · 100 kg` once known, its entry opening
+  under it), the load, the load worked out from the RM** — on all three shapes (a complex row's lines
+  follow its movements; a progression's RM sits under the first group's name). A plain %RM row gains
+  the RM line and the computed kg; `RmChip`/`RmInput`/`LoadLines` replace three copies of the RM entry
+  and of the line order; `usesRm()` is the one rule for "this row has an RM line" and for
+  `autofillRm`'s PR pre-fill; `calcFromRm()` replaces four copies of the ceil-of-%-of-RM sum.
+  `ExerciseList` `tiny` adopts the by-line rules `grid` already had (index day panel, LogPane, the
+  review dialog, the leaderboard card, the Criador preview); `grid` keeps only its 12px name.
+- **#209 — a kg progression stops being a % RM one.** `progressionGroupUnit(ex, reps)` in
+  `lib/wod.js` is the single derivation of a group's unit; `buildProgressionLines` (exports) and
+  `ExRow` (progression and complex shapes) both call it. A kg group reads `60/70/80 kg`, with no RM
+  chip and no computed load.
+- **Gallery (Lane A):** `exLongGender`, `exLadderGender`, `exProgKg`; ExRow cases at the 271px a
+  360px phone leaves a row — RM not set / set / being typed, a long name with and without an RM, a
+  complex row with an RM, the two gender loads and the kg progression; `tiny` cases (the index/LogPane
+  list and the ≈242px review-dialog width) and `grid` with the new fixtures; ConfirmReview "Corpo
+  longo (LogPane, 4 blocos)".
+- **Tests:** +9 `progressionGroupUnit` (`wod.test.js`), +12 `usesRm` / `calcFromRm`
+  (`scheduleHelpers.test.js`); `exportHelpers.test.js` untouched and green — 1158 in all.
+
+**Per-font baseline, before the fix** (local Chromium, the 30-exercise test WOD on today's session,
+at 360×800 / 384×854 / 412×915). schedule.html counts rows whose text overlaps; the other three
+count rows that overflow their box; the last column is the review dialog's height as a multiple of
+the screen:
+
+| Theme · font | schedule.html | index.html | LogPane list | review-dialog list | dialog height |
+|---|---|---|---|---|---|
+| TotK Dark · Cinzel | 7 · 4 · 4 | 4 · 1 · 0 | 1 · 0 · 0 | 4 · 4 · 4 | 1524px · 1.91× · 1.78× · 1.67× |
+| Spirit Blossom · Amarante | 4 · 3 · 0 | 0 · 0 · 0 | 0 · 0 · 0 | 2 · 2 · 2 | 1376px · 1.72× · 1.61× · 1.50× |
+| Halo Reach Dark · `system-ui` (Segoe UI here) | 5 · 4 · 3 | 1 · 0 · 0 | 1 · 0 · 0 | 3 · 3 · 3 | 1467px · 1.83× · 1.72× · 1.60× |
+| Common Dark · Arial | 6 · 4 · 3 | 4 · 1 · 0 | 1 · 0 · 0 | 5 · 5 · 5 | 1545px · 1.93× · 1.81× · 1.69× |
+
+Every cell is a failure: `Confirmar` was off the screen in all twelve runs, and a touch swipe inside
+the dialog moved only the page (TotK Dark 360×800: `scrollY` 2277 → 2630, the body never scrolled).
+
+**After the fix** — the same driver, the same data, all four families at all three viewports: every
+cell above is **0**; the dialog is 0.95× · 0.95× · 0.96× the screen (top 20px, bottom 20px from the
+edge) with `Confirmar` on screen (y 723–763 of 800), its body scrolls on its own (1395px of content
+in 640), and a swipe through and past the end leaves `scrollY` where it was (2431 → 2431) with the
+body scrolled to its end. All 15 rows that carry a load show it under the name, with `Demo` still on
+the name's line in every row of every cell — even in Cinzel at 360px. The 3 rows that carry an `RM`
+chip (Complexo A, Romanian Deadlift, Back Squat) have it on its own line, first in the column under
+the name (Complexo A: after its movements), and the lines stack — no chip beside another element. Typing
+RM = 100 kg into each of the three opens the entry **under the chip**, and the chip then reads
+`RM · 100 kg` with the load and the computed load below it: Back Squat `75% RM` / `75 kg`, the
+`% do RM` progression `65/70/75/80/85% RM` / `65/70/75/80/85 kg`, the complex `50 / 60 / 70 % RM` /
+`50/60/70 kg`; with all three RMs set, schedule.html still has 0 overlapping and 0 overflowing rows
+(the widest chips of the run). The kg Deadlift reads `60/70/80 kg` with only `[Demo]`, no RM line.
+results.html at 360×667, block A logged `Adaptado` with a
+90-character note on all 8 exercises: confirm **627px** (was 772) with `Confirmar` at 590–630 of
+667, success modal **635px** (was 775) with `Fechar` at 594–630, and a swipe on it leaves the page at
+0. The check-in sheet in landscape (800×360): 344px with its title on screen (it is 406px of
+content). `npm test` · `lint` · `format:check` · `build:all` clean.
+
+**What the run found**
+
+- **Every font family collides locally, not only the wide Cinzel** — see Phase 0b: the S22's clean
+  run is consistent with Roboto being narrower than this PC's Segoe UI, which cannot be measured
+  here. By-line rows make the outcome independent of the face.
+- **The first by-line header was not enough — and neither was the wrap.** With a fixed actions
+  cluster beside a flexible name column, a 271px row holding a stored RM (`[100 kg] [Demo]`) left the
+  name ~60px, and `overflow-wrap:anywhere` split THRUSTER into "THRUSTE / R". The harness could not see
+  it (no overlap, no overflow) — the gallery render did. `ExHead` was made to **wrap** (the name keeps
+  its longest word, the actions drop to their own right-aligned line), which fixed the split but left
+  a row that changed shape the moment an RM was typed — and a long name with an RM took three lines.
+  At the Lane A gate the user's call was to give **`RM` its own line** (`Sets × Reps  Exercise Name
+  DEMO` / `RM` / `Load` / `Calculated Load`): the chip leaves the name line, so only `Demo` is left
+  beside the name, and the row no longer reflows when an RM is stored. `ExHead` keeps the wrap as a
+  safety net; nothing in the test WOD needs it (`Demo` stays on the name's line in all 12 cells).
+- **`sw.js` serves assets stale-while-revalidate**, so the first load after an edit renders the
+  *previous* build while it refreshes the cache. A measurement or a screenshot needs a second load —
+  the drivers `goto` then `reload`. (It also explains a first run that mixed old and new rows.)
+- **Today's session renders twice on schedule.html** — the desktop pane (`display:none` at phone
+  width) auto-selects it — so the harness counts rendered rows only (v3, below).
+- **Not touched, but visible in the new screenshots:** `ReadRow` has no gap between label and value,
+  so a short exercise name beside a long note reads "RunSubstituí pela versão…". Worth its own row.
+- The gallery's 390px `MobileFrame` iframe auto-grows to its content; an item that sizes with
+  viewport units (`SessionTextPane`) grows it without bound — a screenshot of it asked Chrome for a
+  33-million-pixel bitmap and killed the browser. Shoot such items in Full mode.
+
+**The checks can fail.** With the five pre-fix files swapped back in (stash-free: copies saved and
+`sha1sum`-checked on the way out), the same driver on the same data reproduced the baseline exactly —
+TotK Dark 360×800: 7 · 4 · 1 · 4 rows, dialog 1524px (1.91×) with `Confirmar` at y 1105, the swipe
+moving the page 2277 → 2630 with the body at scrollTop 0, Back Squat with no `RM` chip and its load
+beside the name, the kg Deadlift reading `60/70/80% RM` **with** an RM chip; Halo Reach Dark 360×800:
+5 · 1 · 1 · 3 and 1467px. The RM-line checks (chip first in its column, below the name, lines
+stacked, `Demo` on the name's line) were proved the same way against the layout they replaced — the
+RM chip inside the `Demo` cluster, copies saved and `sha1sum`-checked: TotK Dark 360×800 reported the
+chip not first in the load column on all 3 rows (Complexo A, Romanian Deadlift, Back Squat), not below
+the name on 2, and `Demo` pushed off the name's line on Complexo A. `npm run design:cards`
+regenerated the 17 cards (the CSS is inlined into each).
+
+**Still open — the device:** the S22 re-check (the dialog, then tema.html → *TotK Dark* →
+schedule.html blocks D/E) is in [DEVICE-TESTS.md](../DEVICE-TESTS.md). Until it passes the plan is
+held at `> 🟡 Shipped:` (the plans/74 precedent) and #227/#231 stay on the board.
 
 ## Verification
 
@@ -348,13 +504,30 @@ also matches `detailExName`; `_exBlock_` misses `_complexBlock_` only because of
 underscore. Rows that share a card count its overflow once (`cardsOverflowing`), never per row. Text
 boxes come from `Range.getClientRects()` on each text node, so a wrapped name is compared line by
 line; a ≤2px vertical touch between adjacent lines is line-box noise — the real hits are tens of px
-wide (worst 71px).
+wide (worst 71px). v3 counts **rendered rows only**: today's session also renders in schedule.html's
+hidden desktop pane, which would double the count with boxes that have no size.
+
+**Driving it (Phase 1).** Set `cone_theme_user` **and** `cone_theme`, `goto`, then `reload` — `sw.js`
+serves assets stale-while-revalidate, so the first load after an edit is the previous build. Open the
+dialog with `Registrar` and close it with **Escape** (`ConfirmReview`'s own "Editar"): pre-fix the
+`Editar` button is itself off-screen, so a click just times out — and never `Confirmar` on the
+LogPane. A swipe is three passes of `Input.dispatchTouchEvent` from 78% to 22% of the screen's height
+at the dialog's centre, comparing `window.scrollY` and the body's `scrollTop` before and after. The
+by-line probe reads every rendered `detailEx`: its load column (`rmVolRow`) starts below the name's
+bottom edge, the `RM` chip is that column's first child and sits below the name, the column's
+children stack, and `Demo` is above the name's bottom edge. Typing an RM (click the row's `RM`, fill
+the input, Enter) is React state only — no storage, no DB — so it is safe to drive. results.html
+(block A → `Adaptado` → RPE 5 → "O que foi adaptado?" → every exercise's toggle → a note in each input
+→ `Registrar resultado`) **writes a `results_v2` row** when `Confirmar` is tapped: delete it afterwards
+from the local REST by id + session_id. The gallery's 390 mode is a real 390px iframe — screenshot
+`iframe[title="Mobile preview"]` on a tall page viewport (a short one stitches the sticky bar into the
+image), and shoot `SessionTextPane` in Full mode only.
 
 ```js
 // plans/98 Phase 0 measurement harness. Installed with page.addInitScript({ path }) so it is
 // present after every navigation. Read-only: it never mutates the page.
 ;(() => {
-  if (window.__h && window.__h.v >= 2) return
+  if (window.__h && window.__h.v >= 3) return
 
   // CSS-module class token: `_detailEx_10yne_253` -> base `detailEx`. An exact-token test, so
   // `detailEx` does NOT match `_detailExName_…` (a substring match would).
@@ -419,6 +592,7 @@ wide (worst 71px).
         if (a.kind === 'chip' && b.kind === 'text' && a.owner.contains(b.owner)) continue
         if (b.kind === 'chip' && a.kind === 'text' && b.owner.contains(a.owner)) continue
         if (a.kind === 'chip' && b.kind === 'chip' && (a.owner.contains(b.owner) || b.owner.contains(a.owner))) continue
+        // chip-vs-chip is only interesting when it is a real collision, text-vs-anything always is
         const w = Math.min(a.r, b.r) - Math.max(a.l, b.l)
         const h = Math.min(a.b, b.b) - Math.max(a.t, b.t)
         if (w > 1 && h > 1) hits.push({ a: a.label, b: b.label, kinds: a.kind + '/' + b.kind, w: round(w), h: round(h) })
@@ -427,11 +601,15 @@ wide (worst 71px).
     return hits
   }
 
-  // cfg: { rowTok | rowSel, cardTok | cardSel, scope?: selector }
+  // cfg: { rowTok | rowSel, cardTok | cardSel, scope?: selector, minRows?: n }
   function measureRows(cfg) {
     const scope = cfg.scope ? document.querySelector(cfg.scope) : document
     if (!scope) return { error: 'scope not found: ' + cfg.scope }
-    const rows = cfg.rowTok ? byTok(scope, cfg.rowTok) : [...scope.querySelectorAll(cfg.rowSel)]
+    // Rendered rows only: schedule.html also renders TODAY's session in its desktop pane, which is
+    // display:none at phone width — those rows have no boxes and would only inflate the count.
+    const rows = (cfg.rowTok ? byTok(scope, cfg.rowTok) : [...scope.querySelectorAll(cfg.rowSel)]).filter(
+      r => r.getClientRects().length > 0,
+    )
     const res = { viewport: { w: innerWidth, h: innerHeight }, rows: rows.length, hit: 0, overflowRows: 0, escapeRows: 0, cards: [], list: [] }
     const seenCards = new Map()
     rows.forEach((row, idx) => {
@@ -495,6 +673,6 @@ wide (worst 71px).
     }
   }
 
-  window.__h = { v: 2, measureRows, dialogInfo, byTok, hasTok, closestTok }
+  window.__h = { v: 3, measureRows, dialogInfo, byTok, hasTok, closestTok }
 })()
 ```

@@ -130,7 +130,21 @@
 .detailExCheckDone { background:color-mix(in srgb,var(--green) 10%,var(--stone)); border-color:color-mix(in srgb,var(--green) 50%,transparent); }
 .detailExCheckDone::after { content:'✓'; font-size:13px; color:var(--green); font-weight:900; }
 .detailExBody { flex:1; min-width:0; }
-.detailExName { font-size:14px; font-weight:700; color:var(--text); line-height:1.3; }
+/* The name line (#231): volume pill + name on the left, [Demo] on the right. It WRAPS. The old row
+   was a no-wrap flex line whose right cluster ([RM] [Demo], plus the load pill on the first cut of
+   this) could not shrink, so on a phone the name column fell to 3–86px and the name — which can't
+   shrink below its longest word — ran over the cluster. `RM` has since moved to its own line
+   (.rmVolRow), so only [Demo] is left beside the name and this wrap is the safety net: `.detailExMain`
+   keeps at least its longest word (flex-basis 0 is clamped by min-content), and if [Demo] doesn't fit
+   beside that it drops to its own line, right-aligned by the auto margin. Never crushed, never
+   overlapping. */
+.detailExHead { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:4px 6px; }
+.detailExMain { display:flex; align-items:baseline; gap:6px; flex:1 1 0; max-width:100%; }
+.detailExActs { display:flex; align-items:center; gap:4px; margin-left:auto; flex-shrink:0; }
+/* break-word, not `anywhere`: `anywhere` shrinks the name's min-content to one letter, which is
+   what let a 271px row break "THRUSTER" into "THRUSTE / R" beside a wide RM chip. A word wider than
+   the whole row still breaks (min-width:0 lets the name shrink inside `.detailExMain`). */
+.detailExName { font-size:14px; font-weight:700; color:var(--text); line-height:1.3; min-width:0; overflow-wrap:break-word; }
 .detailExNameDone { color:var(--dim); text-decoration:line-through; }
 .detailExNote { font-size:12px; color:var(--teal); font-style:italic; margin-top:1px; }
 .detailExMovement { font-size:13px; color:var(--sub); margin-top:2px; padding-left:2px; }
@@ -164,7 +178,13 @@
 .rmUnitSel:focus { border-color:var(--accent); }
 .rmConfirmBtn { font-size:12px; font-weight:900; padding:5px 10px; border:1px solid var(--teal); background:transparent; color:var(--teal); cursor:pointer; font-family:inherit; }
 .rmConfirmBtn:hover,.rmConfirmBtn:active { background:var(--teal); color:var(--accent-text); }
+/* The lines under the name on every row shape (#231), one per row at any width: [RM] (only where the
+   load is a % of the RM) and its entry while it is typed, the load, the load worked out from the RM.
+   The pills are nowrap by default (they sit beside a name elsewhere), so a long load — M/F with three
+   scales at 320px — wraps inside the row here instead of running past it. */
 .rmVolRow { display:flex; flex-direction:column; align-items:flex-start; gap:5px; margin-top:6px; }
+.rmVolRow .pillVol, .rmVolRow .pillWt { max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+.rmVolRow .rmInputWrap { margin:0; }
 @media(min-width:768px){ .rmUnitSel{font-size:13px} }
 
 /* ── Demo button ── */
@@ -348,8 +368,10 @@
 .deskDismissBtn { background:none; border:1px solid var(--divider); color:var(--muted); font-family:inherit; font-size:12px; font-weight:700; padding:5px 14px; cursor:pointer; }
 .deskDismissBtn:hover { color:var(--sub); border-color:var(--muted); }
 
-/* ── Check-in bottom sheet ── */
-.ckSheet { position:fixed; bottom:0; left:0; right:0; z-index:999; background:var(--stone); border-top:2px solid var(--gold); padding:20px 18px 28px; box-shadow:0 -4px 32px rgba(0,0,0,.7); font-family:var(--font,inherit); }
+/* ── Check-in bottom sheet ──
+   Portrait it is ~410px (`.ckList` is capped at 160px), so it only ever clipped in landscape,
+   where the viewport is shorter than the sheet and the title scrolled off the top (#227). */
+.ckSheet { position:fixed; bottom:0; left:0; right:0; z-index:999; max-height:calc(100% - 16px); overflow-y:auto; overscroll-behavior:contain; background:var(--stone); border-top:2px solid var(--gold); padding:20px 18px 28px; box-shadow:0 -4px 32px rgba(0,0,0,.7); font-family:var(--font,inherit); }
 .ckDone { text-align:center; padding:12px 0; }
 .ckDoneIcon { font-size:36px; color:var(--green); display:block; margin-bottom:8px; }
 .ckDoneTitle { font-size:18px; font-weight:900; color:var(--green); letter-spacing:.06em; text-transform:uppercase; }

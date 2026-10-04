@@ -1,4 +1,4 @@
-import { exVolStr, groupProgressionSteps } from '../../../public/lib/wod.js'
+import { exVolStr, groupProgressionSteps, progressionGroupUnit } from '../../../public/lib/wod.js'
 import { monthGridCells, toISO } from '../../../public/lib/week.js'
 
 export function buildProgressionLines(ex) {
@@ -10,26 +10,16 @@ export function buildProgressionLines(ex) {
       ? `${ex.sets}×${ex.dist}${ex.distUnit || 'm'}`
       : `${ex.dist}${ex.distUnit || 'm'}`
     : null
-  const normUnit = u => (u === '%' || u === '% do RM' ? '% RM' : u || '% RM')
   // Groups by reps only (same key as the canonical Schedule.jsx view) so the
   // printed/exported WOD always shows the same number of lines as the in-app
-  // schedule — re-derive each group's unit from the raw steps (canonical
-  // groupProgressionSteps() doesn't carry unit) so kg/lb progressions keep
-  // their real unit instead of always being labeled "% RM".
+  // schedule — each group's unit comes from the shared progressionGroupUnit()
+  // (canonical groupProgressionSteps() doesn't carry unit) so kg/lb progressions
+  // keep their real unit instead of always being labeled "% RM".
   const groups = groupProgressionSteps(ex)
   return groups.map(g => {
     const repsPrefix = distPrefix || (ex.sets && g.reps ? `${ex.sets}×${g.reps}` : g.reps)
     const nameLine = [repsPrefix, name].filter(Boolean).join(' ')
-    const groupUnits = [
-      ...new Set(
-        steps
-          .filter(s => (s.reps || ex.reps || '') === g.reps && s.load)
-          .map(s => normUnit(s.unit)),
-      ),
-    ]
-    const loadStr = g.loads.length
-      ? `${g.loads.join('/')} ${groupUnits.length === 1 ? groupUnits[0] : '% RM'}`
-      : ''
+    const loadStr = g.loads.length ? `${g.loads.join('/')} ${progressionGroupUnit(ex, g.reps)}` : ''
     return { nameLine, loadStr }
   })
 }

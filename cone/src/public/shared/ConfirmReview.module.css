@@ -1,4 +1,10 @@
-/* ConfirmReview (#54/C0). Token-only shell; one backdrop opacity for all confirms. */
+/* ConfirmReview (#54/C0). Token-only shell; one backdrop opacity for all confirms.
+   #227 — the dialog is BOUNDED: the title and the buttons stay put and only the body scrolls.
+   Unbounded, a body taller than the screen (LogPane stacks one list per WOD block: 1.5–1.9×
+   a phone) was clipped top AND bottom by the centring, and `Confirmar`, the last child, was
+   the first thing lost. `max-height:100%` is the overlay's padded box rather than `dvh`: it
+   tracks Android Chrome's moving address bar, and it also bounds the gallery's transformed
+   ModalBox, where a fixed overlay sizes to its container, not the viewport. */
 .overlay{
   position:fixed;
   inset:0;
@@ -8,6 +14,11 @@
   align-items:center;
   justify-content:center;
   padding:20px;
+  /* A swipe that starts on the backdrop, the title or the buttons must not pan the page behind
+     the dialog. pinch-zoom stays on: the page is still zoomable. The body re-allows its own
+     vertical pan below. */
+  touch-action:pinch-zoom;
+  overscroll-behavior:contain;
 }
 .modal{
   background:var(--stone);
@@ -15,6 +26,9 @@
   border-radius:var(--radius-md);
   width:300px;
   max-width:100%;
+  max-height:100%;
+  display:flex;
+  flex-direction:column;
   padding:var(--sp-4);
   box-shadow:0 8px 40px rgba(0,0,0,.5);
   outline:none;
@@ -25,13 +39,28 @@
   color:var(--cream);
   margin-bottom:var(--sp-3);
   letter-spacing:.02em;
+  flex-shrink:0;
 }
 /* flex+gap, not margin-bottom on each child — a multi-block confirm (LogPane) stacks
-   several ReadBox pairs here and needs even spacing without a per-consumer wrapper. */
-.body{display:flex;flex-direction:column;gap:var(--sp-3);margin-bottom:var(--sp-4)}
-.err{font-size:12px;color:var(--err);margin-bottom:var(--sp-3)}
+   several ReadBox pairs here and needs even spacing without a per-consumer wrapper.
+   This is the one scroll container: `min-height:0` lets it shrink below its content,
+   `overscroll-behavior:contain` stops a swipe past its end chaining to the page, and the
+   children keep their natural height (`flex-shrink:0`) so they scroll instead of squashing. */
+.body{
+  display:flex;
+  flex-direction:column;
+  gap:var(--sp-3);
+  margin-bottom:var(--sp-4);
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  touch-action:pan-y pinch-zoom;
+}
+.body > *{flex-shrink:0}
+.err{font-size:12px;color:var(--err);margin-bottom:var(--sp-3);flex-shrink:0}
 
-.btns{display:flex;gap:var(--sp-2)}
+.btns{display:flex;gap:var(--sp-2);flex-shrink:0}
 .btn{
   flex:1;
   font-family:var(--font);

@@ -277,6 +277,24 @@ export function groupProgressionSteps(ex) {
   return groups
 }
 
+// The unit a progression's loads are in, for ONE rep group (`reps` as groupProgressionSteps keys
+// it) — or for every loaded step when `reps` is omitted (the complex path, which shows one merged
+// load line). One unit across the group → that unit ('kg', 'lb'…); anything else (none recorded,
+// or kg and % mixed) → '% RM', the unit a progression has always defaulted to, and `%` / `% do RM`
+// are the same unit as `% RM`. groupProgressionSteps itself doesn't carry the unit (its tests pin
+// `{reps, loads}`), so this re-derives it from the raw steps. Two consumers, and they must agree
+// on what a "60/70/80 kg" progression is (#209): the export lines (publicador/exportHelpers.js)
+// and the schedule's ExRow, which gates its RM chip and its computed load on this being '% RM'.
+export function progressionGroupUnit(ex, reps) {
+  const norm = u => (u === '%' || u === '% do RM' ? '% RM' : u || '% RM')
+  const units = new Set(
+    (ex.intensity?.steps || [])
+      .filter(s => s.load && (reps === undefined || (s.reps || ex.reps || '') === reps))
+      .map(s => norm(s.unit)),
+  )
+  return units.size === 1 ? [...units][0] : '% RM'
+}
+
 // The exercises a REGISTER FORM shows for a block. Estações nests its exercises under
 // stations rather than bl.exercises, so any consumer reading bl.exercises directly renders
 // nothing for that type. Rest stations are dropped and, by default, notes stripped — the

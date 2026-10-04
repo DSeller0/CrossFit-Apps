@@ -23,6 +23,9 @@ import {
   exCal,
   exCardio,
   exLong,
+  exLongGender,
+  exLadderGender,
+  exProgKg,
   exNoteOnly,
   rlFT,
   rlDNF,
@@ -225,16 +228,43 @@ export default {
               size="large"
             />
           </Case>
-          <Case label="size='tiny' (LogPane / WodBlockCard)">
+          <Case label="size='tiny' (index · LogPane · WodBlockCard) — por linha: volume + nome, carga embaixo (#231)">
             <ExerciseList
-              exercises={[exStandard, exProg, exComplex, exLong]}
+              exercises={[
+                exStandard,
+                exProg,
+                exComplex,
+                exLong,
+                exLongGender,
+                exLadderGender,
+                exProgKg,
+              ]}
               color={BLUE}
               size="tiny"
             />
           </Case>
-          {/* 200px wide on purpose: `grid` exists for the Criador week column, and
-              the two things it changes (12px name, intensity on its own line)
-              only read as fixes at the width that broke them. */}
+          {/* ≈242px = the list inside the "Revisar registro" dialog (a fixed 300px column minus its
+              padding and the ReadBox's) — the narrowest `tiny` consumer, and the one that overflowed
+              worst before it went by line (#231, plans/98). */}
+          <Case label="size='tiny' · largura do diálogo Revisar registro (≈242px)">
+            <div
+              style={{
+                width: 242,
+                background: 'var(--stone2)',
+                border: '1px solid var(--divider)',
+                padding: 12,
+              }}
+            >
+              <ExerciseList
+                exercises={[exLongGender, exLadderGender, exProgKg, exComplex]}
+                color={AMBER}
+                size="tiny"
+              />
+            </div>
+          </Case>
+          {/* 200px wide on purpose: `grid` is `tiny` with a 12px name, for the Criador week column
+              (#231: both share the by-line layout now), and the 12px name only reads as a fix at the
+              width that broke it. */}
           <Case label="size='grid' (coluna da semana do Criador · 200px)">
             <div
               style={{
@@ -245,7 +275,7 @@ export default {
               }}
             >
               <ExerciseList
-                exercises={[exStandard, exProg, exComplex, exLong]}
+                exercises={[exStandard, exProg, exComplex, exLong, exLongGender, exProgKg]}
                 color={AMBER}
                 size="grid"
               />

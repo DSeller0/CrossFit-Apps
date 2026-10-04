@@ -208,7 +208,9 @@ refinements: [docs/plans/36](../plans/36-criador-text-mode.md).
   what `GoalInput.jsx:20` needs — it drops any goal whose kind doesn't match the type.
   `parseGoal` keeps `min` a **string** (#110's type-mismatch family).
 - **The week grid has two render modes, it is not a new view** (`WeekGrid` `gridMode` +
-  `WeekSessionCard`): **Grade** = the real `ExerciseList` at size `tiny`; **Texto** =
+  `WeekSessionCard`): **Grade** = the real `ExerciseList` at size `grid` (not `tiny` — this line
+  said `tiny` until plans/98 corrected it; the text preview, `PreviewBlock`, is the Criador
+  consumer that IS `tiny`; both read by line since #231); **Texto** =
   `serializeSession`. Same 7 columns, same `boxFilter`. Texto is the copyable one and
   the only one carrying the structure line, `Meta:` and notes.
 - **`isTextEditable(block)` is false for a LINKED Benchmark only** (`block.benchmarkRef`) — its
