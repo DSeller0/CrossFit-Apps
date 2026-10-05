@@ -17,9 +17,10 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready:** #228
+- **Ready:** #228, #233
 - **In Progress:** none
-- **Start here:** #228 (plans/99), which stops at an approval gate once its editor fields render.
+- **Start here:** #228 (plans/99), which stops at an approval gate once its editor fields render;
+  then #233 (plans/100), the suggested-session engine, which wants #228's interval field.
   plans/98 shipped 2026-10-04 (`9acfdfa`) — only its S22 re-check is left, listed in
   [DEVICE-TESTS.md](./DEVICE-TESTS.md).
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
@@ -33,7 +34,8 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
   live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
   2026-10-02: #227–#231 filed from user reports and the
   [block-structures evidence](./reviews/2026-10-02-block-structures.md); #158 narrowed to its (b) half.
-  2026-10-04: #209 closed by plans/98; #232 filed from its screenshots.
+  2026-10-04: #209 closed by plans/98; #232 filed from its screenshots; #233–#237 filed from the
+  [suggested-session analysis](./reviews/2026-10-04-suggested-session.md).
 
 ⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
 plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
@@ -45,6 +47,7 @@ Every other bullet here is free-form.
 ## 🟢 Ready (planned — pick from the top)
 
 - 🟢 **[→ Ready · plans/99](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off: a time-per-round field on every block type** · M · Sonnet · 38 prod blocks keep an interval only as text, 16 a "40'' on 20'' off", and 12 Estações exist only for the clock. Absorbs #158(a): EMOM's 60 s is hardcoded in the timer. Stops at an approval gate once the editor fields render.
+- 🟢 **[→ Ready · plans/100](./plans/100-suggested-session-engine.md)** — **#233 Suggested session, Phase 1: the statistical engine + a backtest audit** · L · Opus · The third Criador input (✦ Sugerido) needs a pure engine first: structure, lift rotation, WOD themes and loads synthesized from the box's own history, and a `--backtest` scorecard that judges every rule. Starts after #228 (its interval field); Phases 2–5 are #234–#237.
 
 ## 🔵 In Progress
 
@@ -106,6 +109,10 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#229 Round-groups inside a block — buy-in / N rounds / buy-out, one score** · L · Opus→Sonnet · 21 prod blocks type `3 Rounds`, `Buy in`, `Then` as exercise rows: athletes see them as movements, and #112's DNF total counts `3 Rounds` as 3 reps. Claude Design mockup of the inputs and the athlete view first. [Evidence](./reviews/2026-10-02-block-structures.md).
 - **#230 Estações timer + cap math** · S–M · Sonnet · the timer gives every station the FIRST station's duration and never sees `restBetweenCycles` (`Schedule.jsx:601`) — wrong for 2026-09-12's 9'/8'/7' windows. `stationsCapMins` and `stationsCapStr` disagree on a trailing rest; `cloneBlocks` never re-ids stations.
 - **#232 `ReadRow` has no gap between its label and its value** · XS · Sonnet · `ConfirmReview.module.css:96` `.row` is `justify-content:space-between` with no `gap`, so a short exercise name beside a long note reads "RunSubstituí pela versão…" in the review dialog and the LogPane's read boxes. Add a gap and let the value wrap. Found in plans/98's screenshots.
+- ⏸ **#234 Suggested session, Phase 2: Lane-B mockup of ✦ Sugerido** · S · Sonnet · the controls (lift, pattern, budget, blocks), "por quê" + "↻ Outra", the thin-data banner, the budget warning, 390/1280, all themes. Stops for the user's approval. Blocked on #233.
+- ⏸ **#235 Suggested session, Phase 3: the ✦ Sugerido editor mode** · M · Sonnet · `SessionSuggestPane` as a third `sessionMode`, preview → Aplicar, the `session.suggestion` snapshot, a gallery entry, `audit-suggest.mjs --edits` switched on. Blocked on #233 and the #234 approval.
+- ⏸ **#236 Suggested session, Phase 4: link a box's history to the untagged sessions** · S · Sonnet · `location.historyFromUntagged = {until}` so the main box keeps its past when it gets a name — link, never retag. Must land before the rename. Blocked on #233.
+- ⏸ **#237 Suggested session, Phase 5: an editable "Padrão" per exercise** · S–M · Sonnet · a `pattern` override on the registry entry (8 movement patterns) in Exercícios, plus `scripts/audit-patterns.mjs`. Only 71% of movement occurrences resolve today; #211 narrows it. Blocked on #233.
 
 ### P3 — needs a decision before it needs code
 
