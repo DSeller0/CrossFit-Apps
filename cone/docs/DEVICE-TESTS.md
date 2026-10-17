@@ -61,9 +61,9 @@ Say whether plans/98's fix had shipped on the day you ran it. Result → plans/9
 
 ### Timer cues on iPhone — an observation, not an item yet
 
-The timer marks a new round or phase **by vibration only** (`timer/Timer.jsx:315,323,327`), and iOS
+The timer marks a new round or phase **by vibration only** (`timer/Timer.jsx:309,320,324`), and iOS
 Safari has no Vibration API — an iPhone gets no cue at all. Whenever a timer is tested on an iPhone
-(#228's "A cada" timer, once shipped), note whether the missing cue matters in class. If it does, it
+(#228's "A cada" timer, shipped 2026-10-17), note whether the missing cue matters in class. If it does, it
 becomes its own row (a sound or screen-flash cue).
 
 ## Android — pending
@@ -91,3 +91,20 @@ worker can serve the old build for one load, so open each page twice.
 5. **Tell me:** both fixed? In both themes? A screenshot of anything that still looks wrong.
 6. **Clean up:** Criador → `DOM` → `Remover`. Result → plans/98's marker, which turns `> 🟡 Shipped:`
    into `> ✅ Done:` and closes #227 and #231.
+
+### #228 · Does the timer vibrate at each new round? ([plans/99](./plans/99-interval-per-round.md)) (≈3 minutes)
+
+Shipped 2026-10-17. Every other check ran on Chromium with `navigator.vibrate` stubbed: the stub saw
+each call, but no phone has felt one. After the deploy, close every Cone tab and reopen it — the
+service worker can serve the old build for one load.
+
+1. **A short test block** (on the computer is fine). Criador → any day this week → `+ sessão` →
+   `¶ Texto` → paste the three lines `Força` · `3 rounds A cada 20"` · `1 Hang Clean` → `Aplicar` →
+   `Salvar sessão`.
+2. **On the phone:** `schedule.html?box=all` → that day → the Força card → **Timer** (the ▶ row under
+   the exercises) → `INICIAR`. Keep the screen on and the phone in your hand.
+3. **(a)** A double buzz at 0:20 and again at 0:40, as `RD 2/3` and `RD 3/3` appear? **(b)** A long
+   triple buzz at 1:00, with `FINALIZADO 01:00`? **(c)** Does the footer read `DESCARTAR · FECHAR`,
+   with no `REGISTRAR`?
+4. **Tell me** (a)–(c). Then `FECHAR`, and Criador → that day → `Remover`. Result → plans/99's
+   marker, which turns `> 🟡 Shipped:` into `> ✅ Done:` and closes #228.

@@ -17,19 +17,19 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready:** #228, #233
+- **Ready:** #233
 - **In Progress:** none
-- **Start here:** #228 (plans/99), which stops at an approval gate once its editor fields render;
-  then #233 (plans/100), the suggested-session engine, which wants #228's interval field.
-  plans/98 shipped 2026-10-04 (`9acfdfa`) — only its S22 re-check is left, listed in
-  [DEVICE-TESTS.md](./DEVICE-TESTS.md).
+- **Start here:** #233 (plans/100), the suggested-session engine (Opus) — #228's interval field,
+  which it builds on, shipped 2026-10-17 (`5d3f728`). plans/98 (`9acfdfa`) and plans/99 each have
+  only an S22 check left, listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md).
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
   `> 🟡 Shipped:` pending an iPhone re-test, now listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md) (no
   iPhone at hand); nothing to code. · **#211** — the
   [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) needs 20 naming calls and
   approval of the drafted text before its [SQL](./reviews/2026-09-20-registry-additions.sql) reaches
   prod; a Markdown decision checklist for the user comes next. · **#227 · #231** — plans/98 shipped
-  and is held at `> 🟡 Shipped:` until the S22 re-check passes; nothing to code.
+  and is held at `> 🟡 Shipped:` until the S22 re-check passes; nothing to code. · **#228** — plans/99 shipped 2026-10-17 and is
+  held at `> 🟡 Shipped:` until the S22 buzzes at each new round; nothing to code.
 - **Last refill:** the [2026-09-20 full pass](./reviews/2026-09-20.md) (all 9 dimensions incl. a
   live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
   2026-10-02: #227–#231 filed from user reports and the
@@ -46,7 +46,6 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/99](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off, and a Timer on every block** · L · Sonnet · 38 prod blocks keep an interval only as text, 16 a "40'' on 20'' off", and 12 Estações exist only for the clock — while the Timer is WOD-only. Absorbs #158(a): EMOM's 60 s is hardcoded. Stops at an approval gate once the Duração hint and the Timer placement render.
 - 🟢 **[→ Ready · plans/100](./plans/100-suggested-session-engine.md)** — **#233 Suggested session, Phase 1: the statistical engine + a backtest audit** · L · Opus · The third Criador input (✦ Sugerido) needs a pure engine first: structure, lift rotation, WOD themes and loads synthesized from the box's own history, and a `--backtest` scorecard that judges every rule. Starts after #228 (its interval field); Phases 2–5 are #234–#237.
 
 ## 🔵 In Progress
@@ -69,6 +68,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 - ⏸ **#155 iOS Safari zooms the page when logging a result** · S · Sonnet · blocked on the user: `plans/74` shipped the 16px floor (`793ee45`, 2026-08-07) and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test — steps in [DEVICE-TESTS.md](./DEVICE-TESTS.md). Nothing to code until it runs.
 - ⏸ **[plans/98 · `9acfdfa` · 🟡 S22 re-check pending](./plans/98-phone-rendering-verify.md)** — **#227 + #231 The logging dialog loses "Confirmar"; long exercise rows overlap** · S · Sonnet · blocked on the user: both fixed and driven on Chromium; the plan stays `> 🟡 Shipped:` until the S22 re-check passes — steps in [DEVICE-TESTS.md](./DEVICE-TESTS.md). Nothing to code.
+- ⏸ **[plans/99 · `5d3f728` · 🟡 S22 vibration check pending](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off, and a Timer on every block** · L · Sonnet · blocked on the user: shipped and driven on Chromium; held at `> 🟡 Shipped:` until the phone buzzes at each new round — steps in [DEVICE-TESTS.md](./DEVICE-TESTS.md). Nothing to code.
 - **#204 me.html's Distribuição reads 0/N for every athlete** · XS · Sonnet · `results_v2` logs only WOD block types, so `calcBlockStats`' executed side is structurally 0 for Força/LPO/Acessórios/Skill/Core/Cardio/Mobilidade. It was hidden until #164 made planned non-zero. Decide: hide the card until #64 logs strength blocks, or show planned only.
 - **#208 Off-screen panels stay in the tab order on every public page** · XS · Sonnet · `Nav.module.css:3` `.ovSheet` and `Results.module.css:181` `.lbPane` hide by `transform` alone. Verified live: the 3 overflow tiles are `visibility:visible` and take focus. The fix idiom is already in both files (`display:none` / `visibility:hidden`).
 - **#210 A rest-day article was pasted into the Criador and became 50 exercises** · S · Sonnet · session `mt7kwk74qic61a0mx9s` (2026-08-27): 49 prose lines are `exercises` with empty reps/sets across four Mobilidade blocks, `block.notes` empty on all four. Renders to athletes as a WOD with 50 movements. Decide: repair the row, and whether the paste path should have caught it.

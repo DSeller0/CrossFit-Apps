@@ -1,5 +1,31 @@
 # 99 — #228 · "A cada" + on/off: a time-per-round field on every block type, and a Timer on every block
 
+> 🟡 Shipped: `5d3f728` · 2026-10-17 — see BACKLOG.md · #228. Everything is driven on Chromium; the
+> plan stays `> 🟡 Shipped:` until the Android vibration check passes (steps in
+> [DEVICE-TESTS.md](../DEVICE-TESTS.md)), and the marker is flipped then.
+>
+> **Must-haves: 5/6 driven** on the local stack (SPA `:5173`, public `:5174`, two fixture sessions on
+> 2026-11-02/03, deleted afterwards), on the final files. (1) Força `3 rounds · A cada 2:00`, saved
+> from Detalhado and from Texto: `interval:'02:00'`, `rounds:'3'`, no `duration` both times;
+> schedule.html shows `3 RDS · a cada 2'` with a Timer in the right-hand column. (2) Its timer:
+> `RD 1/3` → `RD 2/3` at 120.1 s (`[400,100,400]`) → `RD 3/3` at 240.3 s → `FINALIZADO 06:00` at
+> 360.1 s; footer `DESCARTAR · FECHAR`, no REGISTRAR. For Time's footer: `DESCARTAR · REGISTRAR`.
+> Driven with a `Date.now()` offset, **not** `page.clock`: `runFor` hung the tool twice once the timer
+> was running. (3) Core `3 rounds 40" on 20" off`: the whole session text came back identical through
+> ¶ Texto → Detalhado → ¶ Texto, and so did the block's own ¶; deleting the line emptied A cada and
+> Trabalho, retyping it restored `01:00` / `00:40`. Its timer: `00:39 TRABALHO` → `00:19 DESCANSO` at
+> 40.6 s → `RD 2/3` at 60.6 s. (4) LPO CAP 15': `14:59` → `FINALIZADO 15:00`. Força sem tempo:
+> `15:05`, `30:05`, still running until FIM. EMOM: `MIN 1/12` → `MIN 2/12` at 60.6 s
+> (`[300,100,300]`). EMOM `A cada 1'30"`: 8 rounds, `RD 2/8` at 90.6 s, `FINALIZADO 12:00`. Estações:
+> `EST 1/2 · RD 1/2` → `TRANSIÇÃO` at 45 s → `EST 2/2` at 60 s → `RD 2/2` at 120 s → `04:00`. Before
+> the change, HEAD renders no Timer on a non-WOD block (`actionsEmpty = !isWod`) and offers REGISTRAR
+> on any timer with a session (`canReg = !!cfg.sessionId`). (5) `A cada 2:00` × 5 with Duração empty:
+> placeholder `10'`, saved block without `duration`, week-grid card `5× · a cada 2'`. (6) Android
+> vibration: pending. Text round-trip audit on 747 prod blocks, before and after: 543 identical, 30
+> rewritten, 0 unstable; `interval-approximated` gone, `interval-lost` 0. `/code-review` hit the
+> session limit three times, so the diff was reviewed inline: one finding, fixed in the same commit —
+> the index rail hand-rolls non-WOD meta and dropped the interval.
+
 *Planned 2026-10-02 (Opus); amended 2026-10-05 (Opus) — the Duração hint and a Timer on every block.
 Execution: **Sonnet**, with two approval gates: after the editor fields render (step 3 — the A cada /
 Trabalho fields, approved with the 2026-10-05 amendment) and after the Duração hint and the Timer
