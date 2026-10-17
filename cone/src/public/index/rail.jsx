@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { IconCalendar, IconChartBar, IconTrophy, IconAlertTriangle } from '@tabler/icons-react'
 import { getWeek, toISO, todayISO, DAY_PT_TITLE, DAY_PT_FULL, MONTH_PT_SHORT } from '../lib/week.js'
 import { inBoxScope } from '../lib/boxScope.js'
-import { blkColor, isWodBlock, blkMeta } from '../lib/wod.js'
+import { blkColor, isWodBlock, blkMeta, intervalStr } from '../lib/wod.js'
 import { sessName } from '../lib/sessions.js'
 import { ExerciseList } from '../shared/ExerciseList.jsx'
 import s from './rail.module.css'
@@ -144,7 +144,11 @@ function SessionBlock({ block, expanded, onToggle }) {
   const meta = [
     isWodBlock(block)
       ? blkMeta(block)
-      : [block.duration && `${block.duration}'`, block.rounds && `${block.rounds} rds`]
+      : [
+          block.duration && `${block.duration}'`,
+          block.rounds && `${block.rounds} rds`,
+          intervalStr(block),
+        ]
           .filter(Boolean)
           .join(' · '),
     block.stationRepeat && `${block.stationRepeat}×`,

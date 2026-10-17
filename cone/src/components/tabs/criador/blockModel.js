@@ -1,4 +1,4 @@
-import { uid, expandMMSS } from '../../../public/lib/wod.js'
+import { uid, expandMMSS, fmtSecs, intervalOf, intervalStr } from '../../../public/lib/wod.js'
 import { todayISO } from '../../../public/lib/week.js'
 import { resolveExercise } from '../../../public/lib/registry.js'
 
@@ -137,7 +137,7 @@ export const TYPE_CONFIG = {
     desc: 'Alta intensidade intervalado',
     showDuration: true,
     showRounds: true,
-    durationLabel: 'Intervalo (s)',
+    durationLabel: 'Duração (min)',
   },
   MetCon: {
     icon: 'ti-flame',
@@ -312,6 +312,34 @@ export const normalizeBlockGoals = blocks =>
     return goal === b.goal ? b : { ...b, goal }
   })
 
+// Complete a block's "A cada" / "Trabalho" mm:ss (#228) — the same boundary and the same
+// reason as normalizeGoal above: the editor persists per keystroke, so an interval typed
+// as `2` and never blurred would reach storage bare and toSecs would read it as 2 SECONDS.
+//
+// Keys are stored only while they mean something. An empty, zero or invalid `interval` is
+// deleted rather than kept as '' on every block; a `work` that does not sit strictly inside
+// the interval goes with it (intervalOf's rule); Estações carries neither. Returns the same
+// object when there is nothing to change, like normalizeGoal.
+export function normalizeBlockInterval(b) {
+  if (b.interval === undefined && b.work === undefined) return b
+  const iv = intervalOf({
+    type: b.type,
+    interval: expandMMSS(b.interval),
+    work: expandMMSS(b.work),
+  })
+  const interval = iv ? fmtSecs(iv.every) : undefined
+  const work = iv?.work ? fmtSecs(iv.work) : undefined
+  if (interval === b.interval && work === b.work) return b
+  const next = { ...b }
+  if (interval === undefined) delete next.interval
+  else next.interval = interval
+  if (work === undefined) delete next.work
+  else next.work = work
+  return next
+}
+
+export const normalizeBlockIntervals = blocks => (blocks || []).map(normalizeBlockInterval)
+
 export function stationsCapStr(block) {
   if (block.type !== 'Estações') return null
   const parse = v => {
@@ -345,6 +373,8 @@ export function blockSummary(block) {
   const parts = []
   if (cfg.showDuration && block.duration) parts.push(`${block.duration}'`)
   if (cfg.showRounds && block.rounds) parts.push(`${block.rounds}×`)
+  const interval = intervalStr(block)
+  if (interval) parts.push(interval)
   const named = (block.exercises || []).filter(e => e.name.trim()).length
   if (named) parts.push(`${named} mov.`)
   return parts.join(' · ')

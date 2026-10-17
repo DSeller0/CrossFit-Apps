@@ -169,7 +169,7 @@ refinements: [docs/plans/36](../plans/36-criador-text-mode.md).
 - **The parser never drops a line.** Anything unclassified lands verbatim in
   `block.notes`; `audit` returns one entry per non-blank input line, which is how
   "nothing was lost" is asserted rather than hoped. Warning kinds: `type-unresolved` ·
-  `unknown-exercise` · `complex-detected` · `interval-approximated` · `unparsed-line` ·
+  `unknown-exercise` · `complex-detected` · `unparsed-line` ·
   `orphan-load` · `preamble`.
 - **`scripts/audit-text-roundtrip.mjs` (61·A) is the fidelity instrument** — read-only,
   runs serialize→parse over every prod block in two passes (the pane direction and the
@@ -251,3 +251,30 @@ refinements: [docs/plans/36](../plans/36-criador-text-mode.md).
 - `SessionTextPane` takes its **type picker as a prop** and `WeekImportModal` imports
   `uid`/`toISO` from `public/lib/` rather than `utils/storage` — both render in the
   client-free gallery, and `utils/storage` pulls the SPA Supabase client.
+- **`block.interval` / `block.work` — "A cada" and on/off, per round (#228 · plans/99).**
+  `interval` is mm:ss (`'02:00'`), `work` the on part (`'00:40'`); **rest is never stored**, it is
+  `interval − work`, and only counts when `0 < work < interval`. A key exists only when
+  meaningful: `normalizeBlockIntervals` (the save boundary, `useSessionEditor` — the editor
+  persists per keystroke, #139's trap) drops an empty or invalid `work`, and **Estações never
+  carries either** (its stations already are the cycle; an `A cada` there stays a note). An EMOM
+  with no interval keeps its 60 s. ⚠️ **`duration` stays bare minutes (#93) and is never derived
+  from an interval** — the Duração input only shows `fmtPrime(every × rounds)` as its
+  *placeholder* (`10'`), so a value the coach types always wins and nothing is stored behind his
+  back. Display is `intervalStr` (`a cada 2'` / `40" on 20" off`): `blkMetaParts` puts it in the
+  meta line the public pages show; `WeekSessionCard`, `blockSummary` and the text pane's summary
+  read it directly. `fmtPrime` (`40"` · `2'` · `1'30"` · `2'05"`) is shared by display and Texto,
+  so the two can't disagree.
+- **The grammar:** `A cada 2'` · `A cada 1'30"` · `every 2'` · `A cada dois minutos` · `E2MOM` ·
+  `40" on 20" off` · `1' on 30" off`; the interval goes **last** on the structure line
+  (`3 rounds A cada 2'`). ⚠️ **Minutes then seconds (`DUR_MIN`/`DUR_SEC`):** `''` is seconds unless
+  digits follow it (then it is a typo'd minutes mark), and seconds digits need their own mark or
+  sit flush against the minutes mark — so `A cada 2' 7 Sets` is **2 min + 7 sets**, never 2'07".
+  The on/off probe is consumed **before** `RE_TIME`, or `40" on` reads as a 40-second duration.
+  The old `Obs:` notes `interval-approximated` used to write stay notes (forward-only — nothing is
+  migrated), and that warning kind is **gone**: an interval is a real field now.
+- ⚠️ **`BlockTextEditor` commits through `applyParsedBlock(block, parsed)`, not a field
+  whitelist.** Its old `merge` copied a fixed list of keys, so any new key was silently dropped
+  when a block was flipped to ¶ Texto and back. The helper **deletes** `interval`/`work` before
+  re-setting them, which is also why removing the line from the text removes the field.
+  `audit-text-roundtrip.mjs` carries both in `normBlock` and an `interval-lost` class; before/after
+  on 747 prod blocks: 543 identical, 30 rewritten, **0 unstable** both times, `interval-lost` 0.

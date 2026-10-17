@@ -6,6 +6,7 @@ import {
   findAthleteById,
   usesRm,
   calcFromRm,
+  timerConfigFor,
 } from './scheduleHelpers.js'
 
 // #71 — the guest check-in name helpers. The whole point of this pair is that they never
@@ -246,5 +247,171 @@ describe('calcFromRm', () => {
     expect(calcFromRm(undefined, [75])).toBe('')
     expect(calcFromRm(rm(0, 'kg'), [75])).toBe('')
     expect(calcFromRm(rm(100, 'kg'), [])).toBe('')
+  })
+})
+
+// ── timerConfigFor (#228 · plans/99) ──────────────────────────────────────────
+// The block half of openTimer — one case per row of the table in scheduleHelpers.js.
+describe('timerConfigFor', () => {
+  const complex = {
+    isComplex: true,
+    name: '',
+    sets: 3,
+    complexMovements: [
+      { name: 'Hang Clean', reps: '1' },
+      { name: 'Push Jerk', reps: '1' },
+    ],
+  }
+  const row = { name: 'Back Squat', sets: 5, reps: '5' }
+
+  test('Estações keeps its stations, durations and rounds exactly as before', () => {
+    const cfg = timerConfigFor({
+      id: 'b1',
+      type: 'Estações',
+      label: 'Estações',
+      stationRepeat: 2,
+      stations: [
+        { name: 'Grupo A', duration: '0:45', exercises: [row, { name: '' }] },
+        { name: 'Descanso', isRest: true, duration: '0:20' },
+        { name: '', duration: '1:00', exercises: [complex] },
+      ],
+    })
+    expect(cfg).toMatchObject({
+      blockType: 'Estações',
+      blockId: 'b1',
+      rounds: 2,
+      stationTime: 45,
+      transitionTime: 20,
+      loggable: true,
+    })
+    expect(cfg).not.toHaveProperty('intervalMode')
+    expect(cfg.exercises).toEqual([
+      { name: 'Grupo A', exercises: [{ name: 'Back Squat', sets: 5, reps: '5' }] },
+      { name: 'Grupo', exercises: [{ name: 'Hang Clean + Push Jerk', sets: 3, reps: undefined }] },
+    ])
+  })
+
+  test('an Estações block with no durations falls back to 45s / 15s', () => {
+    const cfg = timerConfigFor({ type: 'Estações', stations: [{ name: 'A', exercises: [row] }] })
+    expect(cfg).toMatchObject({ stationTime: 45, transitionTime: 15 })
+  })
+
+  test("the user's example — Força, 3 rounds a cada 2', a complex — runs the cycle", () => {
+    const cfg = timerConfigFor({
+      id: 'b2',
+      type: 'Força',
+      label: 'Força',
+      rounds: '3',
+      interval: '02:00',
+      exercises: [complex],
+    })
+    expect(cfg).toMatchObject({
+      blockType: 'Força',
+      intervalMode: true,
+      stationTime: 120,
+      transitionTime: 0,
+      rounds: 3,
+      loggable: false,
+    })
+    expect(cfg.exercises).toEqual([
+      { name: 'Força', exercises: [{ name: 'Hang Clean + Push Jerk', sets: 3, reps: undefined }] },
+    ])
+  })
+
+  test('an on/off block times the work, then the rest', () => {
+    const cfg = timerConfigFor({
+      type: 'Core',
+      rounds: '3',
+      interval: '01:00',
+      work: '00:40',
+      exercises: [row],
+    })
+    expect(cfg).toMatchObject({
+      intervalMode: true,
+      stationTime: 40,
+      transitionTime: 20,
+      rounds: 3,
+    })
+  })
+
+  test('with no Rounds, the rounds that fit Duração; with neither, null — it runs until FIM', () => {
+    const lpo = { type: 'LPO', interval: '02:00', exercises: [row] }
+    expect(timerConfigFor({ ...lpo, duration: '15' }).rounds).toBe(7)
+    expect(timerConfigFor({ ...lpo, duration: '12' }).rounds).toBe(6)
+    expect(timerConfigFor({ ...lpo, duration: '1' }).rounds).toBeNull()
+    expect(timerConfigFor(lpo).rounds).toBeNull()
+  })
+
+  test('explicit Rounds beat what Duração would fit, and Duração still rides along as the cap tag', () => {
+    const cfg = timerConfigFor({
+      type: 'Força',
+      rounds: '5',
+      interval: '02:00',
+      duration: '20',
+      exercises: [row],
+    })
+    expect(cfg).toMatchObject({ rounds: 5, timeCap: 20 })
+  })
+
+  test('an EMOM that carries its own interval takes the cycle, whatever its type', () => {
+    const cfg = timerConfigFor({
+      type: 'EMOM',
+      interval: '01:30',
+      duration: '12',
+      exercises: [row],
+    })
+    expect(cfg).toMatchObject({
+      blockType: 'EMOM',
+      intervalMode: true,
+      stationTime: 90,
+      transitionTime: 0,
+      rounds: 8,
+      loggable: true,
+    })
+  })
+
+  test("an EMOM with no interval keeps today's config — the 60s minute stays the timer's", () => {
+    const cfg = timerConfigFor({ type: 'EMOM', duration: '12', exercises: [row] })
+    expect(cfg).toMatchObject({ blockType: 'EMOM', timeCap: 12, loggable: true })
+    expect(cfg).not.toHaveProperty('intervalMode')
+  })
+
+  test('a WOD with no interval is untouched: its own type, cap and rounds', () => {
+    const cfg = timerConfigFor({ type: 'For Time', duration: '15', rounds: '3', exercises: [row] })
+    expect(cfg).toMatchObject({
+      blockType: 'For Time',
+      timeCap: 15,
+      rounds: '3',
+      stationTime: 45,
+      transitionTime: 15,
+      loggable: true,
+    })
+    expect(cfg).not.toHaveProperty('intervalMode')
+  })
+
+  test('a non-WOD block with a Duração counts up to it, and cannot be logged', () => {
+    const cfg = timerConfigFor({ type: 'LPO', duration: '15', exercises: [row] })
+    expect(cfg).toMatchObject({ blockType: 'LPO', timeCap: 15, loggable: false })
+    expect(cfg).not.toHaveProperty('intervalMode')
+  })
+
+  test('a non-WOD block with nothing is a stopwatch: no cap, no rounds', () => {
+    const cfg = timerConfigFor({ type: 'Força', exercises: [row, complex] })
+    expect(cfg).toMatchObject({ blockType: 'Força', timeCap: null, rounds: null, loggable: false })
+    expect(cfg.exercises.map(e => e.name)).toEqual(['Back Squat', 'Hang Clean + Push Jerk'])
+  })
+
+  test('a custom label wins, and the placeholder "-" does not', () => {
+    expect(timerConfigFor({ type: 'Força', label: 'Agacho pesado' }).blockLabel).toBe(
+      'Agacho pesado',
+    )
+    expect(timerConfigFor({ type: 'Força', label: 'Força' }).blockLabel).toBe('Força')
+    expect(timerConfigFor({ type: 'Força', label: '-' }).blockLabel).toBe('-')
+    expect(timerConfigFor({ type: 'Força' }).blockLabel).toBe('Força')
+  })
+
+  test('empty exercise rows never reach the timer', () => {
+    const cfg = timerConfigFor({ type: 'Força', exercises: [{ name: '' }, row, { name: '  ' }] })
+    expect(cfg.exercises).toHaveLength(2)
   })
 })

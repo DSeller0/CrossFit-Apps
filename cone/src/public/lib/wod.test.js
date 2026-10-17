@@ -4,6 +4,11 @@ import {
   exVolStr,
   toSecs,
   fmtSecs,
+  fmtPrime,
+  intervalOf,
+  intervalStr,
+  intervalTotal,
+  blkMetaParts,
   maskMMSS,
   expandMMSS,
   rankResults,
@@ -308,6 +313,131 @@ describe('fmtSecs', () => {
   test('0 → 00:00', () => expect(fmtSecs(0)).toBe('00:00'))
   test('round-trips with toSecs', () => {
     expect(fmtSecs(toSecs('12:45'))).toBe('12:45')
+  })
+})
+
+// ── Interval per round (#228) ─────────────────────────────────────────────────
+describe('fmtPrime', () => {
+  test('seconds only → 40"', () => expect(fmtPrime(40)).toBe('40"'))
+  test("whole minutes → 2'", () => {
+    expect(fmtPrime(60)).toBe("1'")
+    expect(fmtPrime(120)).toBe("2'")
+  })
+  test('minutes + seconds → 1\'30"', () => expect(fmtPrime(90)).toBe('1\'30"'))
+  test('seconds under 10 keep their zero pad → 2\'05"', () => expect(fmtPrime(125)).toBe('2\'05"'))
+  test('rounds a fractional input to the second', () => expect(fmtPrime(89.6)).toBe('1\'30"'))
+  test('zero, negative and non-numeric read as nothing', () => {
+    expect(fmtPrime(0)).toBe('')
+    expect(fmtPrime(-5)).toBe('')
+    expect(fmtPrime(NaN)).toBe('')
+    expect(fmtPrime(Infinity)).toBe('')
+    expect(fmtPrime(undefined)).toBe('')
+  })
+})
+
+describe('intervalOf', () => {
+  test('an interval alone has no work and no rest', () => {
+    expect(intervalOf({ type: 'Força', interval: '02:00' })).toEqual({
+      every: 120,
+      work: null,
+      rest: null,
+    })
+  })
+
+  test('a work time strictly inside the interval yields the rest', () => {
+    expect(intervalOf({ type: 'Core', interval: '01:00', work: '00:40' })).toEqual({
+      every: 60,
+      work: 40,
+      rest: 20,
+    })
+  })
+
+  test('a work time at or past the interval is dropped, the interval stays', () => {
+    expect(intervalOf({ type: 'Core', interval: '01:00', work: '01:00' })?.work).toBeNull()
+    expect(intervalOf({ type: 'Core', interval: '01:00', work: '02:00' })?.work).toBeNull()
+    expect(intervalOf({ type: 'Core', interval: '01:00', work: '00:00' })?.work).toBeNull()
+  })
+
+  test('no interval → null, whatever the work time says', () => {
+    expect(intervalOf({ type: 'Core', work: '00:40' })).toBeNull()
+    expect(intervalOf({ type: 'Core', interval: '' })).toBeNull()
+    expect(intervalOf({ type: 'Core', interval: '00:00' })).toBeNull()
+    expect(intervalOf(undefined)).toBeNull()
+  })
+
+  test('Estações never has one, even if the key is on the block', () => {
+    expect(intervalOf({ type: 'Estações', interval: '02:00' })).toBeNull()
+  })
+
+  test('reads a bare value as seconds — completing it to minutes is the save step', () => {
+    expect(intervalOf({ type: 'Força', interval: '2' })?.every).toBe(2)
+  })
+})
+
+describe('intervalStr', () => {
+  test("an interval → a cada 2'", () => {
+    expect(intervalStr({ type: 'Força', interval: '02:00' })).toBe("a cada 2'")
+    expect(intervalStr({ type: 'LPO', interval: '01:30' })).toBe('a cada 1\'30"')
+  })
+
+  test('an on/off split → 40" on / 20" off', () => {
+    expect(intervalStr({ type: 'Core', interval: '01:00', work: '00:40' })).toBe('40" on / 20" off')
+  })
+
+  test('an invalid work time falls back to the plain interval', () => {
+    expect(intervalStr({ type: 'Core', interval: '01:00', work: '01:30' })).toBe("a cada 1'")
+  })
+
+  test('nothing to say → empty string', () => {
+    expect(intervalStr({ type: 'Força' })).toBe('')
+    expect(intervalStr({ type: 'Estações', interval: '02:00' })).toBe('')
+  })
+})
+
+describe('intervalTotal', () => {
+  test('every × rounds, in seconds', () => {
+    expect(intervalTotal({ type: 'Força', interval: '02:00', rounds: '5' })).toBe(600)
+    expect(intervalTotal({ type: 'LPO', interval: '01:30', rounds: 5 })).toBe(450)
+  })
+
+  test('an on/off split still totals the whole interval', () => {
+    expect(intervalTotal({ type: 'Core', interval: '01:00', work: '00:40', rounds: '3' })).toBe(180)
+  })
+
+  test('0 when the interval, the rounds, or both are missing', () => {
+    expect(intervalTotal({ type: 'Força', interval: '02:00' })).toBe(0)
+    expect(intervalTotal({ type: 'Força', interval: '02:00', rounds: '' })).toBe(0)
+    expect(intervalTotal({ type: 'Força', interval: '02:00', rounds: '0' })).toBe(0)
+    expect(intervalTotal({ type: 'Força', rounds: '5' })).toBe(0)
+    expect(intervalTotal(undefined)).toBe(0)
+  })
+
+  test('0 for Estações — its stations carry their own durations', () => {
+    expect(intervalTotal({ type: 'Estações', interval: '02:00', rounds: '5' })).toBe(0)
+  })
+})
+
+describe('blkMetaParts', () => {
+  test('rounds, then the interval, then CAP', () => {
+    expect(blkMetaParts({ type: 'Força', rounds: '3', interval: '02:00', duration: '14' })).toEqual(
+      ['3 rounds', "a cada 2'", "CAP 14'"],
+    )
+  })
+
+  test('a block without an interval reads exactly as before', () => {
+    expect(blkMetaParts({ type: 'For Time', rounds: '5', duration: '20' })).toEqual([
+      '5 rounds',
+      "CAP 20'",
+    ])
+    expect(blkMetaParts({ type: 'AMRAP', duration: '12' })).toEqual(["CAP 12'"])
+    expect(blkMetaParts({ type: 'Core' })).toEqual([])
+  })
+
+  test('an on/off block shows the split', () => {
+    expect(blkMetaParts({ type: 'Core', rounds: '3', interval: '01:00', work: '00:40' })).toEqual([
+      '3 rounds',
+      '40" on / 20" off',
+    ])
   })
 })
 

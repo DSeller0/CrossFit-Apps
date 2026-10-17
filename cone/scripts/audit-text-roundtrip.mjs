@@ -141,6 +141,10 @@ function normBlock(b) {
   if (b.type === 'Estações') o.stationRepeat = T(b.stationRepeat) || '1'
   else if (b.stationRepeat != null) o.stationRepeat = T(b.stationRepeat)
   if (T(b.restBetweenCycles)) o.restBetweenCycles = T(b.restBetweenCycles)
+  // #228 — only when set, so a block with no interval carries none on either side. The grammar
+  // writes both back exactly, which makes any diff here a real loss.
+  if (T(b.interval)) o.interval = T(b.interval)
+  if (T(b.work)) o.work = T(b.work)
   return o
 }
 
@@ -174,6 +178,7 @@ const CLASSES = [
   'sets-rewrite',
   'duration-invented',
   'rounds-invented',
+  'interval-lost',
   'progression-reps',
   'progression-units',
   'ladder-off',
@@ -197,7 +202,6 @@ const CLASSES = [
 //   compared line-by-line through normLine, so whitespace collapse and curly quotes fold
 //   too (the recorded normalization, CLAUDE.md "Criador text format").
 // · `gender-units` — plans/61·A A11, blast radius zero, measured.
-// · `interval-approximated` — plans/36's deliberate v1 limitation (no interval field).
 // · `vestigial-exercises` / `vestigial-stations` — a block carrying BOTH an `exercises`
 //   array and a `stations` array (prod has 5: the type was switched after the fact and
 //   the editor left the old side behind). Which side is live is decided by the TYPE, and
@@ -212,7 +216,6 @@ const ACCEPTED = [
   'type-drift-flagged',
   'first-line-ambiguous',
   'gender-units',
-  'interval-approximated',
   'vestigial-exercises',
   'vestigial-stations',
 ]
@@ -248,6 +251,7 @@ function classify(path, raw, d) {
   if (p === 'type') return 'type-drift'
   if (p === 'duration') return 'duration-invented'
   if (p === 'rounds') return 'rounds-invented'
+  if (p === 'interval' || p === 'work') return 'interval-lost'
   // `ladderMode:true` with no ladder-shaped reps anywhere carries nothing the notation can
   // express — the flag is vestigial, not a lost ladder.
   if (p === 'ladderMode')
@@ -365,13 +369,6 @@ for (const { dateKey, s } of allSessions) {
       record('other-diff', `${bkey}|throw`, `${where} · lançou: ${e.message}`)
       return
     }
-    if (warnings.some(w => w.kind === 'interval-approximated'))
-      record(
-        'interval-approximated',
-        `${bkey}|interval`,
-        `${where} · intervalo não-inteiro aproximado`,
-      )
-
     // Does the TEXT SETTLE? The first application is the projection itself — it
     // canonicalizes `30M`→`30m`, `A+B`→`A + B`, volume typed into the name into the
     // reps/dist the grammar names. What must not happen is the notation continuing to

@@ -27,6 +27,8 @@ import {
   bdBlWodIdle,
   bdBlPlain,
   bdBlRound,
+  bdBlRoundInterval,
+  bdBlRoundOnOff,
   bdBlEstacoes,
   sdSessNamed,
   sdSessUnnamed,
@@ -355,7 +357,7 @@ export default {
       render: () => (
         <Section
           title="BlockDetail"
-          sub="src/public/schedule/BlockDetail.jsx — cartão de bloco (2 colunas; só blocos WOD ganham Timer/Leaderboard/registro — rodadas não-WOD são só check-off)"
+          sub="src/public/schedule/BlockDetail.jsx — cartão de bloco (2 colunas; todo bloco tem Timer na coluna da direita, mas só os WOD ganham Leaderboard/registro — rodadas não-WOD são check-off, com o intervalo ao lado do selo de rodadas)"
         >
           <Case label="WOD com atleta selecionado (resultado registrado)">
             <BlockDetail
@@ -404,7 +406,7 @@ export default {
               athName=""
             />
           </Case>
-          <Case label="Não-WOD (largura total, sem ações)">
+          <Case label="Não-WOD (Timer na coluna, sem Leaderboard nem registro)">
             <BlockDetail
               bl={bdBlPlain}
               sess={bdSess}
@@ -487,6 +489,46 @@ export default {
               onTimer={NOOP}
             />
           </Case>
+          <Case label="Bloco de rodadas + A cada (#228 · 3 rounds a cada 2', o complexo do exemplo)">
+            <BlockDetail
+              bl={bdBlRoundInterval}
+              sess={bdSess}
+              dateKey="2026-07-11"
+              checked={new Set()}
+              roundState={{}}
+              rmValues={{}}
+              rmEditKey={null}
+              demoMap={{}}
+              isWodLogged={() => false}
+              onCheck={NOOP}
+              onAdvance={NOOP}
+              onReset={NOOP}
+              onRmToggle={NOOP}
+              onRmConfirm={NOOP}
+              onDemo={NOOP}
+              onTimer={NOOP}
+            />
+          </Case>
+          <Case label='Bloco de rodadas + trabalho/descanso (#228 · 40" on / 20" off)'>
+            <BlockDetail
+              bl={bdBlRoundOnOff}
+              sess={bdSess}
+              dateKey="2026-07-11"
+              checked={new Set()}
+              roundState={{}}
+              rmValues={{}}
+              rmEditKey={null}
+              demoMap={{}}
+              isWodLogged={() => false}
+              onCheck={NOOP}
+              onAdvance={NOOP}
+              onReset={NOOP}
+              onRmToggle={NOOP}
+              onRmConfirm={NOOP}
+              onDemo={NOOP}
+              onTimer={NOOP}
+            />
+          </Case>
           <Case label="Estações">
             <BlockDetail
               bl={bdBlEstacoes}
@@ -519,7 +561,7 @@ export default {
       render: () => (
         <Section
           title="SessionDetail"
-          sub="src/public/schedule/SessionDetail.jsx — expansão mobile de uma sessão (lista de blocos, cada um com seu próprio botão de registro quando é WOD, + botão de registro da sessão inteira)"
+          sub="src/public/schedule/SessionDetail.jsx — expansão mobile de uma sessão (lista de blocos, cada um com seu Timer e, quando é WOD, seu próprio botão de registro, + botão de registro da sessão inteira)"
         >
           <Case label="Com nome de sessão · múltiplos blocos (1 WOD já registrado + 1 não-WOD)">
             <SessionDetail
@@ -546,7 +588,7 @@ export default {
               athName="Bruna"
             />
           </Case>
-          <Case label="Sem nome de sessão · um bloco (não-WOD, sem ações de registro)">
+          <Case label="Sem nome de sessão · um bloco (não-WOD · Timer, sem registro)">
             <SessionDetail
               sess={sdSessUnnamed}
               dateKey="2026-07-11"

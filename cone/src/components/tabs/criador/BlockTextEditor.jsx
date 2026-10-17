@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react'
+import { intervalStr } from '../../../public/lib/wod.js'
 import {
   parseBlock,
+  applyParsedBlock,
   serializeBlock,
   serializeGoal,
   FORMAT_REFERENCE,
@@ -31,30 +33,8 @@ export function BlockTextEditor({ block, onApply, registry }) {
     return { parsed: r.block, warnings: r.warnings }
   }, [text, block.type, registry])
 
-  // The text carries volume/exercises/goal/notes; identity and the fields the
-  // block bar owns (label, zone, benchmark link) are preserved from the block.
-  // `goal` and `lettered` apply UNCONDITIONALLY: applied only when truthy, deleting the
-  // `Meta:` line left the old goal in place, so neither could ever be cleared (#121a).
-  // An Estações block writes back its STATIONS instead of its exercises (plans/61·B) —
-  // that is the side its type reads, and `...block` keeps the other one as it was.
-  const merge = p => ({
-    ...block,
-    duration: p.duration,
-    rounds: p.rounds,
-    ladderMode: p.ladderMode,
-    notes: p.notes,
-    lettered: !!p.lettered,
-    goal: p.goal,
-    ...(p.stations
-      ? {
-          stations: p.stations,
-          stationRepeat: p.stationRepeat,
-          restBetweenCycles: p.restBetweenCycles || '',
-        }
-      : { exercises: p.exercises }),
-  })
-
-  const commit = () => onApply(merge(parsed))
+  // What the text owns, and the trap in writing it back, is documented on applyParsedBlock.
+  const commit = () => onApply(applyParsedBlock(block, parsed))
 
   const parsedExs = parsed.stations
     ? parsed.stations.flatMap(st => st.exercises || [])
@@ -67,6 +47,7 @@ export function BlockTextEditor({ block, onApply, registry }) {
     `${named} exercício${named === 1 ? '' : 's'}`,
     parsed.duration && `CAP ${parsed.duration}'`,
     parsed.rounds && `${parsed.rounds} rounds`,
+    intervalStr(parsed),
     goalStr && `Meta ${goalStr}`,
   ]
     .filter(Boolean)

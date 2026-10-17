@@ -117,7 +117,51 @@ export function blkLabel(bl) {
   return l && t && l !== t ? `${l} · ${t}` : l || t || ''
 }
 
-// Block-meta "rounds · CAP" fragment — rounds-first, full word "rounds", "CAP"
+// Interval notation (#228) — ASCII on purpose: it is the string Texto types
+// (`A cada 2'`, `40" on 20" off`), so display and text share one formatter and a block
+// re-parses to what it shows. 40 → 40" · 120 → 2' · 90 → 1'30" · 125 → 2'05"
+export function fmtPrime(secs) {
+  const t = Math.round(Number(secs))
+  if (!Number.isFinite(t) || t <= 0) return ''
+  const m = Math.floor(t / 60)
+  const s = t % 60
+  if (!m) return `${s}"`
+  return s ? `${m}'${String(s).padStart(2, '0')}"` : `${m}'`
+}
+
+// A block's validated interval (#228): `{ every, work, rest }` in seconds, or null when it
+// has none. `interval` ("A cada") is the whole round; `work` ("Trabalho") is the part of
+// it spent working, and counts only strictly inside the interval — a work time at or past
+// it is a typo, not a round with no rest. Estações never has one: its stations carry
+// their own durations.
+export function intervalOf(bl) {
+  if (!bl || bl.type === 'Estações') return null
+  const every = toSecs(bl.interval)
+  if (!Number.isFinite(every) || every <= 0) return null
+  const w = toSecs(bl.work)
+  const work = Number.isFinite(w) && w > 0 && w < every ? w : null
+  return { every, work, rest: work ? every - work : null }
+}
+
+// What an interval block adds up to: `every × rounds` in seconds, or 0 when either is missing.
+// A derived figure, never stored — the editor shows it as Duração's placeholder and the timer's
+// ready screen as its total, so a `duration` the user never typed is not invented (#228).
+export function intervalTotal(bl) {
+  const iv = intervalOf(bl)
+  const rounds = parseInt(bl?.rounds)
+  return iv && rounds > 0 ? iv.every * rounds : 0
+}
+
+// `a cada 2'` · `40" on / 20" off` · '' — the display form. Texto's own is textFormat.js's.
+export function intervalStr(bl) {
+  const iv = intervalOf(bl)
+  if (!iv) return ''
+  return iv.work
+    ? `${fmtPrime(iv.work)} on / ${fmtPrime(iv.rest)} off`
+    : `a cada ${fmtPrime(iv.every)}`
+}
+
+// Block-meta "rounds · interval · CAP" fragment — rounds-first, full word "rounds", "CAP"
 // prefix. Canonical since #84 (was folder-scoped to results/resultsHelpers.js;
 // ~10 other sites hand-rolled it with casing/order drift — "RDS"/"rds" instead
 // of "rounds", duration-first on the TV wall, lowercase "Cap" on the index).
@@ -126,6 +170,8 @@ export function blkLabel(bl) {
 export function blkMetaParts(bl) {
   const p = []
   if (bl.rounds) p.push(`${bl.rounds} rounds`)
+  const iv = intervalStr(bl)
+  if (iv) p.push(iv)
   if (bl.duration) p.push(`CAP ${bl.duration}'`)
   return p
 }

@@ -247,6 +247,23 @@ export const bdBlWodIdle = {
 }
 export const bdBlPlain = { id: 'bdb3', type: 'Força', exercises: [exStandard, exComplex] }
 export const bdBlRound = { id: 'bdb5', type: 'Força', rounds: 4, exercises: [exStandard] }
+// #228 — round blocks on a clock. The rounds badge stands in for the meta line, so the interval
+// rides beside it. The first is the user's own example: 1 Clean Pull… complex, 3 rounds, a cada 2'.
+export const bdBlRoundInterval = {
+  id: 'bdb6',
+  type: 'Força',
+  rounds: 3,
+  interval: '02:00',
+  exercises: [exComplex],
+}
+export const bdBlRoundOnOff = {
+  id: 'bdb7',
+  type: 'Core',
+  rounds: 3,
+  interval: '01:00',
+  work: '00:40',
+  exercises: [exStandard],
+}
 export const bdBlEstacoes = {
   id: 'bdb4',
   type: 'Estações',

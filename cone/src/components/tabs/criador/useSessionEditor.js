@@ -6,6 +6,7 @@ import {
   normalizeLegacyCardio,
   materializeBlocks,
   normalizeBlockGoals,
+  normalizeBlockIntervals,
 } from './blockModel.js'
 
 // ── useSessionEditor ──────────────────────────────────────────────────────────
@@ -174,8 +175,11 @@ export function useSessionEditor({ setSessions, defaultBoxIds, onOpened, onSaved
       // The persistence boundary's normalization pipeline. `normalizeBlockGoals` (#139)
       // completes a Meta: time the coach typed but never blurred — GoalInput persists on
       // every keystroke, so `14` reaches here unexpanded and toSecs would read it as 14
-      // SECONDS. Last in the chain: it only touches `goal`, which the other two ignore.
-      blocks: normalizeBlockGoals(materializeBlocks(normalizeLegacyCardio(blocks), loadRegistry())),
+      // SECONDS. `normalizeBlockIntervals` (#228) is the same repair for "A cada"/"Trabalho".
+      // Both come last: they touch only `goal` / `interval`+`work`, which the rest ignore.
+      blocks: normalizeBlockIntervals(
+        normalizeBlockGoals(materializeBlocks(normalizeLegacyCardio(blocks), loadRegistry())),
+      ),
       id: savedId,
     }
 

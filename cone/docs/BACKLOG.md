@@ -46,7 +46,7 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/99](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off: a time-per-round field on every block type** · M · Sonnet · 38 prod blocks keep an interval only as text, 16 a "40'' on 20'' off", and 12 Estações exist only for the clock. Absorbs #158(a): EMOM's 60 s is hardcoded in the timer. Stops at an approval gate once the editor fields render.
+- 🟢 **[→ Ready · plans/99](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off, and a Timer on every block** · L · Sonnet · 38 prod blocks keep an interval only as text, 16 a "40'' on 20'' off", and 12 Estações exist only for the clock — while the Timer is WOD-only. Absorbs #158(a): EMOM's 60 s is hardcoded. Stops at an approval gate once the Duração hint and the Timer placement render.
 - 🟢 **[→ Ready · plans/100](./plans/100-suggested-session-engine.md)** — **#233 Suggested session, Phase 1: the statistical engine + a backtest audit** · L · Opus · The third Criador input (✦ Sugerido) needs a pure engine first: structure, lift rotation, WOD themes and loads synthesized from the box's own history, and a `--backtest` scorecard that judges every rule. Starts after #228 (its interval field); Phases 2–5 are #234–#237.
 
 ## 🔵 In Progress

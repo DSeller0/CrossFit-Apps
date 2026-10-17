@@ -4,7 +4,8 @@ import Nav from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import BlockTypePicker from './BlockTypePicker.jsx'
 import { benchmarkToTimerExes } from '../lib/benchmarks.js'
-import { fmtSecs, isTimeBlock, MODE_LBL, maskMMSS } from '../lib/wod.js'
+import { fmtSecs, fmtPrime, intervalStr, isTimeBlock, MODE_LBL, maskMMSS } from '../lib/wod.js'
+import { timerMode, cycleOf, cycleEnd } from './timerMode.js'
 import { fmtDate, todayISO } from '../lib/week.js'
 import { getBoxScope } from '../lib/boxScope.js'
 import { syncTheme } from '../lib/theme.js'
@@ -193,9 +194,7 @@ export default function Timer() {
   }
 
   function stCycleRaw(e, c) {
-    const st = c.stationTime ?? 45,
-      tt = c.transitionTime ?? 15
-    const cycle = Math.max(st + tt, 1) // guard divide-by-zero when both are 0
+    const { st, tt, cycle } = cycleOf(c)
     return { st, tt, cycle, pos: e % cycle, totalCycles: Math.floor(e / cycle) }
   }
   function stInfoRaw(e, c) {
@@ -212,26 +211,21 @@ export default function Timer() {
   }
 
   function isTimeUpRaw(e, c) {
-    const cap = capSecs(c),
-      bt = c.blockType
-    if (bt === 'Estações') {
-      const exes = c.exercises || [],
-        r = c.rounds ?? 1,
-        { st, tt } = stCycleRaw(e, c)
-      const cycleDur = st + tt
-      if (cycleDur <= 0) return false // can't determine end with 0-duration cycles
-      return e >= exes.length * r * cycleDur
+    if (timerMode(c) === 'cycle') {
+      const end = cycleEnd(c) // null: nothing to count to, only FIM ends it
+      return end != null && e >= end
     }
+    const cap = capSecs(c)
     if (!cap) return false
     return e >= cap
   }
 
   function ringProgressRaw(e, c) {
     const cap = capSecs(c),
-      bt = c.blockType
-    if (bt === 'AMRAP') return cap ? Math.max(0, (cap - e) / cap) : 1
-    if (bt === 'EMOM') return Math.max(0, (60 - (e % 60)) / 60)
-    if (bt === 'Estações') {
+      mode = timerMode(c)
+    if (mode === 'amrap') return cap ? Math.max(0, (cap - e) / cap) : 1
+    if (mode === 'emom') return Math.max(0, (60 - (e % 60)) / 60)
+    if (mode === 'cycle') {
       const { pos, st, tt } = stCycleRaw(e, c),
         phase = stPhaseRaw(e, c)
       const phaseLen = phase === 'work' ? st : tt
@@ -243,9 +237,8 @@ export default function Timer() {
   }
 
   function ringColorRaw(e, c) {
-    const cap = capSecs(c),
-      bt = c.blockType
-    const isCountdown = bt === 'AMRAP' || bt === 'EMOM' || bt === 'Estações'
+    const cap = capSecs(c)
+    const isCountdown = timerMode(c) !== 'up'
     const rem = isCountdown ? ringProgressRaw(e, c) : cap ? (cap - e) / cap : 1
     if (rem > 0.5) return 'var(--green)'
     if (rem > 0.2) return 'var(--gold)'
@@ -307,18 +300,22 @@ export default function Timer() {
   tickFnRef.current = () => {
     if (statusRef.current !== 'running') return
     const c = cfgRef.current,
-      e = elapsedRaw()
+      e = elapsedRaw(),
+      mode = timerMode(c)
     if (Math.floor(e) % 5 === 0) saveStateRaw()
-    if (c.blockType === 'EMOM') {
+    if (mode === 'emom') {
       const min = Math.floor(e / 60)
       if (lastEmomMin.current >= 0 && min !== lastEmomMin.current)
         navigator.vibrate?.([300, 100, 300])
       lastEmomMin.current = min
     }
-    if (c.blockType === 'Estações') {
-      const { idx } = stInfoRaw(e, c),
+    if (mode === 'cycle') {
+      // The round is part of the key: an interval block has ONE station and may have no rest, so
+      // `idx-phase` would never change and no round turnover would ever vibrate (#228). For real
+      // Estações the key already changed at every station, so adding the round costs nothing.
+      const { idx, round } = stInfoRaw(e, c),
         phase = stPhaseRaw(e, c),
-        key = `${idx}-${phase}`
+        key = `${round}-${idx}-${phase}`
       if (lastStKey.current !== null && key !== lastStKey.current)
         navigator.vibrate?.(phase === 'work' ? [400, 100, 400] : [200])
       lastStKey.current = key
@@ -344,6 +341,7 @@ export default function Timer() {
       sessionDate: c.sessionDate,
       athleteId: c.athleteId,
       blockId: c.blockId,
+      loggable: c.loggable,
       totalTime: fmt(fe),
       totalSecs: fe,
       splits: currentSplits,
@@ -588,13 +586,18 @@ export default function Timer() {
   const bt = cfg.blockType
   const cap = capSecs(cfg)
   /* eslint-enable react-hooks/refs */
+  const mode = timerMode(cfg)
   const isPaused = status === 'paused'
   const exes = cfg.exercises || []
+  // An interval block (#228) is the Estações cycle with ONE station, so it speaks in rounds, not
+  // stations — and only has a work/rest split when its transition time is more than 0.
+  const isInterval = !!cfg.intervalMode
+  const intervalRests = isInterval && (cfg.transitionTime ?? 0) > 0
 
   function getDisplay() {
-    if (bt === 'AMRAP') return Math.max(0, cap - e)
-    if (bt === 'EMOM') return Math.max(0, 60 - (e % 60))
-    if (bt === 'Estações') {
+    if (mode === 'amrap') return Math.max(0, cap - e)
+    if (mode === 'emom') return Math.max(0, 60 - (e % 60))
+    if (mode === 'cycle') {
       const { pos, st, tt } = stCycleRaw(e, cfg)
       return pos < st ? Math.max(0, st - pos) : Math.max(0, st + tt - pos)
     }
@@ -613,7 +616,7 @@ export default function Timer() {
 
   let clockCls = s.clock
   if (isPaused) clockCls += ' ' + s.paused
-  else if (bt === 'AMRAP' && disp <= 30) clockCls += ' ' + s.warn
+  else if (mode === 'amrap' && disp <= 30) clockCls += ' ' + s.warn
   else if (isTimeBlock(bt) && cap && e >= cap * 0.85) clockCls += ' ' + s.warn
 
   // ── Screen-reader announcement (#174/plans/86, review H5) ─────────────────
@@ -637,9 +640,20 @@ export default function Timer() {
     if (status !== 'running') return ''
     // Per type, the unit that actually advances. Each of these changes only at a
     // real boundary (a minute, a station, a lap), never per tick.
-    if (bt === 'EMOM') return `Minuto ${Math.floor(e / 60) + 1}`
-    if (bt === 'Estações') {
+    if (mode === 'emom') return `Minuto ${Math.floor(e / 60) + 1}`
+    if (mode === 'cycle') {
       const { idx, round } = stInfoRaw(e, cfg)
+      if (isInterval) {
+        // Round, and the phase only when there is a rest to tell apart — both change only at a
+        // real boundary, never per tick.
+        const total = cfg.rounds ? ` de ${cfg.rounds}` : ''
+        const phase = intervalRests
+          ? stPhaseRaw(e, cfg) === 'work'
+            ? ', trabalho'
+            : ', descanso'
+          : ''
+        return `Round ${round + 1}${total}${phase}`
+      }
       return `Estação ${idx + 1} de ${exes.length}, round ${round + 1}`
     }
     if (splits.length > 0) return `Round ${splits.length + 1}`
@@ -686,7 +700,7 @@ export default function Timer() {
   function renderClock() {
     let lbl,
       roundJsx = null
-    if (bt === 'EMOM') {
+    if (mode === 'emom') {
       const min = Math.floor(e / 60),
         total = cfg.timeCap || 0
       lbl = isPaused ? 'pausado' : 'até o próximo'
@@ -695,20 +709,37 @@ export default function Timer() {
           MIN {min + 1} / {total}
         </div>
       )
-    } else if (bt === 'Estações') {
+    } else if (mode === 'cycle') {
       const { idx, round } = stInfoRaw(e, cfg),
         phase = stPhaseRaw(e, cfg),
         rounds = cfg.rounds ?? 1
-      lbl = isPaused ? 'pausado' : phase === 'work' ? 'trabalhando' : 'transição'
-      roundJsx = (
-        <div className={s.round}>
-          EST {idx + 1}/{exes.length} · RD {round + 1}/{rounds}
-        </div>
-      )
+      if (isInterval) {
+        // One station, so no "EST 1/1" — just the round, with its total when there is one.
+        lbl = isPaused
+          ? 'pausado'
+          : intervalRests
+            ? phase === 'work'
+              ? 'trabalho'
+              : 'descanso'
+            : 'até o próximo'
+        roundJsx = (
+          <div className={s.round}>
+            RD {round + 1}
+            {cfg.rounds ? '/' + cfg.rounds : ''}
+          </div>
+        )
+      } else {
+        lbl = isPaused ? 'pausado' : phase === 'work' ? 'trabalhando' : 'transição'
+        roundJsx = (
+          <div className={s.round}>
+            EST {idx + 1}/{exes.length} · RD {round + 1}/{rounds}
+          </div>
+        )
+      }
     } else {
       const lapN = splits.length,
         rounds = cfg.rounds
-      lbl = isPaused ? 'pausado' : bt === 'AMRAP' ? 'restando' : 'decorrido'
+      lbl = isPaused ? 'pausado' : mode === 'amrap' ? 'restando' : 'decorrido'
       if (lapN > 0 || rounds)
         roundJsx = (
           <div className={s.round}>
@@ -757,7 +788,10 @@ export default function Timer() {
               <div className={s.recT}>{h.totalTime || '—'}</div>
               <div className={s.recDate}>{h.date ? fmtDate(h.date) : ''}</div>
             </div>
-            {showRegister && h.sessionId && (
+            {/* `loggable` is stored on the entry: only a WOD block can be logged, so a Força timer
+                must not offer REGISTRAR (#228). An entry from before the flag has none and keeps
+                today's behaviour — hence `!== false`, not truthiness. */}
+            {showRegister && h.sessionId && h.loggable !== false && (
               <button className={s.recBtn} onClick={() => registerHist(i)}>
                 REGISTRAR
               </button>
@@ -1003,9 +1037,18 @@ export default function Timer() {
   }
 
   if (status === 'ready') {
+    // An interval block (#228) states its interval and the total it adds up to; real Estações
+    // keep their own `Ns / Ns transição`. The string is rebuilt from the cycle, since the config
+    // carries seconds rather than the block that produced them.
+    const { st, tt, cycle } = cycleOf(cfg)
+    const cycleTotal = isInterval && Number(cfg.rounds) > 0 ? Number(cfg.rounds) * cycle : 0
     const metaParts = [
       cfg.timeCap ? `${cfg.timeCap} min` : '',
       cfg.rounds ? `${cfg.rounds} rounds` : '',
+      isInterval
+        ? intervalStr({ interval: fmtSecs(st + tt), work: tt > 0 ? fmtSecs(st) : '' })
+        : '',
+      cycleTotal ? `total ${fmtPrime(cycleTotal)}` : '',
       cfg.goal ? `Meta: ${cfg.goal}` : '',
       bt === 'Estações' ? `${cfg.stationTime ?? 45}s / ${cfg.transitionTime ?? 15}s transição` : '',
     ].filter(Boolean)
@@ -1025,7 +1068,7 @@ export default function Timer() {
                   <span className={s.rDot} />
                   <div className={s.rExBody}>
                     {exLabel(ex)}
-                    {bt === 'Estações' && ex.exercises?.length > 0 && (
+                    {mode === 'cycle' && ex.exercises?.length > 0 && (
                       <div>
                         {ex.exercises.map((se, j) => (
                           <div key={j} className={s.rSubEx}>
@@ -1061,7 +1104,9 @@ export default function Timer() {
 
   if (status === 'finished') {
     const rounds = splits.length
-    const canReg = !!cfg.sessionId
+    // REGISTRAR opens schedule.html's result log, which only knows WOD blocks. `!== false` so a
+    // config saved before `loggable` existed keeps offering it (#228).
+    const canReg = !!cfg.sessionId && cfg.loggable !== false
     return (
       <div className={s.wrap}>
         {renderHdr(false)}
@@ -1112,7 +1157,7 @@ export default function Timer() {
   }
 
   // Running / Paused screen
-  const showLap = bt !== 'EMOM' && bt !== 'Estações'
+  const showLap = mode === 'up' || mode === 'amrap'
   return (
     <div className={s.wrap}>
       {renderHdr()}
@@ -1155,12 +1200,12 @@ export default function Timer() {
           )}
           {exes.map((ex, i) => {
             let exCls = s.ex
-            if (bt === 'Estações') {
+            if (mode === 'cycle') {
               const { idx } = stInfoRaw(e, cfg),
                 phase = stPhaseRaw(e, cfg)
               if (i === idx && phase === 'work') exCls += ' ' + s.exActive
               else if (i < idx) exCls += ' ' + s.exDone
-            } else if (bt === 'EMOM' && exes.length > 0) {
+            } else if (mode === 'emom' && exes.length > 0) {
               const curIdx = Math.floor(e / 60) % exes.length
               if (i === curIdx) exCls += ' ' + s.exActive
               else if (i < curIdx) exCls += ' ' + s.exDone
@@ -1170,7 +1215,7 @@ export default function Timer() {
                 <span className={s.exDot} />
                 <div className={s.exBody}>
                   {exLabel(ex)}
-                  {bt === 'Estações' && ex.exercises?.length > 0 && (
+                  {mode === 'cycle' && ex.exercises?.length > 0 && (
                     <div>
                       {ex.exercises.map((se, j) => (
                         <div key={j} className={s.subEx}>

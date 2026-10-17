@@ -1,4 +1,4 @@
-import { groupProgressionSteps, progressionGroupUnit, isWodBlock } from '../lib/wod.js'
+import { groupProgressionSteps, progressionGroupUnit, isWodBlock, intervalOf } from '../lib/wod.js'
 import { normExName } from '../lib/registry.js'
 
 // Shared by Schedule.jsx and its extracted schedule/ components (#17) — one
@@ -51,6 +51,77 @@ export function parseDurMins(d) {
     return m + s / 60
   }
   return parseInt(p) || 0
+}
+
+// ── Block → timer config (#228 · plans/99) ────────────────────────────────────
+// The block half of `openTimer`: WHAT to time, never who is timing it — the session and athlete
+// ids and the localStorage hand-off stay in Schedule.jsx. Pure, so each row below is a test.
+//
+//   Estações                  its stations, as always
+//   a valid A cada, any type  the Estações CYCLE, reused rather than a second engine: one pseudo-
+//                             station named after the block · `stationTime` the work time (or the
+//                             whole interval) · `transitionTime` the rest (or 0) · `rounds` = Rounds,
+//                             else the rounds that fit Duração, else null — and null runs until FIM
+//   anything else             the block's own type drives it: a WOD type as it always did; any other
+//                             type counts up, to its Duração when it has one, as a stopwatch when not
+//
+// `loggable` is whether the timer's REGISTRAR may offer to log a result. Only a WOD block can be
+// logged — `doOpenLog` on schedule.html knows no other — so a Força timer must not offer it.
+const timerExName = e =>
+  e.isComplex
+    ? e.name ||
+      (e.complexMovements || [])
+        .map(m => m.name)
+        .filter(Boolean)
+        .join(' + ')
+    : e.name
+const timerExs = exs =>
+  (exs || [])
+    .filter(e => e.name || e.isComplex)
+    .map(e => ({ name: timerExName(e), sets: e.sets, reps: e.reps }))
+
+export function timerConfigFor(bl) {
+  const base = {
+    blockType: bl.type || bl.label,
+    blockLabel:
+      bl.label && bl.label !== bl.type && bl.label !== '-'
+        ? bl.label
+        : bl.label || bl.type || 'WOD',
+    timeCap: bl.duration ? parseInt(bl.duration) : null,
+    rounds: bl.rounds || bl.stationRepeat || null,
+    blockId: bl.id,
+    countdown: true,
+    loggable: isWodBlock(bl),
+  }
+
+  if (bl.type === 'Estações') {
+    const nonRest = (bl.stations || []).filter(st => !st.isRest)
+    const rest = (bl.stations || []).filter(st => st.isRest)
+    return {
+      ...base,
+      exercises: nonRest.map(st => ({
+        name: st.name || 'Grupo',
+        exercises: timerExs(st.exercises),
+      })),
+      stationTime: nonRest[0]?.duration ? Math.round(parseDurMins(nonRest[0].duration) * 60) : 45,
+      transitionTime: rest[0]?.duration ? Math.round(parseDurMins(rest[0].duration) * 60) : 15,
+    }
+  }
+
+  const exercises = timerExs(bl.exercises)
+  const iv = intervalOf(bl)
+  if (iv) {
+    const fit = Math.floor(((base.timeCap || 0) * 60) / iv.every)
+    return {
+      ...base,
+      intervalMode: true,
+      exercises: [{ name: base.blockLabel, exercises }],
+      stationTime: iv.work ?? iv.every,
+      transitionTime: iv.rest ?? 0,
+      rounds: Number(bl.rounds) > 0 ? Number(bl.rounds) : fit > 0 ? fit : null,
+    }
+  }
+  return { ...base, exercises, stationTime: 45, transitionTime: 15 }
 }
 
 export function stationsCapMins(bl) {

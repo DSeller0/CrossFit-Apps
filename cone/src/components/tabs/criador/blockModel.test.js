@@ -9,6 +9,8 @@ import {
   TYPE_CONFIG,
   normalizeGoal,
   normalizeBlockGoals,
+  normalizeBlockInterval,
+  normalizeBlockIntervals,
 } from './blockModel.js'
 import { ALL_CATEGORIES } from '../../../public/lib/exerciseGroups.js'
 
@@ -18,6 +20,13 @@ import { ALL_CATEGORIES } from '../../../public/lib/exerciseGroups.js'
 describe('TYPE_CONFIG', () => {
   test('has an entry for every registry category', () => {
     expect(new Set(Object.keys(TYPE_CONFIG))).toEqual(new Set(ALL_CATEGORIES))
+  })
+
+  // #228 — "A cada" is the interval input now. HIIT's `duration` stores minutes, and its
+  // old "Intervalo (s)" label sat on a field that was never seconds.
+  test("no duration field is labelled 'Intervalo'", () => {
+    expect(Object.values(TYPE_CONFIG).some(c => /intervalo/i.test(c.durationLabel))).toBe(false)
+    expect(TYPE_CONFIG.HIIT.durationLabel).toBe('Duração (min)')
   })
 })
 
@@ -191,6 +200,16 @@ describe('blockSummary', () => {
     }
     expect(blockSummary(block)).toBe("20' · 5× · 2 mov.")
   })
+
+  test('an interval sits after the rounds (#228)', () => {
+    const block = {
+      type: 'Força',
+      rounds: '3',
+      interval: '02:00',
+      exercises: [{ name: 'Hang Clean' }],
+    }
+    expect(blockSummary(block)).toBe("3× · a cada 2' · 1 mov.")
+  })
 })
 
 describe('stationsCapStr', () => {
@@ -311,5 +330,77 @@ describe('normalizeGoal', () => {
     expect(out[1]).not.toBe(dirty)
     expect(out[1].goal).toEqual({ kind: 'time', min: '14:00' })
     expect(normalizeBlockGoals(undefined)).toEqual([])
+  })
+})
+
+// ── normalizeBlockInterval (#228, plans/99) ───────────────────────────────────
+// The editor persists "A cada" / "Trabalho" per keystroke and MaskedTimeInput completes
+// them only on blur, so an interval typed as `2` and never blurred reaches storage bare —
+// where toSecs reads it as 2 SECONDS. Same boundary and same reason as normalizeGoal.
+describe('normalizeBlockInterval', () => {
+  const base = { id: 'a', type: 'Força', rounds: '3' }
+
+  test('completes a colonless interval to minutes and a short one to mm:ss', () => {
+    expect(normalizeBlockInterval({ ...base, interval: '2' }).interval).toBe('02:00')
+    expect(normalizeBlockInterval({ ...base, interval: '1:30' }).interval).toBe('01:30')
+  })
+
+  test('keeps a valid work time and completes it too', () => {
+    const out = normalizeBlockInterval({ ...base, type: 'Core', interval: '1:00', work: '0:40' })
+    expect(out.interval).toBe('01:00')
+    expect(out.work).toBe('00:40')
+  })
+
+  test('an empty or zero interval is deleted, never stored as an empty string', () => {
+    for (const interval of ['', '0', '00:00']) {
+      const out = normalizeBlockInterval({ ...base, interval })
+      expect(out).not.toHaveProperty('interval')
+      expect(out).not.toHaveProperty('work')
+    }
+  })
+
+  test('a work time at or past the interval is deleted, the interval stays', () => {
+    const out = normalizeBlockInterval({ ...base, interval: '01:00', work: '01:00' })
+    expect(out.interval).toBe('01:00')
+    expect(out).not.toHaveProperty('work')
+    expect(normalizeBlockInterval({ ...base, interval: '01:00', work: '13' })).not.toHaveProperty(
+      'work',
+    )
+  })
+
+  test('a work time with no interval goes with it', () => {
+    expect(normalizeBlockInterval({ ...base, interval: '', work: '0:40' })).not.toHaveProperty(
+      'work',
+    )
+    expect(normalizeBlockInterval({ ...base, work: '0:40' })).not.toHaveProperty('work')
+  })
+
+  test('Estações carries neither, even after a type switch', () => {
+    const out = normalizeBlockInterval({
+      id: 's',
+      type: 'Estações',
+      interval: '02:00',
+      work: '01:00',
+    })
+    expect(out).not.toHaveProperty('interval')
+    expect(out).not.toHaveProperty('work')
+  })
+
+  test('keeps untouched blocks by identity, so a caller can map the whole list', () => {
+    const none = { ...base }
+    const clean = { ...base, interval: '02:00' }
+    const cleanOnOff = { ...base, type: 'Core', interval: '01:00', work: '00:40' }
+    expect(normalizeBlockInterval(none)).toBe(none)
+    expect(normalizeBlockInterval(clean)).toBe(clean)
+    expect(normalizeBlockInterval(cleanOnOff)).toBe(cleanOnOff)
+  })
+
+  test('normalizeBlockIntervals maps a list and tolerates a missing one', () => {
+    const clean = { ...base, interval: '02:00' }
+    const dirty = { ...base, id: 'b', interval: '2' }
+    const out = normalizeBlockIntervals([clean, dirty])
+    expect(out[0]).toBe(clean)
+    expect(out[1].interval).toBe('02:00')
+    expect(normalizeBlockIntervals(undefined)).toEqual([])
   })
 })

@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
 import { uid, loadSettings, saveSettings } from '../../../utils/storage'
 import { BTC, ZONES } from '../../../utils/config'
+import { toSecs, fmtPrime, intervalOf, intervalTotal } from '../../../public/lib/wod.js'
+import MaskedTimeInput from '../../../public/shared/MaskedTimeInput.jsx'
 import { StationEditor } from './StationEditor'
 import { ExerciseRow } from './ExerciseRow'
 import { CriadorTypePicker } from './TypePicker'
@@ -47,6 +49,17 @@ export function BlockEditor({
   const cfg = getTypeCfg(block.type)
   const summary = blockSummary(block)
   const capStr = stationsCapStr(block)
+  // #228 — "Trabalho" has to sit strictly inside "A cada". Compared on the STORED strings:
+  // a bare `13` still being typed reads as 13 s and stays quiet; blur completes it to
+  // 13:00 and only then does the error show.
+  const everySecs = toSecs(block.interval)
+  const workTooLong = !!block.work && Number.isFinite(everySecs) && toSecs(block.work) >= everySecs
+  // The interval's total, offered as Duração's placeholder while Duração is empty. Only ever a
+  // hint: nothing is stored, so a CAP the user never typed is never invented (#228).
+  const intervalHint = !block.duration && intervalTotal(block) ? fmtPrime(intervalTotal(block)) : ''
+  const intervalHintTitle = intervalHint
+    ? `${parseInt(block.rounds)} × ${fmtPrime(intervalOf(block).every)} = ${intervalHint}`
+    : undefined
   const customName = block.label && block.label !== block.type ? block.label : ''
   // Shared between the ¶ button's title and its aria-label (#136c) — a bare glyph with a
   // title but no aria-label reads its own character as the accessible name.
@@ -460,7 +473,8 @@ export function BlockEditor({
                       type="number"
                       min={1}
                       inputMode="numeric"
-                      placeholder="—"
+                      placeholder={intervalHint || '—'}
+                      title={intervalHintTitle}
                       value={block.duration}
                       onChange={e => onUpdate({ ...block, duration: e.target.value })}
                       style={fch('duration')}
@@ -477,6 +491,30 @@ export function BlockEditor({
                       value={block.rounds}
                       onChange={e => onUpdate({ ...block, rounds: e.target.value })}
                       style={fch('rounds')}
+                    />
+                  )}
+                  {/* Every type but Estações (its stations carry their own durations). The
+                      work time only exists once there is an interval to sit inside. */}
+                  {!cfg.isStations && (
+                    <MaskedTimeInput
+                      className={cr.metaField}
+                      label="A cada"
+                      placeholder="2:00"
+                      value={block.interval || ''}
+                      onChange={v => onUpdate({ ...block, interval: v })}
+                      style={fch('interval')}
+                    />
+                  )}
+                  {!cfg.isStations && !!block.interval && (
+                    <MaskedTimeInput
+                      className={cr.metaField}
+                      label="Trabalho"
+                      placeholder="0:40"
+                      value={block.work || ''}
+                      onChange={v => onUpdate({ ...block, work: v })}
+                      error={workTooLong ? 'O trabalho precisa ser menor que o intervalo' : ''}
+                      // The changed-field border is inline, so it would beat `.errored`'s red.
+                      style={workTooLong ? undefined : fch('work')}
                     />
                   )}
                   <GoalInput block={block} onUpdate={onUpdate} />

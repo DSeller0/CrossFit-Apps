@@ -2,11 +2,11 @@ import { WARNING_KINDS } from './textFormat.js'
 import s from './textMode.module.css'
 
 // ── ParseWarnings (#129 · plans/61·C) ────────────────────────────────────────
-// One rendering for the eight warning kinds textFormat.js can produce, so every
-// surface that can produce a kind can also show it. Before this, SessionTextPane
-// hand-counted 4 of the 8, WeekImportModal counted 2, BlockTextEditor printed
+// One rendering for every warning kind textFormat.js can produce, so every surface
+// that can produce a kind can also show it. Before this, SessionTextPane hand-counted
+// 4 of the 8 kinds there were then, WeekImportModal counted 2, BlockTextEditor printed
 // every raw per-line message instead of a summary, and `interval-approximated` /
-// `preamble` had no consumer anywhere.
+// `preamble` had no consumer anywhere (the first is gone since #228).
 //
 // `inline`: each kind as its own `· N kind` span, for a status row that already
 // has other content on the same line (BlockTextEditor, a per-day import cell).

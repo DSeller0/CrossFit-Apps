@@ -1,5 +1,13 @@
 import styles from './Schedule.module.css'
-import { blkLabel, blkColor, isWodBlock, blkMeta, goalStr, perfStr } from '../lib/wod.js'
+import {
+  blkLabel,
+  blkColor,
+  isWodBlock,
+  blkMeta,
+  intervalStr,
+  goalStr,
+  perfStr,
+} from '../lib/wod.js'
 import { isRoundBlock, progGroups, stationsCapMins } from './scheduleHelpers.js'
 import ExRow from './ExRow.jsx'
 
@@ -156,6 +164,8 @@ export default function BlockDetail({
 
   const exs = (bl.exercises || []).filter(e => e.name || e.isComplex)
   const meta = blkMeta(bl)
+  // A round block shows its rounds badge instead of `meta`, which would hide the interval (#228).
+  const interval = intervalStr(bl)
   const goal = goalStr(bl)
 
   let rdBadgeEl = null
@@ -190,7 +200,14 @@ export default function BlockDetail({
           {label}
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {isRd ? rdBadgeEl : meta ? <span className={styles.detailBlockMeta}>{meta}</span> : null}
+          {isRd ? (
+            <>
+              {rdBadgeEl}
+              {interval && <span className={styles.detailBlockMeta}>{interval}</span>}
+            </>
+          ) : meta ? (
+            <span className={styles.detailBlockMeta}>{meta}</span>
+          ) : null}
           {goal && <span className={styles.detailBlockGoal}>Meta {goal}</span>}
           {!isRd && wodDone && <span className={styles.detailBlockDone}>✓ Completo</span>}
         </div>
@@ -203,47 +220,42 @@ export default function BlockDetail({
   )
 
   const showIdleHint = deskIdleHint && isWod && !athSection
-  const actionsEmpty = !isWod
 
+  // Every block has a Timer (#228). Only a WOD can be ranked or logged, so the Leaderboard link and
+  // the athlete section stay behind `isWod`; the Timer's REGISTRAR is gated on the same fact.
   return (
     <div className={styles.detailBlock} style={{ borderLeftColor: col }}>
       <div className={styles.cardBody}>
-        <div className={`${styles.cardInfo}${actionsEmpty ? ' ' + styles.cardInfoFull : ''}`}>
-          {infoCol}
+        <div className={styles.cardInfo}>{infoCol}</div>
+        <div className={styles.cardActions}>
+          <button
+            className={styles.timerBtn}
+            onClick={e => {
+              e.stopPropagation()
+              onTimer(bl)
+            }}
+          >
+            <i className="ti ti-player-play" />
+            <span className={styles.btnLabel}> Timer</span>
+          </button>
+          {isWod && (
+            <a
+              className={styles.lbLink}
+              href={`leaderboard.html?wod=${bl.id}&session=${sess.id}&date=${dateKey}`}
+              target="_blank"
+              onClick={e => e.stopPropagation()}
+            >
+              <i className="ti ti-trophy" />
+              <span className={styles.btnLabel}> Ver Leaderboard</span>
+            </a>
+          )}
+          {athSection}
+          {showIdleHint && (
+            <div className={styles.deskIdleHint}>
+              Selecione um atleta no painel ao lado para registrar resultados
+            </div>
+          )}
         </div>
-        {!actionsEmpty && (
-          <div className={styles.cardActions}>
-            {isWod && (
-              <button
-                className={styles.timerBtn}
-                onClick={e => {
-                  e.stopPropagation()
-                  onTimer(bl)
-                }}
-              >
-                <i className="ti ti-player-play" />
-                <span className={styles.btnLabel}> Timer</span>
-              </button>
-            )}
-            {isWod && (
-              <a
-                className={styles.lbLink}
-                href={`leaderboard.html?wod=${bl.id}&session=${sess.id}&date=${dateKey}`}
-                target="_blank"
-                onClick={e => e.stopPropagation()}
-              >
-                <i className="ti ti-trophy" />
-                <span className={styles.btnLabel}> Ver Leaderboard</span>
-              </a>
-            )}
-            {athSection}
-            {showIdleHint && (
-              <div className={styles.deskIdleHint}>
-                Selecione um atleta no painel ao lado para registrar resultados
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   )

@@ -52,7 +52,25 @@ Rules it established, all of which a future edit here must keep:
   for an `alert(); return` validation guard is inline text that names what is missing, not a dialog.
 - 🔴 **The clock rewrite and the decomposition are #191's, not this section's.** `Timer.jsx:139-152`
   documents its own state-model defect (*"pick ONE source of truth for the clock … Filed, not done"*) and
-  the file is **1192 raw lines** with **9** eslint disables and **zero** tests (re-measured 2026-09-06). A design pass does not touch it.
+  the file is **1237 raw lines** with **9** eslint disables (re-measured 2026-10-05; 1192 / 9 on 2026-09-06). Its mode precedence and its block → config mapping have tests since #228 (`timerMode.js`, `timerConfigFor`), but the **component** still has none. A design pass does not touch it.
+- **A Timer on every block, and one mode function (#228 · plans/99).** `schedule.html` offers a Timer on
+  **every** block type (the right-hand actions column, like a WOD block — Leaderboard and the athlete section
+  stay WOD-only), and `timerConfigFor(bl)` (`schedule/scheduleHelpers.js`) is the single block → config
+  mapping. What runs is decided in ONE place, `timerMode(cfg)` (`timer/timerMode.js`): **`'cycle'`** (Estações,
+  or any config with `intervalMode`) **> `'emom'` > `'amrap'` > `'up'`**. ⚠️ **The order is the point** —
+  `Timer.jsx` used to dispatch on `cfg.blockType` at ~20 run-time sites with EMOM and AMRAP tried before
+  Estações, so an EMOM carrying `A cada 1:30` would have taken the 60-second branches. **Don't add a run-time
+  `blockType ===` check — add a mode** (the *setup form's* `form.type` checks are a different thing and stay).
+  An interval block reuses the Estações cycle instead of growing a second engine: one pseudo-station named
+  after the block, `stationTime = work ‖ every`, `transitionTime = rest ‖ 0`,
+  `rounds = Rounds ‖ ⌊Duração ÷ A cada⌋ ‖ null`, and `cycleEnd` null → it runs until FIM. Every other block
+  counts up — to its Duração when it has one, as a stopwatch (LAP, until FIM) when it has none. ⚠️ The tick's
+  vibration key is `${round}-${idx}-${phase}`: with one station and no rest `idx-phase` never changes, so
+  without the round no turnover would ever buzz.
+- ⚠️ **REGISTRAR needs `cfg.loggable !== false`** — on the finished screen and on history rows (`pushHist`
+  stores the flag). `timerConfigFor` sets `loggable: isWodBlock(bl)`; REGISTRAR opens `doOpenLog`, which only
+  knows WOD blocks, so a Força timer must offer FECHAR. It is `!== false`, **not** truthiness: a config saved
+  before the flag existed has none and keeps today's behaviour.
 
 **Data flow:**
 1. TvController calls `push(patch)` → upserts `{ id: 1, ...patch, updated_at: Date.now() }` to `tv_state`.

@@ -159,7 +159,7 @@ const gridColStyle = {
   borderRadius: 6,
   padding: 8,
 }
-// ParseWarnings fixtures (#129) — every one of WARNING_KINDS' 8 kinds, a repeated
+// ParseWarnings fixtures (#129) — every one of WARNING_KINDS' 7 kinds, a repeated
 // kind to show the plural label, and a lone one for the singular. Only `kind` is
 // read by the component; line/message/lineNo are irrelevant to it.
 const pwAllKinds = [
@@ -170,7 +170,6 @@ const pwAllKinds = [
   'unknown-exercise',
   'unparsed-line',
   'orphan-load',
-  'interval-approximated',
   'preamble',
 ].map(kind => ({ kind }))
 const pwSingle = [{ kind: 'type-unresolved' }]

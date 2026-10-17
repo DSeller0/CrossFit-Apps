@@ -64,7 +64,18 @@ export function useBlockList({ blocks, setBlocks, markDirty, trackBlockChange, f
     markDirty()
     if (!old) return
     const newFields = new Set()
-    ;['label', 'type', 'duration', 'rounds', 'notes', 'zone', 'ladderMode', 'goal'].forEach(f => {
+    ;[
+      'label',
+      'type',
+      'duration',
+      'rounds',
+      'interval',
+      'work',
+      'notes',
+      'zone',
+      'ladderMode',
+      'goal',
+    ].forEach(f => {
       if (JSON.stringify(upd[f]) !== JSON.stringify(old[f])) newFields.add(f)
     })
     const oldExs = old.exercises || []

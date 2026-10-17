@@ -12,7 +12,7 @@
 // reported in `warnings`; `audit` carries one entry per non-blank input line so a
 // test can assert total coverage.
 
-import { uid, expandMMSS } from '../../../public/lib/wod.js'
+import { uid, expandMMSS, fmtSecs, fmtPrime, intervalOf } from '../../../public/lib/wod.js'
 import { normExName, resolveExercise } from '../../../public/lib/registry.js'
 import { TYPE_CONFIG, goalKindFor, normalizeCardioEx } from './blockModel.js'
 
@@ -133,7 +133,8 @@ ESTRUTURA — linha logo após o cabeçalho, quando não é um exercício
   AMRAP 15' · Emom 12'                     tipo + duração
   TC 14' · Cap 15'                         time cap
   21-15-9                                  ladder (reps por exercício)
-  A cada 3' · A cada 1'20"                 intervalo (aproximado; guardado na nota)
+  A cada 2' · A cada 1'30" · E2MOM         intervalo por round
+  40" on 20" off · 1' on 30" off           trabalho / descanso por round
 
 EXERCÍCIO — [A–Z]? [qtd] nome [carga]
   100m Run · 20cal Bike                    distância
@@ -184,7 +185,8 @@ ${FORMAT_EXAMPLE}`
 // surfaces render an identical summary instead of each hand-counting a different
 // subset (SessionTextPane counted 4 of these 8, WeekImportModal 2, and
 // `interval-approximated`/`preamble` had no consumer anywhere). Order here is
-// display order: warn kinds first, then info.
+// display order: warn kinds first, then info. `interval-approximated` is gone (#228): the
+// interval is a field now, so there is nothing left to approximate.
 export const WARNING_KINDS = {
   'type-unresolved': { severity: 'warn', label: 'tipos por definir', labelOne: 'tipo por definir' },
   'complex-detected': {
@@ -208,11 +210,6 @@ export const WARNING_KINDS = {
     label: 'cargas sem exercício acima',
     labelOne: 'carga sem exercício acima',
   },
-  'interval-approximated': {
-    severity: 'info',
-    label: 'intervalos aproximados',
-    labelOne: 'intervalo aproximado',
-  },
   preamble: {
     severity: 'info',
     label: 'linhas antes do 1º dia — ignoradas',
@@ -222,7 +219,45 @@ export const WARNING_KINDS = {
 
 // ── Structure lines ───────────────────────────────────────────────────────────
 const RE_LADDER = /^(\d+(?:\s*-\s*\d+)+)(?=\s|$)/
-const RE_EVERY = /\b(?:a\s+cada|every)\s+(\d+)\s*'(?:\s*(\d+)\s*")?/i
+
+// Durations as the user writes them (#228), after normLine has folded the curly quotes:
+//   minutes first   2'  ·  2'30"  ·  1'10''  ·  3'30  ·  3''30"  ·  1:20
+//   seconds         40"  ·  40''
+// `''` is the SECONDS mark unless digits follow it, where it is a typo'd minutes mark
+// (`3''30"`). Seconds digits need their own mark (`2' 30"`) or must sit flush against the
+// minutes mark (`3'30`): a spaced bare number is the NEXT token — `A cada 2' 7 Sets` is two
+// minutes and seven sets, not 2'07.
+const DUR_MIN = `\\d+(?:\\s*'(?!')|\\s*''(?=\\d)|:)(?:\\s*\\d{1,2}\\s*(?:"|'')|\\d{2}(?![\\d'":]))?`
+const DUR_SEC = `\\d+\\s*(?:"|'')`
+const RE_EVERY = new RegExp(`\\b(?:a\\s+cada|every)\\s+(${DUR_MIN}|${DUR_SEC})`, 'i')
+// `a cada dois minutos` — two prod blocks write the number as a word.
+const RE_EVERY_WORDS = /\b(?:a\s+cada|every)\s+(um|dois|tr[êe]s|quatro|cinco|seis)\s+minutos?\b/i
+const EVERY_WORDS = { um: 1, dois: 2, tres: 3, três: 3, quatro: 4, cinco: 5, seis: 6 }
+// `E2MOM` / `E3MOM` — every N minutes, which is also the block's type.
+const RE_EN_MOM = /\be(\d+)mom\b/i
+// Work / rest per round — `40" on 20" off`, `1' On 30" off`, `40on 20off`. Either side may be a
+// bare number: a unit-less value is SECONDS (every prod spelling of it is a seconds count).
+const ONOFF_TOK = `(?:${DUR_MIN}|\\d+(?:\\s*(?:"|''))?)`
+const RE_ONOFF = new RegExp(
+  `\\b(${ONOFF_TOK})\\s*on(?![a-z])\\s*[-–—:]?\\s*(${ONOFF_TOK})\\s*off(?![a-z])`,
+  'i',
+)
+// An interval in the notation the probes above read back exactly — the serializer's structure
+// line, and the note an Estações block keeps (it times itself station by station).
+const intervalNotation = ({ every, work, rest }) =>
+  work ? `${fmtPrime(work)} on ${fmtPrime(rest)} off` : `A cada ${fmtPrime(every)}`
+
+// One duration token → seconds. `''` after bare digits is seconds (`40''`); `''` between digits
+// is a minutes mark (`3''30"`) — the same split DUR_MIN draws.
+function readSecs(tok) {
+  const t = String(tok).replace(/\s+/g, '')
+  let m
+  if ((m = t.match(/^(\d+)(?:"|'')$/))) return +m[1]
+  if ((m = t.match(/^(\d+)(?:'{1,2}|:)(\d{1,2})?(?:"|'')?$/))) return +m[1] * 60 + +(m[2] || 0)
+  if (/^\d+$/.test(t)) return +t
+  return null
+}
+
 const RE_ROUNDS = /\b(\d+)\s*(?:rounds?|rds?|sets?|voltas?|s[ée]ries?|ciclos?)\b/i
 // Decimals on purpose: `block.duration` is a bare minutes NUMBER (#93), and prod holds
 // values like 2.3 — without this the serialized `2.3'` reads back as a 3-minute cap
@@ -244,7 +279,16 @@ const STRUCT_TYPES = [
 // is recognized as a headerless structure line.
 export function parseStructure(raw) {
   let s = normLine(raw).replace(/[()]/g, ' ')
-  const out = { rounds: '', duration: '', type: null, ladder: '', everySecs: null, consumed: false }
+  const out = {
+    rounds: '',
+    duration: '',
+    type: null,
+    ladder: '',
+    everySecs: null,
+    onSecs: null,
+    offSecs: null,
+    consumed: false,
+  }
   const eat = m => {
     s = s.slice(0, m.index) + ' ' + s.slice(m.index + m[0].length)
     out.consumed = true
@@ -254,8 +298,22 @@ export function parseStructure(raw) {
     out.ladder = m[1].replace(/\s*-\s*/g, '-')
     eat(m)
   }
+  // On/off before everything timed: its `1'` would otherwise be read as a one-minute cap below.
+  if ((m = s.match(RE_ONOFF))) {
+    out.onSecs = readSecs(m[1])
+    out.offSecs = readSecs(m[2])
+    eat(m)
+  }
   if ((m = s.match(RE_EVERY))) {
-    out.everySecs = +m[1] * 60 + +(m[2] || 0)
+    out.everySecs = readSecs(m[1])
+    eat(m)
+  } else if ((m = s.match(RE_EVERY_WORDS))) {
+    out.everySecs = EVERY_WORDS[m[1].toLowerCase()] * 60
+    eat(m)
+  }
+  if (out.everySecs == null && (m = s.match(RE_EN_MOM))) {
+    out.everySecs = +m[1] * 60
+    out.type = 'EMOM'
     eat(m)
   }
   if ((m = s.match(RE_ROUNDS))) {
@@ -278,6 +336,9 @@ export function parseStructure(raw) {
     eat(m)
   }
   out.rest = s.replace(/\s+/g, ' ').trim()
+  // Separators left between consumed tokens (`Every 2' x 5 sets`, `A cada 3' — 5 sets`) are not
+  // a note. Only once something was consumed: a bare `x` on its own is still just a name.
+  if (out.consumed && /^[x×,.:;–—-]*$/i.test(out.rest.replace(/\s/g, ''))) out.rest = ''
   return out
 }
 
@@ -739,6 +800,8 @@ const mergeStruct = (a, b) => ({
   type: a.type || b.type,
   ladder: a.ladder || b.ladder,
   everySecs: a.everySecs ?? b.everySecs,
+  onSecs: a.onSecs ?? b.onSecs,
+  offSecs: a.offSecs ?? b.offSecs,
   consumed: true,
   rest: [a.rest, b.rest].filter(Boolean).join(' '),
 })
@@ -754,6 +817,41 @@ export function parseBlock(text, opts = {}) {
     .map((l, i) => ({ raw: l, lineNo: (o.startLine || 1) + i }))
     .filter(l => normLine(l.raw))
   return buildBlock(lines, o)
+}
+
+// A parsed block's text-owned fields written back onto the real block (BlockTextEditor's
+// commit): the text carries volume/exercises/goal/notes; identity and the fields the block bar
+// owns (label, zone, benchmark link) are preserved from the block.
+//
+// This is a WHITELIST, which is what makes it a trap: a field it does not name is never taken
+// from the text, and one it only sets when present can never be cleared by deleting its line.
+// `goal` and `lettered` apply UNCONDITIONALLY — applied only when truthy, deleting the `Meta:`
+// line left the old goal in place (#121a) — and `interval`/`work` (#228) follow suit: dropped
+// from the block first, then set again only if the text still says so.
+// An Estações block writes back its STATIONS instead of its exercises (plans/61·B) — that is the
+// side its type reads, and `...block` keeps the other one as it was.
+export function applyParsedBlock(block, p) {
+  const next = {
+    ...block,
+    duration: p.duration,
+    rounds: p.rounds,
+    ladderMode: p.ladderMode,
+    notes: p.notes,
+    lettered: !!p.lettered,
+    goal: p.goal,
+    ...(p.stations
+      ? {
+          stations: p.stations,
+          stationRepeat: p.stationRepeat,
+          restBetweenCycles: p.restBetweenCycles || '',
+        }
+      : { exercises: p.exercises }),
+  }
+  delete next.interval
+  delete next.work
+  if (p.interval) next.interval = p.interval
+  if (p.work) next.work = p.work
+  return next
 }
 
 function buildBlock(lines, o) {
@@ -824,26 +922,27 @@ function buildBlock(lines, o) {
         noteLines.push(st.rest)
         warn('unparsed-line', lines[i], `"${st.rest}" mantido como nota`)
       }
-      if (st.everySecs != null) {
-        // v1 limitation, recorded deliberately: the block model has no interval
-        // field, so "A cada 1'20"" can't round-trip exactly. Nearest EMOM shape +
-        // the original line verbatim in notes — never invent a schema field here.
-        noteLines.push(normLine(lines[i].raw))
-        if (st.everySecs % 60)
-          warn(
-            'interval-approximated',
-            lines[i],
-            `Intervalo ${st.everySecs}s aproximado para ${Math.round(st.everySecs / 60)}'`,
-          )
-      }
       i++
     }
   }
   if (struct) {
     block.rounds = struct.rounds || ''
-    block.duration =
-      struct.duration ||
-      (struct.everySecs != null ? String(Math.max(1, Math.round(struct.everySecs / 60))) : '')
+    block.duration = struct.duration || ''
+    // The interval is its own field (#228) — it no longer bends `duration` into a whole-minute
+    // approximation or leaves the line behind in notes. An on/off pair IS the whole round
+    // (work + rest); a bare `A cada` is the round itself.
+    const every = struct.onSecs != null ? struct.onSecs + struct.offSecs : struct.everySecs
+    if (every > 0) {
+      const work = struct.onSecs > 0 && struct.offSecs > 0 ? struct.onSecs : null
+      // Estações times itself station by station and never carries an interval; the line
+      // stays as a note, because the parser never drops one.
+      if (stationMode)
+        noteLines.push(intervalNotation({ every, work, rest: work ? struct.offSecs : null }))
+      else {
+        block.interval = fmtSecs(every)
+        if (work) block.work = fmtSecs(work)
+      }
+    }
     if (struct.ladder) {
       block.ladderMode = true
       block.ladderReps = struct.ladder.replace(/-/g, ',')
@@ -1409,6 +1508,10 @@ export function serializeBlock(block, opts = {}) {
   if (block.rounds) st.push(`${block.rounds} rounds`)
   if (block.duration)
     st.push(CAP_TYPES.includes(type) ? `Cap ${block.duration}'` : `${block.duration}'`)
+  // The interval last, in `fmtPrime`'s notation — the very string display uses, and one the
+  // structure probe reads back exactly (`A cada 1'30"`, `40" on 20" off`).
+  const iv = intervalOf(block)
+  if (iv) st.push(intervalNotation(iv))
   if (st.length) out.push(st.join(' '))
 
   if (block.type === 'Estações') out.push(...serializeStations(block))

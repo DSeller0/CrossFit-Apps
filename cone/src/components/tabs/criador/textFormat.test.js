@@ -16,6 +16,7 @@ import {
   isTextEditable,
   splitLockedBlocks,
   mergeLockedBlocks,
+  applyParsedBlock,
   normLine,
   WARNING_KINDS,
   FORMAT_REFERENCE,
@@ -23,6 +24,7 @@ import {
   FORMAT_EXAMPLE_BLOCK,
 } from './textFormat.js'
 import { TYPE_CONFIG } from './blockModel.js'
+import { fmtSecs } from '../../../public/lib/wod.js'
 
 // The real coach artefact is the fixture, read from disk so it can never drift
 // from the file the parser was designed against.
@@ -167,20 +169,24 @@ describe('parseStructure', () => {
     expect(parseStructure('8 Power Clean 60/45kg – 50/35kg').consumed).toBe(false)
   })
 
-  test('an interval block keeps the original line verbatim in notes (no interval field exists)', () => {
+  // #228 — the interval is its own field. It used to bend `duration` into a whole-minute
+  // approximation, leave the raw line in notes and warn; none of that is true any more.
+  test('an interval is a field — it no longer bends duration or rides in notes', () => {
     const b = blk("Skill\nA cada 3'\nBack Squat\n5x5 65/70/75/80/85%")
-    expect(b.duration).toBe('3')
-    expect(b.notes).toBe("A cada 3'")
+    expect(b.interval).toBe('03:00')
+    expect(b.duration).toBe('')
+    expect(b.notes).toBe('')
   })
 
-  test('an interval that is not whole minutes warns instead of inventing a field', () => {
+  test('an interval that is not whole minutes is exact, and says nothing', () => {
     const { block, warnings } = parseBlock(
       'Skill / LPO – Complex\nA cada 1\'20" 5 sets\n1 Hang Squat Snatch\n1 Squat Snatch',
     )
-    expect(block.duration).toBe('1')
+    expect(block.interval).toBe('01:20')
     expect(block.rounds).toBe('5')
-    expect(block.notes).toBe('A cada 1\'20" 5 sets')
-    expect(warnings.map(w => w.kind)).toContain('interval-approximated')
+    expect(block.duration).toBe('')
+    expect(block.notes).toBe('')
+    expect(warnings).toEqual([])
   })
 
   test('a ladder structure line distributes its reps to every bare exercise', () => {
@@ -190,6 +196,281 @@ describe('parseStructure', () => {
     expect(b.ladderMode).toBe(true)
     expect(b.duration).toBe('15')
     expect(b.exercises.map(e => e.reps)).toEqual(['21,15,9', '21,15,9', '21,15,9'])
+  })
+})
+
+// ── Interval per round (#228 · plans/99) ──────────────────────────────────────
+describe('interval spellings', () => {
+  // Every spelling the prod evidence lists (docs/reviews/2026-10-02-block-structures.md §2a),
+  // plus the coach-week fixture's own curly quotes. None may be read as a cap.
+  test.each([
+    ["A cada 2'", 120],
+    ['A cada 2\'30"', 150],
+    ['A cada 2\' 30"', 150],
+    ["A cada 1'10''", 70],
+    ["A cada 1'30''", 90],
+    ["(A cada 3'30", 210],
+    ["A cada 3''30\"", 210],
+    ['a cada 01:20', 80],
+    ['A cada 3’', 180],
+    ['A cada 1’20”', 80],
+    ["Every 2'", 120],
+    ['A cada 40"', 40],
+    ['A cada dois minutos', 120],
+    ['a cada três minutos', 180],
+    ['E2MOM', 120],
+    ['E3MOM', 180],
+  ])('%s → %i s', (line, secs) => {
+    const st = parseStructure(line)
+    expect(st.consumed).toBe(true)
+    expect(st.everySecs).toBe(secs)
+    expect(st.rest).toBe('')
+    expect(st.duration).toBe('')
+  })
+
+  test('E2MOM is an EMOM, and its window is still the duration', () => {
+    expect(parseStructure("E2MOM 12'")).toMatchObject({
+      everySecs: 120,
+      type: 'EMOM',
+      duration: '12',
+    })
+  })
+
+  test('what follows an interval is its own token — minutes first, then the rounds', () => {
+    expect(parseStructure("A cada 2' 7 Sets")).toMatchObject({ everySecs: 120, rounds: '7' })
+    expect(parseStructure("A cada 2' 7 Sets").rest).toBe('')
+    expect(parseStructure("Every 2' x 5 sets")).toMatchObject({
+      everySecs: 120,
+      rounds: '5',
+      rest: '',
+    })
+    expect(parseStructure("A cada 3' — 5 sets")).toMatchObject({
+      everySecs: 180,
+      rounds: '5',
+      rest: '',
+    })
+    expect(parseStructure('A cada 1\'30" 4 rounds')).toMatchObject({ everySecs: 90, rounds: '4' })
+  })
+
+  test('prose around an interval stays behind as the remainder', () => {
+    const st = parseStructure("Um set a cada 3'.")
+    expect(st.everySecs).toBe(180)
+    expect(st.rest).toContain('Um set')
+  })
+
+  test.each([
+    ["40'' on 20'' off", 40, 20],
+    ['40" on - 20" off', 40, 20],
+    ['40” on 20” Off', 40, 20],
+    ['1\' On 30" off', 60, 30],
+    ['40on 20off', 40, 20],
+    ["(1' on 20''off)", 60, 20],
+    ['30" On 30" Off', 30, 30],
+    ['1\'30" on 30" off', 90, 30],
+    ['40 on 20 off', 40, 20],
+  ])('%s → %i s on, %i s off', (line, on, off) => {
+    const st = parseStructure(line)
+    expect(st).toMatchObject({ onSecs: on, offSecs: off, consumed: true, rest: '', duration: '' })
+    expect(st.everySecs).toBeNull()
+  })
+
+  test('on/off beside rounds: the count is not read as part of the split', () => {
+    expect(parseStructure('40 on 20 off 3 Sets')).toMatchObject({
+      onSecs: 40,
+      offSecs: 20,
+      rounds: '3',
+      rest: '',
+    })
+    expect(parseStructure('3 sets 40on 20off')).toMatchObject({
+      onSecs: 40,
+      offSecs: 20,
+      rounds: '3',
+    })
+  })
+
+  test('words that merely contain "on"/"off" are not a work/rest split', () => {
+    expect(parseStructure('1 One-arm Row').consumed).toBe(false)
+    expect(parseStructure('10 Burpees on box').consumed).toBe(false)
+    expect(parseStructure('Switch off 5').consumed).toBe(false)
+  })
+})
+
+describe('interval blocks', () => {
+  test("the user's example — Força, 3 rounds a cada 2', a complex at 50/60/70%", () => {
+    const b = blk("Força\n3 rounds A cada 2'\n1 Hang Clean + 1 Push Jerk 50/60/70%")
+    expect(b).toMatchObject({
+      type: 'Força',
+      rounds: '3',
+      interval: '02:00',
+      duration: '',
+      notes: '',
+    })
+    expect(b).not.toHaveProperty('work')
+    expect(b.exercises).toHaveLength(1)
+    expect(b.exercises[0].isComplex).toBe(true)
+  })
+
+  test('an on/off block stores the whole round as interval and the on part as work', () => {
+    const b = blk('Core\n3 sets 40" on 20" off\n20 Sit Up')
+    expect(b).toMatchObject({
+      type: 'Core',
+      rounds: '3',
+      interval: '01:00',
+      work: '00:40',
+      duration: '',
+    })
+  })
+
+  test('the interval may sit in the header', () => {
+    expect(blk("LPO – A cada 2'\n1 Snatch")).toMatchObject({ type: 'LPO', interval: '02:00' })
+  })
+
+  test('an interval with no type is an EMOM; an on/off with no type is not', () => {
+    expect(blk("A cada 2'\n5 Back Squat")).toMatchObject({ type: 'EMOM', interval: '02:00' })
+    const b = blk('40" on 20" off\n20 Sit Up')
+    expect(b.type).toBe('')
+    expect(b.typeUnresolved).toBe(true)
+    expect(b.interval).toBe('01:00')
+  })
+
+  test('E2MOM sets the type and the interval, and keeps its window as the duration', () => {
+    expect(blk("E2MOM 12'\n5 Back Squat")).toMatchObject({
+      type: 'EMOM',
+      interval: '02:00',
+      duration: '12',
+    })
+  })
+
+  test('Estações times itself station by station — the interval stays a note, never a field', () => {
+    const b = blk("Estações – A cada 2'\nGrupo A 3:00\n10 Wall Ball")
+    expect(b).not.toHaveProperty('interval')
+    expect(b.notes).toBe("A cada 2'")
+  })
+
+  test('an old note that mentions an interval stays a note (forward-only, no backfill)', () => {
+    const b = blk("LPO\n3 rounds\n1 Snatch\nObs: A cada 2' executar um set")
+    expect(b).not.toHaveProperty('interval')
+    expect(b.notes).toBe("A cada 2' executar um set")
+  })
+
+  test('the real coach week: its two "A cada" blocks become fields, with nothing left in notes', () => {
+    const timed = parseWeek(COACH_WEEK)
+      .flatMap(d => d.blocks)
+      .filter(b => b.interval)
+    expect(timed.map(b => [b.type, b.interval, b.rounds, b.duration, b.notes])).toEqual([
+      ['Skill', '03:00', '', '', ''],
+      ['Skill', '01:20', '5', '', ''],
+    ])
+  })
+})
+
+describe('serializing an interval', () => {
+  const line2 = block => serializeBlock({ exercises: [], ...block }).split('\n')[1]
+
+  test('the interval closes the structure line, in the notation the parser reads back', () => {
+    expect(line2({ type: 'Força', rounds: '3', interval: '02:00' })).toBe("3 rounds A cada 2'")
+    expect(line2({ type: 'LPO', rounds: '3', duration: '15', interval: '01:30' })).toBe(
+      "3 rounds 15' A cada 1'30\"",
+    )
+    expect(line2({ type: 'For Time', rounds: '5', duration: '15', interval: '03:00' })).toBe(
+      "5 rounds Cap 15' A cada 3'",
+    )
+  })
+
+  test('an on/off split is written as the split', () => {
+    expect(line2({ type: 'Core', rounds: '3', interval: '01:00', work: '00:40' })).toBe(
+      '3 rounds 40" on 20" off',
+    )
+  })
+
+  test('an invalid work time falls back to the plain interval; none writes nothing', () => {
+    expect(line2({ type: 'Core', rounds: '3', interval: '01:00', work: '01:30' })).toBe(
+      "3 rounds A cada 1'",
+    )
+    expect(line2({ type: 'Core', rounds: '3' })).toBe('3 rounds')
+  })
+
+  test('Estações writes none, even with the key on the block', () => {
+    expect(
+      serializeBlock({ type: 'Estações', interval: '02:00', stations: [], exercises: [] }),
+    ).not.toContain('A cada')
+  })
+
+  test('every interval and every on/off pair re-parses to exactly what was written', () => {
+    for (const every of [30, 45, 60, 70, 90, 120, 125, 150, 180, 300, 600]) {
+      const b = { type: 'Força', rounds: '3', interval: fmtSecs(every), exercises: [] }
+      const back = blk(serializeBlock(b))
+      expect(back.interval, `${every}s`).toBe(b.interval)
+      expect(back.rounds).toBe('3')
+      expect(back.duration).toBe('')
+      expect(back).not.toHaveProperty('work')
+    }
+    for (const [work, rest] of [
+      [40, 20],
+      [30, 30],
+      [45, 15],
+      [60, 30],
+      [60, 60],
+      [90, 30],
+      [100, 20],
+      [20, 40],
+      [15, 45],
+      [120, 60],
+    ]) {
+      const b = {
+        type: 'Core',
+        rounds: '3',
+        interval: fmtSecs(work + rest),
+        work: fmtSecs(work),
+        exercises: [],
+      }
+      const back = blk(serializeBlock(b))
+      expect(back.interval, `${work}/${rest}`).toBe(b.interval)
+      expect(back.work, `${work}/${rest}`).toBe(b.work)
+    }
+  })
+})
+
+describe('applyParsedBlock', () => {
+  const block = {
+    id: 'b1',
+    type: 'Core',
+    label: 'Meu core',
+    zone: 'Zona 03',
+    rounds: '3',
+    interval: '01:00',
+    work: '00:40',
+    notes: '',
+    exercises: [],
+  }
+
+  test('writes the text-owned fields back and keeps what the block bar owns', () => {
+    const p = blk("3 rounds A cada 2'\n20 Sit Up", { knownType: 'Core' })
+    const next = applyParsedBlock(block, p)
+    expect(next).toMatchObject({
+      id: 'b1',
+      label: 'Meu core',
+      zone: 'Zona 03',
+      rounds: '3',
+      interval: '02:00',
+    })
+    expect(next).not.toHaveProperty('work')
+    expect(next.exercises.map(e => e.name)).toEqual(['Sit Up'])
+  })
+
+  // The whitelist trap: a field it only sets when present can never be cleared by deleting its
+  // line — the same bug #121a fixed for `goal`.
+  test('deleting the interval line clears interval AND work', () => {
+    const p = blk('3 sets\n20 Sit Up', { knownType: 'Core' })
+    const next = applyParsedBlock(block, p)
+    expect(next).not.toHaveProperty('interval')
+    expect(next).not.toHaveProperty('work')
+    expect(next.rounds).toBe('3')
+  })
+
+  test('an on/off line replaces the old interval', () => {
+    const p = blk('3 sets 45" on 15" off\n20 Sit Up', { knownType: 'Core' })
+    expect(applyParsedBlock(block, p)).toMatchObject({ interval: '01:00', work: '00:45' })
   })
 })
 
@@ -706,7 +987,6 @@ describe('warnings', () => {
 
     expect([...seen.keys()].sort()).toEqual([
       'complex-detected',
-      'interval-approximated',
       'orphan-load',
       'preamble',
       'type-unresolved',
@@ -728,13 +1008,13 @@ describe('warnings', () => {
 
 // ── Format reference + warning kinds (#120/#129 · plans/61·C) ────────────────
 describe('WARNING_KINDS', () => {
-  test('covers exactly the 8 kinds the parser can produce, plus block-locked', () => {
-    // The 7 parser-only kinds are asserted directly above; block-locked comes
+  test('covers exactly the 6 kinds the parser can produce, plus block-locked', () => {
+    // The 6 parser-only kinds are asserted directly above; block-locked comes
     // from splitLockedBlocks (tested separately), not buildBlock/parseWeek.
+    // `interval-approximated` left with #228: the interval is a field, not an approximation.
     expect(Object.keys(WARNING_KINDS).sort()).toEqual([
       'block-locked',
       'complex-detected',
-      'interval-approximated',
       'orphan-load',
       'preamble',
       'type-unresolved',
@@ -752,6 +1032,12 @@ describe('WARNING_KINDS', () => {
 })
 
 describe('FORMAT_REFERENCE / FORMAT_EXAMPLE', () => {
+  test('documents the interval and the on/off notation, and no longer calls it approximate (#228)', () => {
+    expect(FORMAT_REFERENCE).toContain("A cada 2'")
+    expect(FORMAT_REFERENCE).toContain('on 20" off')
+    expect(FORMAT_REFERENCE).not.toContain('aproximado')
+  })
+
   test('the reference lists every real block type and cannot drift from TYPE_ALIASES', () => {
     Object.keys(TYPE_CONFIG).forEach(type => expect(FORMAT_REFERENCE).toContain(type))
     // A generated alias, not hand-copied — proves the table is built from

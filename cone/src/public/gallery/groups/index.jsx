@@ -49,6 +49,15 @@ const idxSess = {
       label: 'Mobilidade geral',
       exercises: [{ id: 'e1', name: 'Air Squat', sets: 2, reps: '10' }],
     },
+    // A non-WOD round block with an interval: the rail hand-rolls this meta, so it must carry
+    // the interval itself (#228).
+    {
+      id: 'b1b',
+      type: 'Força',
+      rounds: '3',
+      interval: '02:00',
+      exercises: [{ id: 'e1b', name: 'Hang Clean', reps: '1' }],
+    },
     {
       id: 'b2',
       type: 'For Time',

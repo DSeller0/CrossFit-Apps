@@ -16,7 +16,7 @@ import {
   isRoundBlock,
   progGroups,
   usesRm,
-  parseDurMins,
+  timerConfigFor,
   onKey,
   GUEST_CAP,
   findNameCollision,
@@ -577,63 +577,14 @@ export default function Schedule() {
     }
   }
 
+  // What to time is `timerConfigFor`'s (any block, #228); this adds who is timing it.
   function openTimer(bl, sess, dateKey) {
     const ath = selAth ? athletes.find(a => a.id === selAth) : null
-    let exercises,
-      stationTime = 45,
-      transitionTime = 15
-    if (bl.type === 'Estações') {
-      const nonRest = (bl.stations || []).filter(st => !st.isRest),
-        rest = (bl.stations || []).filter(st => st.isRest)
-      exercises = nonRest.map(st => ({
-        name: st.name || 'Grupo',
-        exercises: (st.exercises || [])
-          .filter(e => e.name || e.isComplex)
-          .map(e => ({
-            name: e.isComplex
-              ? e.name ||
-                (e.complexMovements || [])
-                  .map(m => m.name)
-                  .filter(Boolean)
-                  .join(' + ')
-              : e.name,
-            sets: e.sets,
-            reps: e.reps,
-          })),
-      }))
-      if (nonRest[0]?.duration) stationTime = Math.round(parseDurMins(nonRest[0].duration) * 60)
-      if (rest[0]?.duration) transitionTime = Math.round(parseDurMins(rest[0].duration) * 60)
-    } else {
-      exercises = (bl.exercises || [])
-        .filter(e => e.name || e.isComplex)
-        .map(e => ({
-          name: e.isComplex
-            ? e.name ||
-              (e.complexMovements || [])
-                .map(m => m.name)
-                .filter(Boolean)
-                .join(' + ')
-            : e.name,
-          sets: e.sets,
-          reps: e.reps,
-        }))
-    }
     const config = {
-      blockType: bl.type || bl.label,
-      blockLabel:
-        bl.label && bl.label !== bl.type && bl.label !== '-'
-          ? bl.label
-          : bl.label || bl.type || 'WOD',
-      timeCap: bl.duration ? parseInt(bl.duration) : null,
-      rounds: bl.rounds || bl.stationRepeat || null,
-      exercises,
+      ...timerConfigFor(bl),
       sessionId: sess.id,
       sessionDate: dateKey,
       athleteId: ath?.id || null,
-      blockId: bl.id,
-      stationTime,
-      transitionTime,
-      countdown: true,
     }
     try {
       localStorage.setItem('timer_config', JSON.stringify(config))
