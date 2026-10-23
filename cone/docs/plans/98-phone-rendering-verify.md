@@ -1,11 +1,10 @@
 # 98 — #227 + #231 · Two phone rendering bugs: verify on device, then fix
 
-> 🟡 Shipped: `9acfdfa` · 2026-10-04 — see BACKLOG.md · closes #209. #227 and #231 are fixed and
-> driven on Chromium, and **stay open until the S22 re-check passes** (steps in
-> [DEVICE-TESTS.md](../DEVICE-TESTS.md)); the marker is flipped then.
+> ✅ Done: `9acfdfa` · 2026-10-04 — see BACKLOG.md · closes #209, #227, #231. Shipped 2026-10-04
+> and driven on Chromium that day; the S22 re-check then passed on 2026-10-23.
 >
-> **Must-haves: 5/6 driven** on the local stack (SPA `:5173`, public `:5174`, the 30-exercise test
-> WOD on today's session), 4 font families × 360×800 / 384×854 / 412×915, on the final files.
+> **Must-haves: 6/6 driven.** Five on the local stack (SPA `:5173`, public `:5174`, the 30-exercise
+> test WOD on today's session), 4 font families × 360×800 / 384×854 / 412×915, on the final files.
 > (1) `Revisar registro` is 0.95× the screen (760px of 800; 814 of 854) with `Confirmar` at y 723–763
 > (777–817), and its body scrolls on its own — 1395px of content in 640. (2) A swipe through and past
 > the end of the body leaves `scrollY` where it was (2431 → 2431 at 360×800; 2313 → 2313 at 384×854)
@@ -16,8 +15,15 @@
 > each makes the chip `RM · 100 kg` with `75 kg` · `65/70/75/80/85 kg` · `50/60/70 kg` under the
 > load; the kg Deadlift reads `60/70/80 kg` with only `Demo`. (5) results.html at 360×667, block A
 > logged `Adaptado` with a 90-character note on all 8 exercises: confirm 627px with `Confirmar` at
-> 590–630, success modal 635px with `Fechar` at 594–630. **(6) the S22 is the one not driven** — it
-> runs after this deploy. **The checks can fail:** with the pre-fix files swapped back in, the same
+> 590–630, success modal 635px with `Fechar` at 594–630. **(6) The S22, 2026-10-23:** the user ran
+> the guide's checks on their Android phone — rows by line, the `RM` line and its entry, the kg
+> Deadlift, and the review dialog (`Confirmar` on screen, only its list moving, the page behind
+> staying put) — in their own theme and in TotK Dark, and reported that all of them passed ("all
+> screens behave as expected"). No screenshots, and no phone / Chrome version were sent this time
+> (the 2026-10-02 run was SM-S908E · Android 16 · Chrome 154); the optional index.html and
+> home-screen extras were not itemised. The iPhone / Safari run stays in
+> [DEVICE-TESTS.md](../DEVICE-TESTS.md) and can reopen #227 only if Safari differs.
+> **The checks can fail:** with the pre-fix files swapped back in, the same
 > driver reproduced the baseline (TotK Dark 360×800: 7 · 4 · 1 · 4 rows, dialog 1524px, `Confirmar`
 > at y 1105, the swipe moving the page 2277 → 2630), and the RM-line checks flagged all three RM rows
 > against the layout they replaced.
@@ -33,8 +39,8 @@ are under "Phase 0 — result" and "Phase 0b".*
 
 *The user's S22 run (2026-10-02) confirmed #227 and did not show #231, and redirected the fix to
 by-line rows; #209 joined (see "Phase 0b — result"). **Phase 1 ran 2026-10-04 (Sonnet)** and is under
-"Phase 1 — result". This plan carries no `> ✅ Done:` marker until the S22 re-check in
-[DEVICE-TESTS.md](../DEVICE-TESTS.md) passes — its marker is `> 🟡 Shipped:` until then.*
+"Phase 1 — result". It was held at `> 🟡 Shipped:` until the S22 re-check passed (2026-10-23), which
+turned the marker into `> ✅ Done:`.*
 
 ## Context
 
@@ -475,9 +481,9 @@ chip not first in the load column on all 3 rows (Complexo A, Romanian Deadlift, 
 the name on 2, and `Demo` pushed off the name's line on Complexo A. `npm run design:cards`
 regenerated the 17 cards (the CSS is inlined into each).
 
-**Still open — the device:** the S22 re-check (the dialog, then tema.html → *TotK Dark* →
-schedule.html blocks D/E) is in [DEVICE-TESTS.md](../DEVICE-TESTS.md). Until it passes the plan is
-held at `> 🟡 Shipped:` (the plans/74 precedent) and #227/#231 stay on the board.
+**The device — closed 2026-10-23.** The S22 re-check (rows and the dialog, in the user's own theme
+and in *TotK Dark*) passed; between the two dates the plan was held at `> 🟡 Shipped:` (the plans/74
+precedent) with #227/#231 on the board as a ⏸ row.
 
 ## Verification
 

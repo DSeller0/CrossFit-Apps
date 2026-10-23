@@ -1,10 +1,9 @@
 # 99 — #228 · "A cada" + on/off: a time-per-round field on every block type, and a Timer on every block
 
-> 🟡 Shipped: `5d3f728` · 2026-10-17 — see BACKLOG.md · #228. Everything is driven on Chromium; the
-> plan stays `> 🟡 Shipped:` until the Android vibration check passes (steps in
-> [DEVICE-TESTS.md](../DEVICE-TESTS.md)), and the marker is flipped then.
+> ✅ Done: `5d3f728` · 2026-10-17 — see BACKLOG.md · closes #228. Shipped and driven on Chromium on
+> 2026-10-17; the Android vibration check then passed on 2026-10-23.
 >
-> **Must-haves: 5/6 driven** on the local stack (SPA `:5173`, public `:5174`, two fixture sessions on
+> **Must-haves: 6/6 driven** on the local stack (SPA `:5173`, public `:5174`, two fixture sessions on
 > 2026-11-02/03, deleted afterwards), on the final files. (1) Força `3 rounds · A cada 2:00`, saved
 > from Detalhado and from Texto: `interval:'02:00'`, `rounds:'3'`, no `duration` both times;
 > schedule.html shows `3 RDS · a cada 2'` with a Timer in the right-hand column. (2) Its timer:
@@ -21,7 +20,8 @@
 > the change, HEAD renders no Timer on a non-WOD block (`actionsEmpty = !isWod`) and offers REGISTRAR
 > on any timer with a session (`canReg = !!cfg.sessionId`). (5) `A cada 2:00` × 5 with Duração empty:
 > placeholder `10'`, saved block without `duration`, week-grid card `5× · a cada 2'`. (6) Android
-> vibration: pending. Text round-trip audit on 747 prod blocks, before and after: 543 identical, 30
+> vibration, 2026-10-23: the user ran DEVICE-TESTS.md's check on their phone and reported that the
+> timer works with the buzzers — no per-check detail or screenshots were sent. Text round-trip audit on 747 prod blocks, before and after: 543 identical, 30
 > rewritten, 0 unstable; `interval-approximated` gone, `interval-lost` 0. `/code-review` hit the
 > session limit three times, so the diff was reviewed inline: one finding, fixed in the same commit —
 > the index rail hand-rolls non-WOD meta and dropped the interval.

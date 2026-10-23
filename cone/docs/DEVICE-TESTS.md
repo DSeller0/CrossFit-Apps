@@ -33,8 +33,9 @@ add it to that row rather than a new one.
 
 ### #227 + #231 · The logging dialog, and overlapping exercise rows ([plans/98](./plans/98-phone-rendering-verify.md))
 
-plans/98's Phase 1 fixed both on Chromium (2026-10-04): the review dialog is bounded — title and
-buttons pinned, only its body scrolls — and exercise rows read by line. Run plans/98's **Phase 0b**
+plans/98's Phase 1 fixed both on Chromium (2026-10-04) and the user's Android phone confirmed it
+(2026-10-23, plans/98 is Done): the review dialog is bounded — title and buttons pinned, only its
+body scrolls — and exercise rows read by line. This entry is the Safari half. Run plans/98's **Phase 0b**
 script in Safari, with the same test session (recreate it if it was already deleted — it lives on
 this week's Sunday, because index.html shows only the current week) and the **current** test WOD,
 whose block D now ends with `5x5 Back Squat 75%` and `Deadlift 3x60kg / 3x70kg / 3x80kg`. In step 5
@@ -57,54 +58,18 @@ showing, instead of Chrome's items. On top of what that script asks, watch for w
   overlapping rows and the review dialog was 1524px tall with `Confirmar` off the screen; after it,
   0 and 760px (0.95× the screen) with `Confirmar` at y 723–763.
 
-Say whether plans/98's fix had shipped on the day you ran it. Result → plans/98's marker.
+Say whether plans/98's fix had shipped on the day you ran it. Result → a line under plans/98's Done
+marker; if Safari differs from Chrome, file it as a new row rather than reopening #227.
 
 ### Timer cues on iPhone — an observation, not an item yet
 
 The timer marks a new round or phase **by vibration only** (`timer/Timer.jsx:309,320,324`), and iOS
 Safari has no Vibration API — an iPhone gets no cue at all. Whenever a timer is tested on an iPhone
-(#228's "A cada" timer, shipped 2026-10-17), note whether the missing cue matters in class. If it does, it
-becomes its own row (a sound or screen-flash cue).
+(#228's "A cada" timer, shipped 2026-10-17; buzzing confirmed on Android 2026-10-23), note whether
+the missing cue matters in class. The row that would fix it already exists — **#238**, sound cues,
+whose events the user picks in a planning session; this observation is evidence for it, not a new item.
 
 ## Android — pending
 
-### #227 + #231 · The S22 re-check after plans/98's Phase 1 (≈5 minutes)
-
-Phase 0b ran on the S22 on 2026-10-02 (#227 confirmed; #231 not seen in Halo Reach). Phase 1 shipped
-2026-10-04; this closes both rows. After the deploy, close every Cone tab and reopen it — the service
-worker can serve the old build for one load, so open each page twice.
-
-1. **The test session.** If the old one is still there, add the two new lines to block D (`5x5 Back
-   Squat 75%` and `Deadlift 3x60kg / 3x70kg / 3x80kg`); otherwise recreate it from plans/98's Test
-   WOD (Criador → this week's `DOM` → `+ sessão` → `¶ Texto` → paste → check "5 blocos · 30
-   exercícios" → `Aplicar` → `Salvar sessão`).
-2. **Rows, in your own theme.** `schedule.html?box=all` → Atleta00 → the `DOM` card → `Detalhes`.
-   Blocks D and E: is every load **under** its exercise's name, with `Demo` beside it? Back Squat has
-   `RM` on its own line under the name; tap it, enter 100 → does the chip read `RM · 100 kg`, with
-   `75 kg` under `75% RM`? Deadlift reads `60/70/80 kg` with **no** `RM`.
-3. **Rows, in the default theme.** `tema.html` → **TotK Dark** → repeat step 2 (this is the wide face
-   where the overlap was measured). Then put your own theme back.
-4. **The dialog.** `Registrar resultado` → `RX` and RPE `5` in every block → `Registrar`. On
-   **Revisar registro**: is `Confirmar` on screen without scrolling the page? Swipe up inside the
-   dialog, past the end of its list — does only the list move? Swipe on the dark backdrop — does the
-   page stay put? Then `Editar` — never `Confirmar` by accident.
-5. **Tell me:** both fixed? In both themes? A screenshot of anything that still looks wrong.
-6. **Clean up:** Criador → `DOM` → `Remover`. Result → plans/98's marker, which turns `> 🟡 Shipped:`
-   into `> ✅ Done:` and closes #227 and #231.
-
-### #228 · Does the timer vibrate at each new round? ([plans/99](./plans/99-interval-per-round.md)) (≈3 minutes)
-
-Shipped 2026-10-17. Every other check ran on Chromium with `navigator.vibrate` stubbed: the stub saw
-each call, but no phone has felt one. After the deploy, close every Cone tab and reopen it — the
-service worker can serve the old build for one load.
-
-1. **A short test block** (on the computer is fine). Criador → any day this week → `+ sessão` →
-   `¶ Texto` → paste the three lines `Força` · `3 rounds A cada 20"` · `1 Hang Clean` → `Aplicar` →
-   `Salvar sessão`.
-2. **On the phone:** `schedule.html?box=all` → that day → the Força card → **Timer** (the ▶ row under
-   the exercises) → `INICIAR`. Keep the screen on and the phone in your hand.
-3. **(a)** A double buzz at 0:20 and again at 0:40, as `RD 2/3` and `RD 3/3` appear? **(b)** A long
-   triple buzz at 1:00, with `FINALIZADO 01:00`? **(c)** Does the footer read `DESCARTAR · FECHAR`,
-   with no `REGISTRAR`?
-4. **Tell me** (a)–(c). Then `FECHAR`, and Criador → that day → `Remover`. Result → plans/99's
-   marker, which turns `> 🟡 Shipped:` into `> ✅ Done:` and closes #228.
+*(Nothing right now. The S22 re-checks for plans/98 (#227 · #231) and plans/99 (#228) passed on
+2026-10-23; their results are in those plans' Done markers.)*

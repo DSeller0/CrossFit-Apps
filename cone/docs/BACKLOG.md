@@ -20,22 +20,21 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 - **Ready:** #233
 - **In Progress:** none
 - **Start here:** #233 (plans/100), the suggested-session engine (Opus) — #228's interval field,
-  which it builds on, shipped 2026-10-17 (`5d3f728`). plans/98 (`9acfdfa`) and plans/99 each have
-  only an S22 check left, listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md).
+  which it builds on, shipped 2026-10-17 (`5d3f728`) and passed its phone check on 2026-10-23.
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
   `> 🟡 Shipped:` pending an iPhone re-test, now listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md) (no
   iPhone at hand); nothing to code. · **#211** — the
   [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) needs 20 naming calls and
   approval of the drafted text before its [SQL](./reviews/2026-09-20-registry-additions.sql) reaches
-  prod; a Markdown decision checklist for the user comes next. · **#227 · #231** — plans/98 shipped
-  and is held at `> 🟡 Shipped:` until the S22 re-check passes; nothing to code. · **#228** — plans/99 shipped 2026-10-17 and is
-  held at `> 🟡 Shipped:` until the S22 buzzes at each new round; nothing to code.
+  prod; a Markdown decision checklist for the user comes next. · **#238** — which timer events get a
+  sound is the user's call, in a planning session.
 - **Last refill:** the [2026-09-20 full pass](./reviews/2026-09-20.md) (all 9 dimensions incl. a
   live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
   2026-10-02: #227–#231 filed from user reports and the
   [block-structures evidence](./reviews/2026-10-02-block-structures.md); #158 narrowed to its (b) half.
   2026-10-04: #209 closed by plans/98; #232 filed from its screenshots; #233–#237 filed from the
-  [suggested-session analysis](./reviews/2026-10-04-suggested-session.md).
+  [suggested-session analysis](./reviews/2026-10-04-suggested-session.md). 2026-10-23: #227, #231 and
+  #228 passed on the user's phone and closed; #238 filed (timer sound cues).
 
 ⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
 plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
@@ -67,8 +66,6 @@ promoted into **plans/84** and **plans/86** the same day, and **#164** into **pl
 leaving only the blocked row until plans/91's close-out filed #204.*
 
 - ⏸ **#155 iOS Safari zooms the page when logging a result** · S · Sonnet · blocked on the user: `plans/74` shipped the 16px floor (`793ee45`, 2026-08-07) and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test — steps in [DEVICE-TESTS.md](./DEVICE-TESTS.md). Nothing to code until it runs.
-- ⏸ **[plans/98 · `9acfdfa` · 🟡 S22 re-check pending](./plans/98-phone-rendering-verify.md)** — **#227 + #231 The logging dialog loses "Confirmar"; long exercise rows overlap** · S · Sonnet · blocked on the user: both fixed and driven on Chromium; the plan stays `> 🟡 Shipped:` until the S22 re-check passes — steps in [DEVICE-TESTS.md](./DEVICE-TESTS.md). Nothing to code.
-- ⏸ **[plans/99 · `5d3f728` · 🟡 S22 vibration check pending](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off, and a Timer on every block** · L · Sonnet · blocked on the user: shipped and driven on Chromium; held at `> 🟡 Shipped:` until the phone buzzes at each new round — steps in [DEVICE-TESTS.md](./DEVICE-TESTS.md). Nothing to code.
 - **#204 me.html's Distribuição reads 0/N for every athlete** · XS · Sonnet · `results_v2` logs only WOD block types, so `calcBlockStats`' executed side is structurally 0 for Força/LPO/Acessórios/Skill/Core/Cardio/Mobilidade. It was hidden until #164 made planned non-zero. Decide: hide the card until #64 logs strength blocks, or show planned only.
 - **#208 Off-screen panels stay in the tab order on every public page** · XS · Sonnet · `Nav.module.css:3` `.ovSheet` and `Results.module.css:181` `.lbPane` hide by `transform` alone. Verified live: the 3 overflow tiles are `visibility:visible` and take focus. The fix idiom is already in both files (`display:none` / `visibility:hidden`).
 - **#210 A rest-day article was pasted into the Criador and became 50 exercises** · S · Sonnet · session `mt7kwk74qic61a0mx9s` (2026-08-27): 49 prose lines are `exercises` with empty reps/sets across four Mobilidade blocks, `block.notes` empty on all four. Renders to athletes as a WOD with 50 movements. Decide: repair the row, and whether the paste path should have caught it.
@@ -132,6 +129,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#88 Reconcile prod vs. dev database** · S–M · Sonnet · **re-measured 2026-09-20: FOUR tables, not two.** `seed-dev.mjs` prints EMPTY for `locations`, `coach_profile`, **`events` and `templates`** (`0006` locked two, `0009` the others) — indistinguishable from prod having none. It also seeds **0** result rows when #190 fires. Fix is plans/89's service-role read.
 - **#221 `useLiveRegistration.js:52-59` upserts `results_v2` with no error check at all** · XS · Sonnet · decision first: the return value isn't destructured, so a constraint violation (#190's, reachable because `:29` also filters on `date`) vanishes with **zero** signal. Decide how a failed live registration surfaces on the TV controller.
 - **#222 Four test athletes live in prod** · XS · Sonnet · `Atleta00`–`Atleta03` render in me.html's public picker alongside real members. Decide: delete, or mark them non-public — the athlete blob has no flag for it today.
+- **#238 Timer sound cues — which events get a sound?** · S–M · Sonnet · decision first, in a planning session: the timer cues a new round, a phase change and the end by vibration only (works on the user's phone), so a phone with vibration off, and every iPhone (no Vibration API), gets no cue. The user picks the events and the default; then it is a small audio module.
 
 ### P4 — parked (features, infra, large structural)
 
@@ -157,7 +155,8 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
-- ✅ **[plans/98 · `9acfdfa` · 2026-10-04](./plans/98-phone-rendering-verify.md)** — **#209 A kg progression stops reading as % RM** · closed #209. · `progressionGroupUnit()` in `wod.js` is the one derivation (+9 tests); `ExRow` and the exports call it, so `60/70/80 kg` has no RM line and no invented load. Also fixed #227 and #231 (held at 🟡 for the S22). Filed #232.
+- ✅ **[plans/99 · `5d3f728` · 2026-10-17](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off, and a Timer on every block** · closed #228. · One interval field on every block type, stable through Detalhado ↔ Texto (0 unstable of 747 prod blocks); the timer's mode comes from `timerMode(cfg)` alone and every block gets a Timer (+106 tests). Buzzes on the user's phone.
+- ✅ **[plans/98 · `9acfdfa` · 2026-10-04](./plans/98-phone-rendering-verify.md)** — **#227 + #231 + #209 Bounded logging dialogs, rows by line, no fake % RM** · closed #227, #231, #209. · `Confirmar` always on screen and only the list scrolls; rows read name → `RM` → load → computed load, no overlap in 4 fonts at 360–412px; passed on the user's phone, 2026-10-23. Filed #232.
 - ✅ **[plans/97 · `15d12e2` · 2026-09-29](./plans/97-share-link-athlete-guard.md)** — **#207 The Apresentar share link opens its session; no `?id=` can corrupt the athlete filter** · closed #207. · The QR now encodes `?date=…&session=…`; every `?id=` reader on schedule + results validates through `findAthleteById` (+24 tests). Printed QRs keep the old URL — the guard makes them harmless.
 - ✅ **[plans/96 · `d5be099` · 2026-09-29](./plans/96-gsd-core-trial.md)** — **#225 Trial gsd-core's phase loop in isolation, then decide** · closed #225. · **Not adopted**: ~10 700 tok always-on with no supported trim, plans outside the #223 gate, ~40:1 board duplication. Its code review caught #207's write in `Results.jsx` too (→ plans/97). Kept two WORKFLOW rules; filed #226.
 - ✅ **[plans/95 · `2a9ced2` · 2026-09-20](./plans/95-claude-md-split.md)** — **#224 Split `CLAUDE.md` into a lean core + on-demand `docs/arch/`** · closed #224. · Auto-loaded per session **~39 080 → ~6 503 tokens (83%)**. A cut, not a regeneration: 28/28 headings and 997/997 lines still present. The index names each file's traps.
