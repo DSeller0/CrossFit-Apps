@@ -18,9 +18,9 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 ## ▶ Now
 
 - **Ready:** none
-- **In Progress:** #235
-- **Start here:** #235 (plans/102), the ✦ Sugerido editor mode, built from the approved card. #236 and #237
-  are free to start in parallel; #236 must land before the main box is named.
+- **In Progress:** none
+- **Start here:** #236 (Sonnet, S) — the `historyFromUntagged` link, which must land **before the main box is
+  named**. #237 (S–M) is free to follow. ✦ Sugerido (#233–#235) is shipped end to end.
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
   `> 🟡 Shipped:` pending an iPhone re-test, now listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md) (no
   iPhone at hand); nothing to code. · **#211** — the
@@ -36,7 +36,8 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
   [suggested-session analysis](./reviews/2026-10-04-suggested-session.md). 2026-10-23: #227, #231 and
   #228 passed on the user's phone and closed; #238 filed (timer sound cues). 2026-11-05: #233 shipped
   by plans/100; #239 filed from its build; #240 filed and decided the same day (keep the run-length rule
-  as specified); #234's mockup built, approved by the user and closed by plans/101.
+  as specified); #234's mockup built, approved by the user and closed by plans/101;
+  #235 shipped by plans/102.
 
 ⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
 plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
@@ -51,7 +52,7 @@ Every other bullet here is free-form.
 
 ## 🔵 In Progress
 
-- 🔵 **[→ In Progress · plans/102](./plans/102-suggested-session-editor-mode.md)** — **#235 Suggested session, Phase 3: the ✦ Sugerido editor mode** · M · Sonnet
+*(empty)*
 
 ---
 
@@ -156,6 +157,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/102 · `1c64ad0` · 2026-11-05](./plans/102-suggested-session-editor-mode.md)** — **#235 Suggested session, Phase 3: the ✦ Sugerido editor mode** · closed #235. · Third `sessionMode`, from the approved card. Driven: 0 writes through Aplicar, 1 on Salvar; the snapshot survives reopen + re-save. Review also fixed a latent Texto bug (a new session opened in the old pane).
 - ✅ **[plans/101 · `1581458` · 2026-11-05](./plans/101-suggested-session-mockup.md)** — **#234 Suggested session, Phase 2: Lane-B mockup of ✦ Sugerido** · closed #234. · Approved as drawn. `mockups/67-criador-sugerido.html`: real engine output, 8 themes, 1280 + 390, contrast measured; it caught a quirks-mode class-case bug.
 - ✅ **[plans/100 · `417b1dc` · 2026-11-05](./plans/100-suggested-session-engine.md)** — **#233 Suggested session, Phase 1: the statistical engine + a backtest audit** · closed #233. · `criador/suggest/` + `audit-suggest.mjs`: 0 parse warnings, byte-stable, re-rolls isolated. Backtest, 66 days: main lift 55%, the run-length rule = Markov, kept as specified.
 - ✅ **[plans/99 · `5d3f728` · 2026-10-17](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off, and a Timer on every block** · closed #228. · One interval field on every block type, stable through Detalhado ↔ Texto (0 unstable of 747 prod blocks); the timer's mode comes from `timerMode(cfg)` alone and every block gets a Timer (+106 tests). Buzzes on the user's phone.

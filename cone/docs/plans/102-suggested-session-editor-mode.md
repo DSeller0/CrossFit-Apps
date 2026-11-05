@@ -1,5 +1,49 @@
 # 102 — #235 · Suggested session, Phase 3: the ✦ Sugerido editor mode
 
+> ✅ Done: `1c64ad0` · 2026-11-05 — see BACKLOG.md · closes #235. Driven on the local stack (SPA `:5173`,
+> Docker Desktop restarted, the local database a recent prod snapshot) and the gallery (`:5174`), on the
+> final files; a request logger on `fetch` counted every non-GET to `rest/v1`. The sync of the mockup to
+> Claude Design is still the user's `/design-sync`.
+>
+> **Must-haves: 7/7 driven.** (1) A new Monday session of "Sem box" (09/11): ✦ Sugerido is the third
+> button, the pane lists the engine's six blocks, each with a por quê that opens (`hidden` → shown, 5
+> lines) and its own ↻ Outra — **0 writes** from opening it through a re-roll, LPO = Clean, a 60 min
+> class time and Aplicar. (2) Aplicar on an empty session applies with **no confirm**, lands in
+> ▤ Detalhado with `6 Blocos` and `Salvar sessão ●`; on a 7-block session it opens "Blocos atuais 7 —
+> Aquecimento, Força, LPO, Acessórios, For Time, For Time, Cardio · Blocos sugeridos 6"; *Cancelar* keeps
+> the pane, *Substituir blocos* gives 6 blocks, ▤ Detalhado, dirty, tagged, still 0 writes. (3) Salvar:
+> exactly **one** `POST /rest/v1/sessions`; the database row carries `suggestion` (`engine:'synth'`,
+> `version:1`, `at`, `seedKey:'__sem_box__|2026-11-09'`, `options:{lpoLift:'Clean',budgetMin:60}`,
+> `variants:{Core:1}`, the 30-line text); reopening shows "✦ Sugerida · motor v1"; Core rounds 3 → 4 and
+> a second save kept the snapshot byte-identical (its text still says `3 rounds` — the baseline for
+> `--edits`). (4) Core's ↻ Outra changed **only Core** and added "variante 1"; LPO = Clean changed **LPO
+> and For Time** — the WOD reads the day's LPO family, so the must-have as first written ("nothing
+> else") was wrong and is corrected above; a class time of 60 showed "50 min acima dos 60 … Nada foi
+> cortado" with all 6 blocks kept. (5) Test Box 00 (one Saturday): the thin banner with both fallbacks;
+> Garra (no sessions): "Nenhuma sessão no histórico deste box.", Aplicar **disabled**, "Usar todos os
+> boxes" → "26 segundas em 146 sessões", 6 blocks, Aplicar enabled. (6) 390: the mobile layout, page
+> `scrollWidth` = `clientWidth`, the Aplicar bar in view ("Aplicar · 1 bloco"); the gallery entry renders
+> all six states and `npm run design:cards` regenerated 17 cards. (7) `node scripts/audit-suggest.mjs
+> --edits --sessions <blob>` on a fabricated blob printed kept 3 · edited 1 (loads) · replaced 1 ·
+> removed 1 · added 1; against prod it still says "no suggested sessions yet".
+>
+> **`/code-review` (high) found 9; 8 fixed.** (a) Unticking every block left the engine on its default day
+> over an all-unticked list — the last block is now disabled. (b) `startEdit` kept `sessionMode`, so a
+> **different session opened in the old pane** — Texto had the same latent bug (its text, seeded once at
+> mount, would show over the new blocks); both fixed in `useSessionEditor`, driven: Sugerido → another
+> session → ▤ Detalhado. (c) A template now drops a stale `suggestion`; Aplicar clears the active
+> template and the change marks. (d) The confirm names the blocks it replaces — a linked Benchmark
+> included, which Texto preserves and Aplicar does not. (e) The tooltip date was UTC. (f) Blocks keyed
+> by `id` remounted on every control change and dropped keyboard focus — keyed by type; driven, focus
+> stays on ↻ Outra. (g) Duplicate weekday tables → `DIA`/`DIAS`/`ddmm` from `synth.js`. (h) The false
+> "test-only" header on `testFixtures.js`. *Not fixed:* the por quê open-state is remembered per block
+> type, so re-ticking LPO shows it expanded — a harmless preference memory.
+>
+> **Two deviations from the card.** The ✦ Sugerida tag shows from Aplicar on, not only after saving (it
+> is `form.suggestion`); and the mobile Aplicar reads "Aplicar · N blocos", as drawn. **A trap met:** I
+> ran Prettier over the whole `criador/` folder and it reformatted three CSS files the repo's formatter
+> deliberately does not cover (`src/**/*.{js,jsx}` only) — reverted before the commit.
+
 *Planned and executed 2026-11-05 (Sonnet). Phase 3 of 5: [plans/100](./100-suggested-session-engine.md)
 shipped the engine, [plans/101](./101-suggested-session-mockup.md) the approved mockup
 (`design/mockups/67-criador-sugerido.html`). This builds that card on the real editor. The engine is not
