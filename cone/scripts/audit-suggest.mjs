@@ -12,7 +12,8 @@
 // <YYYY-MM-DD> (one day) · --variant <Tipo>=<n> (repeatable; "↻ Outra") · --lpo <Snatch|Clean|
 // Jerk> · --pattern <Padrão> · --blocks <Tipo,Tipo> · --budget <min> · --widen <boxes|weekdays>
 // · backtest only: --since <YYYY-MM-DD> · --write (also writes docs/reviews/<today>-suggest-
-// backtest.md).
+// backtest.md) · --sessions <file.json> (read a sessions blob from disk instead of prod's — how
+// `--edits` is driven before prod holds a saved suggestion; the registry still comes from prod).
 //
 // The anon key reads `sessions` and `exercise_registry`. It CANNOT read `locations` (RLS, 0006):
 // boxes are therefore found by the ids sessions are tagged with, unnamed, and a box's
@@ -87,7 +88,10 @@ const [sRes, rRes, lRes] = await Promise.all([
 ])
 if (sRes.error) throw sRes.error
 if (rRes.error) throw rRes.error
-const sessions = sRes.data?.value || {}
+const sessionsFile = opt('sessions')
+const sessions = sessionsFile
+  ? JSON.parse(readFileSync(sessionsFile, 'utf8'))
+  : sRes.data?.value || {}
 const index = buildRegistryIndex(rRes.data?.value || {})
 const locations = Array.isArray(lRes.data?.value) ? lRes.data.value : []
 const locNote = locations.length

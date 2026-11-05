@@ -1,4 +1,12 @@
 import { SessionTextPane } from '../../../components/tabs/criador/SessionTextPane.jsx'
+import { SessionSuggestPane } from '../../../components/tabs/criador/SessionSuggestPane.jsx'
+import { initialControls } from '../../../components/tabs/criador/suggest/paneModel.js'
+import {
+  REGISTRY as SUG_REGISTRY,
+  blob as sugBlob,
+  session as sugSession,
+  standardBox,
+} from '../../../components/tabs/criador/suggest/testFixtures.js'
 import { BlockTextEditor } from '../../../components/tabs/criador/BlockTextEditor.jsx'
 import { WeekSessionCard } from '../../../components/tabs/criador/WeekSessionCard.jsx'
 import { WeekImportModal } from '../../../components/tabs/criador/WeekImportModal.jsx'
@@ -214,6 +222,39 @@ function StubTypePicker({ onClose }) {
   )
 }
 
+// ── ✦ Sugerido fixtures (#235) ────────────────────────────────────────────────
+// Synthetic weeks from the engine's own test fixtures — backups are personal data. Twelve Sunday-
+// start weeks of the main box (Mon/Tue/Wed/Fri, 07/06 → 29/08), one lone Monday of a second box, and
+// a third box with nothing — so the same pane shows the normal, thin and empty states.
+const SUG_DATE = '2026-08-31'
+const SUG_MAIN = standardBox()
+const SUG_SESSIONS = {
+  ...SUG_MAIN,
+  '2026-08-24': [
+    ...SUG_MAIN['2026-08-24'],
+    ...sugBlob([
+      sugSession('2026-08-24', "Core\n3 rounds\n15 V-up\n\nCardio\n40' Run", {
+        locationIds: ['garra'],
+      }),
+    ])['2026-08-24'],
+  ],
+}
+const SUG_LOCATIONS = [
+  { id: 'garra', name: 'Garra', type: 'box' },
+  { id: 'novo', name: 'Box Novo', type: 'box' },
+]
+const sugProps = {
+  sessions: SUG_SESSIONS,
+  registry: SUG_REGISTRY,
+  locations: SUG_LOCATIONS,
+  locationIds: [],
+  date: SUG_DATE,
+  blocks: [],
+  onApply: NOOP,
+  onCancel: NOOP,
+  onGoToText: NOOP,
+}
+
 export default {
   group: 'Criador',
   items: [
@@ -245,6 +286,41 @@ export default {
           </Case>
           <Case label="Vazio — nada colado ainda">
             <SessionTextPane blocks={[]} onApply={NOOP} typePicker={StubTypePicker} />
+          </Case>
+        </Section>
+      ),
+    },
+    {
+      id: 'criador-sessionsuggestpane',
+      label: 'SessionSuggestPane',
+      render: () => (
+        <Section
+          title="SessionSuggestPane"
+          sub="src/components/tabs/criador/SessionSuggestPane.jsx — ✦ Sugerido, o terceiro modo do editor (#235): uma sessão sintetizada só com o histórico do próprio box pelo motor da #233. Cada bloco explica sua escolha (por quê) e tem o seu ↻ Outra; nada é aplicado até Aplicar, e nada é gravado até Salvar. O tempo da aula só AVISA — nunca corta. Semanas sintéticas (suggest/testFixtures.js): os backups são dados pessoais."
+        >
+          <Case label="Segunda 31/08, Sem box — a sugestão automática; por quê da Força aberto">
+            <SessionSuggestPane {...sugProps} initialOpen={['Força']} />
+          </Case>
+          <Case label="Com ajustes — LPO = Clean, foco Puxar, aula de 60 min (aviso de tempo; a Força ignora o foco e diz por quê)">
+            <SessionSuggestPane
+              {...sugProps}
+              initial={{ ...initialControls(), lpoLift: 'Clean', pattern: 'Puxar', budget: '60' }}
+              initialOpen={['LPO']}
+            />
+          </Case>
+          <Case label="Sessão que já tem blocos — Aplicar abre a confirmação de substituir (clique para ver)">
+            <SessionSuggestPane {...sugProps} blocks={txtMondayBlocks} />
+          </Case>
+          <Case label="Box com 1 segunda no histórico — poucos dados, com as duas saídas">
+            <SessionSuggestPane {...sugProps} locationIds={['garra']} />
+          </Case>
+          <Case label="Box sem nenhuma sessão — vazio, Aplicar desativado">
+            <SessionSuggestPane {...sugProps} locationIds={['novo']} />
+          </Case>
+          <Case label="Mobile 390 — ajustes recolhidos num resumo, Aplicar numa barra fixa">
+            <div style={{ width: 390, maxWidth: '100%' }}>
+              <SessionSuggestPane {...sugProps} isMobile />
+            </div>
           </Case>
         </Section>
       ),

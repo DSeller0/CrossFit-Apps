@@ -18,18 +18,16 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 ## ▶ Now
 
 - **Ready:** none
-- **In Progress:** #234
-- **Start here:** #234's mockup is built and verified on disk — it waits for the user's review (below). #236
-  and #237 are free to start in parallel; #235 waits for the approval.
+- **In Progress:** #235
+- **Start here:** #235 (plans/102), the ✦ Sugerido editor mode, built from the approved card. #236 and #237
+  are free to start in parallel; #236 must land before the main box is named.
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
   `> 🟡 Shipped:` pending an iPhone re-test, now listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md) (no
   iPhone at hand); nothing to code. · **#211** — the
   [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) needs 20 naming calls and
   approval of the drafted text before its [SQL](./reviews/2026-09-20-registry-additions.sql) reaches
   prod; a Markdown decision checklist for the user comes next. · **#238** — which timer events get a
-  sound is the user's call, in a planning session. · **#234** — review of the ✦ Sugerido mockup
-  (`design/mockups/67-criador-sugerido.html`); the sync to Claude Design is the user's `/design-sync`,
-  and #235 is built from the card they approve.
+  sound is the user's call, in a planning session.
 - **Last refill:** the [2026-09-20 full pass](./reviews/2026-09-20.md) (all 9 dimensions incl. a
   live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
   2026-10-02: #227–#231 filed from user reports and the
@@ -38,7 +36,7 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
   [suggested-session analysis](./reviews/2026-10-04-suggested-session.md). 2026-10-23: #227, #231 and
   #228 passed on the user's phone and closed; #238 filed (timer sound cues). 2026-11-05: #233 shipped
   by plans/100; #239 filed from its build; #240 filed and decided the same day (keep the run-length rule
-  as specified); #234's mockup built.
+  as specified); #234's mockup built, approved by the user and closed by plans/101.
 
 ⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
 plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
@@ -53,7 +51,7 @@ Every other bullet here is free-form.
 
 ## 🔵 In Progress
 
-- 🔵 **[→ In Progress · plans/101](./plans/101-suggested-session-mockup.md)** — **#234 Suggested session, Phase 2: Lane-B mockup of ✦ Sugerido** · S · Sonnet
+- 🔵 **[→ In Progress · plans/102](./plans/102-suggested-session-editor-mode.md)** — **#235 Suggested session, Phase 3: the ✦ Sugerido editor mode** · M · Sonnet
 
 ---
 
@@ -111,7 +109,6 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#229 Round-groups inside a block — buy-in / N rounds / buy-out, one score** · L · Opus→Sonnet · 21 prod blocks type `3 Rounds`, `Buy in`, `Then` as exercise rows: athletes see them as movements, and #112's DNF total counts `3 Rounds` as 3 reps. Claude Design mockup of the inputs and the athlete view first. [Evidence](./reviews/2026-10-02-block-structures.md).
 - **#230 Estações timer + cap math** · S–M · Sonnet · the timer gives every station the FIRST station's duration and never sees `restBetweenCycles` (`Schedule.jsx:601`) — wrong for 2026-09-12's 9'/8'/7' windows. `stationsCapMins` and `stationsCapStr` disagree on a trailing rest; `cloneBlocks` never re-ids stations.
 - **#232 `ReadRow` has no gap between its label and its value** · XS · Sonnet · `ConfirmReview.module.css:96` `.row` is `justify-content:space-between` with no `gap`, so a short exercise name beside a long note reads "RunSubstituí pela versão…" in the review dialog and the LogPane's read boxes. Add a gap and let the value wrap. Found in plans/98's screenshots.
-- ⏸ **#235 Suggested session, Phase 3: the ✦ Sugerido editor mode** · M · Sonnet · `SessionSuggestPane` as a third `sessionMode`, preview → Aplicar, the `session.suggestion` snapshot, a gallery entry, `audit-suggest.mjs --edits` switched on. Blocked on the #234 approval (the mockup is built, awaiting review).
 - **#236 Suggested session, Phase 4: link a box's history to the untagged sessions** · S · Sonnet · `location.historyFromUntagged = {until}` so the main box keeps its past when it gets a name — link, never retag. Must land before the rename. The engine already reads the field.
 - **#237 Suggested session, Phase 5: an editable "Padrão" per exercise** · S–M · Sonnet · a `pattern` override on the registry entry (8 movement patterns) in Exercícios, plus `scripts/audit-patterns.mjs`. Only 71% of movement occurrences resolve today; #211 narrows it. `patternOf` already honours `entry.pattern`.
 
@@ -159,6 +156,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/101 · `1581458` · 2026-11-05](./plans/101-suggested-session-mockup.md)** — **#234 Suggested session, Phase 2: Lane-B mockup of ✦ Sugerido** · closed #234. · Approved as drawn. `mockups/67-criador-sugerido.html`: real engine output, 8 themes, 1280 + 390, contrast measured; it caught a quirks-mode class-case bug.
 - ✅ **[plans/100 · `417b1dc` · 2026-11-05](./plans/100-suggested-session-engine.md)** — **#233 Suggested session, Phase 1: the statistical engine + a backtest audit** · closed #233. · `criador/suggest/` + `audit-suggest.mjs`: 0 parse warnings, byte-stable, re-rolls isolated. Backtest, 66 days: main lift 55%, the run-length rule = Markov, kept as specified.
 - ✅ **[plans/99 · `5d3f728` · 2026-10-17](./plans/99-interval-per-round.md)** — **#228 "A cada" + on/off, and a Timer on every block** · closed #228. · One interval field on every block type, stable through Detalhado ↔ Texto (0 unstable of 747 prod blocks); the timer's mode comes from `timerMode(cfg)` alone and every block gets a Timer (+106 tests). Buzzes on the user's phone.
 - ✅ **[plans/98 · `9acfdfa` · 2026-10-04](./plans/98-phone-rendering-verify.md)** — **#227 + #231 + #209 Bounded logging dialogs, rows by line, no fake % RM** · closed #227, #231, #209. · `Confirmar` always on screen and only the list scrolls; rows read name → `RM` → load → computed load, no overlap in 4 fonts at 360–412px; passed on the user's phone, 2026-10-23. Filed #232.

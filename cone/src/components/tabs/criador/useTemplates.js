@@ -36,7 +36,13 @@ export function useTemplates({ editor, setSessions, defaultBoxIds }) {
 
   const applyTemplate = tpl => {
     editor.setBlocks(normalizeLegacyCardio(cloneBlocks(tpl.blocks)))
-    editor.setForm(f => ({ ...f, sessionName: f.sessionName || tpl.name }))
+    // A template REPLACES the blocks, so the session no longer started from a suggestion — keeping
+    // `suggestion` would tag it ✦ Sugerida and make `--edits` count the template as edits.
+    editor.setForm(f => {
+      const next = { ...f, sessionName: f.sessionName || tpl.name }
+      delete next.suggestion
+      return next
+    })
     setShowTemplateModal(false)
     editor.setActiveTemplateId(tpl.id)
     editor.setChangedBlockFields({})

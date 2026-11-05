@@ -1,8 +1,8 @@
 # Criador — layout + text format + suggested session
 
 > Split out of `cone/CLAUDE.md` by [plans/95](../plans/95-claude-md-split.md) (#224, 2026-09-20) — the text is unchanged, only its location.
-> Criador layout (#58 / plans/37), the text grammar (#92 / plans/36) and the suggested-session
-> engine (#233 / plans/100).
+> Criador layout (#58 / plans/37), the text grammar (#92 / plans/36), the suggested-session engine
+> (#233 / plans/100) and its editor mode (#235 / plans/102).
 > ↩ back to [CLAUDE.md](../../CLAUDE.md)
 
 ---
@@ -295,7 +295,7 @@ refinements: [docs/plans/36](../plans/36-criador-text-mode.md).
   names comes from here. `synth.js` — one generator per type + the pt-BR why. `rng.js` — FNV-1a over
   `scope|date|blockType|variant` → mulberry32. `estimate.js` — a warning figure, never a trim.
   `index.js` — `suggestSession`, `ENGINE_VERSION`, `THIN_WEEKDAY_SESSIONS`, `suggestionRecord` (the
-  `session.suggestion` snapshot). `testFixtures.js` — synthetic weeks for the suites (test-only).
+  `session.suggestion` snapshot). `testFixtures.js` — synthetic weeks for the suites, shared with the dev-only gallery.
 - **The rules in one paragraph.** A type joins a weekday on ≥ 50% of its sessions (plus the
   weekday's commonest WOD type when no WOD type reaches 50% but most sessions hold one); the blocks
   follow one canonical order per box (pairwise majority of the last 6 weeks of strength days, then
@@ -338,3 +338,33 @@ refinements: [docs/plans/36](../plans/36-criador-text-mode.md).
   derived, #228); steady and interval Cardio are never mixed (the weekday's majority style decides).
 - ⚠️ **The anon key cannot read `locations`** (`0006`): the script finds boxes by session tags, unnamed,
   and cannot see `historyFromUntagged`. Bump `ENGINE_VERSION` on any rule change — it is provenance.
+
+#### ✦ Sugerido, the editor mode (#235 · plans/102)
+
+The third `sessionMode` — `'sugerido'`, beside `'detalhado'` and `'texto'` — is `criador/SessionSuggestPane.jsx`,
+built from the approved card `design/mockups/67-criador-sugerido.html`. Its logic is
+`suggest/paneModel.js` (pure, tested), so the pane stays thin like `SessionTextPane`.
+
+- **Client-free.** `sessions`, `registry` and `locations` are props — no `utils/storage` — so it renders in
+  the gallery. `SessionEditor` gets `sessions` and the box locations from `Criador.jsx`, which already
+  holds both; nothing new is fetched. `initial` / `initialOpen` are gallery-only seeds for a stateful
+  demo's first state.
+- 🔴 **Nothing is written until Salvar.** Opening the pane, a control, ↻ Outra, even Aplicar only touch
+  editor state (driven on the local stack: zero `POST /rest/v1/sessions` through Aplicar, exactly one on
+  Salvar). Aplicar hands `(blocks, suggestionRecord)` up; `SessionEditor` does `setBlocks` ·
+  `setForm(f ⇒ ({...f, suggestion}))` · `markDirty`.
+- **`saveS` is untouched on purpose.** `form` is `{...s}` on `startEdit` and `saveS` writes `{...form}`, so a
+  `form.suggestion` survives opening, editing and re-saving with no code of its own. The saved snapshot
+  keeps the *suggested* text while the blocks drift: that pair is what `audit-suggest.mjs --edits` diffs
+  (`--sessions <file>` runs it on a blob from disk). The ✦ Sugerida tag shows from Aplicar on, not only
+  after saving.
+- **Aplicar replaces.** Blocks already on the session → `ConfirmReview` ("Blocos atuais N · Blocos
+  sugeridos M"), else straight through. The block list shows the box's whole structure (`meta.structure`)
+  with the day's types ticked; the first tick materialises `blockTypes`, after which the list is the
+  user's. An untouched pane sends the engine **no options**.
+- ⚠️ **LPO = Clean also moves the themed WOD.** The WOD reads the day's LPO *family* (the 60% theme rule),
+  so choosing the lift changes the LPO block **and** the For Time block; Core, Força, Acessórios and
+  Cardio stay identical. ↻ Outra, by contrast, changes only its own block.
+- **Scope:** no box tag → `SEM_BOX`; one → it; two or more → the first (no prod session carries two,
+  measured 0 of 197). The class time only warns. `PreviewBlock` gained an optional `footer` slot for the
+  por quê / ↻ Outra row; no other surface passes it.

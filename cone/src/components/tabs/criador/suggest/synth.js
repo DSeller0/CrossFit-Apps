@@ -45,8 +45,8 @@ export const THEME_MIN_RATE = 0.5
 const FALLBACK_REPS = 10
 
 // ── pt-BR copy ────────────────────────────────────────────────────────────────
-const DIA = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado']
-const DIAS = ['domingos', 'segundas', 'terças', 'quartas', 'quintas', 'sextas', 'sábados']
+export const DIA = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado']
+export const DIAS = ['domingos', 'segundas', 'terças', 'quartas', 'quintas', 'sextas', 'sábados']
 export const ddmm = d => `${d.slice(8, 10)}/${d.slice(5, 7)}`
 const dayOf = d => DIA[new Date(`${d}T12:00:00`).getDay()]
 const pc = x => `${Math.round(x * 100)}%`

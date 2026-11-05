@@ -1,0 +1,126 @@
+/* ✦ Sugerido (#235 · plans/102) — built from design/mockups/67-criador-sugerido.html (approved).
+   Token-only: no hardcoded hex, so every theme works. Informational text is --sub, never --muted
+   (--muted is 3.0–3.6:1 on the dark palettes, measured on the mockup). Block-family colours arrive
+   inline from blkColor(), like PreviewBlock's. The block cards themselves are PreviewBlock's
+   (textMode.module.css) — this file styles what surrounds them. */
+
+.wrap { display: flex; flex-direction: column }
+
+/* ── Aplicar bar (desktop: top · mobile: sticky at the foot) ─────────────── */
+.bar {
+  display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap;
+  padding: var(--sp-3) 0; border-bottom: 1px solid var(--divider); margin-bottom: var(--sp-3);
+}
+.barTxt { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--sub); font-weight: 700 }
+.spacer { flex: 1 }
+.help {
+  font-size: 11px; color: var(--sub); background: none; border: 0; padding: 0;
+  border-bottom: 1px dotted var(--muted); cursor: help; font-family: inherit;
+}
+.helpBox {
+  font-size: 11.5px; line-height: 1.65; color: var(--sub); background: var(--stone2);
+  border: 1px solid var(--divider); border-radius: var(--radius-sm);
+  padding: var(--sp-2) var(--sp-3); margin-bottom: var(--sp-3);
+}
+.helpBox b { color: var(--cream) }
+.sticky {
+  position: sticky; bottom: 0; z-index: 5; display: flex; gap: var(--sp-3); justify-content: flex-end;
+  padding: var(--sp-3); background: var(--stone); border-top: 1px solid var(--border);
+  margin: var(--sp-3) calc(-1 * var(--sp-3)) calc(-1 * var(--sp-3));
+}
+
+/* ── the two columns ─────────────────────────────────────────────────────── */
+.pane { display: grid; grid-template-columns: 300px 1fr; gap: var(--sp-4); align-items: start }
+.left { border-right: 1px solid var(--divider); padding-right: var(--sp-4) }
+.prev { min-width: 0 }
+
+/* ── controls ────────────────────────────────────────────────────────────── */
+.ctls { display: flex; flex-direction: column; gap: var(--sp-4) }
+.ctx { display: flex; flex-direction: column; gap: 2px; padding-bottom: var(--sp-3); border-bottom: 1px solid var(--divider) }
+.ctx b { font-size: 13px; color: var(--cream) }
+.ctx span { font-size: 11px; color: var(--sub); font-family: var(--font-mono) }
+.ctlL { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--sub); font-weight: 700; margin-bottom: 6px }
+.ctlSub { display: block; text-transform: none; letter-spacing: 0; font-weight: 400; font-family: var(--font-mono); font-size: 10px; margin-top: 2px }
+.selRow { display: flex; gap: 6px; flex-wrap: wrap }
+.sel {
+  font-family: inherit; font-size: 11.5px; line-height: 1.2; padding: 6px 10px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--stone2); color: var(--sub); cursor: pointer;
+}
+.sel:hover:not(.selOn) { border-color: var(--sub); color: var(--text) }
+.selOn { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 700 }
+.sel:focus-visible, .whyBtn:focus-visible, .help:focus-visible, .mSum:focus-visible, .chk input:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+.hint { font-size: 11px; color: var(--sub); line-height: 1.5; margin-top: 6px }
+.hint b { color: var(--cream) }
+.minRow { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--sub) }
+.numInp {
+  width: 72px; border: 1px solid var(--border); background: var(--stone2); color: var(--text);
+  border-radius: var(--radius-sm); padding: 7px 9px; font-family: var(--font-mono); font-size: 13px;
+}
+.numInp:focus { outline: 0; border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent) }
+.chkGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px }
+.chk { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--sub); padding: 3px 4px; border-radius: var(--radius-sm); cursor: pointer }
+.chkOn { color: var(--text) }
+.chk input { accent-color: var(--accent); margin: 0 }
+.dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0 }
+.ctlAct { display: flex; gap: var(--sp-2); flex-wrap: wrap; border-top: 1px solid var(--divider); padding-top: var(--sp-3) }
+
+/* ── preview ─────────────────────────────────────────────────────────────── */
+.title { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--cream); font-weight: 700; margin-bottom: 6px }
+.chips { display: flex; gap: 6px; flex-wrap: wrap }
+.pchip { font-size: 10.5px; font-family: var(--font-mono); padding: 2px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); background: var(--stone2) }
+.pchipDim { color: var(--sub) }
+.pchipWarn { border-color: var(--gold) }
+.estr { font-size: 11px; color: var(--sub); font-family: var(--font-mono); margin: 8px 0 var(--sp-3) }
+.foot { border-top: 1px solid var(--divider); margin-top: var(--sp-3); padding-top: var(--sp-2); font-size: 11px; line-height: 1.85; color: var(--sub) }
+.foot b { color: var(--cream) }
+.rest { font-size: 11px; color: var(--sub); font-family: var(--font-mono); margin: 0 0 var(--sp-2) }
+
+/* ── banners ─────────────────────────────────────────────────────────────── */
+.banner {
+  display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;
+  border: 1px solid var(--border); border-left: 3px solid var(--gold); background: var(--stone2);
+  border-radius: var(--radius-sm); padding: var(--sp-3); margin: var(--sp-3) 0;
+  font-size: 12px; line-height: 1.55; color: var(--sub);
+}
+.bannerInfo { border-left-color: var(--teal) }
+.bannerNote { border-left-color: var(--muted); margin: var(--sp-2) 0 }
+.banner b { color: var(--cream) }
+.bi { font-size: 14px; line-height: 1.3; color: var(--gold) }
+.bannerInfo .bi { color: var(--teal) }
+.bt { flex: 1; min-width: 200px }
+.ba { display: flex; gap: var(--sp-2); flex-wrap: wrap; width: 100% }
+
+.empty { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2); padding: var(--sp-5) 0; font-size: 12.5px; color: var(--sub); max-width: 520px; line-height: 1.6 }
+.empty b { color: var(--cream); font-size: 14px }
+.eIc { font-size: 22px; color: var(--sub) }
+.eAct { display: flex; gap: var(--sp-2); flex-wrap: wrap }
+
+/* ── under each block: por quê · ↻ Outra ─────────────────────────────────── */
+.actions { display: flex; align-items: center; gap: var(--sp-2); margin-top: var(--sp-2); border-top: 1px solid var(--divider); padding-top: 7px }
+.whyBtn { font-family: inherit; font-size: 11px; background: none; border: 0; color: var(--sub); cursor: pointer; padding: 3px 4px; border-bottom: 1px dotted var(--muted) }
+.whyBtnOn { color: var(--cream) }
+.car { display: inline-block; transition: transform .12s }
+.whyBtnOn .car { transform: rotate(180deg) }
+.vtag { font-size: 10px; font-family: var(--font-mono); color: var(--teal); border: 1px solid var(--border); padding: 1px 6px; border-radius: var(--radius-sm) }
+.whyList { margin: 8px 0 2px; padding: 0 0 0 18px; font-size: 11.5px; line-height: 1.6; color: var(--sub); font-family: var(--font-mono) }
+.whyList li { margin: 2px 0 }
+.whyLead { font-style: italic }
+.num { color: var(--text); font-weight: 700 }
+.focusNote { font-size: 11px; color: var(--sub); margin-top: 6px; padding-left: 8px; border-left: 2px solid var(--gold); line-height: 1.5 }
+
+/* ── mobile: the controls collapse into one row ──────────────────────────── */
+.mSum {
+  width: 100%; display: flex; justify-content: space-between; gap: var(--sp-2); align-items: center; text-align: left;
+  font-family: inherit; font-size: 12px; padding: var(--sp-3); background: var(--stone2);
+  border: 1px solid var(--divider); border-radius: var(--radius-sm); color: var(--sub); cursor: pointer; margin-bottom: var(--sp-3);
+}
+.mSum b { color: var(--cream) }
+.mCtl { background: var(--stone2); border: 1px solid var(--divider); border-radius: var(--radius-sm); padding: var(--sp-3); margin-bottom: var(--sp-3) }
+
+@media (max-width: 860px) {
+  .pane { grid-template-columns: 1fr }
+  .left { border-right: 0; padding-right: 0 }
+}

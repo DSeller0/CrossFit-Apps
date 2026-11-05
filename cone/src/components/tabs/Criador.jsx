@@ -358,6 +358,8 @@ export default function CriadorTab({
                 templates={templates}
                 isMobile={isMobile}
                 registry={registry}
+                sessions={sessions}
+                locations={boxLocs}
                 blockNames={blockNames}
                 editorDateStr={editorDateStr}
                 editorBoxes={editorBoxes}

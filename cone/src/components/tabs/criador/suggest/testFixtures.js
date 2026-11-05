@@ -1,7 +1,8 @@
 // Synthetic history for the suggest/*.test.js suites (#233). Backups are personal data and
 // gitignored, so every test builds its box here. A day is written as Texto and read by the real
-// parseSession — the same path the user's own week takes. Test-only: nothing in the app imports
-// this file.
+// parseSession — the same path the user's own week takes. ⚠️ Shared with the dev-only gallery
+// (gallery/groups/criador.jsx, #235), so it is not test-only: nothing in a PRODUCTION bundle imports
+// it, but the gallery's SessionSuggestPane entries break if it changes shape.
 
 import { parseSession } from '../textFormat.js'
 import { addDays } from './history.js'

@@ -99,6 +99,8 @@
   border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 5px;
 }
 .editorTagHidden { border-color: var(--muted); color: var(--sub) }
+/* ✦ Sugerida (#235): where the session started — accent, so it reads as provenance, not as a state. */
+.editorTagSug { border-color: var(--accent); color: var(--accent) }
 .editorHdSpacer { flex: 1 }
 
 /* Mobile editor header: 4 explicit rows instead of one flex-wrap line — the

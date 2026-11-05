@@ -11,10 +11,13 @@ import s from './textMode.module.css'
 // live preview and WeekImportModal's per-day expanded preview (#128) — same
 // component, same rendering, whichever surface parsed the block.
 //
+// `footer` is an optional slot under the block (✦ Sugerido's por quê / ↻ Outra, #235) — every
+// other surface leaves it empty.
+//
 // `blockExercises` (not `block.exercises`) — an Estações block's movements hang
 // off `stations`, not the block itself; this is the same fork every other
 // consumer already makes (wod.js, normalizeLegacyCardio, materializeBlocks…).
-export function PreviewBlock({ block, onPickType, locked }) {
+export function PreviewBlock({ block, onPickType, locked, footer }) {
   const cfg = getTypeCfg(block.type)
   const color = blkColor(block)
   const label = block.label && block.label !== block.type ? block.label : ''
@@ -56,6 +59,7 @@ export function PreviewBlock({ block, onPickType, locked }) {
       <ExerciseList exercises={blockExercises(block)} color={color} size="tiny" />
       {goal && <div className={s.prevGoal}>Meta {goal}</div>}
       {block.notes && <div className={s.prevNote}>{block.notes}</div>}
+      {footer}
     </div>
   )
 }

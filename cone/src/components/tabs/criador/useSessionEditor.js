@@ -38,8 +38,9 @@ export function useSessionEditor({ setSessions, defaultBoxIds, onOpened, onSaved
   // before they can even see which block is empty.
   const [saveError, setSaveError] = useState('')
   // Text mode (#92) is EDITOR UI STATE, never persisted: detalhado→texto
-  // serializes, texto→detalhado parses. The blocks stay canonical either way.
-  const [sessionMode, setSessionMode] = useState('detalhado') // 'detalhado' | 'texto'
+  // serializes, texto→detalhado parses. The blocks stay canonical either way. 'sugerido' (#235)
+  // is the same kind of state: the pane only ever hands blocks back through Aplicar.
+  const [sessionMode, setSessionMode] = useState('detalhado') // 'detalhado' | 'texto' | 'sugerido'
 
   const markDirty = () => setIsDirty(true)
   // The per-field "changed" marks BlockEditor renders. The diff itself is block-list
@@ -66,6 +67,10 @@ export function useSessionEditor({ setSessions, defaultBoxIds, onOpened, onSaved
     setBlocks(s.blocks?.length ? normalizeLegacyCardio(s.blocks) : [])
     setEditing({ dateKey, id: s.id })
     setEditorOpen(true)
+    // A different session opens in ▤ Detalhado: the Texto and Sugerido panes seed their own state
+    // once, at mount, so staying in one would show the PREVIOUS session's text or controls over
+    // this one's blocks (and Aplicar would write them onto it).
+    setSessionMode('detalhado')
     setIsDirty(false)
     setChangedBlockFields({})
     setActiveTemplateId(null)
@@ -131,6 +136,7 @@ export function useSessionEditor({ setSessions, defaultBoxIds, onOpened, onSaved
     setBlocks([])
     setEditing(null)
     setEditorOpen(true)
+    setSessionMode('detalhado')
     setIsDirty(true)
     setChangedBlockFields({})
     setActiveTemplateId(null)

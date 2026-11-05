@@ -2,6 +2,8 @@ import { APP_CONFIG } from '../../../utils/config'
 import { BlockEditor } from './BlockEditor'
 import { CriadorTypePicker } from './TypePicker'
 import { SessionTextPane } from './SessionTextPane'
+import { SessionSuggestPane } from './SessionSuggestPane.jsx'
+import { fmtDateShort, toISO, todayISO } from '../../../public/lib/week.js'
 import Button from '../../ui/Button.jsx'
 import Card from '../../ui/Card.jsx'
 import Toast from '../../ui/Toast.jsx'
@@ -23,6 +25,8 @@ export function SessionEditor({
   templates,
   isMobile,
   registry,
+  sessions,
+  locations,
   blockNames,
   editorDateStr,
   editorBoxes,
@@ -48,6 +52,17 @@ export function SessionEditor({
   const templateBtnLabel = activeTemplateId
     ? 'Template ativo — clique para atualizar'
     : 'Salvar como template'
+  // ✦ Sugerida (#235) — where the session started. It sits on `form.suggestion`, which startEdit
+  // fills from the saved session and saveS spreads back, so it survives later edits and re-saves.
+  const sug = form.suggestion
+  const sugTag = sug ? (
+    <span
+      className={`${cr.editorTag} ${cr.editorTagSug}`}
+      title={`Sugerida pelo motor v${sug.version}${sug.at ? ` em ${fmtDateShort(toISO(new Date(sug.at)))}` : ''}. O texto sugerido fica guardado na sessão: é ele que mede quanto você edita.`}
+    >
+      ✦ Sugerida · motor v{sug.version}
+    </span>
+  ) : null
 
   return (
     <Card>
@@ -91,6 +106,7 @@ export function SessionEditor({
             >
               {form.public === false ? 'Oculto' : 'Público'}
             </span>
+            {sugTag}
             {templates.templateFlash && (
               <span className={cr.editorTag}>
                 <i className="ti ti-bookmark-filled" aria-hidden="true" /> &ldquo;
@@ -145,6 +161,7 @@ export function SessionEditor({
           >
             {form.public === false ? 'Oculto' : 'Público'}
           </span>
+          {sugTag}
           {/* The gear belongs to the title, not to the action cluster: everything
                 it edits — date, name, box, visibility — is what the title shows. */}
           <Button
@@ -227,7 +244,7 @@ export function SessionEditor({
                 </Button>
               </>
             )}
-            {/* Detalhado / Texto — the whole session as the coach's own notation */}
+            {/* Detalhado / Texto / Sugerido — the whole session, three ways to fill it */}
             <span className={tm.modeSeg} role="group" aria-label="Modo de edição da sessão">
               <button
                 type="button"
@@ -245,6 +262,14 @@ export function SessionEditor({
               >
                 ¶ Texto
               </button>
+              <button
+                type="button"
+                className={sessionMode === 'sugerido' ? tm.on : ''}
+                aria-pressed={sessionMode === 'sugerido'}
+                onClick={() => setSessionMode('sugerido')}
+              >
+                ✦ Sugerido
+              </button>
             </span>
           </div>
         </div>
@@ -261,6 +286,33 @@ export function SessionEditor({
               // `next` are the ORIGINAL objects and must be passed through
               // untouched (plans/61·B), so nothing may be re-mapped here.
               editor.setBlocks(next)
+              editor.markDirty()
+              blockList.setCollapsedBlocks({})
+              setSessionMode('detalhado')
+            }}
+          />
+        )}
+
+        {sessionMode === 'sugerido' && (
+          <SessionSuggestPane
+            sessions={sessions}
+            registry={registry}
+            locations={locations}
+            locationIds={form.locationIds}
+            date={form.date || todayISO()}
+            blocks={blocks}
+            isMobile={isMobile}
+            onCancel={() => setSessionMode('detalhado')}
+            onGoToText={() => setSessionMode('texto')}
+            onApply={(next, suggestion) => {
+              // Nothing is written here — the blocks and the snapshot go onto the editor's own
+              // state, like the Texto pane's Aplicar; the session blob changes only on Salvar.
+              editor.setBlocks(next)
+              editor.setForm(f => ({ ...f, suggestion }))
+              // The blocks are no longer a template's, and the per-field change marks belong to
+              // blocks that are gone — the same two resets applyTemplate makes.
+              editor.setActiveTemplateId(null)
+              editor.setChangedBlockFields({})
               editor.markDirty()
               blockList.setCollapsedBlocks({})
               setSessionMode('detalhado')

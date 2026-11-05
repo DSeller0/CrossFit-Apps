@@ -1,5 +1,26 @@
 # 101 — #234 · Suggested session, Phase 2: the ✦ Sugerido mockup (Lane B)
 
+> ✅ Done: `1581458` · 2026-11-05 — see BACKLOG.md · closes #234. **Approved by the user on 2026-11-05,
+> as drawn** — the six open decisions in the card's section 8 stand (Aplicar replaces, with a confirm ·
+> "por quê" inline per block · "↻ Outra sessão" and the per-block ↻ Outra · the ✦ Sugerida tag visible
+> in the title · the ×3 weight shown · the block list shows the whole structure). The sync to Claude
+> Design (`/design-sync`) is the user's and has not been run from here.
+>
+> **Must-haves: 6/6 driven.** The card served over localhost and driven in Chromium. (1) 1280: the six
+> engine blocks for Monday 09/11, the por quê toggling (`aria-expanded` false → true, list `none` →
+> `block`), ↻ Outra on every block, controls and preview side by side. (2) Thin: a banner carrying
+> `thinReason` ("Só 1 terça no histórico deste box (mínimo 2).") with both fallbacks over 2 blocks and
+> a skipped-LPO notice; empty: "Nenhuma sessão no histórico deste box." with Aplicar disabled.
+> (3) Contrast: 1386 text nodes per theme measured against the surface they sit on, transitions off —
+> Halo and Common clean; the dark palettes' `--muted` informational text (3.0–3.6:1) moved to `--sub`,
+> the gold numbers (3.6:1 on the light palettes) to the body colour; the page's own gold headings
+> (3.8–4.5:1 on two light themes) stay, as in mockup 29. No external reference, no duplicate id, no
+> unnamed button. (4) 390: `scrollWidth` = `clientWidth`, Aplicar in a sticky bar. (5) **Caught a real
+> bug:** the card has no doctype, so it renders in quirks mode, where class names are
+> case-insensitive — a new `.ctlS` helper rule (`display:block`) also matched the `.ctls` container and
+> collapsed its flex gaps; found only in the second theme screenshot. Renamed; a scan of every class
+> in the file for case-only collisions is clean. (6) The user's review — done, approved.
+
 *Planned and executed 2026-11-05 (Sonnet). Phase 2 of 5 of the suggested-session program —
 [plans/100](./100-suggested-session-engine.md) shipped the engine (Phase 1); this decides how it
 appears. **No code in `src/`.** It ends at the approval gate: #235 (the editor mode) is built from
