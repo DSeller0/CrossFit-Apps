@@ -18,9 +18,9 @@ hand-written; the data below the marker is regenerated.
    run (17/08–31/08) exists before 05/10, below the threshold. With a threshold of 1 the rule does
    propose Front Squat on 05/10 (top 90, the real top), but loses a Tuesday: **35/66**.
    The rule ships as specified (it is neutral today, and the 14/09–28/09 run now counts as evidence,
-   so the next third Back Squat Monday will switch); whether to keep it, lower the threshold or turn
-   it off is the user's call — `rules.runEvidence` is the knob, the sensitivity column below is the
-   evidence.
+   so the next third Back Squat Monday will switch). **Decided 2026-11-05 by the user: keep it as
+   specified** (≥ 2 completed runs) — not loosened, not turned off. `rules.runEvidence` stays the
+   knob and the sensitivity column below the evidence, should a later backtest argue otherwise.
 2. **The review's examples reproduce.** Mon 05/10 under Markov: "Back Squat 4 de 7", tops after a
    90% Monday 95/90/90/75 → 90, scheme of 31/08 with 92→90 → `4x2 Back Squat 80/85/90/90%`, the
    review's §4a example B to the character. Fri 09/10: Front Squat, Bench Press and Deadlift excluded

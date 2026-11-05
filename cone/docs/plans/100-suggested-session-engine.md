@@ -22,7 +22,8 @@
 > and 05/10 stays Back Squat. The review's "2/2 at week 3" counted the 14/09–28/09 run whose ending
 > *is* 05/10; leakage-free only one such run precedes it. With an evidence threshold of 1, 05/10
 > becomes Front Squat (top 90) but a Tuesday is lost (35/66). The rule ships as specified (neutral
-> today; the next third Back Squat Monday will switch); keep / 1 / off is #240.
+> today; the next third Back Squat Monday will switch). **The user decided 2026-11-05 to keep it as
+> specified** (#240, closed).
 >
 > **Backtest, before → after the run-length rule** (main lift, thin days out): Markov 36/66 (Seg 7/17 ·
 > Ter 9/17 · Qua 15/16 · Sex 5/16) → run-length 36/66 (the same, weekday by weekday); sensitivity

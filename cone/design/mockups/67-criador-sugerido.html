@@ -1,0 +1,592 @@
+<!-- @dsCard group="Mockups" -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cone — Criador ✦ Sugerido (#234 · plans/101) · sessão sugerida pelo histórico</title>
+<style>
+  /* ═══════════════════════════════════════════════════════════════════════
+     #234 — ✦ Sugerido, the third Criador input (Lane-B ideation, plans/101 · #233).
+     Every number, name and "por quê" below is REAL OUTPUT of the #233 engine
+     (criador/suggest, v1) run read-only against prod on 2026-11-05:
+       A  node scripts/audit-suggest.mjs --box sem-box --date 2026-11-09
+       B  … --lpo Clean --pattern Puxar --budget 90
+       C  … --variant Força=1 --variant Core=1
+       D  a box tagged on 2 sessions, Tuesday 2026-11-10 · E  a box id with none
+     The 8 palettes are verbatim from themes.css. Fonts fall back to serif
+     (Cinzel is CDN-loaded, CSP blocks it); icons are text glyphs, no `ti` webfont.
+     ═══════════════════════════════════════════════════════════════════════ */
+  .page{
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
+    --radius-sm:4px; --radius-md:6px;
+    --fam-red:#c84038; --fam-amber:#d8a840; --fam-blue:#4878d8; --fam-green:#48b860;
+  }
+  .page[data-theme="totk-dark"]{--bg:#0d0b09;--stone:#161210;--stone2:#1e1a16;--div:#2a231c;
+  --gold:#d8a840;--gold2:#b88820;--teal:#4ac8c0;--green:#18cc30;
+  --red:#fa3c3c;--cream:#f0e8d0;--sub:#c8b090;--muted:#806850;--dim:#554a3a;
+  
+  --divider:#2a231c;--border:#4a3e30;--accent:#4ac8c0;--accent-text:#000;
+  --text:#f0e8d0;--cyan:#4ac8c0;
+  --bg2:#161210;--bg3:#1e1a16;--err:#fa3c3c;
+  --podium-1:#d8a840;--podium-2:#b8b8c4;--podium-3:#c07840;}
+  .page[data-theme="totk-light"]{--bg:#ede8dc;--stone:#f5f1e8;--stone2:#e8e2d4;--div:#d4cab8;
+  --gold:#9a6c14;--gold2:#7a5008;--teal:#1c6860;--green:#1a6830;
+  --red:#b83020;--cream:#1c1508;--sub:#503828;--muted:#7a6448;--dim:#a89070;
+  
+  --divider:#d4cab8;--border:#b4a490;--accent:#1c6860;--accent-text:#fff;
+  --text:#1c1508;--cyan:#1c6860;
+  --bg2:#f5f1e8;--bg3:#e8e2d4;--err:#b83020;
+  --podium-1:#8a6010;--podium-2:#5c5c68;--podium-3:#8a5220;}
+  .page[data-theme="spirit-blossom"]{--bg:#09070f;--stone:#100d1c;--stone2:#17122a;--div:#221638;
+  --gold:#e05490;--gold2:#b83872;--teal:#38c4d0;--green:#50d890;
+  --red:#f03060;--cream:#ede4f8;--sub:#c4a0d0;--muted:#7d5090;--dim:#4a2d60;
+  
+  --divider:#221638;--border:#4a3060;--accent:#38c4d0;--accent-text:#09070f;
+  --text:#ede4f8;--cyan:#38c4d0;
+  --bg2:#100d1c;--bg3:#17122a;--err:#f03060;
+  --podium-1:#e8c060;--podium-2:#c0b8d8;--podium-3:#d08858;}
+  .page[data-theme="spirit-blossom-light"]{--bg:#f4eefb;--stone:#ffffff;--stone2:#f0e8f8;--div:#e2d4f0;
+  --gold:#c83070;--gold2:#a02258;--teal:#0f727e;--green:#1e784b;
+  --red:#c02040;--cream:#1a0828;--sub:#4a2460;--muted:#7840a0;--dim:#9070b0;
+  
+  --divider:#e2d4f0;--border:#c4a8d8;--accent:#0f727e;--accent-text:#fff;
+  --text:#1a0828;--cyan:#0f727e;
+  --bg2:#ffffff;--bg3:#f0e8f8;--err:#c02040;
+  --podium-1:#8a6414;--podium-2:#61596e;--podium-3:#95502a;}
+  .page[data-theme="halo-reach-dark"]{--bg:#0b131a;--stone:#111b24;--stone2:#16222c;--div:#1d2b34;
+  --gold:#cf9a6e;--gold2:#a87549;--teal:#5aa2d8;--green:#3fbf74;
+  --red:#f5564a;--cream:#e9eaeb;--sub:#c2c5c7;--muted:#8f9396;--dim:#6b7783;
+  
+  --divider:#1d2b34;--border:#3b464e;--accent:#5aa2d8;--accent-text:#060c11;
+  --text:#e9eaeb;--cyan:#5aa2d8;
+  --bg2:#111b24;--bg3:#16222c;--err:#f5564a;
+  --podium-1:#cf9a6e;--podium-2:#bcc3c9;--podium-3:#b9774e;}
+  .page[data-theme="halo-reach-light"]{--bg:#e6ebee;--stone:#f5f8fa;--stone2:#e0e6ea;--div:#c6d0d7;
+  --gold:#7d5330;--gold2:#5f3d20;--teal:#1d6389;--green:#1b7240;
+  --red:#bc2c1f;--cream:#11181d;--sub:#3f4a53;--muted:#57626b;--dim:#767f88;
+  
+  --divider:#c6d0d7;--border:#a0abb2;--accent:#1d6389;--accent-text:#ffffff;
+  --text:#11181d;--cyan:#1d6389;
+  --bg2:#f5f8fa;--bg3:#e0e6ea;--err:#bc2c1f;
+  --podium-1:#7d5a28;--podium-2:#586169;--podium-3:#8a5230;}
+  .page[data-theme="common-dark"]{--bg:#101012;--stone:#17171a;--stone2:#1d1d20;--div:#27272b;
+  --gold:#e0a83e;--gold2:#b8821c;--teal:#4a9ae6;--green:#3fbf74;
+  --red:#f4564a;--cream:#ececed;--sub:#b7b7ba;--muted:#8d8d91;--dim:#6d6d72;
+  
+  --divider:#27272b;--border:#434347;--accent:#4a9ae6;--accent-text:#070708;
+  --text:#ececed;--cyan:#4a9ae6;
+  --bg2:#17171a;--bg3:#1d1d20;--err:#f4564a;
+  --podium-1:#e0a83e;--podium-2:#c4c4c8;--podium-3:#c67f4a;}
+  .page[data-theme="common-light"]{--bg:#f2f2f3;--stone:#ffffff;--stone2:#e8e8ea;--div:#d6d6d9;
+  --gold:#855e08;--gold2:#66480a;--teal:#1f68a6;--green:#1b7341;
+  --red:#bb312b;--cream:#161618;--sub:#46464a;--muted:#5f5f64;--dim:#7b7b81;
+  
+  --divider:#d6d6d9;--border:#afafb3;--accent:#1f68a6;--accent-text:#ffffff;
+  --text:#161618;--cyan:#1f68a6;
+  --bg2:#ffffff;--bg3:#e8e8ea;--err:#bb312b;
+  --podium-1:#8a6010;--podium-2:#5a5a60;--podium-3:#8f5024;}
+  *{box-sizing:border-box}
+  body{margin:0;background:#050403}
+  .page{background:var(--bg);color:var(--text);font-family:Georgia,serif;min-height:100vh;
+    padding:24px 26px 60px;transition:background .15s,color .15s}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  h1{font-size:16px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);margin:0}
+  .themebar{display:flex;gap:6px;flex-wrap:wrap}
+  .tbtn{font-family:inherit;font-size:11px;letter-spacing:.04em;padding:6px 11px;border:1px solid var(--border);
+    background:var(--stone);color:var(--sub);cursor:pointer;border-radius:var(--radius-sm)}
+  .tbtn.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:700}
+  .tbtn:focus-visible,.btn:focus-visible,.sel:focus-visible,.whyT:focus-visible,.modeSeg button:focus-visible,.mSum:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .lede{font-size:13px;color:var(--sub);line-height:1.6;max-width:900px;margin:10px 0 4px}
+  .lede b{color:var(--cream)} code{font-family:var(--font-mono);font-size:12px;color:var(--gold)}
+  h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+    margin:36px 0 4px;display:flex;align-items:center;gap:10px}
+  h2::after{content:'';flex:1;height:1px;background:var(--divider)}
+  .note{font-size:12.5px;color:var(--sub);line-height:1.6;margin:6px 0 14px;max-width:920px}
+  .note b{color:var(--cream)}
+  .clbl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);
+    font-family:var(--font-mono);margin:18px 0 6px}
+
+  .btn{font-family:inherit;font-size:13px;line-height:1;padding:9px 15px;border-radius:var(--radius-sm);
+    border:1px solid var(--border);background:var(--stone2);color:var(--text);cursor:pointer}
+  .btn.sm{font-size:12px;padding:7px 12px} .btn.xs{font-size:11px;padding:5px 9px}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:700}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--sub)}
+  .btn:hover:not(:disabled),.btn.hov{border-color:var(--sub)}
+  .btn.primary:hover:not(:disabled){filter:brightness(1.08)}
+  .btn.s-focus,.sel.s-focus,.whyT.s-focus,.chk.s-focus{outline:2px solid var(--accent);outline-offset:2px}
+  .btn.s-disabled,.btn:disabled{opacity:.45;cursor:not-allowed}
+  .card{background:var(--stone);border:1px solid var(--border);border-radius:var(--radius-md)}
+
+  .blocksBar{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--divider);flex-wrap:wrap}
+  .blocksBar .count,.paneBar .count{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);font-weight:700}
+  .spacer,.sp{flex:1}
+  .modeSeg{display:inline-flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+  .modeSeg button{font-family:inherit;font-size:11px;letter-spacing:.06em;padding:6px 11px;border:0;
+    background:var(--stone2);color:var(--sub);cursor:pointer;display:flex;align-items:center;gap:5px}
+  .modeSeg button + button{border-left:1px solid var(--border)}
+  .modeSeg button.on{background:var(--accent);color:var(--accent-text);font-weight:700}
+  .paneBar{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap;padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--divider)}
+  .fmtLink{font-size:11px;color:var(--sub);border-bottom:1px dotted var(--muted);cursor:help}
+
+  .pane{display:grid;grid-template-columns:320px 1fr}
+  .pane > .left{border-right:1px solid var(--divider)}
+  .ctls{padding:var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-4)}
+  .ctx{display:flex;flex-direction:column;gap:2px;padding-bottom:var(--sp-3);border-bottom:1px solid var(--divider)}
+  .ctx b{font-size:13px;color:var(--cream)} .ctx span{font-size:11px;color:var(--sub);font-family:var(--font-mono)}
+  .ctlL{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--sub);font-weight:700;margin-bottom:6px}
+  .ctlSub{display:block;text-transform:none;letter-spacing:0;font-weight:400;color:var(--sub);margin-top:2px;font-family:var(--font-mono);font-size:10px}
+  .selRow{display:flex;gap:6px;flex-wrap:wrap}
+  .sel{font-family:inherit;font-size:11.5px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);
+    background:var(--stone2);color:var(--sub);cursor:pointer}
+  .sel.on{background:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:700}
+  .sel:hover:not(.on):not(:disabled),.sel.hov{border-color:var(--sub);color:var(--text)}
+  .sel.dis,.sel:disabled{opacity:.45;cursor:not-allowed}
+  .hint{font-size:11px;color:var(--sub);line-height:1.5;margin-top:6px} .hint b{color:var(--cream)}
+  .minRow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub)}
+  .numInp{width:72px;border:1px solid var(--border);background:var(--stone2);color:var(--text);border-radius:var(--radius-sm);
+    padding:7px 9px;font-family:var(--font-mono);font-size:13px}
+  .numInp:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 28%,transparent)}
+  .chkGrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
+  .chk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--sub);padding:3px 4px;border-radius:var(--radius-sm);cursor:pointer}
+  .chk.on{color:var(--text)} .chk input{accent-color:var(--accent);margin:0}
+  .dot{width:8px;height:8px;display:inline-block;background:var(--fam-amber);border-radius:2px;flex-shrink:0}
+  .dot.blue{background:var(--fam-blue)} .dot.green{background:var(--fam-green)} .dot.red{background:var(--fam-red)}
+  .ctlAct{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--divider);padding-top:var(--sp-3)}
+
+  .prev{padding:var(--sp-3) var(--sp-4) var(--sp-4);min-width:0}
+  .prevTitle{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream);font-weight:700;margin-bottom:6px}
+  .pchips{display:flex;gap:6px;flex-wrap:wrap}
+  .pchip{font-size:10.5px;font-family:var(--font-mono);padding:2px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);background:var(--stone2)}
+  .pchip.dim{color:var(--sub)} .pchip.warn{border-color:var(--gold);color:var(--text)}
+  .estr{font-size:11px;color:var(--sub);font-family:var(--font-mono);margin:8px 0 var(--sp-3)}
+  .pblk{background:var(--stone2);border:1px solid var(--border);border-left:3px solid var(--fam-amber);
+    border-radius:var(--radius-sm);padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-2)}
+  .pblk.green{border-left-color:var(--fam-green)} .pblk.blue{border-left-color:var(--fam-blue)} .pblk.red{border-left-color:var(--fam-red)}
+  .pblkHd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+  .chip{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:var(--radius-sm);
+    color:#0d0b09;background:var(--fam-amber)}
+  .chip.green{background:var(--fam-green)} .chip.blue{background:var(--fam-blue)} .chip.red{background:var(--fam-red)}
+  .pblkHd .lbl{font-size:12px;color:var(--cream)}
+  .pblkHd .meta{font-size:10.5px;color:var(--sub);font-family:var(--font-mono)}
+  .pex{font-size:12px;color:var(--sub);line-height:1.75;display:flex;gap:6px;flex-wrap:wrap}
+  .pex .q{font-family:var(--font-mono);color:var(--cream);flex-shrink:0;min-width:2.2ch}
+  .pex .load{font-family:var(--font-mono);color:var(--sub);font-size:10.5px}
+  .pgoal{font-size:10.5px;font-family:var(--font-mono);color:var(--teal);margin-top:5px}
+  .pnote{font-size:11px;color:var(--sub);margin-top:6px;padding-left:8px;border-left:2px solid var(--divider);line-height:1.5}
+  .pnote.warn{border-left-color:var(--gold)} .pnote b{color:var(--cream)}
+  .pact{display:flex;align-items:center;gap:8px;margin-top:8px;border-top:1px solid var(--divider);padding-top:7px}
+  .whyT{font-family:inherit;font-size:11px;background:transparent;border:0;color:var(--sub);cursor:pointer;padding:3px 4px;border-bottom:1px dotted var(--muted)}
+  .whyT.on{color:var(--cream)} .whyT .car{display:inline-block;transition:transform .12s} .whyT.on .car{transform:rotate(180deg)}
+  .vtag{font-size:10px;font-family:var(--font-mono);color:var(--teal);border:1px solid var(--border);padding:1px 6px;border-radius:var(--radius-sm)}
+  .whyList{display:none;margin:8px 0 2px;padding:0 0 0 18px;font-size:11.5px;line-height:1.6;color:var(--sub);font-family:var(--font-mono)}
+  .whyList.open{display:block} .whyList li{margin:2px 0} .whyList li.lead{color:var(--sub);font-style:italic}
+  .n{color:var(--text);font-weight:700}
+  .prevFoot{border-top:1px solid var(--divider);margin-top:var(--sp-3);padding-top:var(--sp-2);font-size:11px;line-height:1.85;color:var(--sub)}
+  .prevFoot b{color:var(--cream)} .prevFoot .i{color:var(--sub)}
+
+  .banner{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;border:1px solid var(--border);border-left:3px solid var(--gold);
+    background:var(--stone2);border-radius:var(--radius-sm);padding:var(--sp-3);margin:var(--sp-3) 0;font-size:12px;line-height:1.55;color:var(--sub)}
+  .banner.info{border-left-color:var(--teal)} .banner.note{border-left-color:var(--muted);margin:var(--sp-2) 0}
+  .banner b{color:var(--cream)} .bi{font-size:14px;line-height:1.3;color:var(--gold)} .banner.info .bi{color:var(--teal)}
+  .bt{flex:1;min-width:200px} .ba{display:flex;gap:8px;flex-wrap:wrap;width:100%}
+  .empty{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:var(--sp-5) 0;font-size:12.5px;color:var(--sub);max-width:520px;line-height:1.6}
+  .empty b{color:var(--cream);font-size:14px} .eIc{font-size:22px;color:var(--sub)} .eAct{display:flex;gap:8px;flex-wrap:wrap}
+
+  .pairs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);align-items:start;margin-bottom:var(--sp-2)}
+  .pairCol .pblk{margin-bottom:0}
+  .panel{max-width:760px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);align-items:start}
+  .dlg{max-width:520px} .dlgHd{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);font-weight:700;padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--divider)}
+  .dlgBd{padding:var(--sp-4);font-size:12.5px;line-height:1.65;color:var(--sub)} .dlgBd b{color:var(--cream)}
+  .dlgBt{display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--divider);padding:var(--sp-3) var(--sp-4)}
+  .titleRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:var(--sp-4) var(--sp-4) var(--sp-3);color:var(--cream);font-size:15px}
+  .tag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--sub)}
+  .tag.sug{color:var(--accent);border-color:var(--accent)}
+  .states{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--sp-2) var(--sp-5)}
+  .ask{font-size:12.5px;color:var(--sub);line-height:1.65;max-width:920px;padding-left:20px} .ask li{margin:6px 0} .ask b{color:var(--cream)}
+
+  .frames{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+  .fcol{width:390px;max-width:100%} .fcol .clbl{margin-top:6px}
+  .frame{width:390px;max-width:100%;border:1px solid var(--divider);border-radius:var(--radius-md);overflow:hidden;background:var(--stone)}
+  .frame .blocksBar{padding:var(--sp-2) var(--sp-3)}
+  .frame .modeSeg button{padding:6px 8px;font-size:10.5px}
+  .frame .prev{padding:var(--sp-3)}
+  .mSum{width:100%;display:flex;justify-content:space-between;gap:8px;align-items:center;text-align:left;font-family:inherit;font-size:12px;
+    padding:var(--sp-3);background:var(--stone2);border:0;border-bottom:1px solid var(--divider);color:var(--sub);cursor:pointer}
+  .mSum b{color:var(--cream)} .mSum.on{color:var(--cream)}
+  .mCtl .ctls{padding:var(--sp-3)} .mCtl .chkGrid{grid-template-columns:1fr 1fr}
+  .sticky{position:sticky;bottom:0;display:flex;gap:10px;justify-content:flex-end;padding:var(--sp-3);background:var(--stone);border-top:1px solid var(--border)}
+
+  @media (max-width:900px){
+    .page{padding:16px}
+    .pane{grid-template-columns:1fr} .pane > .left{border-right:0;border-bottom:1px solid var(--divider)}
+    .pairs,.two{grid-template-columns:1fr}
+  }
+</style>
+
+<div class="page" data-theme="totk-dark">
+  <div class="topbar">
+    <h1>#234 · Criador — ✦ Sugerido</h1>
+    <div class="themebar" id="themebar">
+      <button class="tbtn on" data-t="totk-dark">TotK Dark</button><button class="tbtn" data-t="totk-light">TotK Light</button><button class="tbtn" data-t="spirit-blossom">Spirit Blossom</button><button class="tbtn" data-t="spirit-blossom-light">Spirit Light</button><button class="tbtn" data-t="halo-reach-dark">Halo Dark</button><button class="tbtn" data-t="halo-reach-light">Halo Light</button><button class="tbtn" data-t="common-dark">Common Dark</button><button class="tbtn" data-t="common-light">Common Light</button>
+    </div>
+  </div>
+  <p class="lede">
+    O terceiro jeito de preencher uma sessão no Criador, ao lado de <b>▤ Detalhado</b> e <b>¶ Texto</b>: uma
+    sessão <b>sintetizada a partir do histórico do próprio box</b> — para um box e para o “Sem box” — com foco opcional
+    (um levantamento de LPO, um padrão de movimento). Estatística pura, <b>sem IA e sem servidor</b>: o mesmo dia
+    sempre dá a mesma sessão, e cada escolha tem um número por trás (o <b>por quê</b>). O motor é o da #233
+    (<code>criador/suggest</code>); este desenho só decide como ele aparece. <b>Todo número, nome e por quê abaixo é saída real</b>
+    do motor rodado em leitura sobre os dados de produção em 05/11/2026.
+  </p>
+  <h2>1 · A sessão sugerida (desktop 1280)</h2>
+  <div class="note">Terceiro modo ao lado de <b>Detalhado</b> e <b>Texto</b> — estado de UI, nunca persistido. À esquerda os <b>ajustes</b> (todos opcionais: sem tocar em nada, sai a sugestão automática do dia); à direita a <b>pré-visualização</b>, ao vivo. Nada é gravado até <b>Aplicar</b> e <b>Salvar</b>. Cada bloco explica sua escolha em <b>por quê</b> (aberto aqui só na Força) e tem o seu <b>↻ Outra</b>. A sugestão é <b>estável por dia</b>: reabrir a mesma segunda mostra a mesma sessão.</div>
+  <div class="card">
+    <div class="blocksBar"><span class="count">6 Blocos</span><span class="spacer"></span><span class="modeSeg" role="group" aria-label="Modo de edição da sessão"><button>▤ Detalhado</button><button>¶ Texto</button><button class="on">✦ Sugerido</button></span></div>
+    <div class="paneBar"><span class="count">Aplicar troca os blocos da sessão</span><span class="spacer"></span><span class="fmtLink" title="Como a sugestão é calculada">ⓘ Como funciona</span><button class="btn sm">Cancelar</button><button class="btn primary sm">Aplicar</button></div>
+    <div class="pane">
+      <div class="left"><div class="ctls">
+      <div class="ctx"><b>Segunda 09/11 · Sem box</b><span>22 segundas no histórico · 118 sessões</span></div>
+      <div class="ctlG">
+        <div class="ctlL">Levantamento do LPO</div>
+        <div class="selRow"><button class="sel on" aria-pressed="true">Automático → Snatch</button><button class="sel" aria-pressed="false">Snatch</button><button class="sel" aria-pressed="false">Clean</button><button class="sel" aria-pressed="false">Jerk</button></div>
+      </div>
+      <div class="ctlG">
+        <div class="ctlL">Foco de movimento</div>
+        <div class="selRow"><button class="sel on" aria-pressed="true">Sem foco</button><button class="sel" aria-pressed="false">Agachamento</button><button class="sel" aria-pressed="false">Dobradiça</button><button class="sel" aria-pressed="false">Empurrar</button><button class="sel" aria-pressed="false">Puxar</button><button class="sel" aria-pressed="false">Olímpico</button><button class="sel" aria-pressed="false">Core</button><button class="sel" aria-pressed="false">Monoestrutural</button><button class="sel" aria-pressed="false">Carregar</button></div>
+        <div class="hint">Com foco, a <b>Força</b> e os <b>Acessórios</b> usam só esse padrão; o <b>Core</b> e o <b>WOD</b> o pesam <b>×3</b>.</div>
+      </div>
+      <div class="ctlG">
+        <div class="ctlL">Tempo da aula</div>
+        <div class="minRow"><input class="numInp" inputmode="numeric" placeholder="—" value="" aria-label="Tempo da aula em minutos"><span>min</span></div>
+        <div class="hint">Só avisa. <b>Nunca corta</b> blocos.</div>
+      </div>
+      <div class="ctlG">
+        <div class="ctlL">Blocos <span class="ctlSub">estrutura do box</span></div>
+        <div class="chkGrid"><label class="chk"><input type="checkbox"><i class="dot green"></i><span>Mobilidade</span></label><label class="chk"><input type="checkbox"><i class="dot green"></i><span>Aquecimento</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>Core</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>Força</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>LPO</span></label><label class="chk"><input type="checkbox"><i class="dot green"></i><span>Skill</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>Acessórios</span></label><label class="chk"><input type="checkbox"><i class="dot amber"></i><span>EMOM</span></label><label class="chk"><input type="checkbox"><i class="dot red"></i><span>MetCon</span></label><label class="chk"><input type="checkbox"><i class="dot amber"></i><span>Estações</span></label><label class="chk"><input type="checkbox"><i class="dot amber"></i><span>AMRAP</span></label><label class="chk on"><input type="checkbox" checked><i class="dot amber"></i><span>For Time</span></label><label class="chk"><input type="checkbox"><i class="dot red"></i><span>HIIT</span></label><label class="chk on"><input type="checkbox" checked><i class="dot green"></i><span>Cardio</span></label></div>
+        <div class="hint">Ordem das últimas 6 semanas (18 sessões de força). Marcados: os blocos habituais das segundas.</div>
+      </div>
+      <div class="ctlAct"><button class="btn sm">↻ Outra sessão</button><button class="btn ghost sm">Limpar ajustes</button></div>
+    </div></div>
+      <div class="prev"><div class="prevTitle">Sugestão · segunda 09/11 · Sem box</div><div class="pchips"><span class="pchip">6 blocos</span><span class="pchip">≈ 112 min</span><span class="pchip dim">motor v1</span></div><div class="estr">Estrutura: Core → Força → LPO → Acessórios → For Time → Cardio</div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Core</span><span class="meta">3 rounds</span></div>
+      <div class="pex"><span class="q">1'</span><span class="nm">Plank</span></div><div class="pex"><span class="q">15</span><span class="nm">V-up</span></div><div class="pex"><span class="q">20&quot;</span><span class="nm">Hollow Hold</span></div><div class="pex"><span class="q">20</span><span class="nm">Russian Twist KB</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b1" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b1"><li class="lead">Core em <b class="n">18</b> de <b class="n">22</b> segundas (<b class="n">82%</b>).</li><li><b class="n">3</b> rounds (mediana de <b class="n">11</b>) · <b class="n">4</b> movimentos — de <b class="n">18</b> blocos de Core às segundas.</li><li>Plank (Core): <b class="n">1</b>' (mediana de <b class="n">7</b>) · p <b class="n">10%</b> — <b class="n">3</b> segundas + <b class="n">11</b> outros × <b class="n">0,25</b>, recência <b class="n">0,84</b> (<b class="n">13</b> d).</li><li>V-up (Core): <b class="n">15</b> (mediana de <b class="n">4</b>) · p <b class="n">14%</b> — <b class="n">6</b> segundas + <b class="n">3</b> outros × <b class="n">0,25</b>, recência <b class="n">0,86</b> (<b class="n">14</b> d).</li><li>Hollow Hold (Core): <b class="n">20</b>&quot; = <b class="n">25</b> ÷ <b class="n">3</b> rounds (chipper) · p <b class="n">3%</b> — <b class="n">1</b> segundas + <b class="n">2</b> outros × <b class="n">0,25</b>, recência <b class="n">0,76</b> (<b class="n">10</b> d).</li><li>Russian Twist KB (Core): <b class="n">20</b> (mediana de <b class="n">1</b>) · p <b class="n">3%</b> — <b class="n">1</b> uso, recência <b class="n">1,00</b> (<b class="n">147</b> d).</li></ol>
+    </div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Força</span><span class="meta">5 rounds · a cada 2'</span></div>
+      <div class="pex"><span class="q">2×5</span><span class="nm">Front Squat</span><span class="load">70% RM</span></div><div class="pex"><span class="q">3×3</span><span class="nm">Front Squat</span><span class="load">90% RM</span></div><div class="pact">
+        <button class="whyT on" aria-expanded="true" aria-controls="b2" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList open" id="b2"><li class="lead">Força em <b class="n">18</b> de <b class="n">22</b> segundas (<b class="n">82%</b>).</li><li>Depois de Front Squat na segunda, veio Front Squat <b class="n">4</b> de <b class="n">8</b> vezes.</li><li>Topo <b class="n">90%</b>: depois de um topo de <b class="n">90%</b> na segunda, os seguintes foram <b class="n">95</b>/<b class="n">90</b>/<b class="n">90</b>/<b class="n">75</b>/<b class="n">90</b>/<b class="n">90</b> (mediana).</li><li>Esquema de <b class="n">19</b>/<b class="n">10</b>, topo <b class="n">90%</b>.</li></ol>
+    </div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">LPO</span><span class="lbl">Snatch</span><span class="meta">3 rounds · a cada 1'30&quot; · CAP 15'</span></div>
+      <div class="pex"><span class="q">5</span><span class="nm">Drop Snatch</span><span class="load">30/35/40 % RM</span></div><div class="pex"><span class="q">1×</span><span class="nm">2 Muscle Clean + 2 Snatch Balance</span><span class="load">55/60/65 % RM</span></div><div class="pex"><span class="q">1×</span><span class="nm">1 Hang Snatch + 1 Snatch</span><span class="load">80/85/90 % RM</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b3" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b3"><li class="lead">LPO em <b class="n">20</b> de <b class="n">22</b> segundas (<b class="n">91%</b>).</li><li>Família Snatch (frequência às segundas × recência): Snatch <b class="n">8</b> × <b class="n">0,84</b> = <b class="n">6,75</b> · Clean <b class="n">11</b> × <b class="n">0,58</b> = <b class="n">6,33</b> · Jerk <b class="n">1</b> × <b class="n">0,94</b> = <b class="n">0,94</b>.</li><li><b class="n">3</b> rounds · <b class="n">3</b> drills · <b class="n">15</b>' · A cada <b class="n">1</b>'<b class="n">30</b>&quot; (<b class="n">5</b> de <b class="n">6</b>) — de <b class="n">8</b> blocos de Snatch às segundas.</li><li>A Drop Snatch: p <b class="n">40%</b> (<b class="n">2</b> de <b class="n">5</b> no slot).</li><li>B Muscle Clean + Snatch Balance: p <b class="n">25%</b> (<b class="n">1</b> de <b class="n">4</b> no slot).</li><li>C Hang Snatch + Snatch: p <b class="n">33%</b> (<b class="n">1</b> de <b class="n">3</b> no slot).</li><li>Início pela mediana do %RM, nunca abaixo do anterior, +<b class="n">5</b> por round: Drop Snatch <b class="n">30</b> · Muscle Clean + Snatch Balance <b class="n">55</b> · Hang Snatch + Snatch <b class="n">80</b>.</li></ol>
+    </div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Acessórios</span><span class="meta">3 rounds</span></div>
+      <div class="pex"><span class="q"></span><span class="nm">8/8 Bulgarian Split Squat</span><span class="load">M: 16 kg | F: 12 kg</span></div><div class="pex"><span class="q">10</span><span class="nm">Barbell Row</span></div><div class="pex"><span class="q">10</span><span class="nm">Bicep Curl</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b4" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b4"><li class="lead">Acessórios em <b class="n">21</b> de <b class="n">22</b> segundas (<b class="n">95%</b>).</li><li><b class="n">3</b> rounds (mediana de <b class="n">20</b>) · <b class="n">3</b> movimentos — de <b class="n">21</b> blocos de Acessórios às segundas.</li><li>Bulgarian Split Squat (Agachamento): <b class="n">8</b>/<b class="n">8</b> (mediana de <b class="n">9</b>) · p <b class="n">47%</b> — <b class="n">10</b> segundas + <b class="n">4</b> outros × <b class="n">0,25</b>, recência <b class="n">0,51</b> (<b class="n">5</b> d).</li><li>Barbell Row (Puxar): <b class="n">10</b> (mediana de <b class="n">9</b>) · p <b class="n">20%</b> — <b class="n">3</b> segundas + <b class="n">7</b> outros × <b class="n">0,25</b>, recência <b class="n">1,00</b> (<b class="n">56</b> d).</li><li>Bicep Curl (Puxar): <b class="n">10</b> (mediana de <b class="n">9</b>) · p <b class="n">28%</b> — <b class="n">3</b> segundas + <b class="n">6</b> outros × <b class="n">0,25</b>, recência <b class="n">0,82</b> (<b class="n">12</b> d).</li></ol>
+    </div><div class="pblk amber">
+      <div class="pblkHd"><span class="chip amber">For Time</span><span class="meta">3 rounds · CAP 16'</span></div>
+      <div class="pex"><span class="q">12</span><span class="nm">DB Snatch</span><span class="load">M: 22 kg | F: 15 kg</span></div><div class="pex"><span class="q">12</span><span class="nm">Toes to Bar</span></div><div class="pex"><span class="q">400m</span><span class="nm">Run</span></div><div class="pex"><span class="q">10</span><span class="nm">Chest-to-Bar</span></div><div class="pgoal">Meta 13'</div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b5" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b5"><li class="lead">For Time em <b class="n">15</b> de <b class="n">22</b> segundas (<b class="n">68%</b>).</li><li><b class="n">3</b> rounds (mediana de <b class="n">13</b>) · <b class="n">16</b>' (mediana de <b class="n">12</b>) · <b class="n">4</b> movimentos — de <b class="n">17</b> blocos de For Time às segundas.</li><li>DB Snatch (tema Snatch: <b class="n">36</b> de <b class="n">67</b> dias, <b class="n">54%</b>): <b class="n">12</b> (mediana de <b class="n">3</b>) · p <b class="n">53%</b> — <b class="n">2</b> segundas + <b class="n">7</b> outros × <b class="n">0,25</b>, recência <b class="n">0,98</b> (<b class="n">27</b> d).</li><li>Toes to Bar (Core): <b class="n">12</b> (mediana de <b class="n">21</b>) · p <b class="n">90%</b> — <b class="n">12</b> segundas + <b class="n">26</b> outros × <b class="n">0,25</b>, recência <b class="n">0,58</b> (<b class="n">6</b> d).</li><li>Run (Monoestrutural): <b class="n">400</b>m (mediana de <b class="n">26</b>) · p <b class="n">38%</b> — <b class="n">13</b> segundas + <b class="n">75</b> outros × <b class="n">0,25</b>, recência <b class="n">0,44</b> (<b class="n">4</b> d).</li><li>Chest-to-Bar (Puxar): <b class="n">10</b> (mediana de <b class="n">8</b>) · p <b class="n">22%</b> — <b class="n">3</b> segundas + <b class="n">16</b> outros × <b class="n">0,25</b>, recência <b class="n">0,72</b> (<b class="n">9</b> d).</li><li>Meta <b class="n">13</b>' = <b class="n">0,82</b> × cap (mediana de <b class="n">8</b> metas).</li></ol>
+    </div><div class="pblk green">
+      <div class="pblkHd"><span class="chip green">Cardio</span></div>
+      <div class="pex"><span class="q">20'</span><span class="nm">Bike</span><span class="load">Z1</span></div><div class="pex"><span class="q">20'</span><span class="nm">Remo</span><span class="load">Z1</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b6" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b6"><li class="lead">Cardio em <b class="n">22</b> de <b class="n">22</b> segundas (<b class="n">100%</b>).</li><li>Estilo contínuo (<b class="n">19</b> de <b class="n">22</b>) · Z<b class="n">1</b> (<b class="n">9</b> de <b class="n">10</b> com zona).</li><li><b class="n">2</b> movimentos — de <b class="n">19</b> blocos de Cardio às segundas.</li><li>Bike (Monoestrutural): <b class="n">20</b>' (mediana de <b class="n">19</b>) · p <b class="n">40%</b> — <b class="n">19</b> segundas + <b class="n">18</b> outros × <b class="n">0,25</b>, recência <b class="n">0,58</b> (<b class="n">6</b> d).</li><li>Remo (Monoestrutural): <b class="n">20</b>' (mediana de <b class="n">14</b>) · p <b class="n">39%</b> — <b class="n">5</b> segundas + <b class="n">36</b> outros × <b class="n">0,25</b>, recência <b class="n">0,58</b> (<b class="n">6</b> d).</li></ol>
+    </div><div class="prevFoot"><b>6</b> blocos · <b>18</b> movimentos · <span class="i">0 avisos de formato</span><br>Nada é gravado até <b>Aplicar</b> e <b>Salvar</b>. Ao salvar, a sessão guarda a etiqueta <b>✦ Sugerida</b> e o texto sugerido.</div></div>
+    </div>
+  </div>
+  <h2>2 · Com ajustes: levantamento, foco e tempo</h2>
+  <div class="note"><b>LPO = Clean</b> sobrepõe a família sugerida e a regra do par segunda/quarta. <b>Foco = Puxar</b> restringe os Acessórios (só Gorila Row, Bicep Curl e Strict Pull-up) e pesa ×3 no Core e no WOD; na Força o foco é <b>ignorado e o aviso fica no bloco</b>, porque o histórico não tem nenhum levantamento de puxar. <b>Tempo = 90 min</b> só liga o aviso — o motor <b>nunca corta</b> blocos (decisão de 04/10). O peso ×3 é a constante <code>PATTERN_FOCUS_WEIGHT</code>.</div>
+  <div class="card">
+    <div class="blocksBar"><span class="count">6 Blocos</span><span class="spacer"></span><span class="modeSeg" role="group" aria-label="Modo de edição da sessão"><button>▤ Detalhado</button><button>¶ Texto</button><button class="on">✦ Sugerido</button></span></div>
+    <div class="paneBar"><span class="count">Aplicar troca os blocos da sessão</span><span class="spacer"></span><span class="fmtLink" title="Como a sugestão é calculada">ⓘ Como funciona</span><button class="btn sm">Cancelar</button><button class="btn primary sm">Aplicar</button></div>
+    <div class="pane">
+      <div class="left"><div class="ctls">
+      <div class="ctx"><b>Segunda 09/11 · Sem box</b><span>22 segundas no histórico · 118 sessões</span></div>
+      <div class="ctlG">
+        <div class="ctlL">Levantamento do LPO</div>
+        <div class="selRow"><button class="sel" aria-pressed="false">Automático → Snatch</button><button class="sel" aria-pressed="false">Snatch</button><button class="sel on" aria-pressed="true">Clean</button><button class="sel" aria-pressed="false">Jerk</button></div>
+      </div>
+      <div class="ctlG">
+        <div class="ctlL">Foco de movimento</div>
+        <div class="selRow"><button class="sel" aria-pressed="false">Sem foco</button><button class="sel" aria-pressed="false">Agachamento</button><button class="sel" aria-pressed="false">Dobradiça</button><button class="sel" aria-pressed="false">Empurrar</button><button class="sel on" aria-pressed="true">Puxar</button><button class="sel" aria-pressed="false">Olímpico</button><button class="sel" aria-pressed="false">Core</button><button class="sel" aria-pressed="false">Monoestrutural</button><button class="sel" aria-pressed="false">Carregar</button></div>
+        <div class="hint">Com foco, a <b>Força</b> e os <b>Acessórios</b> usam só esse padrão; o <b>Core</b> e o <b>WOD</b> o pesam <b>×3</b>.</div>
+      </div>
+      <div class="ctlG">
+        <div class="ctlL">Tempo da aula</div>
+        <div class="minRow"><input class="numInp" inputmode="numeric" placeholder="—" value="90" aria-label="Tempo da aula em minutos"><span>min</span></div>
+        <div class="hint">Só avisa. <b>Nunca corta</b> blocos.</div>
+      </div>
+      <div class="ctlG">
+        <div class="ctlL">Blocos <span class="ctlSub">estrutura do box</span></div>
+        <div class="chkGrid"><label class="chk"><input type="checkbox"><i class="dot green"></i><span>Mobilidade</span></label><label class="chk"><input type="checkbox"><i class="dot green"></i><span>Aquecimento</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>Core</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>Força</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>LPO</span></label><label class="chk"><input type="checkbox"><i class="dot green"></i><span>Skill</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>Acessórios</span></label><label class="chk"><input type="checkbox"><i class="dot amber"></i><span>EMOM</span></label><label class="chk"><input type="checkbox"><i class="dot red"></i><span>MetCon</span></label><label class="chk"><input type="checkbox"><i class="dot amber"></i><span>Estações</span></label><label class="chk"><input type="checkbox"><i class="dot amber"></i><span>AMRAP</span></label><label class="chk on"><input type="checkbox" checked><i class="dot amber"></i><span>For Time</span></label><label class="chk"><input type="checkbox"><i class="dot red"></i><span>HIIT</span></label><label class="chk on"><input type="checkbox" checked><i class="dot green"></i><span>Cardio</span></label></div>
+        <div class="hint">Ordem das últimas 6 semanas (18 sessões de força). Marcados: os blocos habituais das segundas.</div>
+      </div>
+      <div class="ctlAct"><button class="btn sm">↻ Outra sessão</button><button class="btn ghost sm">Limpar ajustes</button></div>
+    </div></div>
+      <div class="prev"><div class="prevTitle">Sugestão · segunda 09/11 · Sem box</div><div class="pchips"><span class="pchip">6 blocos</span><span class="pchip warn">≈ 103 min</span><span class="pchip dim">motor v1</span></div><div class="estr">Estrutura: Core → Força → LPO → Acessórios → For Time → Cardio</div><div class="banner warn" role="status"><span class="bi" aria-hidden="true">⏱</span><div class="bt">Estimativa <b>≈ 103 min</b> — <b>13 min</b> acima dos 90 que você indicou. <b>Nada foi cortado</b>: ajuste os blocos ou aplique assim mesmo.</div></div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Core</span><span class="meta">3 rounds</span></div>
+      <div class="pex"><span class="q">1'</span><span class="nm">Plank</span></div><div class="pex"><span class="q">15</span><span class="nm">V-up</span></div><div class="pex"><span class="q">20&quot;</span><span class="nm">Hollow Hold</span></div><div class="pex"><span class="q">20</span><span class="nm">Russian Twist KB</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b7" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b7"><li class="lead">Core em <b class="n">18</b> de <b class="n">22</b> segundas (<b class="n">82%</b>).</li><li><b class="n">3</b> rounds (mediana de <b class="n">11</b>) · <b class="n">4</b> movimentos — de <b class="n">18</b> blocos de Core às segundas.</li><li>Plank (Core): <b class="n">1</b>' (mediana de <b class="n">7</b>) · p <b class="n">10%</b> — <b class="n">3</b> segundas + <b class="n">11</b> outros × <b class="n">0,25</b>, recência <b class="n">0,84</b> (<b class="n">13</b> d).</li><li>V-up (Core): <b class="n">15</b> (mediana de <b class="n">4</b>) · p <b class="n">14%</b> — <b class="n">6</b> segundas + <b class="n">3</b> outros × <b class="n">0,25</b>, recência <b class="n">0,86</b> (<b class="n">14</b> d).</li><li>Hollow Hold (Core): <b class="n">20</b>&quot; = <b class="n">25</b> ÷ <b class="n">3</b> rounds (chipper) · p <b class="n">3%</b> — <b class="n">1</b> segundas + <b class="n">2</b> outros × <b class="n">0,25</b>, recência <b class="n">0,76</b> (<b class="n">10</b> d).</li><li>Russian Twist KB (Core): <b class="n">20</b> (mediana de <b class="n">1</b>) · p <b class="n">3%</b> — <b class="n">1</b> uso, recência <b class="n">1,00</b> (<b class="n">147</b> d).</li></ol>
+    </div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Força</span><span class="meta">5 rounds · a cada 2'</span></div>
+      <div class="pex"><span class="q">2×5</span><span class="nm">Front Squat</span><span class="load">70% RM</span></div><div class="pex"><span class="q">3×3</span><span class="nm">Front Squat</span><span class="load">90% RM</span></div><div class="pnote warn">Foco <b>Puxar</b> ignorado aqui: nenhum levantamento desse padrão no histórico da Força.</div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b8" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b8"><li class="lead">Força em <b class="n">18</b> de <b class="n">22</b> segundas (<b class="n">82%</b>).</li><li>Nenhum levantamento de Puxar no histórico — foco ignorado no Força.</li><li>Depois de Front Squat na segunda, veio Front Squat <b class="n">4</b> de <b class="n">8</b> vezes.</li><li>Topo <b class="n">90%</b>: depois de um topo de <b class="n">90%</b> na segunda, os seguintes foram <b class="n">95</b>/<b class="n">90</b>/<b class="n">90</b>/<b class="n">75</b>/<b class="n">90</b>/<b class="n">90</b> (mediana).</li><li>Esquema de <b class="n">19</b>/<b class="n">10</b>, topo <b class="n">90%</b>.</li></ol>
+    </div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">LPO</span><span class="lbl">Clean</span><span class="meta">4 rounds · a cada 1'30&quot;</span></div>
+      <div class="pex"><span class="q">3</span><span class="nm">Clean Pull</span><span class="load">90/95/100/105 % RM</span></div><div class="pex"><span class="q">1×</span><span class="nm">3 Hang Clean + 1 Push Jerk</span><span class="load">90/95/100/100 % RM</span></div><div class="pact">
+        <button class="whyT on" aria-expanded="true" aria-controls="b9" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList open" id="b9"><li class="lead">LPO em <b class="n">20</b> de <b class="n">22</b> segundas (<b class="n">91%</b>).</li><li>Clean: escolhido por você.</li><li><b class="n">4</b> rounds · <b class="n">2</b> drills · A cada <b class="n">1</b>'<b class="n">30</b>&quot; (<b class="n">5</b> de <b class="n">6</b>) — de <b class="n">12</b> blocos de Clean às segundas.</li><li>A Clean Pull: p <b class="n">55%</b> (<b class="n">4</b> de <b class="n">6</b> no slot).</li><li>B Hang Clean + Push Jerk: p <b class="n">100%</b> (<b class="n">1</b> de <b class="n">1</b> no slot).</li><li>Rampa limitada ao teto: Hang Clean + Push Jerk <b class="n">100%</b>.</li><li>Início pela mediana do %RM, nunca abaixo do anterior, +<b class="n">5</b> por round: Clean Pull <b class="n">90</b> · Hang Clean + Push Jerk sem %RM registrado → <b class="n">90</b>.</li></ol>
+    </div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Acessórios</span><span class="meta">3 rounds</span></div>
+      <div class="pex"><span class="q">12</span><span class="nm">Gorila Row</span></div><div class="pex"><span class="q">10</span><span class="nm">Bicep Curl</span></div><div class="pex"><span class="q">8</span><span class="nm">Strict Pull-up</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b10" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b10"><li class="lead">Acessórios em <b class="n">21</b> de <b class="n">22</b> segundas (<b class="n">95%</b>).</li><li><b class="n">3</b> rounds (mediana de <b class="n">20</b>) · <b class="n">3</b> movimentos — de <b class="n">21</b> blocos de Acessórios às segundas.</li><li>Gorila Row (Puxar): <b class="n">12</b> (mediana de <b class="n">1</b>) · p <b class="n">5%</b> — <b class="n">1</b> segundas + <b class="n">1</b> outros × <b class="n">0,25</b>, recência <b class="n">1,00</b> (<b class="n">115</b> d).</li><li>Bicep Curl (Puxar): <b class="n">10</b> (mediana de <b class="n">9</b>) · p <b class="n">28%</b> — <b class="n">3</b> segundas + <b class="n">6</b> outros × <b class="n">0,25</b>, recência <b class="n">0,82</b> (<b class="n">12</b> d).</li><li>Strict Pull-up (Puxar): <b class="n">8</b> (mediana de <b class="n">28</b>) · p <b class="n">95%</b> — <b class="n">13</b> segundas + <b class="n">16</b> outros × <b class="n">0,25</b>, recência <b class="n">0,51</b> (<b class="n">5</b> d).</li></ol>
+    </div><div class="pblk amber">
+      <div class="pblkHd"><span class="chip amber">For Time</span><span class="meta">3 rounds · CAP 16'</span></div>
+      <div class="pex"><span class="q">6</span><span class="nm">Clean &amp; Jerk</span><span class="load">M: 60 kg | F: 45 kg</span></div><div class="pex"><span class="q">12</span><span class="nm">Toes to Bar</span></div><div class="pex"><span class="q">400m</span><span class="nm">Run</span></div><div class="pex"><span class="q">10</span><span class="nm">Chest-to-Bar</span></div><div class="pgoal">Meta 13'</div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b11" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b11"><li class="lead">For Time em <b class="n">15</b> de <b class="n">22</b> segundas (<b class="n">68%</b>).</li><li><b class="n">3</b> rounds (mediana de <b class="n">13</b>) · <b class="n">16</b>' (mediana de <b class="n">12</b>) · <b class="n">4</b> movimentos — de <b class="n">17</b> blocos de For Time às segundas.</li><li>Clean &amp; Jerk (tema Clean: <b class="n">36</b> de <b class="n">67</b> dias, <b class="n">54%</b>): <b class="n">6</b> (mediana de <b class="n">4</b>) · p <b class="n">30%</b> — <b class="n">2</b> segundas + <b class="n">6</b> outros × <b class="n">0,25</b>, recência <b class="n">0,86</b> (<b class="n">14</b> d).</li><li>Toes to Bar (Core): <b class="n">12</b> (mediana de <b class="n">21</b>) · p <b class="n">90%</b> — <b class="n">12</b> segundas + <b class="n">26</b> outros × <b class="n">0,25</b>, recência <b class="n">0,58</b> (<b class="n">6</b> d).</li><li>Run (Monoestrutural): <b class="n">400</b>m (mediana de <b class="n">26</b>) · p <b class="n">38%</b> — <b class="n">13</b> segundas + <b class="n">75</b> outros × <b class="n">0,25</b>, recência <b class="n">0,44</b> (<b class="n">4</b> d).</li><li>Chest-to-Bar (Puxar): <b class="n">10</b> (mediana de <b class="n">8</b>) · p <b class="n">22%</b> — <b class="n">3</b> segundas + <b class="n">16</b> outros × <b class="n">0,25</b>, recência <b class="n">0,72</b> (<b class="n">9</b> d).</li><li>Meta <b class="n">13</b>' = <b class="n">0,82</b> × cap (mediana de <b class="n">8</b> metas).</li></ol>
+    </div><div class="pblk green">
+      <div class="pblkHd"><span class="chip green">Cardio</span></div>
+      <div class="pex"><span class="q">20'</span><span class="nm">Bike</span><span class="load">Z1</span></div><div class="pex"><span class="q">20'</span><span class="nm">Remo</span><span class="load">Z1</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b12" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b12"><li class="lead">Cardio em <b class="n">22</b> de <b class="n">22</b> segundas (<b class="n">100%</b>).</li><li>Estilo contínuo (<b class="n">19</b> de <b class="n">22</b>) · Z<b class="n">1</b> (<b class="n">9</b> de <b class="n">10</b> com zona).</li><li><b class="n">2</b> movimentos — de <b class="n">19</b> blocos de Cardio às segundas.</li><li>Bike (Monoestrutural): <b class="n">20</b>' (mediana de <b class="n">19</b>) · p <b class="n">40%</b> — <b class="n">19</b> segundas + <b class="n">18</b> outros × <b class="n">0,25</b>, recência <b class="n">0,58</b> (<b class="n">6</b> d).</li><li>Remo (Monoestrutural): <b class="n">20</b>' (mediana de <b class="n">14</b>) · p <b class="n">39%</b> — <b class="n">5</b> segundas + <b class="n">36</b> outros × <b class="n">0,25</b>, recência <b class="n">0,58</b> (<b class="n">6</b> d).</li></ol>
+    </div><div class="prevFoot"><b>6</b> blocos · <b>17</b> movimentos · <span class="i">0 avisos de formato</span><br>Nada é gravado até <b>Aplicar</b> e <b>Salvar</b>. Ao salvar, a sessão guarda a etiqueta <b>✦ Sugerida</b> e o texto sugerido.</div></div>
+    </div>
+  </div>
+  <h2>3 · ↻ Outra — um bloco de cada vez</h2>
+  <div class="note">Cada bloco sorteia com a <b>sua própria semente</b> (<code>escopo|data|bloco|variante</code>): ↻ Outra muda só a variante daquele bloco e <b>nenhum outro bloco muda</b> — o Core abaixo foi sorteado de novo junto, mas a LPO, os Acessórios, o WOD e o Cardio saíram idênticos (verificado no motor). Na Força, ↻ Outra oferece o <b>outro levantamento</b> que a regra do histórico deixou de lado; o <b>por quê</b> diz qual. Se não houver outra opção livre, o bloco fica como estava e o por quê explica.</div>
+  <div class="pairs"><div class="pairCol"><div class="clbl">Antes</div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Força</span><span class="meta">5 rounds · a cada 2'</span></div>
+      <div class="pex"><span class="q">2×5</span><span class="nm">Front Squat</span><span class="load">70% RM</span></div><div class="pex"><span class="q">3×3</span><span class="nm">Front Squat</span><span class="load">90% RM</span></div><div class="pact">
+        <button class="whyT on" aria-expanded="true" aria-controls="b13" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList open" id="b13"><li class="lead">Força em <b class="n">18</b> de <b class="n">22</b> segundas (<b class="n">82%</b>).</li><li>Depois de Front Squat na segunda, veio Front Squat <b class="n">4</b> de <b class="n">8</b> vezes.</li><li>Topo <b class="n">90%</b>: depois de um topo de <b class="n">90%</b> na segunda, os seguintes foram <b class="n">95</b>/<b class="n">90</b>/<b class="n">90</b>/<b class="n">75</b>/<b class="n">90</b>/<b class="n">90</b> (mediana).</li><li>Esquema de <b class="n">19</b>/<b class="n">10</b>, topo <b class="n">90%</b>.</li></ol>
+    </div></div>
+    <div class="pairCol"><div class="clbl">Depois de ↻ Outra</div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Força</span></div>
+      <div class="pex"><span class="q">2×5</span><span class="nm">Bench Press</span><span class="load">70% RM</span></div><div class="pex"><span class="q">3×3</span><span class="nm">Bench Press</span><span class="load">90% RM</span></div><div class="pact">
+        <button class="whyT on" aria-expanded="true" aria-controls="b14" data-why>por quê <span class="car">▾</span></button>
+        <span class="vtag" title="variante 1 deste bloco">variante 1</span>
+        <span class="sp"></span>
+        <button class="btn xs s-focus" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList open" id="b14"><li class="lead">Força em <b class="n">18</b> de <b class="n">22</b> segundas (<b class="n">82%</b>).</li><li>Outra opção: Bench Press (p <b class="n">18%</b>) no lugar de Front Squat.</li><li>Topo <b class="n">90%</b>: mediana dos topos de Bench Press no box (<b class="n">95</b>/<b class="n">60</b>/<b class="n">85</b>/<b class="n">95</b>/<b class="n">90</b>/<b class="n">95</b>/<b class="n">75</b>/<b class="n">80</b>/<b class="n">90</b>/<b class="n">85</b>/<b class="n">90</b>/<b class="n">85</b>).</li><li>Esquema de <b class="n">23</b>/<b class="n">10</b> (sexta), topo <b class="n">90%</b>.</li></ol>
+    </div></div></div>
+  <div class="pairs"><div class="pairCol"><div class="clbl">Antes</div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Core</span><span class="meta">3 rounds</span></div>
+      <div class="pex"><span class="q">1'</span><span class="nm">Plank</span></div><div class="pex"><span class="q">15</span><span class="nm">V-up</span></div><div class="pex"><span class="q">20&quot;</span><span class="nm">Hollow Hold</span></div><div class="pex"><span class="q">20</span><span class="nm">Russian Twist KB</span></div><div class="pact">
+        <button class="whyT on" aria-expanded="true" aria-controls="b15" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList open" id="b15"><li class="lead">Core em <b class="n">18</b> de <b class="n">22</b> segundas (<b class="n">82%</b>).</li><li><b class="n">3</b> rounds (mediana de <b class="n">11</b>) · <b class="n">4</b> movimentos — de <b class="n">18</b> blocos de Core às segundas.</li><li>Plank (Core): <b class="n">1</b>' (mediana de <b class="n">7</b>) · p <b class="n">10%</b> — <b class="n">3</b> segundas + <b class="n">11</b> outros × <b class="n">0,25</b>, recência <b class="n">0,84</b> (<b class="n">13</b> d).</li><li>V-up (Core): <b class="n">15</b> (mediana de <b class="n">4</b>) · p <b class="n">14%</b> — <b class="n">6</b> segundas + <b class="n">3</b> outros × <b class="n">0,25</b>, recência <b class="n">0,86</b> (<b class="n">14</b> d).</li><li>Hollow Hold (Core): <b class="n">20</b>&quot; = <b class="n">25</b> ÷ <b class="n">3</b> rounds (chipper) · p <b class="n">3%</b> — <b class="n">1</b> segundas + <b class="n">2</b> outros × <b class="n">0,25</b>, recência <b class="n">0,76</b> (<b class="n">10</b> d).</li><li>Russian Twist KB (Core): <b class="n">20</b> (mediana de <b class="n">1</b>) · p <b class="n">3%</b> — <b class="n">1</b> uso, recência <b class="n">1,00</b> (<b class="n">147</b> d).</li></ol>
+    </div></div>
+    <div class="pairCol"><div class="clbl">Depois de ↻ Outra</div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Core</span><span class="meta">3 rounds</span></div>
+      <div class="pex"><span class="q">15</span><span class="nm">GHD Sit-up</span></div><div class="pex"><span class="q">20&quot;</span><span class="nm">Hollow Hold</span></div><div class="pex"><span class="q">20</span><span class="nm">Side Plank</span></div><div class="pex"><span class="q">20</span><span class="nm">Touch Heel</span></div><div class="pact">
+        <button class="whyT on" aria-expanded="true" aria-controls="b16" data-why>por quê <span class="car">▾</span></button>
+        <span class="vtag" title="variante 1 deste bloco">variante 1</span>
+        <span class="sp"></span>
+        <button class="btn xs s-focus" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList open" id="b16"><li class="lead">Core em <b class="n">18</b> de <b class="n">22</b> segundas (<b class="n">82%</b>).</li><li><b class="n">3</b> rounds (mediana de <b class="n">11</b>) · <b class="n">4</b> movimentos — de <b class="n">18</b> blocos de Core às segundas.</li><li>GHD Sit-up (Core): <b class="n">15</b> (mediana de <b class="n">14</b>) · p <b class="n">10%</b> — <b class="n">6</b> segundas + <b class="n">9</b> outros × <b class="n">0,25</b>, recência <b class="n">0,58</b> (<b class="n">6</b> d).</li><li>Hollow Hold (Core): <b class="n">20</b>&quot; = <b class="n">25</b> ÷ <b class="n">3</b> rounds (chipper) · p <b class="n">3%</b> — <b class="n">1</b> segundas + <b class="n">2</b> outros × <b class="n">0,25</b>, recência <b class="n">0,76</b> (<b class="n">10</b> d).</li><li>Side Plank (Core): <b class="n">20</b> (mediana de <b class="n">1</b>) · p <b class="n">6%</b> — <b class="n">0</b> segundas + <b class="n">10</b> outros × <b class="n">0,25</b>, recência <b class="n">1,00</b> (<b class="n">48</b> d).</li><li>Touch Heel (Core): <b class="n">20</b> (mediana de <b class="n">4</b>) · p <b class="n">6%</b> — <b class="n">1</b> segundas + <b class="n">4</b> outros × <b class="n">0,25</b>, recência <b class="n">0,86</b> (<b class="n">14</b> d).</li></ol>
+    </div></div></div>
+  <h2>4 · Dados insuficientes e box sem histórico</h2>
+  <div class="note">O limite é <code>THIN_WEEKDAY_SESSIONS = 2</code> sessões naquele dia da semana — escolhido no backtest, onde a precisão cai abaixo disso. Abaixo do limite o motor <b>avisa e oferece duas saídas</b>, nunca esconde: usar <b>todos os dias do box</b> ou <b>todos os boxes</b>. Um bloco sem histórico suficiente aparece como aviso (aqui, a LPO), em vez de um bloco vazio. Sem nenhuma sessão, não há bloco e <b>Aplicar fica desativado</b>.</div>
+  <div class="clbl">4a · terça num box com 1 terça no histórico</div>
+  <div class="card panel"><div class="prev"><div class="prevTitle">Sugestão · terça 10/11 · Box com poucas sessões</div><div class="pchips"><span class="pchip">2 blocos</span><span class="pchip">≈ 42 min</span><span class="pchip dim">motor v1</span></div><div class="estr">Estrutura: Aquecimento → Cardio</div><div class="banner warn" role="status"><span class="bi" aria-hidden="true">⚠</span><div class="bt"><b>Poucos dados.</b> Só 1 terça no histórico deste box (mínimo 2). A sugestão pode errar mais. Para tentar de novo com mais histórico:</div><div class="ba"><button class="btn sm">Usar todos os dias do box</button><button class="btn sm">Usar todos os boxes</button></div></div><div class="pblk green">
+      <div class="pblkHd"><span class="chip green">Aquecimento</span><span class="meta">2 rounds</span></div>
+      <div class="pex"><span class="q">10</span><span class="nm">Goblet Squat</span></div><div class="pex"><span class="q">1'</span><span class="nm">Pigeon Pose</span></div><div class="pex"><span class="q">1'</span><span class="nm">Couch Stretch</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b17" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b17"><li class="lead">Aquecimento em <b class="n">1</b> de <b class="n">1</b> terças (<b class="n">100%</b>).</li><li><b class="n">2</b> rounds (mediana de <b class="n">2</b>) · <b class="n">6</b> movimentos — de Aquecimento de todos os dias (poucos às terças).</li><li>Goblet Squat (Agachamento): <b class="n">10</b> (mediana de <b class="n">1</b>) · p <b class="n">100%</b> — <b class="n">1</b> uso, recência <b class="n">1,00</b> (<b class="n">98</b> d).</li><li>Pigeon Pose (sem Agachamento livre — outro padrão): <b class="n">1</b>' (mediana de <b class="n">1</b>) · p <b class="n">50%</b> — <b class="n">1</b> uso, recência <b class="n">1,00</b> (<b class="n">98</b> d).</li><li>Couch Stretch (sem Agachamento livre — outro padrão): <b class="n">1</b>' (mediana de <b class="n">1</b>) · p <b class="n">100%</b> — <b class="n">1</b> uso, recência <b class="n">1,00</b> (<b class="n">98</b> d).</li></ol>
+    </div><div class="pblk green">
+      <div class="pblkHd"><span class="chip green">Cardio</span></div>
+      <div class="pex"><span class="q">30'</span><span class="nm">Run</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b18" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b18"><li class="lead">Cardio em <b class="n">1</b> de <b class="n">1</b> terças (<b class="n">100%</b>).</li><li>Estilo contínuo (<b class="n">3</b> de <b class="n">3</b>).</li><li><b class="n">30</b>' (mediana de <b class="n">3</b>) — de <b class="n">3</b> blocos de um movimento (todos os dias).</li><li>Run: p <b class="n">33%</b> — <b class="n">0</b> terças + <b class="n">2</b> outros × <b class="n">0,25</b>, recência <b class="n">1,00</b> (<b class="n">97</b> d).</li></ol>
+    </div><div class="banner note" role="status"><span class="bi" aria-hidden="true">ⓘ</span><div class="bt"><b>LPO</b> não foi sugerido — Sem histórico suficiente para gerar LPO.</div></div><div class="prevFoot"><b>2</b> blocos · <b>4</b> movimentos · <span class="i">0 avisos de formato</span><br>Nada é gravado até <b>Aplicar</b> e <b>Salvar</b>. Ao salvar, a sessão guarda a etiqueta <b>✦ Sugerida</b> e o texto sugerido.</div></div></div>
+  <div class="clbl">4b · depois de “Usar todos os boxes”</div>
+  <div class="card panel"><div class="prev"><div class="banner info" role="status"><span class="bi" aria-hidden="true">ⓘ</span><div class="bt">Usando <b>o histórico de todos os boxes</b> — 36 terças em 189 sessões.</div><div class="ba"><button class="btn ghost sm">Voltar ao box</button></div></div><div class="pchips" style="margin-bottom:var(--sp-2)"><span class="chip blue">Core</span><span class="chip blue">Força</span><span class="chip blue">LPO</span><span class="chip blue">Acessórios</span><span class="chip amber">EMOM</span><span class="chip amber">For Time</span><span class="chip green">Cardio</span></div><div class="estr">7 blocos · ≈ 103 min · … (cada um com o seu por quê, como na seção 1)</div></div></div>
+  <div class="clbl">4c · box sem nenhuma sessão</div>
+  <div class="card panel"><div class="paneBar"><span class="count">Aplicar troca os blocos da sessão</span><span class="spacer"></span><span class="fmtLink" title="Como a sugestão é calculada">ⓘ Como funciona</span><button class="btn sm">Cancelar</button><button class="btn primary sm s-disabled" disabled aria-disabled="true">Aplicar</button></div><div class="prev">
+    <div class="prevTitle">Sugestão · segunda 09/11 · Box novo</div>
+    <div class="empty"><div class="eIc" aria-hidden="true">✦</div><b>Nenhuma sessão no histórico deste box.</b><span>Não há de onde tirar uma sugestão. Você pode usar o histórico de todos os boxes, ou escrever a sessão em ¶ Texto.</span><div class="eAct"><button class="btn sm">Usar todos os boxes</button><button class="btn ghost sm">Ir para ¶ Texto</button></div></div>
+  </div></div>
+  <h2>5 · Mobile 390</h2>
+  <div class="note">Os ajustes viram um <b>resumo recolhido</b> acima da sugestão (a sugestão é o que se quer ver); abrir empilha os controles. <b>Aplicar</b> fica numa barra fixa embaixo, sempre ao alcance do polegar. Os chips quebram linha em vez de rolar de lado — o mesmo critério das abas de box do Criador. A pré-visualização mostra os dois primeiros blocos; o resto segue a seção 1.</div>
+  <div class="frames">
+    <div class="fcol"><div class="clbl">5a · recolhido (padrão)</div><div class="frame"><div class="blocksBar"><span class="count">6 Blocos</span><span class="spacer"></span><span class="modeSeg" role="group" aria-label="Modo de edição da sessão"><button>▤ Detalhado</button><button>¶ Texto</button><button class="on">✦ Sugerido</button></span></div><button class="mSum" aria-expanded="false"><span><b>Ajustes</b> · LPO automático · sem foco · sem limite</span><span class="car">▾</span></button><div class="prev"><div class="prevTitle">Sugestão · segunda 09/11 · Sem box</div><div class="pchips"><span class="pchip">6 blocos</span><span class="pchip">≈ 112 min</span><span class="pchip dim">motor v1</span></div><div class="estr">Estrutura: Core → Força → LPO → Acessórios → For Time → Cardio</div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Core</span><span class="meta">3 rounds</span></div>
+      <div class="pex"><span class="q">1'</span><span class="nm">Plank</span></div><div class="pex"><span class="q">15</span><span class="nm">V-up</span></div><div class="pex"><span class="q">20&quot;</span><span class="nm">Hollow Hold</span></div><div class="pex"><span class="q">20</span><span class="nm">Russian Twist KB</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b19" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b19"><li class="lead">Core em <b class="n">18</b> de <b class="n">22</b> segundas (<b class="n">82%</b>).</li><li><b class="n">3</b> rounds (mediana de <b class="n">11</b>) · <b class="n">4</b> movimentos — de <b class="n">18</b> blocos de Core às segundas.</li><li>Plank (Core): <b class="n">1</b>' (mediana de <b class="n">7</b>) · p <b class="n">10%</b> — <b class="n">3</b> segundas + <b class="n">11</b> outros × <b class="n">0,25</b>, recência <b class="n">0,84</b> (<b class="n">13</b> d).</li><li>V-up (Core): <b class="n">15</b> (mediana de <b class="n">4</b>) · p <b class="n">14%</b> — <b class="n">6</b> segundas + <b class="n">3</b> outros × <b class="n">0,25</b>, recência <b class="n">0,86</b> (<b class="n">14</b> d).</li><li>Hollow Hold (Core): <b class="n">20</b>&quot; = <b class="n">25</b> ÷ <b class="n">3</b> rounds (chipper) · p <b class="n">3%</b> — <b class="n">1</b> segundas + <b class="n">2</b> outros × <b class="n">0,25</b>, recência <b class="n">0,76</b> (<b class="n">10</b> d).</li><li>Russian Twist KB (Core): <b class="n">20</b> (mediana de <b class="n">1</b>) · p <b class="n">3%</b> — <b class="n">1</b> uso, recência <b class="n">1,00</b> (<b class="n">147</b> d).</li></ol>
+    </div><div class="pblk blue">
+      <div class="pblkHd"><span class="chip blue">Força</span><span class="meta">5 rounds · a cada 2'</span></div>
+      <div class="pex"><span class="q">2×5</span><span class="nm">Front Squat</span><span class="load">70% RM</span></div><div class="pex"><span class="q">3×3</span><span class="nm">Front Squat</span><span class="load">90% RM</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b20" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b20"><li class="lead">Força em <b class="n">18</b> de <b class="n">22</b> segundas (<b class="n">82%</b>).</li><li>Depois de Front Squat na segunda, veio Front Squat <b class="n">4</b> de <b class="n">8</b> vezes.</li><li>Topo <b class="n">90%</b>: depois de um topo de <b class="n">90%</b> na segunda, os seguintes foram <b class="n">95</b>/<b class="n">90</b>/<b class="n">90</b>/<b class="n">75</b>/<b class="n">90</b>/<b class="n">90</b> (mediana).</li><li>Esquema de <b class="n">19</b>/<b class="n">10</b>, topo <b class="n">90%</b>.</li></ol>
+    </div><div class="estr">+ 4 blocos abaixo, como na seção 1</div></div><div class="sticky"><button class="btn sm">Cancelar</button><button class="btn primary sm">Aplicar · 6 blocos</button></div></div></div>
+    <div class="fcol"><div class="clbl">5b · ajustes abertos</div><div class="frame"><div class="blocksBar"><span class="count">6 Blocos</span><span class="spacer"></span><span class="modeSeg" role="group" aria-label="Modo de edição da sessão"><button>▤ Detalhado</button><button>¶ Texto</button><button class="on">✦ Sugerido</button></span></div><button class="mSum on" aria-expanded="true"><span><b>Ajustes</b></span><span class="car">▴</span></button><div class="mCtl"><div class="ctls">
+      <div class="ctx"><b>Segunda 09/11 · Sem box</b><span>22 segundas no histórico · 118 sessões</span></div>
+      <div class="ctlG">
+        <div class="ctlL">Levantamento do LPO</div>
+        <div class="selRow"><button class="sel" aria-pressed="false">Automático → Snatch</button><button class="sel" aria-pressed="false">Snatch</button><button class="sel on" aria-pressed="true">Clean</button><button class="sel" aria-pressed="false">Jerk</button></div>
+      </div>
+      <div class="ctlG">
+        <div class="ctlL">Foco de movimento</div>
+        <div class="selRow"><button class="sel" aria-pressed="false">Sem foco</button><button class="sel" aria-pressed="false">Agachamento</button><button class="sel" aria-pressed="false">Dobradiça</button><button class="sel" aria-pressed="false">Empurrar</button><button class="sel on" aria-pressed="true">Puxar</button><button class="sel" aria-pressed="false">Olímpico</button><button class="sel" aria-pressed="false">Core</button><button class="sel" aria-pressed="false">Monoestrutural</button><button class="sel" aria-pressed="false">Carregar</button></div>
+        <div class="hint">Com foco, a <b>Força</b> e os <b>Acessórios</b> usam só esse padrão; o <b>Core</b> e o <b>WOD</b> o pesam <b>×3</b>.</div>
+      </div>
+      <div class="ctlG">
+        <div class="ctlL">Tempo da aula</div>
+        <div class="minRow"><input class="numInp" inputmode="numeric" placeholder="—" value="90" aria-label="Tempo da aula em minutos"><span>min</span></div>
+        <div class="hint">Só avisa. <b>Nunca corta</b> blocos.</div>
+      </div>
+      <div class="ctlG">
+        <div class="ctlL">Blocos <span class="ctlSub">estrutura do box</span></div>
+        <div class="chkGrid"><label class="chk"><input type="checkbox"><i class="dot green"></i><span>Mobilidade</span></label><label class="chk"><input type="checkbox"><i class="dot green"></i><span>Aquecimento</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>Core</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>Força</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>LPO</span></label><label class="chk"><input type="checkbox"><i class="dot green"></i><span>Skill</span></label><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>Acessórios</span></label><label class="chk"><input type="checkbox"><i class="dot amber"></i><span>EMOM</span></label><label class="chk"><input type="checkbox"><i class="dot red"></i><span>MetCon</span></label><label class="chk"><input type="checkbox"><i class="dot amber"></i><span>Estações</span></label><label class="chk"><input type="checkbox"><i class="dot amber"></i><span>AMRAP</span></label><label class="chk on"><input type="checkbox" checked><i class="dot amber"></i><span>For Time</span></label><label class="chk"><input type="checkbox"><i class="dot red"></i><span>HIIT</span></label><label class="chk on"><input type="checkbox" checked><i class="dot green"></i><span>Cardio</span></label></div>
+        <div class="hint">Ordem das últimas 6 semanas (18 sessões de força). Marcados: os blocos habituais das segundas.</div>
+      </div>
+      <div class="ctlAct"><button class="btn sm">↻ Outra sessão</button><button class="btn ghost sm">Limpar ajustes</button></div>
+    </div></div><div class="sticky"><button class="btn sm">Cancelar</button><button class="btn primary sm">Aplicar · 6 blocos</button></div></div></div>
+    <div class="fcol"><div class="clbl">5c · poucos dados</div><div class="frame"><div class="blocksBar"><span class="count">2 Blocos</span><span class="spacer"></span><span class="modeSeg" role="group" aria-label="Modo de edição da sessão"><button>▤ Detalhado</button><button>¶ Texto</button><button class="on">✦ Sugerido</button></span></div><button class="mSum" aria-expanded="false"><span><b>Ajustes</b> · LPO automático · sem foco · sem limite</span><span class="car">▾</span></button><div class="prev"><div class="prevTitle">Sugestão · terça 10/11 · Box com poucas sessões</div><div class="pchips"><span class="pchip">2 blocos</span><span class="pchip">≈ 42 min</span><span class="pchip dim">motor v1</span></div><div class="estr">Estrutura: Aquecimento → Cardio</div><div class="banner warn" role="status"><span class="bi" aria-hidden="true">⚠</span><div class="bt"><b>Poucos dados.</b> Só 1 terça no histórico deste box (mínimo 2).</div><div class="ba"><button class="btn sm">Todos os dias do box</button><button class="btn sm">Todos os boxes</button></div></div><div class="pblk green">
+      <div class="pblkHd"><span class="chip green">Aquecimento</span><span class="meta">2 rounds</span></div>
+      <div class="pex"><span class="q">10</span><span class="nm">Goblet Squat</span></div><div class="pex"><span class="q">1'</span><span class="nm">Pigeon Pose</span></div><div class="pex"><span class="q">1'</span><span class="nm">Couch Stretch</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b21" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b21"><li class="lead">Aquecimento em <b class="n">1</b> de <b class="n">1</b> terças (<b class="n">100%</b>).</li><li><b class="n">2</b> rounds (mediana de <b class="n">2</b>) · <b class="n">6</b> movimentos — de Aquecimento de todos os dias (poucos às terças).</li><li>Goblet Squat (Agachamento): <b class="n">10</b> (mediana de <b class="n">1</b>) · p <b class="n">100%</b> — <b class="n">1</b> uso, recência <b class="n">1,00</b> (<b class="n">98</b> d).</li><li>Pigeon Pose (sem Agachamento livre — outro padrão): <b class="n">1</b>' (mediana de <b class="n">1</b>) · p <b class="n">50%</b> — <b class="n">1</b> uso, recência <b class="n">1,00</b> (<b class="n">98</b> d).</li><li>Couch Stretch (sem Agachamento livre — outro padrão): <b class="n">1</b>' (mediana de <b class="n">1</b>) · p <b class="n">100%</b> — <b class="n">1</b> uso, recência <b class="n">1,00</b> (<b class="n">98</b> d).</li></ol>
+    </div><div class="pblk green">
+      <div class="pblkHd"><span class="chip green">Cardio</span></div>
+      <div class="pex"><span class="q">30'</span><span class="nm">Run</span></div><div class="pact">
+        <button class="whyT" aria-expanded="false" aria-controls="b22" data-why>por quê <span class="car">▾</span></button>
+        
+        <span class="sp"></span>
+        <button class="btn xs" title="Outro bloco, sem mexer nos demais">↻ Outra</button>
+      </div>
+      <ol class="whyList" id="b22"><li class="lead">Cardio em <b class="n">1</b> de <b class="n">1</b> terças (<b class="n">100%</b>).</li><li>Estilo contínuo (<b class="n">3</b> de <b class="n">3</b>).</li><li><b class="n">30</b>' (mediana de <b class="n">3</b>) — de <b class="n">3</b> blocos de um movimento (todos os dias).</li><li>Run: p <b class="n">33%</b> — <b class="n">0</b> terças + <b class="n">2</b> outros × <b class="n">0,25</b>, recência <b class="n">1,00</b> (<b class="n">97</b> d).</li></ol>
+    </div><div class="banner note" role="status"><span class="bi" aria-hidden="true">ⓘ</span><div class="bt"><b>LPO</b> não foi sugerido — Sem histórico suficiente para gerar LPO.</div></div></div><div class="sticky"><button class="btn sm">Cancelar</button><button class="btn primary sm">Aplicar · 2 blocos</button></div></div></div>
+  </div>
+  <h2>6 · Aplicar e a etiqueta na sessão</h2>
+  <div class="note">Aplicar <b>troca</b> os blocos da sessão — como o Texto — e, se já houver blocos, pede confirmação mostrando o que se perde. Depois volta ao <b>Detalhado</b> com os blocos editáveis, e a sessão fica suja até <b>Salvar</b>. Ao salvar, ela guarda <code>session.suggestion</code> (motor, versão, semente, ajustes e o <b>texto sugerido</b>) em JSON, sem migração; o título ganha a etiqueta <b>✦ Sugerida</b>. É esse par — texto sugerido × sessão salva — que o <code>audit-suggest.mjs --edits</code> compara para medir quanto você edita.</div>
+  <div class="two">
+    <div class="card dlg"><div class="dlgHd">Aplicar a sugestão?</div><div class="dlgBd">Isto <b>substitui os blocos atuais</b> da sessão (no exemplo, 3) pelos <b>6 blocos sugeridos</b>. Você ainda precisa <b>Salvar</b> a sessão, e pode voltar atrás fechando o editor sem salvar.</div><div class="dlgBt"><button class="btn sm">Cancelar</button><button class="btn primary sm">Substituir blocos</button></div></div>
+    <div class="card dlg"><div class="dlgHd">Sessão salva</div><div class="titleRow"><b>Segunda-feira</b><span class="tag">Público</span><span class="tag sug">✦ Sugerida · motor v1</span></div><div class="dlgBd" style="padding-top:0">Etiqueta e texto sugerido ficam em <code>session.suggestion</code>. Editar os blocos depois <b>não apaga</b> a etiqueta — ela registra de onde a sessão partiu.</div></div>
+  </div>
+  <h2>7 · Estados dos controles</h2>
+  <div class="note">Padrão · hover · foco por teclado (<code>:focus-visible</code>, anel de 2px no <code>--accent</code>, nunca <code>outline:none</code> sem substituto) · selecionado · desativado. Não há estado de <b>carregando</b> nem de <b>erro</b>: o motor é uma função pura e síncrona (≈ 60 ms) sobre dados que o app já tem em memória.</div>
+  <div class="states">
+    <div><div class="clbl">Chip de ajuste</div><div class="selRow"><button class="sel">Padrão</button><button class="sel hov">Hover</button><button class="sel on">Selecionado</button><button class="sel s-focus">Foco</button><button class="sel dis" disabled>Desativado</button></div></div>
+    <div><div class="clbl">↻ Outra</div><div class="selRow"><button class="btn xs">Padrão</button><button class="btn xs hov">Hover</button><button class="btn xs s-focus">Foco</button><button class="btn xs s-disabled" disabled>Sem outra opção</button></div></div>
+    <div><div class="clbl">por quê</div><div class="selRow"><button class="whyT">fechado ▾</button><button class="whyT on">aberto ▾</button><button class="whyT s-focus">foco ▾</button></div></div>
+    <div><div class="clbl">Aplicar</div><div class="selRow"><button class="btn primary sm">Padrão</button><button class="btn primary sm s-focus">Foco</button><button class="btn primary sm s-disabled" disabled>Sem blocos</button></div></div>
+    <div><div class="clbl">Bloco da lista</div><div class="chkGrid"><label class="chk on"><input type="checkbox" checked><i class="dot blue"></i><span>Marcado</span></label><label class="chk"><input type="checkbox"><i class="dot green"></i><span>Opcional</span></label><label class="chk on s-focus"><input type="checkbox" checked><i class="dot amber"></i><span>Foco</span></label></div></div>
+  </div>
+  <h2>8 · Para você decidir</h2>
+  <div class="note">Nada abaixo está aprovado — é o que o desenho assume e você pode mudar antes de eu construir (#235).</div>
+  <ol class="ask">
+    <li><b>Aplicar substitui</b> todos os blocos (com confirmação quando já há blocos), como o Texto. A alternativa é <b>acrescentar</b> ao fim. Assumi substituir.</li>
+    <li><b>“por quê” em linha</b>, recolhido por bloco, em vez de uma gaveta lateral que mostra todos de uma vez. Em linha acompanha o bloco no celular; a gaveta compara melhor no desktop.</li>
+    <li><b>↻ Outra sessão</b> (botão dos ajustes) sorteia todos os blocos de novo; ↻ Outra de cada bloco muda um só. Ambos existem — o motor já suporta os dois.</li>
+    <li><b>Etiqueta “✦ Sugerida”</b> no título da sessão salva. Se preferir discreta (só no hover) ou sem etiqueta visível — o JSON guarda o mesmo.</li>
+    <li><b>Foco ×3</b> no Core e no WOD é um peso fixo (<code>PATTERN_FOCUS_WEIGHT = 3</code>), mostrado ao lado do campo. Só vale mudar se o backtest mostrar que 3 é fraco ou forte demais.</li>
+    <li><b>Lista de blocos</b> mostra a estrutura do box inteira (14 tipos) com os habituais marcados. Em vez disso, só os marcados mais “+ Adicionar bloco”?</li>
+  </ol>
+</div>
+<script>
+  const page = document.querySelector('.page')
+  document.getElementById('themebar').addEventListener('click', e => {
+    const b = e.target.closest('[data-t]'); if (!b) return
+    page.dataset.theme = b.dataset.t
+    document.querySelectorAll('#themebar .tbtn').forEach(x => x.classList.toggle('on', x === b))
+  })
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-why]'); if (!t) return
+    const open = !t.classList.contains('on')
+    t.classList.toggle('on', open); t.setAttribute('aria-expanded', open)
+    document.getElementById(t.getAttribute('aria-controls')).classList.toggle('open', open)
+  })
+  document.addEventListener('click', e => {
+    const s = e.target.closest('.sel:not(:disabled)'); if (!s) return
+    const row = s.parentElement
+    row.querySelectorAll('.sel').forEach(x => { x.classList.toggle('on', x === s); x.setAttribute('aria-pressed', x === s) })
+  })
+</script>
