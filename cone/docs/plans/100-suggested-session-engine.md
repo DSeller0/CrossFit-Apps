@@ -1,5 +1,40 @@
 # 100 — #233 · Suggested session, Phase 1: the statistical engine + a backtest audit
 
+> ✅ Done: `417b1dc` · 2026-11-05 — see BACKLOG.md · closes #233. Driven read-only against prod
+> (anon key) on 2026-11-05, on the final files.
+>
+> **Must-haves: 6/6 driven — 5 pass, 1 fails its gate.** (1) `node scripts/audit-suggest.mjs`
+> prints the main box's week of 08/11 — Mon 09/11 and Fri 13/11 among it — as Texto, each block
+> followed by its why (counts, shares, medians), `parse: 0 warnings` on every block of every box,
+> and the run ends with the main box's registry-miss list (445 movement names, 532 occurrences;
+> 60 structure names typed into name fields counted apart). (2) Two runs `cmp` byte-identical;
+> `--variant LPO=1` changes the two LPO blocks (LPO – Snatch, LPO – Jerk) of 29 and nothing else.
+> (3) `--week 2026-10-04`: one structure for the week, every day's blocks in its order, 0 %RM off the
+> 0/5 grid, 0 parse warnings (the script's `✔ checks` line, every box); Fri 09/10 → `5x3 Back Squat`
+> with Front Squat, Bench Press and Deadlift excluded and named. (4) A box id with no sessions → 0
+> blocks, `historyCount 0`, `thin: true`, "Nenhuma sessão no histórico deste box." — Garra's own id
+> lives in `locations`, which the anon key cannot read (RLS `0006`), so an id with no sessions stood
+> in; `index.test.js` pins the same path. (5) `--backtest` prints 73 day rows (66 scored, 7 thin);
+> 05/10: the same 6 types, the suggested order `Core>F>LPO>Ac>FT>Ca` (the intended one; the real day
+> was out of it), Back Squat with a top of 90 under Markov — `4x2 Back Squat 80/85/90/90%`, the
+> review's §4a example B to the character. The poison test is a unit test, live and backtest.
+> (6) **Fails:** the run-length rule picks exactly what Markov picks — Monday 7/17 both, 36/66 both —
+> and 05/10 stays Back Squat. The review's "2/2 at week 3" counted the 14/09–28/09 run whose ending
+> *is* 05/10; leakage-free only one such run precedes it. With an evidence threshold of 1, 05/10
+> becomes Front Squat (top 90) but a Tuesday is lost (35/66). The rule ships as specified (neutral
+> today; the next third Back Squat Monday will switch); keep / 1 / off is #240.
+>
+> **Backtest, before → after the run-length rule** (main lift, thin days out): Markov 36/66 (Seg 7/17 ·
+> Ter 9/17 · Qua 15/16 · Sex 5/16) → run-length 36/66 (the same, weekday by weekday); sensitivity
+> ≥ 1 run 35/66. All dimensions: block set 23% · order 41% · top ±5 55% · LPO family 55% · theme 50%
+> · movement overlap 25% · parse warnings 0 — [2026-11-05 report](../reviews/2026-11-05-suggest-backtest.md).
+> **`THIN_WEEKDAY_SESSIONS = 2`**: block-set Jaccard 0.36 and main lift 0/7 with 0–1 earlier sessions
+> on the weekday, against ≈ 0.8 and 71–77% at 2–9.
+>
+> `/code-review` (high) found 10; all fixed except a test for the empty-re-roll fallback — a
+> variant-0 block's own picks stay free for its re-roll, so no fixture reaches it; the guard stays.
+> Sibling filed: #239 (the text grammar's `RE_REST` reads "Rest-pause Bench Press" as a rest).
+
 *Planned 2026-10-04 (Opus). Execution: **Opus** — it defines a new statistical standard. Starts after
 #228 (plans/99) ships.*
 
