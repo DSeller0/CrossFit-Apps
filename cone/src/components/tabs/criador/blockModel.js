@@ -340,8 +340,11 @@ export function normalizeBlockInterval(b) {
 
 export const normalizeBlockIntervals = blocks => (blocks || []).map(normalizeBlockInterval)
 
-export function stationsCapStr(block) {
-  if (block.type !== 'Estações') return null
+// An Estações block's whole length in seconds — every station, every cycle, the rest between
+// cycles — or 0 when no station has a duration. stationsCapStr shows it; the suggested session's
+// class-length estimate (#233) counts it.
+export function stationsTotalSecs(block) {
+  if (block?.type !== 'Estações') return 0
   const parse = v => {
     if (!v) return 0
     const p = String(v).split(':')
@@ -349,10 +352,15 @@ export function stationsCapStr(block) {
   }
   const sts = block.stations || []
   const singleCycle = sts.reduce((s, st) => s + parse(st.duration), 0)
-  if (!singleCycle) return null
+  if (!singleCycle) return 0
   const repeat = block.stationRepeat || 1
-  const restBetween = parse(block.restBetweenCycles) * (repeat - 1)
-  const totalSec = singleCycle * repeat + restBetween
+  return singleCycle * repeat + parse(block.restBetweenCycles) * (repeat - 1)
+}
+
+export function stationsCapStr(block) {
+  if (block.type !== 'Estações') return null
+  const totalSec = stationsTotalSecs(block)
+  if (!totalSec) return null
   const m = Math.floor(totalSec / 60),
     s = totalSec % 60
   return s > 0 ? `Cap ${m}:${String(s).padStart(2, '0')}` : `Cap ${m}'`

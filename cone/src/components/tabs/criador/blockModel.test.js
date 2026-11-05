@@ -5,6 +5,7 @@ import {
   normalizeLegacyCardio,
   blockSummary,
   stationsCapStr,
+  stationsTotalSecs,
   loadBadgeStr,
   TYPE_CONFIG,
   normalizeGoal,
@@ -209,6 +210,20 @@ describe('blockSummary', () => {
       exercises: [{ name: 'Hang Clean' }],
     }
     expect(blockSummary(block)).toBe("3× · a cada 2' · 1 mov.")
+  })
+})
+
+describe('stationsTotalSecs', () => {
+  test('every station, every cycle, plus the rest between cycles — 0 when nothing is timed', () => {
+    const block = {
+      type: 'Estações',
+      stationRepeat: 2,
+      restBetweenCycles: '1:00',
+      stations: [{ duration: '4:00' }, { duration: '1:00', isRest: true }],
+    }
+    expect(stationsTotalSecs(block)).toBe(2 * 300 + 60)
+    expect(stationsTotalSecs({ type: 'Estações', stations: [{ duration: '' }] })).toBe(0)
+    expect(stationsTotalSecs({ type: 'For Time', duration: '15' })).toBe(0)
   })
 })
 

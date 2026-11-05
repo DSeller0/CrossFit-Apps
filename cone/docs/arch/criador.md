@@ -1,7 +1,8 @@
-# Criador — layout + text format
+# Criador — layout + text format + suggested session
 
 > Split out of `cone/CLAUDE.md` by [plans/95](../plans/95-claude-md-split.md) (#224, 2026-09-20) — the text is unchanged, only its location.
-> Criador layout (#58 / plans/37) and the text grammar (#92 / plans/36).
+> Criador layout (#58 / plans/37), the text grammar (#92 / plans/36) and the suggested-session
+> engine (#233 / plans/100).
 > ↩ back to [CLAUDE.md](../../CLAUDE.md)
 
 ---
@@ -278,3 +279,62 @@ refinements: [docs/plans/36](../plans/36-criador-text-mode.md).
   re-setting them, which is also why removing the line from the text removes the field.
   `audit-text-roundtrip.mjs` carries both in `normBlock` and an `interval-lost` class; before/after
   on 747 prod blocks: 543 identical, 30 rewritten, **0 unstable** both times, `interval-lost` 0.
+
+### Suggested session engine (#233 · plans/100)
+
+✦ Sugerido's engine is `criador/suggest/` — pure, React-free, the registry passed in (never
+`utils/storage`: it pulls the SPA Supabase client into the audit script and the gallery). Phase 3
+(#235) puts it behind a third editor mode; nothing in this folder writes anything.
+
+- **Module map.** `history.js` — what counts (scope: a box id or `SEM_BOX`, and a named box's
+  `location.historyFromUntagged.until`; public, no "teste"/"apagar"; strictly before the date, plus
+  the later days of the same Sunday-start week when live) and `readRow`/`readBlock` (volume typed
+  into a name is peeled through `parseExerciseLine`). `patterns.js` — the 8 patterns + modality;
+  `derivePattern` = keyword table → LPO category → `rootGroup` → category, `patternOf` honours
+  `entry.pattern` (#237). `stats.js` — `buildContext` reads the history once; every figure a why
+  names comes from here. `synth.js` — one generator per type + the pt-BR why. `rng.js` — FNV-1a over
+  `scope|date|blockType|variant` → mulberry32. `estimate.js` — a warning figure, never a trim.
+  `index.js` — `suggestSession`, `ENGINE_VERSION`, `THIN_WEEKDAY_SESSIONS`, `suggestionRecord` (the
+  `session.suggestion` snapshot). `testFixtures.js` — synthetic weeks for the suites (test-only).
+- **The rules in one paragraph.** A type joins a weekday on ≥ 50% of its sessions (plus the
+  weekday's commonest WOD type when no WOD type reaches 50% but most sessions hold one); the blocks
+  follow one canonical order per box (pairwise majority of the last 6 weeks of strength days, then
+  all history, then a default rank); parameters come from the exact type on that weekday; movements
+  are drawn by (same-weekday uses + ¼ other uses) × recency (1 − e^(−days/7), warm-up/mobility
+  excluded), no root twice in a block, no movement twice in the session; volume is the median per
+  round, else a chipper total ÷ rounds, rounded to the user's numbers; the main lift is once per
+  week, then run-length (§7c), then Markov, then frequency; LPO takes the family by weekday frequency
+  × family recency unless the learned Mon/Wed pair already placed it this week; the WOD carries the
+  day's family when the box does so on ≥ 50% of days; every %RM is snapped to the 0/5 grid.
+- 🔴 **`scripts/audit-suggest.mjs --backtest` is the yardstick for every rule.** Run it before and
+  after a change and keep both tables ([2026-11-05](../reviews/2026-11-05-suggest-backtest.md) is
+  the first). It replays every strength day on the sessions dated **strictly before** it — the
+  review's §7c "2/2 at week 3" was in-sample (it counted the run whose ending was the day being
+  predicted), and leakage-free the run-length rule as specified picks exactly what Markov picks.
+- ⚠️ **"↻ Outra" isolation is a generation order, not a seed.** Every block is built at variant 0
+  in `GEN_ORDER` (each avoiding the movements earlier blocks took); a re-rolled block is then rebuilt
+  against every OTHER block's final movements. A re-roll must never feed back into another block —
+  the WOD theme reads the day's LPO *family*, never the drills, for that reason.
+- ⚠️ **The canonical order is anchored on the week** (the window ends at the target's Sunday): a
+  window sliding with each date gave Monday and Thursday of one week two orders. A type the box never
+  used is *inserted* by the default rank, never scored — in a Copeland count it can flip two real
+  types.
+- ⚠️ **Lift identity is `baseLift`:** the shortest Força entry whose name runs inside the typed name
+  as whole tokens — Sumo/Banded/Deficit/Snatch Deadlift are Deadlift weeks, Back/Front/Overhead
+  Squat stay three lifts. An unresolved name keeps its spelling as identity (it still ends a run) and
+  is never suggested. A Markov tie goes to the latest transition **on that weekday**; breaking it by
+  a lift's last use anywhere let a Wednesday Deadlift outvote a Monday BS→BS (3 Monday hits).
+- ⚠️ **Since 19/10 the main lift sometimes sits in an EMOM** ("FRONT SQUAT · 5/5 70% · 3/3/3 90%").
+  A session without a Força block lends its first non-LPO block naming a Força lift with a %RM top,
+  both to the weekday's runs and to the once-per-week exclusion; `5/5`-style rows become sets × reps.
+- ⚠️ **Emitted text must re-parse with 0 warnings, so:** every name is a registry name
+  (`displayName` drops a parenthetical only when the short form resolves to the same entry); a
+  complex carries `sets: '1'` (with sets = step count `serializeExercise` writes the two-line form,
+  which reads back with `complex-detected`); a hold keeps ONE mark (`90"`, `2'` — `1'30"` reads as a
+  1-minute hold plus a name starting `30"`).
+- ⚠️ **Small reads that were wrong once:** an empty `pct` is no load (`dec('')` is 0 — it put a 0%
+  top into Bench Press); an `EMOM 12'` is per round though it has no rounds; a duration shorter than
+  interval × rounds is the pre-#228 interval notation and is dropped, never shown as a cap (and never
+  derived, #228); steady and interval Cardio are never mixed (the weekday's majority style decides).
+- ⚠️ **The anon key cannot read `locations`** (`0006`): the script finds boxes by session tags, unnamed,
+  and cannot see `historyFromUntagged`. Bump `ENGINE_VERSION` on any rule change — it is provenance.
