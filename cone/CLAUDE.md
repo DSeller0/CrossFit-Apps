@@ -179,6 +179,8 @@ here because every tab touches them.
 
 **Chunk hash 404 (GitHub Pages limitation):** After every CI deploy, lazy-loaded chunk filenames change. Old hashes 404 until users hard-refresh (Ctrl+Shift+R). GitHub Pages cannot set `Cache-Control: no-cache`. This is structural — do not re-diagnose, just document and tell the user to hard-refresh.
 
+**A green `Deploy to GitHub Pages` run does not mean the site is live** (#235, 2026-11-06). It only pushes the build to `gh-pages`; GitHub's own `pages-build-deployment` run then publishes it, and that run can fail (a transient HTTP 502 left the Sugerido editor unpublished for ~15 hours — the user cleared the cache and saw nothing). Docs-only follow-up commits rebuild byte-identical output, so nothing retriggers the publish. When "it doesn't show" **after** a hard refresh: `gh run list` for a failed `pages-build-deployment`, then `gh run rerun <id> --failed`; confirm by fetching the lazy chunk (`Criador-*.js` from `assets/index-*.js`) and grepping for a string from the change.
+
 **Lint + React-hooks policy** — the `react-refresh/only-export-components` exemptions and the
 react-hooks correctness conventions are in [docs/arch/code-policy.md](./docs/arch/code-policy.md).
 Both rule sets are at **zero**, so there is no floor left to ratchet: a new warning fails CI.
