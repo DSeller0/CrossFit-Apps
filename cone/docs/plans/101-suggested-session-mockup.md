@@ -3,8 +3,8 @@
 > ✅ Done: `1581458` · 2026-11-05 — see BACKLOG.md · closes #234. **Approved by the user on 2026-11-05,
 > as drawn** — the six open decisions in the card's section 8 stand (Aplicar replaces, with a confirm ·
 > "por quê" inline per block · "↻ Outra sessão" and the per-block ↻ Outra · the ✦ Sugerida tag visible
-> in the title · the ×3 weight shown · the block list shows the whole structure). The sync to Claude
-> Design (`/design-sync`) is the user's and has not been run from here.
+> in the title · the ×3 weight shown · the block list shows the whole structure). Synced to Claude Design
+> on 2026-11-06 (`/design-sync`, after the approval and the build of #235) — see plans/102.
 >
 > **Must-haves: 6/6 driven.** The card served over localhost and driven in Chromium. (1) 1280: the six
 > engine blocks for Monday 09/11, the por quê toggling (`aria-expanded` false → true, list `none` →

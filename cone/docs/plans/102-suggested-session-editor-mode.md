@@ -2,8 +2,9 @@
 
 > ✅ Done: `1c64ad0` · 2026-11-05 — see BACKLOG.md · closes #235. Driven on the local stack (SPA `:5173`,
 > Docker Desktop restarted, the local database a recent prod snapshot) and the gallery (`:5174`), on the
-> final files; a request logger on `fetch` counted every non-GET to `rest/v1`. The sync of the mockup to
-> Claude Design is still the user's `/design-sync`.
+> final files; a request logger on `fetch` counted every non-GET to `rest/v1`. Synced to Claude Design on
+> 2026-11-06 (`/design-sync`): `mockups/67-criador-sugerido.html` added, `components/criador.html`
+> replaced; nothing deleted.
 >
 > **Must-haves: 7/7 driven.** (1) A new Monday session of "Sem box" (09/11): ✦ Sugerido is the third
 > button, the pane lists the engine's six blocks, each with a por quê that opens (`hidden` → shown, 5
