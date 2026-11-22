@@ -52,7 +52,7 @@ Rules it established, all of which a future edit here must keep:
   for an `alert(); return` validation guard is inline text that names what is missing, not a dialog.
 - 🔴 **The clock rewrite and the decomposition are #191's, not this section's.** `Timer.jsx:139-152`
   documents its own state-model defect (*"pick ONE source of truth for the clock … Filed, not done"*) and
-  the file is **1237 raw lines** with **9** eslint disables (re-measured 2026-10-05; 1192 / 9 on 2026-09-06). Its mode precedence and its block → config mapping have tests since #228 (`timerMode.js`, `timerConfigFor`), but the **component** still has none. A design pass does not touch it.
+  the file is **1233 raw lines** with **9** eslint disables (re-measured 2026-11-22; 1237 / 9 on 2026-10-05, 1192 / 9 on 2026-09-06). Its mode precedence, its block → config mapping and its form ↔ config halves have tests (`timerMode.js`, `timerConfigFor`), but the **component** still has none. A design pass does not touch it.
 - **A Timer on every block, and one mode function (#228 · plans/99).** `schedule.html` offers a Timer on
   **every** block type (the right-hand actions column, like a WOD block — Leaderboard and the athlete section
   stay WOD-only), and `timerConfigFor(bl)` (`schedule/scheduleHelpers.js`) is the single block → config
@@ -67,6 +67,58 @@ Rules it established, all of which a future edit here must keep:
   counts up — to its Duração when it has one, as a stopwatch (LAP, until FIM) when it has none. ⚠️ The tick's
   vibration key is `${round}-${idx}-${phase}`: with one station and no rest `idx-phase` never changes, so
   without the round no turnover would ever buzz.
+- **What the Timer branches on — the mode, and two flags (#242 · plans/105).** The Timer reads **no**
+  `blockType ===` at run time: `timerMode(cfg)` plus the flags below are all it asks. `timerConfigFor` is
+  **the one place a block's type is read**, and it writes the answer onto the config:
+
+  | Where | What it decides | Read by |
+  |---|---|---|
+  | `timerMode(cfg)` | `'cycle'` > `'emom'` > `'amrap'` > `'up'` | everything |
+  | `cfg.rotate` | an interval **EMOM** with >1 movement: movement `round % n` is the active one (it wraps) | the running list's highlight (`subExOn`), the screen-reader announcement |
+  | `cfg.laps` | an interval **AMRAP**: it counts rounds, so it keeps **LAP** | `showLap`; the finish screen's `N ROUNDS` and REGISTRAR's prefill already read the splits |
+  | `cfg.loggable` | the block is a WOD type (`isWodBlock`) | REGISTRAR (below) |
+
+  Both flags exist **only on an interval config** (a plain EMOM/AMRAP has its own mode). A new "this block
+  type behaves differently" need is a **new flag decided in `timerConfigFor`**, never a type check in `Timer.jsx`.
+  The behaviours the modes drive: `doLap` ends a **count-up** (`'up'`) timer at its last round, whatever the
+  block's type (it was time blocks only, so a Força with `3 rounds` ran on to `RD 4/3`) — an AMRAP and a cycle
+  end on the clock, because their `rounds` is not a number of LAPs; the clock **warns at 85 % of what ends the
+  timer** — `cycleEnd(cfg)` in a cycle (an interval block's Duração is only a tag: `10 rounds · 40" on 20" off`
+  ends at 600 s whatever it says), the cap in `'up'`, the last 30 s of a countdown; `cycleEnd` is **`null`
+  whenever the product is 0** (a cycle with no stations — an Estações whose movements sit in `bl.exercises` —
+  used to finish at 00:00).
+- 🔑 **A "legacy" block has no cap (#242).** Before #228 a block had no `interval` field: `A cada 1'30" 3 Sets`
+  stayed in its notes and the text parser wrote the **nearest whole minute** into Duração
+  (`max(1, round(every / 60))`, `textFormat.js` at `4edc639`) — and #228 made Duração a real cap, so the timer
+  stopped such a block after one interval. `timerConfigFor`'s `isLegacyEveryCap`: no valid `interval` ∧ not
+  Estações ∧ not an AMRAP ∧ a note/label interval (`noteEverySecs`, `lib/wod.js` — a **mirror** of
+  `textFormat.js:223-237`, not an import, since the timer is a public page; `wod.test.js` feeds both readers the
+  same 21 spellings, so a grammar change there fails a test here) ∧ **Duração equals that rounded interval** →
+  `timeCap: null`, `rounds` stays. ⚠️ **Anything else keeps its cap**: `E2MOM` with Duração 12 and `A cada 3'` ×
+  5 rounds with Duração 15 are real totals — and an **AMRAP always keeps its Duração**, because it counts *down*
+  from it (no cap is a clock stuck at 00:00 that never ends). A plain EMOM with no cap runs until FIM and shows
+  `MIN n` with no total. Running the legacy note as a real interval timer is deliberately not done (it would
+  change every old block, and none is current). Prod, 2026-11-22: **10 blocks** (EMOM 5 · LPO 4 · Skill 1).
+  `timeCap` keeps **decimals** (`parseFloat`, comma accepted — prod has 2.3); `fit` rounds to whole seconds
+  first (`2.3 × 60` is `137.99999999999997`).
+- 🔴 **The setup form ↔ config round trip is a contract (#242).** `formFromCfg(cfg)` / `cfgFromForm(form, base)`
+  (`timer/timerMode.js`, pure, tested) replaced a seed and a build that disagreed: the seed turned a capless
+  config's blank cap into `20` (`?? 20`) and the build dropped `intervalMode`/`loggable`/the flags, so a form
+  nobody touched ran a **different timer** than the block's. Now `cfgFromForm(formFromCfg(cfg), cfg)` deep-equals
+  `cfg` — blank cap is `''` and builds `null`, `rounds: '3'` stays the string, the session/block ids and the flags
+  survive. A field the user didn't change keeps the config's value verbatim; **changing the type or the movements
+  rebuilds from the form** (string lines, ids nulled, `loggable` recomputed with `isWodBlock`, no
+  `intervalMode`) — "changed" means the trimmed, blank-free lines differ, so a stray space is not an edit. ⚠️ That
+  is the plan's rule and a real trade-off: fixing one movement's name on an interval block's setup form turns it
+  into a plain timer. The one exception to "blank is no cap": a mode that counts **down** from it (AMRAP, a plain
+  EMOM) takes `20` for a blanked cap — decided by the config's **mode**, not its type, so an interval EMOM (a cycle
+  whose Duração is only a tag) stays capless. An interval config's form lists its movements, not the pseudo-station's name;
+  Estações lists one line per station. `selectBenchmark` keeps `bm.duration || 20` (a benchmark has a real cap).
+  `exLabel` moved into `timerMode.js` and renders through `exVolStr` (distance first), and `timerExs` passes
+  `dist`/`distUnit` and trims the name — `400m Run` was `Run`, a `'  '` row reached the timer. `timerConfigFor`
+  also never lets the `-` placeholder label through (falls back to the type, then `WOD`) and reads Estações'
+  rounds as `stationRepeat` first, as `BlockDetail` and `stationsCapMins` do — and **only** Estações: a count-up
+  timer ends at its last LAP now, so a stale `stationRepeat` on any other block would be a hidden lap limit.
 - ⚠️ **REGISTRAR needs `cfg.loggable !== false`** — on the finished screen and on history rows (`pushHist`
   stores the flag). `timerConfigFor` sets `loggable: isWodBlock(bl)`; REGISTRAR opens `doOpenLog`, which only
   knows WOD blocks, so a Força timer must offer FECHAR. It is `!== false`, **not** truthiness: a config saved

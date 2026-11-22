@@ -1,4 +1,10 @@
-import { groupProgressionSteps, progressionGroupUnit, isWodBlock, intervalOf } from '../lib/wod.js'
+import {
+  groupProgressionSteps,
+  progressionGroupUnit,
+  isWodBlock,
+  intervalOf,
+  noteEverySecs,
+} from '../lib/wod.js'
 import { normExName } from '../lib/registry.js'
 
 // Shared by Schedule.jsx and its extracted schedule/ components (#17) — one
@@ -67,6 +73,15 @@ export function parseDurMins(d) {
 //
 // `loggable` is whether the timer's REGISTRAR may offer to log a result. Only a WOD block can be
 // logged — `doOpenLog` on schedule.html knows no other — so a Força timer must not offer it.
+//
+// What a block MEANS beyond its mode rides on the config as flags (#242) — THIS is the one place the
+// block's type is read, and `timerMode`'s three other modes plus these two flags are all the Timer
+// branches on (see timer/timerMode.js):
+//
+//   rotate  an interval EMOM with several movements — one per round, as a plain EMOM rotates per minute
+//   laps    an interval AMRAP — it counts rounds, so it keeps LAP
+//
+// And one rule about Duração: a LEGACY block has none to speak of (`isLegacyEveryCap`).
 const timerExName = e =>
   e.isComplex
     ? e.name ||
@@ -75,20 +90,57 @@ const timerExName = e =>
         .filter(Boolean)
         .join(' + ')
     : e.name
+// The name is trimmed and a blank one drops the row, so a `'  '` row — or a complex with no
+// movements — never reaches the timer. `dist`/`distUnit` ride along: `400m Run` was `Run` (#242).
 const timerExs = exs =>
   (exs || [])
-    .filter(e => e.name || e.isComplex)
-    .map(e => ({ name: timerExName(e), sets: e.sets, reps: e.reps }))
+    .map(e => ({
+      name: String(timerExName(e) ?? '').trim(),
+      sets: e.sets,
+      reps: e.reps,
+      dist: e.dist,
+      distUnit: e.distUnit,
+    }))
+    .filter(e => e.name)
+
+// Duração in minutes, decimals kept (prod has 2.3) — or null. `parseInt` truncated it, so EMOM
+// 01:30 × Duração 7.5 was four rounds, not five (#242).
+const capMins = d => {
+  const n = parseFloat(String(d ?? '').replace(',', '.'))
+  return n > 0 ? n : null
+}
+
+// A block from before #228 has no `interval` field: "A cada 1'30" 3 Sets" lives in its notes, and
+// the text parser wrote the NEAREST WHOLE MINUTE into Duração — `max(1, round(every / 60))`
+// (textFormat.js at 4edc639). #228 made Duração a real cap, so the timer read that rounded figure
+// as one and stopped the block after a single interval (#242): rounds 3 · A cada 1'30" · Duração 2
+// ended at 2:00 of a 4:30 block.
+//
+// So a block is legacy only when Duração IS that rounded interval. ⚠️ Anything else is a real total
+// and keeps its cap — `E2MOM` with Duração 12 is a 12-minute block, and so is `A cada 3'` × 5 rounds
+// with Duração 15. Estações times itself station by station, and a block with a real interval
+// carries its own rounds, so neither is ever legacy — nor is an AMRAP, which counts DOWN from its
+// Duração: with none the clock would sit at 00:00 for good, so it keeps the rounded one it always had.
+// Running the note as a real interval timer is deliberately NOT done: it would change every old
+// block's behaviour, and none of them is current.
+function isLegacyEveryCap(bl, cap) {
+  if (!cap || bl.type === 'Estações' || bl.type === 'AMRAP' || intervalOf(bl)) return false
+  const every = noteEverySecs(bl.notes) ?? noteEverySecs(bl.label)
+  return every != null && cap === Math.max(1, Math.round(every / 60))
+}
+
+// The placeholder label `-` is no name (blkLabel in lib/wod.js draws the same line).
+const realName = s => (s && s !== '-' ? s : '')
 
 export function timerConfigFor(bl) {
+  const cap = capMins(bl.duration)
   const base = {
     blockType: bl.type || bl.label,
-    blockLabel:
-      bl.label && bl.label !== bl.type && bl.label !== '-'
-        ? bl.label
-        : bl.label || bl.type || 'WOD',
-    timeCap: bl.duration ? parseInt(bl.duration) : null,
-    rounds: bl.rounds || bl.stationRepeat || null,
+    blockLabel: realName(bl.label) || realName(bl.type) || 'WOD',
+    timeCap: isLegacyEveryCap(bl, cap) ? null : cap,
+    // `stationRepeat` is Estações' own (its branch below): a count-up timer ends at its last LAP, so
+    // a stale one on a block converted from Estações would be a hidden lap limit.
+    rounds: bl.rounds || null,
     blockId: bl.id,
     countdown: true,
     loggable: isWodBlock(bl),
@@ -99,6 +151,8 @@ export function timerConfigFor(bl) {
     const rest = (bl.stations || []).filter(st => st.isRest)
     return {
       ...base,
+      // stationRepeat first, as BlockDetail and stationsCapMins read it (#242)
+      rounds: bl.stationRepeat || bl.rounds || null,
       exercises: nonRest.map(st => ({
         name: st.name || 'Grupo',
         exercises: timerExs(st.exercises),
@@ -111,7 +165,8 @@ export function timerConfigFor(bl) {
   const exercises = timerExs(bl.exercises)
   const iv = intervalOf(bl)
   if (iv) {
-    const fit = Math.floor(((base.timeCap || 0) * 60) / iv.every)
+    // whole seconds first: 2.3 min × 60 is 137.99999999999997 in floating point
+    const fit = Math.floor(Math.round((base.timeCap || 0) * 60) / iv.every)
     return {
       ...base,
       intervalMode: true,
@@ -119,6 +174,8 @@ export function timerConfigFor(bl) {
       stationTime: iv.work ?? iv.every,
       transitionTime: iv.rest ?? 0,
       rounds: Number(bl.rounds) > 0 ? Number(bl.rounds) : fit > 0 ? fit : null,
+      rotate: base.blockType === 'EMOM' && exercises.length > 1,
+      laps: base.blockType === 'AMRAP',
     }
   }
   return { ...base, exercises, stationTime: 45, transitionTime: 15 }

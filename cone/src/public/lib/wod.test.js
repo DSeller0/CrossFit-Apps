@@ -7,6 +7,8 @@ import {
   fmtPrime,
   intervalOf,
   intervalStr,
+  intervalSecsStr,
+  noteEverySecs,
   intervalTotal,
   blkMetaParts,
   maskMMSS,
@@ -23,6 +25,7 @@ import {
   BLOCK_FAMILY,
 } from './wod.js'
 import { ALL_CATEGORIES } from './exerciseGroups.js'
+import { parseStructure } from '../../components/tabs/criador/textFormat.js'
 
 // #98 — BLOCK_FAMILY is a hand-authored presentation map (block color family), not
 // derived from ALL_CATEGORIES. It legitimately carries a 16th key, 'WOD' (a block
@@ -392,6 +395,113 @@ describe('intervalStr', () => {
     expect(intervalStr({ type: 'Força' })).toBe('')
     expect(intervalStr({ type: 'Estações', interval: '02:00' })).toBe('')
   })
+})
+
+// #242 — the Timer's ready screen holds seconds, not a block; it used to format them to mm:ss only
+// so that intervalStr could parse them straight back.
+describe('intervalSecsStr', () => {
+  test('is intervalStr without the round trip through a block', () => {
+    expect(intervalSecsStr({ every: 120 })).toBe("a cada 2'")
+    expect(intervalSecsStr({ every: 90 })).toBe('a cada 1\'30"')
+    expect(intervalSecsStr({ every: 60, work: 40 })).toBe('40" on / 20" off')
+  })
+
+  test('agrees with intervalStr on every block shape', () => {
+    for (const bl of [
+      { type: 'Força', interval: '02:00' },
+      { type: 'LPO', interval: '01:30' },
+      { type: 'Core', interval: '01:00', work: '00:40' },
+      { type: 'Core', interval: '01:00', work: '01:30' },
+    ])
+      expect(intervalSecsStr(intervalOf(bl)), JSON.stringify(bl)).toBe(intervalStr(bl))
+  })
+
+  test('a work time at or past the interval is no split; nothing to say → empty', () => {
+    expect(intervalSecsStr({ every: 60, work: 60 })).toBe("a cada 1'")
+    expect(intervalSecsStr(null)).toBe('')
+    expect(intervalSecsStr({ every: 0 })).toBe('')
+  })
+})
+
+// #242 — the "A cada" a pre-#228 block kept ONLY in its notes. Mirrors textFormat.js:223-237 (an SPA
+// module the public timer must not import), so each row is a spelling that file reads.
+describe('noteEverySecs', () => {
+  test("minutes, minutes + seconds, and the typo'd marks", () => {
+    expect(noteEverySecs("A cada 2'")).toBe(120)
+    expect(noteEverySecs('A cada 1\'30"')).toBe(90)
+    expect(noteEverySecs("A cada 1'10''")).toBe(70)
+    expect(noteEverySecs("A cada 3'30 executar um set")).toBe(210)
+    expect(noteEverySecs("A cada 3''30\"")).toBe(210)
+    expect(noteEverySecs('A cada 1:20')).toBe(80)
+  })
+
+  test('seconds, and the English spelling', () => {
+    expect(noteEverySecs('every 90"')).toBe(90)
+    expect(noteEverySecs("x Every 2' x 5 sets")).toBe(120)
+    expect(noteEverySecs('A cada 40"')).toBe(40)
+  })
+
+  test('curly quotes and a note that carries more than the interval', () => {
+    expect(noteEverySecs('A cada 3’ somar 45 C&J no total')).toBe(180)
+    expect(noteEverySecs('(A cada 3’30 executar um set)')).toBe(210)
+    expect(noteEverySecs('Executar um set a cada 1’30”.')).toBe(90)
+  })
+
+  test('the number written as a word', () => {
+    expect(noteEverySecs('Executar um set a cada dois minutos.')).toBe(120)
+    expect(noteEverySecs('a cada três minutos')).toBe(180)
+  })
+
+  test('E2MOM / E3MOM is every N minutes', () => {
+    expect(noteEverySecs('E2MOM')).toBe(120)
+    expect(noteEverySecs('e3mom 4 sets')).toBe(180)
+  })
+
+  test("a spaced bare number is the NEXT token, not seconds — `A cada 2' 7 Sets` is 2 minutes", () => {
+    expect(noteEverySecs("A cada 2' 7 Sets")).toBe(120)
+  })
+
+  test('no interval → null (a cada round / a cada minuto are not an interval)', () => {
+    expect(noteEverySecs('')).toBeNull()
+    expect(noteEverySecs(undefined)).toBeNull()
+    expect(noteEverySecs('A cada round 35 Du')).toBeNull()
+    expect(noteEverySecs('A cada minuto do relógio 5 Burpees')).toBeNull()
+    expect(noteEverySecs('* a cada rounds 200m Run')).toBeNull()
+    expect(noteEverySecs('Executar cada movimento')).toBeNull()
+  })
+})
+
+// The drift guard for the mirror: every spelling below is fed to BOTH readers, so a grammar change in
+// textFormat.js that this copy misses fails here instead of silently capping a legacy block again.
+// ⚠️ A test may import the SPA module; the public page must not (that is the whole reason for the copy).
+describe('noteEverySecs agrees with textFormat.js', () => {
+  const spellings = [
+    "A cada 2'",
+    'A cada 1\'30"',
+    "A cada 1'10''",
+    "A cada 3'30 executar um set",
+    "A cada 3''30\"",
+    'A cada 1:20',
+    'A cada 40"',
+    "x Every 2' x 5 sets",
+    'every 90"',
+    'A cada 3’ somar 45 C&J no total',
+    'Executar um set a cada 1’30”.',
+    'Executar um set a cada dois minutos.',
+    'a cada três minutos',
+    "A cada 2' 7 Sets",
+    'A cada 2\' 30"',
+    'E2MOM',
+    'e3mom 4 sets',
+    'A cada round 35 Du',
+    'A cada minuto do relógio 5 Burpees',
+    'Executar cada movimento',
+    '',
+  ]
+  for (const s of spellings)
+    test(JSON.stringify(s), () => {
+      expect(noteEverySecs(s)).toBe(parseStructure(s).everySecs)
+    })
 })
 
 describe('intervalTotal', () => {

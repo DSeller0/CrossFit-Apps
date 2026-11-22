@@ -152,13 +152,56 @@ export function intervalTotal(bl) {
   return iv && rounds > 0 ? iv.every * rounds : 0
 }
 
-// `a cada 2'` · `40" on / 20" off` · '' — the display form. Texto's own is textFormat.js's.
+// `a cada 2'` · `40" on / 20" off` · '' — the display form, from an interval already in seconds
+// (`intervalOf`'s shape, or any `{ every, work }`). The Timer's ready screen holds the cycle as
+// seconds, not as a block, and used to format them to mm:ss only so `intervalStr` could parse them
+// straight back (#242). A work time at or past `every` is no split, as in `intervalOf`.
+export function intervalSecsStr(iv) {
+  const every = Number(iv?.every)
+  if (!(every > 0)) return ''
+  const work = Number(iv.work)
+  return work > 0 && work < every
+    ? `${fmtPrime(work)} on / ${fmtPrime(every - work)} off`
+    : `a cada ${fmtPrime(every)}`
+}
+
+// The same, from a block. Texto's own notation is textFormat.js's.
 export function intervalStr(bl) {
-  const iv = intervalOf(bl)
-  if (!iv) return ''
-  return iv.work
-    ? `${fmtPrime(iv.work)} on / ${fmtPrime(iv.rest)} off`
-    : `a cada ${fmtPrime(iv.every)}`
+  return intervalSecsStr(intervalOf(bl))
+}
+
+// The "A cada" a pre-#228 block kept ONLY in its notes, in seconds — or null. Before #228 a block had
+// no interval field: `A cada 1'30" 3 Sets` stayed a note, and the parser wrote the nearest whole
+// minute into Duração. The Timer reads this to tell that rounded figure from a real cap (#242).
+//
+// ⚠️ A MIRROR of textFormat.js:223-237 (RE_EVERY / RE_EVERY_WORDS / RE_EN_MOM and DUR_MIN/DUR_SEC),
+// not an import: that file is an SPA module, and this one is loaded by the public pages. If Texto's
+// reading of an interval changes, change this with it. Not mirrored: the on/off pair (a legacy block
+// never had one) and `A cada minuto` (a number word is needed, as there).
+const NOTE_DUR_MIN = `\\d+(?:\\s*'(?!')|\\s*''(?=\\d)|:)(?:\\s*\\d{1,2}\\s*(?:"|'')|\\d{2}(?![\\d'":]))?`
+const NOTE_DUR_SEC = `\\d+\\s*(?:"|'')`
+const RE_NOTE_EVERY = new RegExp(`\\b(?:a\\s+cada|every)\\s+(${NOTE_DUR_MIN}|${NOTE_DUR_SEC})`, 'i')
+const RE_NOTE_EVERY_WORDS =
+  /\b(?:a\s+cada|every)\s+(um|dois|tr[êe]s|quatro|cinco|seis)\s+minutos?\b/i
+const NOTE_WORD_MINS = { um: 1, dois: 2, tres: 3, três: 3, quatro: 4, cinco: 5, seis: 6 }
+const RE_NOTE_EN_MOM = /\be(\d+)mom\b/i
+// (`\s` already folds the NBSP that textFormat.js's normLine spells out.)
+export function noteEverySecs(text) {
+  const s = String(text ?? '')
+    .replace(/[‘’ʼ′´]/g, "'")
+    .replace(/[“”″]/g, '"')
+    .replace(/\s+/g, ' ')
+  let m = s.match(RE_NOTE_EVERY)
+  if (m) {
+    const t = m[1].replace(/\s+/g, '')
+    let p
+    if ((p = t.match(/^(\d+)(?:"|'')$/))) return +p[1]
+    if ((p = t.match(/^(\d+)(?:'{1,2}|:)(\d{1,2})?(?:"|'')?$/))) return +p[1] * 60 + +(p[2] || 0)
+    return null
+  }
+  if ((m = s.match(RE_NOTE_EVERY_WORDS))) return NOTE_WORD_MINS[m[1].toLowerCase()] * 60
+  if ((m = s.match(RE_NOTE_EN_MOM))) return +m[1] * 60
+  return null
 }
 
 // Block-meta "rounds · interval · CAP" fragment — rounds-first, full word "rounds", "CAP"

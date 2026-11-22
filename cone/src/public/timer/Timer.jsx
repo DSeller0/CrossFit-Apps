@@ -4,8 +4,8 @@ import Nav from '../Nav.jsx'
 import { sb } from '../supabaseClient.js'
 import BlockTypePicker from './BlockTypePicker.jsx'
 import { benchmarkToTimerExes } from '../lib/benchmarks.js'
-import { fmtSecs, fmtPrime, intervalStr, isTimeBlock, MODE_LBL, maskMMSS } from '../lib/wod.js'
-import { timerMode, cycleOf, cycleEnd } from './timerMode.js'
+import { fmtSecs, fmtPrime, intervalSecsStr, MODE_LBL, maskMMSS } from '../lib/wod.js'
+import { timerMode, cycleOf, cycleEnd, exLabel, formFromCfg, cfgFromForm } from './timerMode.js'
 import { fmtDate, todayISO } from '../lib/week.js'
 import { getBoxScope } from '../lib/boxScope.js'
 import { syncTheme } from '../lib/theme.js'
@@ -21,13 +21,10 @@ const RING_R = 85,
 function fmt(sec) {
   return fmtSecs(Math.max(0, Math.floor(sec)))
 }
-function exLabel(ex) {
-  if (typeof ex === 'string') return ex
-  const v = []
-  if (ex.sets && ex.sets > 1) v.push(ex.sets + 'x')
-  if (ex.reps) v.push(ex.reps + ' reps')
-  if (ex.load) v.push(ex.load + (ex.unit || 'kg'))
-  return [ex.name || '', v.join(' ')].filter(Boolean).join(' · ')
+// A cap in minutes as the header's tag: 12 → 12:00, and 7.5 → 7:30 (a Duração may carry decimals).
+function capClock(mins) {
+  const total = Math.round(mins * 60)
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
 }
 
 // ── localStorage ──────────────────────────────────────────────────────────
@@ -108,17 +105,9 @@ export default function Timer() {
   const [getreadySecs, setGetreadySecs] = useState(10)
   const [showTypePicker, setShowTypePicker] = useState(false)
 
-  const [form, setForm] = useState(() => ({
-    type: initCfg.blockType || 'For Time',
-    cap: initCfg.timeCap ?? 20,
-    rounds: initCfg.rounds ?? '',
-    label: initCfg.blockLabel || '',
-    exes: (initCfg.exercises || []).map(exLabel).join('\n'),
-    st: initCfg.stationTime ?? 45,
-    tt: initCfg.transitionTime ?? 15,
-    goal: initCfg.goal ?? '',
-    countdown: initCfg.countdown ?? true,
-  }))
+  // Seeded and built back through the two pure halves in timerMode.js: a form nobody touched
+  // returns the config it was seeded from, so INICIAR runs the block's own timer (#242).
+  const [form, setForm] = useState(() => formFromCfg(initCfg))
 
   // Timing refs
   const startEpoch = useRef(initSaved?.startEpoch ?? 0)
@@ -438,10 +427,13 @@ export default function Timer() {
   function doLap() {
     if (statusRef.current !== 'running') return
     const e = elapsedRaw(),
-      bt = cfgRef.current?.blockType
+      c = cfgRef.current
     const newSplits = [...splitsRef.current, e]
     splitsRef.current = newSplits
-    if (cfgRef.current?.rounds && newSplits.length >= cfgRef.current.rounds && isTimeBlock(bt)) {
+    // The last of a counted round ends a count-up block, whatever its type — it used to be only a
+    // time block's, so a Força with `3 rounds` ran on to `RD 4/3` (#242). A countdown (AMRAP) and a
+    // cycle end on the clock instead: their `rounds` is not a number of LAPs to reach.
+    if (c?.rounds && newSplits.length >= c.rounds && timerMode(c) === 'up') {
       doFinishRaw()
       return
     }
@@ -520,26 +512,7 @@ export default function Timer() {
   }
 
   function applyCfg() {
-    const stVal = form.st === '' ? 45 : Number(form.st)
-    const ttVal = form.tt === '' ? 15 : Number(form.tt)
-    const newCfg = {
-      blockType: form.type,
-      blockLabel: form.label.trim(),
-      timeCap: parseInt(form.cap) || 20,
-      rounds: parseInt(form.rounds) || null,
-      exercises: String(form.exes)
-        .split('\n')
-        .map(l => l.trim())
-        .filter(Boolean),
-      stationTime: isNaN(stVal) ? 45 : stVal,
-      transitionTime: isNaN(ttVal) ? 15 : ttVal,
-      sessionId: null,
-      sessionDate: null,
-      athleteId: null,
-      blockId: null,
-      goal: form.goal?.trim() || '',
-      countdown: form.countdown ?? true,
-    }
+    const newCfg = cfgFromForm(form, cfgRef.current)
     try {
       localStorage.setItem(K_CFG, JSON.stringify(newCfg))
     } catch {
@@ -593,6 +566,12 @@ export default function Timer() {
   // stations — and only has a work/rest split when its transition time is more than 0.
   const isInterval = !!cfg.intervalMode
   const intervalRests = isInterval && (cfg.transitionTime ?? 0) > 0
+  // A rotating interval EMOM (`cfg.rotate`, decided by timerConfigFor): the pseudo-station's own
+  // movements take the round in turn — movement `round % n` is the active one, and it wraps. `round`
+  // is stInfoRaw's, 0-based; -1 is no movement (not rotating, or only one to rotate to).
+  const rotateList = (cfg.rotate && exes[0]?.exercises) || []
+  const rotatingIdx = round => (rotateList.length > 1 ? round % rotateList.length : -1)
+  const rotatingMove = round => rotateList[rotatingIdx(round)]?.name || ''
 
   function getDisplay() {
     if (mode === 'amrap') return Math.max(0, cap - e)
@@ -614,10 +593,14 @@ export default function Timer() {
     return ringColorRaw(e, cfg)
   }
 
+  // The clock warns at 85% of whatever ENDS the timer: a cycle's own end (an interval block's cap is
+  // only a tag — `10 rounds · 40" on 20" off` ends at 600 s whatever its Duração says), a count-up's
+  // cap, and the last 30 s of a countdown. Read off the mode, never the block's type (#242).
+  const warnAt = mode === 'cycle' ? cycleEnd(cfg) : mode === 'up' && cap ? cap : null
   let clockCls = s.clock
   if (isPaused) clockCls += ' ' + s.paused
   else if (mode === 'amrap' && disp <= 30) clockCls += ' ' + s.warn
-  else if (isTimeBlock(bt) && cap && e >= cap * 0.85) clockCls += ' ' + s.warn
+  else if (warnAt && e >= warnAt * 0.85) clockCls += ' ' + s.warn
 
   // ── Screen-reader announcement (#174/plans/86, review H5) ─────────────────
   // 🔴 The clock itself must NEVER be a live region: it ticks every 250ms, so
@@ -652,7 +635,10 @@ export default function Timer() {
             ? ', trabalho'
             : ', descanso'
           : ''
-        return `Round ${round + 1}${total}${phase}`
+        // A rotating EMOM names the movement that came up — the highlight alone is invisible to a
+        // screen reader. It changes only at a round boundary, like everything else here.
+        const move = cfg.rotate ? rotatingMove(round) : ''
+        return `Round ${round + 1}${total}${phase}${move ? `, ${move}` : ''}`
       }
       return `Estação ${idx + 1} de ${exes.length}, round ${round + 1}`
     }
@@ -701,12 +687,15 @@ export default function Timer() {
     let lbl,
       roundJsx = null
     if (mode === 'emom') {
+      // No total when there is no cap (a legacy "A cada" EMOM runs uncapped, #242), and a whole
+      // number of minutes when the cap has decimals.
       const min = Math.floor(e / 60),
-        total = cfg.timeCap || 0
+        total = cfg.timeCap ? Math.ceil(cfg.timeCap) : 0
       lbl = isPaused ? 'pausado' : 'até o próximo'
       roundJsx = (
         <div className={s.round}>
-          MIN {min + 1} / {total}
+          MIN {min + 1}
+          {total ? ` / ${total}` : ''}
         </div>
       )
     } else if (mode === 'cycle') {
@@ -763,7 +752,7 @@ export default function Timer() {
   }
 
   function renderHdr(showCap = true) {
-    const capStr = cfg.timeCap ? `${cfg.timeCap}:00` : ''
+    const capStr = cfg.timeCap ? capClock(cfg.timeCap) : ''
     return (
       <div className={s.hdr}>
         <div className={s.hdrMid}>
@@ -1045,12 +1034,12 @@ export default function Timer() {
     const metaParts = [
       cfg.timeCap ? `${cfg.timeCap} min` : '',
       cfg.rounds ? `${cfg.rounds} rounds` : '',
-      isInterval
-        ? intervalStr({ interval: fmtSecs(st + tt), work: tt > 0 ? fmtSecs(st) : '' })
-        : '',
+      isInterval ? intervalSecsStr({ every: st + tt, work: tt > 0 ? st : null }) : '',
       cycleTotal ? `total ${fmtPrime(cycleTotal)}` : '',
       cfg.goal ? `Meta: ${cfg.goal}` : '',
-      bt === 'Estações' ? `${cfg.stationTime ?? 45}s / ${cfg.transitionTime ?? 15}s transição` : '',
+      mode === 'cycle' && !isInterval
+        ? `${cfg.stationTime ?? 45}s / ${cfg.transitionTime ?? 15}s transição`
+        : '',
     ].filter(Boolean)
     return (
       <div className={s.wrap}>
@@ -1157,7 +1146,9 @@ export default function Timer() {
   }
 
   // Running / Paused screen
-  const showLap = mode === 'up' || mode === 'amrap'
+  // LAP counts rounds: the count-up and countdown modes always, and a cycle that stands for an AMRAP
+  // (`cfg.laps`, decided by timerConfigFor) — it lost the button when it became an interval (#242).
+  const showLap = mode === 'up' || mode === 'amrap' || !!cfg.laps
   return (
     <div className={s.wrap}>
       {renderHdr()}
@@ -1200,11 +1191,16 @@ export default function Timer() {
           )}
           {exes.map((ex, i) => {
             let exCls = s.ex
+            // The active movement of a rotating interval EMOM — only while it is working, like the
+            // station itself.
+            let onSub = -1
             if (mode === 'cycle') {
-              const { idx } = stInfoRaw(e, cfg),
+              const { idx, round } = stInfoRaw(e, cfg),
                 phase = stPhaseRaw(e, cfg)
-              if (i === idx && phase === 'work') exCls += ' ' + s.exActive
-              else if (i < idx) exCls += ' ' + s.exDone
+              if (i === idx && phase === 'work') {
+                exCls += ' ' + s.exActive
+                onSub = rotatingIdx(round)
+              } else if (i < idx) exCls += ' ' + s.exDone
             } else if (mode === 'emom' && exes.length > 0) {
               const curIdx = Math.floor(e / 60) % exes.length
               if (i === curIdx) exCls += ' ' + s.exActive
@@ -1218,7 +1214,7 @@ export default function Timer() {
                   {mode === 'cycle' && ex.exercises?.length > 0 && (
                     <div>
                       {ex.exercises.map((se, j) => (
-                        <div key={j} className={s.subEx}>
+                        <div key={j} className={j === onSub ? `${s.subEx} ${s.subExOn}` : s.subEx}>
                           {exLabel(se)}
                         </div>
                       ))}

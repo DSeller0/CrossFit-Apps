@@ -401,17 +401,245 @@ describe('timerConfigFor', () => {
     expect(cfg.exercises.map(e => e.name)).toEqual(['Back Squat', 'Hang Clean + Push Jerk'])
   })
 
+  // #242 (review #3) — this test was titled "does not" and asserted `.toBe('-')`: the placeholder
+  // reached the timer header, the ready title and the history row.
   test('a custom label wins, and the placeholder "-" does not', () => {
     expect(timerConfigFor({ type: 'Força', label: 'Agacho pesado' }).blockLabel).toBe(
       'Agacho pesado',
     )
     expect(timerConfigFor({ type: 'Força', label: 'Força' }).blockLabel).toBe('Força')
-    expect(timerConfigFor({ type: 'Força', label: '-' }).blockLabel).toBe('-')
+    expect(timerConfigFor({ type: 'Força', label: '-' }).blockLabel).toBe('Força')
     expect(timerConfigFor({ type: 'Força' }).blockLabel).toBe('Força')
+    expect(timerConfigFor({ type: '-', label: '-' }).blockLabel).toBe('WOD')
+    expect(timerConfigFor({ label: '-' }).blockLabel).toBe('WOD')
   })
 
-  test('empty exercise rows never reach the timer', () => {
+  // #242 (review #14) — the row at `:413` passed only because `'  '` was kept; the timer would have
+  // shown a blank movement.
+  test('empty exercise rows never reach the timer — a blank name is empty too', () => {
     const cfg = timerConfigFor({ type: 'Força', exercises: [{ name: '' }, row, { name: '  ' }] })
-    expect(cfg.exercises).toHaveLength(2)
+    expect(cfg.exercises).toHaveLength(1)
+    expect(cfg.exercises[0].name).toBe('Back Squat')
+  })
+
+  test('a name is trimmed, and a complex with no movements is not a row', () => {
+    const cfg = timerConfigFor({
+      type: 'Força',
+      exercises: [
+        { name: '  Deadlift ', sets: 3, reps: '5' },
+        { isComplex: true, name: '' },
+      ],
+    })
+    expect(cfg.exercises).toEqual([{ name: 'Deadlift', sets: 3, reps: '5' }])
+  })
+
+  // #242 (review #13) — `400m Run` reached the timer as `Run`.
+  test('a distance rides along with the row', () => {
+    const cfg = timerConfigFor({
+      type: 'Cardio',
+      exercises: [
+        { name: 'Run', dist: '400', distUnit: 'm' },
+        { name: 'Row', dist: '500' },
+      ],
+    })
+    expect(cfg.exercises).toEqual([
+      { name: 'Run', dist: '400', distUnit: 'm' },
+      { name: 'Row', dist: '500' },
+    ])
+  })
+
+  test('a distance rides along inside an Estações station too', () => {
+    const cfg = timerConfigFor({
+      type: 'Estações',
+      stations: [{ name: 'A', duration: '1:00', exercises: [{ name: 'Run', dist: '200' }] }],
+    })
+    expect(cfg.exercises[0].exercises).toEqual([{ name: 'Run', dist: '200' }])
+  })
+
+  // #242 (review #10) — `BlockDetail` and `stationsCapMins` read stationRepeat; this read rounds.
+  test('Estações rounds are stationRepeat first, then rounds', () => {
+    const stations = [{ name: 'A', duration: '0:45', exercises: [row] }]
+    expect(
+      timerConfigFor({ type: 'Estações', stations, stationRepeat: 3, rounds: '2' }).rounds,
+    ).toBe(3)
+    expect(timerConfigFor({ type: 'Estações', stations, rounds: '2' }).rounds).toBe('2')
+    expect(timerConfigFor({ type: 'Estações', stations }).rounds).toBeNull()
+  })
+
+  // A count-up timer now ENDS at its last LAP, so a stale `stationRepeat` on a block converted from
+  // Estações would have been a hidden lap limit.
+  test('a non-Estações block reads rounds, never stationRepeat', () => {
+    expect(timerConfigFor({ type: 'Força', rounds: '4', stationRepeat: 9 }).rounds).toBe('4')
+    expect(timerConfigFor({ type: 'Força', stationRepeat: 3 }).rounds).toBeNull()
+    expect(
+      timerConfigFor({ type: 'Força', stationRepeat: 3, interval: '02:00', duration: '' }).rounds,
+    ).toBeNull()
+  })
+
+  // ── The flags (#242, review #2) — decided HERE, read by the Timer ────────────
+  describe('rotate / laps', () => {
+    const three = [{ name: 'A' }, { name: 'B' }, { name: 'C' }]
+
+    test('an interval EMOM with several movements rotates them, one per round', () => {
+      const cfg = timerConfigFor({ type: 'EMOM', interval: '02:00', rounds: '6', exercises: three })
+      expect(cfg).toMatchObject({ intervalMode: true, rotate: true, laps: false })
+    })
+
+    test('a single movement has nothing to rotate to', () => {
+      const cfg = timerConfigFor({ type: 'EMOM', interval: '02:00', rounds: '6', exercises: [row] })
+      expect(cfg.rotate).toBe(false)
+    })
+
+    test('an interval AMRAP counts rounds (LAP) and rotates nothing', () => {
+      const cfg = timerConfigFor({
+        type: 'AMRAP',
+        interval: '03:00',
+        rounds: '4',
+        exercises: three,
+      })
+      expect(cfg).toMatchObject({ intervalMode: true, laps: true, rotate: false })
+    })
+
+    test('any other interval type is neither — it runs its movements as one set', () => {
+      for (const type of ['Força', 'LPO', 'Core', 'HIIT', 'For Time'])
+        expect(
+          timerConfigFor({ type, interval: '02:00', rounds: '3', exercises: three }),
+          type,
+        ).toMatchObject({ rotate: false, laps: false })
+    })
+
+    test('a block with no interval carries no flag: its own mode already knows', () => {
+      for (const type of ['EMOM', 'AMRAP', 'Força']) {
+        const cfg = timerConfigFor({ type, duration: '12', exercises: three })
+        expect(cfg, type).not.toHaveProperty('rotate')
+        expect(cfg, type).not.toHaveProperty('laps')
+      }
+    })
+  })
+
+  // ── The decimal cap (#242, review #12) ───────────────────────────────────────
+  describe('timeCap keeps its decimals', () => {
+    test("EMOM 01:30 × Duração 7.5 is five rounds, not four — and the cap tag says 7.5'", () => {
+      const cfg = timerConfigFor({
+        type: 'EMOM',
+        interval: '01:30',
+        duration: '7.5',
+        exercises: [row],
+      })
+      expect(cfg).toMatchObject({ timeCap: 7.5, rounds: 5 })
+    })
+
+    test('a comma is a decimal point; blank and zero are no cap', () => {
+      expect(timerConfigFor({ type: 'For Time', duration: '7,5' }).timeCap).toBe(7.5)
+      expect(timerConfigFor({ type: 'For Time', duration: '' }).timeCap).toBeNull()
+      expect(timerConfigFor({ type: 'For Time', duration: '0' }).timeCap).toBeNull()
+      expect(timerConfigFor({ type: 'For Time', duration: 'abc' }).timeCap).toBeNull()
+      expect(timerConfigFor({ type: 'For Time', duration: 12 }).timeCap).toBe(12)
+    })
+  })
+
+  // ── The legacy shape (#242, review #1) ───────────────────────────────────────
+  // Before #228 a block had no interval field: "A cada 1'30" 3 Sets" was kept as a note, and the
+  // parser wrote the nearest whole minute into Duração (`max(1, round(every / 60))`). #228 made
+  // Duração a real cap, so the timer stopped such a block after ONE interval.
+  describe('a legacy "A cada" block has no cap', () => {
+    const legacy = (notes, duration, extra = {}) => ({
+      type: 'LPO',
+      rounds: '3',
+      duration,
+      notes,
+      exercises: [row],
+      ...extra,
+    })
+
+    test("the review's example — 3 rounds A cada 1'30\", Duração 2 — runs uncapped, rounds intact", () => {
+      const cfg = timerConfigFor({
+        type: 'Skill',
+        rounds: '3',
+        duration: '2',
+        notes: '3 rounds A cada 1\'30"',
+      })
+      expect(cfg.timeCap).toBeNull()
+      expect(cfg.rounds).toBe('3')
+      expect(cfg).not.toHaveProperty('intervalMode')
+    })
+
+    test("Duração is the nearest whole minute of the note's interval: 1'30\" → 2, 2'30\" → 3", () => {
+      expect(timerConfigFor(legacy('A cada 2\'30"', '3')).timeCap).toBeNull()
+      expect(timerConfigFor(legacy("A cada 3'", '3')).timeCap).toBeNull()
+      expect(timerConfigFor(legacy("A cada 1'10''", '1')).timeCap).toBeNull()
+      expect(timerConfigFor(legacy('A cada 1\'30"', '1')).timeCap).toBe(1)
+    })
+
+    test('an EMOM whose Duração is its interval is legacy too', () => {
+      const cfg = timerConfigFor({
+        type: 'EMOM',
+        rounds: '5',
+        duration: '3',
+        notes: "A cada 3' 5 Sets",
+      })
+      expect(cfg.timeCap).toBeNull()
+      expect(
+        timerConfigFor({ type: 'EMOM', duration: '2', notes: "x Every 2' x 5 sets" }).timeCap,
+      ).toBeNull()
+    })
+
+    test('curly quotes in the note are read like straight ones', () => {
+      expect(timerConfigFor(legacy('A cada 3’ executar um set', '3')).timeCap).toBeNull()
+    })
+
+    test('the interval may be in the label instead of the notes', () => {
+      expect(
+        timerConfigFor({ type: 'LPO', label: "A cada 2' x3 Sets", rounds: '3', duration: '2' })
+          .timeCap,
+      ).toBeNull()
+    })
+
+    // ⚠️ The line the rule exists to draw. Here the Duração is NOT the rounded interval — it is the
+    // real total, so it stays a cap and the timer still ends at it.
+    test('E2MOM with Duração 12 is a real total: it keeps its cap', () => {
+      expect(timerConfigFor({ type: 'EMOM', duration: '12', notes: 'E2MOM' }).timeCap).toBe(12)
+      expect(timerConfigFor({ type: 'EMOM', duration: '2', notes: 'E2MOM' }).timeCap).toBeNull()
+    })
+
+    test('a real total keeps its cap: rounds × interval, or a longer block', () => {
+      expect(timerConfigFor(legacy("A cada 3'", '15', { rounds: '5' })).timeCap).toBe(15)
+      expect(timerConfigFor(legacy('A cada 1\'30"', '12', { rounds: '8' })).timeCap).toBe(12)
+      expect(timerConfigFor(legacy("Executar cada set a cada 2'", '12')).timeCap).toBe(12)
+    })
+
+    test('a note with no interval in it never makes a block legacy', () => {
+      expect(timerConfigFor(legacy('Executar um set', '2')).timeCap).toBe(2)
+      expect(
+        timerConfigFor({ type: 'For Time', duration: '12', notes: 'A cada minuto 5 Burpees' })
+          .timeCap,
+      ).toBe(12)
+    })
+
+    test('a block with a real interval is not legacy — its cap is a cap', () => {
+      const cfg = timerConfigFor(legacy("A cada 2'", '2', { interval: '02:00' }))
+      expect(cfg).toMatchObject({ intervalMode: true, timeCap: 2 })
+    })
+
+    // A countdown has nothing to show without its cap: `Math.max(0, cap - e)` with no cap is 00:00 for
+    // good, with the warn colour on. An AMRAP keeps its (rounded) Duração, as it did before.
+    test('an AMRAP counts DOWN from its Duração, so it keeps it', () => {
+      const cfg = timerConfigFor({ type: 'AMRAP', duration: '2', notes: "A cada 2' 3 sets" })
+      expect(cfg.timeCap).toBe(2)
+    })
+
+    test('Estações times itself station by station: never legacy', () => {
+      const cfg = timerConfigFor({
+        type: 'Estações',
+        duration: '4',
+        notes: "A cada 4' 4 Sets",
+        stations: [{ name: 'A', duration: '1:00', exercises: [row] }],
+      })
+      expect(cfg.timeCap).toBe(4)
+    })
+
+    test('no Duração at all is simply no cap, legacy or not', () => {
+      expect(timerConfigFor(legacy("A cada 3'", '')).timeCap).toBeNull()
+    })
   })
 })
