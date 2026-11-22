@@ -1,5 +1,73 @@
 # 105 — #242 · The Timer after #228: legacy caps, interval AMRAP/EMOM, round overrun
 
+> ✅ Done: `28f775f` · 2026-11-22 — see BACKLOG.md · closes #242. Tests first (66 new cases red), then the fix:
+> all 1682 tests, lint and `format:check` pass (1586 before; +96, no new file).
+>
+> **Must-haves: 6/6 driven** on `timer.html` served by `npm run dev:public`, with `Date.now` offset (no
+> `page.clock`). ⚠️ **One deviation from the plan:** I did not insert fixture sessions and click Timer in
+> `schedule.html`. Each block went through the **real `timerConfigFor`** (a node script built the configs) and the
+> result was written to `localStorage.timer_config`, which is exactly what `openTimer` does plus three ids. So the
+> `schedule.html` click path itself was not driven; nothing was written to any DB.
+> (1) **EMOM rotation** — A cada 2:00 × 6 rounds × 3 movements: #1 at 0:05 and 1:59, #2 at 2:05 and 3:59, #3 at
+> 4:05 and 5:59, #1 again at 6:05, #3 at 10:00 (`RD 6/6`), FINALIZADO at 12:05. The highlight is a bold/cream
+> `subExOn` line; the screen-reader line names the movement (`Round 2 de 6, Bravo`).
+> (2) **No round overrun** — Força `3 rounds`, label `-`: header `Força`; `RD 1/3 → 2/3 → 3/3`, the third LAP lands on
+> FINALIZADO with `3 ROUNDS`; `RD 4/3` never shows.
+> (3) **Legacy cap gone** — `{Skill, rounds 3, Duração 2, "3 rounds A cada 1'30\""}`: the ready screen has no CAP tag
+> or `2 min`; still running at 1:59, 2:01, 2:30 and 6:40. `{EMOM, 12, E2MOM}`: `CAP 12:00`, `MIN 12 / 12` at 11:59,
+> FINALIZADO at 12:02.
+> (4) **Warn on the cycle end** — HIIT 10 rounds · 40" on 20" off, Duração 8: no warn at 408, 409, 450, 505 or
+> **509**; warn at **511**, 515 and 560.
+> (5) **INICIAR runs the block's own timer** — timer.html opened directly: the cap field is blank, INICIAR (form) →
+> ready → INICIAR runs the capless Força past 41:40 with no FINALIZADO, and `timer_config` after INICIAR is identical to
+> the config that was loaded (session ids included). The interval Core (3 × 40" on / 20" off) still runs the cycle:
+> `trabalho` 0:29 → `descanso` at 45 s → `RD 2/3` at 65 s → FINALIZADO at 185 s.
+> (6) **An empty cycle** — Estações with its movements in `bl.exercises`: running at 0:05 and at 5:00; FIM ends it.
+> Also driven: an interval AMRAP shows LAP, and 3 LAPs finish as `3 ROUNDS` (REGISTRAR's prefill and the finish
+> screen already read the splits). No console errors.
+>
+> **The legacy reconciliation (prod, read-only, 958 blocks, 2026-11-22).** The pre-#228 parser wrote
+> `max(1, round(every / 60))` (`textFormat.js` at `4edc639`), so that is the rule — *nearest*, not up; prod
+> cannot tell the two apart (no block has a sub-half-minute fraction), the parser does. **The rule finds 10 blocks:**
+> EMOM 5 (07-24, 09-04, 09-23, 10-13, 10-16) · LPO 4 (08-14, 10-12, 10-13, 10-16) · Skill 1 (07-29). The **draft
+> detector finds 33** here (Skill 12 · LPO 10 · EMOM 5 · For Time 4 · MetCon 1 · Estações 1) — the plan's 28 is the
+> same list without the 4 For Time blocks and one LPO (`a cada dois minutos`, which this run's regex reads).
+> **The 23 it disagrees on keep their cap, and each is right to:**
+> · **4 are not an interval** — `a cada round` / `a cada minuto` on For Time (06-24, 07-07, 09-18, 09-22);
+> · **1 is Estações** (08-04), which times itself;
+> · **18 have a Duração that is a real total**, not the rounded interval: rounds × interval (06-30 MetCon,
+> 07-02, 08-07, 08-10, 08-19, 08-26, 08-27, 08-28, 09-18 Skill; the three 10 × 1'10'' LPO on 09-14/15/16 at 12'),
+> or a longer block than rounds × interval (07-22 Skill, 08-12 Skill, 09-09 / 09-21 / 09-22 LPO).
+> One is off by a minute and left alone: 09-16 Skill, 8 × 1'30'' = 12' against Duração 11 — not legacy (the rounded
+> interval is 2), so it still stops a minute early.
+> **The review's 38** (Skill 18 · LPO 14 · Força 2) cannot be reproduced exactly — its script was deleted. The closest
+> reconstruction, "an A cada note, any Duração, no `interval`", gives Skill 19 · LPO 15 · Força 2 today, so it counted
+> **blocks with no Duração at all** (about 14 of them), which no timer ever capped. The affected population is 10.
+> The 5 legacy EMOMs now run uncapped, a 60-s minute at a time, until FIM (`MIN n`, no total). Running the legacy note
+> as a real interval was left out, as planned.
+>
+> **Beyond the plan:** (a) **`doLap` ends only an `'up'` timer**, not an AMRAP-with-`laps`: for an interval AMRAP
+> `rounds` is the number of intervals, so "finish at the last LAP" would have ended it early; the plan's sentence
+> ("…or `laps` is set") reads either way, and this is the safe one. (b) `capClock` — the header's `CAP` tag kept
+> `7.5` as `7.5:00`; it reads `7:30` now. (c) The EMOM clock shows `MIN n` with no `/ 0` when there is no cap, and
+> `Math.ceil` of a decimal one. (d) `cfg.rotate` is `round % n` — the plan wrote `(round − 1) % n`, but `stInfoRaw`'s
+> round is 0-based. (e) `exLabel` moved into `timerMode.js` and reads `exVolStr`, so a row now says `5×5` where it said
+> `5x 5 reps`; sets with no reps still say `5x`.
+>
+> **`/code-review high` found six; all fixed.** (1) **A legacy AMRAP got no cap** — it counts *down* from it, so the
+> clock would have sat at 00:00 for good: an AMRAP is now never legacy (0 in prod; a unit test pins it). (2) A trailing
+> space or blank line in the movements box rebuilt an interval block into a stopwatch: "changed" now compares trimmed,
+> blank-free lines. (3) `rounds` fell back to `stationRepeat` for every type, which is now a hidden lap limit on a
+> block converted from Estações: only Estações reads it. (4) Blanking Duração on an interval EMOM invented a 20' cap:
+> `capFromForm` takes the config's **mode**, not its type. (5) `exLabel` dropped `5x` for a progression row. (6) The
+> `noteEverySecs` mirror could drift from Texto: a parity suite feeds 21 spellings to both readers. **Left,
+> deliberately:** editing the *movements* (not whitespace) or the type on an interval block's setup form still
+> rebuilds a plain timer — the plan's rule ("the form's own config wins"), noted in `tv.md` as a trade-off.
+>
+> **Not driven:** the `schedule.html` click-through; the form's edit paths and the AMRAP-never-legacy rule (unit tests
+> only — the live runs were of the untouched form); a phone layout of the new highlight (a desktop screenshot only);
+> vibration. The warn is a colour class and buzzes nothing, so `DEVICE-TESTS.md` gets no line.
+
 *Planned 2026-11-22 (Opus) from the [2026-11-22 code review](../reviews/2026-11-22-code-review.md).
 It absorbs #243's timer half: findings #3, #10, #13, #14 and #25. #243 keeps the index rail and the
 gallery (#18, #19, #24). Execution: **Sonnet**. There is no approval gate: no new layout, and every
