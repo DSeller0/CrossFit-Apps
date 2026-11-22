@@ -98,7 +98,7 @@ describe('chooseLift — once per week', () => {
 
   test('a lift the registry cannot resolve is never suggested, however frequent', () => {
     const sessions = blob([
-      ...[0, 1, 2].map(i => session(addDays('2026-06-02', 7 * i), 'Força\n3x5 Shoulder Press 70%')),
+      ...[0, 1, 2].map(i => session(addDays('2026-06-02', 7 * i), 'Força\n3x5 Mystery Lift 70%')),
       session('2026-06-23', 'Força\n3x5 Bench Press 70%'),
     ])
     const ctx = ctxFor(sessions, '2026-06-30')

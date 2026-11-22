@@ -277,7 +277,7 @@ describe('the main lift', () => {
   })
 
   test('an unresolved lift keeps its spelling as identity and has no entry to suggest', () => {
-    expect(baseLift('Shoulder Press', ctx)).toEqual({ key: 'shoulder press', entry: null })
+    expect(baseLift('Mystery Lift', ctx)).toEqual({ key: 'mystery lift', entry: null })
     expect(baseLift('Power Snatch', ctx)).toBe(null)
   })
 
@@ -368,11 +368,11 @@ describe('pools', () => {
 describe('registryMisses', () => {
   test('lists every unresolved name with its count; structure typed into a name is apart', () => {
     const sessions = blob([
-      session('2026-09-07', 'Força\n3x5 Shoulder Press 70%\n\nCore\nCore\n3 rounds\n15 V-up'),
-      session('2026-09-14', 'Força\n3x5 Shoulder Press 70%'),
+      session('2026-09-07', 'Força\n3x5 Mystery Lift 70%\n\nCore\nCore\n3 rounds\n15 V-up'),
+      session('2026-09-14', 'Força\n3x5 Mystery Lift 70%'),
     ])
     const { movements, structural } = registryMisses(ctxFor(sessions, '2026-09-21'))
-    expect(movements).toEqual([expect.objectContaining({ name: 'Shoulder Press', count: 2 })])
+    expect(movements).toEqual([expect.objectContaining({ name: 'Mystery Lift', count: 2 })])
     expect(structural.map(m => m.name)).toContain('Core')
   })
 

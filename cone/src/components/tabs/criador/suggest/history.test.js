@@ -117,8 +117,10 @@ describe('readRow', () => {
     expect(sn).toMatchObject({ reps: '30', raw: 'DB Snatch' })
   })
 
+  // #211: "Shoulder Press" used to be the example here, until it was mapped to Strict Press — an
+  // unresolved name in a fixture has to be one no naming pass can ever resolve.
   test('an unresolved name stays unresolved — never guessed', () => {
-    const r = readRow({ name: 'Shoulder Press', reps: '5' }, index)
+    const r = readRow({ name: 'Mystery Lift', reps: '5' }, index)
     expect(r.kind).toBe('single')
     expect(r.entry).toBe(null)
   })
