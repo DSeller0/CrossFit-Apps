@@ -21,7 +21,10 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 - **In Progress:** none
 - **Start here:** do the three Ready items **in order, on Sonnet**:
   1. **#211** (plans/103). It needs the user once: to run its SQL on prod before its code ships.
-     Before running it, the user skims Batch E's pt-BR text in the
+     The SQL is generated and rehearsed twice on the local stack
+     ([2026-11-22-registry-additions.sql](./reviews/2026-11-22-registry-additions.sql)). **It is
+     waiting for the user to run it on prod.** Until the user confirms, don't push the code (steps
+     2–7). The user should first skim Batch E's pt-BR text in the
      [decision doc](./reviews/2026-11-22-exercise-names-decisions.md).
   2. **#241** (plans/104), the [2026-11-22 code review](./reviews/2026-11-22-code-review.md)'s one
      high.
