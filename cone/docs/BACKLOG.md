@@ -17,14 +17,12 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready:** #241 · #242
+- **Ready:** #242
 - **In Progress:** none
-- **Start here:** do the two Ready items **in order, on Sonnet**:
-  1. **#241** (plans/104), the [2026-11-22 code review](./reviews/2026-11-22-code-review.md)'s one
-     high.
-  2. **#242** (plans/105).
+- **Start here:** do the Ready item **on Sonnet**:
+  1. **#242** (plans/105).
 
-  After them:
+  After it:
   - **#190** (S–M, widened). Its evidence is in that review's addendum; its plan, plans/106, gets
     written once one of the two ships.
   - Then the code-review backstop, then #208 + #204, then #210.
@@ -52,7 +50,7 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
   decision doc written; #249 filed — all in that review's addendum. 2026-11-22 (part 2): the user
   answered #211, plus four more calls in the session. plans/103–105 were written, so #211, #241 and
   #242 are Ready. #243 was narrowed to the rail and the gallery, and #250 was filed for the 27
-  September aliases #211 holds back. 2026-11-22 (part 3): the user ran the SQL on prod and plans/103 shipped #211.
+  September aliases #211 holds back. 2026-11-22 (part 3): the user ran the SQL on prod and plans/103 shipped #211. 2026-11-22 (part 4): plans/104 shipped #241.
 
 ⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
 plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
@@ -63,7 +61,6 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/104](./plans/104-texto-onoff-duration.md)** — **#241 ¶ Texto corrupts a block with a Duração and a sub-minute work time** · S · Sonnet · the review's one HIGH: `ONOFF_TOK` reads `Cap 10' 40" on 20" off` as on = 10'40", and a blur is enough to trigger it. The fix: a flush-only on/off token, `/` as a separator, a commit on blur only after an edit, a duration axis in the round-trip tests, and an engine round-trip count.
 - 🟢 **[→ Ready · plans/105](./plans/105-timer-after-228.md)** — **#242 The Timer after #228: legacy caps, interval AMRAP/EMOM, round overrun** · M · Sonnet · 15 of the 35 recent interval blocks are EMOMs that lose their rotation. Legacy "A cada" blocks stop at their rounded Duração, and round blocks overrun (`RD 4/3`). The fix: `rotate`/`laps` flags decided once in `timerConfigFor`, pure form↔config helpers, and #243's timer half.
 
 ## 🔵 In Progress
@@ -180,6 +177,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/104 · `0e250e3` · 2026-11-22](./plans/104-texto-onoff-duration.md)** — **#241 ¶ Texto corrupts a block with a Duração and a sub-minute work time** · closed #241. · The on/off token is flush-only, `40" on / 20" off` parses, and an unedited blur commits nothing. Prod round trip unchanged (0 unstable); the engine's Core re-parses (was 10:00/9:40, 0 warnings). +25 tests.
 - ✅ **[plans/103 · `e9a03e7` · 2026-11-22](./plans/103-registry-names-apply.md)** — **#211 Registry: the exercise-names pass, applied** · closed #211. · 92 entries by SQL (the user ran it first), ALIASES 126 → 297, five resolver fallbacks. Prod's honest unresolved rate 25.6% → 10.7%. The user's variant rules replaced #94's squat rule. #250 holds 27 aliases back.
 - ✅ **[plans/102 · `1c64ad0` · 2026-11-05](./plans/102-suggested-session-editor-mode.md)** — **#235 Suggested session, Phase 3: the ✦ Sugerido editor mode** · closed #235. · Third `sessionMode`, from the approved card. Driven: 0 writes through Aplicar, 1 on Salvar; the snapshot survives reopen + re-save. Review also fixed a latent Texto bug (a new session opened in the old pane).
 - ✅ **[plans/101 · `1581458` · 2026-11-05](./plans/101-suggested-session-mockup.md)** — **#234 Suggested session, Phase 2: Lane-B mockup of ✦ Sugerido** · closed #234. · Approved as drawn. `mockups/67-criador-sugerido.html`: real engine output, 8 themes, 1280 + 390, contrast measured; it caught a quirks-mode class-case bug.

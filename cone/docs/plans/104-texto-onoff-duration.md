@@ -1,5 +1,46 @@
 # 104 — #241 · ¶ Texto: a Duração beside a sub-minute work time, and the `/` display form
 
+> ✅ Done: `0e250e3` · 2026-11-22 — see BACKLOG.md · closes #241. Reproduced first (19 of the new tests
+> failed exactly as the review describes), then fixed: all 1586 tests, lint and `format:check` pass.
+>
+> **Must-haves: 5/5 driven** — (1)–(3) in the real SPA on the local stack, (4)–(5) as audits against prod.
+> (1) **A blur doesn't eat the cap.** Built a HIIT block (8 rounds, Duração 10, A cada 1:00, Trabalho 0:40,
+> one exercise) in Detalhado; its ¶ Texto read `8 rounds Cap 10' 40" on 20" off` — the exact shape the review
+> flagged. Blurred without editing, then blurred again after appending a line (a blur that really goes through
+> the parser): Detalhado kept 10 / 8 / 1:00 / 0:40 and gained the exercise, none named `rounds…`. After Salvar
+> the `sessions` blob held `duration:'10'`, `rounds:'8'`, `interval:'01:00'`, `work:'00:40'`.
+> (2) **The coach's own spelling.** Pasted `AMRAP 12' 40" on / 20" off` + two exercise lines into the session
+> pane: the live preview read AMRAP · `40" on / 20" off` · CAP 12' with 2 exercises and no warning line; after
+> Aplicar, Detalhado showed Duração 12, A cada 01:00, Trabalho 00:40, exactly 2 rows (none named `40"`), empty notes.
+> (3) **An unedited blur is a no-op.** A Força block with 3 exercises: its block JSON was **byte-identical**
+> (ids included) after ¶ Texto → focus → blur → Salvar — re-driven on the final code. **The check can fail:**
+> with the old `BlockTextEditor` swapped back in (copy, no stash) the same steps re-minted all three ids.
+> (4) **The prod round trip.** `audit-text-roundtrip.mjs`: 733/958 identical, 36 rewritten, **0 unstable**,
+> before and after, so the counts match. Exactly one line differs, and it is explained: `projection-shift`
+> 908 → 909, an Estações (2026-10-01 #1) whose **label** is `Hyrox WOD - 4' ON / 1' OFF`. It used to come back
+> as label `Hyrox WOD – 4' ON – 1' OFF`; the pair now parses as structure, so it comes back as label
+> `Hyrox WOD` with note `4' on 1' off` (the note an Estações keeps for its interval). A move, not a loss.
+> (5) **The engine's shape re-parses.** `audit-suggest.mjs` prints `round trip: N mismatches` (both editor
+> paths, in the `✔ checks` line, exit 1 on any): **0** on every prod scope (53 suggested blocks). Prod can't
+> exercise it, so on a synthetic box (five Mondays from `testFixtures.js`'s `MONDAY()` with the Core written
+> `3 rounds 9' 40" on 20" off`) the engine suggests that very Core and it reads back with 0 mismatches. Under
+> the old parser the same run exits 1: `duration 9 → —`, `interval 01:00 → 10:00`, `work 00:40 → 09:40`, with
+> 0 parse warnings — the review's numbers to the digit.
+>
+> **Beyond the plan, one thing.** `HEADER_SPLIT` also cuts a header line on a spaced ` / `, so the one-character
+> `/` fix alone left `HIIT – 8 rounds 40" on / 20" off` broken (the Must-haves' own `AMRAP 12' … on / 20" off`
+> works without it, via the whole-line probe). `parseHeaderLine` now folds the slash **inside a real
+> `RE_ONOFF` match** first. That is what moved the Hyrox block above.
+>
+> **`/code-review high` found four nits, none a correctness blocker.** Fixed: (a) the guard also keys on
+> `block.type` — the type can change from the block bar while ¶ Texto is open, and `knownType` steers the
+> parse; (b) the slash fold rides on `RE_ONOFF` instead of a looser regex that would have eaten the slash in
+> `Cardio – 3 on / 2 rounds` (pinned by a test); (c) the CLAUDE.md test count. **Left, deliberately:** a spaced
+> `1' 30" on 30" off` now reads as a 1' duration plus `30" on`, with no warning — it is step 3's pinned
+> trade-off (prod holds none; the serializer never writes it), and #247 owns any change. The type-change path
+> was not driven live; it is two lines and not covered by a unit test (`BlockTextEditor` has none, the suite is
+> node-only).
+
 *Planned 2026-11-22 (Opus) from the [2026-11-22 code review](../reviews/2026-11-22-code-review.md)'s
 findings #26 (its one HIGH) and #27. Execution: **Sonnet**. There is no approval gate: it changes no
 layout and no data.*
