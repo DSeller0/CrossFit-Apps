@@ -4,7 +4,8 @@
 > the code followed. Honest unresolved rate on prod **25.6% → 10.73%** (331 of 3 085; sessions since
 > 09-19: 34.9% → 15.13%), against the ≤ 13.0% acceptance.
 >
-> **Must-haves: 5/5 driven**, two of them at module level (see 3 and 5).
+> **Must-haves: 5/5 driven.** (3) and (5) were first driven at module level, then in the real SPA once the
+> local stack was back (see below).
 > (1) **The SQL, on prod.** Read-only anon read afterwards: Acessórios 52 → 69, Aquecimento 20 → 28,
 > Cardio 20 → 24, Core 37 → 45, Força 33 → 46, LPO 36 → 62, Mobilidade 18 → 19, Skill 44 → 59 (260 →
 > 352); all 92 entries present once, in the right category, with text identical to the file; `DUal`
@@ -21,17 +22,18 @@
 > Lunge` → Demo disabled. **It can fail:** with HEAD's `registry.js` swapped in, `DU Crossover` showed
 > Double Under, `21-15-9 S Hspu` the general HSPU, `Strict T2B` plain Toes to Bar, and `RMU / 12 Pull
 > Up` and `Thruster 60/45` had no demo.
-> (3) **¶ Texto's warnings, at module level.** The SPA could not sign in (below), so this drove
-> `parseBlock(text, { knownType, registry })` with prod's registry, which is what BlockTextEditor
-> calls. `Squat Clean`, `Strict T2B`, `Thruster 60/45`, `RMU / 12 Pull Up`, `8/8 Military Press`, `DU
-> Crossover` and `HSPU` raise no `unknown-exercise`, alone or together; `LOW SQUAT` and `Plate
-> Overhead Lunge` still do. **Not driven in the SPA's UI.**
+> (3) **¶ Texto's warnings.** First at module level (`parseBlock` with prod's registry), then **in the SPA**
+> (Criador › a new session on 24/11 › ¶ Texto, local stack re-seeded from prod, discarded unsaved): `Squat
+> Clean`, `Strict T2B`, `Thruster 60/45`, `RMU / 12 Pull Up`, `8/8 Military Press`, `DU Crossover` and `HSPU`
+> raise no "fora do registro" warning, alone or together; `LOW SQUAT` and `Plate Overhead Lunge` read "1 nome
+> fora do registro" each and "2 nomes" together.
 > (4) **Rate, danglers, alias diff.** 297 imported = 297 planned (0 missing, 0 wrong, 0 extra);
 > `audit-session-registry.mjs`: 0 dangling. Against HEAD's resolver on the same prod data: **0
 > prescriptions lost**, 367 newly resolved, 36 moved to another entry, each one a decision.
-> (5) **The catalog's groups, at module level** (`groupByRoot` over prod's LPO list): the *Clean* group
-> lists Squat Clean, Hang Squat Clean and Low Hang Clean beside Clean and Hang Clean; `Low Hang Snatch`
-> is listed and `Low Snatch` is not. **Not driven in the SPA's UI.**
+> (5) **The catalog's groups.** First at module level, then **in the SPA** (Exercícios › LPO, local stack):
+> the header reads **Todos 346** (254 + 92); the *Clean* group (18) lists Squat Clean, Hang Squat Clean,
+> Floor/Low Hang/High Hang Squat Clean and Low Hang Clean beside Clean and Hang Clean; the *Snatch* group
+> (20) lists `Low Hang Snatch`, and `Low Snatch` is nowhere.
 >
 > **Per rule, measured on prod:** R2 42 prescriptions (12.09% without it) · R3 22 (11.44%) · R4 2 ·
 > **R5 0** (September's `echo bike` alias already covered the one spelling in use; kept because
@@ -50,8 +52,10 @@
 > (c) Three `suggest/` suites used "Shoulder Press" as their unresolved example; swapped for a fictional
 > lift. (d) **The local Supabase stack was unreachable**: Windows reserves TCP ports 54329–54428, which
 > contains the gateway's 54331, so Docker publishes nothing (`seed-dev.mjs` printed `fetch failed`).
-> That is why (3) and (5) were not driven in the SPA. Fix, if wanted: `net stop winnat` and `net start
-> winnat` in an elevated shell, then restart the stack. (e) **`/code-review` (medium) ran after the push,
+> That is why (3) and (5) were first driven only at module level. **Fixed the same day** with `net stop
+> winnat` and `net start winnat` in an elevated shell (Docker Desktop quit first): the gateway published
+> 54331, `seed-dev.mjs` re-seeded the local stack (352 registry entries), and (3) and (5) were then driven
+> in the SPA. (e) **`/code-review` (medium) ran after the push,
 > not before, because of (a):** 5 findings. Two were fixed in the follow-up commit: R4 now runs the noise
 > stripper on what follows the label (`B Jerk Balance 3" pausa`), and R7's keep-unit form still consumes
 > an `x`, so `3 x 10 S Pull Up` stays strict. One went to the docs: aliases are code and entries are data,
