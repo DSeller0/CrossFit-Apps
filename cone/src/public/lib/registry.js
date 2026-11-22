@@ -43,13 +43,14 @@ const TRAILING_PAREN = /\s*\([^)]*\)\s*$/
 // dangling "pausa" left behind once its tempo mark is stripped ("Bench Press pausa 2\" …").
 const TRAILING_ALT = /\s+(?:alt|alternad[oa]s?|alternando|pausa|pause)$/
 
-// R7 (#211) — the same stripper, but a ONE-letter unit (k/m/s/x) is left in place. In the coach's
+// R7 (#211) — the same stripper, but a ONE-letter unit (k/m/s) is left in place. In the coach's
 // shorthand "S" is STRICT ("21-15-9 S Hspu", "5 S Pull Up"), and LEADING_VOLUME reads it as a
-// seconds unit and eats it. resolveExercise tries this form BEFORE the unit-stripping one, so
-// "s hspu" resolves through its alias, while "800m Run" / "30 s Plank" / "10 x Burpee" leave
-// "m run" / "s plank" / "x burpee", which resolve to nothing and fall through to LEADING_VOLUME.
+// seconds unit and eats it. An "x" is still consumed — it is only ever a multiplier ("3 x 10 S
+// Pull Up"). resolveExercise tries this form BEFORE the unit-stripping one, so "s hspu" resolves
+// through its alias, while "800m Run" / "30 s Plank" leave "m run" / "s plank", which resolve to
+// nothing and fall through to LEADING_VOLUME.
 const LEADING_VOLUME_KEEP_UNIT =
-  /^(?:heavy(?![a-z])|z\d+|\d+(?:[.,]\d+)?\s*(?:(?:km|kg|cal|min)(?![a-z]))?)\s*['"’”′″]*\s*[-/…,.]*\s*/
+  /^(?:heavy(?![a-z])|z\d+|\d+(?:[.,]\d+)?\s*(?:(?:km|kg|cal|min|x)(?![a-z]))?)\s*['"’”′″]*\s*[-/…,.]*\s*/
 
 function stripVolumeNoise(key, leading = LEADING_VOLUME) {
   let out = key.replace(SLOT, '')
@@ -591,8 +592,12 @@ export function resolveExercise(name, registryOrIndex) {
     const hit = tryForms([peeled])
     if (hit) return hit
   }
-  // R4 — a leading step label (and, with it, a trailing prescription).
+  // R4 — a leading step label, with whatever noise the name carries after it (a tempo note, a
+  // parenthetical, a trailing load), so it goes through the same stripper as everything else.
   const unlabeled = dropStepLabel(key)
-  if (unlabeled !== key) return tryForms([unlabeled, peelTrailing(unlabeled)])
+  if (unlabeled !== key) {
+    const base = stripVolumeNoise(unlabeled)
+    return tryForms([unlabeled, base, peelTrailing(base)])
+  }
   return null
 }

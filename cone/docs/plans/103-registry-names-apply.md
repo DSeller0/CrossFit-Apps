@@ -51,8 +51,14 @@
 > lift. (d) **The local Supabase stack was unreachable**: Windows reserves TCP ports 54329–54428, which
 > contains the gateway's 54331, so Docker publishes nothing (`seed-dev.mjs` printed `fetch failed`).
 > That is why (3) and (5) were not driven in the SPA. Fix, if wanted: `net stop winnat` and `net start
-> winnat` in an elevated shell, then restart the stack. `/code-review` ran after the push, not before,
-> because of (a).
+> winnat` in an elevated shell, then restart the stack. (e) **`/code-review` (medium) ran after the push,
+> not before, because of (a):** 5 findings. Two were fixed in the follow-up commit: R4 now runs the noise
+> stripper on what follows the label (`B Jerk Balance 3" pausa`), and R7's keep-unit form still consumes
+> an `x`, so `3 x 10 S Pull Up` stays strict. One went to the docs: aliases are code and entries are data,
+> so a registry that predates the SQL (the dev seed, an old backup) loses every alias retargeted to a new
+> entry. Two were not findings: `Hip to bar en bar turnover` is the real prod entry name, and R2 taking
+> only the first alternative is the accepted trade-off. No prod resolution changed (10.73% before and
+> after).
 
 *Planned 2026-11-22 (Opus), from the user's answers in
 [2026-11-22-exercise-names-decisions.md](../reviews/2026-11-22-exercise-names-decisions.md).

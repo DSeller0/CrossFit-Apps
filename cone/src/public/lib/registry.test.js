@@ -930,6 +930,12 @@ describe('#211 · resolver fallbacks', () => {
       expect(dropStepLabel('a jerk balance')).toBe('jerk balance')
     })
 
+    test('the name after the label goes through the same noise stripper (code review)', () => {
+      expect(name211('B Jerk Balance 3" pausa')).toBe('Jerk Balance')
+      expect(name211('A Jerk Balance (BNK)')).toBe('Jerk Balance')
+      expect(name211('A Jerk Balance 60/45')).toBe('Jerk Balance')
+    })
+
     test('a real entry that starts with a lone letter is untouched (it resolves before R4)', () => {
       expect(name211('C Skips')).toBe('C-Skip')
       expect(name211('A Skip')).toBe('A-Skip')
@@ -958,6 +964,8 @@ describe('#211 · resolver fallbacks', () => {
       ['21-15-9 S Hspu', 'Strict HSPU'],
       ['5 S Pull Up', 'Strict Pull-up'],
       ['8 S T2B', 'Strict Toes to Bar'],
+      // A rep scheme before the S: the "x" is a multiplier, so the S still survives (code review).
+      ['3 x 10 S Pull Up', 'Strict Pull-up'],
     ])('%j → %j', (typed, canonical) => {
       expect(name211(typed)).toBe(canonical)
     })
