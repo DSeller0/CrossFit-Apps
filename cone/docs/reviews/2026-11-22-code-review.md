@@ -224,3 +224,64 @@ right where #8 is wrong · `snapIntensity` returns `ins` by reference for gender
 suggested blocks share intensity objects with the history, but nothing in `src/` mutates an intensity
 in place · `estimate.js`'s one `knownMinutes` reader is shared by the estimate and the box's typical
 minutes, as its comment says · `genEstacoes` works on a copy of `take` and reports `used`.
+
+## Addendum: found while planning the next items (2026-11-22)
+
+Same day, in the session that ordered the P1 rows. Each finding was read in the code and measured
+with read-only anon reads of prod (counts only, nothing written). **No code was changed.**
+
+### #190 is wider than its row: the coach's results save rewrites the whole table
+
+- **Mechanism.** Resultados' `persist` (`RegistroView.jsx:245-247`) hands the **whole** local
+  results array to `saveResults` → `dbSaveResults` (`utils/supabase.js:67`), which upserts every
+  row on `id`. `resultToRow` (`resultMappers.js:17`) stamps `updated_at = now` on each one. So
+  every coach save:
+  - re-stamps every row's `updated_at`;
+  - silently **reverts** any row changed on the server since the coach's last pull, such as an
+    athlete's own edit through `log_result`;
+  - fails outright when one stale row collides with `unique (athlete_id, session_id)`. The next
+    save fails the same way until a reload, and the only trace is a `console.warn`.
+- **Excluir never deletes.** `deleteResult` (`RegistroView.jsx:285`) only drops the row locally
+  and re-upserts the rest. There is no `.delete()` anywhere in `src/`, and the next pull
+  (`utils/storage.js:322`) brings the row back. The dialog says "A linha sai do results_v2 e de
+  todos os rankings".
+- **Prod evidence.**
+  - `results_v2` holds 100 rows, all `logged_by_athlete`, the newest dated 2026-10-14.
+  - **35 of them share one JS-millisecond `updated_at` (`2026-08-04T14:02:54.938`).** That is a
+    whole-array save, after #76's load-path fix (2026-07-18).
+  - The path has run, but only once in 3½ months. That makes it a real but mostly latent
+    data-loss path, so it is ordered after #241 and #242.
+- **Siblings:** `scripts/seed-dev.mjs:82` (the #190 row) · `stateBackup.js:120` (restore, same
+  whole-array upsert) · `useLiveRegistration.js:52` (#221) · `scripts/migrate-phase4.mjs:81` (a
+  one-off).
+
+### #242's exposure
+
+- 15 of the 35 interval blocks written 11/11–19/11 are **EMOMs**, the shape whose movement
+  rotation the Timer drops (#2).
+- 34 non-WOD round blocks since 10/17 can show `RD 4/3` (#4).
+- A draft detector for #1's legacy shape (an `A cada`/`E\dMOM` note plus a Duração, no `interval`)
+  finds 28 blocks: Skill 12 · LPO 9 · EMOM 5 · MetCon 1 · Estações 1. #1 counted 38 by its own
+  rule, so the plan must reconcile the two.
+
+### #210, still live
+
+Session `mt7kwk74qic61a0mx9s` (2026-08-27, public) still has 4 Mobilidade blocks with 50
+"exercises", none with reps or sets, and every `notes` field empty. The four block labels are the
+article's section headings; no row is a real prescription. ✦ Sugerido doesn't learn from them:
+its movement pool only counts rows that resolve against the registry (`suggest/stats.js:373`).
+
+### #249 (new): goal and structure lines saved as exercise rows
+
+The #211 refresh found 46 rows whose `name` is a goal or structure line, 23 of them since 09-19.
+Athletes see them as movements.
+
+| Kind | Rows | Since 09-19 | Examples |
+|---|---|---|---|
+| `Meta …` | 22 | 10 | `Meta 12'` ×5, `Meta 10'`, `Meta 15'`, `Meta 5 Rounds` |
+| `AMRAP …` / `For Time` | 17 | 9 | `AMRAP 10'` ×3, `Amrap 4'` ×3, `AMRAP 3'` ×2 |
+| on/off · `A cada` | 7 | 4 | `on 20" off 3 sets` ×2 (2026-10-13), `A CADA 2' 5 SETS` (2026-10-23) |
+
+Which write path produces them (¶ Texto paste vs typing in Detalhado) is not established yet. The
+on/off rows match #247's #29 (an interval line under a structure header), and the `AMRAP 4'` rows
+look like #229's round-groups. The 63 `Rounds`-style rows all predate 09-19.

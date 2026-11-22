@@ -19,18 +19,25 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 - **Ready:** none
 - **In Progress:** none
-- **Start here:** **#241 first** (Sonnet, S) — the [2026-11-22 code review](./reviews/2026-11-22-code-review.md)'s
-  one high: ¶ Texto silently corrupts a block with a Duração and a sub-minute work time, and the user is
-  already writing intervals. Then #242 (the Timer after #228). #236 (Sonnet, S) — the
-  `historyFromUntagged` link — must still land **before the main box is named**; #237 (S–M) is free to
-  follow. ✦ Sugerido (#233–#235) is shipped end to end.
+- **Start here:** **#211's decision pass first.** The user fills in
+  [2026-11-22-exercise-names-decisions.md](./reviews/2026-11-22-exercise-names-decisions.md), where a
+  blank slot means the recommendation; then an Opus session writes plans/103 (#211 apply), #241 and
+  #242.
+  Order after the pass, set 2026-11-22:
+  - **#211 → #241** (S, the [2026-11-22 code review](./reviews/2026-11-22-code-review.md)'s one high)
+  - **→ #242** (M; 15 of the 35 recent interval blocks are EMOMs)
+  - **→ #190** (S–M, widened; evidence in that review's addendum)
+  - → the code-review backstop → #208 + #204 → #210.
+
+  #236 (S) must still land **before the main box is named** (not soon, per the user); #237 (S–M) is
+  free to follow. ✦ Sugerido (#233–#235) is shipped end to end.
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
   `> 🟡 Shipped:` pending an iPhone re-test, now listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md) (no
-  iPhone at hand); nothing to code. · **#211** — the
-  [exercise↔session cross-reference](./reviews/2026-09-20-exercises.md) needs 20 naming calls and
-  approval of the drafted text before its [SQL](./reviews/2026-09-20-registry-additions.sql) reaches
-  prod; a Markdown decision checklist for the user comes next. · **#238** — which timer events get a
-  sound is the user's call, in a planning session.
+  iPhone at hand); nothing to code. · **#211** — the decision doc is ready:
+  [2026-11-22-exercise-names-decisions.md](./reviews/2026-11-22-exercise-names-decisions.md),
+  refreshed on prod (25.5% unresolved today, 11.8% if every recommendation lands). DU Crossover is
+  already decided (a new entry). · **#238** — which timer events get a sound is the user's call, in a
+  planning session.
 - **Last refill:** the [2026-09-20 full pass](./reviews/2026-09-20.md) (all 9 dimensions incl. a
   live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
   2026-10-02: #227–#231 filed from user reports and the
@@ -42,7 +49,9 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
   as specified); #234's mockup built, approved by the user and closed by plans/101;
   #235 shipped by plans/102. 2026-11-22: the
   [code review of plans/98–102](./reviews/2026-11-22-code-review.md) (36 findings, 1 high) filed
-  #241–#248; its #17 was already #156.
+  #241–#248; its #17 was already #156. 2026-11-22 (planning): #204 and #210 decided; #190 widened
+  (Excluir never deletes; every save rewrites the whole table); #211's pass refreshed on prod and its
+  decision doc written; #249 filed — all in that review's addendum.
 
 ⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
 plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
@@ -74,11 +83,11 @@ promoted into **plans/84** and **plans/86** the same day, and **#164** into **pl
 leaving only the blocked row until plans/91's close-out filed #204.*
 
 - ⏸ **#155 iOS Safari zooms the page when logging a result** · S · Sonnet · blocked on the user: `plans/74` shipped the 16px floor (`793ee45`, 2026-08-07) and is held at `> 🟡 Shipped:` pending an on-device iPhone re-test — steps in [DEVICE-TESTS.md](./DEVICE-TESTS.md). Nothing to code until it runs.
-- **#204 me.html's Distribuição reads 0/N for every athlete** · XS · Sonnet · `results_v2` logs only WOD block types, so `calcBlockStats`' executed side is structurally 0 for Força/LPO/Acessórios/Skill/Core/Cardio/Mobilidade. It was hidden until #164 made planned non-zero. Decide: hide the card until #64 logs strength blocks, or show planned only.
+- **#204 me.html's Distribuição reads 0/N for every athlete** · XS · Sonnet · only WOD blocks are logged, so `calcBlockStats`' executed side is 0 for every non-WOD type. **Decided 2026-11-22:** a non-WOD block counts as done when the athlete has a `Presente` row for that session (skipped excluded); the subtitle says presence. me.html only — Atletas' adherence is untouched.
 - **#208 Off-screen panels stay in the tab order on every public page** · XS · Sonnet · `Nav.module.css:3` `.ovSheet` and `Results.module.css:181` `.lbPane` hide by `transform` alone. Verified live: the 3 overflow tiles are `visibility:visible` and take focus. The fix idiom is already in both files (`display:none` / `visibility:hidden`).
-- **#210 A rest-day article was pasted into the Criador and became 50 exercises** · S · Sonnet · session `mt7kwk74qic61a0mx9s` (2026-08-27): 49 prose lines are `exercises` with empty reps/sets across four Mobilidade blocks, `block.notes` empty on all four. Renders to athletes as a WOD with 50 movements. Decide: repair the row, and whether the paste path should have caught it.
-- **#211 Registry: 29 new entries + 115 aliases + 4 resolver rules** · M · Sonnet · [audit](./reviews/2026-09-20-exercises.md) + [SQL](./reviews/2026-09-20-registry-additions.sql). Measured to take unresolved prescriptions 20.3% → 10.9%. ⏸ **20 naming calls + the drafted pt-BR text need the user first.** Aliases/rules are a code change, not the SQL.
-- **#190 `dbSaveResults` upserts `onConflict:'id'` against a `unique (athlete_id, session_id)` table** · S · Sonnet · **promoted from P2 2026-09-20 — no longer latent.** `utils/supabase.js:67` AND `scripts/seed-dev.mjs:82`. Reproduced live: seed-dev failed the whole batch and seeded **0** result rows; after a `delete from results_v2` it seeded 87. Only trace is a `console.warn`.
+- **#210 A rest-day article was pasted into the Criador and became 50 exercises** · S · Sonnet · session `mt7kwk74qic61a0mx9s`, still live. **Decided 2026-11-22:** (1) a one-off repair moves the 50 rows into the blocks' notes (backup, dry run, a conditional write, the user's go-ahead); (2) the paste parser sends long, quantity-free sentences to notes with a warning, measured on prod first.
+- ⏸ **#211 Registry: the exercise-names pass — entries, aliases, repoints, resolver rules** · M · Sonnet · blocked on the user: the [decision doc](./reviews/2026-11-22-exercise-names-decisions.md) is ready (prod: 25.5% unresolved, 11.8% if every recommendation lands). Answers → plans/103. Entries are SQL the user runs; aliases, repoints and rules are code.
+- **#190 The coach's results save rewrites the whole table — and Excluir never deletes** · S–M · Sonnet · every Resultados save upserts the whole local array on `id`: it re-stamps every `updated_at`, reverts rows changed on the server since the pull, and one stale row fails every later save. `deleteResult` deletes nothing. Also `seed-dev.mjs:82`. [Addendum](./reviews/2026-11-22-code-review.md).
 - **#241 ¶ Texto corrupts a block with a Duração and a sub-minute work time** · S · Sonnet · `ONOFF_TOK` reads `Cap 10' 40" on 20" off` as on = 10'40", so rounds, cap and interval are lost or wrong with 0 warnings — a blur in ¶ Texto is enough, and the engine can emit the shape. The display form `40" on / 20" off` doesn't parse. [Review](./reviews/2026-11-22-code-review.md) #26–27.
 - **#242 The Timer after #228: legacy caps, interval AMRAP/EMOM, round overrun** · M · Sonnet · a pre-#228 block's rounded `duration` (38 prod blocks) stops its Timer after one interval; an interval AMRAP loses LAP, an interval EMOM its rotation; `RD 4/3`; warns on the cap, not the cycle; an empty cycle ends at 00:00. [Review](./reviews/2026-11-22-code-review.md) #1 #2 #4 #5 #11 #12 #22.
 
@@ -124,6 +133,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#245 schedule.html with a Timer on every block** · S · Sonnet · the phone Timer button has no accessible name; check-offs and a typed RM are lost on a non-bfcache return; the meta + goal chips may overflow at 320–360px; the bounded review body isn't keyboard-scrollable; a 3-entry timer history pushes WODs out. [Review](./reviews/2026-11-22-code-review.md) #6 #7 #20 #21 #23.
 - **#246 Suggested-session fixes** · S · Sonnet · ↻ Outra on Força is dead under a pattern focus matching 0–1 lifts, yet shows "variante N"; Força copies a pre-#228 scheme's rounded duration as a cap; `--edits` tallies a first-row edit as `structure`; the pane says "Sem box" for an unknown box id. [Review](./reviews/2026-11-22-code-review.md) #33–36.
 - **#247 Interval grammar + input batch** · S · Sonnet · `A cada 2 min`/`2 minutos`/`90s`/`40 seg on` aren't read (`dois minutos` is); an interval line under a structure header (`EMOM 12'`) becomes an exercise; Trabalho's bare `40` expands to 40:00 and is dropped on save; two benchmark whitelists drop `interval`/`work`. Plan with #239. [Review](./reviews/2026-11-22-code-review.md) #28–31.
+- **#249 Goal and structure lines are saved as exercise rows** · S · Sonnet · 46 rows (23 since 09-19) named `Meta 12'`, `AMRAP 4'`, `For Time` or `on 20" off 3 sets`, so athletes see them as movements. First establish which path writes them (¶ Texto paste or Detalhado). Plan with #247 (its #29 is the on/off case) and #229. [Evidence](./reviews/2026-11-22-code-review.md).
 
 ### P3 — needs a decision before it needs code
 
