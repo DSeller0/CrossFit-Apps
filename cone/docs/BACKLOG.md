@@ -17,27 +17,28 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready:** none
+- **Ready:** #211 · #241 · #242
 - **In Progress:** none
-- **Start here:** **#211's decision pass first.** The user fills in
-  [2026-11-22-exercise-names-decisions.md](./reviews/2026-11-22-exercise-names-decisions.md), where a
-  blank slot means the recommendation; then an Opus session writes plans/103 (#211 apply), #241 and
-  #242.
-  Order after the pass, set 2026-11-22:
-  - **#211 → #241** (S, the [2026-11-22 code review](./reviews/2026-11-22-code-review.md)'s one high)
-  - **→ #242** (M; 15 of the 35 recent interval blocks are EMOMs)
-  - **→ #190** (S–M, widened; evidence in that review's addendum)
-  - → the code-review backstop → #208 + #204 → #210.
+- **Start here:** do the three Ready items **in order, on Sonnet**:
+  1. **#211** (plans/103). It needs the user once: to run its SQL on prod before its code ships.
+     Before running it, the user skims Batch E's pt-BR text in the
+     [decision doc](./reviews/2026-11-22-exercise-names-decisions.md).
+  2. **#241** (plans/104), the [2026-11-22 code review](./reviews/2026-11-22-code-review.md)'s one
+     high.
+  3. **#242** (plans/105).
 
-  #236 (S) must still land **before the main box is named** (not soon, per the user); #237 (S–M) is
-  free to follow. ✦ Sugerido (#233–#235) is shipped end to end.
-- **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
-  `> 🟡 Shipped:` pending an iPhone re-test, now listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md) (no
-  iPhone at hand); nothing to code. · **#211** — the decision doc is ready:
-  [2026-11-22-exercise-names-decisions.md](./reviews/2026-11-22-exercise-names-decisions.md),
-  refreshed on prod (25.5% unresolved today, 11.8% if every recommendation lands). DU Crossover is
-  already decided (a new entry). · **#238** — which timer events get a sound is the user's call, in a
-  planning session.
+  After them:
+  - **#190** (S–M, widened). Its evidence is in that review's addendum; its plan, plans/106, gets
+    written once one of the three ships.
+  - Then the code-review backstop, then #208 + #204, then #210.
+
+  #236 (S) must still land **before the main box is named**, which per the user is not soon. #237
+  (S–M) can follow whenever. ✦ Sugerido (#233–#235) is shipped end to end.
+- **Blocked on the user:**
+  - **#155** — `plans/74` shipped the 16px floor on 2026-08-07. It is held at `> 🟡 Shipped:` until
+    an iPhone re-test, now listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md); there is no iPhone at
+    hand. Nothing to code.
+  - **#238** — which timer events get a sound is the user's call, made in a planning session.
 - **Last refill:** the [2026-09-20 full pass](./reviews/2026-09-20.md) (all 9 dimensions incl. a
   live UX walk) filed #207–#222 and corrected #14, #23, #88, #96, #156, #184, #185, #190, #194.
   2026-10-02: #227–#231 filed from user reports and the
@@ -51,7 +52,10 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
   [code review of plans/98–102](./reviews/2026-11-22-code-review.md) (36 findings, 1 high) filed
   #241–#248; its #17 was already #156. 2026-11-22 (planning): #204 and #210 decided; #190 widened
   (Excluir never deletes; every save rewrites the whole table); #211's pass refreshed on prod and its
-  decision doc written; #249 filed — all in that review's addendum.
+  decision doc written; #249 filed — all in that review's addendum. 2026-11-22 (part 2): the user
+  answered #211, plus four more calls in the session. plans/103–105 were written, so #211, #241 and
+  #242 are Ready. #243 was narrowed to the rail and the gallery, and #250 was filed for the 27
+  September aliases #211 holds back.
 
 ⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
 plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
@@ -62,7 +66,9 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-*(empty)*
+- 🟢 **[→ Ready · plans/103](./plans/103-registry-names-apply.md)** — **#211 Registry: the exercise-names pass, applied** · M · Sonnet · the user answered on 2026-11-22. 92 entries go in first, by SQL the user runs on prod. Then 297 aliases (183 new, 20 retargeted, 12 removed) and 5 resolver rules take prod's unresolved rate from 25.6% to ≤13.0%. [Decisions](./reviews/2026-11-22-exercise-names-decisions.md).
+- 🟢 **[→ Ready · plans/104](./plans/104-texto-onoff-duration.md)** — **#241 ¶ Texto corrupts a block with a Duração and a sub-minute work time** · S · Sonnet · the review's one HIGH: `ONOFF_TOK` reads `Cap 10' 40" on 20" off` as on = 10'40", and a blur is enough to trigger it. The fix: a flush-only on/off token, `/` as a separator, a commit on blur only after an edit, a duration axis in the round-trip tests, and an engine round-trip count.
+- 🟢 **[→ Ready · plans/105](./plans/105-timer-after-228.md)** — **#242 The Timer after #228: legacy caps, interval AMRAP/EMOM, round overrun** · M · Sonnet · 15 of the 35 recent interval blocks are EMOMs that lose their rotation. Legacy "A cada" blocks stop at their rounded Duração, and round blocks overrun (`RD 4/3`). The fix: `rotate`/`laps` flags decided once in `timerConfigFor`, pure form↔config helpers, and #243's timer half.
 
 ## 🔵 In Progress
 
@@ -86,10 +92,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#204 me.html's Distribuição reads 0/N for every athlete** · XS · Sonnet · only WOD blocks are logged, so `calcBlockStats`' executed side is 0 for every non-WOD type. **Decided 2026-11-22:** a non-WOD block counts as done when the athlete has a `Presente` row for that session (skipped excluded); the subtitle says presence. me.html only — Atletas' adherence is untouched.
 - **#208 Off-screen panels stay in the tab order on every public page** · XS · Sonnet · `Nav.module.css:3` `.ovSheet` and `Results.module.css:181` `.lbPane` hide by `transform` alone. Verified live: the 3 overflow tiles are `visibility:visible` and take focus. The fix idiom is already in both files (`display:none` / `visibility:hidden`).
 - **#210 A rest-day article was pasted into the Criador and became 50 exercises** · S · Sonnet · session `mt7kwk74qic61a0mx9s`, still live. **Decided 2026-11-22:** (1) a one-off repair moves the 50 rows into the blocks' notes (backup, dry run, a conditional write, the user's go-ahead); (2) the paste parser sends long, quantity-free sentences to notes with a warning, measured on prod first.
-- ⏸ **#211 Registry: the exercise-names pass — entries, aliases, repoints, resolver rules** · M · Sonnet · blocked on the user: the [decision doc](./reviews/2026-11-22-exercise-names-decisions.md) is ready (prod: 25.5% unresolved, 11.8% if every recommendation lands). Answers → plans/103. Entries are SQL the user runs; aliases, repoints and rules are code.
 - **#190 The coach's results save rewrites the whole table — and Excluir never deletes** · S–M · Sonnet · every Resultados save upserts the whole local array on `id`: it re-stamps every `updated_at`, reverts rows changed on the server since the pull, and one stale row fails every later save. `deleteResult` deletes nothing. Also `seed-dev.mjs:82`. [Addendum](./reviews/2026-11-22-code-review.md).
-- **#241 ¶ Texto corrupts a block with a Duração and a sub-minute work time** · S · Sonnet · `ONOFF_TOK` reads `Cap 10' 40" on 20" off` as on = 10'40", so rounds, cap and interval are lost or wrong with 0 warnings — a blur in ¶ Texto is enough, and the engine can emit the shape. The display form `40" on / 20" off` doesn't parse. [Review](./reviews/2026-11-22-code-review.md) #26–27.
-- **#242 The Timer after #228: legacy caps, interval AMRAP/EMOM, round overrun** · M · Sonnet · a pre-#228 block's rounded `duration` (38 prod blocks) stops its Timer after one interval; an interval AMRAP loses LAP, an interval EMOM its rotation; `RD 4/3`; warns on the cap, not the cycle; an empty cycle ends at 00:00. [Review](./reviews/2026-11-22-code-review.md) #1 #2 #4 #5 #11 #12 #22.
 
 ### P2 — queued (design program + measured layout rows)
 
@@ -128,7 +131,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#232 `ReadRow` has no gap between its label and its value** · XS · Sonnet · `ConfirmReview.module.css:96` `.row` is `justify-content:space-between` with no `gap`, so a short exercise name beside a long note reads "RunSubstituí pela versão…" in the review dialog and the LogPane's read boxes. Add a gap and let the value wrap. Found in plans/98's screenshots.
 - **#236 Suggested session, Phase 4: link a box's history to the untagged sessions** · S · Sonnet · `location.historyFromUntagged = {until}` so the main box keeps its past when it gets a name — link, never retag. Must land before the rename. The engine already reads the field.
 - **#237 Suggested session, Phase 5: an editable "Padrão" per exercise** · S–M · Sonnet · a `pattern` override on the registry entry (8 movement patterns) in Exercícios, plus `scripts/audit-patterns.mjs`. Only 71% of movement occurrences resolve today; #211 narrows it. `patternOf` already honours `entry.pattern`.
-- **#243 `timerConfigFor` + index rail hygiene** · S · Sonnet · the `'-'` label reaches the timer (its own test asserts it), `dist` and loads are dropped, blank names pass, Estações reads `rounds` before `stationRepeat`; the rail shows `1×` and `Força · -`; the gallery still says "oito" warning kinds. [Review](./reviews/2026-11-22-code-review.md) #3 #10 #13 #14 #18 #19 #24 #25.
+- **#243 Index rail + gallery hygiene** · XS · Sonnet · the rail shows `1×` on every Estações block and reads `Força · -` for the placeholder label. The gallery still says "oito" warning kinds; there are seven. The timer half (#3 #10 #13 #14 #25) moved into #242 (plans/105). [Review](./reviews/2026-11-22-code-review.md) #18 #19 #24.
 - **#244 %RM after #209: complexes, `fmtIntensity`, RM chips** · S · Sonnet · a mixed kg/% complex is labelled and computed as % RM; `fmtIntensity` takes the unit from `steps[0]`, so ExerciseList/TV/Publicador show `60/80 kg` where ExRow shows `80% RM`; `usesRm` chips non-numeric loads; `autofillRm` skips stations. [Review](./reviews/2026-11-22-code-review.md) #8 #9 #15 #16.
 - **#245 schedule.html with a Timer on every block** · S · Sonnet · the phone Timer button has no accessible name; check-offs and a typed RM are lost on a non-bfcache return; the meta + goal chips may overflow at 320–360px; the bounded review body isn't keyboard-scrollable; a 3-entry timer history pushes WODs out. [Review](./reviews/2026-11-22-code-review.md) #6 #7 #20 #21 #23.
 - **#246 Suggested-session fixes** · S · Sonnet · ↻ Outra on Força is dead under a pattern focus matching 0–1 lifts, yet shows "variante N"; Força copies a pre-#228 scheme's rounded duration as a cap; `--edits` tallies a first-row edit as `structure`; the pane says "Sem box" for an unknown box id. [Review](./reviews/2026-11-22-code-review.md) #33–36.
@@ -155,6 +158,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#222 Four test athletes live in prod** · XS · Sonnet · `Atleta00`–`Atleta03` render in me.html's public picker alongside real members. Decide: delete, or mark them non-public — the athlete blob has no flag for it today.
 - **#238 Timer sound cues — which events get a sound?** · S–M · Sonnet · decision first, in a planning session: the timer cues a new round, a phase change and the end by vibration only (works on the user's phone), so a phone with vibration off, and every iPhone (no Vibration API), gets no cue. The user picks the events and the default; then it is a small audio module.
 - **#248 `session.suggestion` rides the public sessions blob** · XS · Opus · decision first: the provenance snapshot (≈ 0.6 KB, +19% of an average session) is saved in the one anon-readable blob every public page loads (674 KB, 213 sessions). Keep it, move it to a coach-only table, or trim `text` — with #82/#218. [Review](./reviews/2026-11-22-code-review.md) #32.
+- **#250 Registry: September's aliases that break the variant rule** · S · Sonnet · #211 holds back 27 (36 prescriptions) that send a variant to its base or another movement (`Plate Overhead Lunge` → DB OH Lunge, `Banded Deadlift` → Deadlift), plus `pause bench press`. Each needs a name or an entry from the user. [List](./reviews/2026-11-22-exercise-names-decisions.md).
 
 ### P4 — parked (features, infra, large structural)
 
