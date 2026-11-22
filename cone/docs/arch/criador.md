@@ -273,12 +273,37 @@ refinements: [docs/plans/36](../plans/36-criador-text-mode.md).
   The on/off probe is consumed **before** `RE_TIME`, or `40" on` reads as a 40-second duration.
   The old `Obs:` notes `interval-approximated` used to write stay notes (forward-only — nothing is
   migrated), and that warning kind is **gone**: an interval is a real field now.
+- 🔴 **The on/off pair's token is FLUSH-ONLY (`DUR_FLUSH`), where "A cada" keeps `DUR_MIN`'s spaced
+  seconds (#241 · plans/104).** `serializeBlock` writes the duration **immediately before** the pair
+  (`8 rounds Cap 10' 40" on 20" off`), and `DUR_MIN`'s spaced-seconds branch (`2' 30"` = 2'30") read
+  `10' 40"` as ONE 10'40" work time — eating the cap, the rounds and, on the ¶ path, the whole line
+  into an exercise named `rounds Cap 10' 40" on 20" off`, mostly with **0 warnings**. So `1'30" on` is a
+  work time and `1' 30" on` is a **1' duration plus `30" on`** (pinned by a test — it is a decision,
+  not an accident; prod holds no block that writes the spaced form, measured 2026-11-22, and the
+  serializer never emits it). `A cada 2' 30"` is anchored by "a cada" and stays valid. ⚠️ Don't fix
+  this by moving the interval before the cap in the serializer: it rewrites every interval block's
+  text, and `audit-text-roundtrip` reports that as churn. #247 (the interval grammar batch) extends
+  these tokens — keep the two apart.
+- **`40" on / 20" off` is the display form (`intervalStr`) and parses (#241).** `/` is in `RE_ONOFF`'s
+  separator class, and `parseHeaderLine` rewrites the pair's slash (`RE_ONOFF_SLASH`) **before**
+  `HEADER_SPLIT` runs — that regex also cuts a header on a spaced ` / ` (`Força / Agachamento`), so
+  `HIIT – 8 rounds 40" on / 20" off` would otherwise lose the pair to a label. The digit or mark before
+  `on` and the digit after the slash are what tell the two apart. One prod block changes as a result
+  (an Estações labelled `Hyrox WOD - 4' ON / 1' OFF`): its label is now `Hyrox WOD` and the pair is
+  kept as the block's note — a move, not a loss.
 - ⚠️ **`BlockTextEditor` commits through `applyParsedBlock(block, parsed)`, not a field
   whitelist.** Its old `merge` copied a fixed list of keys, so any new key was silently dropped
   when a block was flipped to ¶ Texto and back. The helper **deletes** `interval`/`work` before
   re-setting them, which is also why removing the line from the text removes the field.
   `audit-text-roundtrip.mjs` carries both in `normBlock` and an `interval-lost` class; before/after
   on 747 prod blocks: 543 identical, 30 rewritten, **0 unstable** both times, `interval-lost` 0.
+- **`BlockTextEditor` commits on blur only when the text CHANGED (#241).** It keeps the text it was
+  seeded or last committed from in a local ref (`committedRef`, read and written in the handler, never
+  passed as a prop). A blur with no edit used to re-parse the block and mint new ids for every
+  exercise — driven live: an unedited blur + Salvar on a 3-exercise Força block changed all three ids
+  — and any parse that can't read what the serializer wrote then corrupted a block the user only
+  clicked into. This is defence in depth, **not** the fix for #26 (that is `DUR_FLUSH`): an edited
+  blur still goes through the parser.
 
 ### Suggested session engine (#233 · plans/100)
 
@@ -327,6 +352,16 @@ refinements: [docs/plans/36](../plans/36-criador-text-mode.md).
 - ⚠️ **Since 19/10 the main lift sometimes sits in an EMOM** ("FRONT SQUAT · 5/5 70% · 3/3/3 90%").
   A session without a Força block lends its first non-LPO block naming a Força lift with a %RM top,
   both to the weekday's runs and to the once-per-week exclusion; `5/5`-style rows become sets × reps.
+- 🔴 **A parse warning cannot see a structure mismatch — the gate counts both (#241).** `applyParams` keeps
+  a cap of at least interval × rounds, so a Core `{3 rounds, 9', 1:00/0:40}` is written
+  `3 rounds 9' 40" on 20" off`, which the old tokens read back as `10:00/9:40` with the 9' gone and
+  **0 warnings**. `audit-suggest.mjs` now prints `round trip: N mismatches` beside `parse: N warnings` and
+  in the `✔ checks` line, comparing `duration`/`rounds`/`interval`/`work` on **both** editor paths against
+  the block's *validated* interval (`intervalOf`), and exits 1 on any. Prod scopes can't exercise it (no
+  box holds a cap beside an on/off yet), so drive it on a synthetic box: build sessions from
+  `testFixtures.js`'s `MONDAY()` with the Core line replaced by `3 rounds 9' 40" on 20" off` and run
+  `--sessions <file> --week <a Sunday-start week>`. If it shows a mismatch, the token is not fixed — don't
+  loosen the check.
 - ⚠️ **Emitted text must re-parse with 0 warnings, so:** every name is a registry name
   (`displayName` drops a parenthetical only when the short form resolves to the same entry); a
   complex carries `sets: '1'` (with sets = step count `serializeExercise` writes the two-line form,

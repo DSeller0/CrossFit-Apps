@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { intervalStr } from '../../../public/lib/wod.js'
 import {
   parseBlock,
@@ -21,11 +21,19 @@ import s from './textMode.module.css'
 // Commit is on BLUR, not on every keystroke: parsing mints new exercise ids, so a
 // per-keystroke commit would churn Criador's changed-field tracking and re-render
 // every row mid-typing. Live parsing still drives the status line.
+// And only when the text (or the type it is read under) CHANGED (#241): a blur with no edit would
+// otherwise still re-parse the block and mint new ids for every exercise, and a parse that cannot
+// read what the serializer wrote would then corrupt a block the coach only clicked into.
 // The caller passes key={block.id} so React re-mounts (and this re-seeds from the
 // serializer) when the block identity changes — rather than an effect that would
 // re-seed on every block update and fight the coach mid-sentence.
 export function BlockTextEditor({ block, onApply, registry }) {
   const [text, setText] = useState(() => serializeBlock(block, { header: false }))
+  // What a commit is built from: the text AND the type it is read under (`knownType` steers the
+  // parse, and the type can change from the block bar while this stays mounted). The key of the
+  // last seed or commit lives in a ref — read and written in the handler only, never in render.
+  const sourceKey = `${block.type}\n${text}`
+  const committedRef = useRef(sourceKey)
   const [showHelp, setShowHelp] = useState(false)
 
   const { parsed, warnings } = useMemo(() => {
@@ -34,7 +42,11 @@ export function BlockTextEditor({ block, onApply, registry }) {
   }, [text, block.type, registry])
 
   // What the text owns, and the trap in writing it back, is documented on applyParsedBlock.
-  const commit = () => onApply(applyParsedBlock(block, parsed))
+  const commit = () => {
+    if (sourceKey === committedRef.current) return
+    committedRef.current = sourceKey
+    onApply(applyParsedBlock(block, parsed))
+  }
 
   const parsedExs = parsed.stations
     ? parsed.stations.flatMap(st => st.exercises || [])

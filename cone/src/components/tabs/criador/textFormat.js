@@ -235,13 +235,29 @@ const RE_EVERY_WORDS = /\b(?:a\s+cada|every)\s+(um|dois|tr[êe]s|quatro|cinco|se
 const EVERY_WORDS = { um: 1, dois: 2, tres: 3, três: 3, quatro: 4, cinco: 5, seis: 6 }
 // `E2MOM` / `E3MOM` — every N minutes, which is also the block's type.
 const RE_EN_MOM = /\be(\d+)mom\b/i
-// Work / rest per round — `40" on 20" off`, `1' On 30" off`, `40on 20off`. Either side may be a
-// bare number: a unit-less value is SECONDS (every prod spelling of it is a seconds count).
-const ONOFF_TOK = `(?:${DUR_MIN}|\\d+(?:\\s*(?:"|''))?)`
+// Work / rest per round — `40" on 20" off`, `1' On 30" off`, `40on 20off`, and the display form
+// `40" on / 20" off` (#27 — `intervalStr` prints it). Either side may be a bare number: a
+// unit-less value is SECONDS (every prod spelling of it is a seconds count).
+//
+// The pair's token is FLUSH-ONLY (#241), where DUR_MIN is not: `1'30"` is a minute and a half, but
+// `1' 30"` is `1'` and then `30"`. ⚠️ That is deliberate, not an oversight. `serializeBlock`
+// writes the block's duration IMMEDIATELY before the pair (`Cap 10' 40" on 20" off`), and the
+// spaced-seconds branch read `10' 40"` as one 10'40" work time — eating the cap, and with it the
+// rounds, in front of the pair. A spaced `1' 30" on` therefore now reads as a 1' duration plus
+// `30" on`. Prod has no block that writes it (measured 2026-11-22), and the serializer never emits
+// it (it writes `1'30" on`); #247's interval grammar batch extends these tokens, so keep
+// `RE_EVERY` on DUR_MIN — `A cada 2' 30"` is anchored by "a cada", with nothing before it to eat.
+const DUR_FLUSH = `\\d+(?:\\s*'(?!')|\\s*''(?=\\d)|:)(?:\\d{1,2}(?:"|'')|\\d{2}(?![\\d'":]))?`
+const ONOFF_TOK = `(?:${DUR_FLUSH}|\\d+(?:\\s*(?:"|''))?)`
 const RE_ONOFF = new RegExp(
-  `\\b(${ONOFF_TOK})\\s*on(?![a-z])\\s*[-–—:]?\\s*(${ONOFF_TOK})\\s*off(?![a-z])`,
+  `\\b(${ONOFF_TOK})\\s*on(?![a-z])\\s*[-–—:/]?\\s*(${ONOFF_TOK})\\s*off(?![a-z])`,
   'i',
 )
+// The display form's slash, which a HEADER line would otherwise cut on: HEADER_SPLIT separates
+// `Tipo / Rótulo`, and `HIIT – 8 rounds 40" on / 20" off` has a ` / ` of its own. Rides on
+// RE_ONOFF itself, so only a slash INSIDE a real pair is touched — `Cardio – 3 on / 2 rounds` is not.
+const RE_ONOFF_G = new RegExp(RE_ONOFF.source, 'gi')
+const foldOnOffSlash = line => line.replace(RE_ONOFF_G, m => m.replace(/\s*\/\s*/, ' '))
 // An interval in the notation the probes above read back exactly — the serializer's structure
 // line, and the note an Estações block keeps (it times itself station by station).
 const intervalNotation = ({ every, work, rest }) =>
@@ -763,7 +779,7 @@ function isExerciseNotStructure(line, st) {
 function parseHeaderLine(raw, allowUnresolved) {
   const line = normLine(raw)
   if (!line) return null
-  const segs = line
+  const segs = foldOnOffSlash(line)
     .split(HEADER_SPLIT)
     .map(s => s.trim())
     .filter(Boolean)

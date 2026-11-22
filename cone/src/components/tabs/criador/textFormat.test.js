@@ -24,7 +24,7 @@ import {
   FORMAT_EXAMPLE_BLOCK,
 } from './textFormat.js'
 import { TYPE_CONFIG } from './blockModel.js'
-import { fmtSecs } from '../../../public/lib/wod.js'
+import { fmtSecs, intervalStr } from '../../../public/lib/wod.js'
 
 // The real coach artefact is the fixture, read from disk so it can never drift
 // from the file the parser was designed against.
@@ -427,6 +427,248 @@ describe('serializing an interval', () => {
       const back = blk(serializeBlock(b))
       expect(back.interval, `${work}/${rest}`).toBe(b.interval)
       expect(back.work, `${work}/${rest}`).toBe(b.work)
+    }
+  })
+})
+
+// #241 · plans/104 — `serializeBlock` writes the duration straight before the on/off pair, and
+// the pair's token used to read `10'` + `40"` across the space as ONE `10'40"`. The matrix above
+// never set a `duration`, which is how a corrupting round trip stayed green. Both editor paths
+// run here: ¶ Texto's (serialize without a header → parseBlock(knownType) → applyParsedBlock) and
+// the session pane's (serializeSession → parseSession).
+describe('a duration beside an interval — both editor paths (#241)', () => {
+  const mk = o => ({
+    id: 'b1',
+    label: o.type,
+    zone: 'Zona 01',
+    duration: '',
+    rounds: '',
+    notes: '',
+    ladderMode: false,
+    exercises: [
+      { id: 'e1', name: 'Sit Up', sets: '', reps: '20', note: '', intensity: null },
+      { id: 'e2', name: 'Push Up', sets: '', reps: '10', note: '', intensity: null },
+    ],
+    ...o,
+  })
+  const viaBlock = b => {
+    const p = parseBlock(serializeBlock(b, { header: false }), { knownType: b.type })
+    return { next: applyParsedBlock(b, p.block), warnings: p.warnings }
+  }
+  const viaSession = b => {
+    const r = parseSession(serializeSession({ blocks: [b] }))
+    return { next: r.blocks[0], warnings: r.warnings, count: r.blocks.length }
+  }
+  // Everything the structure line owns, plus the two exercise rows that must stay exercise rows.
+  const shape = b => ({
+    duration: b.duration,
+    rounds: b.rounds,
+    interval: b.interval,
+    work: b.work,
+    exercises: b.exercises.map(e => e.name),
+  })
+  const want = b => shape(b)
+  const check = (b, label) => {
+    const p1 = viaBlock(b)
+    expect(shape(p1.next), `¶ ${label}`).toEqual(want(b))
+    expect(p1.warnings, `¶ ${label} warnings`).toEqual([])
+    const p2 = viaSession(b)
+    expect(p2.count, `pane ${label} blocks`).toBe(1)
+    expect(shape(p2.next), `pane ${label}`).toEqual(want(b))
+    expect(p2.warnings, `pane ${label} warnings`).toEqual([])
+  }
+
+  const DURATIONS = ['', '8', '10', '12', '2.3']
+  // CAP types write `Cap N'`, the others `N'` — the two spellings the parser reads as a duration.
+  const TYPES = ['HIIT', 'MetCon', 'For Time', 'AMRAP', 'Força', 'Cardio']
+  const PAIRS = [
+    [40, 20],
+    [30, 30],
+    [45, 15],
+    [60, 30],
+    [60, 60],
+    [90, 30],
+    [100, 20],
+    [20, 40],
+    [15, 45],
+    [120, 60],
+  ]
+  const EVERY = [30, 45, 60, 70, 90, 120, 125, 150, 180, 300, 600]
+
+  test('every on/off pair survives beside every duration, on every type and both paths', () => {
+    for (const type of TYPES)
+      for (const duration of DURATIONS)
+        for (const [work, rest] of PAIRS)
+          check(
+            mk({
+              type,
+              rounds: '8',
+              duration,
+              interval: fmtSecs(work + rest),
+              work: fmtSecs(work),
+            }),
+            `${type} dur=${duration || '—'} ${work}/${rest}`,
+          )
+  })
+
+  test('every plain interval survives beside every duration, on every type and both paths', () => {
+    for (const type of TYPES)
+      for (const duration of DURATIONS)
+        for (const every of EVERY)
+          check(
+            mk({ type, rounds: '3', duration, interval: fmtSecs(every) }),
+            `${type} dur=${duration || '—'} every ${every}s`,
+          )
+  })
+
+  // The review's own four probes, by name — the first one came back as an exercise row.
+  test.each([
+    ['HIIT', { rounds: '8', duration: '10', interval: '01:00', work: '00:40' }],
+    ['AMRAP', { duration: '12', interval: '01:00', work: '00:40' }],
+    ['Força', { rounds: '5', duration: '12', interval: '02:00', work: '00:45' }],
+    ['Cardio', { duration: '20', interval: '01:00', work: '00:30' }],
+    ['MetCon', { duration: '8', interval: '00:30', work: '00:20' }],
+    // The engine's own shape (#241): applyParams keeps a cap of at least interval × rounds.
+    ['Core', { rounds: '3', duration: '9', interval: '01:00', work: '00:40' }],
+  ])('%s with a duration and a sub-minute work time reads back unchanged', (type, f) => {
+    check(mk({ type, ...f }), type)
+  })
+
+  test('the HIIT case writes the line the review printed, and that line is a structure line', () => {
+    const b = mk({
+      type: 'HIIT',
+      rounds: '8',
+      duration: '10',
+      interval: '01:00',
+      work: '00:40',
+    })
+    expect(serializeBlock(b, { header: false }).split('\n')[0]).toBe(
+      '8 rounds Cap 10\' 40" on 20" off',
+    )
+  })
+
+  // ── A blur with no edit changes nothing (acceptance 3) ──
+  test('serialize → parse → apply twice is a fixed point on the structure fields', () => {
+    const b = mk({ type: 'HIIT', rounds: '8', duration: '10', interval: '01:00', work: '00:40' })
+    const once = viaBlock(b).next
+    const twice = viaBlock(once).next
+    expect(shape(twice)).toEqual(shape(b))
+    expect(serializeBlock(twice)).toBe(serializeBlock(b))
+  })
+
+  // ── The pinned trade-off (plans/104 step 3) ──
+  // The pair's token is FLUSH-only: `1'30"` is a work time, `1' 30"` is a 1' duration followed by
+  // `30" on`. The serializer always writes the duration immediately before the pair, so a spaced
+  // spelling can only be the duration — and prod holds none (measured 2026-11-22). This is a
+  // decision, not an accident: if it flips, #247's grammar batch must flip it on purpose.
+  test('a spaced `1\' 30" on` reads as a 1\' duration plus `30" on` — flush-only is deliberate', () => {
+    expect(parseStructure('1\' 30" on 30" off')).toMatchObject({
+      duration: '1',
+      onSecs: 30,
+      offSecs: 30,
+      rest: '',
+    })
+    const b = blk('HIIT\n3 rounds 1\' 30" on 30" off\n10 Sit Up')
+    expect(b).toMatchObject({ duration: '1', rounds: '3', interval: '01:00', work: '00:30' })
+  })
+
+  test('the flush spellings of a work time still read whole', () => {
+    expect(parseStructure('1\'30" on 30" off')).toMatchObject({ onSecs: 90, offSecs: 30 })
+    expect(parseStructure("1'30 on 30 off")).toMatchObject({ onSecs: 90, offSecs: 30 })
+    expect(parseStructure('1:30 on 30" off')).toMatchObject({ onSecs: 90, offSecs: 30 })
+    expect(parseStructure('3\'\'30" on 20" off')).toMatchObject({ onSecs: 210, offSecs: 20 })
+    expect(parseStructure('40on 20off')).toMatchObject({ onSecs: 40, offSecs: 20 })
+  })
+
+  test('"A cada 2\' 30"" keeps its spaced seconds — only the on/off pair is flush', () => {
+    expect(parseStructure('A cada 2\' 30"')).toMatchObject({ everySecs: 150, rest: '' })
+  })
+})
+
+// #27 — the display form `intervalStr` prints. `wod.js` claims a block "re-parses to what it
+// shows"; this is the test that makes the claim true.
+describe('the display form of an interval parses (#241)', () => {
+  test.each([
+    ['40" on / 20" off', 40, 20],
+    ['40" on /20" off', 40, 20],
+    ['40" on/ 20" off', 40, 20],
+    ['40" on/20" off', 40, 20],
+    ['1\' on / 30" off', 60, 30],
+    ['40 on / 20 off', 40, 20],
+  ])('%s → %i s on, %i s off', (line, on, off) => {
+    expect(parseStructure(line)).toMatchObject({
+      onSecs: on,
+      offSecs: off,
+      consumed: true,
+      rest: '',
+    })
+  })
+
+  test("the coach's own spelling pastes cleanly as a header line", () => {
+    const r = parseSession('AMRAP 12\' 40" on / 20" off\n10 Sit Up\n10 Push Up')
+    expect(r.blocks).toHaveLength(1)
+    expect(r.blocks[0]).toMatchObject({
+      type: 'AMRAP',
+      duration: '12',
+      interval: '01:00',
+      work: '00:40',
+    })
+    expect(r.blocks[0].exercises.map(e => e.name)).toEqual(['Sit Up', 'Push Up'])
+    expect(r.warnings).toEqual([])
+  })
+
+  test('and on a structure line, with or without a type above it', () => {
+    const a = blk('Core\n3 rounds 40" on / 20" off\n10 Sit Up')
+    expect(a).toMatchObject({ rounds: '3', interval: '01:00', work: '00:40', notes: '' })
+    const b = blk('40" on / 20" off\n10 Sit Up')
+    expect(b).toMatchObject({ interval: '01:00', work: '00:40' })
+    expect(b.exercises.map(e => e.name)).toEqual(['Sit Up'])
+  })
+
+  // `HEADER_SPLIT` also cuts a header on a spaced slash, so the pair's own slash must not be one.
+  test('a type-first header keeps the slash inside the pair', () => {
+    const b = blk('HIIT – 8 rounds 40" on / 20" off\n10 Sit Up')
+    expect(b).toMatchObject({ type: 'HIIT', rounds: '8', interval: '01:00', work: '00:40' })
+    expect(b.label).toBe('HIIT')
+  })
+
+  // …and only a slash INSIDE a real pair is folded: no `off` after it, no pair, no rewrite.
+  test('a spaced slash that is not an on/off pair is left to the header split', () => {
+    const slash = blk('Cardio – 3 on / 2 rounds\n10 Burpee')
+    expect(slash).toMatchObject({ type: 'Cardio', label: '3 on', rounds: '2' })
+    // exactly what the same line reads as with a dash — the slash was never rewritten
+    const dash = blk('Cardio – 3 on – 2 rounds\n10 Burpee')
+    expect([slash.label, slash.rounds, slash.notes]).toEqual([dash.label, dash.rounds, dash.notes])
+  })
+
+  // The ordinary reader of a ` / ` in a header is unchanged: it still separates type from label.
+  test('a spaced slash elsewhere in a header is still a separator', () => {
+    expect(blk('Força / Agachamento\n5 Back Squat')).toMatchObject({
+      type: 'Força',
+      label: 'Agachamento',
+    })
+  })
+
+  test('intervalStr output re-parses to the interval it came from', () => {
+    for (const [every, work] of [
+      [60, 40],
+      [120, 90],
+      [75, 45],
+      [30, 20],
+      [180, 0],
+      [90, 0],
+    ]) {
+      const b = {
+        type: 'Core',
+        rounds: '3',
+        interval: fmtSecs(every),
+        ...(work && { work: fmtSecs(work) }),
+      }
+      const shown = intervalStr(b)
+      const back = blk(`Core\n${shown}\n10 Sit Up`, { knownType: 'Core' })
+      expect(back.interval, shown).toBe(b.interval)
+      if (work) expect(back.work, shown).toBe(b.work)
+      else expect(back).not.toHaveProperty('work')
     }
   })
 })

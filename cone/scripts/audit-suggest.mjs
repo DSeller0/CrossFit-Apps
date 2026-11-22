@@ -26,7 +26,13 @@ import { buildRegistryIndex } from '../src/public/lib/registry.js'
 import { SEM_BOX } from '../src/public/lib/sessions.js'
 import { sessionBoxIds } from '../src/public/lib/boxScope.js'
 import { DAY_PT_TITLE as DOW, todayISO } from '../src/public/lib/week.js'
-import { parseSession, serializeBlock } from '../src/components/tabs/criador/textFormat.js'
+import {
+  applyParsedBlock,
+  parseBlock,
+  parseSession,
+  serializeBlock,
+} from '../src/components/tabs/criador/textFormat.js'
+import { fmtSecs, intervalOf } from '../src/public/lib/wod.js'
 import {
   ENGINE_VERSION,
   THIN_WEEKDAY_SESSIONS,
@@ -119,6 +125,48 @@ function allScopes() {
 const parseWarnings = blocks =>
   blocks.map(b => parseSession(serializeBlock(b), { registry: index }).warnings)
 
+// The structure fields a block's Texto must read back, on BOTH editor paths (#241 · plans/104):
+// the session pane's (serializeBlock → parseSession — also what `suggestion.text` is read back
+// with by `--edits`) and ¶ Texto's (serialize without the header → parseBlock(knownType) →
+// applyParsedBlock). A parse WARNING cannot see this: `3 rounds 9' 40" on 20" off` once came back
+// `10:00/9:40` with the 9' gone and no warning at all, so the gate counts the mismatch itself.
+// The expectation is the block's VALIDATED interval (`intervalOf`) — a work time at or past the
+// interval is written as a plain "A cada", on purpose — and Estações carries none at all.
+const structOf = b => {
+  const iv = intervalOf(b)
+  return {
+    duration: String(b.duration ?? ''),
+    rounds: String(b.rounds ?? ''),
+    interval: iv ? fmtSecs(iv.every) : '',
+    work: iv?.work ? fmtSecs(iv.work) : '',
+  }
+}
+const readStruct = b => ({
+  duration: String(b.duration ?? ''),
+  rounds: String(b.rounds ?? ''),
+  interval: String(b.interval ?? ''),
+  work: String(b.work ?? ''),
+})
+function roundTrip(blocks) {
+  return blocks.flatMap(b => {
+    const want = structOf(b)
+    const paths = {
+      session: readStruct(parseSession(serializeBlock(b)).blocks[0] || {}),
+      '¶': readStruct(
+        applyParsedBlock(
+          b,
+          parseBlock(serializeBlock(b, { header: false }), { knownType: b.type }).block,
+        ),
+      ),
+    }
+    return Object.entries(paths).flatMap(([path, got]) =>
+      Object.keys(want)
+        .filter(k => want[k] !== got[k])
+        .map(k => `${b.type} ${k} ${path}: ${want[k] || '—'} → ${got[k] || '—'}`),
+    )
+  })
+}
+
 // Every %RM the blocks carry that does not end in 0 or 5 — read back from the Texto, the form
 // the user sees.
 function offGrid(blocks) {
@@ -149,9 +197,17 @@ function runWeek() {
   out.push(locNote)
   if (Object.keys(variants).length) out.push(`variants: ${JSON.stringify(variants)}`)
   if (Object.keys(options).length) out.push(`options: ${JSON.stringify(options)}`)
+  let mismatches = 0
   for (const [scope, n] of scopes) {
     out.push('', `═══ ${scopeName(scope)}${n != null ? ` · ${n} sessions` : ''} ═══`)
-    const check = { structures: new Set(), outOfOrder: [], offGrid: [], warnings: 0, days: 0 }
+    const check = {
+      structures: new Set(),
+      outOfOrder: [],
+      offGrid: [],
+      warnings: 0,
+      roundTrip: 0,
+      days: 0,
+    }
     for (const date of days) {
       const r = suggestSession({
         sessions,
@@ -180,16 +236,21 @@ function runWeek() {
       )
       if (m.skipped.length)
         out.push(`   skipped: ${m.skipped.map(s => `${s.type} — ${s.reason}`).join(' · ')}`)
+      const trips = r.blocks.map(b => roundTrip([b]))
       r.blocks.forEach((b, i) => {
         out.push('', serializeBlock(b))
         r.why[i].forEach(w => out.push(`   ↳ ${w}`))
         out.push(
           `   ⚑ parse: ${warns[i].length} warnings${warns[i].length ? ` — ${warns[i].map(w => `${w.kind}: ${w.line}`).join(' · ')}` : ''}`,
+          `   ⚑ round trip: ${trips[i].length} mismatches${trips[i].length ? ` — ${trips[i].join(' · ')}` : ''}`,
         )
       })
-      out.push(`   ⚑ session: ${warns.flat().length} parse warnings`)
+      out.push(
+        `   ⚑ session: ${warns.flat().length} parse warnings · ${trips.flat().length} round-trip mismatches`,
+      )
       check.days++
       check.warnings += warns.flat().length
+      check.roundTrip += trips.flat().length
       check.structures.add(m.structure.join('>'))
       const pos = r.blocks.map(b => m.structure.indexOf(b.type))
       if (pos.some((p, i) => i && p < pos[i - 1])) check.outOfOrder.push(ddmm(date))
@@ -198,8 +259,9 @@ function runWeek() {
     if (check.days)
       out.push(
         '',
-        `   ✔ checks · ${check.days} days · one structure for the week: ${check.structures.size === 1 ? 'yes' : `NO (${check.structures.size})`} · blocks in structure order: ${check.outOfOrder.length ? `NO (${check.outOfOrder.join(', ')})` : 'yes'} · %RM off the 0/5 grid: ${check.offGrid.length ? check.offGrid.join(', ') : 'none'} · parse warnings: ${check.warnings}`,
+        `   ✔ checks · ${check.days} days · one structure for the week: ${check.structures.size === 1 ? 'yes' : `NO (${check.structures.size})`} · blocks in structure order: ${check.outOfOrder.length ? `NO (${check.outOfOrder.join(', ')})` : 'yes'} · %RM off the 0/5 grid: ${check.offGrid.length ? check.offGrid.join(', ') : 'none'} · parse warnings: ${check.warnings} · round-trip mismatches: ${check.roundTrip}`,
       )
+    mismatches += check.roundTrip
   }
   // The run ENDS with the miss lists, the main box's last: a name nobody resolves is invisible
   // to recency and to every pool, so it is shown here rather than read as "not used" (#211).
@@ -224,6 +286,8 @@ function runWeek() {
       )
   }
   console.log(out.join('\n'))
+  // The gate (#241): a round-trip mismatch is a failure, not a note — the exit code says so.
+  if (mismatches) process.exitCode = 1
 }
 
 // ── backtest ──────────────────────────────────────────────────────────────────
