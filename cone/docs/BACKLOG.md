@@ -19,8 +19,11 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 - **Ready:** none
 - **In Progress:** none
-- **Start here:** #236 (Sonnet, S) — the `historyFromUntagged` link, which must land **before the main box is
-  named**. #237 (S–M) is free to follow. ✦ Sugerido (#233–#235) is shipped end to end.
+- **Start here:** **#241 first** (Sonnet, S) — the [2026-11-22 code review](./reviews/2026-11-22-code-review.md)'s
+  one high: ¶ Texto silently corrupts a block with a Duração and a sub-minute work time, and the user is
+  already writing intervals. Then #242 (the Timer after #228). #236 (Sonnet, S) — the
+  `historyFromUntagged` link — must still land **before the main box is named**; #237 (S–M) is free to
+  follow. ✦ Sugerido (#233–#235) is shipped end to end.
 - **Blocked on the user:** **#155** — `plans/74` shipped the 16px floor 2026-08-07 and is held at
   `> 🟡 Shipped:` pending an iPhone re-test, now listed in [DEVICE-TESTS.md](./DEVICE-TESTS.md) (no
   iPhone at hand); nothing to code. · **#211** — the
@@ -37,7 +40,9 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
   #228 passed on the user's phone and closed; #238 filed (timer sound cues). 2026-11-05: #233 shipped
   by plans/100; #239 filed from its build; #240 filed and decided the same day (keep the run-length rule
   as specified); #234's mockup built, approved by the user and closed by plans/101;
-  #235 shipped by plans/102.
+  #235 shipped by plans/102. 2026-11-22: the
+  [code review of plans/98–102](./reviews/2026-11-22-code-review.md) (36 findings, 1 high) filed
+  #241–#248; its #17 was already #156.
 
 ⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
 plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
@@ -74,6 +79,8 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#210 A rest-day article was pasted into the Criador and became 50 exercises** · S · Sonnet · session `mt7kwk74qic61a0mx9s` (2026-08-27): 49 prose lines are `exercises` with empty reps/sets across four Mobilidade blocks, `block.notes` empty on all four. Renders to athletes as a WOD with 50 movements. Decide: repair the row, and whether the paste path should have caught it.
 - **#211 Registry: 29 new entries + 115 aliases + 4 resolver rules** · M · Sonnet · [audit](./reviews/2026-09-20-exercises.md) + [SQL](./reviews/2026-09-20-registry-additions.sql). Measured to take unresolved prescriptions 20.3% → 10.9%. ⏸ **20 naming calls + the drafted pt-BR text need the user first.** Aliases/rules are a code change, not the SQL.
 - **#190 `dbSaveResults` upserts `onConflict:'id'` against a `unique (athlete_id, session_id)` table** · S · Sonnet · **promoted from P2 2026-09-20 — no longer latent.** `utils/supabase.js:67` AND `scripts/seed-dev.mjs:82`. Reproduced live: seed-dev failed the whole batch and seeded **0** result rows; after a `delete from results_v2` it seeded 87. Only trace is a `console.warn`.
+- **#241 ¶ Texto corrupts a block with a Duração and a sub-minute work time** · S · Sonnet · `ONOFF_TOK` reads `Cap 10' 40" on 20" off` as on = 10'40", so rounds, cap and interval are lost or wrong with 0 warnings — a blur in ¶ Texto is enough, and the engine can emit the shape. The display form `40" on / 20" off` doesn't parse. [Review](./reviews/2026-11-22-code-review.md) #26–27.
+- **#242 The Timer after #228: legacy caps, interval AMRAP/EMOM, round overrun** · M · Sonnet · a pre-#228 block's rounded `duration` (38 prod blocks) stops its Timer after one interval; an interval AMRAP loses LAP, an interval EMOM its rotation; `RD 4/3`; warns on the cap, not the cycle; an empty cycle ends at 00:00. [Review](./reviews/2026-11-22-code-review.md) #1 #2 #4 #5 #11 #12 #22.
 
 ### P2 — queued (design program + measured layout rows)
 
@@ -112,6 +119,11 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#232 `ReadRow` has no gap between its label and its value** · XS · Sonnet · `ConfirmReview.module.css:96` `.row` is `justify-content:space-between` with no `gap`, so a short exercise name beside a long note reads "RunSubstituí pela versão…" in the review dialog and the LogPane's read boxes. Add a gap and let the value wrap. Found in plans/98's screenshots.
 - **#236 Suggested session, Phase 4: link a box's history to the untagged sessions** · S · Sonnet · `location.historyFromUntagged = {until}` so the main box keeps its past when it gets a name — link, never retag. Must land before the rename. The engine already reads the field.
 - **#237 Suggested session, Phase 5: an editable "Padrão" per exercise** · S–M · Sonnet · a `pattern` override on the registry entry (8 movement patterns) in Exercícios, plus `scripts/audit-patterns.mjs`. Only 71% of movement occurrences resolve today; #211 narrows it. `patternOf` already honours `entry.pattern`.
+- **#243 `timerConfigFor` + index rail hygiene** · S · Sonnet · the `'-'` label reaches the timer (its own test asserts it), `dist` and loads are dropped, blank names pass, Estações reads `rounds` before `stationRepeat`; the rail shows `1×` and `Força · -`; the gallery still says "oito" warning kinds. [Review](./reviews/2026-11-22-code-review.md) #3 #10 #13 #14 #18 #19 #24 #25.
+- **#244 %RM after #209: complexes, `fmtIntensity`, RM chips** · S · Sonnet · a mixed kg/% complex is labelled and computed as % RM; `fmtIntensity` takes the unit from `steps[0]`, so ExerciseList/TV/Publicador show `60/80 kg` where ExRow shows `80% RM`; `usesRm` chips non-numeric loads; `autofillRm` skips stations. [Review](./reviews/2026-11-22-code-review.md) #8 #9 #15 #16.
+- **#245 schedule.html with a Timer on every block** · S · Sonnet · the phone Timer button has no accessible name; check-offs and a typed RM are lost on a non-bfcache return; the meta + goal chips may overflow at 320–360px; the bounded review body isn't keyboard-scrollable; a 3-entry timer history pushes WODs out. [Review](./reviews/2026-11-22-code-review.md) #6 #7 #20 #21 #23.
+- **#246 Suggested-session fixes** · S · Sonnet · ↻ Outra on Força is dead under a pattern focus matching 0–1 lifts, yet shows "variante N"; Força copies a pre-#228 scheme's rounded duration as a cap; `--edits` tallies a first-row edit as `structure`; the pane says "Sem box" for an unknown box id. [Review](./reviews/2026-11-22-code-review.md) #33–36.
+- **#247 Interval grammar + input batch** · S · Sonnet · `A cada 2 min`/`2 minutos`/`90s`/`40 seg on` aren't read (`dois minutos` is); an interval line under a structure header (`EMOM 12'`) becomes an exercise; Trabalho's bare `40` expands to 40:00 and is dropped on save; two benchmark whitelists drop `interval`/`work`. Plan with #239. [Review](./reviews/2026-11-22-code-review.md) #28–31.
 
 ### P3 — needs a decision before it needs code
 
@@ -132,6 +144,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#221 `useLiveRegistration.js:52-59` upserts `results_v2` with no error check at all** · XS · Sonnet · decision first: the return value isn't destructured, so a constraint violation (#190's, reachable because `:29` also filters on `date`) vanishes with **zero** signal. Decide how a failed live registration surfaces on the TV controller.
 - **#222 Four test athletes live in prod** · XS · Sonnet · `Atleta00`–`Atleta03` render in me.html's public picker alongside real members. Decide: delete, or mark them non-public — the athlete blob has no flag for it today.
 - **#238 Timer sound cues — which events get a sound?** · S–M · Sonnet · decision first, in a planning session: the timer cues a new round, a phase change and the end by vibration only (works on the user's phone), so a phone with vibration off, and every iPhone (no Vibration API), gets no cue. The user picks the events and the default; then it is a small audio module.
+- **#248 `session.suggestion` rides the public sessions blob** · XS · Opus · decision first: the provenance snapshot (≈ 0.6 KB, +19% of an average session) is saved in the one anon-readable blob every public page loads (674 KB, 213 sessions). Keep it, move it to a coach-only table, or trim `text` — with #82/#218. [Review](./reviews/2026-11-22-code-review.md) #32.
 
 ### P4 — parked (features, infra, large structural)
 
