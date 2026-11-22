@@ -1,5 +1,59 @@
 # 103 — #211 · The exercise-names pass, applied: 92 entries, the alias change set, five resolver rules
 
+> ✅ Done: `e9a03e7` · 2026-11-22 — see BACKLOG.md · closes #211. The user ran the SQL on prod first;
+> the code followed. Honest unresolved rate on prod **25.6% → 10.73%** (331 of 3 085; sessions since
+> 09-19: 34.9% → 15.13%), against the ≤ 13.0% acceptance.
+>
+> **Must-haves: 5/5 driven**, two of them at module level (see 3 and 5).
+> (1) **The SQL, on prod.** Read-only anon read afterwards: Acessórios 52 → 69, Aquecimento 20 → 28,
+> Cardio 20 → 24, Core 37 → 45, Força 33 → 46, LPO 36 → 62, Mobilidade 18 → 19, Skill 44 → 59 (260 →
+> 352); all 92 entries present once, in the right category, with text identical to the file; `DUal`
+> gone, `Dual KB Overhead Walking` present; Devil Press reads *um halter*; `Low Hang Snatch` present,
+> `Low Snatch` absent. ⚠️ **The second run was proven on the LOCAL stack** (byte-identical md5 after
+> run 2; 258 of the 260 existing entries field-for-field unchanged, the two exceptions being the
+> intended edits), not on prod: the user ran it there once.
+> (2) **The detail page, driven on schedule.html** (public dev server, prod's post-SQL registry and one
+> fabricated session fed through `context.route`; nothing written anywhere). 15 rows opened their Demo:
+> `DU Crossover` → the crossover text, not Double Under; `HSPU` and `Handstand Push Up` → the general
+> entry; `21-15-9 S Hspu` → Strict HSPU; `Squat Clean`, `Hang Squat Celan`, `Low Squat Snatch` → their
+> own entries; `Devil Press` → one dumbbell, `Dual DB Devil press` → two; `Strict T2B` → Strict Toes to
+> Bar; `RMU / 12 Pull Up` → Ring Muscle-up; `Thruster 60/45` → Thruster; `LOW SQUAT` and `Plate Overhead
+> Lunge` → Demo disabled. **It can fail:** with HEAD's `registry.js` swapped in, `DU Crossover` showed
+> Double Under, `21-15-9 S Hspu` the general HSPU, `Strict T2B` plain Toes to Bar, and `RMU / 12 Pull
+> Up` and `Thruster 60/45` had no demo.
+> (3) **¶ Texto's warnings, at module level.** The SPA could not sign in (below), so this drove
+> `parseBlock(text, { knownType, registry })` with prod's registry, which is what BlockTextEditor
+> calls. `Squat Clean`, `Strict T2B`, `Thruster 60/45`, `RMU / 12 Pull Up`, `8/8 Military Press`, `DU
+> Crossover` and `HSPU` raise no `unknown-exercise`, alone or together; `LOW SQUAT` and `Plate
+> Overhead Lunge` still do. **Not driven in the SPA's UI.**
+> (4) **Rate, danglers, alias diff.** 297 imported = 297 planned (0 missing, 0 wrong, 0 extra);
+> `audit-session-registry.mjs`: 0 dangling. Against HEAD's resolver on the same prod data: **0
+> prescriptions lost**, 367 newly resolved, 36 moved to another entry, each one a decision.
+> (5) **The catalog's groups, at module level** (`groupByRoot` over prod's LPO list): the *Clean* group
+> lists Squat Clean, Hang Squat Clean and Low Hang Clean beside Clean and Hang Clean; `Low Hang Snatch`
+> is listed and `Low Snatch` is not. **Not driven in the SPA's UI.**
+>
+> **Per rule, measured on prod:** R2 42 prescriptions (12.09% without it) · R3 22 (11.44%) · R4 2 ·
+> **R5 0** (September's `echo bike` alias already covered the one spelling in use; kept because
+> `Assault Bike` would otherwise miss) · R7 2 moved, 0 gained (`8 S T2B` → Strict Toes to Bar,
+> `21-15-9 S Hspu` → Strict HSPU).
+>
+> **✦ Sugerido backtest, HEAD resolver vs this one** (72 strength days, same prod data): main lift 54% →
+> 52% (38/71 → 37/71), top-set load 55% → 53%, LPO family 55% → 57%; block set, order, theme,
+> movements, cap, meta and warnings identical. Cause: Strict Press is now a known lift, so one day's
+> suggestion changed. Reported, not gated.
+>
+> **Found while driving.** (a) The SQL's `DUal` → `Dual KB Overhead Walking` rename left the old deployed
+> code's three aliases dangling (about 8 prescriptions lost their detail) between the SQL and this push.
+> The plan had the right order but did not foresee that; the shared-utils note now says so. (b) R3's first
+> draft peeled only the `10` of `3 x 10`; the unit test caught it and the scheme pattern now runs first.
+> (c) Three `suggest/` suites used "Shoulder Press" as their unresolved example; swapped for a fictional
+> lift. (d) **The local Supabase stack was unreachable**: Windows reserves TCP ports 54329–54428, which
+> contains the gateway's 54331, so Docker publishes nothing (`seed-dev.mjs` printed `fetch failed`).
+> That is why (3) and (5) were not driven in the SPA. Fix, if wanted: `net stop winnat` and `net start
+> winnat` in an elevated shell, then restart the stack. `/code-review` ran after the push, not before,
+> because of (a).
+
 *Planned 2026-11-22 (Opus), from the user's answers in
 [2026-11-22-exercise-names-decisions.md](../reviews/2026-11-22-exercise-names-decisions.md).
 Execution: **Sonnet**. There is one hand-off: **the user runs the SQL on prod** (step 1) before any

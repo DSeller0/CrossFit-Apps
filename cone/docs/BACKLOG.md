@@ -17,22 +17,16 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
 
 ## ▶ Now
 
-- **Ready:** #211 · #241 · #242
+- **Ready:** #241 · #242
 - **In Progress:** none
-- **Start here:** do the three Ready items **in order, on Sonnet**:
-  1. **#211** (plans/103). It needs the user once: to run its SQL on prod before its code ships.
-     The SQL is generated and rehearsed twice on the local stack
-     ([2026-11-22-registry-additions.sql](./reviews/2026-11-22-registry-additions.sql)). **It is
-     waiting for the user to run it on prod.** Until the user confirms, don't push the code (steps
-     2–7). The user should first skim Batch E's pt-BR text in the
-     [decision doc](./reviews/2026-11-22-exercise-names-decisions.md).
-  2. **#241** (plans/104), the [2026-11-22 code review](./reviews/2026-11-22-code-review.md)'s one
+- **Start here:** do the two Ready items **in order, on Sonnet**:
+  1. **#241** (plans/104), the [2026-11-22 code review](./reviews/2026-11-22-code-review.md)'s one
      high.
-  3. **#242** (plans/105).
+  2. **#242** (plans/105).
 
   After them:
   - **#190** (S–M, widened). Its evidence is in that review's addendum; its plan, plans/106, gets
-    written once one of the three ships.
+    written once one of the two ships.
   - Then the code-review backstop, then #208 + #204, then #210.
 
   #236 (S) must still land **before the main box is named**, which per the user is not soon. #237
@@ -58,7 +52,7 @@ design program [plans/16](./plans/16-design-pass-program.md) · review reports [
   decision doc written; #249 filed — all in that review's addendum. 2026-11-22 (part 2): the user
   answered #211, plus four more calls in the session. plans/103–105 were written, so #211, #241 and
   #242 are Ready. #243 was narrowed to the rail and the gallery, and #250 was filed for the 27
-  September aliases #211 holds back.
+  September aliases #211 holds back. 2026-11-22 (part 3): the user ran the SQL on prod and plans/103 shipped #211.
 
 ⚠️ **The `Ready:` and `In Progress:` bullets carry `none` or `#N`s and nothing else** — no dates, no
 plan links, no history (WORKFLOW.md "▶ Now grammar"). `scripts/audit-backlog-markers.mjs` cross-checks
@@ -69,7 +63,6 @@ Every other bullet here is free-form.
 
 ## 🟢 Ready (planned — pick from the top)
 
-- 🟢 **[→ Ready · plans/103](./plans/103-registry-names-apply.md)** — **#211 Registry: the exercise-names pass, applied** · M · Sonnet · the user answered on 2026-11-22. 92 entries go in first, by SQL the user runs on prod. Then 297 aliases (183 new, 20 retargeted, 12 removed) and 5 resolver rules take prod's unresolved rate from 25.6% to ≤13.0%. [Decisions](./reviews/2026-11-22-exercise-names-decisions.md).
 - 🟢 **[→ Ready · plans/104](./plans/104-texto-onoff-duration.md)** — **#241 ¶ Texto corrupts a block with a Duração and a sub-minute work time** · S · Sonnet · the review's one HIGH: `ONOFF_TOK` reads `Cap 10' 40" on 20" off` as on = 10'40", and a blur is enough to trigger it. The fix: a flush-only on/off token, `/` as a separator, a commit on blur only after an edit, a duration axis in the round-trip tests, and an engine round-trip count.
 - 🟢 **[→ Ready · plans/105](./plans/105-timer-after-228.md)** — **#242 The Timer after #228: legacy caps, interval AMRAP/EMOM, round overrun** · M · Sonnet · 15 of the 35 recent interval blocks are EMOMs that lose their rotation. Legacy "A cada" blocks stop at their rounded Duração, and round blocks overrun (`RD 4/3`). The fix: `rotate`/`laps` flags decided once in `timerConfigFor`, pure form↔config helpers, and #243's timer half.
 
@@ -133,7 +126,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 - **#230 Estações timer + cap math** · S–M · Sonnet · the timer gives every station the FIRST station's duration and never sees `restBetweenCycles` (`Schedule.jsx:601`) — wrong for 2026-09-12's 9'/8'/7' windows. `stationsCapMins` and `stationsCapStr` disagree on a trailing rest; `cloneBlocks` never re-ids stations.
 - **#232 `ReadRow` has no gap between its label and its value** · XS · Sonnet · `ConfirmReview.module.css:96` `.row` is `justify-content:space-between` with no `gap`, so a short exercise name beside a long note reads "RunSubstituí pela versão…" in the review dialog and the LogPane's read boxes. Add a gap and let the value wrap. Found in plans/98's screenshots.
 - **#236 Suggested session, Phase 4: link a box's history to the untagged sessions** · S · Sonnet · `location.historyFromUntagged = {until}` so the main box keeps its past when it gets a name — link, never retag. Must land before the rename. The engine already reads the field.
-- **#237 Suggested session, Phase 5: an editable "Padrão" per exercise** · S–M · Sonnet · a `pattern` override on the registry entry (8 movement patterns) in Exercícios, plus `scripts/audit-patterns.mjs`. Only 71% of movement occurrences resolve today; #211 narrows it. `patternOf` already honours `entry.pattern`.
+- **#237 Suggested session, Phase 5: an editable "Padrão" per exercise** · S–M · Sonnet · a `pattern` override on the registry entry (8 movement patterns) in Exercícios, plus `scripts/audit-patterns.mjs`. Re-measure the movement share first: #211 (plans/103) took the honest unresolved rate on prod from 25.6% to 10.7% (2026-11-22). `patternOf` already honours `entry.pattern`.
 - **#243 Index rail + gallery hygiene** · XS · Sonnet · the rail shows `1×` on every Estações block and reads `Força · -` for the placeholder label. The gallery still says "oito" warning kinds; there are seven. The timer half (#3 #10 #13 #14 #25) moved into #242 (plans/105). [Review](./reviews/2026-11-22-code-review.md) #18 #19 #24.
 - **#244 %RM after #209: complexes, `fmtIntensity`, RM chips** · S · Sonnet · a mixed kg/% complex is labelled and computed as % RM; `fmtIntensity` takes the unit from `steps[0]`, so ExerciseList/TV/Publicador show `60/80 kg` where ExRow shows `80% RM`; `usesRm` chips non-numeric loads; `autofillRm` skips stations. [Review](./reviews/2026-11-22-code-review.md) #8 #9 #15 #16.
 - **#245 schedule.html with a Timer on every block** · S · Sonnet · the phone Timer button has no accessible name; check-offs and a typed RM are lost on a non-bfcache return; the meta + goal chips may overflow at 320–360px; the bounded review body isn't keyboard-scrollable; a 3-entry timer history pushes WODs out. [Review](./reviews/2026-11-22-code-review.md) #6 #7 #20 #21 #23.
@@ -187,6 +180,7 @@ leaving only the blocked row until plans/91's close-out filed #204.*
 
 Newest first. One row per shipped item; the plan file's `> ✅ Done:` marker holds the detail.
 
+- ✅ **[plans/103 · `e9a03e7` · 2026-11-22](./plans/103-registry-names-apply.md)** — **#211 Registry: the exercise-names pass, applied** · closed #211. · 92 entries by SQL (the user ran it first), ALIASES 126 → 297, five resolver fallbacks. Prod's honest unresolved rate 25.6% → 10.7%. The user's variant rules replaced #94's squat rule. #250 holds 27 aliases back.
 - ✅ **[plans/102 · `1c64ad0` · 2026-11-05](./plans/102-suggested-session-editor-mode.md)** — **#235 Suggested session, Phase 3: the ✦ Sugerido editor mode** · closed #235. · Third `sessionMode`, from the approved card. Driven: 0 writes through Aplicar, 1 on Salvar; the snapshot survives reopen + re-save. Review also fixed a latent Texto bug (a new session opened in the old pane).
 - ✅ **[plans/101 · `1581458` · 2026-11-05](./plans/101-suggested-session-mockup.md)** — **#234 Suggested session, Phase 2: Lane-B mockup of ✦ Sugerido** · closed #234. · Approved as drawn. `mockups/67-criador-sugerido.html`: real engine output, 8 themes, 1280 + 390, contrast measured; it caught a quirks-mode class-case bug.
 - ✅ **[plans/100 · `417b1dc` · 2026-11-05](./plans/100-suggested-session-engine.md)** — **#233 Suggested session, Phase 1: the statistical engine + a backtest audit** · closed #233. · `criador/suggest/` + `audit-suggest.mjs`: 0 parse warnings, byte-stable, re-rolls isolated. Backtest, 66 days: main lift 55%, the run-length rule = Markov, kept as specified.

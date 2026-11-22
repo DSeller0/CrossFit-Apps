@@ -1,6 +1,6 @@
 # 2026-11-22 · Exercise names: your decision pass (#211)
 
-> ✅ **Answered 2026-11-22.** How your answers were read, the four follow-up calls, and the text for
+> ✅ **Answered and applied 2026-11-22** (SQL on prod, then code at `e9a03e7`). How your answers were read, the four follow-up calls, and the text for
 > the entries they created (Batch E) are in [*Resolved*](#resolved-how-your-answers-were-read-2026-11-22)
 > at the end. The apply is [plans/103](../plans/103-registry-names-apply.md).
 
